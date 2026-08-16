@@ -1,19 +1,17 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "./assets/vite.svg";
-import heroImg from "./assets/hero.png";
 import "./App.css";
 import { Button } from "#components/ui/button";
 import { Test } from "./Test";
+import { Navbar } from "#components/layout/Navbar";
+import { Footer } from "#components/layout/Footer";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
+      <Navbar />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <Button>GG</Button>
       <Test />
+      <Footer />
       {/* <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
