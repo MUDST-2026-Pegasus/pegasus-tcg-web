@@ -13,7 +13,10 @@
     "#components/*": "./src/components/*.tsx",
     "#lib/*": "./src/lib/*.ts",
     "#hooks/*": "./src/hooks/*.ts",
-    "#app/*": "./src/app/*.tsx",
+    "#app/*": [
+      "./src/app/*.tsx",
+      "./src/app/*.ts"
+    ],
     "#features/*": [
       "./src/features/*.tsx",
       "./src/features/*.ts"
