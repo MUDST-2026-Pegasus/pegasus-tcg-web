@@ -1,4 +1,4 @@
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "#components/ui/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 type PagePlaceholderProps = {
   /** ชื่อหน้าตามที่ตั้งไว้ใน Figma */

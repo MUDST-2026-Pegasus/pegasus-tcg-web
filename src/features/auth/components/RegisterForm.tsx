@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 
-import { Button } from "#components/ui/button";
-import { Checkbox } from "#components/ui/checkbox";
-import { Field, FieldGroup, FieldLabel } from "#components/ui/field";
-import { Input } from "#components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export function RegisterForm() {
   return (

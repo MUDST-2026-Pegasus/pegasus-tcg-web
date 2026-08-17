@@ -1,8 +1,8 @@
 import { SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
-import { Button } from "#components/ui/button";
-import { cn } from "#lib/utils";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "HOME", to: "/" },

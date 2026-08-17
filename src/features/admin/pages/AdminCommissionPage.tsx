@@ -1,4 +1,4 @@
-import { PagePlaceholder } from "#components/PagePlaceholder";
+import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 
 export function AdminCommissionPage() {
   return <PagePlaceholder title="ค่าคอมมิชชั่น" figmaNode="432:6229" />;

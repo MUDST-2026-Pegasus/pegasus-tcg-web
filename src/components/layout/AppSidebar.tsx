@@ -10,8 +10,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "#components/ui/sidebar";
-import type { NavGroup } from "#lib/nav-config";
+} from "@/components/ui/sidebar";
+import type { NavGroup } from "@/lib/nav-config";
 
 type AppSidebarProps = {
   /** ป้ายใต้โลโก้ เช่น "ADMIN" หรือ "SELLER" */

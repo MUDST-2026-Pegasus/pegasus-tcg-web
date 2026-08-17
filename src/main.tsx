@@ -1,11 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import './index.css'
-import App from './app/App.tsx'
-import { TooltipProvider } from '#components/ui/tooltip'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
 
-createRoot(document.getElementById('root')!).render(
+import App from "@/app/App";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <TooltipProvider>
@@ -13,4 +13,4 @@ createRoot(document.getElementById('root')!).render(
       </TooltipProvider>
     </BrowserRouter>
   </StrictMode>,
-)
+);

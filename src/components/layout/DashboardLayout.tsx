@@ -1,13 +1,13 @@
 import { Outlet } from "react-router-dom";
 
-import { AppSidebar } from "#components/layout/AppSidebar";
-import { Footer } from "#components/layout/Footer";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { Footer } from "@/components/layout/Footer";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "#components/ui/sidebar";
-import type { NavGroup } from "#lib/nav-config";
+} from "@/components/ui/sidebar";
+import type { NavGroup } from "@/lib/nav-config";
 
 type DashboardLayoutProps = {
   role: string;
