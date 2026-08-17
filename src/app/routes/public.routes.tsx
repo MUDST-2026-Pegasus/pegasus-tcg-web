@@ -2,20 +2,17 @@ import type { RouteObject } from "react-router-dom";
 
 import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { AboutPage } from "@/features/about";
-import {
-  AddressBookPage,
-  OrderHistoryPage,
-  ProfilePage,
-} from "@/features/account";
-import { CartPage, CheckoutPage } from "@/features/cart";
-import {
-  ProductDetailPage,
-  ProductListPage,
-  SearchResultsPage,
-} from "@/features/catalog";
-import { HomePage } from "@/features/home";
-import { StoreProfilePage } from "@/features/store";
+import { AboutPage } from "@/features/about/pages/AboutPage";
+import { AddressBookPage } from "@/features/account/pages/AddressBookPage";
+import { OrderHistoryPage } from "@/features/account/pages/OrderHistoryPage";
+import { ProfilePage } from "@/features/account/pages/ProfilePage";
+import { CartPage } from "@/features/cart/pages/CartPage";
+import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
+import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
+import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
+import { SearchResultsPage } from "@/features/catalog/pages/SearchResultsPage";
+import { HomePage } from "@/features/home/pages/HomePage";
+import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {

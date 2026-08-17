@@ -1,14 +1,12 @@
 import type { RouteObject } from "react-router-dom";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import {
-  SellerDashboardPage,
-  SellerLogoutPage,
-  SellerOrdersPage,
-  SellerPayoutPage,
-  SellerProductsPage,
-  SellerShopPage,
-} from "@/features/seller";
+import { SellerDashboardPage } from "@/features/seller/pages/SellerDashboardPage";
+import { SellerLogoutPage } from "@/features/seller/pages/SellerLogoutPage";
+import { SellerOrdersPage } from "@/features/seller/pages/SellerOrdersPage";
+import { SellerPayoutPage } from "@/features/seller/pages/SellerPayoutPage";
+import { SellerProductsPage } from "@/features/seller/pages/SellerProductsPage";
+import { SellerShopPage } from "@/features/seller/pages/SellerShopPage";
 import { sellerNav } from "@/lib/nav-config";
 
 /**

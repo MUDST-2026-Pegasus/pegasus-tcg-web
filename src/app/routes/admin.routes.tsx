@@ -1,17 +1,15 @@
 import type { RouteObject } from "react-router-dom";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import {
-  AdminActivityLogPage,
-  AdminCardAttributesPage,
-  AdminCatalogPage,
-  AdminCommissionPage,
-  AdminListingReviewPage,
-  AdminOrdersPage,
-  AdminOverviewPage,
-  AdminSellerApprovalPage,
-  AdminUsersPage,
-} from "@/features/admin";
+import { AdminActivityLogPage } from "@/features/admin/pages/AdminActivityLogPage";
+import { AdminCardAttributesPage } from "@/features/admin/pages/AdminCardAttributesPage";
+import { AdminCatalogPage } from "@/features/admin/pages/AdminCatalogPage";
+import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage";
+import { AdminListingReviewPage } from "@/features/admin/pages/AdminListingReviewPage";
+import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
+import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
+import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
+import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
 import { adminNav } from "@/lib/nav-config";
 
 /**
