@@ -5,7 +5,7 @@ import registerHeader from "../assets/register-header.jpg";
 
 export function RegisterPage() {
   return (
-    <div className="relative flex min-h-svh items-center justify-center overflow-hidden p-12">
+    <>
       <img
         src={registerBackground}
         alt=""
@@ -33,6 +33,6 @@ export function RegisterPage() {
           <RegisterForm />
         </div>
       </Card>
-    </div>
+    </>
   );
 }
