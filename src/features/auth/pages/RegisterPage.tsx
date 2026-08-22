@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import registerBackground from "@/assets/auth/register-background.jpg";
 import registerHeader from "@/assets/auth/register-header.jpg";
-import { Button } from "@base-ui/react";
 
 export function RegisterPage() {
   return (
