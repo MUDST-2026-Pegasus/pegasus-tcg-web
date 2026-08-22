@@ -1,3 +1,5 @@
+import { Button } from "@base-ui/react";
+
 export function HomePage() {
   return (
     <>
