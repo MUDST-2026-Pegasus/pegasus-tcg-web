@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import registerBackground from "@/assets/auth/register-background.jpg";
 import registerHeader from "@/assets/auth/register-header.jpg";
+import { Button } from "@base-ui/react";
 
 export function RegisterPage() {
   return (
@@ -25,7 +26,7 @@ export function RegisterPage() {
             </h1>
             <p className="text-sm text-primary-foreground">
               To like or purchase an item, or to chat with the seller, please
-              create your account.11
+              create your account.
             </p>
           </div>
         </div>
