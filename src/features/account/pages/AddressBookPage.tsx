@@ -1,4 +1,4 @@
-import { MapPin, Pencil, Phone, Plus, ShieldPlus, Trash2 } from "lucide-react";
+import { MapPin, MapPinPlus, Pencil, Phone, Plus, Trash2 } from "lucide-react";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
@@ -30,10 +30,13 @@ const ADDRESSES = [
 
 function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
   return (
-    <Card className={address.isDefault ? "gap-4 rounded-xl border-primary py-5 shadow-none" : "gap-4 rounded-xl border py-5 shadow-none"}>
+    <Card
+      data-default={address.isDefault}
+      className="gap-4 rounded-xl border py-5 shadow-none data-[default=true]:border-primary"
+    >
       <CardHeader>
         <CardTitle className="text-xl font-semibold">{address.name}</CardTitle>
-        {address.isDefault && <CardAction><Badge variant="secondary">DEFAULT</Badge></CardAction>}
+        {address.isDefault && <CardAction><Badge>DEFAULT</Badge></CardAction>}
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-muted-foreground">
         <p className="flex items-center gap-2"><Phone /> {address.phone}</p>
@@ -69,7 +72,7 @@ export function AddressBookPage() {
             {ADDRESSES.map((address) => <AddressCard key={address.phone} address={address} />)}
             <Button variant="outline" className="h-64 flex-col gap-3 border-dashed text-center">
               <span className="flex size-12 items-center justify-center rounded-full border">
-                <ShieldPlus />
+                <MapPinPlus />
               </span>
               <span className="text-lg font-semibold">Add New Address</span>
               <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
