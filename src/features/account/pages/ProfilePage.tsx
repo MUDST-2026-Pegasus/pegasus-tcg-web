@@ -1,9 +1,10 @@
 import {
-  ArrowRight, BadgeCheck, Check, CircleUserRound, ClipboardList, CreditCard,
-  Diamond, MapPin, Package, Pencil, Plus, Truck,
+  ArrowRight, BadgeCheck, Check, CreditCard, Diamond, MapPin, Package, Pencil,
+  Plus, Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,37 +13,12 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-function ProfileAvatar({ compact = false }: { compact?: boolean }) {
+function ProfileAvatar() {
   return (
-    <Avatar className={compact ? "size-14" : "size-28"}>
-      <AvatarFallback className={compact ? "text-lg" : "text-3xl"}>สช</AvatarFallback>
-      {!compact && <AvatarBadge className="size-6"><BadgeCheck /></AvatarBadge>}
+    <Avatar className="size-28">
+      <AvatarFallback className="text-3xl">สช</AvatarFallback>
+      <AvatarBadge className="size-6"><BadgeCheck /></AvatarBadge>
     </Avatar>
-  );
-}
-
-function AccountMenu() {
-  return (
-    <Card className="h-fit gap-5 rounded-xl p-4 shadow-none lg:sticky lg:top-28">
-      <CardHeader className="flex-row items-center gap-3 px-0">
-        <ProfileAvatar compact />
-        <div className="min-w-0">
-          <CardTitle className="truncate text-lg font-semibold">สมชาย ใจดี</CardTitle>
-          <p className="truncate text-sm text-muted-foreground">somchai.j@example.com</p>
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1 px-0">
-        <Button className="w-full justify-start" render={<Link to="/account/profile" />}>
-          <CircleUserRound data-icon="inline-start" /> ภาพรวมบัญชี
-        </Button>
-        <Button variant="ghost" className="w-full justify-start" render={<Link to="/account/orders" />}>
-          <ClipboardList data-icon="inline-start" /> ประวัติการสั่งซื้อ
-        </Button>
-        <Button variant="ghost" className="w-full justify-start" render={<Link to="/account/addresses" />}>
-          <MapPin data-icon="inline-start" /> สมุดที่อยู่
-        </Button>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -153,7 +129,7 @@ export function ProfilePage() {
   return (
     <div className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountMenu />
+        <AccountSidebar />
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
