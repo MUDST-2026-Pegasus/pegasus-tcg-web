@@ -1,5 +1,5 @@
 import { SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,9 +17,13 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-[6px]">
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-12 py-4">
-        <span className="text-2xl font-black tracking-[-1.2px] text-primary">
+        <Link
+          to="/"
+          aria-label="Pegasus TCG — กลับหน้าแรก"
+          className="cursor-pointer text-2xl font-black tracking-[-1.2px] text-primary"
+        >
           PEGASUS
-        </span>
+        </Link>
         <nav className="flex items-center">
           {NAV_LINKS.map(({ label, to }, index) => (
             <NavLink
