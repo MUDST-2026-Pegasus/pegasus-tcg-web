@@ -55,7 +55,7 @@ function SectionHeader({
         type="button"
         variant="link"
         size="xs"
-        className="shrink-0"
+        className="shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
       >
         {actionLabel}
       </Button>
@@ -74,13 +74,14 @@ function ProductCard({
 }) {
   return (
     <div className="relative h-full">
-      <article
+      <button
+        type="button"
         aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
-        className="block h-full rounded-lg"
+        className="group block h-full cursor-pointer rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <Card
           className={cn(
-            "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-colors hover:border-ring",
+            "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-[transform,box-shadow,border-color] group-hover:-translate-y-1 group-hover:border-ring group-hover:shadow-md",
             layout === "rail" ? "w-[292px]" : "w-full",
           )}
         >
@@ -113,7 +114,7 @@ function ProductCard({
             </p>
           </CardContent>
         </Card>
-      </article>
+      </button>
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
           {rank}
@@ -126,6 +127,7 @@ function ProductCard({
 function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (!api) return;
@@ -141,14 +143,29 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     };
   }, [api]);
 
+  useEffect(() => {
+    if (!api || slides.length < 2 || isPaused) return;
+
+    const timer = window.setInterval(() => api.scrollNext(), 5000);
+    return () => window.clearInterval(timer);
+  }, [api, current, isPaused, slides.length]);
+
   return (
     <section aria-label="โปรโมชั่นแนะนำ" className="bg-background px-4 pb-3 sm:px-6 lg:px-8">
       <Carousel
         setApi={setApi}
         opts={{ align: "start", loop: slides.length > 1 }}
         className="mx-auto max-w-[1216px]"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onFocusCapture={() => setIsPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsPaused(false);
+          }
+        }}
       >
-        <CarouselContent className="py-0">
+        <CarouselContent className="cursor-grab py-0 active:cursor-grabbing">
           {slides.map((slide, index) => (
             <CarouselItem
               key={slide.id}
@@ -157,10 +174,14 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 index === 0 && "sm:basis-[min(720px,calc(100vw-4rem))]",
               )}
             >
-              <article className="block rounded-xl">
+              <button
+                type="button"
+                aria-label={`เลือกโปรโมชัน ${slide.title}`}
+                className="group block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
                 <Card
                   className={cn(
-                    "h-[292px] gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0 sm:p-7",
+                    "h-[292px] gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0 transition-[transform,box-shadow,border-color] group-hover:-translate-y-1 group-hover:border-ring group-hover:shadow-md sm:p-7",
                     index === 0 && "bg-muted",
                   )}
                 >
@@ -204,7 +225,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                     />
                   </div>
                 </Card>
-              </article>
+              </button>
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -217,7 +238,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               aria-current={current === index ? "true" : undefined}
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                "h-[3px] cursor-pointer rounded-sm transition-[width,background-color]",
+                "h-[3px] cursor-pointer rounded-sm transition-[width,background-color,transform] hover:scale-y-[2]",
                 current === index ? "w-5 bg-foreground" : "w-3 bg-border",
               )}
             />
@@ -240,9 +261,9 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
             <button
               key={game.id}
               type="button"
-              className="flex h-40 w-[138px] shrink-0 flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted">
+              <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-[box-shadow,transform] group-hover:scale-105 group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/20">
                 <img src={game.image} alt={game.imageAlt} className="size-[82px] object-contain" />
               </span>
               <span className="w-full text-center text-sm text-foreground">{game.name}</span>
@@ -259,11 +280,13 @@ function ProductRail({
   products,
   description,
   muted = false,
+  spacious = false,
 }: {
   title: string;
   products: (HomeProduct | TrendingProduct)[];
   description?: string;
   muted?: boolean;
+  spacious?: boolean;
 }) {
   return (
     <section
@@ -273,11 +296,14 @@ function ProductRail({
       <div className="mx-auto max-w-[1216px]">
         <SectionHeader title={title} description={description} />
         <Carousel opts={{ align: "start", dragFree: true }} className="mt-[18px]">
-          <CarouselContent>
+          <CarouselContent className={spacious ? "-ml-6" : undefined}>
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className="basis-[min(292px,calc(100vw-3rem))]"
+                className={cn(
+                  "basis-[min(292px,calc(100vw-3rem))]",
+                  spacious && "pl-6",
+                )}
               >
                 <ProductCard
                   product={product}
@@ -305,9 +331,9 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
             <button
               key={category.id}
               type="button"
-              className="w-56 shrink-0 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group w-56 shrink-0 cursor-pointer rounded-xl text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <Card className="h-[218px] gap-4 rounded-xl border border-border py-0 pb-4 shadow-none ring-0 transition-colors hover:border-ring">
+              <Card className="h-[218px] gap-4 rounded-xl border border-border py-0 pb-4 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-ring group-hover:shadow-md">
                 <img
                   src={category.image}
                   alt={category.imageAlt}
@@ -350,8 +376,8 @@ export function HomeContent({ data }: { data: HomeData }) {
     <div className="bg-background">
       <HeroCarousel slides={data.heroSlides} />
       <BrowseByGame games={data.games} />
-      <ProductRail title="ดูล่าสุด" products={data.recentlyViewed} muted />
-      <ProductRail title="มาแรง" products={data.trending} muted />
+      <ProductRail title="ดูล่าสุด" products={data.recentlyViewed} muted spacious />
+      <ProductRail title="มาแรง" products={data.trending} muted spacious />
       <CategoryGrid categories={data.categories} />
       <ProductRail
         title="สินค้าจาก Pegasus"
