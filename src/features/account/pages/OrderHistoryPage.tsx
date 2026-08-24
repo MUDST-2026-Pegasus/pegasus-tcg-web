@@ -1,13 +1,18 @@
-
-import { CheckCircle2, Download, Package, PackageCheck, Truck } from "lucide-react";
+import { ChevronDown, Download, TriangleAlert } from "lucide-react";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle,
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 type OrderCardProps = {
   id: string;
@@ -15,17 +20,20 @@ type OrderCardProps = {
   title: string;
   description: string;
   total: string;
+  image: string;
   status: "completed" | "shipping" | "payment";
 };
 
-function OrderCard({ id, date, title, description, total, status }: OrderCardProps) {
+function OrderCard({ id, date, title, description, total, image, status }: OrderCardProps) {
   const isCompleted = status === "completed";
   const isShipping = status === "shipping";
+  const isPayment = status === "payment";
+  const statusLabel = isCompleted ? "Completed" : isShipping ? "In Transit" : "Awaiting Payment";
 
   return (
-    <Card className="gap-0 rounded-xl border py-0 shadow-none">
-      <CardHeader className="border-b bg-muted/40 py-4">
-        <div className="flex gap-8">
+    <Card className={cn("gap-0 overflow-hidden rounded-xl border py-0 shadow-none", isPayment && "border-[#ff95004d]")}>
+      <CardHeader className="rounded-none border-b bg-[#faf9fe] px-4 py-3">
+        <div className="flex gap-6">
           <div>
             <p className="text-xs text-muted-foreground">ORDER ID</p>
             <p className="font-medium">{id}</p>
@@ -36,45 +44,53 @@ function OrderCard({ id, date, title, description, total, status }: OrderCardPro
           </div>
         </div>
         <CardAction>
-          <Badge variant={isCompleted ? "outline" : isShipping ? "default" : "destructive"}>
-            {isCompleted ? <CheckCircle2 /> : isShipping ? <Truck /> : <PackageCheck />}
-            {isCompleted ? "Completed" : isShipping ? "In Transit" : "Awaiting Payment"}
+          <Badge
+            variant={isPayment ? "destructive" : "secondary"}
+            className={cn("before:size-1.5 before:rounded-full before:bg-current before:content-['']", isPayment && "bg-destructive text-primary-foreground")}
+          >
+            {statusLabel}
           </Badge>
         </CardAction>
       </CardHeader>
 
-      <CardContent className="grid gap-5 py-5 sm:grid-cols-[120px_1fr_auto] sm:items-center">
-        <div className="flex aspect-square items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-          <Package className="size-10" />
-        </div>
+      <CardContent className="grid gap-6 p-4 sm:grid-cols-[96px_1fr_auto] sm:items-center">
+        <img src={image} alt={title} className="size-24 rounded-lg border object-cover" />
         <div className="min-w-0">
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
           <p className="mt-1 text-muted-foreground">{description}</p>
-          {isCompleted && <p className="mt-2 text-sm text-muted-foreground">+ 2 other items</p>}
+          {isCompleted && (
+            <p className="mt-2 flex items-center text-sm text-muted-foreground">
+              + 2 other items <ChevronDown className="size-4" />
+            </p>
+          )}
           {isShipping && (
-            <div className="mt-4 flex items-center gap-3">
-              <Progress value={60} className="max-w-64 flex-1" />
-              <span className="text-xs font-medium text-muted-foreground">ถึงพรุ่งนี้</span>
+            <div className="mt-4 flex items-center gap-2">
+              <Progress value={60} className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1" />
+              <span className="text-[10px] font-medium text-muted-foreground">Est. Delivery Tomorrow</span>
             </div>
           )}
-          {status === "payment" && <p className="mt-3 text-xs font-medium text-destructive">กรุณาชำระเงินภายใน 24 ชั่วโมง</p>}
+          {isPayment && (
+            <p className="mt-3 flex items-center gap-1 text-[10px] font-semibold text-[#ff9500]">
+              <TriangleAlert className="size-3" /> Payment due in 24 hours
+            </p>
+          )}
         </div>
         <div className="sm:text-right">
-          <p className="text-xs text-muted-foreground">ยอดรวมคำสั่งซื้อ</p>
-          <p className="mt-1 text-2xl font-semibold">฿{total}</p>
+          <p className="text-xs font-medium text-muted-foreground">Order Total</p>
+          <p className="text-2xl font-semibold">${total}</p>
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-wrap justify-between gap-3 border-t bg-muted/30 py-3">
+      <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
-          {isCompleted && <Button variant="link" className="px-0">ดาวน์โหลดใบเสร็จ <Download data-icon="inline-end" /></Button>}
-          {status === "payment" && <Button variant="ghost">ยกเลิกคำสั่งซื้อ</Button>}
+          {isCompleted && <Button variant="link" size="sm" className="px-0">Download Invoice <Download data-icon="inline-end" /></Button>}
+          {isPayment && <Button variant="destructive" size="xs">Cancel Order</Button>}
         </div>
         <div className="flex flex-wrap gap-3">
-          {isShipping && <Button variant="outline">ติดตามพัสดุ</Button>}
-          <Button variant="outline">ดูรายละเอียด</Button>
-          {isCompleted && <Button>ซื้ออีกครั้ง</Button>}
-          {status === "payment" && <Button variant="destructive">ชำระเงิน</Button>}
+          {isShipping && <Button variant="outline" size="sm" className="w-[121px]">Track Package</Button>}
+          <Button variant="outline" size="sm" className="w-[121px]">View Details</Button>
+          {isCompleted && <Button size="sm" className="w-[105px]">Buy Again</Button>}
+          {isPayment && <Button size="sm" className="w-[99px]">Pay Now</Button>}
         </div>
       </CardFooter>
     </Card>
@@ -83,13 +99,13 @@ function OrderCard({ id, date, title, description, total, status }: OrderCardPro
 
 export function OrderHistoryPage() {
   return (
-    <div className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
+    <div className="min-h-[956px] bg-muted/60 px-4 py-8 sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
         <AccountSidebar />
-        <div className="flex min-w-0 flex-col gap-6">
-          <OrderCard id="#PEG-2023-8891" date="24 ต.ค. 2023" title="ErgoPro Executive Mesh Chair" description="สี: Graphite Black • จำนวน: 1" total="1,249.97" status="completed" />
-          <OrderCard id="#PEG-2023-8942" date="28 ต.ค. 2023" title="Elevate Aluminum Laptop Stand" description="สี: Space Grey • จำนวน: 5" total="449.75" status="shipping" />
-          <OrderCard id="#PEG-2023-9105" date="1 พ.ย. 2023" title="Aura Pro Noise-Cancelling Headphones" description="สี: Matte Black • จำนวน: 2" total="699.98" status="payment" />
+        <div className="flex min-w-0 flex-col gap-4">
+          <OrderCard id="#PEG-2023-8891" date="Oct 24, 2023" title="Charizard VMAX #020" description="Darkness Ablaze • Near Mint • Qty: 1" total="12,900" image="/charizard.jpg" status="completed" />
+          <OrderCard id="#PEG-2023-8942" date="Oct 28, 2023" title="Monkey D. Luffy OP01-003" description="Romance Dawn • Near Mint • Qty: 1" total="8,450" image="/luffy.jpg" status="shipping" />
+          <OrderCard id="#PEG-2023-9105" date="Nov 01, 2023" title="Charizard VMAX #020" description="Darkness Ablaze • Near Mint • Qty: 2" total="25,800" image="/charizard.jpg" status="payment" />
         </div>
       </div>
     </div>
