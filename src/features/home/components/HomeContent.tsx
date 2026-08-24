@@ -82,7 +82,7 @@ function ProductCard({
         <Card
           className={cn(
             "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md",
-            layout === "rail" ? "w-[292px]" : "w-full",
+            "w-full",
           )}
         >
           <div
@@ -151,7 +151,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   }, [api, current, isPaused, slides.length]);
 
   return (
-    <section aria-label="โปรโมชั่นแนะนำ" className="bg-background px-4 pb-3 sm:px-6 lg:px-8">
+    <section aria-label="โปรโมชั่นแนะนำ" className="bg-background px-4 pt-6 pb-3 sm:px-6 lg:px-8">
       <Carousel
         setApi={setApi}
         opts={{ align: "start", loop: slides.length > 1 }}
@@ -165,7 +165,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           }
         }}
       >
-        <CarouselContent className="cursor-grab py-0 active:cursor-grabbing">
+        <CarouselContent className="cursor-grab py-2 active:cursor-grabbing">
           {slides.map((slide, index) => (
             <CarouselItem
               key={slide.id}
@@ -256,7 +256,7 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
         <div id="browse-by-game-title">
           <SectionHeader title="เลือกเกมที่คุณเล่น" />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-[18px] flex gap-4 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
             <button
               key={game.id}
@@ -296,13 +296,16 @@ function ProductRail({
       <div className="mx-auto max-w-[1216px]">
         <SectionHeader title={title} description={description} />
         <Carousel opts={{ align: "start", dragFree: true }} className="mt-[18px]">
-          <CarouselContent className={spacious ? "-ml-6" : undefined}>
+          <CarouselContent
+            className={cn("py-2", spacious && "-ml-6")}
+          >
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
                 className={cn(
-                  "basis-[min(292px,calc(100vw-3rem))]",
-                  spacious && "pl-6",
+                  spacious
+                    ? "basis-[min(316px,calc(100vw-3rem))] pl-6"
+                    : "basis-[min(308px,calc(100vw-3rem))]",
                 )}
               >
                 <ProductCard
@@ -326,7 +329,7 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
         <div id="category-title">
           <SectionHeader title="เลือกตามประเภทสินค้า" />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-[18px] flex gap-4 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((category) => (
             <button
               key={category.id}
