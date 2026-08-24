@@ -15,8 +15,8 @@ const NAV_LINKS = [
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-[6px]">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-12 py-4">
+    <header className="sticky top-0 z-40 h-[var(--navbar-h,75px)] border-b border-border bg-background/90 backdrop-blur-[6px]">
+      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-12">
         <Link
           to="/"
           aria-label="Pegasus TCG — กลับหน้าแรก"
