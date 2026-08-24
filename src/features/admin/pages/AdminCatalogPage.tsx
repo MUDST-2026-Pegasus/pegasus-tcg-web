@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_CATALOG_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminCatalogContent } from "@/features/admin/components/AdminCatalogContent";
 
 export function AdminCatalogPage() {
-  return <PagePlaceholder title="จัดการแคตตาล็อก" figmaNode="432:4447" />;
+  return <AdminCatalogContent data={ADMIN_CATALOG_FIXTURE} />;
 }
