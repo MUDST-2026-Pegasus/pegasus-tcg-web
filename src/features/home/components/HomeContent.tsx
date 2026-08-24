@@ -81,7 +81,7 @@ function ProductCard({
       >
         <Card
           className={cn(
-            "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-[transform,box-shadow,border-color] group-hover:-translate-y-1 group-hover:border-ring group-hover:shadow-md",
+            "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md",
             layout === "rail" ? "w-[292px]" : "w-full",
           )}
         >
@@ -181,7 +181,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               >
                 <Card
                   className={cn(
-                    "h-[292px] gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0 transition-[transform,box-shadow,border-color] group-hover:-translate-y-1 group-hover:border-ring group-hover:shadow-md sm:p-7",
+                    "h-[292px] gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md sm:p-7",
                     index === 0 && "bg-muted",
                   )}
                 >
@@ -261,9 +261,9 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
             <button
               key={game.id}
               type="button"
-              className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-[box-shadow,transform] group-hover:scale-105 group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/20">
+              <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-shadow group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/30">
                 <img src={game.image} alt={game.imageAlt} className="size-[82px] object-contain" />
               </span>
               <span className="w-full text-center text-sm text-foreground">{game.name}</span>
@@ -331,9 +331,9 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
             <button
               key={category.id}
               type="button"
-              className="group w-56 shrink-0 cursor-pointer rounded-xl text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="group w-56 shrink-0 cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <Card className="h-[218px] gap-4 rounded-xl border border-border py-0 pb-4 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-ring group-hover:shadow-md">
+              <Card className="h-[218px] gap-4 rounded-xl border border-border py-0 pb-4 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
                 <img
                   src={category.image}
                   alt={category.imageAlt}
