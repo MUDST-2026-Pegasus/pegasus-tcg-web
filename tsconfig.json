@@ -8,8 +8,6 @@
     "moduleResolution": "bundler",
     "resolvePackageJsonImports": true,
 
-    /* ซ้ำกับ tsconfig.app.json เพื่อให้ shadcn CLI resolve "@/" ได้
-       (CLI อ่านเฉพาะ tsconfig.json ตัวนี้ ไม่ตาม references เข้าไป) */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
