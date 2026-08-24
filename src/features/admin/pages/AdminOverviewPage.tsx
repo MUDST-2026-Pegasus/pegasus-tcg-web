@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_OVERVIEW_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminOverviewContent } from "@/features/admin/components/AdminOverviewContent";
 
 export function AdminOverviewPage() {
-  return <PagePlaceholder title="ภาพรวมแพลตฟอร์ม" figmaNode="432:4152" />;
+  return <AdminOverviewContent data={ADMIN_OVERVIEW_FIXTURE} />;
 }
