@@ -1,3 +1,5 @@
+import type { ComponentProps } from "react";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -7,11 +9,15 @@ const latestDetailWidths = ["w-28", "w-36", "w-28", "w-32", "w-28"];
 const priceWidths = ["w-[75px]", "w-14", "w-[75px]", "w-28", "w-[75px]"];
 const trendingTitleWidths = ["w-42", "w-36", "w-44", "w-42", "w-36"];
 
+function HomeSkeleton(props: Omit<ComponentProps<typeof Skeleton>, "tone">) {
+  return <Skeleton tone="contrast" {...props} />;
+}
+
 function SkeletonSectionHeader({ titleWidth }: { titleWidth: string }) {
   return (
     <div className="flex items-end justify-between gap-4">
-      <Skeleton className={cn("h-8", titleWidth)} />
-      <Skeleton className="h-5 w-24" />
+      <HomeSkeleton className={cn("h-8", titleWidth)} />
+      <HomeSkeleton className="h-5 w-24" />
     </div>
   );
 }
@@ -29,13 +35,13 @@ function ProductSkeleton({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <Skeleton className={imageClassName} />
-      <Skeleton className={cn("h-5 max-w-full", titleWidth)} />
+      <HomeSkeleton className={imageClassName} />
+      <HomeSkeleton className={cn("h-5 max-w-full", titleWidth)} />
       {detailWidth ? (
-        <Skeleton className={cn("h-4 max-w-full", detailWidth)} />
+        <HomeSkeleton className={cn("h-4 max-w-full", detailWidth)} />
       ) : null}
       <div className="pt-1">
-        <Skeleton className={cn("h-5 max-w-full", priceWidth)} />
+        <HomeSkeleton className={cn("h-5 max-w-full", priceWidth)} />
       </div>
     </div>
   );
@@ -54,21 +60,21 @@ export function HomePageSkeleton() {
 
       <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8">
         <div className="w-full px-4 sm:px-6 lg:px-12">
-          <Skeleton className="h-[500px] w-full" />
+          <HomeSkeleton className="h-[500px] w-full" />
         </div>
 
         <section className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
           <div className="flex flex-col gap-6">
-            <Skeleton className="h-8 w-48" />
+            <HomeSkeleton className="h-8 w-48" />
             <div className="flex gap-6 overflow-hidden pb-4">
               {gameLabelWidths.map((labelWidth, index) => (
                 <div
                   key={index}
                   className="flex shrink-0 flex-col items-center gap-3"
                 >
-                  <Skeleton className="size-24 rounded-full" />
+                  <HomeSkeleton className="size-24 rounded-full" />
                   {labelWidth === "w-0" ? null : (
-                    <Skeleton className={cn("h-4", labelWidth)} />
+                    <HomeSkeleton className={cn("h-4", labelWidth)} />
                   )}
                 </div>
               ))}
@@ -94,7 +100,7 @@ export function HomePageSkeleton() {
         </section>
 
         <div className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
-          <Skeleton className="h-[200px] w-full" />
+          <HomeSkeleton className="h-[200px] w-full" />
         </div>
 
         <section className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
