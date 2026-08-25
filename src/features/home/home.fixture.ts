@@ -2,10 +2,19 @@ import arcaneDeckBox from "@/assets/home/arcane-deck-box.jpg";
 import aurasphereMouse from "@/assets/home/aurasphere-mouse.jpg";
 import celestialGuardianBox from "@/assets/home/celestial-guardian-box.jpg";
 import galacticGuardiansBox from "@/assets/home/galactic-guardians-box.jpg";
+import megaEvolutionPitchBlack from "@/assets/home/mega-evolution-pitch-black.jpg";
 import pegasusCollectorBox from "@/assets/home/pegasus-collector-box.jpg";
 import type { HomeData, HomeProduct } from "@/features/home/home.types";
 
 const products = {
+  pitchBlack: {
+    id: "mega-evolution-pitch-black-booster-box",
+    name: "Mega Evolution Pitch Black Booster Box [ENG]",
+    type: "Sealed",
+    price: 2450,
+    image: megaEvolutionPitchBlack,
+    imageAlt: "การ์ดสะสม Mega Evolution Pitch Black บนโต๊ะจัดแสดง",
+  },
   arcane: {
     id: "charizard-ex-sar",
     name: "Charizard ex SAR [M2a 223/193]",
@@ -86,7 +95,7 @@ export const HOME_FIGMA_FIXTURE: HomeData = {
     { id: "shadowverse", name: "Shadowverse Evolve", image: galacticGuardiansBox, imageAlt: "Shadowverse Evolve" },
   ],
   recentlyViewed: [
-    products.arcane,
+    products.pitchBlack,
     products.aurasphere,
     products.galactic,
     products.celestial,
