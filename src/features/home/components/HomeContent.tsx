@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { ProductCard as ProductCardComponent } from "@/components/common/ProductCard";
+import { ItemCard } from "@/components/common/ItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,17 +84,15 @@ function HomeProductCard({
       <button
         type="button"
         aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
-        className="block h-full w-full cursor-pointer rounded-lg text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="block h-full cursor-pointer rounded-xl text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <ProductCardComponent
-          product={{
-            id: product.id,
-            type: product.type,
-            title: product.name,
-            price: currencyFormatter.format(product.price),
-            image: product.image,
-            imageAlt: product.imageAlt,
-          }}
+        <ItemCard
+          imageSrc={product.image}
+          imageAlt={product.imageAlt}
+          badge={product.type}
+          title={product.name}
+          price={currencyFormatter.format(product.price)}
+          className="h-full"
         />
       </button>
       {rank ? (
@@ -230,7 +228,10 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
 function BrowseByGame({ games }: { games: GameCategory[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="browse-by-game-title">
+    <section
+      className="bg-background px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="browse-by-game-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
           <SectionHeader title="เลือกเกมที่คุณเล่น" />
