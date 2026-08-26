@@ -1,13 +1,9 @@
 import { useEffect, useState } from "react";
 
+import { ItemCard } from "@/components/common/ItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -44,7 +40,7 @@ function SectionHeader({
   return (
     <div className="flex min-h-7 items-start justify-between gap-4">
       <div className="min-w-0">
-        <h2 className="text-xl font-semibold text-foreground sm:text-2xl">
+        <h2 className={cn("text-xl font-semibold text-foreground sm:text-2xl")}>
           {title}
         </h2>
         {description ? (
@@ -63,13 +59,11 @@ function SectionHeader({
   );
 }
 
-function ProductCard({
+function HomeProductCard({
   product,
-  layout,
   rank,
 }: {
   product: HomeProduct;
-  layout: "rail" | "grid";
   rank?: number;
 }) {
   return (
@@ -77,43 +71,16 @@ function ProductCard({
       <button
         type="button"
         aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
-        className="group block h-full cursor-pointer rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="block h-full cursor-pointer rounded-xl text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <Card
-          className={cn(
-            "h-full gap-0 rounded-lg border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md",
-            "w-full",
-          )}
-        >
-          <div
-            className={cn(
-              "overflow-hidden rounded-lg bg-muted",
-              layout === "rail" ? "h-[222px]" : "aspect-square",
-            )}
-          >
-            <img
-              src={product.image}
-              alt={product.imageAlt}
-              className="size-full object-contain"
-            />
-          </div>
-          <CardContent className="flex min-h-[146px] flex-1 flex-col justify-between gap-4 px-4 pt-[18px] pb-4">
-            <div className="flex min-w-0 flex-col items-start gap-3">
-              <Badge
-                variant="secondary"
-                className="h-auto rounded-sm bg-primary-foreground px-2 py-1 text-[10px] leading-[15px] font-semibold text-foreground"
-              >
-                {product.type}
-              </Badge>
-              <p className="line-clamp-2 min-h-10 text-sm leading-5 text-foreground">
-                {product.name}
-              </p>
-            </div>
-            <p className="text-lg leading-6 font-semibold text-primary">
-              {currencyFormatter.format(product.price)}
-            </p>
-          </CardContent>
-        </Card>
+        <ItemCard
+          imageSrc={product.image}
+          imageAlt={product.imageAlt}
+          badge={product.type}
+          title={product.name}
+          price={currencyFormatter.format(product.price)}
+          className="h-full"
+        />
       </button>
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
@@ -151,10 +118,17 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   }, [api, current, isPaused, slides.length]);
 
   return (
-    <section aria-label="โปรโมชั่นแนะนำ" className="bg-background px-4 pt-6 pb-3 sm:px-6 lg:px-8">
+    <section
+      aria-label="โปรโมชั่นแนะนำ"
+      className="h-[310px] overflow-hidden bg-secondary px-4 pb-3 sm:px-6 lg:px-8"
+    >
       <Carousel
         setApi={setApi}
-        opts={{ align: "start", loop: slides.length > 1 }}
+        opts={{
+          align: "center",
+          loop: slides.length > 1,
+          slidesToScroll: 1,
+        }}
         className="mx-auto max-w-[1216px]"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
@@ -165,14 +139,11 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           }
         }}
       >
-        <CarouselContent className="cursor-grab py-2 active:cursor-grabbing">
+        <CarouselContent className="cursor-grab active:cursor-grabbing">
           {slides.map((slide, index) => (
             <CarouselItem
               key={slide.id}
-              className={cn(
-                "basis-[min(332px,calc(100vw-2rem))]",
-                index === 0 && "sm:basis-[min(720px,calc(100vw-4rem))]",
-              )}
+              className="basis-[min(696px,calc(100vw-2rem))]"
             >
               <button
                 type="button"
@@ -181,33 +152,26 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               >
                 <Card
                   className={cn(
-                    "h-[292px] gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md sm:p-7",
-                    index === 0 && "bg-muted",
+                    "h-[272px] gap-4 rounded-xl border border-border p-5 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md sm:p-6",
+                    current === index ? "bg-muted" : "bg-card",
                   )}
                 >
-                  <div
-                    className={cn(
-                      "grid h-full min-w-0 items-start gap-4",
-                      index === 0
-                        ? "grid-cols-1 sm:grid-cols-[minmax(0,1fr)_220px]"
-                        : "grid-cols-[minmax(0,1fr)_120px]",
-                    )}
-                  >
+                  <div className="grid h-full min-w-0 grid-cols-[minmax(0,1fr)_112px] items-start gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
                     <div
                       className={cn(
-                        "z-10 flex min-w-0 flex-col gap-2.5 rounded-lg bg-background",
-                        index === 0 && "p-1.5",
+                        "z-10 flex min-w-0 flex-col gap-2.5 rounded-lg p-1.5",
+                        current === index && "bg-background",
                       )}
                     >
                       <p className="text-[11px] font-semibold text-primary">
                         {slide.eyebrow}
                       </p>
                       {index === 0 ? (
-                        <h1 className="truncate text-xl font-bold text-foreground sm:text-[28px]">
+                        <h1 className="truncate text-xl font-bold text-foreground sm:text-[26px]">
                           {slide.title}
                         </h1>
                       ) : (
-                        <h2 className="truncate text-xl font-bold text-foreground">
+                        <h2 className="truncate text-xl font-bold text-foreground sm:text-[26px]">
                           {slide.title}
                         </h2>
                       )}
@@ -218,10 +182,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                     <img
                       src={slide.image}
                       alt={slide.imageAlt}
-                      className={cn(
-                        "self-start rounded-lg object-contain",
-                        index === 0 ? "hidden size-[220px] sm:block" : "size-[120px]",
-                      )}
+                      className="size-28 self-start rounded-lg object-contain sm:size-[200px]"
                     />
                   </div>
                 </Card>
@@ -229,7 +190,10 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="mt-2.5 flex items-center justify-center gap-1.5" aria-label="เลือกสไลด์">
+        <div
+          className="mt-2.5 flex items-center justify-center gap-1.5"
+          aria-label="เลือกสไลด์"
+        >
           {slides.map((slide, index) => (
             <button
               key={slide.id}
@@ -251,12 +215,15 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
 function BrowseByGame({ games }: { games: GameCategory[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="browse-by-game-title">
+    <section
+      className="bg-background px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="browse-by-game-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
           <SectionHeader title="เลือกเกมที่คุณเล่น" />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-[18px] flex gap-4 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
             <button
               key={game.id}
@@ -264,9 +231,15 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
               className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-shadow group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/30">
-                <img src={game.image} alt={game.imageAlt} className="size-[82px] object-contain" />
+                <img
+                  src={game.image}
+                  alt={game.imageAlt}
+                  className="size-[82px] object-contain"
+                />
               </span>
-              <span className="w-full text-center text-sm text-foreground">{game.name}</span>
+              <span className="w-full text-center text-sm text-foreground">
+                {game.name}
+              </span>
             </button>
           ))}
         </div>
@@ -279,38 +252,27 @@ function ProductRail({
   title,
   products,
   description,
-  muted = false,
-  spacious = false,
 }: {
   title: string;
   products: (HomeProduct | TrendingProduct)[];
   description?: string;
-  muted?: boolean;
-  spacious?: boolean;
 }) {
   return (
-    <section
-      className={cn("px-4 py-7 sm:px-6 lg:px-8", muted && "bg-muted/50")}
-      aria-label={title}
-    >
+    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-label={title}>
       <div className="mx-auto max-w-[1216px]">
         <SectionHeader title={title} description={description} />
-        <Carousel opts={{ align: "start", dragFree: true }} className="mt-[18px]">
-          <CarouselContent
-            className={cn("py-2", spacious && "-ml-6")}
-          >
+        <Carousel
+          opts={{ align: "start", dragFree: true }}
+          className="mt-[18px]"
+        >
+          <CarouselContent className="py-2">
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className={cn(
-                  spacious
-                    ? "basis-[min(316px,calc(100vw-3rem))] pl-6"
-                    : "basis-[min(308px,calc(100vw-3rem))]",
-                )}
+                className="basis-[min(240px,calc(100vw-2rem))]"
               >
-                <ProductCard
+                <HomeProductCard
                   product={product}
-                  layout="rail"
                   rank={"rank" in product ? product.rank : undefined}
                 />
               </CarouselItem>
@@ -324,7 +286,10 @@ function ProductRail({
 
 function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="category-title">
+    <section
+      className="px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="category-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="category-title">
           <SectionHeader title="เลือกตามประเภทสินค้า" />
@@ -356,17 +321,17 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
 
 function ExploreGrid({ products }: { products: HomeProduct[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="explore-title">
+    <section
+      className="px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="explore-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader
-            title="Explore More"
-            actionLabel="ดูสินค้าทั้งหมด"
-          />
+          <SectionHeader title="Explore More" actionLabel="ดูสินค้าทั้งหมด" />
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(5,224px)]">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} layout="grid" />
+            <HomeProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -376,11 +341,11 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
 
 export function HomeContent({ data }: { data: HomeData }) {
   return (
-    <div className="bg-background">
+    <div className="bg-secondary font-sans">
       <HeroCarousel slides={data.heroSlides} />
       <BrowseByGame games={data.games} />
-      <ProductRail title="ดูล่าสุด" products={data.recentlyViewed} muted spacious />
-      <ProductRail title="มาแรง" products={data.trending} muted spacious />
+      <ProductRail title="ดูล่าสุด" products={data.recentlyViewed} />
+      <ProductRail title="มาแรง" products={data.trending} />
       <CategoryGrid categories={data.categories} />
       <ProductRail
         title="สินค้าจาก Pegasus"
