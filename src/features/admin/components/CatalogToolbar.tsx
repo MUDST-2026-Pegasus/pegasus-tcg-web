@@ -37,8 +37,8 @@ export function CatalogToolbar({
       </Badge>
 
       <div className="flex flex-wrap items-center gap-2.5">
-        <InputGroup className="h-8 w-full rounded-lg sm:w-[320px]">
-          <InputGroupAddon>
+        <InputGroup className="h-8 w-full bg-white rounded-lg sm:w-[320px]">
+          <InputGroupAddon className="bg-white">
             <SearchIcon />
           </InputGroupAddon>
           <InputGroupInput
@@ -60,7 +60,7 @@ export function CatalogToolbar({
           >
             <SelectTrigger
               aria-label={select.placeholder}
-              className="h-8 w-full rounded-lg text-sm sm:w-[200px]"
+              className="h-8 w-full rounded-lg bg-white text-sm sm:w-[200px]"
             >
               <SelectValue placeholder={select.placeholder} />
             </SelectTrigger>
