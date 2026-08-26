@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { ItemCard } from "@/components/common/ItemCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -41,30 +37,21 @@ function SectionHeader({
   actionLabel = "ดูทั้งหมด",
   description,
 }: SectionHeaderProps) {
-  const hasThaiTitle = /[\u0E00-\u0E7F]/.test(title);
-
   return (
     <div className="flex min-h-7 items-start justify-between gap-4">
       <div className="min-w-0">
-        <h2
-          className={cn(
-            "text-xl font-semibold text-foreground sm:text-2xl",
-            hasThaiTitle ? "font-thai" : "font-sans",
-          )}
-        >
+        <h2 className={cn("text-xl font-semibold text-foreground sm:text-2xl")}>
           {title}
         </h2>
         {description ? (
-          <p className="mt-0.5 font-thai text-xs text-muted-foreground">
-            {description}
-          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         ) : null}
       </div>
       <Button
         type="button"
         variant="link"
         size="xs"
-        className="shrink-0 cursor-pointer font-thai transition-transform hover:-translate-y-0.5"
+        className="shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
       >
         {actionLabel}
       </Button>
@@ -244,9 +231,13 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
               className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-shadow group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/30">
-                <img src={game.image} alt={game.imageAlt} className="size-[82px] object-contain" />
+                <img
+                  src={game.image}
+                  alt={game.imageAlt}
+                  className="size-[82px] object-contain"
+                />
               </span>
-              <span className="w-full text-center font-thai text-sm text-foreground">
+              <span className="w-full text-center text-sm text-foreground">
                 {game.name}
               </span>
             </button>
@@ -270,7 +261,10 @@ function ProductRail({
     <section className="px-4 py-7 sm:px-6 lg:px-8" aria-label={title}>
       <div className="mx-auto max-w-[1216px]">
         <SectionHeader title={title} description={description} />
-        <Carousel opts={{ align: "start", dragFree: true }} className="mt-[18px]">
+        <Carousel
+          opts={{ align: "start", dragFree: true }}
+          className="mt-[18px]"
+        >
           <CarouselContent className="py-2">
             {products.map((product) => (
               <CarouselItem
@@ -292,7 +286,10 @@ function ProductRail({
 
 function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="category-title">
+    <section
+      className="px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="category-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="category-title">
           <SectionHeader title="เลือกตามประเภทสินค้า" />
@@ -324,13 +321,13 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
 
 function ExploreGrid({ products }: { products: HomeProduct[] }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-labelledby="explore-title">
+    <section
+      className="px-4 py-7 sm:px-6 lg:px-8"
+      aria-labelledby="explore-title"
+    >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader
-            title="Explore More"
-            actionLabel="ดูสินค้าทั้งหมด"
-          />
+          <SectionHeader title="Explore More" actionLabel="ดูสินค้าทั้งหมด" />
         </div>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(5,224px)]">
           {products.map((product) => (
