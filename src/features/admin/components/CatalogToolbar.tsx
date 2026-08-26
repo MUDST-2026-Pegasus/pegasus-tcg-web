@@ -38,7 +38,7 @@ export function CatalogToolbar({
 
       <div className="flex flex-wrap items-center gap-2.5">
         <InputGroup className="h-8 w-full bg-white rounded-lg sm:w-[320px]">
-          <InputGroupAddon className="bg-white">
+          <InputGroupAddon>
             <SearchIcon />
           </InputGroupAddon>
           <InputGroupInput
