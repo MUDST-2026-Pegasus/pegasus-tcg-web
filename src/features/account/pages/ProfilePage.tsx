@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 function ProfileAvatar() {
   return (
     <Avatar className="size-28">
-      <AvatarFallback className="text-3xl">สช</AvatarFallback>
+      <AvatarFallback className="text-3xl">SJ</AvatarFallback>
       <AvatarBadge className="size-6"><BadgeCheck /></AvatarBadge>
     </Avatar>
   );
@@ -28,19 +28,19 @@ function ProfileSummary() {
       <CardContent className="flex flex-col items-center gap-3 text-center">
         <ProfileAvatar />
         <div>
-          <h2 className="text-2xl font-semibold">สมชาย ใจดี</h2>
+          <h2 className="text-2xl font-semibold">Somchai Jaidee</h2>
           <p className="text-muted-foreground">somchai.j@example.com</p>
         </div>
         <Separator className="my-3" />
         <div className="grid w-full grid-cols-2 gap-4 text-left">
           <div>
-            <p className="text-xs text-muted-foreground">ระดับสมาชิก</p>
+            <p className="text-xs text-muted-foreground">Membership Tier</p>
             <p className="mt-1 flex items-center gap-1 text-lg font-semibold text-primary">
               <Diamond className="fill-primary" /> Elite
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">คะแนนสะสม</p>
+            <p className="text-xs text-muted-foreground">Reward Points</p>
             <p className="mt-1 text-2xl font-semibold">2,450</p>
           </div>
         </div>
@@ -80,22 +80,22 @@ function OrderStatus() {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">สถานะการสั่งซื้อล่าสุด</CardTitle>
+        <CardTitle className="text-xl font-semibold">Latest Order Status</CardTitle>
         <CardAction>
           <Button variant="link" render={<Link to="/account/orders" />}>
-            ดูทั้งหมด <ArrowRight data-icon="inline-end" />
+            View All <ArrowRight data-icon="inline-end" />
           </Button>
         </CardAction>
       </CardHeader>
       <CardContent className="flex min-h-52 items-center overflow-x-auto">
         <div className="grid min-w-[520px] w-full grid-cols-[auto_1fr_auto_1fr_auto_1fr_auto] items-start">
-          <StatusStep icon={CreditCard} label="ที่ต้องชำระ" count="0" active />
+          <StatusStep icon={CreditCard} label="Awaiting Payment" count="0" active />
           <StatusLine active />
-          <StatusStep icon={Package} label="ที่ต้องจัดส่ง" count="1" active />
+          <StatusStep icon={Package} label="To Ship" count="1" active />
           <StatusLine />
-          <StatusStep icon={Truck} label="กำลังจัดส่ง" />
+          <StatusStep icon={Truck} label="In Transit" />
           <StatusLine />
-          <StatusStep icon={Check} label="สำเร็จ" />
+          <StatusStep icon={Check} label="Completed" />
         </div>
       </CardContent>
     </Card>
@@ -106,20 +106,20 @@ function PrimaryAddress() {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl font-semibold"><MapPin className="text-primary" /> ที่อยู่หลัก</CardTitle>
-        <CardAction><Button variant="ghost" size="icon" aria-label="แก้ไขที่อยู่"><Pencil /></Button></CardAction>
+        <CardTitle className="flex items-center gap-2 text-xl font-semibold"><MapPin className="text-primary" /> Primary Address</CardTitle>
+        <CardAction><Button variant="ghost" size="icon" aria-label="Edit address"><Pencil /></Button></CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 leading-7">
-        <Badge className="w-fit">บ้าน</Badge>
+        <Badge className="w-fit">Home</Badge>
         <address className="not-italic">
-          สมชาย ใจดี | (+66) 89-123-4567<br />
-          123/45 ซอยสุขุมวิท 1 ถนนสุขุมวิท<br />
-          แขวงคลองเตยนเหนือ เขตวัฒนา<br />
-          กรุงเทพมหานคร 10110
+          Somchai Jaidee | (+66) 89-123-4567<br />
+          123/45 Sukhumvit Soi 1, Sukhumvit Road<br />
+          Khlong Toei Nuea, Watthana<br />
+          Bangkok 10110
         </address>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" render={<Link to="/account/addresses" />}><Plus data-icon="inline-start" /> เพิ่มที่อยู่ใหม่</Button>
+        <Button className="w-full" render={<Link to="/account/addresses" />}><Plus data-icon="inline-start" /> Add New Address</Button>
       </CardFooter>
     </Card>
   );
@@ -127,16 +127,16 @@ function PrimaryAddress() {
 
 export function ProfilePage() {
   return (
-    <div className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
+    <div className="bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
         <AccountSidebar />
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold">โปรไฟล์ของฉัน</h1>
-              <p className="mt-1 text-muted-foreground">จัดการข้อมูลส่วนตัว ประวัติการสั่งซื้อ และสิทธิพิเศษของคุณ</p>
+              <h1 className="text-3xl font-semibold">My Profile</h1>
+              <p className="mt-1 text-muted-foreground">Manage your personal information, order history, and benefits.</p>
             </div>
-            <Button className="sm:self-start"><Pencil data-icon="inline-start" /> แก้ไขโปรไฟล์</Button>
+            <Button className="sm:self-start"><Pencil data-icon="inline-start" /> Edit Profile</Button>
           </div>
           <div className="grid gap-6 xl:grid-cols-[352px_1fr]">
             <ProfileSummary />
