@@ -13,6 +13,8 @@ import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
 import { SearchResultsPage } from "@/features/catalog/pages/SearchResultsPage";
 import { HomePage } from "@/features/home/pages/HomePage";
 import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
+import { PaymentPage } from "@/features/payment/pages/PaymentPage";
+import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
@@ -34,6 +36,8 @@ export const publicRoutes: RouteObject = {
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },
+    { path: "payment", element: <PaymentPage /> },
+    { path: "payment/success", element: <PaymentSuccessPage /> },
 
     { path: "about", element: <AboutPage /> },
 
