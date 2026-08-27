@@ -41,6 +41,11 @@ export const publicRoutes: RouteObject = {
 
     { path: "about", element: <AboutPage /> },
 
+    {
+      path: "become-a-seller",
+      element: <PagePlaceholder title="สมัครเป็นผู้ขาย" />,
+    },
+
     { path: "account/profile", element: <ProfilePage /> },
     { path: "account/orders", element: <OrderHistoryPage /> },
     { path: "account/addresses", element: <AddressBookPage /> },
