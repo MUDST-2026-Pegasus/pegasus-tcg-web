@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Clock, QrCode } from "lucide-react";
+import { PAYMENT_PAGE_FIXTURE } from "@/features/payment/Payment.fixture";
 
 export function PaymentPage() {
   const navigate = useNavigate();
@@ -24,14 +25,14 @@ export function PaymentPage() {
             <div className="bg-muted w-64 h-64 flex flex-col items-center justify-center p-4 rounded-xl">
                <QrCode className="w-48 h-48 text-primary" />
                <span className="text-xs mt-2 font-medium">PAY VIA QR SCAN</span>
-               <span className="text-[10px] text-muted-foreground">Scan to Pay | $129.99 USD</span>
+               <span className="text-[10px] text-muted-foreground">Scan to Pay | {PAYMENT_PAGE_FIXTURE.qrCode.amountText}</span>
             </div>
             
             <div className="text-center flex flex-col items-center gap-4">
               <p className="font-medium text-lg">Open your banking app to scan</p>
               <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-full text-sm font-medium">
                 <Clock className="w-4 h-4" />
-                <span>Pay within 14:59</span>
+                <span>Pay within {PAYMENT_PAGE_FIXTURE.qrCode.timeRemaining}</span>
               </div>
             </div>
             
@@ -53,9 +54,9 @@ export function PaymentPage() {
                  <span className="text-xs text-muted-foreground text-center px-2">Image<br/>Placeholder</span>
               </div>
               <div className="flex flex-col gap-1">
-                <p className="font-bold text-sm">Charizard VMAX #020</p>
-                <p className="text-xs text-muted-foreground">DARKNESS ABLAZE • NM</p>
-                <p className="font-medium mt-2">THB 12,900</p>
+                <p className="font-bold text-sm">{PAYMENT_PAGE_FIXTURE.orderSummary.item.name}</p>
+                <p className="text-xs text-muted-foreground">{PAYMENT_PAGE_FIXTURE.orderSummary.item.description}</p>
+                <p className="font-medium mt-2">{PAYMENT_PAGE_FIXTURE.orderSummary.item.price}</p>
               </div>
             </div>
 
@@ -64,15 +65,15 @@ export function PaymentPage() {
             <div className="flex flex-col gap-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">THB 13,150</span>
+                <span className="font-medium">{PAYMENT_PAGE_FIXTURE.orderSummary.subtotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span className="font-medium">THB 50</span>
+                <span className="font-medium">{PAYMENT_PAGE_FIXTURE.orderSummary.shipping}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax</span>
-                <span className="font-medium">Included</span>
+                <span className="font-medium">{PAYMENT_PAGE_FIXTURE.orderSummary.tax}</span>
               </div>
             </div>
 
@@ -80,7 +81,7 @@ export function PaymentPage() {
 
             <div className="flex justify-between items-center pb-4">
               <span className="font-bold text-lg">Total</span>
-              <span className="font-bold text-xl">THB 13,200</span>
+              <span className="font-bold text-xl">{PAYMENT_PAGE_FIXTURE.orderSummary.total}</span>
             </div>
           </CardContent>
         </Card>

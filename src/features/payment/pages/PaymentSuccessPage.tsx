@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Check } from "lucide-react";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Field, FieldTitle, FieldContent } from "@/components/ui/field";
+import { PAYMENT_SUCCESS_FIXTURE } from "@/features/payment/Payment.fixture";
+
 export function PaymentSuccessPage() {
   const navigate = useNavigate();
 
@@ -32,7 +34,7 @@ export function PaymentSuccessPage() {
           
           <div className="flex flex-col gap-1 mt-2">
             <h1 className="text-3xl font-bold">Payment Successful</h1>
-            <p className="text-muted-foreground">Order Number: #ORD-99521</p>
+            <p className="text-muted-foreground">Order Number: {PAYMENT_SUCCESS_FIXTURE.orderNumber}</p>
           </div>
         </CardHeader>
         
@@ -42,22 +44,22 @@ export function PaymentSuccessPage() {
             
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Date</span>
-              <span className="font-medium">Oct 24, 2026 14:32</span>
+              <span className="font-medium">{PAYMENT_SUCCESS_FIXTURE.transactionSummary.date}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Payment Method</span>
-              <span className="font-medium">QR</span>
+              <span className="font-medium">{PAYMENT_SUCCESS_FIXTURE.transactionSummary.paymentMethod}</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Items</span>
-              <span className="font-medium">3 TCG Booster Boxes</span>
+              <span className="font-medium">{PAYMENT_SUCCESS_FIXTURE.transactionSummary.items}</span>
             </div>
             
             <Separator className="my-2" />
             
             <div className="flex justify-between items-center">
               <span className="font-semibold">Total Amount</span>
-              <span className="font-bold text-lg text-primary">THB 4,250.00</span>
+              <span className="font-bold text-lg text-primary">{PAYMENT_SUCCESS_FIXTURE.transactionSummary.totalAmount}</span>
             </div>
           </div>
 
@@ -67,43 +69,39 @@ export function PaymentSuccessPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
             <Dialog>
-              <DialogTrigger asChild>
-                <Button className="flex-1" size="lg">
-                  View Order Details
-                </Button>
+              <DialogTrigger className={buttonVariants({ size: "lg", className: "flex-1" })}>
+                View Order Details
               </DialogTrigger>
               <DialogContent className="sm:max-w-md p-8 gap-6">
                 <DialogHeader className="gap-2">
                   <DialogTitle className="text-2xl font-bold">Order Details</DialogTitle>
                   <DialogDescription className="text-base text-muted-foreground">
-                    Order #PEG-2023-8891
+                    Order {PAYMENT_SUCCESS_FIXTURE.orderDetails.orderNumber}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-5">
                   <Field>
                     <FieldTitle className="text-muted-foreground text-sm font-semibold">Product</FieldTitle>
                     <FieldContent>
-                      <Input readOnly value="ErgoPro Executive Mesh Chair × 1" className="bg-transparent border rounded-lg h-10 px-3 text-base" />
+                      <Input readOnly value={PAYMENT_SUCCESS_FIXTURE.orderDetails.product} className="bg-transparent border rounded-lg h-10 px-3 text-base" />
                     </FieldContent>
                   </Field>
                   <Field>
                     <FieldTitle className="text-muted-foreground text-sm font-semibold">Status</FieldTitle>
                     <FieldContent>
-                      <Input readOnly value="Completed" className="bg-transparent border rounded-lg h-10 px-3 text-base" />
+                      <Input readOnly value={PAYMENT_SUCCESS_FIXTURE.orderDetails.status} className="bg-transparent border rounded-lg h-10 px-3 text-base" />
                     </FieldContent>
                   </Field>
                   <Field>
                     <FieldTitle className="text-muted-foreground text-sm font-semibold">Total</FieldTitle>
                     <FieldContent>
-                      <Input readOnly value="$1,249.97" className="bg-transparent border rounded-lg h-10 px-3 text-base" />
+                      <Input readOnly value={PAYMENT_SUCCESS_FIXTURE.orderDetails.total} className="bg-transparent border rounded-lg h-10 px-3 text-base" />
                     </FieldContent>
                   </Field>
                 </div>
                 <DialogFooter className="sm:justify-end gap-3 pt-2">
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline" size="lg" className="px-6 rounded-full font-semibold">
-                      Close
-                    </Button>
+                  <DialogClose className={buttonVariants({ variant: "outline", size: "lg", className: "px-6 rounded-full font-semibold" })}>
+                    Close
                   </DialogClose>
                   <Button type="button" size="lg" className="px-6 rounded-full font-semibold" onClick={() => navigate("/account/orders")}>
                     Back to Order History
