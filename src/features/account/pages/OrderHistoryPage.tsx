@@ -1,6 +1,7 @@
 import { ChevronDown, Download, TriangleAlert } from "lucide-react";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
+import { ORDER_HISTORY_FIXTURE } from "@/features/account/account.fixture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,11 +102,9 @@ export function OrderHistoryPage() {
   return (
     <div className="min-h-[956px] bg-muted/60 px-4 py-8 font-sans sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar />
+        <AccountSidebar user={ORDER_HISTORY_FIXTURE.user} />
         <div className="flex min-w-0 flex-col gap-4">
-          <OrderCard id="#PEG-2023-8891" date="Oct 24, 2023" title="Charizard VMAX #020" description="Darkness Ablaze • Near Mint • Qty: 1" total="12,900" image="/charizard.jpg" status="completed" />
-          <OrderCard id="#PEG-2023-8942" date="Oct 28, 2023" title="Monkey D. Luffy OP01-003" description="Romance Dawn • Near Mint • Qty: 1" total="8,450" image="/luffy.jpg" status="shipping" />
-          <OrderCard id="#PEG-2023-9105" date="Nov 01, 2023" title="Charizard VMAX #020" description="Darkness Ablaze • Near Mint • Qty: 2" total="25,800" image="/charizard.jpg" status="payment" />
+          {ORDER_HISTORY_FIXTURE.orders.map((order) => <OrderCard key={order.id} {...order} />)}
         </div>
       </div>
     </div>

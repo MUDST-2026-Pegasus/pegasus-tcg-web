@@ -12,36 +12,37 @@ import {
   Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PROFILE_FIXTURE } from "@/features/account/account.fixture";
 
-function ProfileAvatar() {
+function ProfileAvatar({ initials }: { initials: string }) {
   return (
     <Avatar className="size-28">
-      <AvatarFallback className="text-3xl">SJ</AvatarFallback>
+      <AvatarFallback className="text-3xl">{initials}</AvatarFallback>
       <AvatarBadge className="size-6"><BadgeCheck /></AvatarBadge>
     </Avatar>
   );
 }
 
-function ProfileSummary() {
+function ProfileSummary({ data }: { data: typeof PROFILE_FIXTURE }) {
   return (
     <Card className="rounded-xl shadow-none">
       <CardContent className="flex flex-col items-center gap-3 text-center">
-        <ProfileAvatar />
+        <ProfileAvatar initials={data.user.initials} />
         <div>
-          <h2 className="text-2xl font-semibold">Somchai Jaidee</h2>
-          <p className="text-muted-foreground">somchai.j@example.com</p>
+          <h2 className="text-2xl font-semibold">{data.user.name}</h2>
+          <p className="text-muted-foreground">{data.user.email}</p>
         </div>
         <Separator className="my-3" />
         <div className="grid w-full grid-cols-2 gap-4 text-left">
           <div>
             <p className="text-xs text-muted-foreground">Membership Tier</p>
             <p className="mt-1 flex items-center gap-1 text-lg font-semibold text-primary">
-              <Diamond className="fill-primary" /> Elite
+              <Diamond className="fill-primary" /> {data.membership.tier}
             </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Reward Points</p>
-            <p className="mt-1 text-2xl font-semibold">2,450</p>
+            <p className="mt-1 text-2xl font-semibold">{data.membership.rewardPoints}</p>
           </div>
         </div>
       </CardContent>
@@ -76,7 +77,7 @@ function StatusLine({ active = false }: { active?: boolean }) {
   return <div className={active ? "mt-6 h-1 bg-primary" : "mt-6 h-1 bg-muted"} />;
 }
 
-function OrderStatus() {
+function OrderStatus({ data }: { data: typeof PROFILE_FIXTURE.latestOrder }) {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
@@ -89,9 +90,9 @@ function OrderStatus() {
       </CardHeader>
       <CardContent className="flex min-h-52 items-center overflow-x-auto">
         <div className="grid min-w-[520px] w-full grid-cols-[auto_1fr_auto_1fr_auto_1fr_auto] items-start">
-          <StatusStep icon={CreditCard} label="Awaiting Payment" count="0" active />
+          <StatusStep icon={CreditCard} label="Awaiting Payment" count={data.awaitingPayment} active />
           <StatusLine active />
-          <StatusStep icon={Package} label="To Ship" count="1" active />
+          <StatusStep icon={Package} label="To Ship" count={data.toShip} active />
           <StatusLine />
           <StatusStep icon={Truck} label="In Transit" />
           <StatusLine />
@@ -102,7 +103,7 @@ function OrderStatus() {
   );
 }
 
-function PrimaryAddress() {
+function PrimaryAddress({ address }: { address: typeof PROFILE_FIXTURE.primaryAddress }) {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
@@ -110,12 +111,10 @@ function PrimaryAddress() {
         <CardAction><Button variant="ghost" size="icon" aria-label="Edit address"><Pencil /></Button></CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 leading-7">
-        <Badge className="w-fit">Home</Badge>
+        <Badge className="w-fit">{address.label}</Badge>
         <address className="not-italic">
-          Somchai Jaidee | (+66) 89-123-4567<br />
-          123/45 Sukhumvit Soi 1, Sukhumvit Road<br />
-          Khlong Toei Nuea, Watthana<br />
-          Bangkok 10110
+          {address.recipient} | {address.phone}<br />
+          {address.lines.map((line) => <span key={line}>{line}<br /></span>)}
         </address>
       </CardContent>
       <CardFooter>
@@ -129,7 +128,7 @@ export function ProfilePage() {
   return (
     <div className="bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar />
+        <AccountSidebar user={PROFILE_FIXTURE.user} />
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -139,10 +138,10 @@ export function ProfilePage() {
             <Button className="sm:self-start"><Pencil data-icon="inline-start" /> Edit Profile</Button>
           </div>
           <div className="grid gap-6 xl:grid-cols-[352px_1fr]">
-            <ProfileSummary />
-            <OrderStatus />
+            <ProfileSummary data={PROFILE_FIXTURE} />
+            <OrderStatus data={PROFILE_FIXTURE.latestOrder} />
           </div>
-          <PrimaryAddress />
+          <PrimaryAddress address={PROFILE_FIXTURE.primaryAddress} />
         </div>
       </div>
     </div>
