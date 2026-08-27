@@ -2,6 +2,12 @@ import { SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -11,6 +17,14 @@ const NAV_LINKS = [
   { label: "NEW ARRIVALS", to: "/new-arrivals" },
   { label: "POKEMON", to: "/pokemon" },
   { label: "ONE PIECE", to: "/one-piece" },
+] as const;
+
+/** เมนูใต้ไอคอนผู้ใช้ — อ้างจาก Figma node 939:222 (Account Menu) */
+const ACCOUNT_MENU = [
+  { label: "My Account", to: "/account/profile" },
+  { label: "Seller Dashboard", to: "/seller" },
+  { label: "Become a Seller", to: "/become-a-seller" },
+  { label: "Admin Dashboard", to: "/admin" },
 ] as const;
 
 export function Navbar() {
@@ -64,9 +78,29 @@ export function Navbar() {
           <Button variant="ghost" size="icon" aria-label="Cart">
             <ShoppingCartIcon />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Account">
-            <UserIcon />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon" aria-label="Account" />
+              }
+            >
+              <UserIcon />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="flex w-56 flex-col gap-2 rounded-lg border border-border p-4 shadow-md ring-0"
+            >
+              {ACCOUNT_MENU.map(({ label, to }) => (
+                <DropdownMenuItem
+                  key={to}
+                  className="cursor-pointer rounded-lg px-2.5"
+                  render={<Link to={to} />}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
