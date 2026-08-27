@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -14,25 +15,29 @@ type DashboardLayoutProps = {
   groups: NavGroup[];
 };
 
-/**
- * โครงหน้าหลังบ้าน — Sidebar + TopBar + เนื้อหา + Footer
- * Admin (9 หน้า) และ Seller (6 หน้า) ใช้โครงเดียวกัน ต่างแค่ `groups`
- * ที่ส่งเข้ามาจาก #lib/nav-config
- */
 export function DashboardLayout({ role, groups }: DashboardLayoutProps) {
   return (
-    <SidebarProvider>
-      <AppSidebar role={role} groups={groups} />
-      <SidebarInset className="flex min-h-svh flex-col">
-        <header className="sticky top-0 z-30 flex h-[75px] shrink-0 items-center gap-3 border-b border-border bg-background/90 px-6 backdrop-blur-[6px]">
-          <SidebarTrigger />
-        </header>
-        {/* SidebarInset เป็น <main> อยู่แล้ว ตรงนี้จึงใช้ div ไม่ให้ landmark ซ้อนกัน */}
-        <div className="flex-1 p-6">
-          <Outlet />
-        </div>
-        <Footer />
-      </SidebarInset>
-    </SidebarProvider>
+    <div
+      className="flex min-h-svh flex-col"
+      style={{ "--navbar-h": "75px" } as React.CSSProperties}
+    >
+      <Navbar />
+
+      <SidebarProvider className="min-h-0 flex-1 items-stretch">
+        <AppSidebar role={role} groups={groups} />
+
+        <SidebarInset className="min-w-0">
+          <header className="flex h-12 shrink-0 items-center border-b border-border px-4 md:hidden">
+            <SidebarTrigger />
+          </header>
+
+          <div className="flex-1 bg-muted px-8 pt-7 pb-10">
+            <Outlet />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+
+      <Footer />
+    </div>
   );
 }

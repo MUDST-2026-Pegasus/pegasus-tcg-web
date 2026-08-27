@@ -1,6 +1,7 @@
 import { MapPin, MapPinPlus, Pencil, Phone, Plus, Trash2 } from "lucide-react";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
+import { ADDRESS_BOOK_FIXTURE } from "@/features/account/account.fixture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,22 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-const ADDRESSES = [
-  {
-    name: "Elena Rostova",
-    phone: "+1 (555) 019-2837",
-    lines: ["1440 Corporate Way, Suite 400", "San Francisco, CA 94107", "United States"],
-    isDefault: true,
-  },
-  {
-    name: "Elena Rostova",
-    phone: "+1 (555) 837-1102",
-    lines: ["829 Logistics Blvd, Warehouse B", "Newark, NJ 07114", "United States"],
-    isDefault: false,
-  },
-] as const;
-
-function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
+function AddressCard({ address }: { address: (typeof ADDRESS_BOOK_FIXTURE.addresses)[number] }) {
   return (
     <Card
       data-default={address.isDefault}
@@ -48,11 +34,11 @@ function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
       <Separator />
       <CardFooter className="justify-between gap-3">
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm"><Pencil data-icon="inline-start" /> Edit</Button>
+          <Button variant="link" size="sm"><Pencil data-icon="inline-start" /> Edit</Button>
           <Separator orientation="vertical" />
           <Button variant="destructive" size="sm"><Trash2 data-icon="inline-start" /> Delete</Button>
         </div>
-        {!address.isDefault && <Button variant="ghost" size="sm">Set as Default</Button>}
+        {!address.isDefault && <Button variant="link" size="sm">Set as Default</Button>}
       </CardFooter>
     </Card>
   );
@@ -60,16 +46,16 @@ function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
 
 export function AddressBookPage() {
   return (
-    <div className="min-h-[720px] bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
+    <div className="min-h-[720px] bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar />
+        <AccountSidebar user={ADDRESS_BOOK_FIXTURE.user} />
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-semibold">Address Book</h1>
             <Button><Plus data-icon="inline-start" /> Add New Address</Button>
           </div>
           <div className="grid gap-5 xl:grid-cols-2">
-            {ADDRESSES.map((address) => <AddressCard key={address.phone} address={address} />)}
+            {ADDRESS_BOOK_FIXTURE.addresses.map((address) => <AddressCard key={address.phone} address={address} />)}
             <Button variant="outline" className="h-64 flex-col gap-3 border-dashed text-center">
               <span className="flex size-12 items-center justify-center rounded-full border">
                 <MapPinPlus />
