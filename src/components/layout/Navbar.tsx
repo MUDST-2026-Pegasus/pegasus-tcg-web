@@ -72,16 +72,31 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" aria-label="Search">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Search"
+            className="cursor-pointer"
+          >
             <SearchIcon />
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Cart">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Cart"
+            className="cursor-pointer"
+          >
             <ShoppingCartIcon />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="ghost" size="icon" aria-label="Account" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Account"
+                  className="cursor-pointer"
+                />
               }
             >
               <UserIcon />
