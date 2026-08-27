@@ -14,6 +14,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronRight, Plus } from "lucide-react";
 import { Field, FieldTitle } from "@/components/ui/field";
+import { CHECKOUT_PAGE_FIXTURE } from "@/features/cart/Cart.fixture";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f8fa] py-10 px-4 flex flex-col items-center">
+    <div className="min-h-screen bg-muted py-10 px-4 flex flex-col items-center">
       <div className="text-center mb-6 flex flex-col gap-1">
         <h1 className="text-xl sm:text-2xl font-bold font-heading text-foreground">Review & Purchase</h1>
         <p className="text-muted-foreground text-sm">Please review your order details below.</p>
@@ -58,10 +59,10 @@ export function CheckoutPage() {
               </div>
               <div className="flex flex-col gap-1">
                 <h2 className="font-semibold text-sm sm:text-base leading-snug text-foreground">
-                  MEGA Charizard X ex MA [M2a 223/193] (High Class Pack "MEGA Dream ex")
+                  {CHECKOUT_PAGE_FIXTURE.item.name}
                 </h2>
-                <p className="text-[#0066cc] font-medium text-sm mt-1">
-                  ฿3,226 <span className="text-muted-foreground font-normal">/ PSA 10</span>
+                <p className="text-primary font-medium text-sm mt-1">
+                  {CHECKOUT_PAGE_FIXTURE.item.price} <span className="text-muted-foreground font-normal">/ {CHECKOUT_PAGE_FIXTURE.item.condition}</span>
                 </p>
               </div>
             </div>
@@ -89,13 +90,13 @@ export function CheckoutPage() {
                       <p className="text-sm text-muted-foreground">You don't have any addresses yet.</p>
                       <button 
                         onClick={() => {
-                          const newAddr = "123 Mock Street, Bangkok 10110";
+                          const newAddr = CHECKOUT_PAGE_FIXTURE.addresses[0];
                           setAddresses([newAddr]);
                           setTempShipping(newAddr);
                         }}
                         className="w-full border border-dashed border-border rounded-xl p-4 text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/50 transition-colors text-sm"
                       >
-                        <Plus className="w-4 h-4 text-blue-600" /> Add New Address
+                        <Plus className="w-4 h-4 text-primary" /> Add New Address
                       </button>
                     </div>
                   ) : (
@@ -156,7 +157,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="mt-2">
                   <Button 
-                    className="w-full rounded-full bg-[#0066cc] hover:bg-[#005bb5] text-white font-medium" 
+                    className="w-full rounded-full bg-primary hover:bg-primary/90 text-white font-medium" 
                     onClick={() => {
                       if (tempPayment) {
                         setSelectedPayment(tempPayment);
@@ -176,19 +177,19 @@ export function CheckoutPage() {
             <div className="px-6 py-5 flex flex-col gap-3 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping Fee</span>
-                <span>฿597</span>
+                <span>{CHECKOUT_PAGE_FIXTURE.fees.shipping}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Purchase Fee</span>
-                <span>฿113</span>
+                <span>{CHECKOUT_PAGE_FIXTURE.fees.purchase}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Authentication Fee</span>
-                <span>฿0</span>
+                <span>{CHECKOUT_PAGE_FIXTURE.fees.authentication}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Duty & Taxes</span>
-                <span>Pay at the door</span>
+                <span>{CHECKOUT_PAGE_FIXTURE.fees.taxes}</span>
               </div>
             </div>
 
@@ -197,14 +198,14 @@ export function CheckoutPage() {
             {/* Total Section */}
             <div className="px-6 py-5 flex justify-between items-center">
               <span className="font-bold text-lg text-foreground">Total</span>
-              <span className="font-bold text-[28px] font-heading text-foreground">฿3,936</span>
+              <span className="font-bold text-[28px] font-heading text-foreground">{CHECKOUT_PAGE_FIXTURE.fees.total}</span>
             </div>
           </CardContent>
         </Card>
 
         <Button 
           disabled={!selectedShipping || !selectedPayment} 
-          className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-[#0066cc] hover:bg-[#005bb5] text-white"
+          className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
           onClick={() => {
             if (selectedShipping && selectedPayment) {
               navigate('/payment');
