@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +16,7 @@ import { ChevronRight, Plus } from "lucide-react";
 import { Field, FieldTitle } from "@/components/ui/field";
 
 export function CheckoutPage() {
+  const navigate = useNavigate();
   const [selectedShipping, setSelectedShipping] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
 
@@ -203,6 +205,11 @@ export function CheckoutPage() {
         <Button 
           disabled={!selectedShipping || !selectedPayment} 
           className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-[#0066cc] hover:bg-[#005bb5] text-white"
+          onClick={() => {
+            if (selectedShipping && selectedPayment) {
+              navigate('/payment');
+            }
+          }}
         >
           Purchase
         </Button>

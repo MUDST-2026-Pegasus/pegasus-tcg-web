@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Lock, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -6,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 export function CartPage() {
+  const navigate = useNavigate()
   const [items, setItems] = useState([
     {
       id: 1,
@@ -186,6 +188,7 @@ export function CartPage() {
               <Button 
                 className="w-full bg-[#0052cc] hover:bg-[#0052cc]/90 text-white font-semibold text-lg py-6 rounded-full shadow-md"
                 disabled={checkedItems.length === 0}
+                onClick={() => navigate('/checkout')}
               >
                 Proceed to Checkout
               </Button>
