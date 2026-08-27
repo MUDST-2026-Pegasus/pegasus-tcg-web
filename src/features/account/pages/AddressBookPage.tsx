@@ -48,11 +48,11 @@ function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
       <Separator />
       <CardFooter className="justify-between gap-3">
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm"><Pencil data-icon="inline-start" /> Edit</Button>
+          <Button variant="link" size="sm"><Pencil data-icon="inline-start" /> Edit</Button>
           <Separator orientation="vertical" />
           <Button variant="destructive" size="sm"><Trash2 data-icon="inline-start" /> Delete</Button>
         </div>
-        {!address.isDefault && <Button variant="ghost" size="sm">Set as Default</Button>}
+        {!address.isDefault && <Button variant="link" size="sm">Set as Default</Button>}
       </CardFooter>
     </Card>
   );
