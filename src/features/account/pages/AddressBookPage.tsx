@@ -60,7 +60,7 @@ function AddressCard({ address }: { address: (typeof ADDRESSES)[number] }) {
 
 export function AddressBookPage() {
   return (
-    <div className="min-h-[720px] bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
+    <div className="min-h-[720px] bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
         <AccountSidebar />
         <div className="flex min-w-0 flex-col gap-6">
