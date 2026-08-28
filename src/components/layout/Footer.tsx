@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const FOOTER_COLUMNS = [
   ["Terms of Service", "Privacy Policy"],
   ["Shipping Info", "Authenticity Guarantee"],
@@ -13,13 +15,13 @@ export function Footer() {
           {FOOTER_COLUMNS.map((links) => (
             <div key={links[0]} className="flex flex-col gap-4">
               {links.map((label) => (
-                <a
+                <Link
                   key={label}
-                  href="#"
-                  className="text-sm text-foreground"
+                  to="/about"
+                  className="text-sm text-foreground transition-colors hover:text-primary"
                 >
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           ))}
