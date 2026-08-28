@@ -17,11 +17,15 @@ export function RegisterForm() {
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="username">Username</FieldLabel>
-          <Input id="username" placeholder="Create your username" />
+          <Input
+            id="username"
+            placeholder="Create your username"
+            className="h-12 rounded-lg border-border bg-background px-4"
+          />
         </Field>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="Enter your email" />
+          <Input id="email" type="email" placeholder="Enter your email" className="h-12 rounded-lg border-border bg-background px-4" />
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -29,10 +33,11 @@ export function RegisterForm() {
             id="password"
             type="password"
             placeholder="Create a password"
+            className="h-12 rounded-lg border-border bg-background px-4"
           />
         </Field>
         <Field orientation="horizontal">
-          <Checkbox id="terms" />
+          <Checkbox id="terms" className="bg-white border-2 border-black-50 size-4.5" />
           <FieldLabel htmlFor="terms" className="font-normal">
             I agree to the Pegasus{" "}
             <span className="text-primary">Terms of Service</span> and{" "}
@@ -43,15 +48,15 @@ export function RegisterForm() {
           Sign up
         </Button>
       </FieldGroup>
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
+      <p className="text-center text-sm text-muted-foreground ">
+        Already have an account? &nbsp;
         <Link to="/login" className="font-medium text-primary">
           Log in
         </Link>
       </p>
       <p className="text-center text-xs tracking-[0.24px] text-muted-foreground">
-        We keep your information safe. We never use your information outside
-        of Pegasus TCG.
+        We keep your information safe. We never use your information outside of
+        Pegasus TCG.
       </p>
     </form>
   );
