@@ -5,6 +5,7 @@ export type HeroSlide = {
   description: string;
   image: string;
   imageAlt: string;
+  theme: "campaign" | "release" | "collector";
 };
 
 export type GameCategory = {
@@ -37,7 +38,6 @@ export type TrendingProduct = HomeProduct & {
 export type HomeData = {
   heroSlides: HeroSlide[];
   games: GameCategory[];
-  recentlyViewed: HomeProduct[];
   trending: TrendingProduct[];
   categories: ProductCategory[];
   pegasusProducts: HomeProduct[];

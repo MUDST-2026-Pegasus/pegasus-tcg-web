@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ItemCard } from "@/components/common/ItemCard";
 import { Badge } from "@/components/ui/badge";
@@ -30,31 +30,35 @@ type SectionHeaderProps = {
   title: string;
   actionLabel?: string;
   description?: string;
+  showAction?: boolean;
 };
 
 function SectionHeader({
   title,
-  actionLabel = "ดูทั้งหมด",
+  actionLabel = "View All",
   description,
+  showAction = true,
 }: SectionHeaderProps) {
   return (
-    <div className="flex min-h-7 items-start justify-between gap-4">
+    <div className="flex min-h-[34px] items-start justify-between gap-4">
       <div className="min-w-0">
-        <h2 className={cn("text-xl font-semibold text-foreground sm:text-2xl")}>
+        <h2 className="text-[28px] leading-[34px] font-semibold text-foreground">
           {title}
         </h2>
         {description ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs leading-4 text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      <Button
-        type="button"
-        variant="link"
-        size="xs"
-        className="shrink-0 cursor-pointer transition-transform hover:-translate-y-0.5"
-      >
-        {actionLabel}
-      </Button>
+      {showAction ? (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="shrink-0 cursor-pointer px-0 text-sm"
+        >
+          {actionLabel}
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -67,11 +71,11 @@ function HomeProductCard({
   rank?: number;
 }) {
   return (
-    <div className="relative h-full">
+    <div className="relative h-[260px]">
       <button
         type="button"
         aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
-        className="block h-full cursor-pointer rounded-xl text-left outline-none transition-transform hover:-translate-y-1 focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="block h-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ItemCard
           imageSrc={product.image}
@@ -120,7 +124,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   return (
     <section
       aria-label="โปรโมชั่นแนะนำ"
-      className="h-[310px] overflow-hidden bg-secondary px-4 pb-3 sm:px-6 lg:px-8"
+      className="overflow-hidden bg-secondary"
     >
       <Carousel
         setApi={setApi}
@@ -129,7 +133,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           loop: slides.length > 1,
           slidesToScroll: 1,
         }}
-        className="mx-auto max-w-[1216px]"
+        className="w-full"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onFocusCapture={() => setIsPaused(true)}
@@ -139,59 +143,95 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           }
         }}
       >
-        <CarouselContent className="cursor-grab active:cursor-grabbing">
+        <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
           {slides.map((slide, index) => (
             <CarouselItem
               key={slide.id}
-              className="basis-[min(696px,calc(100vw-2rem))]"
+              className="basis-full pl-0"
             >
-              <button
-                type="button"
-                aria-label={`เลือกโปรโมชัน ${slide.title}`}
-                className="group block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              <article
+                aria-label={slide.title}
+                className="flex h-[600px] w-full flex-col overflow-hidden bg-muted shadow-sm lg:h-[740px]"
               >
-                <Card
+                <div
                   className={cn(
-                    "h-[272px] gap-4 rounded-xl border border-border p-5 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md sm:p-6",
-                    current === index ? "bg-muted" : "bg-card",
+                    "flex h-[380px] shrink-0 items-center justify-center overflow-hidden lg:h-[520px]",
+                    slide.theme === "release" && "bg-primary-foreground",
+                    slide.theme === "collector" && "bg-foreground",
                   )}
                 >
-                  <div className="grid h-full min-w-0 grid-cols-[minmax(0,1fr)_112px] items-start gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-                    <div
+                  <img
+                    src={slide.image}
+                    alt={slide.imageAlt}
+                    className={cn(
+                      "size-full",
+                      slide.theme === "campaign"
+                        ? "object-cover"
+                        : "object-contain",
+                    )}
+                  />
+                </div>
+                <div
+                  className={cn(
+                    "flex h-[220px] shrink-0 flex-col items-center justify-center gap-2 px-6 pb-8 text-center sm:px-12",
+                    slide.theme === "collector"
+                      ? "bg-foreground"
+                      : slide.theme === "release"
+                        ? "bg-primary-foreground"
+                        : "bg-background",
+                  )}
+                >
+                  <p className="text-xs font-semibold tracking-[0.08em] text-primary">
+                    {slide.eyebrow}
+                  </p>
+                  {index === 0 ? (
+                    <h1
                       className={cn(
-                        "z-10 flex min-w-0 flex-col gap-2.5 rounded-lg p-1.5",
-                        current === index && "bg-background",
+                        "text-3xl leading-[0.95] font-bold sm:text-5xl",
+                        slide.theme === "collector"
+                          ? "text-background"
+                          : "text-foreground",
                       )}
                     >
-                      <p className="text-[11px] font-semibold text-primary">
-                        {slide.eyebrow}
-                      </p>
-                      {index === 0 ? (
-                        <h1 className="truncate text-xl font-bold text-foreground sm:text-[26px]">
-                          {slide.title}
-                        </h1>
-                      ) : (
-                        <h2 className="truncate text-xl font-bold text-foreground sm:text-[26px]">
-                          {slide.title}
-                        </h2>
+                      {slide.title}
+                    </h1>
+                  ) : (
+                    <h2
+                      className={cn(
+                        "text-3xl leading-[0.95] font-bold sm:text-5xl",
+                        slide.theme === "collector"
+                          ? "text-background"
+                          : "text-foreground",
                       )}
-                      <p className="line-clamp-2 text-[13px] text-muted-foreground">
-                        {slide.description}
-                      </p>
-                    </div>
-                    <img
-                      src={slide.image}
-                      alt={slide.imageAlt}
-                      className="size-28 self-start rounded-lg object-contain sm:size-[200px]"
-                    />
+                    >
+                      {slide.title}
+                    </h2>
+                  )}
+                  <p
+                    className={cn(
+                      "text-sm leading-6",
+                      slide.theme === "collector"
+                        ? "text-background/70"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {slide.description}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <Button type="button" size="lg">
+                      Shop New Releases
+                    </Button>
+                    <Button type="button" variant="outline" size="lg">
+                      Explore Cards
+                    </Button>
                   </div>
-                </Card>
-              </button>
+                </div>
+              </article>
             </CarouselItem>
           ))}
         </CarouselContent>
         <div
-          className="mt-2.5 flex items-center justify-center gap-1.5"
+          className="absolute right-0 bottom-2 left-0 flex h-2 items-start justify-center gap-2.5"
           aria-label="เลือกสไลด์"
         >
           {slides.map((slide, index) => (
@@ -202,8 +242,10 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               aria-current={current === index ? "true" : undefined}
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                "h-[3px] cursor-pointer rounded-sm transition-[width,background-color,transform] hover:scale-y-[2]",
-                current === index ? "w-5 bg-foreground" : "w-3 bg-border",
+                "h-1.5 cursor-pointer rounded-[3px] transition-[width,background-color,transform] hover:scale-y-125",
+                current === index
+                  ? "w-8 bg-primary"
+                  : "w-4 bg-muted-foreground",
               )}
             />
           ))}
@@ -216,14 +258,14 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 function BrowseByGame({ games }: { games: GameCategory[] }) {
   return (
     <section
-      className="bg-background px-4 py-7 sm:px-6 lg:px-8"
+      className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8 lg:pt-7 lg:pb-5"
       aria-labelledby="browse-by-game-title"
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title="เลือกเกมที่คุณเล่น" />
+          <SectionHeader title="Shop by Game" />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
             <button
               key={game.id}
@@ -252,24 +294,36 @@ function ProductRail({
   title,
   products,
   description,
+  actionLabel,
 }: {
   title: string;
   products: (HomeProduct | TrendingProduct)[];
   description?: string;
+  actionLabel?: string;
 }) {
   return (
-    <section className="px-4 py-7 sm:px-6 lg:px-8" aria-label={title}>
+    <section
+      className={cn(
+        "bg-secondary px-4 py-7 sm:px-6 lg:px-8",
+        description ? "lg:h-[400px]" : "lg:h-[390px]",
+      )}
+      aria-label={title}
+    >
       <div className="mx-auto max-w-[1216px]">
-        <SectionHeader title={title} description={description} />
+        <SectionHeader
+          title={title}
+          description={description}
+          actionLabel={actionLabel}
+        />
         <Carousel
           opts={{ align: "start", dragFree: true }}
           className="mt-[18px]"
         >
-          <CarouselContent className="py-2">
+          <CarouselContent>
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className="basis-[min(240px,calc(100vw-2rem))]"
+                className="basis-[min(241px,calc(100vw-2rem))]"
               >
                 <HomeProductCard
                   product={product}
@@ -284,34 +338,118 @@ function ProductRail({
   );
 }
 
-function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
+function CategoryCarousel({ categories }: { categories: ProductCategory[] }) {
+  const [api, setApi] = useState<CarouselApi>();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const pageCount = Math.ceil(categories.length / 3);
+
+  const scrollToPage = useCallback(
+    (page: number) => {
+      if (!api) return;
+
+      const lastSnapIndex = Math.max(api.scrollSnapList().length, 1) - 1;
+      api.scrollTo(Math.min(page * 3, lastSnapIndex));
+    },
+    [api],
+  );
+
+  useEffect(() => {
+    if (!api) return;
+
+    const updateCurrentPage = () => {
+      setCurrentPage(
+        Math.round(api.scrollProgress() * Math.max(pageCount - 1, 0)),
+      );
+    };
+
+    updateCurrentPage();
+    api.on("select", updateCurrentPage);
+    api.on("reInit", updateCurrentPage);
+
+    return () => {
+      api.off("select", updateCurrentPage);
+      api.off("reInit", updateCurrentPage);
+    };
+  }, [api, pageCount]);
+
+  useEffect(() => {
+    if (!api || pageCount < 2 || isPaused) return;
+
+    const timer = window.setInterval(() => {
+      scrollToPage(currentPage === pageCount - 1 ? 0 : currentPage + 1);
+    }, 7500);
+
+    return () => window.clearInterval(timer);
+  }, [api, currentPage, isPaused, pageCount, scrollToPage]);
+
   return (
     <section
-      className="px-4 py-7 sm:px-6 lg:px-8"
+      className="bg-secondary px-4 py-7 sm:px-6 lg:h-[486px] lg:px-8"
       aria-labelledby="category-title"
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="category-title">
-          <SectionHeader title="เลือกตามประเภทสินค้า" />
+          <SectionHeader title="Find by category" showAction={false} />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {categories.map((category) => (
+        <Carousel
+          setApi={setApi}
+          opts={{ align: "start", dragFree: true }}
+          className="mt-[18px]"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setIsPaused(false);
+            }
+          }}
+        >
+          <CarouselContent className="cursor-grab active:cursor-grabbing">
+            {categories.map((category) => (
+              <CarouselItem
+                key={category.id}
+                className="basis-[min(396px,calc(100vw-2rem))]"
+              >
+                <button
+                  type="button"
+                  className="group h-[371px] w-full min-w-0 cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  <Card className="h-full gap-0 rounded-xl border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
+                    <div className="h-[272px] w-full overflow-hidden bg-muted">
+                      <img
+                        src={category.image}
+                        alt={category.imageAlt}
+                        className="size-full object-cover"
+                      />
+                    </div>
+                    <CardHeader className="flex flex-1 items-center justify-center px-4">
+                      <CardTitle className="text-center text-[28px] leading-[34px] font-semibold">
+                        {category.name}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                </button>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+        <div
+          className="mt-3 flex justify-center gap-2"
+          aria-label="เลือกกลุ่มหมวดหมู่สินค้า"
+        >
+          {Array.from({ length: pageCount }, (_, page) => (
             <button
-              key={category.id}
+              key={page}
               type="button"
-              className="group w-56 shrink-0 cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <Card className="h-[218px] gap-4 rounded-xl border border-border py-0 pb-4 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
-                <img
-                  src={category.image}
-                  alt={category.imageAlt}
-                  className="h-40 w-full object-contain"
-                />
-                <CardHeader className="px-4">
-                  <CardTitle className="text-center">{category.name}</CardTitle>
-                </CardHeader>
-              </Card>
-            </button>
+              aria-label={`ไปยังหมวดหมู่ชุดที่ ${page + 1}`}
+              aria-current={currentPage === page ? "true" : undefined}
+              onClick={() => scrollToPage(page)}
+              className={cn(
+                "h-1.5 w-4 cursor-pointer rounded-[3px] transition-colors hover:opacity-80",
+                currentPage === page ? "bg-primary" : "bg-muted-foreground",
+              )}
+            />
           ))}
         </div>
       </div>
@@ -322,16 +460,18 @@ function CategoryGrid({ categories }: { categories: ProductCategory[] }) {
 function ExploreGrid({ products }: { products: HomeProduct[] }) {
   return (
     <section
-      className="px-4 py-7 sm:px-6 lg:px-8"
+      className="bg-secondary px-4 py-7 sm:px-6 lg:h-[638px] lg:px-8"
       aria-labelledby="explore-title"
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader title="Explore More" actionLabel="ดูสินค้าทั้งหมด" />
+          <SectionHeader title="More to Explore" />
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(5,224px)]">
+        <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225px)]">
           {products.map((product) => (
-            <HomeProductCard key={product.id} product={product} />
+            <div key={product.id} className="h-[260px] min-w-0">
+              <HomeProductCard product={product} />
+            </div>
           ))}
         </div>
       </div>
@@ -343,15 +483,15 @@ export function HomeContent({ data }: { data: HomeData }) {
   return (
     <div className="bg-secondary font-sans">
       <HeroCarousel slides={data.heroSlides} />
-      <BrowseByGame games={data.games} />
-      <ProductRail title="ดูล่าสุด" products={data.recentlyViewed} />
-      <ProductRail title="มาแรง" products={data.trending} />
-      <CategoryGrid categories={data.categories} />
+      <CategoryCarousel categories={data.categories} />
+      <ProductRail title="Trending Now" products={data.trending} />
       <ProductRail
-        title="สินค้าจาก Pegasus"
-        description="คัดเลือก ตรวจสอบ และจัดส่งโดยทีม Pegasus"
+        title="Pegasus Picks"
+        description="Curated, verified, and shipped by Pegasus."
+        actionLabel="Shop Pegasus"
         products={data.pegasusProducts}
       />
+      <BrowseByGame games={data.games} />
       <ExploreGrid products={data.exploreMore} />
     </div>
   );

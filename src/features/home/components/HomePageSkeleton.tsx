@@ -3,122 +3,156 @@ import type { ComponentProps } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-const gameLabelWidths = ["w-16", "w-20", "w-14", "w-0", "w-24", "w-16"];
-const latestTitleWidths = ["w-42", "w-44", "w-36", "w-42", "w-46"];
-const latestDetailWidths = ["w-28", "w-36", "w-28", "w-32", "w-28"];
-const priceWidths = ["w-[75px]", "w-14", "w-[75px]", "w-28", "w-[75px]"];
-const trendingTitleWidths = ["w-42", "w-36", "w-44", "w-42", "w-36"];
+const productTitleWidths = ["w-36", "w-40", "w-32", "w-36", "w-40"];
 
 function HomeSkeleton(props: Omit<ComponentProps<typeof Skeleton>, "tone">) {
   return <Skeleton tone="contrast" {...props} />;
 }
 
-function SkeletonSectionHeader({ titleWidth }: { titleWidth: string }) {
+function SkeletonSectionHeader({
+  description = false,
+}: {
+  description?: boolean;
+}) {
   return (
-    <div className="flex items-end justify-between gap-4">
-      <HomeSkeleton className={cn("h-8", titleWidth)} />
-      <HomeSkeleton className="h-5 w-24" />
+    <div className="flex min-h-[34px] items-start justify-between gap-4">
+      <div>
+        <HomeSkeleton className="h-[34px] w-52" />
+        {description ? <HomeSkeleton className="mt-1 h-4 w-64" /> : null}
+      </div>
+      <HomeSkeleton className="h-8 w-16" />
     </div>
   );
 }
 
-function ProductSkeleton({
-  imageClassName,
-  titleWidth,
-  detailWidth,
-  priceWidth,
+function ProductCardSkeleton({ titleWidth }: { titleWidth: string }) {
+  return (
+    <div className="h-[260px] w-[225px] rounded-xl bg-background p-4 ring-1 ring-foreground/5">
+      <HomeSkeleton className="h-[104px] w-full rounded-lg" />
+      <HomeSkeleton className="mt-3.5 h-[18px] w-16 rounded-full" />
+      <HomeSkeleton className={cn("mt-2.5 h-[42px]", titleWidth)} />
+      <HomeSkeleton className="mt-3.5 h-6 w-20" />
+    </div>
+  );
+}
+
+function ProductRailSkeleton({
+  description = false,
 }: {
-  imageClassName: string;
-  titleWidth: string;
-  detailWidth?: string;
-  priceWidth: string;
+  description?: boolean;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3">
-      <HomeSkeleton className={imageClassName} />
-      <HomeSkeleton className={cn("h-5 max-w-full", titleWidth)} />
-      {detailWidth ? (
-        <HomeSkeleton className={cn("h-4 max-w-full", detailWidth)} />
-      ) : null}
-      <div className="pt-1">
-        <HomeSkeleton className={cn("h-5 max-w-full", priceWidth)} />
+    <section
+      aria-hidden="true"
+      className={cn(
+        "bg-secondary px-4 py-7 sm:px-6 lg:px-8",
+        description ? "lg:h-[400px]" : "lg:h-[390px]",
+      )}
+    >
+      <div className="mx-auto max-w-[1216px]">
+        <SkeletonSectionHeader description={description} />
+        <div className="mt-[18px] flex gap-4 overflow-hidden">
+          {productTitleWidths.map((titleWidth, index) => (
+            <ProductCardSkeleton key={index} titleWidth={titleWidth} />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
 export function HomePageSkeleton() {
   return (
-    <div
+    <main
       aria-busy="true"
       aria-label="กำลังโหลดหน้าแรก"
-      className="bg-secondary py-8"
+      className="bg-secondary font-sans"
     >
       <span className="sr-only" role="status" aria-live="polite">
         กำลังโหลดข้อมูลหน้าแรก
       </span>
 
-      <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-8">
-        <div className="w-full px-4 sm:px-6 lg:px-12">
-          <HomeSkeleton className="h-[500px] w-full" />
+      <section
+        aria-hidden="true"
+        className="h-[600px] bg-background lg:h-[740px]"
+      >
+        <HomeSkeleton className="h-[380px] w-full rounded-none lg:h-[520px]" />
+        <div className="flex h-[220px] flex-col items-center justify-center gap-3 px-6 pb-8">
+          <HomeSkeleton className="h-4 w-32" />
+          <HomeSkeleton className="h-12 w-[min(520px,80vw)]" />
+          <HomeSkeleton className="h-5 w-[min(440px,70vw)]" />
+          <div className="flex gap-3">
+            <HomeSkeleton className="h-10 w-36 rounded-full" />
+            <HomeSkeleton className="h-10 w-32 rounded-full" />
+          </div>
         </div>
+      </section>
 
-        <section className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
-          <div className="flex flex-col gap-6">
-            <HomeSkeleton className="h-8 w-48" />
-            <div className="flex gap-6 overflow-hidden pb-4">
-              {gameLabelWidths.map((labelWidth, index) => (
-                <div
-                  key={index}
-                  className="flex shrink-0 flex-col items-center gap-3"
-                >
-                  <HomeSkeleton className="size-24 rounded-full" />
-                  {labelWidth === "w-0" ? null : (
-                    <HomeSkeleton className={cn("h-4", labelWidth)} />
-                  )}
+      <section
+        aria-hidden="true"
+        className="bg-secondary px-4 py-7 sm:px-6 lg:h-[486px] lg:px-8"
+      >
+        <div className="mx-auto max-w-[1216px]">
+          <SkeletonSectionHeader />
+          <div className="mt-[18px] flex gap-4 overflow-hidden">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div
+                key={index}
+                className="h-[371px] w-[380px] shrink-0 overflow-hidden rounded-xl bg-background ring-1 ring-foreground/5"
+              >
+                <HomeSkeleton className="h-[272px] w-full rounded-none" />
+                <div className="flex h-[99px] items-center justify-center">
+                  <HomeSkeleton className="h-[34px] w-40" />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        </section>
-
-        <section className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
-          <div className="flex flex-col gap-6">
-            <SkeletonSectionHeader titleWidth="w-40" />
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {latestTitleWidths.map((titleWidth, index) => (
-                <ProductSkeleton
-                  key={index}
-                  imageClassName="aspect-[3/4] w-full"
-                  titleWidth={titleWidth}
-                  detailWidth={latestDetailWidths[index]}
-                  priceWidth={priceWidths[index]}
-                />
-              ))}
-            </div>
+          <div className="mt-3 flex justify-center gap-2">
+            <HomeSkeleton className="h-1.5 w-4 rounded-[3px]" />
+            <HomeSkeleton className="h-1.5 w-4 rounded-[3px]" />
           </div>
-        </section>
-
-        <div className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
-          <HomeSkeleton className="h-[200px] w-full" />
         </div>
+      </section>
 
-        <section className="w-full px-4 sm:px-6 lg:px-12" aria-hidden="true">
-          <div className="flex flex-col gap-6">
-            <SkeletonSectionHeader titleWidth="w-48" />
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {trendingTitleWidths.map((titleWidth, index) => (
-                <ProductSkeleton
-                  key={index}
-                  imageClassName="aspect-square w-full"
-                  titleWidth={titleWidth}
-                  priceWidth={priceWidths[index]}
-                />
-              ))}
-            </div>
+      <ProductRailSkeleton />
+      <ProductRailSkeleton description />
+
+      <section
+        aria-hidden="true"
+        className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8 lg:pt-7 lg:pb-5"
+      >
+        <div className="mx-auto max-w-[1216px]">
+          <SkeletonSectionHeader />
+          <div className="mt-[18px] flex gap-4 overflow-hidden">
+            {Array.from({ length: 8 }, (_, index) => (
+              <div
+                key={index}
+                className="flex h-40 w-[138px] shrink-0 flex-col items-center gap-2.5"
+              >
+                <HomeSkeleton className="size-[104px] rounded-full" />
+                <HomeSkeleton className="h-5 w-24" />
+              </div>
+            ))}
           </div>
-        </section>
-      </div>
-    </div>
+        </div>
+      </section>
+
+      <section
+        aria-hidden="true"
+        className="bg-secondary px-4 py-7 sm:px-6 lg:h-[638px] lg:px-8"
+      >
+        <div className="mx-auto max-w-[1216px]">
+          <SkeletonSectionHeader />
+          <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225px)]">
+            {Array.from({ length: 10 }, (_, index) => (
+              <ProductCardSkeleton
+                key={index}
+                titleWidth={productTitleWidths[index % productTitleWidths.length]}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
