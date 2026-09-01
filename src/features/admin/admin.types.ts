@@ -132,3 +132,60 @@ export type AdminCatalogData = {
     nextLabel: string;
   };
 };
+
+/* ── หน้า "คุณสมบัติการ์ด" ───────────────────────────────────────── */
+
+/** ชนิดข้อมูลของฟิลด์ — ค่าเดียวกับที่โชว์บน badge ในตาราง */
+export type CardFieldType = "text" | "number" | "enum" | "boolean";
+
+/** หนึ่งแถวในตาราง schema */
+export type CardSchemaField = {
+  id: string;
+  label: string;
+  type: CardFieldType;
+  /** ค่าตัวอย่าง ใช้บอกผู้ดูแลว่าฟิลด์นี้เก็บอะไร เช่น "60 / 120 / 340" */
+  sample: string;
+  /** true = ผู้ขายต้องกรอกฟิลด์นี้ตอนลงประกาศขาย */
+  required: boolean;
+  /** true = ฟิลด์นี้ถูกนำไปสร้างตัวกรองในหน้าค้นหา */
+  filterable: boolean;
+};
+
+/** schema ของเกมหนึ่งเกม = รายการทางซ้าย + ตารางทางขวา */
+export type CardSchemaGame = {
+  id: string;
+  name: string;
+  /** จำนวนการ์ดในเกมนั้น แสดงเป็นข้อความจัดรูปแบบแล้ว เช่น "8,420" */
+  cardCount: string;
+  fields: CardSchemaField[];
+};
+
+export type AdminCardAttributesData = {
+  title: string;
+  subtitle: string;
+  /** ปุ่มมุมขวาบนของหน้า */
+  actions: { viewJsonLabel: string; saveLabel: string };
+  /** แถบแจ้งเตือนสีฟ้าใต้หัวข้อ */
+  notice: string;
+  gamePicker: { title: string };
+  fieldTypes: {
+    title: string;
+    items: { type: CardFieldType; description: string }[];
+  };
+  table: {
+    addFieldLabel: string;
+    /** ป้ายหัวตาราง เรียงตามลำดับคอลัมน์ในดีไซน์ */
+    columns: {
+      name: string;
+      type: string;
+      sample: string;
+      required: string;
+      filterable: string;
+      /** ใช้เป็น aria-label ของปุ่ม ... ท้ายแถว (คอลัมน์นี้ไม่มีหัวตาราง) */
+      actions: string;
+    };
+  };
+  /** id ของเกมที่เลือกไว้ตอนเปิดหน้า */
+  defaultGameId: string;
+  games: CardSchemaGame[];
+};
