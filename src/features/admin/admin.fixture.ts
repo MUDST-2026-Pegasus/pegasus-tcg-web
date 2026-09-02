@@ -2,6 +2,7 @@ import type {
   AdminCardAttributesData,
   AdminCatalogData,
   AdminOverviewData,
+  AdminSellerApprovalData,
 } from "@/features/admin/admin.types";
 
 const SPARK_BARS = [9, 14, 11, 18, 13, 22, 17, 26];
@@ -596,6 +597,194 @@ export const ADMIN_CARD_ATTRIBUTES_FIXTURE: AdminCardAttributesData = {
           filterable: true,
         },
       ],
+    },
+  ],
+};
+
+export const ADMIN_SELLER_APPROVAL_FIXTURE: AdminSellerApprovalData = {
+  title: "อนุมัติผู้ขาย",
+  subtitle: "ตรวจสอบเอกสาร KYC ก่อนอนุญาตให้เปิดร้านค้าบนแพลตฟอร์ม",
+  exportLabel: "ส่งออกรายชื่อ",
+
+  stats: [
+    {
+      id: "pending",
+      label: "รอตรวจสอบ",
+      value: "19",
+      tone: "pending",
+      emphasis: true,
+    },
+    { id: "approved", label: "อนุมัติแล้ว", value: "214", tone: "approved" },
+    { id: "rejected", label: "ปฏิเสธ", value: "6", tone: "rejected" },
+    { id: "total", label: "ทั้งหมด", value: "239", tone: "total" },
+  ],
+
+  queue: {
+    title: "คิวรอตรวจสอบ",
+    sortLabel: "เรียงตาม: เก่าสุด",
+    viewingLabel: "กำลังดู",
+  },
+
+  documentsTitle: "เอกสารที่แนบมา",
+  documentHint: "คลิกเพื่อดูขนาดเต็ม",
+  reviewTitle: "ผลการตรวจสอบ",
+
+  actions: {
+    requestMore: "ขอเอกสารเพิ่ม",
+    reject: "ปฏิเสธคำขอ",
+    approve: "อนุมัติเปิดร้าน",
+  },
+
+  defaultApplicationId: "minmin-tcg",
+
+  applications: [
+    {
+      id: "minmin-tcg",
+      handle: "minmin_tcg",
+      initials: "MT",
+      avatarAccent: "teal",
+      submittedAt: "ส่งเมื่อ 5 นาทีที่แล้ว",
+      documentTags: ["บัตรประชาชน", "สมุดบัญชี"],
+      statusLabel: "รอตรวจสอบ",
+      statusTone: "pending",
+      contactLine:
+        "สมัครเมื่อ 14 ส.ค. 2569 · อีเมล minmin@example.com · โทร 08x-xxx-4821",
+      details: [
+        { label: "ชื่อร้านค้า", value: "minmin_tcg Cards" },
+        { label: "ชื่อ-นามสกุล (ตามบัตร)", value: "มินตรา ทองสุข" },
+        { label: "เลขบัตรประชาชน", value: "1-1010-0xxxx-xx-x" },
+        { label: "ธนาคาร", value: "กสิกรไทย · xxx-x-x1234-5" },
+        {
+          label: "ที่อยู่จัดส่งคืน",
+          value: "123 ถ.สุขุมวิท คลองเตย กทม. 10110",
+        },
+        { label: "ประเภทการ์ดที่จะขาย", value: "Pokémon, One Piece" },
+      ],
+      documents: [
+        { id: "id-card", title: "บัตรประชาชน", meta: "ด้านหน้า · 1.2 MB" },
+        { id: "bankbook", title: "สมุดบัญชีธนาคาร", meta: "หน้าแรก · 840 KB" },
+        {
+          id: "selfie",
+          title: "เซลฟี่คู่บัตร",
+          meta: "ตรวจสอบใบหน้า · 1.6 MB",
+        },
+      ],
+      review: "เอกสารครบถ้วน ชื่อบัญชีตรงกับบัตรประชาชน",
+    },
+    {
+      id: "nattapong-p",
+      handle: "nattapong_p",
+      initials: "NP",
+      avatarAccent: "primary",
+      submittedAt: "ส่งเมื่อ 2 ชม. ที่แล้ว",
+      documentTags: ["บัตรประชาชน"],
+      statusLabel: "รอตรวจสอบ",
+      statusTone: "pending",
+      contactLine:
+        "สมัครเมื่อ 12 ส.ค. 2569 · อีเมล nattapong@example.com · โทร 08x-xxx-1173",
+      details: [
+        { label: "ชื่อร้านค้า", value: "Nattapong Singles" },
+        { label: "ชื่อ-นามสกุล (ตามบัตร)", value: "ณัฐพงศ์ ประเสริฐ" },
+        { label: "เลขบัตรประชาชน", value: "3-1002-0xxxx-xx-x" },
+        { label: "ธนาคาร", value: "ไทยพาณิชย์ · xxx-x-x8842-1" },
+        {
+          label: "ที่อยู่จัดส่งคืน",
+          value: "45/2 ถ.พหลโยธิน จตุจักร กทม. 10900",
+        },
+        { label: "ประเภทการ์ดที่จะขาย", value: "Pokémon" },
+      ],
+      documents: [
+        { id: "id-card", title: "บัตรประชาชน", meta: "ด้านหน้า · 980 KB" },
+      ],
+      review: "ยังไม่แนบสมุดบัญชี — ต้องขอเอกสารเพิ่มก่อนอนุมัติ",
+    },
+    {
+      id: "tcg-bangkok",
+      handle: "tcg.bangkok",
+      initials: "TB",
+      avatarAccent: "amber",
+      submittedAt: "ส่งเมื่อ 5 ชม. ที่แล้ว",
+      documentTags: ["บัตรประชาชน", "สมุดบัญชี", "ทะเบียนพาณิชย์"],
+      statusLabel: "รอตรวจสอบ",
+      statusTone: "pending",
+      contactLine:
+        "สมัครเมื่อ 11 ส.ค. 2569 · อีเมล contact@tcgbangkok.co.th · โทร 02-xxx-7710",
+      details: [
+        { label: "ชื่อร้านค้า", value: "TCG Bangkok" },
+        { label: "ชื่อ-นามสกุล (ตามบัตร)", value: "ธนกฤต บุญมาก" },
+        { label: "เลขบัตรประชาชน", value: "1-1005-0xxxx-xx-x" },
+        { label: "ธนาคาร", value: "กรุงเทพ · xxx-x-x0157-9" },
+        {
+          label: "ที่อยู่จัดส่งคืน",
+          value: "88 ถ.เยาวราช สัมพันธวงศ์ กทม. 10100",
+        },
+        { label: "ประเภทการ์ดที่จะขาย", value: "Pokémon, One Piece, Yu-Gi-Oh!" },
+      ],
+      documents: [
+        { id: "id-card", title: "บัตรประชาชน", meta: "ด้านหน้า · 1.1 MB" },
+        { id: "bankbook", title: "สมุดบัญชีธนาคาร", meta: "หน้าแรก · 760 KB" },
+        {
+          id: "registration",
+          title: "ทะเบียนพาณิชย์",
+          meta: "นิติบุคคล · 2.4 MB",
+        },
+      ],
+      review: "เอกสารครบถ้วน จดทะเบียนในนามนิติบุคคล",
+    },
+    {
+      id: "cardsdeal-th",
+      handle: "cardsdeal.th",
+      initials: "CD",
+      avatarAccent: "primary",
+      submittedAt: "ส่งเมื่อวานนี้",
+      documentTags: ["บัตรประชาชน", "สมุดบัญชี"],
+      statusLabel: "รอตรวจสอบ",
+      statusTone: "pending",
+      contactLine:
+        "สมัครเมื่อ 10 ส.ค. 2569 · อีเมล hello@cardsdeal.th · โทร 09x-xxx-3306",
+      details: [
+        { label: "ชื่อร้านค้า", value: "Cardsdeal TH" },
+        { label: "ชื่อ-นามสกุล (ตามบัตร)", value: "ศิริพร วงศ์อารีย์" },
+        { label: "เลขบัตรประชาชน", value: "1-5099-0xxxx-xx-x" },
+        { label: "ธนาคาร", value: "กรุงไทย · xxx-x-x4420-3" },
+        {
+          label: "ที่อยู่จัดส่งคืน",
+          value: "9/14 ถ.นิมมานเหมินท์ เมือง เชียงใหม่ 50200",
+        },
+        { label: "ประเภทการ์ดที่จะขาย", value: "Magic: The Gathering" },
+      ],
+      documents: [
+        { id: "id-card", title: "บัตรประชาชน", meta: "ด้านหน้า · 1.4 MB" },
+        { id: "bankbook", title: "สมุดบัญชีธนาคาร", meta: "หน้าแรก · 910 KB" },
+      ],
+      review: "ชื่อบัญชีสะกดต่างจากบัตรเล็กน้อย — ควรขอเอกสารยืนยันเพิ่ม",
+    },
+    {
+      id: "rare-gems",
+      handle: "rare.gems",
+      initials: "RG",
+      avatarAccent: "red",
+      submittedAt: "ส่งเมื่อ 2 วันที่แล้ว",
+      documentTags: ["บัตรประชาชน"],
+      statusLabel: "รอตรวจสอบ",
+      statusTone: "pending",
+      contactLine:
+        "สมัครเมื่อ 9 ส.ค. 2569 · อีเมล raregems@example.com · โทร 08x-xxx-9925",
+      details: [
+        { label: "ชื่อร้านค้า", value: "Rare Gems Collectibles" },
+        { label: "ชื่อ-นามสกุล (ตามบัตร)", value: "กิตติพงษ์ แสงทอง" },
+        { label: "เลขบัตรประชาชน", value: "2-3001-0xxxx-xx-x" },
+        { label: "ธนาคาร", value: "กสิกรไทย · xxx-x-x7731-8" },
+        {
+          label: "ที่อยู่จัดส่งคืน",
+          value: "212 ถ.มิตรภาพ เมือง ขอนแก่น 40000",
+        },
+        { label: "ประเภทการ์ดที่จะขาย", value: "Sports Cards" },
+      ],
+      documents: [
+        { id: "id-card", title: "บัตรประชาชน", meta: "ด้านหน้า · 1.0 MB" },
+      ],
+      review: "รูปบัตรเบลอบางส่วน อ่านเลขบัตรไม่ชัด",
     },
   ],
 };

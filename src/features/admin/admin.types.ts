@@ -189,3 +189,70 @@ export type AdminCardAttributesData = {
   defaultGameId: string;
   games: CardSchemaGame[];
 };
+
+/* ── หน้า "อนุมัติผู้ขาย" ────────────────────────────────────────── */
+
+/** สีพื้น avatar ของผู้สมัคร — ชุดเดียวกับที่ใช้ในหน้าภาพรวม */
+export type SellerAvatarAccent = "teal" | "primary" | "amber" | "red";
+
+/** สีจุดนำหน้าตัวเลขสรุปด้านบน และสีของ badge สถานะคำขอ */
+export type SellerApprovalTone = "pending" | "approved" | "rejected" | "total";
+
+export type SellerApprovalStat = {
+  id: string;
+  label: string;
+  value: string;
+  tone: SellerApprovalTone;
+  /** true = ช่องที่ต้องลงมือทำ ดีไซน์เน้นให้ตัวหนังสือเข้มกว่าช่องอื่น */
+  emphasis?: boolean;
+};
+
+/** เอกสาร KYC หนึ่งใบที่ผู้สมัครแนบมา */
+export type SellerDocument = {
+  id: string;
+  title: string;
+  /** บรรทัดล่างของการ์ดเอกสาร เช่น "ด้านหน้า · 1.2 MB" */
+  meta: string;
+};
+
+export type SellerApplication = {
+  id: string;
+  /** ชื่อผู้ใช้ที่ยื่นคำขอ เช่น "minmin_tcg" */
+  handle: string;
+  initials: string;
+  avatarAccent: SellerAvatarAccent;
+  /** เวลาที่ยื่นคำขอแบบข้อความ เช่น "ส่งเมื่อ 5 นาทีที่แล้ว" */
+  submittedAt: string;
+  /** ป้ายเอกสารที่แนบแล้ว โชว์บนการ์ดในคิวทางซ้าย */
+  documentTags: string[];
+  statusLabel: string;
+  statusTone: SellerApprovalTone;
+  /** บรรทัดใต้ชื่อในการ์ดรายละเอียด (วันสมัคร · อีเมล · เบอร์โทร) */
+  contactLine: string;
+  /** ข้อมูล KYC จัดเป็นตาราง 2 คอลัมน์ */
+  details: { label: string; value: string }[];
+  documents: SellerDocument[];
+  /** สรุปผลตรวจเอกสาร โชว์ในแถบปุ่มด้านล่าง */
+  review: string;
+};
+
+export type AdminSellerApprovalData = {
+  title: string;
+  subtitle: string;
+  exportLabel: string;
+  stats: SellerApprovalStat[];
+  queue: {
+    title: string;
+    sortLabel: string;
+    /** badge บนการ์ดที่กำลังเปิดดูอยู่ */
+    viewingLabel: string;
+  };
+  documentsTitle: string;
+  /** ข้อความบนการ์ดเอกสารตอนยังไม่ได้เปิดดูรูปจริง */
+  documentHint: string;
+  reviewTitle: string;
+  actions: { requestMore: string; reject: string; approve: string };
+  /** id ของคำขอที่เปิดดูอยู่ตอนเข้าหน้า */
+  defaultApplicationId: string;
+  applications: SellerApplication[];
+};
