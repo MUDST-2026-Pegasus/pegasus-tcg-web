@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_CARD_ATTRIBUTES_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminCardAttributesContent } from "@/features/admin/components/AdminCardAttributesContent";
 
 export function AdminCardAttributesPage() {
-  return <PagePlaceholder title="คุณสมบัติการ์ด" figmaNode="432:4640" />;
+  return <AdminCardAttributesContent data={ADMIN_CARD_ATTRIBUTES_FIXTURE} />;
 }
