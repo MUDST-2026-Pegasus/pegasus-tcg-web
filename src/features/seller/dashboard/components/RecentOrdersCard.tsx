@@ -3,11 +3,9 @@ import { ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type {
-  OrderStatus,
-  SellerRecentOrders,
-} from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
+
+import type { OrderStatus, RecentOrders } from "../dashboard.types";
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
   awaiting_pack: "bg-[#fbe9e8] text-[#d0342c]",
@@ -16,18 +14,20 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   completed: "bg-[#e3f4ec] text-[#12805c]",
 };
 
-type SellerRecentOrdersCardProps = SellerRecentOrders;
-
-export function SellerRecentOrdersCard({
+export function RecentOrdersCard({
   title,
   actionLabel,
   items,
-}: SellerRecentOrdersCardProps) {
+}: RecentOrders) {
   return (
     <Card className="flex-1 gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-5 pt-4 pb-3.5">
         <p className="text-base font-semibold text-zinc-950">{title}</p>
-        <Button variant="ghost" size="sm" className="rounded-md px-2.5 text-[#0d9488]">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-md px-2.5 text-[#0d9488]"
+        >
           {actionLabel}
         </Button>
       </div>

@@ -1,25 +1,21 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type {
-  SellerLowStock,
-  StockSeverity,
-} from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
+
+import type { LowStock, StockSeverity } from "../dashboard.types";
 
 const SEVERITY_COLOR: Record<StockSeverity, string> = {
   critical: "bg-[#d0342c] text-[#d0342c]",
   warning: "bg-[#b45309] text-[#b45309]",
 };
 
-type SellerLowStockCardProps = SellerLowStock;
-
-export function SellerLowStockCard({
+export function LowStockCard({
   title,
   count,
   items,
   actionLabel,
-}: SellerLowStockCardProps) {
+}: LowStock) {
   return (
     <Card className="w-80 gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">

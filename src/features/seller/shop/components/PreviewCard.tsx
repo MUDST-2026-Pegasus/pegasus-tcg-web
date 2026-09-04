@@ -3,18 +3,19 @@ import { BadgeCheck, Eye } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { SellerShopData } from "@/features/seller/seller.types";
 
-type SellerShopPreviewCardProps = SellerShopData["preview"];
+import type { ShopData } from "../shop.types";
 
-export function SellerShopPreviewCard({
+type PreviewCardProps = ShopData["preview"];
+
+export function PreviewCard({
   label,
   shopName,
   description,
   initials,
   stats,
   tags,
-}: SellerShopPreviewCardProps) {
+}: PreviewCardProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-center gap-1.5">

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
-import type { SellerStatCardData, StatAccent } from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
+
+import type { StatAccent, StatCardData } from "../dashboard.types";
 
 const ICON_BG: Record<StatAccent, string> = {
   primary: "bg-[#e8f1fc]",
@@ -16,13 +17,13 @@ const ICON_COLOR: Record<StatAccent, string> = {
   green: "text-[#12805c]",
 };
 
-export function SellerStatCard({
+export function StatCard({
   icon: Icon,
   accent,
   label,
   value,
   footnote,
-}: SellerStatCardData) {
+}: StatCardData) {
   return (
     <Card className="flex-1 gap-3 rounded-xl border border-border p-4 shadow-none ring-0">
       <div className="flex items-center gap-2.5">

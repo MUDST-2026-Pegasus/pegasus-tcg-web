@@ -1,15 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { SellerShopData } from "@/features/seller/seller.types";
 
-type SellerShopCompletenessCardProps = SellerShopData["completeness"];
+import type { ShopData } from "../shop.types";
 
-export function SellerShopCompletenessCard({
+type CompletenessCardProps = ShopData["completeness"];
+
+export function CompletenessCard({
   percent,
   title,
   remainingLabel,
   description,
-}: SellerShopCompletenessCardProps) {
+}: CompletenessCardProps) {
   return (
     <Card className="w-full flex-row items-center gap-5 rounded-xl border border-border p-4 shadow-none ring-0">
       <div className="flex flex-1 flex-col gap-1.5">

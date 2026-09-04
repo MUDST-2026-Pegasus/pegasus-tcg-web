@@ -1,14 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import type { SellerShopData } from "@/features/seller/seller.types";
 
-type SellerShopPoliciesCardProps = SellerShopData["policies"];
+import type { ShopData } from "../shop.types";
 
-export function SellerShopPoliciesCard({
+type PoliciesCardProps = ShopData["policies"];
+
+export function PoliciesCard({
   title,
   description,
   items,
-}: SellerShopPoliciesCardProps) {
+}: PoliciesCardProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
@@ -25,10 +26,7 @@ export function SellerShopPoliciesCard({
             <p className="text-xs font-medium text-zinc-950">{item.title}</p>
             <p className="text-xs text-gray-500">{item.description}</p>
           </div>
-          <Switch
-            defaultChecked={item.enabled}
-            aria-label={item.title}
-          />
+          <Switch defaultChecked={item.enabled} aria-label={item.title} />
         </div>
       ))}
     </Card>

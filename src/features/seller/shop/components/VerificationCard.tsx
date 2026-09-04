@@ -1,16 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { SellerShopData } from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
 
-type SellerShopVerificationCardProps = SellerShopData["verification"];
+import type { ShopData } from "../shop.types";
 
-export function SellerShopVerificationCard({
+type VerificationCardProps = ShopData["verification"];
+
+export function VerificationCard({
   title,
   statusLabel,
   items,
-}: SellerShopVerificationCardProps) {
+}: VerificationCardProps) {
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">

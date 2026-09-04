@@ -1,14 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { SellerShopData } from "@/features/seller/seller.types";
 
-type SellerShopInfoCardProps = SellerShopData["info"];
+import type { ShopData } from "../shop.types";
 
-export function SellerShopInfoCard({
-  title,
-  description,
-  fields,
-}: SellerShopInfoCardProps) {
+type InfoCardProps = ShopData["info"];
+
+export function InfoCard({ title, description, fields }: InfoCardProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">

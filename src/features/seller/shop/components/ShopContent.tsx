@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { SellerShopCompletenessCard } from "@/features/seller/components/SellerShopCompletenessCard";
-import { SellerShopInfoCard } from "@/features/seller/components/SellerShopInfoCard";
-import { SellerShopPoliciesCard } from "@/features/seller/components/SellerShopPoliciesCard";
-import { SellerShopPreviewCard } from "@/features/seller/components/SellerShopPreviewCard";
-import { SellerShopVerificationCard } from "@/features/seller/components/SellerShopVerificationCard";
-import type { SellerShopData } from "@/features/seller/seller.types";
 
-type SellerShopContentProps = {
-  data: SellerShopData;
+import type { ShopData } from "../shop.types";
+
+import { CompletenessCard } from "./CompletenessCard";
+import { InfoCard } from "./InfoCard";
+import { PoliciesCard } from "./PoliciesCard";
+import { PreviewCard } from "./PreviewCard";
+import { VerificationCard } from "./VerificationCard";
+
+type ShopContentProps = {
+  data: ShopData;
 };
 
-export function SellerShopContent({ data }: SellerShopContentProps) {
+export function ShopContent({ data }: ShopContentProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -29,17 +31,17 @@ export function SellerShopContent({ data }: SellerShopContentProps) {
         </div>
       </div>
 
-      <SellerShopCompletenessCard {...data.completeness} />
+      <CompletenessCard {...data.completeness} />
 
       <div className="flex flex-col items-start gap-6 lg:flex-row">
         <div className="flex flex-1 flex-col gap-4">
-          <SellerShopInfoCard {...data.info} />
-          <SellerShopPoliciesCard {...data.policies} />
+          <InfoCard {...data.info} />
+          <PoliciesCard {...data.policies} />
         </div>
 
         <div className="flex w-80 shrink-0 flex-col gap-4">
-          <SellerShopPreviewCard {...data.preview} />
-          <SellerShopVerificationCard {...data.verification} />
+          <PreviewCard {...data.preview} />
+          <VerificationCard {...data.verification} />
         </div>
       </div>
     </div>
