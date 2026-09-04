@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { SellerShopContent } from "@/features/seller/components/SellerShopContent";
+import { SELLER_SHOP_FIXTURE } from "@/features/seller/seller.fixture";
 
 export function SellerShopPage() {
-  return <PagePlaceholder title="จัดการร้านค้า" figmaNode="432:7057" />;
+  return <SellerShopContent data={SELLER_SHOP_FIXTURE} />;
 }
