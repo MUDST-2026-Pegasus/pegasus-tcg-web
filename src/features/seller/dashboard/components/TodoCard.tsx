@@ -2,8 +2,9 @@ import { ChevronRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { SellerTodoList, TodoAccent } from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
+
+import type { TodoAccent, TodoList } from "../dashboard.types";
 
 const ICON_BG: Record<TodoAccent, string> = {
   red: "bg-[#fbe9e8]",
@@ -19,14 +20,7 @@ const ICON_COLOR: Record<TodoAccent, string> = {
   gray: "text-[#6b7280]",
 };
 
-type SellerTodoCardProps = SellerTodoList;
-
-export function SellerTodoCard({
-  title,
-  description,
-  count,
-  items,
-}: SellerTodoCardProps) {
+export function TodoCard({ title, description, count, items }: TodoList) {
   return (
     <Card className="w-96 gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-3">

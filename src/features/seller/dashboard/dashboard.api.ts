@@ -7,25 +7,18 @@ import {
   Wallet,
 } from "lucide-react";
 
-import type { SellerDashboardData, SellerProfile } from "@/features/seller/seller.types";
+import { getSellerProfile } from "../shared/seller.api";
 
-/**
- * ข้อมูลผู้ขายตัวอย่าง ใช้ทั้งใน sidebar footer และหัวหน้าแดชบอร์ด
- * เมื่อต่อ API auth จริงแล้วให้แทนที่ก้อนนี้ด้วยข้อมูล session ของผู้ใช้
- */
-export const SELLER_PROFILE_FIXTURE: SellerProfile = {
-  username: "minmin_tcg",
-  initials: "MM",
-  verifiedLabel: "ผู้ขายที่ยืนยันแล้ว",
-};
+import type { DashboardData } from "./dashboard.types";
+
+const profile = getSellerProfile();
 
 /**
  * ข้อมูลตัวอย่างของหน้า "แดชบอร์ดผู้ขาย" — ลอกข้อความและตัวเลขจาก
  * Figma node 432:6773 เพื่อให้เทียบหน้าจอกับดีไซน์ได้ตรง ๆ
- * เมื่อต่อ API จริงแล้วให้แทนที่ทั้งก้อนนี้
  */
-export const SELLER_DASHBOARD_FIXTURE: SellerDashboardData = {
-  greeting: `สวัสดี, ${SELLER_PROFILE_FIXTURE.username} 👋`,
+const DASHBOARD_MOCK: DashboardData = {
+  greeting: `สวัสดี, ${profile.username} 👋`,
   subtitle: "สรุปภาพรวมร้านของคุณ · วันพฤหัสบดีที่ 14 สิงหาคม 2569",
 
   actions: {
@@ -209,3 +202,11 @@ export const SELLER_DASHBOARD_FIXTURE: SellerDashboardData = {
     actionLabel: "เติมสต็อกทั้งหมด",
   },
 };
+
+/**
+ * จุดต่อข้อมูลของหน้าแดชบอร์ด — ตอนนี้คืนข้อมูลจำลอง
+ * วันที่ต่อ API จริงให้แก้เฉพาะข้างในฟังก์ชันนี้ component ทุกตัวไม่ต้องแตะ
+ */
+export function getDashboardData(): DashboardData {
+  return DASHBOARD_MOCK;
+}

@@ -1,14 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 
-/** โปรไฟล์ผู้ขายที่ล็อกอินอยู่ — ใช้ทั้งใน sidebar footer และหัวหน้าแดชบอร์ด */
-export type SellerProfile = {
-  username: string;
-  initials: string;
-  verifiedLabel: string;
-};
-
-/* ── หน้า "แดชบอร์ด" ────────────────────────────────────────────── */
-
 export type SalesChartBar = {
   /** ความสูงของแท่งกราฟ หน่วย px */
   height: number;
@@ -16,7 +7,7 @@ export type SalesChartBar = {
   highlighted: boolean;
 };
 
-export type SellerSalesSummary = {
+export type SalesSummary = {
   label: string;
   amount: string;
   delta: string;
@@ -36,7 +27,7 @@ export type TodoItem = {
   description: string;
 };
 
-export type SellerTodoList = {
+export type TodoList = {
   title: string;
   description: string;
   count: number;
@@ -45,7 +36,7 @@ export type SellerTodoList = {
 
 export type StatAccent = "primary" | "violet" | "amber" | "green";
 
-export type SellerStatCardData = {
+export type StatCardData = {
   id: string;
   icon: LucideIcon;
   accent: StatAccent;
@@ -54,13 +45,14 @@ export type SellerStatCardData = {
   footnote: string;
 };
 
+/** ย้ายขึ้น shared/seller.types.ts เมื่อหน้า "จัดการคำสั่งซื้อ" ต้องใช้ซ้ำ */
 export type OrderStatus =
   | "awaiting_pack"
   | "shipped"
   | "awaiting_payment"
   | "completed";
 
-export type SellerOrderRow = {
+export type OrderRow = {
   id: string;
   buyer: string;
   item: string;
@@ -69,10 +61,10 @@ export type SellerOrderRow = {
   statusLabel: string;
 };
 
-export type SellerRecentOrders = {
+export type RecentOrders = {
   title: string;
   actionLabel: string;
-  items: SellerOrderRow[];
+  items: OrderRow[];
 };
 
 export type StockSeverity = "critical" | "warning";
@@ -86,7 +78,7 @@ export type LowStockItem = {
   severity: StockSeverity;
 };
 
-export type SellerLowStock = {
+export type LowStock = {
   title: string;
   /** จำนวนสินค้าใกล้หมดทั้งหมด อาจมากกว่าจำนวนใน items ถ้าตัดแสดงบางส่วน */
   count: number;
@@ -94,16 +86,16 @@ export type SellerLowStock = {
   actionLabel: string;
 };
 
-export type SellerDashboardData = {
+export type DashboardData = {
   greeting: string;
   subtitle: string;
   actions: {
     viewShopLabel: string;
     createListingLabel: string;
   };
-  sales: SellerSalesSummary;
-  todo: SellerTodoList;
-  stats: SellerStatCardData[];
-  recentOrders: SellerRecentOrders;
-  lowStock: SellerLowStock;
+  sales: SalesSummary;
+  todo: TodoList;
+  stats: StatCardData[];
+  recentOrders: RecentOrders;
+  lowStock: LowStock;
 };

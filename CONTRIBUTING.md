@@ -30,6 +30,9 @@ src/
     <feature>/
       pages/        หน้าที่ feature นี้เป็นเจ้าของ
       components/   component เฉพาะ feature (สร้างเมื่อต้องใช้จริง)
+
+      ── หรือแบบ "โมดูลต่อหน้า" เมื่อ feature มีหลายหน้าและแต่ละหน้ามีข้อมูลของตัวเอง
+         (ตอนนี้ seller ใช้แบบนี้ ดูหัวข้อ "feature ที่มีหลายหน้า" ด้านล่าง)
   hooks/          hook ที่ใช้ร่วมกันทั้งแอป
   lib/            utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
   styles/         globals.css — theme token ของ shadcn ทั้งหมด
@@ -66,6 +69,39 @@ import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
 หน้าที่ยังไม่ได้ทำจะขึ้น `<PagePlaceholder>` พร้อม Figma node id ให้เปิดดูดีไซน์ได้ตรงจุด
 พอทำเสร็จให้ลบ `PagePlaceholder` ออกจากไฟล์นั้น
 
+## feature ที่มีหลายหน้า (แบบ seller)
+
+พอ feature หนึ่งมีหลายหน้า และแต่ละหน้ามีข้อมูล/component ของตัวเอง การเอา type กับ mock
+ของทุกหน้าไปกองรวมในไฟล์เดียว (`<feature>.types.ts` / `<feature>.fixture.ts`) จะเริ่มมีปัญหา —
+ไฟล์ยาวขึ้นเรื่อย ๆ และคนที่ทำคนละหน้าต้องแก้ไฟล์เดียวกัน ชนกันตอน merge
+
+`features/seller/` จึงแยกเป็น **โมดูลต่อหน้า** แต่ละหน้าจบในโฟลเดอร์ตัวเอง
+
+```
+features/seller/
+  shared/                    ของที่ ≥2 หน้าใช้ร่วมกันเท่านั้น
+    SellerLayout.tsx
+    SellerSidebar.tsx
+    seller.types.ts          SellerProfile
+    seller.api.ts            getSellerProfile()
+  shop/                      = 1 หน้า = 1 โมดูล
+    SellerShopPage.tsx       ไฟล์ที่ route ชี้มา
+    shop.types.ts            type ของหน้านี้
+    shop.api.ts              mock + getShopData()  ← จุดต่อ API จริงในอนาคต
+    components/              component ที่ใช้เฉพาะหน้านี้
+  payout/
+    SellerPayoutPage.tsx     หน้าที่ยังเป็น placeholder — ไฟล์เดียวพอ
+```
+
+กติกาของแบบนี้
+
+- **เริ่มที่ในโมดูลของหน้านั้นก่อนเสมอ** ย้ายขึ้น `shared/` เฉพาะตอนมีหน้าที่สองใช้จริง
+- **ยังไม่ทำหน้านั้น = ยังไม่ต้องสร้าง `types`/`api`/`components`** มีแค่ไฟล์หน้าเพจพอ
+- **ไฟล์ในโมดูลเดียวกัน import กันด้วย relative** (`./shop.types`, `./components/InfoCard`)
+  ข้ามโมดูลค่อยใช้ `@/features/seller/shared/...` — เห็นแล้วรู้ทันทีว่าอันไหนข้ามขอบเขต
+- **ข้อมูลทุกหน้าออกมาจากฟังก์ชันใน `*.api.ts`** วันที่ต่อ backend จริงแก้ข้างในฟังก์ชันนั้น
+  component ไม่ต้องแก้เลย
+
 ## Layout
 
 route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/app/routes/*.routes.tsx` อยู่แล้ว หน้าใหม่แค่วางไว้ในกลุ่มที่ถูกต้อง
@@ -74,7 +110,8 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 | Layout            | ใช้กับ                                                                     |
 | ----------------- | -------------------------------------------------------------------------- |
 | `PublicLayout`    | หน้าฝั่งผู้ซื้อ — Navbar + Footer                                          |
-| `DashboardLayout` | admin + seller — Sidebar + topbar + Footer (เมนูมาจาก `lib/nav-config.ts`) |
+| `DashboardLayout` | admin — Sidebar + topbar + Footer (เมนูมาจาก `lib/nav-config.ts`)          |
+| `SellerLayout`    | seller — โครงเดียวกับ `DashboardLayout` แต่ใช้ `SellerSidebar` ของตัวเอง<br>อยู่ที่ `features/seller/shared/SellerLayout.tsx` |
 | `AuthLayout`      | login / register — กลางจอ ไม่มี Navbar                                     |
 
 ## ถ้าหน้านั้นต้องเขียน CSS เอง

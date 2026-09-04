@@ -1,11 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { SellerSalesSummary } from "@/features/seller/seller.types";
 import { cn } from "@/lib/utils";
 
-type SellerSalesCardProps = SellerSalesSummary;
+import type { SalesSummary } from "../dashboard.types";
 
-export function SellerSalesCard({
+export function SalesCard({
   label,
   amount,
   delta,
@@ -13,7 +12,7 @@ export function SellerSalesCard({
   bars,
   rangeStart,
   rangeEnd,
-}: SellerSalesCardProps) {
+}: SalesSummary) {
   return (
     <Card className="flex-1 gap-5 rounded-2xl border-0 bg-[#0d9488] p-6 text-white shadow-none ring-0">
       <div className="flex flex-col gap-1.5">

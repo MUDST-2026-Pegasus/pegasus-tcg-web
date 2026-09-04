@@ -7,8 +7,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { SellerSidebar } from "@/features/seller/components/SellerSidebar";
-import type { SellerProfile } from "@/features/seller/seller.types";
+
+import { SellerSidebar } from "./SellerSidebar";
+import type { SellerProfile } from "./seller.types";
 
 type SellerLayoutProps = {
   profile: SellerProfile;

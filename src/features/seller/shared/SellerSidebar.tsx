@@ -16,9 +16,10 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { SellerProfile } from "@/features/seller/seller.types";
 import { sellerNav } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
+
+import type { SellerProfile } from "./seller.types";
 
 const NAV_ACTIVE =
   "data-active:bg-[#e6f4f2] data-active:font-medium data-active:text-teal-600 data-active:hover:bg-[#e6f4f2] data-active:hover:text-teal-600";
@@ -45,9 +46,7 @@ export function SellerSidebar({ profile }: SellerSidebarProps) {
       <div className="sticky top-[var(--navbar-h,75px)] flex h-full max-h-[calc(100svh-var(--navbar-h,75px))] flex-col px-3 py-4">
         <SidebarHeader className="gap-0 px-0.5 pt-1 pb-4">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-bold text-sky-700">
-              DASHBOARD
-            </span>
+            <span className="text-base font-bold text-sky-700">DASHBOARD</span>
             <Badge className="h-5 rounded-[5px] bg-teal-600 px-2 py-0.5 text-[9px] leading-4 font-medium text-white">
               SELLER
             </Badge>
