@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { SellerDashboardContent } from "@/features/seller/components/SellerDashboardContent";
+import { SELLER_DASHBOARD_FIXTURE } from "@/features/seller/seller.fixture";
 
 export function SellerDashboardPage() {
-  return <PagePlaceholder title="แดชบอร์ดผู้ขาย" figmaNode="432:6773" />;
+  return <SellerDashboardContent data={SELLER_DASHBOARD_FIXTURE} />;
 }

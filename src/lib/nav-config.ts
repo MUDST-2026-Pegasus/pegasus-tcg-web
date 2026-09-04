@@ -21,6 +21,8 @@ export type NavItem = {
   icon: LucideIcon;
   /** true = highlight only on an exact URL match (index routes) */
   end?: boolean;
+  /** "danger" = ย้อมสีแดงตลอด (ใช้กับ "ออกจากระบบ") */
+  tone?: "default" | "danger";
 };
 
 export type NavGroup = {
@@ -77,22 +79,32 @@ export const adminNav: NavGroup[] = [
 /** Sidebar ของ /seller — อ้างจาก Figma node 432:6773 เป็นต้นไป */
 export const sellerNav: NavGroup[] = [
   {
-    label: "ร้านของฉัน",
+    label: "ภาพรวม",
     items: [
       { label: "แดชบอร์ด", to: "/seller", icon: LayoutDashboard, end: true },
-      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
-      { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
     ],
   },
   {
-    label: "คำสั่งซื้อและเงิน",
+    label: "ร้านค้า",
     items: [
+      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
+      { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
-      { label: "ถอนเงิน", to: "/seller/payout", icon: Wallet },
     ],
+  },
+  {
+    label: "การเงิน",
+    items: [{ label: "ถอนเงิน", to: "/seller/payout", icon: Wallet }],
   },
   {
     label: "บัญชี",
-    items: [{ label: "ออกจากระบบ", to: "/seller/logout", icon: LogOut }],
+    items: [
+      {
+        label: "ออกจากระบบ",
+        to: "/seller/logout",
+        icon: LogOut,
+        tone: "danger",
+      },
+    ],
   },
 ];
