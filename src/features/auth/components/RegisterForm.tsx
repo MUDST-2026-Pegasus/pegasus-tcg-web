@@ -61,7 +61,7 @@ export function RegisterForm() {
             <span className="text-primary">Privacy Policy</span>
           </FieldLabel>
         </Field>
-        <Button type="submit" className="h-12 w-full">
+        <Button type="submit" className="h-12 w-full rounded-lg text-base">
           Sign up
         </Button>
       </FieldGroup>
