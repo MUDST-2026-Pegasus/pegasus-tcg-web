@@ -256,3 +256,74 @@ export type AdminSellerApprovalData = {
   defaultApplicationId: string;
   applications: SellerApplication[];
 };
+
+/* ── หน้า "ค่าคอมมิชชั่น" ────────────────────────────────────────── */
+
+/** หนึ่งหมวดหมู่ในการ์ด "อัตราเฉพาะหมวดหมู่" */
+export type CommissionCategory = {
+  id: string;
+  name: string;
+  /** คำอธิบายบรรทัดล่าง เช่น "การ์ดเดี่ยวและกล่องสุ่ม" */
+  description: string;
+  /** อัตราค่าคอมของหมวดนี้ เก็บเป็น string เพื่อเสิร์ฟเข้า input ตรง ๆ */
+  rate: string;
+  /** true = ใช้อัตราของตัวเองแทนอัตราเริ่มต้น (สวิตช์เปิด) */
+  useCustom: boolean;
+  /** ข้อความบอกสถานะข้างสวิตช์ */
+  customLabel: string;
+  defaultLabel: string;
+};
+
+/** หนึ่งแถวใน "ตัวอย่างการคำนวณ" ทางขวา */
+export type CalcRow = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+/** หนึ่งกฎในการ์ด "กฎการเก็บค่าธรรมเนียม" */
+export type FeeRule = {
+  id: string;
+  label: string;
+  /** true = เปิดใช้กฎ */
+  active: boolean;
+};
+
+export type AdminCommissionData = {
+  title: string;
+  subtitle: string;
+  actions: { historyLabel: string; saveLabel: string };
+  defaultRate: {
+    title: string;
+    description: string;
+    /** อัตราเริ่มต้น เก็บเป็น string จัดรูปแบบแล้ว เช่น "5.0" */
+    value: string;
+    /** ปลายซ้าย/ขวาของแถบเลื่อน (0% / 15%) */
+    minLabel: string;
+    maxLabel: string;
+    /** ข้อความช่วงที่แนะนำ ตำแหน่งอิงจากช่วงที่แนะนำในแถบ */
+    recommendedLabel: string;
+    /** ค่ามากสุดของแถบ ใช้คำนวณตำแหน่ง handle ปัจจุบัน */
+    max: number;
+  };
+  categories: {
+    title: string;
+    description: string;
+    addLabel: string;
+    items: CommissionCategory[];
+  };
+  calculation: {
+    title: string;
+    rows: CalcRow[];
+    totalLabel: string;
+    totalValue: string;
+  };
+  rules: {
+    title: string;
+    items: FeeRule[];
+  };
+  impact: {
+    title: string;
+    description: string;
+  };
+};
