@@ -93,7 +93,6 @@ export function RegisterForm() {
           />
           <FieldError errors={[errors.username]} />
         </Field>
-            className="h-12 rounded-lg border-border bg-background px-4"
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
           <FieldLabel htmlFor="displayName">Display name</FieldLabel>
           <Input
@@ -102,6 +101,7 @@ export function RegisterForm() {
             placeholder="Name other members will see"
             aria-invalid={Boolean(errors.displayName)}
             {...register("displayName")}
+            className="h-12 rounded-lg border-border bg-background px-4"
           />
           <FieldError errors={[errors.displayName]} />
         </Field>
@@ -167,7 +167,11 @@ export function RegisterForm() {
           </FieldLabel>
         </Field>
         <FieldError errors={[errors.acceptTerms]} />
-        <Button type="submit" disabled={isSubmitting} className="h-12 w-full">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-12 w-full rounded-lg text-base"
+        >
           {isSubmitting && <Spinner />}
           {isSubmitting ? "Creating account…" : "Sign up"}
         </Button>
