@@ -132,3 +132,335 @@ export type AdminCatalogData = {
     nextLabel: string;
   };
 };
+
+/* ── หน้า "คุณสมบัติการ์ด" ───────────────────────────────────────── */
+
+/** ชนิดข้อมูลของฟิลด์ — ค่าเดียวกับที่โชว์บน badge ในตาราง */
+export type CardFieldType = "text" | "number" | "enum" | "boolean";
+
+/** หนึ่งแถวในตาราง schema */
+export type CardSchemaField = {
+  id: string;
+  label: string;
+  type: CardFieldType;
+  /** ค่าตัวอย่าง ใช้บอกผู้ดูแลว่าฟิลด์นี้เก็บอะไร เช่น "60 / 120 / 340" */
+  sample: string;
+  /** true = ผู้ขายต้องกรอกฟิลด์นี้ตอนลงประกาศขาย */
+  required: boolean;
+  /** true = ฟิลด์นี้ถูกนำไปสร้างตัวกรองในหน้าค้นหา */
+  filterable: boolean;
+};
+
+/** schema ของเกมหนึ่งเกม = รายการทางซ้าย + ตารางทางขวา */
+export type CardSchemaGame = {
+  id: string;
+  name: string;
+  /** จำนวนการ์ดในเกมนั้น แสดงเป็นข้อความจัดรูปแบบแล้ว เช่น "8,420" */
+  cardCount: string;
+  fields: CardSchemaField[];
+};
+
+export type AdminCardAttributesData = {
+  title: string;
+  subtitle: string;
+  /** ปุ่มมุมขวาบนของหน้า */
+  actions: { viewJsonLabel: string; saveLabel: string };
+  /** แถบแจ้งเตือนสีฟ้าใต้หัวข้อ */
+  notice: string;
+  gamePicker: { title: string };
+  fieldTypes: {
+    title: string;
+    items: { type: CardFieldType; description: string }[];
+  };
+  table: {
+    addFieldLabel: string;
+    /** ป้ายหัวตาราง เรียงตามลำดับคอลัมน์ในดีไซน์ */
+    columns: {
+      name: string;
+      type: string;
+      sample: string;
+      required: string;
+      filterable: string;
+      /** ใช้เป็น aria-label ของปุ่ม ... ท้ายแถว (คอลัมน์นี้ไม่มีหัวตาราง) */
+      actions: string;
+    };
+  };
+  /** id ของเกมที่เลือกไว้ตอนเปิดหน้า */
+  defaultGameId: string;
+  games: CardSchemaGame[];
+};
+
+/* ── หน้า "อนุมัติผู้ขาย" ────────────────────────────────────────── */
+
+/**
+ * สีพื้นวงกลมตัวย่อชื่อ — ชุดเดียวกับที่ใช้ในหน้าภาพรวม
+ * ใช้ทั้งหน้า "อนุมัติผู้ขาย" และตารางหน้า "จัดการผู้ใช้"
+ */
+export type SellerAvatarAccent =
+  | "teal"
+  | "primary"
+  | "amber"
+  | "red"
+  | "slate";
+
+/** สีจุดนำหน้าตัวเลขสรุปด้านบน และสีของ badge สถานะคำขอ */
+export type SellerApprovalTone = "pending" | "approved" | "rejected" | "total";
+
+export type SellerApprovalStat = {
+  id: string;
+  label: string;
+  value: string;
+  tone: SellerApprovalTone;
+  /** true = ช่องที่ต้องลงมือทำ ดีไซน์เน้นให้ตัวหนังสือเข้มกว่าช่องอื่น */
+  emphasis?: boolean;
+};
+
+/** เอกสาร KYC หนึ่งใบที่ผู้สมัครแนบมา */
+export type SellerDocument = {
+  id: string;
+  title: string;
+  /** บรรทัดล่างของการ์ดเอกสาร เช่น "ด้านหน้า · 1.2 MB" */
+  meta: string;
+};
+
+export type SellerApplication = {
+  id: string;
+  /** ชื่อผู้ใช้ที่ยื่นคำขอ เช่น "minmin_tcg" */
+  handle: string;
+  initials: string;
+  avatarAccent: SellerAvatarAccent;
+  /** เวลาที่ยื่นคำขอแบบข้อความ เช่น "ส่งเมื่อ 5 นาทีที่แล้ว" */
+  submittedAt: string;
+  /** ป้ายเอกสารที่แนบแล้ว โชว์บนการ์ดในคิวทางซ้าย */
+  documentTags: string[];
+  statusLabel: string;
+  statusTone: SellerApprovalTone;
+  /** บรรทัดใต้ชื่อในการ์ดรายละเอียด (วันสมัคร · อีเมล · เบอร์โทร) */
+  contactLine: string;
+  /** ข้อมูล KYC จัดเป็นตาราง 2 คอลัมน์ */
+  details: { label: string; value: string }[];
+  documents: SellerDocument[];
+  /** สรุปผลตรวจเอกสาร โชว์ในแถบปุ่มด้านล่าง */
+  review: string;
+};
+
+export type AdminSellerApprovalData = {
+  title: string;
+  subtitle: string;
+  exportLabel: string;
+  stats: SellerApprovalStat[];
+  queue: {
+    title: string;
+    sortLabel: string;
+    /** badge บนการ์ดที่กำลังเปิดดูอยู่ */
+    viewingLabel: string;
+  };
+  documentsTitle: string;
+  /** ข้อความบนการ์ดเอกสารตอนยังไม่ได้เปิดดูรูปจริง */
+  documentHint: string;
+  reviewTitle: string;
+  actions: { requestMore: string; reject: string; approve: string };
+  /** id ของคำขอที่เปิดดูอยู่ตอนเข้าหน้า */
+  defaultApplicationId: string;
+  applications: SellerApplication[];
+};
+
+/* ── หน้า "ค่าคอมมิชชั่น" ────────────────────────────────────────── */
+
+/** หนึ่งหมวดหมู่ในการ์ด "อัตราเฉพาะหมวดหมู่" */
+export type CommissionCategory = {
+  id: string;
+  name: string;
+  /** คำอธิบายบรรทัดล่าง เช่น "การ์ดเดี่ยวและกล่องสุ่ม" */
+  description: string;
+  /** อัตราค่าคอมของหมวดนี้ เก็บเป็น string เพื่อเสิร์ฟเข้า input ตรง ๆ */
+  rate: string;
+  /** true = ใช้อัตราของตัวเองแทนอัตราเริ่มต้น (สวิตช์เปิด) */
+  useCustom: boolean;
+  /** ข้อความบอกสถานะข้างสวิตช์ */
+  customLabel: string;
+  defaultLabel: string;
+};
+
+/** หนึ่งแถวใน "ตัวอย่างการคำนวณ" ทางขวา */
+export type CalcRow = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+/** หนึ่งกฎในการ์ด "กฎการเก็บค่าธรรมเนียม" */
+export type FeeRule = {
+  id: string;
+  label: string;
+  /** true = เปิดใช้กฎ */
+  active: boolean;
+};
+
+export type AdminCommissionData = {
+  title: string;
+  subtitle: string;
+  actions: { historyLabel: string; saveLabel: string };
+  defaultRate: {
+    title: string;
+    description: string;
+    /** อัตราเริ่มต้น เก็บเป็น string จัดรูปแบบแล้ว เช่น "5.0" */
+    value: string;
+    /** ปลายซ้าย/ขวาของแถบเลื่อน (0% / 15%) */
+    minLabel: string;
+    maxLabel: string;
+    /** ข้อความช่วงที่แนะนำ ตำแหน่งอิงจากช่วงที่แนะนำในแถบ */
+    recommendedLabel: string;
+    /** ค่ามากสุดของแถบ ใช้คำนวณตำแหน่ง handle ปัจจุบัน */
+    max: number;
+  };
+  categories: {
+    title: string;
+    description: string;
+    addLabel: string;
+    items: CommissionCategory[];
+  };
+  calculation: {
+    title: string;
+    rows: CalcRow[];
+    totalLabel: string;
+    totalValue: string;
+  };
+  rules: {
+    title: string;
+    items: FeeRule[];
+  };
+  impact: {
+    title: string;
+    description: string;
+  };
+};
+
+/* ── หน้า "จัดการผู้ใช้" ─────────────────────────────────────────── */
+
+/** บทบาทของบัญชี — กำหนดสีของ badge คอลัมน์ "บทบาท" */
+export type AdminUserRole = "buyer" | "seller";
+
+/** สถานะบัญชี — กำหนดสีของ badge คอลัมน์ "สถานะ" */
+export type AdminUserStatus = "active" | "suspended" | "kycPending";
+
+/** หนึ่งแถวในตารางผู้ใช้ */
+export type AdminUser = {
+  id: string;
+  handle: string;
+  email: string;
+  initials: string;
+  avatarAccent: SellerAvatarAccent;
+  role: AdminUserRole;
+  /** ข้อความบน badge บทบาท เช่น "ผู้ซื้อ" */
+  roleLabel: string;
+  /** จำนวนคำสั่งซื้อ จัดรูปแบบมาแล้ว */
+  orders: string;
+  /** ยอดใช้จ่ายสะสม จัดรูปแบบมาแล้ว เช่น "฿18,420" */
+  spend: string;
+  /** วันที่สมัครแบบข้อความ เช่น "12 ม.ค. 2568" */
+  joinedAt: string;
+  status: AdminUserStatus;
+  statusLabel: string;
+};
+
+/** ตัวกรองที่ถูกเลือกไว้แล้ว โชว์เป็นชิปใต้แถบเครื่องมือ */
+export type AdminUserFilterChip = {
+  id: string;
+  label: string;
+};
+
+export type AdminUsersData = {
+  title: string;
+  subtitle: string;
+  /** ปุ่มมุมขวาบนของหน้า */
+  actions: { exportLabel: string; addAdminLabel: string };
+  toolbar: {
+    searchPlaceholder: string;
+    /** dropdown กรองบทบาท/สถานะ — โครงเดียวกับแถบเครื่องมือหน้าแคตตาล็อก */
+    selects: CatalogFilterSelect[];
+    advancedLabel: string;
+    /** ป้ายนำหน้าแถวชิป เช่น "ตัวกรองที่ใช้:" */
+    appliedLabel: string;
+    chips: AdminUserFilterChip[];
+    clearLabel: string;
+  };
+  table: {
+    /** ป้ายหัวตาราง เรียงตามลำดับคอลัมน์ในดีไซน์ */
+    columns: {
+      user: string;
+      role: string;
+      orders: string;
+      spend: string;
+      joinedAt: string;
+      status: string;
+      /** ใช้เป็น aria-label ของปุ่ม ... ท้ายแถว (คอลัมน์นี้ไม่มีหัวตาราง) */
+      actions: string;
+    };
+    /** aria-label ของ checkbox หัวตารางและของแต่ละแถว */
+    selectAllLabel: string;
+    selectRowLabel: string;
+  };
+  users: AdminUser[];
+  pagination: {
+    /** สรุปช่วงที่แสดง เช่น "แสดง 1–8 จาก 4,982 บัญชี" */
+    summary: string;
+    previousLabel: string;
+    nextLabel: string;
+    pages: string[];
+    activePage: string;
+    /** true = มีหน้าถัดไปอีก ดีไซน์โชว์ "…" คั่นก่อนปุ่มถัดไป */
+    hasMore: boolean;
+  };
+};
+
+/* ── หน้า "ภาพรวมคำสั่งซื้อ" ─────────────────────────────────────── */
+
+/** สถานะคำสั่งซื้อในหน้า Kanban — ใช้ทั้งกำหนดสีจุดหัวคอลัมน์และโทน badge */
+export type OrderStatusTone =
+  | "pending" // รอชำระเงิน — ส้ม
+  | "packing" // ชำระแล้ว รอส่ง — น้ำเงิน
+  | "shipping" // กำลังจัดส่ง — ม่วง
+  | "success" // สำเร็จ — เขียว
+  | "dispute"; // ข้อพิพาท — แดง
+
+/** หนึ่งใบสั่งซื้อในคอลัมน์ */
+export type OrderCard = {
+  id: string;
+  /** เลขคำสั่งซื้อ เช่น "ORD-10233" */
+  code: string;
+  /** ยอดรวม จัดรูปแบบมาแล้ว เช่น "฿1,180" */
+  amount: string;
+  /** ผู้ขาย (โชว์คู่ไอคอนร้าน) */
+  seller: string;
+  /** ผู้ซื้อ (โชว์คู่ไอคอนคน) */
+  buyer: string;
+  /** ข้อความบน badge ท้ายการ์ด — เนื้อหาต่างกันตามสถานะ
+   *  รอชำระเงิน = "ค้าง N ชม.", รอส่ง = "รอแพ็ค N ชม.",
+   *  จัดส่ง = เลขพัสดุ, สำเร็จ = สถานะรีวิว, ข้อพิพาท = สาเหตุ */
+  contextLabel: string;
+  /** จำนวนใบการ์ดในคำสั่งซื้อ เช่น "2 ใบ" */
+  itemsLabel: string;
+};
+
+/** หนึ่งคอลัมน์ในหน้า Kanban */
+export type OrderColumn = {
+  id: string;
+  tone: OrderStatusTone;
+  title: string;
+  /** จำนวนคำสั่งซื้อรวมของสถานะนี้ จัดรูปแบบมาแล้ว เช่น "1,398" */
+  count: string;
+  cards: OrderCard[];
+  /** ถ้า false = ซ่อนปุ่ม "ดูเพิ่มเติม" (คอลัมน์ข้อพิพาทที่มีแค่ 2 ใบ) */
+  showMore?: boolean;
+};
+
+export type AdminOrdersData = {
+  title: string;
+  subtitle: string;
+  actions: { exportLabel: string; disputeLabel: string };
+  /** แถบเตือนสีพีชด้านบน */
+  notice: { title: string; description: string };
+  columns: OrderColumn[];
+  moreLabel: string;
+};

@@ -3,6 +3,7 @@ import aurasphereMouse from "@/assets/home/aurasphere-mouse.jpg";
 import celestialGuardianBox from "@/assets/home/celestial-guardian-box.jpg";
 import galacticGuardiansBox from "@/assets/home/galactic-guardians-box.jpg";
 import megaEvolutionPitchBlack from "@/assets/home/mega-evolution-pitch-black.jpg";
+import pegasusCampaignTable from "@/assets/home/pegasus-campaign-table.jpeg";
 import pegasusCollectorBox from "@/assets/home/pegasus-collector-box.jpg";
 import type { HomeData, HomeProduct } from "@/features/home/home.types";
 
@@ -61,27 +62,33 @@ export const HOME_FIGMA_FIXTURE: HomeData = {
   heroSlides: [
     {
       id: "mega-evolution",
-      eyebrow: "NEW RELEASE",
-      title: "Mega Evolution is here",
-      description: "ค้นหาการ์ดใหม่และสินค้ายอดนิยมจากร้านค้าที่คัดสรร",
-      image: aurasphereMouse,
-      imageAlt: "สินค้า Mega Evolution รุ่นใหม่",
+      eyebrow: "NEW FROM PEGASUS",
+      title: "PLAY. COLLECT. REPEAT.",
+      description:
+        "The newest cards and sealed releases, made for your next great pull.",
+      image: pegasusCampaignTable,
+      imageAlt: "การ์ดสะสม Pegasus วางบนโต๊ะจัดแสดง",
+      theme: "campaign",
     },
     {
       id: "singles-collection",
-      eyebrow: "SPOTLIGHT",
-      title: "Singles collection",
-      description: "เลือกการ์ดใบที่ใช่ พร้อมข้อมูลประกอบชัดเจน",
-      image: galacticGuardiansBox,
-      imageAlt: "คอลเลกชันการ์ดแยกใบ",
+      eyebrow: "MEGA EVOLUTION",
+      title: "A NEW ERA IS HERE.",
+      description:
+        "Open the latest sealed release and build your next winning deck.",
+      image: aurasphereMouse,
+      imageAlt: "สินค้า Mega Evolution รุ่นใหม่บนพื้นสีอ่อน",
+      theme: "release",
     },
     {
       id: "sealed-accessories",
-      eyebrow: "PEGASUS",
-      title: "Sealed & accessories",
-      description: "กล่องซีลและอุปกรณ์สำหรับนักสะสม",
-      image: arcaneDeckBox,
-      imageAlt: "กล่องซีลและอุปกรณ์สะสม",
+      eyebrow: "COLLECTOR SPOTLIGHT",
+      title: "BUILT FOR COLLECTORS.",
+      description:
+        "Premium boxes, trusted sellers, and essentials worth displaying.",
+      image: celestialGuardianBox,
+      imageAlt: "กล่องสะสม Celestial Guardian บนพื้นสีเข้ม",
+      theme: "collector",
     },
   ],
   games: [
@@ -93,13 +100,6 @@ export const HOME_FIGMA_FIXTURE: HomeData = {
     { id: "weiss", name: "Weiss Schwarz", image: arcaneDeckBox, imageAlt: "Weiss Schwarz" },
     { id: "union-arena", name: "Union Arena", image: aurasphereMouse, imageAlt: "Union Arena" },
     { id: "shadowverse", name: "Shadowverse Evolve", image: galacticGuardiansBox, imageAlt: "Shadowverse Evolve" },
-  ],
-  recentlyViewed: [
-    products.pitchBlack,
-    products.aurasphere,
-    products.galactic,
-    products.celestial,
-    { ...products.celestial, id: "blue-eyes-white-dragon-2" },
   ],
   trending: [
     { ...products.pegasus, rank: 1 },

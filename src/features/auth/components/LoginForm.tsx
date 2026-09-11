@@ -37,10 +37,6 @@ export function LoginForm() {
         </Field>
       </FieldGroup>
 
-      <span className="self-end text-sm font-medium text-primary">
-        Forgot Password?
-      </span>
-
       <Button type="submit" className="h-12 w-full rounded-lg text-base">
         Log in
       </Button>

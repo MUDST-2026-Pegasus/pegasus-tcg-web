@@ -1,23 +1,23 @@
 import type { RouteObject } from "react-router-dom";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { SellerDashboardPage } from "@/features/seller/pages/SellerDashboardPage";
-import { SellerLogoutPage } from "@/features/seller/pages/SellerLogoutPage";
-import { SellerOrdersPage } from "@/features/seller/pages/SellerOrdersPage";
-import { SellerPayoutPage } from "@/features/seller/pages/SellerPayoutPage";
-import { SellerProductsPage } from "@/features/seller/pages/SellerProductsPage";
-import { SellerShopPage } from "@/features/seller/pages/SellerShopPage";
-import { sellerNav } from "@/lib/nav-config";
+import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
+import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
+import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
+import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
+import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
+import { SellerLayout } from "@/features/seller/shared/SellerLayout";
+import { getSellerProfile } from "@/features/seller/shared/seller.api";
+import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
 
 /**
- * หลังบ้านฝั่งผู้ขาย — ใช้ DashboardLayout ตัวเดียวกับ admin
- * ต่างแค่ groups ที่ส่งเข้าไป
+ * หลังบ้านฝั่งผู้ขาย — ใช้ SellerLayout ของตัวเอง (sidebar แยกจาก admin)
+ * แต่ละหน้าเป็นโมดูลของตัวเองใน features/seller/<หน้า>/
  *
  * เจ้าของไฟล์นี้: คนที่ทำ feature seller — แก้ได้เลยโดยไม่ชนกับคนอื่น
  */
 export const sellerRoutes: RouteObject = {
   path: "seller",
-  element: <DashboardLayout role="SELLER" groups={sellerNav} />,
+  element: <SellerLayout profile={getSellerProfile()} />,
   children: [
     { index: true, element: <SellerDashboardPage /> },
     { path: "shop", element: <SellerShopPage /> },

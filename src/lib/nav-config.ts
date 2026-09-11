@@ -1,16 +1,15 @@
 import {
   BadgeCheck,
-  ClipboardCheck,
+  Clock2,
   LayoutDashboard,
-  Library,
+  LayoutGrid,
   LogOut,
   Package,
-  Percent,
   Receipt,
-  ScrollText,
-  ShoppingBag,
+  Settings2,
+  Shield,
+  ShoppingCart,
   Store,
-  Tags,
   Users,
   Wallet,
   type LucideIcon,
@@ -22,6 +21,8 @@ export type NavItem = {
   icon: LucideIcon;
   /** true = highlight only on an exact URL match (index routes) */
   end?: boolean;
+  /** "danger" = ย้อมสีแดงตลอด (ใช้กับ "ออกจากระบบ") */
+  tone?: "default" | "danger";
 };
 
 export type NavGroup = {
@@ -30,7 +31,7 @@ export type NavGroup = {
 };
 
 /**
- * Sidebar ของ /admin — ลำดับและชื่อเมนูอ้างจาก Figma node 432:4152 เป็นต้นไป
+ * Sidebar ของ /admin — ลำดับ ชื่อเมนู และไอคอนอ้างจาก Figma component Sidebar_Admin (node 1371:6991)
  * แก้ที่นี่ที่เดียว ทั้ง AppSidebar และหน้า admin ทุกหน้าจะเปลี่ยนตาม
  */
 export const adminNav: NavGroup[] = [
@@ -48,33 +49,29 @@ export const adminNav: NavGroup[] = [
   {
     label: "แคตตาล็อก",
     items: [
-      { label: "จัดการแคตตาล็อก", to: "/admin/catalog", icon: Library },
-      { label: "คุณสมบัติการ์ด", to: "/admin/card-attributes", icon: Tags },
+      { label: "จัดการแคตตาล็อก", to: "/admin/catalog", icon: LayoutGrid },
+      { label: "คุณสมบัติการ์ด", to: "/admin/card-attributes", icon: Settings2 },
     ],
   },
   {
     label: "ความน่าเชื่อถือ",
     items: [
       { label: "อนุมัติผู้ขาย", to: "/admin/sellers", icon: BadgeCheck },
-      {
-        label: "ตรวจสอบประกาศขาย",
-        to: "/admin/listings",
-        icon: ClipboardCheck,
-      },
-      { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
+      { label: "ตรวจสอบประกาศขาย", to: "/admin/listings", icon: Shield },
     ],
   },
   {
-    label: "การขาย",
+    label: "การดำเนินงาน",
     items: [
-      { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingBag },
-      { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Percent },
+      { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
+      { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
+      { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
     ],
   },
   {
     label: "ระบบ",
     items: [
-      { label: "บันทึกกิจกรรม", to: "/admin/activity-log", icon: ScrollText },
+      { label: "บันทึกกิจกรรม", to: "/admin/activity-log", icon: Clock2 },
     ],
   },
 ];
@@ -82,22 +79,32 @@ export const adminNav: NavGroup[] = [
 /** Sidebar ของ /seller — อ้างจาก Figma node 432:6773 เป็นต้นไป */
 export const sellerNav: NavGroup[] = [
   {
-    label: "ร้านของฉัน",
+    label: "ภาพรวม",
     items: [
       { label: "แดชบอร์ด", to: "/seller", icon: LayoutDashboard, end: true },
-      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
-      { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
     ],
   },
   {
-    label: "คำสั่งซื้อและเงิน",
+    label: "ร้านค้า",
     items: [
+      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
+      { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
-      { label: "ถอนเงิน", to: "/seller/payout", icon: Wallet },
     ],
+  },
+  {
+    label: "การเงิน",
+    items: [{ label: "ถอนเงิน", to: "/seller/payout", icon: Wallet }],
   },
   {
     label: "บัญชี",
-    items: [{ label: "ออกจากระบบ", to: "/seller/logout", icon: LogOut }],
+    items: [
+      {
+        label: "ออกจากระบบ",
+        to: "/seller/logout",
+        icon: LogOut,
+        tone: "danger",
+      },
+    ],
   },
 ];

@@ -1,0 +1,106 @@
+# Label PRs by area based on changed file paths.
+# Docs: https://github.com/actions/labeler
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-lock.yaml"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.config.*"
+          - "tsconfig*.json"
+          - "components.json"
+          - "wrangler.jsonc"
+          - "eslint.config.js"
+          - ".gitignore"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docker/**"
+          - "Dockerfile*"
+
+styles:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/styles/**"
+          - "**/*.css"
+
+components:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/components/**"
+
+hooks:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/hooks/**"
+
+lib:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/lib/**"
+
+feature/admin:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/admin/**"
+
+feature/auth:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/auth/**"
+
+feature/account:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/account/**"
+
+feature/cart:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/cart/**"
+
+feature/catalog:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/catalog/**"
+
+feature/home:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/home/**"
+
+feature/payment:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/payment/**"
+
+feature/seller:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/seller/**"
+
+feature/store:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/store/**"
+
+feature/about:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/features/about/**"

@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_SELLER_APPROVAL_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminSellerApprovalContent } from "@/features/admin/components/AdminSellerApprovalContent";
 
 export function AdminSellerApprovalPage() {
-  return <PagePlaceholder title="อนุมัติผู้ขาย" figmaNode="432:4958" />;
+  return <AdminSellerApprovalContent data={ADMIN_SELLER_APPROVAL_FIXTURE} />;
 }

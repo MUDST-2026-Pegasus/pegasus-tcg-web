@@ -1,33 +1,15 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Lock, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { CART_PAGE_FIXTURE, type CartItem } from "@/features/cart/Cart.fixture"
 
 export function CartPage() {
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: "Charizard VMAX #020",
-      description: "Darkness Ablaze • Near Mint",
-      seller: "CardVaultBKK",
-      price: 12900,
-      quantity: 1,
-      isChecked: true,
-      image: "/charizard.jpg",
-    },
-    {
-      id: 2,
-      name: "Monkey D. Luffy OP01-003",
-      description: "Romance Dawn • Near Mint",
-      seller: "Grand Line Cards",
-      price: 8450,
-      quantity: 1,
-      isChecked: true,
-      image: "/luffy.jpg",
-    }
-  ])
+  const navigate = useNavigate()
+  const [items, setItems] = useState<CartItem[]>(CART_PAGE_FIXTURE.items)
 
   const increaseQuantity = (id: number) => {
     setItems(prev => prev.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
@@ -58,12 +40,12 @@ export function CartPage() {
 
   const checkedItems = items.filter(item => item.isChecked)
   const subtotal = checkedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-  const shipping = 150
+  const shipping = CART_PAGE_FIXTURE.shippingCost
   const total = subtotal > 0 ? subtotal + shipping : 0
   const allChecked = items.length > 0 && items.every(item => item.isChecked)
 
   return (
-    <div className="bg-[#F4F4F5] flex-1 font-sans">
+    <div className="bg-muted flex-1 font-sans">
       <main className="max-w-[1200px] w-full mx-auto px-6 py-12 flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-4xl font-bold text-foreground">Shopping Cart</h1>
@@ -87,7 +69,7 @@ export function CartPage() {
                   </label>
                 </div>
                 <button 
-                  className="text-[#C62828] text-sm font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-destructive text-sm font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={removeSelected}
                   disabled={checkedItems.length === 0}
                 >
@@ -120,11 +102,11 @@ export function CartPage() {
                         <h3 className="font-bold text-xl text-foreground">{item.name}</h3>
                         <p className="text-muted-foreground text-sm">{item.description}</p>
                         <p className="text-sm mt-1 text-foreground">
-                          Seller: <a href="#" className="text-[#0052cc] hover:underline">{item.seller}</a>
+                          Seller: <a href="#" className="text-primary hover:underline">{item.seller}</a>
                         </p>
                       </div>
                       <button 
-                        className="text-[#C62828] text-sm font-medium hover:underline text-left w-fit mt-auto"
+                        className="text-destructive text-sm font-medium hover:underline text-left w-fit mt-auto"
                         onClick={() => removeItem(item.id)}
                       >
                         Remove
@@ -180,12 +162,13 @@ export function CartPage() {
 
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xl font-bold text-foreground">Total</span>
-                <span className="text-4xl font-bold text-[#0052cc]">{formatPrice(total)}</span>
+                <span className="text-4xl font-bold text-primary">{formatPrice(total)}</span>
               </div>
 
               <Button 
-                className="w-full bg-[#0052cc] hover:bg-[#0052cc]/90 text-white font-semibold text-lg py-6 rounded-full shadow-md"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg py-6 rounded-full shadow-md"
                 disabled={checkedItems.length === 0}
+                onClick={() => navigate('/checkout')}
               >
                 Proceed to Checkout
               </Button>
