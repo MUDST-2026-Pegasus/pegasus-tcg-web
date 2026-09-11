@@ -7,6 +7,7 @@ const AVATAR_ACCENT: Record<SellerAvatarAccent, string> = {
   primary: "bg-[#0058bc]",
   amber: "bg-[#b45309]",
   red: "bg-[#d0342c]",
+  slate: "bg-[#9aa5ad]",
 };
 
 type SellerAvatarProps = {

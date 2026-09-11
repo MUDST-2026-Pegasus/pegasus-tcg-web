@@ -192,8 +192,16 @@ export type AdminCardAttributesData = {
 
 /* ── หน้า "อนุมัติผู้ขาย" ────────────────────────────────────────── */
 
-/** สีพื้น avatar ของผู้สมัคร — ชุดเดียวกับที่ใช้ในหน้าภาพรวม */
-export type SellerAvatarAccent = "teal" | "primary" | "amber" | "red";
+/**
+ * สีพื้นวงกลมตัวย่อชื่อ — ชุดเดียวกับที่ใช้ในหน้าภาพรวม
+ * ใช้ทั้งหน้า "อนุมัติผู้ขาย" และตารางหน้า "จัดการผู้ใช้"
+ */
+export type SellerAvatarAccent =
+  | "teal"
+  | "primary"
+  | "amber"
+  | "red"
+  | "slate";
 
 /** สีจุดนำหน้าตัวเลขสรุปด้านบน และสีของ badge สถานะคำขอ */
 export type SellerApprovalTone = "pending" | "approved" | "rejected" | "total";
@@ -255,6 +263,155 @@ export type AdminSellerApprovalData = {
   /** id ของคำขอที่เปิดดูอยู่ตอนเข้าหน้า */
   defaultApplicationId: string;
   applications: SellerApplication[];
+};
+
+/* ── หน้า "ค่าคอมมิชชั่น" ────────────────────────────────────────── */
+
+/** หนึ่งหมวดหมู่ในการ์ด "อัตราเฉพาะหมวดหมู่" */
+export type CommissionCategory = {
+  id: string;
+  name: string;
+  /** คำอธิบายบรรทัดล่าง เช่น "การ์ดเดี่ยวและกล่องสุ่ม" */
+  description: string;
+  /** อัตราค่าคอมของหมวดนี้ เก็บเป็น string เพื่อเสิร์ฟเข้า input ตรง ๆ */
+  rate: string;
+  /** true = ใช้อัตราของตัวเองแทนอัตราเริ่มต้น (สวิตช์เปิด) */
+  useCustom: boolean;
+  /** ข้อความบอกสถานะข้างสวิตช์ */
+  customLabel: string;
+  defaultLabel: string;
+};
+
+/** หนึ่งแถวใน "ตัวอย่างการคำนวณ" ทางขวา */
+export type CalcRow = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+/** หนึ่งกฎในการ์ด "กฎการเก็บค่าธรรมเนียม" */
+export type FeeRule = {
+  id: string;
+  label: string;
+  /** true = เปิดใช้กฎ */
+  active: boolean;
+};
+
+export type AdminCommissionData = {
+  title: string;
+  subtitle: string;
+  actions: { historyLabel: string; saveLabel: string };
+  defaultRate: {
+    title: string;
+    description: string;
+    /** อัตราเริ่มต้น เก็บเป็น string จัดรูปแบบแล้ว เช่น "5.0" */
+    value: string;
+    /** ปลายซ้าย/ขวาของแถบเลื่อน (0% / 15%) */
+    minLabel: string;
+    maxLabel: string;
+    /** ข้อความช่วงที่แนะนำ ตำแหน่งอิงจากช่วงที่แนะนำในแถบ */
+    recommendedLabel: string;
+    /** ค่ามากสุดของแถบ ใช้คำนวณตำแหน่ง handle ปัจจุบัน */
+    max: number;
+  };
+  categories: {
+    title: string;
+    description: string;
+    addLabel: string;
+    items: CommissionCategory[];
+  };
+  calculation: {
+    title: string;
+    rows: CalcRow[];
+    totalLabel: string;
+    totalValue: string;
+  };
+  rules: {
+    title: string;
+    items: FeeRule[];
+  };
+  impact: {
+    title: string;
+    description: string;
+  };
+};
+
+/* ── หน้า "จัดการผู้ใช้" ─────────────────────────────────────────── */
+
+/** บทบาทของบัญชี — กำหนดสีของ badge คอลัมน์ "บทบาท" */
+export type AdminUserRole = "buyer" | "seller";
+
+/** สถานะบัญชี — กำหนดสีของ badge คอลัมน์ "สถานะ" */
+export type AdminUserStatus = "active" | "suspended" | "kycPending";
+
+/** หนึ่งแถวในตารางผู้ใช้ */
+export type AdminUser = {
+  id: string;
+  handle: string;
+  email: string;
+  initials: string;
+  avatarAccent: SellerAvatarAccent;
+  role: AdminUserRole;
+  /** ข้อความบน badge บทบาท เช่น "ผู้ซื้อ" */
+  roleLabel: string;
+  /** จำนวนคำสั่งซื้อ จัดรูปแบบมาแล้ว */
+  orders: string;
+  /** ยอดใช้จ่ายสะสม จัดรูปแบบมาแล้ว เช่น "฿18,420" */
+  spend: string;
+  /** วันที่สมัครแบบข้อความ เช่น "12 ม.ค. 2568" */
+  joinedAt: string;
+  status: AdminUserStatus;
+  statusLabel: string;
+};
+
+/** ตัวกรองที่ถูกเลือกไว้แล้ว โชว์เป็นชิปใต้แถบเครื่องมือ */
+export type AdminUserFilterChip = {
+  id: string;
+  label: string;
+};
+
+export type AdminUsersData = {
+  title: string;
+  subtitle: string;
+  /** ปุ่มมุมขวาบนของหน้า */
+  actions: { exportLabel: string; addAdminLabel: string };
+  toolbar: {
+    searchPlaceholder: string;
+    /** dropdown กรองบทบาท/สถานะ — โครงเดียวกับแถบเครื่องมือหน้าแคตตาล็อก */
+    selects: CatalogFilterSelect[];
+    advancedLabel: string;
+    /** ป้ายนำหน้าแถวชิป เช่น "ตัวกรองที่ใช้:" */
+    appliedLabel: string;
+    chips: AdminUserFilterChip[];
+    clearLabel: string;
+  };
+  table: {
+    /** ป้ายหัวตาราง เรียงตามลำดับคอลัมน์ในดีไซน์ */
+    columns: {
+      user: string;
+      role: string;
+      orders: string;
+      spend: string;
+      joinedAt: string;
+      status: string;
+      /** ใช้เป็น aria-label ของปุ่ม ... ท้ายแถว (คอลัมน์นี้ไม่มีหัวตาราง) */
+      actions: string;
+    };
+    /** aria-label ของ checkbox หัวตารางและของแต่ละแถว */
+    selectAllLabel: string;
+    selectRowLabel: string;
+  };
+  users: AdminUser[];
+  pagination: {
+    /** สรุปช่วงที่แสดง เช่น "แสดง 1–8 จาก 4,982 บัญชี" */
+    summary: string;
+    previousLabel: string;
+    nextLabel: string;
+    pages: string[];
+    activePage: string;
+    /** true = มีหน้าถัดไปอีก ดีไซน์โชว์ "…" คั่นก่อนปุ่มถัดไป */
+    hasMore: boolean;
+  };
 };
 
 /* ── หน้า "ภาพรวมคำสั่งซื้อ" ─────────────────────────────────────── */
