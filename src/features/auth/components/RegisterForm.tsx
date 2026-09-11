@@ -24,6 +24,14 @@ export function RegisterForm() {
           />
         </Field>
         <Field>
+          <FieldLabel htmlFor="displayName">Display name</FieldLabel>
+          <Input
+            id="displayName"
+            placeholder="Enter your display name"
+            className="h-12 rounded-lg border-border bg-background px-4"
+          />
+        </Field>
+        <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input id="email" type="email" placeholder="Enter your email" className="h-12 rounded-lg border-border bg-background px-4" />
         </Field>
@@ -36,6 +44,15 @@ export function RegisterForm() {
             className="h-12 rounded-lg border-border bg-background px-4"
           />
         </Field>
+        <Field>
+          <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            className="h-12 rounded-lg border-border bg-background px-4"
+          />
+        </Field>
         <Field orientation="horizontal">
           <Checkbox id="terms" className="bg-white border-2 border-black-50 size-4.5" />
           <FieldLabel htmlFor="terms" className="font-normal">
@@ -44,7 +61,7 @@ export function RegisterForm() {
             <span className="text-primary">Privacy Policy</span>
           </FieldLabel>
         </Field>
-        <Button type="submit" className="h-12 w-full">
+        <Button type="submit" className="h-12 w-full rounded-lg text-base">
           Sign up
         </Button>
       </FieldGroup>
