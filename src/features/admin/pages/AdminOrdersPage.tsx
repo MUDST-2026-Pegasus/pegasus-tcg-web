@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_ORDERS_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminOrdersContent } from "@/features/admin/components/AdminOrdersContent";
 
 export function AdminOrdersPage() {
-  return <PagePlaceholder title="ภาพรวมคำสั่งซื้อ" figmaNode="432:5856" />;
+  return <AdminOrdersContent data={ADMIN_ORDERS_FIXTURE} />;
 }
