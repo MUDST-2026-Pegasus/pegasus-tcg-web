@@ -1,13 +1,8 @@
-import { SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
+import { SearchIcon, ShoppingCartIcon } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 
+import { AccountMenu } from "@/components/layout/AccountMenu";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -17,13 +12,6 @@ const NAV_LINKS = [
   { label: "NEW ARRIVALS", to: "/new-arrivals" },
   { label: "POKEMON", to: "/pokemon" },
   { label: "ONE PIECE", to: "/one-piece" },
-] as const;
-
-const ACCOUNT_MENU = [
-  { label: "My Account", to: "/account/profile" },
-  { label: "Seller Dashboard", to: "/seller" },
-  { label: "Become a Seller", to: "/become-a-seller" },
-  { label: "Admin Dashboard", to: "/admin" },
 ] as const;
 
 export function Navbar() {
@@ -102,34 +90,7 @@ export function Navbar() {
           >
             <ShoppingCartIcon className="size-5" />
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Account"
-                  className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
-                />
-              }
-            >
-              <UserIcon className="size-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="flex w-56 flex-col gap-2 rounded-lg border border-border p-4 shadow-md ring-0"
-            >
-              {ACCOUNT_MENU.map(({ label, to }) => (
-                <DropdownMenuItem
-                  key={to}
-                  className="cursor-pointer rounded-lg px-2.5"
-                  render={<Link to={to} />}
-                >
-                  {label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <AccountMenu />
         </div>
       </div>
     </header>

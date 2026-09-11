@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router-dom";
 
 import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { AboutPage } from "@/features/about/pages/AboutPage";
 import { AddressBookPage } from "@/features/account/pages/AddressBookPage";
 import { OrderHistoryPage } from "@/features/account/pages/OrderHistoryPage";
@@ -46,9 +47,14 @@ export const publicRoutes: RouteObject = {
       element: <PagePlaceholder title="สมัครเป็นผู้ขาย" />,
     },
 
-    { path: "account/profile", element: <ProfilePage /> },
-    { path: "account/orders", element: <OrderHistoryPage /> },
-    { path: "account/addresses", element: <AddressBookPage /> },
+    {
+      element: <RequireAuth />,
+      children: [
+        { path: "account/profile", element: <ProfilePage /> },
+        { path: "account/orders", element: <OrderHistoryPage /> },
+        { path: "account/addresses", element: <AddressBookPage /> },
+      ],
+    },
 
     { path: "*", element: <PagePlaceholder title="ไม่พบหน้านี้" /> },
   ],

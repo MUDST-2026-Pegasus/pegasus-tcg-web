@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router-dom";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { AdminActivityLogPage } from "@/features/admin/pages/AdminActivityLogPage";
 import { AdminCardAttributesPage } from "@/features/admin/pages/AdminCardAttributesPage";
 import { AdminCatalogPage } from "@/features/admin/pages/AdminCatalogPage";
@@ -20,7 +21,11 @@ import { adminNav } from "@/lib/nav-config";
  */
 export const adminRoutes: RouteObject = {
   path: "admin",
-  element: <DashboardLayout role="ADMIN" groups={adminNav} />,
+  element: (
+    <RequireAuth roles={["ADMIN"]}>
+      <DashboardLayout role="ADMIN" groups={adminNav} />
+    </RequireAuth>
+  ),
   children: [
     { index: true, element: <AdminOverviewPage /> },
     { path: "catalog", element: <AdminCatalogPage /> },
