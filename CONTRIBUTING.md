@@ -15,6 +15,7 @@ pnpm add [dependency] # for install dep
 ```
 src/
   app/
+    providers.tsx     QueryClientProvider / Toaster / Tooltip (แทบไม่ต้องแก้)
     router.tsx        ประกอบกลุ่มเส้นทางเข้าด้วยกัน (แทบไม่ต้องแก้)
     routes/
       public.routes.tsx    เส้นทางฝั่งผู้ซื้อ
@@ -34,7 +35,11 @@ src/
       ── หรือแบบ "โมดูลต่อหน้า" เมื่อ feature มีหลายหน้าและแต่ละหน้ามีข้อมูลของตัวเอง
          (ตอนนี้ seller ใช้แบบนี้ ดูหัวข้อ "feature ที่มีหลายหน้า" ด้านล่าง)
   hooks/          hook ที่ใช้ร่วมกันทั้งแอป
-  lib/            utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
+  lib/
+    api/          ชั้นเชื่อม backend — ดูหัวข้อ "ต่อ API" ด้านล่าง
+    env.ts        ค่าจาก .env ทั้งหมดอ่านผ่านไฟล์นี้ที่เดียว
+    form.ts       แปลง error จาก backend ไปแปะที่ช่องกรอก
+    utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
   styles/         globals.css — theme token ของ shadcn ทั้งหมด
   main.tsx        entry point
 ```
@@ -101,6 +106,164 @@ features/seller/
   ข้ามโมดูลค่อยใช้ `@/features/seller/shared/...` — เห็นแล้วรู้ทันทีว่าอันไหนข้ามขอบเขต
 - **ข้อมูลทุกหน้าออกมาจากฟังก์ชันใน `*.api.ts`** วันที่ต่อ backend จริงแก้ข้างในฟังก์ชันนั้น
   component ไม่ต้องแก้เลย
+
+## ต่อ API
+
+backend คือ `pegasus-tcg-api` (Spring Boot) ทุก endpoint อยู่ใต้ `/api/v1`
+
+### เริ่มใช้งาน
+
+```bash
+cp .env.example .env.local   # แก้ VITE_API_PROXY_TARGET ถ้า backend ไม่ได้อยู่พอร์ต 8080
+pnpm dev
+```
+
+ตอน dev ไม่ต้องตั้ง `VITE_API_BASE_URL` — `vite.config.ts` proxy `/api` ไปให้ backend อยู่แล้ว
+เบราว์เซอร์จึงเห็นเป็น origin เดียวกัน ไม่ต้องไปยุ่งกับ CORS ฝั่ง backend
+ตอน build ขึ้น production ค่อยตั้ง `VITE_API_BASE_URL` เป็น origin จริง
+
+### ยิง request
+
+ใช้ `api` จาก `@/lib/api` อย่างเดียว อย่าเรียก `fetch` เอง เพราะตัวนี้จัดการให้แล้ว
+ทั้งการต่อ base URL, แนบ `Authorization`, แกะซอง `ApiResponse` ออกให้เหลือแต่ `data`,
+ต่ออายุ access token อัตโนมัติเมื่อเจอ 401 และแปลงทุกความผิดพลาดเป็น `ApiError`
+
+```ts
+import { api, type PageResponse } from "@/lib/api";
+
+const product = await api.get<Product>(`/products/${id}`);
+const page = await api.get<PageResponse<Product>>("/products", {
+  query: { page: 0, size: 20, game: "POKEMON" },   // ค่า null/undefined ถูกตัดทิ้งให้
+});
+await api.post<Order>("/orders", { items });
+```
+
+### วางไฟล์ยังไง
+
+หนึ่ง feature (หรือหนึ่งโมดูลหน้า) มีสองไฟล์ แยกหน้าที่กันชัด ๆ
+
+```
+features/catalog/
+  catalog.types.ts     รูปร่างข้อมูล — ลอกจาก DTO ฝั่ง backend ให้ตรง
+  catalog.api.ts       ยิงไปที่ไหน รับอะไรกลับมา (ฟังก์ชันเปล่า ๆ ไม่มี React)
+  catalog.queries.ts   query key + hook ที่ component เรียกใช้
+```
+
+`catalog.api.ts`
+
+```ts
+import { api } from "@/lib/api";
+import type { Product } from "./catalog.types";
+
+export function getProduct(id: string): Promise<Product> {
+  return api.get<Product>(`/products/${id}`);
+}
+```
+
+`catalog.queries.ts` — **query key ต้องรวมทุกค่าที่ทำให้ผลลัพธ์ต่างกัน**
+ไม่งั้นสินค้าคนละตัวจะใช้ cache ก้อนเดียวกัน
+
+```ts
+import { useQuery } from "@tanstack/react-query";
+import * as catalogApi from "./catalog.api";
+
+export const catalogKeys = {
+  all: ["catalog"] as const,
+  detail: (id: string) => [...catalogKeys.all, "detail", id] as const,
+};
+
+export function useProduct(id: string) {
+  return useQuery({
+    queryKey: catalogKeys.detail(id),
+    queryFn: () => catalogApi.getProduct(id),
+  });
+}
+```
+
+ในหน้าเพจ
+
+```tsx
+const { data: product, isPending, isError, error } = useProduct(productId);
+
+if (isPending) return <Skeleton className="h-96 w-full" />;
+if (isError) return <p>{getErrorMessage(error, "โหลดสินค้าไม่สำเร็จ")}</p>;
+```
+
+ส่วนที่เขียนข้อมูลใช้ `useMutation` แล้ว `invalidateQueries` คีย์ที่เกี่ยวข้อง
+
+```ts
+const queryClient = useQueryClient();
+const addToCart = useMutation({
+  mutationFn: cartApi.addItem,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+});
+```
+
+> หน้าไหนยังไม่มี endpoint จริง ให้คงไว้เป็น mock ใน `*.api.ts` ตามเดิม
+> วันที่ backend เสร็จค่อยเปลี่ยนข้างในฟังก์ชันเป็น `api.get(...)` — component ไม่ต้องแก้
+
+### error
+
+ทุกอย่างที่ออกมาจาก `api.*` เป็น `ApiError` เสมอ มี `status`, `code` (ตรงกับ
+`ErrorCode.java`) และ `violations` ของฟิลด์ที่ไม่ผ่าน validation
+
+```ts
+import { getErrorMessage, hasErrorCode } from "@/lib/api";
+
+if (hasErrorCode(error, "EMAIL_ALREADY_USED")) { ... }
+toast({ description: getErrorMessage(error, "ทำรายการไม่สำเร็จ") });
+```
+
+ในฟอร์ม ใช้ `applyApiErrors` จาก `@/lib/form` แปะ error ลงช่องที่ผิดให้อัตโนมัติ
+(ดูตัวอย่างเต็มที่ `features/auth/components/RegisterForm.tsx`)
+
+### สถานะ login
+
+```tsx
+import { useAuth, useLogout } from "@/features/auth/auth.queries";
+
+const { user, isAuthenticated, isLoading, hasRole } = useAuth();
+if (hasRole("SELLER")) { ... }
+```
+
+- token เก็บใน localStorage และต่ออายุเองอัตโนมัติ — **ไม่ต้องแตะ token เอง**
+- ข้อมูลผู้ใช้อยู่ใน cache ของ TanStack Query อ่านผ่าน `useAuth()` เท่านั้น
+- แท็บอื่น login/logout แท็บนี้เห็นตามทันที
+
+หน้าที่ต้อง login ครอบด้วย `RequireAuth` ในไฟล์ route ของกลุ่มตัวเอง
+
+```tsx
+// ทั้งกลุ่ม
+element: (
+  <RequireAuth roles={["ADMIN"]}>
+    <DashboardLayout role="ADMIN" groups={adminNav} />
+  </RequireAuth>
+),
+
+// เฉพาะบางหน้าในกลุ่ม (ดู account/* ใน public.routes.tsx)
+{ element: <RequireAuth />, children: [ ... ] },
+```
+
+ตอนนี้ `/admin` บังคับ ADMIN, `/seller` บังคับ SELLER และ `/account/*` บังคับว่าต้อง login
+
+### บัญชีสำหรับ dev
+
+สมัครผ่านหน้า `/register` จะได้บทบาท BUYER ถ้าอยากได้ SELLER ด้วยให้ยิงตรง
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","username":"you_dev","displayName":"You","password":"Str0ngPassw0rd!","roles":["BUYER","SELLER"]}'
+```
+
+ส่วน ADMIN ให้ตัวเองผ่านฐานข้อมูลโดยตรง (`app_role.code = 'ADMIN'` คือ id 3)
+
+```bash
+docker exec pegasus-tcg-postgres psql -U postgres -d pegasus_tcg \
+  -c "INSERT INTO user_role (user_id, role_id) SELECT id, 3 FROM user_account WHERE username = 'you_dev';"
+```
+
+บทบาทใหม่จะติดมากับ access token รอบถัดไป — logout แล้ว login ใหม่หนึ่งครั้ง
 
 ## Layout
 

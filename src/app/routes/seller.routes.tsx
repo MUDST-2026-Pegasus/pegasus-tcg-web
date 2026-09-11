@@ -1,5 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 
+import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
 import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
 import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
@@ -17,7 +18,11 @@ import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
  */
 export const sellerRoutes: RouteObject = {
   path: "seller",
-  element: <SellerLayout profile={getSellerProfile()} />,
+  element: (
+    <RequireAuth roles={["SELLER"]}>
+      <SellerLayout profile={getSellerProfile()} />
+    </RequireAuth>
+  ),
   children: [
     { index: true, element: <SellerDashboardPage /> },
     { path: "shop", element: <SellerShopPage /> },
