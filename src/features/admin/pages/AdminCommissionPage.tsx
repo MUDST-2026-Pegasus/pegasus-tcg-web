@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { ADMIN_COMMISSION_FIXTURE } from "@/features/admin/admin.fixture";
+import { AdminCommissionContent } from "@/features/admin/components/AdminCommissionContent";
 
 export function AdminCommissionPage() {
-  return <PagePlaceholder title="ค่าคอมมิชชั่น" figmaNode="432:6229" />;
+  return <AdminCommissionContent data={ADMIN_COMMISSION_FIXTURE} />;
 }

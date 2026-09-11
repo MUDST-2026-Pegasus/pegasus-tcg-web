@@ -1,6 +1,7 @@
 import type {
   AdminCardAttributesData,
   AdminCatalogData,
+  AdminCommissionData,
   AdminOverviewData,
   AdminSellerApprovalData,
   AdminUsersData,
@@ -788,6 +789,101 @@ export const ADMIN_SELLER_APPROVAL_FIXTURE: AdminSellerApprovalData = {
       review: "รูปบัตรเบลอบางส่วน อ่านเลขบัตรไม่ชัด",
     },
   ],
+};
+
+export const ADMIN_COMMISSION_FIXTURE: AdminCommissionData = {
+  title: "ค่าคอมมิชชั่น",
+  subtitle:
+    "กำหนดอัตราค่าธรรมเนียมที่แพลตฟอร์มเก็บจากผู้ขายในแต่ละหมวดหมู่",
+  actions: {
+    historyLabel: "ดูประวัติการแก้ไข",
+    saveLabel: "บันทึกการตั้งค่า",
+  },
+  defaultRate: {
+    title: "อัตราเริ่มต้นทั้งแพลตฟอร์ม",
+    description: "ใช้กับทุกหมวดหมู่ที่ไม่ได้ตั้งค่าเฉพาะไว้",
+    value: "5.0",
+    minLabel: "0%",
+    maxLabel: "15%",
+    recommendedLabel: "แนะนำ 3–7%",
+    max: 15,
+  },
+  categories: {
+    title: "อัตราเฉพาะหมวดหมู่",
+    description: "เปิดสวิตช์เพื่อกำหนดอัตราแยกจากค่าเริ่มต้น",
+    addLabel: "+ เพิ่มหมวดหมู่",
+    items: [
+      {
+        id: "pokemon",
+        name: "Pokémon",
+        description: "การ์ดเดี่ยวและกล่องสุ่ม",
+        rate: "5.0",
+        useCustom: false,
+        customLabel: "ตั้งค่าเฉพาะ",
+        defaultLabel: "ใช้ค่าเริ่มต้น",
+      },
+      {
+        id: "one-piece",
+        name: "One Piece",
+        description: "การ์ดเดี่ยวและกล่องสุ่ม",
+        rate: "5.0",
+        useCustom: false,
+        customLabel: "ตั้งค่าเฉพาะ",
+        defaultLabel: "ใช้ค่าเริ่มต้น",
+      },
+      {
+        id: "sports-cards",
+        name: "Sports Cards",
+        description: "ต้องตรวจสอบความแท้เพิ่มเติม",
+        rate: "7.0",
+        useCustom: true,
+        customLabel: "ตั้งค่าเฉพาะ",
+        defaultLabel: "ใช้ค่าเริ่มต้น",
+      },
+      {
+        id: "mtg",
+        name: "Magic: The Gathering",
+        description: "การ์ดเดี่ยว",
+        rate: "5.0",
+        useCustom: false,
+        customLabel: "ตั้งค่าเฉพาะ",
+        defaultLabel: "ใช้ค่าเริ่มต้น",
+      },
+      {
+        id: "sealed",
+        name: "กล่อง/ซองสุ่ม (ทุกเกม)",
+        description: "สินค้าซีลปิดผนึก",
+        rate: "3.5",
+        useCustom: true,
+        customLabel: "ตั้งค่าเฉพาะ",
+        defaultLabel: "ใช้ค่าเริ่มต้น",
+      },
+    ],
+  },
+  calculation: {
+    title: "ตัวอย่างการคำนวณ",
+    rows: [
+      { id: "price", label: "ราคาขาย", value: "฿1,290" },
+      { id: "commission", label: "ค่าคอมมิชชั่น (5.0%)", value: "− ฿64.50" },
+      { id: "fixed", label: "ค่าธรรมเนียมคงที่", value: "− ฿0.00" },
+    ],
+    totalLabel: "ผู้ขายได้รับ",
+    totalValue: "฿1,225.50",
+  },
+  rules: {
+    title: "กฎการเก็บค่าธรรมเนียม",
+    items: [
+      { id: "on-success", label: "เก็บเมื่อคำสั่งซื้อสำเร็จ", active: true },
+      { id: "exclude-shipping", label: "ยกเว้นค่าส่ง", active: true },
+      { id: "refund-on-cancel", label: "คืนค่าธรรมเนียมเมื่อยกเลิก", active: true },
+      { id: "buyer-pays", label: "เก็บกับผู้ซื้อแทนผู้ขาย", active: false },
+    ],
+  },
+  impact: {
+    title: "ผลกระทบต่อผู้ขาย",
+    description:
+      "การขึ้นอัตราจะมีผลกับคำสั่งซื้อใหม่เท่านั้น และระบบจะแจ้งผู้ขายล่วงหน้า 14 วันโดยอัตโนมัติ",
+  },
 };
 
 export const ADMIN_USERS_FIXTURE: AdminUsersData = {
