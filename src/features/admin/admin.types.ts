@@ -256,3 +256,54 @@ export type AdminSellerApprovalData = {
   defaultApplicationId: string;
   applications: SellerApplication[];
 };
+
+/* ── หน้า "ภาพรวมคำสั่งซื้อ" ─────────────────────────────────────── */
+
+/** สถานะคำสั่งซื้อในหน้า Kanban — ใช้ทั้งกำหนดสีจุดหัวคอลัมน์และโทน badge */
+export type OrderStatusTone =
+  | "pending" // รอชำระเงิน — ส้ม
+  | "packing" // ชำระแล้ว รอส่ง — น้ำเงิน
+  | "shipping" // กำลังจัดส่ง — ม่วง
+  | "success" // สำเร็จ — เขียว
+  | "dispute"; // ข้อพิพาท — แดง
+
+/** หนึ่งใบสั่งซื้อในคอลัมน์ */
+export type OrderCard = {
+  id: string;
+  /** เลขคำสั่งซื้อ เช่น "ORD-10233" */
+  code: string;
+  /** ยอดรวม จัดรูปแบบมาแล้ว เช่น "฿1,180" */
+  amount: string;
+  /** ผู้ขาย (โชว์คู่ไอคอนร้าน) */
+  seller: string;
+  /** ผู้ซื้อ (โชว์คู่ไอคอนคน) */
+  buyer: string;
+  /** ข้อความบน badge ท้ายการ์ด — เนื้อหาต่างกันตามสถานะ
+   *  รอชำระเงิน = "ค้าง N ชม.", รอส่ง = "รอแพ็ค N ชม.",
+   *  จัดส่ง = เลขพัสดุ, สำเร็จ = สถานะรีวิว, ข้อพิพาท = สาเหตุ */
+  contextLabel: string;
+  /** จำนวนใบการ์ดในคำสั่งซื้อ เช่น "2 ใบ" */
+  itemsLabel: string;
+};
+
+/** หนึ่งคอลัมน์ในหน้า Kanban */
+export type OrderColumn = {
+  id: string;
+  tone: OrderStatusTone;
+  title: string;
+  /** จำนวนคำสั่งซื้อรวมของสถานะนี้ จัดรูปแบบมาแล้ว เช่น "1,398" */
+  count: string;
+  cards: OrderCard[];
+  /** ถ้า false = ซ่อนปุ่ม "ดูเพิ่มเติม" (คอลัมน์ข้อพิพาทที่มีแค่ 2 ใบ) */
+  showMore?: boolean;
+};
+
+export type AdminOrdersData = {
+  title: string;
+  subtitle: string;
+  actions: { exportLabel: string; disputeLabel: string };
+  /** แถบเตือนสีพีชด้านบน */
+  notice: { title: string; description: string };
+  columns: OrderColumn[];
+  moreLabel: string;
+};
