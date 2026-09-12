@@ -61,34 +61,44 @@ const products = {
 export const HOME_FIGMA_FIXTURE: HomeData = {
   heroSlides: [
     {
-      id: "mega-evolution",
+      id: "pegasus-new-releases",
       eyebrow: "NEW FROM PEGASUS",
-      title: "PLAY. COLLECT. REPEAT.",
+      title: "FRESH CARDS.\nREADY TO PLAY.",
       description:
-        "The newest cards and sealed releases, made for your next great pull.",
+        "Discover this week’s newest singles and sealed releases—up front, before the campaign story.",
       image: pegasusCampaignTable,
-      imageAlt: "การ์ดสะสม Pegasus วางบนโต๊ะจัดแสดง",
+      imageAlt: "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ",
       theme: "campaign",
     },
     {
-      id: "singles-collection",
-      eyebrow: "MEGA EVOLUTION",
-      title: "A NEW ERA IS HERE.",
+      id: "mega-evolution",
+      eyebrow: "LATEST SEALED RELEASE",
+      title: "MEGA EVOLUTION.\nNOW IN STOCK.",
       description:
-        "Open the latest sealed release and build your next winning deck.",
+        "Open the newest sealed release and build your next winning deck.",
       image: aurasphereMouse,
       imageAlt: "สินค้า Mega Evolution รุ่นใหม่บนพื้นสีอ่อน",
       theme: "release",
     },
     {
-      id: "sealed-accessories",
+      id: "collector-spotlight",
       eyebrow: "COLLECTOR SPOTLIGHT",
-      title: "BUILT FOR COLLECTORS.",
+      title: "BUILT FOR\nCOLLECTORS.",
       description:
         "Premium boxes, trusted sellers, and essentials worth displaying.",
       image: celestialGuardianBox,
-      imageAlt: "กล่องสะสม Celestial Guardian บนพื้นสีเข้ม",
+      imageAlt: "กล่องสะสม Celestial Guardian",
       theme: "collector",
+    },
+    {
+      id: "weekly-card-picks",
+      eyebrow: "WEEKLY CARD PICKS",
+      title: "FIND YOUR\nNEXT FAVORITE.",
+      description:
+        "Explore standout cards selected for collectors, players, and every deck in between.",
+      image: galacticGuardiansBox,
+      imageAlt: "สินค้า Galactic Guardians สำหรับนักสะสมการ์ด",
+      theme: "release",
     },
   ],
   games: [
@@ -100,6 +110,18 @@ export const HOME_FIGMA_FIXTURE: HomeData = {
     { id: "weiss", name: "Weiss Schwarz", image: arcaneDeckBox, imageAlt: "Weiss Schwarz" },
     { id: "union-arena", name: "Union Arena", image: aurasphereMouse, imageAlt: "Union Arena" },
     { id: "shadowverse", name: "Shadowverse Evolve", image: galacticGuardiansBox, imageAlt: "Shadowverse Evolve" },
+  ],
+  newReleases: [
+    { ...products.arcane, id: "new-charizard-ex-sar", name: "Charizard ex SAR", type: "Single Card", price: 4200 },
+    { ...products.galactic, id: "new-pikachu-ar", name: "Pikachu AR", type: "Single Card", price: 2790 },
+    { ...products.galactic, id: "new-mew-vmax", name: "Mew VMAX", type: "Single Card", price: 6250 },
+    { ...products.arcane, id: "new-darkrai-ex", name: "Darkrai ex", type: "Single Card", price: 4780 },
+    { ...products.aurasphere, id: "new-one-piece-premium-set", name: "ONE PIECE OP-09 Premium Set", type: "Sealed", price: 1990 },
+    { ...products.celestial, id: "new-mega-evolution-booster-box", name: "MEGA Evolution Booster Box", type: "Booster Box", price: 4290 },
+    { ...products.pegasus, id: "new-pokemon-151-booster", name: "Pokémon 151 Booster", type: "Booster Box", price: 1890 },
+    { ...products.aurasphere, id: "new-one-piece-op-09", name: "ONE PIECE OP-09", type: "Booster Box", price: 1150 },
+    { ...products.aurasphere, id: "new-union-arena-booster", name: "UNION ARENA Booster", type: "Booster Pack", price: 980 },
+    { ...products.pegasus, id: "new-battle-of-talingchan", name: "Battle of Talingchan Deck", type: "Deck", price: 290 },
   ],
   trending: [
     { ...products.pegasus, rank: 1 },

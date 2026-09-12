@@ -26,76 +26,13 @@ const currencyFormatter = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 0,
 });
 
-type SectionHeaderProps = {
-  title: string;
-  actionLabel?: string;
-  description?: string;
-  showAction?: boolean;
-};
+const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
+const HERO_CAROUSEL_INTERVAL_MS = 4000;
 
-function SectionHeader({
-  title,
-  actionLabel = "View All",
-  description,
-  showAction = true,
-}: SectionHeaderProps) {
-  return (
-    <div className="flex min-h-[34px] items-start justify-between gap-4">
-      <div className="min-w-0">
-        <h2 className="text-[28px] leading-[34px] font-semibold text-foreground">
-          {title}
-        </h2>
-        {description ? (
-          <p className="text-xs leading-4 text-muted-foreground">{description}</p>
-        ) : null}
-      </div>
-      {showAction ? (
-        <Button
-          type="button"
-          variant="link"
-          size="sm"
-          className="shrink-0 cursor-pointer px-0 text-sm"
-        >
-          {actionLabel}
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
-function HomeProductCard({
-  product,
-  rank,
-}: {
-  product: HomeProduct;
-  rank?: number;
-}) {
-  return (
-    <div className="relative h-[260px]">
-      <button
-        type="button"
-        aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
-        className="block h-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <ItemCard
-          imageSrc={product.image}
-          imageAlt={product.imageAlt}
-          badge={product.type}
-          title={product.name}
-          price={currencyFormatter.format(product.price)}
-          className="h-full"
-        />
-      </button>
-      {rank ? (
-        <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
-          {rank}
-        </Badge>
-      ) : null}
-    </div>
-  );
-}
-
-function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+function useHomeCarousel(
+  itemCount: number,
+  intervalMs = DEFAULT_CAROUSEL_INTERVAL_MS,
+) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -115,25 +52,213 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   }, [api]);
 
   useEffect(() => {
-    if (!api || slides.length < 2 || isPaused) return;
+    if (!api || itemCount < 2 || isPaused) return;
 
-    const timer = window.setInterval(() => api.scrollNext(), 5000);
+    const timer = window.setInterval(
+      () => api.scrollNext(),
+      intervalMs,
+    );
+
     return () => window.clearInterval(timer);
-  }, [api, current, isPaused, slides.length]);
+  }, [api, current, intervalMs, isPaused, itemCount]);
+
+  const scrollTo = useCallback(
+    (index: number) => api?.scrollTo(index),
+    [api],
+  );
+
+  return {
+    current,
+    isPaused,
+    scrollTo,
+    setApi,
+    setIsPaused,
+  };
+}
+
+function CarouselPagination({
+  ids,
+  current,
+  label,
+  itemLabel,
+  onSelect,
+  className,
+}: {
+  ids: string[];
+  current: number;
+  label: string;
+  itemLabel: string;
+  onSelect: (index: number) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex h-2 items-start justify-center gap-2.5",
+        className,
+      )}
+      aria-label={label}
+    >
+      {ids.map((id, index) => (
+        <button
+          key={id}
+          type="button"
+          aria-label={`${itemLabel} ${index + 1}`}
+          aria-current={current === index ? "true" : undefined}
+          onClick={() => onSelect(index)}
+          className={cn(
+            "h-1.5 cursor-pointer rounded-[3px] transition-[width,background-color,transform] hover:scale-y-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+            current === index
+              ? "w-8 bg-primary"
+              : "w-4 bg-muted-foreground",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
+type SectionHeaderProps = {
+  title: string;
+  actionLabel?: string;
+  description?: string;
+  showAction?: boolean;
+};
+
+function SectionHeader({
+  title,
+  actionLabel = "View All",
+  description,
+  showAction = true,
+}: SectionHeaderProps) {
+  return (
+    <div
+      className={cn(
+        "flex items-start justify-between gap-4",
+        description ? "h-11" : "h-7",
+      )}
+    >
+      <div className="min-w-0">
+        <h2 className="text-[28px] leading-8 font-semibold text-foreground">
+          {title}
+        </h2>
+        {description ? (
+          <p className="text-[10px] leading-3 text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
+      </div>
+      {showAction ? (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="h-7 shrink-0 cursor-pointer px-0 text-sm font-normal"
+        >
+          {actionLabel}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function HomeProductCard({
+  product,
+  rank,
+}: {
+  product: HomeProduct;
+  rank?: number;
+}) {
+  return (
+    <div className="relative h-[260px] min-w-0">
+      <button
+        type="button"
+        aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
+        className="block h-full w-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <ItemCard
+          imageSrc={product.image}
+          imageAlt={product.imageAlt}
+          badge={product.type}
+          title={product.name}
+          price={currencyFormatter.format(product.price)}
+          className="h-full w-full [&_img]:object-contain"
+        />
+      </button>
+      {rank ? (
+        <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
+          {rank}
+        </Badge>
+      ) : null}
+    </div>
+  );
+}
+
+function CompactFeature({
+  slide,
+  isPrimaryHeading,
+}: {
+  slide: HeroSlide;
+  isPrimaryHeading: boolean;
+}) {
+  return (
+    <article className="flex flex-col overflow-hidden bg-background lg:h-[360px] lg:flex-row">
+      <div className="order-2 flex min-h-[320px] flex-col justify-center gap-[14px] px-6 py-10 sm:px-12 lg:order-1 lg:h-full lg:min-h-0 lg:w-[500px] lg:shrink-0">
+        <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground">
+          {slide.eyebrow}
+        </p>
+        {isPrimaryHeading ? (
+          <h1 className="whitespace-pre-line text-4xl leading-[1.08] font-bold tracking-tight text-foreground">
+            {slide.title}
+          </h1>
+        ) : (
+          <h2 className="whitespace-pre-line text-4xl leading-[1.08] font-bold tracking-tight text-foreground">
+            {slide.title}
+          </h2>
+        )}
+        <p className="max-w-[404px] text-sm leading-[1.45] text-muted-foreground">
+          {slide.description}
+        </p>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            size="lg"
+            className="h-11 w-[148px] cursor-pointer rounded-lg"
+          >
+            Shop New Releases
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="h-11 w-[126px] cursor-pointer rounded-lg"
+          >
+            Explore Cards
+          </Button>
+        </div>
+      </div>
+      <div className="order-1 h-[260px] overflow-hidden lg:order-2 lg:h-full lg:min-w-0 lg:flex-1">
+        <img
+          src={slide.image}
+          alt={slide.imageAlt}
+          className="size-full object-cover"
+        />
+      </div>
+    </article>
+  );
+}
+
+function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+  const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
+    slides.length,
+    HERO_CAROUSEL_INTERVAL_MS,
+  );
 
   return (
-    <section
-      aria-label="โปรโมชั่นแนะนำ"
-      className="overflow-hidden bg-secondary"
-    >
+    <section aria-label="โปรโมชั่นแนะนำ" className="overflow-hidden bg-background">
       <Carousel
         setApi={setApi}
-        opts={{
-          align: "center",
-          loop: slides.length > 1,
-          slidesToScroll: 1,
-        }}
-        className="w-full"
+        opts={{ align: "start", loop: slides.length > 1, slidesToScroll: 1 }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onFocusCapture={() => setIsPaused(true)}
@@ -145,112 +270,43 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
       >
         <CarouselContent className="-ml-0 cursor-grab active:cursor-grabbing">
           {slides.map((slide, index) => (
-            <CarouselItem
-              key={slide.id}
-              className="basis-full pl-0"
-            >
-              <article
-                aria-label={slide.title}
-                className="flex h-[600px] w-full flex-col overflow-hidden bg-muted shadow-sm lg:h-[740px]"
-              >
-                <div
-                  className={cn(
-                    "flex h-[380px] shrink-0 items-center justify-center overflow-hidden lg:h-[520px]",
-                    slide.theme === "release" && "bg-primary-foreground",
-                    slide.theme === "collector" && "bg-foreground",
-                  )}
-                >
-                  <img
-                    src={slide.image}
-                    alt={slide.imageAlt}
-                    className={cn(
-                      "size-full",
-                      slide.theme === "campaign"
-                        ? "object-cover"
-                        : "object-contain",
-                    )}
-                  />
-                </div>
-                <div
-                  className={cn(
-                    "flex h-[220px] shrink-0 flex-col items-center justify-center gap-2 px-6 pb-8 text-center sm:px-12",
-                    slide.theme === "collector"
-                      ? "bg-foreground"
-                      : slide.theme === "release"
-                        ? "bg-primary-foreground"
-                        : "bg-background",
-                  )}
-                >
-                  <p className="text-xs font-semibold tracking-[0.08em] text-primary">
-                    {slide.eyebrow}
-                  </p>
-                  {index === 0 ? (
-                    <h1
-                      className={cn(
-                        "text-3xl leading-[0.95] font-bold sm:text-5xl",
-                        slide.theme === "collector"
-                          ? "text-background"
-                          : "text-foreground",
-                      )}
-                    >
-                      {slide.title}
-                    </h1>
-                  ) : (
-                    <h2
-                      className={cn(
-                        "text-3xl leading-[0.95] font-bold sm:text-5xl",
-                        slide.theme === "collector"
-                          ? "text-background"
-                          : "text-foreground",
-                      )}
-                    >
-                      {slide.title}
-                    </h2>
-                  )}
-                  <p
-                    className={cn(
-                      "text-sm leading-6",
-                      slide.theme === "collector"
-                        ? "text-background/70"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    {slide.description}
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    <Button type="button" size="lg">
-                      Shop New Releases
-                    </Button>
-                    <Button type="button" variant="outline" size="lg">
-                      Explore Cards
-                    </Button>
-                  </div>
-                </div>
-              </article>
+            <CarouselItem key={slide.id} className="basis-full pl-0">
+              <CompactFeature
+                slide={slide}
+                isPrimaryHeading={index === 0}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div
-          className="absolute right-0 bottom-2 left-0 flex h-2 items-start justify-center gap-2.5"
-          aria-label="เลือกสไลด์"
-        >
-          {slides.map((slide, index) => (
-            <button
-              key={slide.id}
-              type="button"
-              aria-label={`ไปยังสไลด์ ${index + 1}`}
-              aria-current={current === index ? "true" : undefined}
-              onClick={() => api?.scrollTo(index)}
-              className={cn(
-                "h-1.5 cursor-pointer rounded-[3px] transition-[width,background-color,transform] hover:scale-y-125",
-                current === index
-                  ? "w-8 bg-primary"
-                  : "w-4 bg-muted-foreground",
-              )}
-            />
+        <CarouselPagination
+          ids={slides.map((slide) => slide.id)}
+          current={current}
+          label="เลือกโปรโมชั่น"
+          itemLabel="ไปยังโปรโมชั่น"
+          onSelect={scrollTo}
+          className="my-2.5"
+        />
+      </Carousel>
+    </section>
+  );
+}
+
+function NewReleases({ products }: { products: HomeProduct[] }) {
+  return (
+    <section
+      className="bg-secondary px-4 py-7 sm:px-6 lg:h-[642px] lg:px-8"
+      aria-labelledby="new-releases-title"
+    >
+      <div className="mx-auto max-w-[1216px]">
+        <div id="new-releases-title">
+          <SectionHeader title="New Releases" />
+        </div>
+        <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
+          {products.map((product) => (
+            <HomeProductCard key={product.id} product={product} />
           ))}
         </div>
-      </Carousel>
+      </div>
     </section>
   );
 }
@@ -258,7 +314,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 function BrowseByGame({ games }: { games: GameCategory[] }) {
   return (
     <section
-      className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8 lg:pt-7 lg:pb-5"
+      className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8"
       aria-labelledby="browse-by-game-title"
     >
       <div className="mx-auto max-w-[1216px]">
@@ -319,11 +375,11 @@ function ProductRail({
           opts={{ align: "start", dragFree: true }}
           className="mt-[18px]"
         >
-          <CarouselContent>
+          <CarouselContent className="cursor-grab active:cursor-grabbing">
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className="basis-[min(241px,calc(100vw-2rem))]"
+                className="basis-[min(241.347px,calc(100vw-2rem))]"
               >
                 <HomeProductCard
                   product={product}
@@ -338,63 +394,31 @@ function ProductRail({
   );
 }
 
-function CategoryCarousel({ categories }: { categories: ProductCategory[] }) {
-  const [api, setApi] = useState<CarouselApi>();
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const pageCount = Math.ceil(categories.length / 3);
-
-  const scrollToPage = useCallback(
-    (page: number) => {
-      if (!api) return;
-
-      const lastSnapIndex = Math.max(api.scrollSnapList().length, 1) - 1;
-      api.scrollTo(Math.min(page * 3, lastSnapIndex));
-    },
-    [api],
+function FeaturedCategories({
+  categories,
+}: {
+  categories: ProductCategory[];
+}) {
+  const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
+    categories.length,
   );
-
-  useEffect(() => {
-    if (!api) return;
-
-    const updateCurrentPage = () => {
-      setCurrentPage(
-        Math.round(api.scrollProgress() * Math.max(pageCount - 1, 0)),
-      );
-    };
-
-    updateCurrentPage();
-    api.on("select", updateCurrentPage);
-    api.on("reInit", updateCurrentPage);
-
-    return () => {
-      api.off("select", updateCurrentPage);
-      api.off("reInit", updateCurrentPage);
-    };
-  }, [api, pageCount]);
-
-  useEffect(() => {
-    if (!api || pageCount < 2 || isPaused) return;
-
-    const timer = window.setInterval(() => {
-      scrollToPage(currentPage === pageCount - 1 ? 0 : currentPage + 1);
-    }, 7500);
-
-    return () => window.clearInterval(timer);
-  }, [api, currentPage, isPaused, pageCount, scrollToPage]);
 
   return (
     <section
-      className="bg-secondary px-4 py-7 sm:px-6 lg:h-[486px] lg:px-8"
-      aria-labelledby="category-title"
+      className="bg-secondary px-4 py-7 sm:px-6 lg:h-[473px] lg:px-8"
+      aria-labelledby="featured-title"
     >
       <div className="mx-auto max-w-[1216px]">
-        <div id="category-title">
-          <SectionHeader title="Find by category" showAction={false} />
+        <div id="featured-title">
+          <SectionHeader title="Featured" showAction={false} />
         </div>
         <Carousel
           setApi={setApi}
-          opts={{ align: "start", dragFree: true }}
+          opts={{
+            align: "start",
+            loop: categories.length > 3,
+            slidesToScroll: 1,
+          }}
           className="mt-[18px]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -409,22 +433,22 @@ function CategoryCarousel({ categories }: { categories: ProductCategory[] }) {
             {categories.map((category) => (
               <CarouselItem
                 key={category.id}
-                className="basis-[min(396px,calc(100vw-2rem))]"
+                className="basis-[min(396.8px,calc(100vw-2rem))]"
               >
                 <button
                   type="button"
-                  className="group h-[371px] w-full min-w-0 cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="group h-[371px] w-full min-w-0 cursor-pointer rounded-[20px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
-                  <Card className="h-full gap-0 rounded-xl border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
+                  <Card className="h-full gap-0 rounded-[20px] border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
                     <div className="h-[272px] w-full overflow-hidden bg-muted">
                       <img
                         src={category.image}
                         alt={category.imageAlt}
-                        className="size-full object-cover"
+                        className="size-full object-contain"
                       />
                     </div>
-                    <CardHeader className="flex flex-1 items-center justify-center px-4">
-                      <CardTitle className="text-center text-[28px] leading-[34px] font-semibold">
+                    <CardHeader className="flex flex-1 items-center justify-center px-7">
+                      <CardTitle className="text-center text-[28px] leading-[41px] font-medium">
                         {category.name}
                       </CardTitle>
                     </CardHeader>
@@ -434,24 +458,14 @@ function CategoryCarousel({ categories }: { categories: ProductCategory[] }) {
             ))}
           </CarouselContent>
         </Carousel>
-        <div
-          className="mt-3 flex justify-center gap-2"
-          aria-label="เลือกกลุ่มหมวดหมู่สินค้า"
-        >
-          {Array.from({ length: pageCount }, (_, page) => (
-            <button
-              key={page}
-              type="button"
-              aria-label={`ไปยังหมวดหมู่ชุดที่ ${page + 1}`}
-              aria-current={currentPage === page ? "true" : undefined}
-              onClick={() => scrollToPage(page)}
-              className={cn(
-                "h-1.5 w-4 cursor-pointer rounded-[3px] transition-colors hover:opacity-80",
-                currentPage === page ? "bg-primary" : "bg-muted-foreground",
-              )}
-            />
-          ))}
-        </div>
+        <CarouselPagination
+          ids={categories.map((category) => category.id)}
+          current={current}
+          label="เลือกหมวดหมู่สินค้า"
+          itemLabel="ไปยังหมวดหมู่"
+          onSelect={scrollTo}
+          className="mt-2.5"
+        />
       </div>
     </section>
   );
@@ -465,13 +479,11 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader title="More to Explore" />
+          <SectionHeader title="More to Explore" actionLabel="more" />
         </div>
-        <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225px)]">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)] lg:gap-x-[14.653px]">
           {products.map((product) => (
-            <div key={product.id} className="h-[260px] min-w-0">
-              <HomeProductCard product={product} />
-            </div>
+            <HomeProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -483,15 +495,16 @@ export function HomeContent({ data }: { data: HomeData }) {
   return (
     <div className="bg-secondary font-sans">
       <HeroCarousel slides={data.heroSlides} />
-      <CategoryCarousel categories={data.categories} />
+      <NewReleases products={data.newReleases} />
+      <BrowseByGame games={data.games} />
       <ProductRail title="Trending Now" products={data.trending} />
+      <FeaturedCategories categories={data.categories} />
       <ProductRail
         title="Pegasus Picks"
         description="Curated, verified, and shipped by Pegasus."
         actionLabel="Shop Pegasus"
         products={data.pegasusProducts}
       />
-      <BrowseByGame games={data.games} />
       <ExploreGrid products={data.exploreMore} />
     </div>
   );
