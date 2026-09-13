@@ -71,6 +71,9 @@ export type OrdersData = {
   };
   card: {
     selectLabel: string;
+    /** aria-label ของปุ่มกาง/พับการ์ด ต่อท้ายด้วยเลขออเดอร์ */
+    toggleLabel: string;
+    detailLabel: string;
     addressTitle: string;
     trackingPlaceholder: string;
     carrierPlaceholder: string;

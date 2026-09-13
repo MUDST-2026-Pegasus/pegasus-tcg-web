@@ -2,12 +2,14 @@ import { useState } from "react";
 
 import {
   ChevronDown,
+  ChevronRight,
   ImageIcon,
   MapIcon,
   SearchIcon,
   ShoppingBag,
   Truck,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,9 +57,10 @@ type OrderCardProps = {
 };
 
 /**
- * การ์ดคำสั่งซื้อหนึ่งใบ — กดส่วนหัวเพื่อกาง/พับรายละเอียด
+ * การ์ดคำสั่งซื้อหนึ่งใบ — กดส่วนหัวเพื่อกาง/พับรายละเอียด กดเลขออเดอร์เพื่อไปหน้ารายละเอียด
  *
- * ช่องติ๊กอยู่นอกปุ่มกางการ์ด เพื่อไม่ให้มีปุ่มซ้อนปุ่ม และติ๊กเลือกได้โดยการ์ดไม่กาง
+ * ปุ่มกาง/พับจริง ๆ คือลูกศรขวาสุด แต่ ::after ของมันขยายคลุมทั้งแถบหัวการ์ด
+ * ช่องติ๊กกับลิงก์เลขออเดอร์ยกขึ้น z-10 ให้กดได้โดยไม่ไปกางการ์ด และไม่มีปุ่มซ้อนลิงก์
  * ฟอร์มเลขพัสดุเก็บ state ไว้ที่ตัวการ์ด (ไม่ใช่ใน panel) พับการ์ดแล้วค่าที่กรอกไม่หาย
  */
 export function OrderCard({
@@ -71,6 +74,7 @@ export function OrderCard({
   const [carrier, setCarrier] = useState(labels.carriers[0]?.value ?? "");
 
   const isUrgent = Boolean(order.urgentLabel);
+  const detailPath = `/seller/orders/${order.id}`;
 
   return (
     <Card
@@ -82,47 +86,54 @@ export function OrderCard({
       )}
     >
       <Collapsible defaultOpen={defaultOpen}>
-        <div className="flex items-center gap-3.5 px-5 py-4">
+        <div className="relative flex items-center gap-3.5 px-5 py-4">
           <Checkbox
             checked={selected}
             onCheckedChange={onToggleSelect}
             aria-label={`${labels.selectLabel}: ${order.id}`}
+            className="z-10"
           />
 
-          <CollapsibleTrigger className="group flex min-w-0 flex-1 cursor-pointer items-center gap-3.5 rounded-md text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/30">
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-zinc-950">
-                  {order.id}
-                </span>
-                {order.urgentLabel ? (
-                  <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-xs text-[#b45309]">
-                    {order.urgentLabel}
-                  </Badge>
-                ) : null}
-              </span>
-              <span className="flex min-w-0 items-center gap-1.5 text-xs">
-                <span className="truncate text-gray-500">{order.buyer}</span>
-                <span className="shrink-0 text-gray-400">
-                  · {order.orderedAtLabel}
-                </span>
-              </span>
-            </span>
-
-            <span className="flex shrink-0 flex-col items-end gap-[3px]">
-              <span className="text-base font-bold text-zinc-950">
-                {order.total}
-              </span>
-              <span
-                className={cn("text-[10px]", PAYMENT_TEXT[order.payment.status])}
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Link
+                to={detailPath}
+                className="relative z-10 rounded-sm text-sm font-semibold text-zinc-950 outline-none hover:text-teal-600 hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
               >
-                {order.payment.label}
+                {order.id}
+              </Link>
+              {order.urgentLabel ? (
+                <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-xs text-[#b45309]">
+                  {order.urgentLabel}
+                </Badge>
+              ) : null}
+            </div>
+            <div className="flex min-w-0 items-center gap-1.5 text-xs">
+              <span className="truncate text-gray-500">{order.buyer}</span>
+              <span className="shrink-0 text-gray-400">
+                · {order.orderedAtLabel}
               </span>
-            </span>
+            </div>
+          </div>
 
+          <div className="flex shrink-0 flex-col items-end gap-[3px]">
+            <span className="text-base font-bold text-zinc-950">
+              {order.total}
+            </span>
+            <span
+              className={cn("text-[10px]", PAYMENT_TEXT[order.payment.status])}
+            >
+              {order.payment.label}
+            </span>
+          </div>
+
+          <CollapsibleTrigger
+            aria-label={`${labels.toggleLabel} ${order.id}`}
+            className="group flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md outline-none after:absolute after:inset-0 focus-visible:ring-3 focus-visible:ring-ring/30"
+          >
             <ChevronDown
               aria-hidden="true"
-              className="size-4 shrink-0 text-gray-500 transition-transform group-data-panel-open:rotate-180"
+              className="size-4 text-gray-500 transition-transform group-data-panel-open:rotate-180"
             />
           </CollapsibleTrigger>
         </div>
@@ -232,6 +243,14 @@ export function OrderCard({
                 </span>
               </div>
             ) : null}
+
+            <Link
+              to={detailPath}
+              className="inline-flex items-center gap-0.5 self-end rounded-sm text-xs font-medium text-teal-600 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
+            >
+              {labels.detailLabel}
+              <ChevronRight aria-hidden="true" className="size-3.5" />
+            </Link>
           </div>
         </CollapsibleContent>
       </Collapsible>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useSearchParams } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import type { OrderStatus } from "@/features/seller/shared/seller.types";
 
@@ -16,10 +18,16 @@ type OrdersContentProps = {
 };
 
 export function OrdersContent({ data }: OrdersContentProps) {
-  const [activeFilterId, setActiveFilterId] = useState<OrderStatus>(
-    data.filters[0]?.id ?? "awaiting_pack",
-  );
+  // ตัวกรองอยู่ใน URL (?status=) — breadcrumb หน้ารายละเอียดลิงก์กลับมาที่สถานะเดิมได้
+  // และกด back จากหน้ารายละเอียดแล้วยังอยู่แท็บเดิม
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const statusParam = searchParams.get("status");
+  const activeFilterId: OrderStatus =
+    data.filters.find((filter) => filter.id === statusParam)?.id ??
+    data.filters[0]?.id ??
+    "awaiting_pack";
 
   const visibleOrders = data.orders.filter(
     (order) => order.status === activeFilterId,
@@ -27,7 +35,7 @@ export function OrdersContent({ data }: OrdersContentProps) {
 
   /** ล้างการเลือกด้วยเมื่อสลับตัวกรอง กันสับสนว่ามีของที่เลือกไว้แต่มองไม่เห็น */
   function handleFilterChange(id: OrderStatus) {
-    setActiveFilterId(id);
+    setSearchParams({ status: id }, { replace: true });
     setSelectedIds([]);
   }
 

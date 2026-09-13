@@ -3,6 +3,7 @@ import type { RouteObject } from "react-router-dom";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
 import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
+import { SellerOrderDetailPage } from "@/features/seller/orders/SellerOrderDetailPage";
 import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
 import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
 import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
@@ -28,6 +29,7 @@ export const sellerRoutes: RouteObject = {
     { path: "shop", element: <SellerShopPage /> },
     { path: "products", element: <SellerProductsPage /> },
     { path: "orders", element: <SellerOrdersPage /> },
+    { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
     { path: "logout", element: <SellerLogoutPage /> },
   ],
