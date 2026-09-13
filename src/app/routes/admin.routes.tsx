@@ -6,7 +6,6 @@ import { AdminActivityLogPage } from "@/features/admin/pages/AdminActivityLogPag
 import { AdminCardAttributesPage } from "@/features/admin/pages/AdminCardAttributesPage";
 import { AdminCatalogPage } from "@/features/admin/pages/AdminCatalogPage";
 import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage";
-import { AdminListingReviewPage } from "@/features/admin/pages/AdminListingReviewPage";
 import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
 import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
 import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
@@ -31,7 +30,6 @@ export const adminRoutes: RouteObject = {
     { path: "catalog", element: <AdminCatalogPage /> },
     { path: "card-attributes", element: <AdminCardAttributesPage /> },
     { path: "sellers", element: <AdminSellerApprovalPage /> },
-    { path: "listings", element: <AdminListingReviewPage /> },
     { path: "users", element: <AdminUsersPage /> },
     { path: "orders", element: <AdminOrdersPage /> },
     { path: "commission", element: <AdminCommissionPage /> },
