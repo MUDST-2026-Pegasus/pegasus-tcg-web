@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
+import type { OrderStatus } from "@/features/seller/shared/seller.types";
+
 export type SalesChartBar = {
   /** ความสูงของแท่งกราฟ หน่วย px */
   height: number;
@@ -44,13 +46,6 @@ export type StatCardData = {
   value: string;
   footnote: string;
 };
-
-/** ย้ายขึ้น shared/seller.types.ts เมื่อหน้า "จัดการคำสั่งซื้อ" ต้องใช้ซ้ำ */
-export type OrderStatus =
-  | "awaiting_pack"
-  | "shipped"
-  | "awaiting_payment"
-  | "completed";
 
 export type OrderRow = {
   id: string;
