@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { PayoutContent } from "./components/PayoutContent";
+import { getPayoutData } from "./payout.api";
 
 export function SellerPayoutPage() {
-  return <PagePlaceholder title="ถอนเงิน" figmaNode="432:7880" />;
+  return <PayoutContent data={getPayoutData()} />;
 }

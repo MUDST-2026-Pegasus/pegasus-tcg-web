@@ -94,8 +94,8 @@ features/seller/
     shop.types.ts            type ของหน้านี้
     shop.api.ts              mock + getShopData()  ← จุดต่อ API จริงในอนาคต
     components/              component ที่ใช้เฉพาะหน้านี้
-  payout/
-    SellerPayoutPage.tsx     หน้าที่ยังเป็น placeholder — ไฟล์เดียวพอ
+  logout/
+    SellerLogoutPage.tsx     หน้าที่ยังเป็น placeholder — ไฟล์เดียวพอ
 ```
 
 กติกาของแบบนี้
