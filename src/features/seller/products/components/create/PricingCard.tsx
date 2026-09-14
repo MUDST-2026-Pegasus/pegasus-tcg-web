@@ -11,13 +11,16 @@ import {
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 
-import { roundMoney, toNumber } from "../../product-create.form";
 import type {
   ListingDraft,
   ProductCreateData,
 } from "../../product-create.types";
-
-import { AmountInput } from "./AmountInput";
+import {
+  formatSignedBaht,
+  roundMoney,
+  toNumber,
+} from "../../products.format";
+import { AmountInput } from "../AmountInput";
 
 /** ตั้งราคาห่างจากค่ากลางไม่เกินกี่ % ถึงนับว่า "ใกล้ค่ากลาง" — ตรงกับเคล็ดลับตั้งราคา */
 const NEAR_MEDIAN_PERCENT = 5;
@@ -25,11 +28,6 @@ const NEAR_MEDIAN_PERCENT = 5;
 const INPUT_CLASS = "h-8 rounded-lg border-input bg-background px-2.5 text-sm";
 const LABEL_CLASS = "text-xs font-medium text-gray-700";
 const HELPER_CLASS = "text-[10px] leading-normal text-gray-400";
-
-/** กำไรติดลบแสดงเป็น "−฿120" แทน "฿-120" */
-function formatSignedBaht(amount: number): string {
-  return amount < 0 ? `−${formatBaht(-amount)}` : formatBaht(amount);
-}
 
 type PricingCardProps = ProductCreateData["pricing"] & {
   draft: Pick<ListingDraft, "price" | "cost" | "quantity">;
@@ -162,7 +160,7 @@ export function PricingCard({
           <AmountInput
             id={quantityId}
             required
-            maxLength={5}
+            maxLength={6}
             allowDecimal={false}
             value={draft.quantity}
             onValueChange={(value) => onFieldChange("quantity", value)}

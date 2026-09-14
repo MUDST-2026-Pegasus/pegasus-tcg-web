@@ -58,6 +58,7 @@ const PRODUCTS_MOCK: ProductsData = {
     selectRowLabel: "เลือกสินค้า",
     editLabel: "แก้ไขสินค้า",
     moreLabel: "ตัวเลือกเพิ่มเติม",
+    restockLabel: "เติมสต็อก",
   },
 
   rows: [

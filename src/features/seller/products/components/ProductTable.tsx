@@ -1,9 +1,16 @@
-import { Ellipsis, ImageIcon, Pencil } from "lucide-react";
+import { Ellipsis, ImageIcon, PackagePlus, Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -184,14 +191,31 @@ export function ProductTable({
                     >
                       <Pencil className="size-6" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`${table.moreLabel}: ${row.name}`}
-                      className="rounded-md text-slate-500"
-                    >
-                      <Ellipsis className="size-6" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={`${table.moreLabel}: ${row.name}`}
+                            className="rounded-md text-slate-500"
+                          />
+                        }
+                      >
+                        <Ellipsis className="size-6" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-auto rounded-xl">
+                        <DropdownMenuItem
+                          render={
+                            <Link to={`/seller/products/${row.id}/restock`} />
+                          }
+                          className="rounded-lg text-xs"
+                        >
+                          <PackagePlus />
+                          {table.restockLabel}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </TableCell>
               </TableRow>

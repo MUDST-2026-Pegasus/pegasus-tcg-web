@@ -56,6 +56,8 @@ export type ProductsData = {
     selectRowLabel: string;
     editLabel: string;
     moreLabel: string;
+    /** เมนูในปุ่ม "⋯" ท้ายแถว */
+    restockLabel: string;
   };
   rows: ProductRow[];
   pagination: {

@@ -15,11 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import { getReadiness, toNumber } from "../../product-create.form";
+import { getReadiness } from "../../product-create.form";
 import type {
   ListingDraft,
   ProductCreateData,
 } from "../../product-create.types";
+import { toNumber } from "../../products.format";
 
 import { CatalogCardSummary } from "./CatalogCardSummary";
 import { ConditionCard } from "./ConditionCard";
