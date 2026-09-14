@@ -7,7 +7,6 @@ import {
   Package,
   Receipt,
   Settings2,
-  Shield,
   ShoppingCart,
   Store,
   Users,
@@ -57,7 +56,6 @@ export const adminNav: NavGroup[] = [
     label: "ความน่าเชื่อถือ",
     items: [
       { label: "อนุมัติผู้ขาย", to: "/admin/sellers", icon: BadgeCheck },
-      { label: "ตรวจสอบประกาศขาย", to: "/admin/listings", icon: Shield },
     ],
   },
   {
