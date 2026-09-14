@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { formatBaht } from "@/features/seller/shared/seller.format";
@@ -8,6 +9,7 @@ import type { RestockCalculation } from "../../restock.calc";
 import type { RestockData } from "../../restock.types";
 
 type ProfitWarningCardProps = RestockData["profitWarning"] & {
+  productId: string;
   averageCost: number;
   result: RestockCalculation;
 };
@@ -16,6 +18,7 @@ type ProfitWarningCardProps = RestockData["profitWarning"] & {
 export function ProfitWarningCard({
   title,
   adjustPriceLabel,
+  productId,
   averageCost,
   result,
 }: ProfitWarningCardProps) {
@@ -34,7 +37,14 @@ export function ProfitWarningCard({
         {formatBaht(result.suggestedPrice)}
       </p>
 
-      <Button variant="outline" size="sm" className="w-full rounded-md px-2.5">
+      {/* ไปหน้าแก้ไขสินค้าแล้วโฟกัสช่องราคา — ค่าที่กรอกในหน้าเติมสต็อกยังไม่ถูกบันทึก */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full rounded-md px-2.5"
+        render={<Link to={`/seller/products/${productId}/edit?focus=price`} />}
+        nativeButton={false}
+      >
         {adjustPriceLabel}
       </Button>
     </div>

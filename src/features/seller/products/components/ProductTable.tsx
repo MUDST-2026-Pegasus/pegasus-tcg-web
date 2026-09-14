@@ -197,6 +197,8 @@ export function ProductTable({
                       size="icon-sm"
                       aria-label={`${table.editLabel}: ${row.name}`}
                       className="rounded-md text-slate-500"
+                      render={<Link to={`/seller/products/${row.id}/edit`} />}
+                      nativeButton={false}
                     >
                       <Pencil className="size-6" />
                     </Button>

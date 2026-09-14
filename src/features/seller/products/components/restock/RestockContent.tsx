@@ -123,6 +123,7 @@ export function RestockContent({ data }: RestockContentProps) {
           {showProfitWarning ? (
             <ProfitWarningCard
               {...data.profitWarning}
+              productId={data.productId}
               averageCost={data.product.averageCost}
               result={result}
             />

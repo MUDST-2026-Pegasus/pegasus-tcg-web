@@ -6,7 +6,13 @@ import { Card } from "@/components/ui/card";
 
 import type { ProductCreateData } from "../../product-create.types";
 
-type CatalogCardSummaryProps = ProductCreateData["catalogCard"];
+type CatalogCardSummaryProps = Omit<
+  ProductCreateData["catalogCard"],
+  "changeLabel"
+> & {
+  /** ไม่ส่งมา = ซ่อนปุ่มเปลี่ยนการ์ด (หน้าแก้ไข — เปลี่ยนการ์ดต้องลงประกาศใหม่) */
+  changeLabel?: string;
+};
 
 export function CatalogCardSummary({
   title,
@@ -18,9 +24,11 @@ export function CatalogCardSummary({
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
-        <Button variant="outline" size="sm" className="rounded-md px-2.5">
-          {changeLabel}
-        </Button>
+        {changeLabel ? (
+          <Button variant="outline" size="sm" className="rounded-md px-2.5">
+            {changeLabel}
+          </Button>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-3.5 rounded-[10px] bg-emerald-50 p-3.5">

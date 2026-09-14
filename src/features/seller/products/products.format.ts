@@ -4,6 +4,14 @@ import { formatBaht } from "@/features/seller/shared/seller.format";
  * ตัวช่วยเรื่องตัวเลขที่ใช้ร่วมกันในหน้าลงขายสินค้าและหน้าเติมสต็อก
  */
 
+/**
+ * "฿1,290" → 1290 — ข้อมูลจำลองหน้ารายการเก็บราคาเป็นข้อความ
+ * ใช้เฉพาะใน mock ของหน้าย่อย วันที่ต่อ API จะได้ตัวเลขจาก backend ตรง ๆ
+ */
+export function parseBaht(value: string): number {
+  return Number(value.replace(/[^\d.]/g, "")) || 0;
+}
+
 /** "1290" / "1290.5" → ตัวเลข · ช่องว่างหรือพิมพ์ไม่ครบ (".") → null */
 export function toNumber(value: string): number | null {
   if (value === "" || value === ".") return null;

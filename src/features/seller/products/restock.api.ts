@@ -1,4 +1,5 @@
 import { getProductsData } from "./products.api";
+import { parseBaht } from "./products.format";
 import { toIsoDate } from "./restock.calc";
 import type { RestockData, RestockLot } from "./restock.types";
 
@@ -62,11 +63,6 @@ const SOURCE_OPTIONS = [
   { value: "event", label: "งาน TCG Expo" },
   { value: "other", label: "อื่น ๆ" },
 ];
-
-/** ข้อมูลจำลองหน้ารายการเก็บราคาเป็นข้อความ ("฿1,290") — แปลงกลับเป็นตัวเลขเฉพาะใน mock */
-function parseBaht(value: string): number {
-  return Number(value.replace(/[^\d.]/g, "")) || 0;
-}
 
 /**
  * จุดต่อข้อมูลของหน้าเติมสต็อก — ตอนนี้ประกอบจากข้อมูลจำลองของหน้าจัดการสินค้า
