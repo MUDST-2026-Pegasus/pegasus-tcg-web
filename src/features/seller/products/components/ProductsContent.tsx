@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 
 import type { ProductFilterId, ProductsData } from "../products.types";
@@ -59,7 +61,12 @@ export function ProductsContent({ data }: ProductsContentProps) {
           <Button variant="outline" size="sm" className="rounded-md px-2.5">
             {data.actions.importLabel}
           </Button>
-          <Button size="sm" className="rounded-md px-2.5">
+          <Button
+            size="sm"
+            className="rounded-md px-2.5"
+            render={<Link to="/seller/products/new" />}
+            nativeButton={false}
+          >
             {data.actions.createLabel}
           </Button>
         </div>

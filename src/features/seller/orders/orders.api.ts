@@ -1,6 +1,7 @@
+import { formatBaht } from "@/features/seller/shared/seller.format";
 import type { OrderStatus } from "@/features/seller/shared/seller.types";
 
-import { formatBaht, ORDER_STATUS_LABELS } from "./orders.format";
+import { ORDER_STATUS_LABELS } from "./orders.format";
 import {
   CARRIER_OPTIONS,
   ORDER_SEEDS,

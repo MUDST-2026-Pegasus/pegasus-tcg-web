@@ -6,6 +6,7 @@ import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
 import { SellerOrderDetailPage } from "@/features/seller/orders/SellerOrderDetailPage";
 import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
 import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
+import { SellerProductCreatePage } from "@/features/seller/products/SellerProductCreatePage";
 import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
 import { SellerLayout } from "@/features/seller/shared/SellerLayout";
 import { getSellerProfile } from "@/features/seller/shared/seller.api";
@@ -28,6 +29,7 @@ export const sellerRoutes: RouteObject = {
     { index: true, element: <SellerDashboardPage /> },
     { path: "shop", element: <SellerShopPage /> },
     { path: "products", element: <SellerProductsPage /> },
+    { path: "products/new", element: <SellerProductCreatePage /> },
     { path: "orders", element: <SellerOrdersPage /> },
     { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
