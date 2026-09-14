@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 
 import type { PayoutData } from "../payout.types";
@@ -5,12 +7,20 @@ import type { PayoutData } from "../payout.types";
 import { BalanceCard } from "./BalanceCard";
 import { BankAccountCard } from "./BankAccountCard";
 import { WithdrawalHistoryCard } from "./WithdrawalHistoryCard";
+import { WithdrawConfirmDialog } from "./WithdrawConfirmDialog";
 
 type PayoutContentProps = {
   data: PayoutData;
 };
 
 export function PayoutContent({ data }: PayoutContentProps) {
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+
+  /** ยังไม่มี endpoint ถอนเงิน — วันที่ต่อ API ให้ยิงคำขอถอนพร้อม OTP ตรงนี้ก่อนปิด dialog */
+  function handleConfirmWithdraw() {
+    setIsWithdrawOpen(false);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -27,11 +37,22 @@ export function PayoutContent({ data }: PayoutContentProps) {
       </div>
 
       <div className="flex flex-col items-start gap-4 lg:flex-row">
-        <BalanceCard {...data.balance} />
+        <BalanceCard
+          {...data.balance}
+          onWithdraw={() => setIsWithdrawOpen(true)}
+        />
         <BankAccountCard {...data.bankAccount} />
       </div>
 
       <WithdrawalHistoryCard {...data.history} />
+
+      <WithdrawConfirmDialog
+        {...data.withdraw}
+        bankAccount={data.bankAccount}
+        open={isWithdrawOpen}
+        onOpenChange={setIsWithdrawOpen}
+        onConfirm={handleConfirmWithdraw}
+      />
     </div>
   );
 }

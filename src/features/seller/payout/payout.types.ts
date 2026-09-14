@@ -45,6 +45,31 @@ export type PayoutData = {
     changeLabel: string;
     changeNote: string;
   };
+  /** dialog "ยืนยันการถอนเงิน" ที่เปิดจากปุ่มถอนเงินในการ์ดยอดเงิน */
+  withdraw: {
+    title: string;
+    description: string;
+    amountLabel: string;
+    amount: string;
+    feeLabel: string;
+    /** รายการหัก ใส่เครื่องหมายลบมาแล้ว เช่น "− ฿0.00" */
+    fee: string;
+    netLabel: string;
+    net: string;
+    otp: {
+      /** เช่น "รหัส OTP ที่ส่งไปยัง 08x-xxx-4821" — component เติม " *" ต่อท้ายเอง */
+      label: string;
+      length: number;
+      /** ต้องรอกี่วินาทีถึงจะกดขอรหัสใหม่ได้ */
+      resendAfterSeconds: number;
+      /** ข้อความหน้าตัวนับถอยหลัง เช่น "ส่งรหัสใหม่ได้ใน" */
+      resendCountdownLabel: string;
+      resendLabel: string;
+    };
+    limitNote: string;
+    cancelLabel: string;
+    confirmLabel: string;
+  };
   history: {
     title: string;
     subtitle: string;

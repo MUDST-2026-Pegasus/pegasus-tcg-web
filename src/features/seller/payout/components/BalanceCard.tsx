@@ -6,7 +6,9 @@ import { Separator } from "@/components/ui/separator";
 
 import type { PayoutData } from "../payout.types";
 
-type BalanceCardProps = PayoutData["balance"];
+type BalanceCardProps = PayoutData["balance"] & {
+  onWithdraw: () => void;
+};
 
 export function BalanceCard({
   label,
@@ -14,6 +16,7 @@ export function BalanceCard({
   withdrawLabel,
   stats,
   scheduleNote,
+  onWithdraw,
 }: BalanceCardProps) {
   return (
     <Card className="w-full min-w-0 flex-1 gap-5 rounded-2xl border-0 bg-zinc-950 p-6 text-white shadow-none ring-0">
@@ -23,7 +26,10 @@ export function BalanceCard({
           <p className="text-4xl font-bold text-white">{amount}</p>
         </div>
 
-        <Button className="h-auto rounded-lg bg-teal-600 px-5 py-3 text-xs font-semibold text-white hover:bg-teal-700">
+        <Button
+          onClick={onWithdraw}
+          className="h-auto rounded-lg bg-teal-600 px-5 py-3 text-xs font-semibold text-white hover:bg-teal-700"
+        >
           {withdrawLabel}
         </Button>
       </div>

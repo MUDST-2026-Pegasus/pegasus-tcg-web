@@ -1,5 +1,8 @@
 import type { PayoutData } from "./payout.types";
 
+/** ยอดพร้อมถอน — ใช้ทั้งในการ์ดยอดเงินและใน dialog ยืนยันการถอน */
+const AVAILABLE_BALANCE = "฿3,420.00";
+
 /**
  * ข้อมูลตัวอย่างของหน้า "ถอนเงิน" — ลอกข้อความและตัวเลขจาก
  * Figma node 432:7880 เพื่อให้เทียบหน้าจอกับดีไซน์ได้ตรง ๆ
@@ -14,7 +17,7 @@ const PAYOUT_MOCK: PayoutData = {
 
   balance: {
     label: "ยอดเงินพร้อมถอน",
-    amount: "฿3,420.00",
+    amount: AVAILABLE_BALANCE,
     withdrawLabel: "ถอนเงินตอนนี้",
     stats: [
       { id: "processing", label: "กำลังดำเนินการ", value: "฿0.00" },
@@ -35,6 +38,28 @@ const PAYOUT_MOCK: PayoutData = {
     changeLabel: "เปลี่ยนบัญชีธนาคาร",
     changeNote:
       "การเปลี่ยนบัญชีต้องยืนยันตัวตนใหม่ และจะระงับการถอนเงิน 3 วันทำการ",
+  },
+
+  withdraw: {
+    title: "ยืนยันการถอนเงิน",
+    description:
+      "เงินจะเข้าบัญชีภายใน 1–2 วันทำการ ตรวจสอบเลขบัญชีให้ถูกต้องก่อนยืนยัน",
+    amountLabel: "ยอดที่ถอน",
+    amount: AVAILABLE_BALANCE,
+    feeLabel: "ค่าธรรมเนียมการโอน",
+    fee: "− ฿0.00",
+    netLabel: "ยอดที่จะได้รับ",
+    net: AVAILABLE_BALANCE,
+    otp: {
+      label: "รหัส OTP ที่ส่งไปยัง 08x-xxx-4821",
+      length: 6,
+      resendAfterSeconds: 180,
+      resendCountdownLabel: "ส่งรหัสใหม่ได้ใน",
+      resendLabel: "ส่งรหัสใหม่",
+    },
+    limitNote: "ทำรายการได้ 3 ครั้ง/สัปดาห์",
+    cancelLabel: "ยกเลิก",
+    confirmLabel: "ยืนยันถอนเงิน",
   },
 
   history: {
