@@ -1,4 +1,10 @@
-import { Ellipsis, ImageIcon, PackagePlus, Pencil } from "lucide-react";
+import {
+  Ellipsis,
+  ImageIcon,
+  PackagePlus,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -45,6 +52,7 @@ type ProductTableProps = {
   selectedIds: string[];
   onToggleRow: (id: string) => void;
   onToggleAll: () => void;
+  onDeleteRow: (row: ProductRow) => void;
 };
 
 /**
@@ -63,6 +71,7 @@ export function ProductTable({
   selectedIds,
   onToggleRow,
   onToggleAll,
+  onDeleteRow,
 }: ProductTableProps) {
   const allSelected = rows.length > 0 && selectedIds.length === rows.length;
 
@@ -213,6 +222,15 @@ export function ProductTable({
                         >
                           <PackagePlus />
                           {table.restockLabel}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => onDeleteRow(row)}
+                          className="rounded-lg text-xs"
+                        >
+                          <Trash2 />
+                          {table.deleteLabel}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

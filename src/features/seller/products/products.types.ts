@@ -58,6 +58,18 @@ export type ProductsData = {
     moreLabel: string;
     /** เมนูในปุ่ม "⋯" ท้ายแถว */
     restockLabel: string;
+    deleteLabel: string;
+  };
+  /** dialog ยืนยันก่อนลบสินค้า เปิดจากเมนู "⋯" ท้ายแถว */
+  deleteDialog: {
+    title: string;
+    description: string;
+    /** บรรทัดรองใต้ชื่อสินค้า: "เหลือ 12 ใบ · ขายไปแล้ว 48 ใบ" */
+    remainingLabel: string;
+    soldLabel: string;
+    warning: string;
+    unpublishLabel: string;
+    confirmLabel: string;
   };
   rows: ProductRow[];
   pagination: {
