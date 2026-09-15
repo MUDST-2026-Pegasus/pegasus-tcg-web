@@ -38,6 +38,7 @@ export type TrendingProduct = HomeProduct & {
 export type HomeData = {
   heroSlides: HeroSlide[];
   games: GameCategory[];
+  newReleases: HomeProduct[];
   trending: TrendingProduct[];
   categories: ProductCategory[];
   pegasusProducts: HomeProduct[];
