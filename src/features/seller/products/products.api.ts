@@ -58,6 +58,19 @@ const PRODUCTS_MOCK: ProductsData = {
     selectRowLabel: "เลือกสินค้า",
     editLabel: "แก้ไขสินค้า",
     moreLabel: "ตัวเลือกเพิ่มเติม",
+    restockLabel: "เติมสต็อก",
+    deleteLabel: "ลบสินค้า",
+  },
+
+  deleteDialog: {
+    title: "ลบสินค้านี้ออกจากร้าน?",
+    description: "การลบไม่สามารถย้อนกลับได้ ผู้ซื้อจะไม่เห็นประกาศนี้อีก",
+    remainingLabel: "เหลือ",
+    soldLabel: "ขายไปแล้ว",
+    warning:
+      'ประวัติการขายและกำไรของสินค้านี้จะยังอยู่ในรายงาน แต่จะลบออกจากหน้าร้านทันที แนะนำให้ "ปิดการขาย" แทนถ้าจะกลับมาขายอีก',
+    unpublishLabel: "ปิดการขายแทน",
+    confirmLabel: "ลบถาวร",
   },
 
   rows: [
