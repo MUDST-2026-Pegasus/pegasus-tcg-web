@@ -50,9 +50,13 @@ export function BankBookUpload({
   }, [previewUrl]);
 
   const selectFile = (next: File | undefined) => {
-    setPreviewUrl(
-      next?.type.startsWith("image/") ? URL.createObjectURL(next) : null,
-    );
+    if (next?.type.startsWith("image/")) {
+      const url = URL.createObjectURL(next);
+      // blob: URLs are safe — reject anything else defensively
+      setPreviewUrl(url.startsWith("blob:") ? url : null);
+    } else {
+      setPreviewUrl(null);
+    }
     onFileChange(next);
   };
 
