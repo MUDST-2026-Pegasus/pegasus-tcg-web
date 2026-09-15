@@ -16,6 +16,7 @@ import { HomePage } from "@/features/home/pages/HomePage";
 import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
 import { PaymentPage } from "@/features/payment/pages/PaymentPage";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
+import { SellerApplicationPage } from "@/features/seller/application/SellerApplicationPage";
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
@@ -43,16 +44,13 @@ export const publicRoutes: RouteObject = {
     { path: "about", element: <AboutPage /> },
 
     {
-      path: "become-a-seller",
-      element: <PagePlaceholder title="สมัครเป็นผู้ขาย" />,
-    },
-
-    {
       element: <RequireAuth />,
       children: [
         { path: "account/profile", element: <ProfilePage /> },
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },
+        // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
+        { path: "become-a-seller", element: <SellerApplicationPage /> },
       ],
     },
 
