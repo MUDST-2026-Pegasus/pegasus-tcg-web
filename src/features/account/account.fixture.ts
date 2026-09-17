@@ -69,21 +69,3 @@ export const ORDER_HISTORY_FIXTURE = {
     status: "completed" | "shipping" | "payment";
   }>;
 };
-
-export const ADDRESS_BOOK_FIXTURE = {
-  user: ACCOUNT_USER,
-  addresses: [
-    {
-      name: "Elena Rostova",
-      phone: "+1 (555) 019-2837",
-      lines: ["1440 Corporate Way, Suite 400", "San Francisco, CA 94107", "United States"],
-      isDefault: true,
-    },
-    {
-      name: "Elena Rostova",
-      phone: "+1 (555) 837-1102",
-      lines: ["829 Logistics Blvd, Warehouse B", "Newark, NJ 07114", "United States"],
-      isDefault: false,
-    },
-  ],
-};
