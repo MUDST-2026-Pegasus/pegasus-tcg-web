@@ -26,7 +26,8 @@ src/
   components/
     ui/           shadcn — CLI เขียนทับได้ ห้ามแก้เอง
     layout/       โครงหน้า: PublicLayout, DashboardLayout, AuthLayout, Navbar, Footer, AppSidebar
-    common/       component กลางที่ใช้ข้าม feature เช่น PagePlaceholder
+    common/       component กลางที่ใช้ข้าม feature — import จาก "@/components/common"
+                  QueryBoundary / LoadingState / ErrorState / EmptyState, PagePlaceholder, RouteError
   features/       งานหลักของแต่ละคนอยู่ที่นี่
     <feature>/
       pages/        หน้าที่ feature นี้เป็นเจ้าของ
@@ -50,7 +51,7 @@ src/
 
 ```ts
 import { Button } from "@/components/ui/button";
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { QueryBoundary } from "@/components/common";   // common มี barrel ใช้ชื่อโฟลเดอร์ได้เลย
 import heroImage from "@/assets/auth/register-header.jpg";
 ```
 
@@ -140,7 +141,7 @@ await api.post<Order>("/orders", { items });
 
 ### วางไฟล์ยังไง
 
-หนึ่ง feature (หรือหนึ่งโมดูลหน้า) มีสองไฟล์ แยกหน้าที่กันชัด ๆ
+หนึ่ง feature (หรือหนึ่งโมดูลหน้า) มีสามไฟล์ แยกหน้าที่กันชัด ๆ
 
 ```
 features/catalog/
@@ -180,14 +181,35 @@ export function useProduct(id: string) {
 }
 ```
 
-ในหน้าเพจ
+ในหน้าเพจ ไม่ต้องเขียน loading / error / empty เองทุกหน้า — ครอบด้วย `QueryBoundary`
 
 ```tsx
-const { data: product, isPending, isError, error } = useProduct(productId);
+import { EmptyState, QueryBoundary } from "@/components/common";
 
-if (isPending) return <Skeleton className="h-96 w-full" />;
-if (isError) return <p>{getErrorMessage(error, "โหลดสินค้าไม่สำเร็จ")}</p>;
+<QueryBoundary
+  query={products}                        // ผลจาก useQuery ส่งเข้าไปทั้งก้อน
+  loading={<ProductListSkeleton />}        // skeleton ของหน้านั้นเอง
+  isEmpty={(items) => items.length === 0}
+  empty={<EmptyState title="ยังไม่มีสินค้า" />}
+>
+  {(items) => items.map((item) => <ProductCard key={item.id} product={item} />)}
+</QueryBoundary>
 ```
+
+`@/components/common` มีให้เลือกสามตัว ใช้เดี่ยว ๆ ก็ได้เมื่อ layout ไม่เข้ากับ boundary
+
+| component | ใช้เมื่อ |
+| --- | --- |
+| `LoadingState` | กำลังโหลด และหน้านั้นยังไม่มี skeleton เป็นของตัวเอง |
+| `ErrorState` | โหลดไม่สำเร็จทั้งบล็อก รับ `error` แล้วดึงข้อความจาก backend ให้เอง มีปุ่มลองใหม่ |
+| `EmptyState` | โหลดสำเร็จแต่ไม่มีข้อมูล (คนละเรื่องกับ `PagePlaceholder` ที่แปลว่ายังไม่ได้ทำหน้านี้) |
+
+ข้อความ default เป็นภาษาไทย หน้าไหนเป็นภาษาอังกฤษให้ส่ง `errorTitle` / `errorMessage` /
+`errorRetryLabel` ทับ
+
+สอง gotcha ของ `QueryBoundary`
+- query ที่ปิดด้วย `enabled: false` ค้างที่ `isPending` ตลอด เช็คเงื่อนไขนั้นก่อนแล้วค่อย render
+- refetch พังทั้งที่มีข้อมูลเก่าอยู่ จะโชว์ข้อมูลเก่าต่อ ไม่เด้ง error ทับของที่ใช้ได้
 
 ส่วนที่เขียนข้อมูลใช้ `useMutation` แล้ว `invalidateQueries` คีย์ที่เกี่ยวข้อง
 
@@ -200,7 +222,56 @@ const addToCart = useMutation({
 ```
 
 > หน้าไหนยังไม่มี endpoint จริง ให้คงไว้เป็น mock ใน `*.api.ts` ตามเดิม
-> วันที่ backend เสร็จค่อยเปลี่ยนข้างในฟังก์ชันเป็น `api.get(...)` — component ไม่ต้องแก้
+> แต่ **เขียนเป็น `async` คืน `Promise` ตั้งแต่แรก** วันที่ backend เสร็จจะได้แก้แค่ข้างในฟังก์ชัน
+> ถ้าเขียนเป็นฟังก์ชัน sync ที่ `return MOCK` ตรง ๆ วันเปลี่ยนต้องไล่แก้ทุก component ที่เรียก
+
+### แปลง mock → API
+
+หน้าตัวอย่างที่ทำครบตามมาตรฐานนี้แล้วคือ **`features/account` (Address Book)** เปิดดูคู่กันได้
+ทำตามลำดับนี้ ห้ามข้าม — แต่ละข้อจบแล้ว `pnpm build` ต้องผ่านก่อนไปข้อถัดไป
+
+**1. ลอก type จาก DTO** สร้าง `<x>.types.ts` แล้วลอกจาก `model/*.java` (สิ่งที่ backend ส่งกลับ)
+กับ `dto/*Request.java` (สิ่งที่เราส่งไป) ทีละฟิลด์ ชื่อต้องตรงกัน
+ห้ามใช้ type ที่เดาจาก fixture เพราะ fixture เขียนไว้ให้ UI สวย ไม่ได้ตรงกับของจริง
+
+```ts
+// ลอกมาจาก `model/Address.java` ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
+export type Address = {
+  id: number;
+  label: string | null;      // ฝั่ง Java เป็น String ที่ null ได้ → `| null` ไม่ใช่ `?`
+  recipientName: string;
+};
+```
+
+จุดที่พลาดกันบ่อย: `PUT` ส่วนใหญ่ของ backend นี้ **เขียนทับทั้งก้อน ไม่ใช่ patch** ฟิลด์ไหน
+ไม่ส่งจะโดนล้างเป็นค่าว่าง ก่อนเขียน `update` ให้เปิด `*Repository.java` ดูก่อนว่าเขียนทับหมดไหม
+
+**2. สร้าง `<x>.api.ts`** ฟังก์ชันเปล่า ๆ หนึ่งตัวต่อหนึ่ง endpoint ห้ามมี React ห้ามมี state
+ห้าม import ไอคอนหรือ component (ถ้า mock เดิมมี ให้ย้ายไปไว้ฝั่ง component)
+
+**3. สร้าง `<x>.queries.ts`** query key + hook — component เรียกไฟล์นี้เท่านั้น ไม่เรียก `*.api.ts` ตรง ๆ
+ทุก mutation ต้อง `invalidateQueries` คีย์ที่กระทบ ไม่งั้นหน้าไม่อัปเดตจนกว่าจะ reload
+
+**4. เปลี่ยนหน้าเพจ** เอา `import ... from "*.fixture"` ออก เปลี่ยนมาอ่านจาก hook
+แล้วครอบด้วย `QueryBoundary`
+
+**5. skeleton** หน้าไหนมี skeleton อยู่แล้วให้ส่งตัวเดิมเข้า `loading` ไม่ต้องเขียนใหม่
+หน้าไหนยังไม่มี ให้ทำตัวที่วางตรงกับ layout จริง (ดู `AddressBookSkeleton.tsx`)
+อย่ารีบใช้ `LoadingState` ถ้าหน้ามีโครงชัดเจนอยู่แล้ว เพราะภาพจะกระโดดตอนข้อมูลมาถึง
+
+**6. ฟอร์ม** schema zod ใน `<x>.schema.ts` ตั้งกติกาให้ตรงกับ Bean Validation ของ DTO
+แล้วใช้ `applyApiErrors` รับ violations ที่หลุดมาจาก backend — ชื่อฟิลด์ฝั่ง Spring
+ตรงกับชื่อ field ใน DTO อยู่แล้ว ถ้าตั้งชื่อช่องในฟอร์มให้ตรงกัน ก็ไม่ต้อง map เอง
+
+**7. ลบ fixture** ลบ constant ที่ไม่มีใครใช้แล้วออกจาก `*.fixture.ts` ไม่ใช่แค่เลิก import
+เช็คด้วย `grep -rn "ชื่อ_FIXTURE" src` ต้องไม่เหลือ ถ้าไฟล์ fixture ว่างทั้งไฟล์ให้ลบไฟล์ทิ้ง
+
+**เสร็จแล้วเช็ค**
+
+- [ ] ไม่มี `*.fixture` เหลือใน import ของหน้านั้น
+- [ ] มีครบ loading / error / empty
+- [ ] เพิ่ม–แก้–ลบ แล้วรายการอัปเดตเองโดยไม่ต้อง reload
+- [ ] `pnpm build` กับ `pnpm lint` ผ่าน
 
 ### error
 
@@ -318,3 +389,5 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 - **ฟอร์มใช้ `Field` + `FieldGroup`** จาก `@/components/ui/field` ไม่ใช้ `div` + `space-y-*`
 - **ไอคอนใช้ `lucide-react`** ห้ามก๊อป SVG จาก Figma มาแปะ
 - **ระยะห่างใช้ `gap-*`** ไม่ใช้ `space-x-*` / `space-y-*`
+- **loading / error / empty ใช้ของกลาง** จาก `@/components/common` อย่าเขียน spinner หรือ
+  ข้อความ error ของตัวเองรายหน้า — ดูหัวข้อ "แปลง mock → API"
