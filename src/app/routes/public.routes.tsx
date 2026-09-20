@@ -13,6 +13,8 @@ import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
 import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
 import { SearchResultsPage } from "@/features/catalog/pages/SearchResultsPage";
 import { HomePage } from "@/features/home/pages/HomePage";
+import { TermsOfServicePage } from "@/features/legal/pages/TermsOfServicePage";
+import { PrivacyPolicyPage } from "@/features/legal/pages/PrivacyPolicyPage";
 import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
 import { PaymentPage } from "@/features/payment/pages/PaymentPage";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
@@ -42,6 +44,8 @@ export const publicRoutes: RouteObject = {
     { path: "payment/success", element: <PaymentSuccessPage /> },
 
     { path: "about", element: <AboutPage /> },
+    { path: "terms-of-service", element: <TermsOfServicePage /> },
+    { path: "privacy-policy", element: <PrivacyPolicyPage /> },
 
     {
       element: <RequireAuth />,
