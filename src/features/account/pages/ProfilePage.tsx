@@ -6,6 +6,7 @@ import {
   Package,
   Pencil,
   Plus,
+  RotateCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -24,6 +25,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth.queries";
 import type { AuthUser } from "@/features/auth/auth.types";
+import { getErrorMessage } from "@/lib/api";
 
 import { initialsOf, toSidebarUser } from "../account.format";
 import { formatAddressLines } from "../address.format";
@@ -100,16 +102,22 @@ function OrderStatus() {
   );
 }
 
+type PrimaryAddressCardProps = {
+  addresses?: Address[];
+  isLoading: boolean;
+  isError?: boolean;
+  error?: unknown;
+  onRetry?: () => void;
+};
+
 function PrimaryAddressCard({
   addresses,
   isLoading,
-}: {
-  addresses?: Address[];
-  isLoading: boolean;
-}) {
-  const primary =
-    addresses?.find((a) => a.defaultShipping) ?? addresses?.[0] ?? null;
-
+  isError,
+  error,
+  onRetry,
+}: PrimaryAddressCardProps) {
+  // 1. Loading state
   if (isLoading) {
     return (
       <Card className="rounded-xl shadow-none" aria-busy="true">
@@ -128,6 +136,42 @@ function PrimaryAddressCard({
     );
   }
 
+  // 2. Error state
+  if (isError) {
+    return (
+      <Card className="rounded-xl shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+            <MapPin className="text-primary" /> Primary Address
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2 text-muted-foreground">
+          <p className="text-sm font-medium text-destructive">
+            Could not load your address
+          </p>
+          <p className="text-sm">
+            {getErrorMessage(error, "Please check your connection and try again.")}
+          </p>
+        </CardContent>
+        {onRetry && (
+          <CardFooter>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onRetry}
+            >
+              <RotateCw data-icon="inline-start" /> Try again
+            </Button>
+          </CardFooter>
+        )}
+      </Card>
+    );
+  }
+
+  const primary =
+    addresses?.find((a) => a.defaultShipping) ?? addresses?.[0] ?? null;
+
+  // 3. Empty state
   if (!primary) {
     return (
       <Card className="rounded-xl shadow-none">
@@ -153,6 +197,7 @@ function PrimaryAddressCard({
     );
   }
 
+  // 4. Data state
   const lines = formatAddressLines(primary);
 
   return (
@@ -273,6 +318,9 @@ export function ProfilePage() {
             <PrimaryAddressCard
               addresses={addressesQuery.data}
               isLoading={addressesQuery.isLoading}
+              isError={addressesQuery.isError}
+              error={addressesQuery.error}
+              onRetry={() => addressesQuery.refetch()}
             />
 
             <EditProfileDialog
