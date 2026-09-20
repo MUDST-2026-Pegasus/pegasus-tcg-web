@@ -3,7 +3,7 @@ import type { AuthUser } from "@/features/auth/auth.types";
 import type { AccountSidebarUser } from "./components/AccountSidebar";
 
 /** ตัวย่อสองตัวจากชื่อที่แสดง ใช้เป็นรูปแทนเมื่อผู้ใช้ยังไม่มี avatar */
-function initialsOf(name: string): string {
+export function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) {
     return "?";
