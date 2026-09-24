@@ -167,6 +167,7 @@ function SectionHeader({
           variant="link"
           size="sm"
           className="h-7 shrink-0 cursor-pointer px-0 text-sm font-normal"
+          nativeButton={false}
           render={<Link to={actionHref} />}
         >
           {actionLabel}
@@ -240,6 +241,7 @@ function CompactFeature({
             <Button
               size="lg"
               className="h-11 min-w-[148px] cursor-pointer rounded-lg"
+              nativeButton={false}
               render={<Link to={slide.primaryAction.href} />}
             >
               {slide.primaryAction.label}
@@ -250,6 +252,7 @@ function CompactFeature({
               variant="outline"
               size="lg"
               className="h-11 min-w-[126px] cursor-pointer rounded-lg"
+              nativeButton={false}
               render={<Link to={slide.secondaryAction.href} />}
             >
               {slide.secondaryAction.label}
