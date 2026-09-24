@@ -68,6 +68,12 @@ export function AccountMenu() {
             >
               My Account
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer rounded-lg px-2.5"
+              render={<Link to="/account/collection" />}
+            >
+              My Collection
+            </DropdownMenuItem>
 
             {hasRole("SELLER") ? (
               <DropdownMenuItem

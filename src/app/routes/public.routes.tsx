@@ -11,6 +11,8 @@ import { CartPage } from "@/features/cart/pages/CartPage";
 import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
 import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
 import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
+import { MyCollectionPage } from "@/features/collection/pages/MyCollectionPage";
+import { PublicCollectionPage } from "@/features/collection/pages/PublicCollectionPage";
 import { SearchResultsPage } from "@/features/catalog/pages/SearchResultsPage";
 import { HomePage } from "@/features/home/pages/HomePage";
 import { TermsOfServicePage } from "@/features/legal/pages/TermsOfServicePage";
@@ -37,6 +39,7 @@ export const publicRoutes: RouteObject = {
     { path: "search", element: <SearchResultsPage /> },
 
     { path: "store/:storeId", element: <StoreProfilePage /> },
+    { path: "users/:userId", element: <PublicCollectionPage /> },
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },
@@ -53,6 +56,7 @@ export const publicRoutes: RouteObject = {
         { path: "account/profile", element: <ProfilePage /> },
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },
+        { path: "account/collection", element: <MyCollectionPage /> },
         // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
         { path: "become-a-seller", element: <SellerApplicationPage /> },
       ],
