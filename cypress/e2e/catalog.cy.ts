@@ -33,22 +33,14 @@ describe('Catalog UI', () => {
   });
 
   it('displays products in the catalog using ItemCard/ProductCard', () => {
-    // Navigate to a page that lists products (adjust if the actual route is different, e.g., /search or /market)
-    cy.visit('/');
-    
-    // We don't strictly wait for the API here in case the home page has different endpoints,
-    // but assuming there is a product list rendered:
-    // This is a generic test checking if cards render correctly if they exist on the page.
-    // If the mock is hit, we verify the mocked data. If not, we just check for basic UI elements.
+    cy.visit('/products');
     
     // Check if any product cards are visible on the page
     cy.get('.rounded-lg').should('exist');
   });
 
   it('allows clicking on a product to view details', () => {
-    // To make this robust without knowing the exact homepage layout, we can mount the component
-    // or assume there is a product link. We will check for general anchor tags that might represent products.
-    cy.visit('/');
+    cy.visit('/products');
     
     // Find the first link that likely goes to a product
     cy.get('a[href*="/product/"], a[href*="/item/"]').first().then(($link) => {

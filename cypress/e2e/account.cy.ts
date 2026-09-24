@@ -1,9 +1,10 @@
 describe('Account & Profile Flow', () => {
   beforeEach(() => {
     // Setup authenticated state using API mocks
-    window.localStorage.setItem('auth-storage', JSON.stringify({
-      state: { session: { accessToken: 'mock-access', refreshToken: 'mock-refresh' } },
-      version: 0
+    window.localStorage.setItem('pegasus.auth.session', JSON.stringify({
+      accessToken: 'mock-access',
+      refreshToken: 'mock-refresh',
+      accessExpiresAt: Date.now() + 3600000
     }));
 
     cy.intercept('GET', '**/auth/me', {
