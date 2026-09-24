@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useEffectEvent, useState, type FormEvent, type MouseEvent } from "react";
 import { SearchIcon } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
+import { EmptyState, ErrorState, QueryBoundary } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -152,9 +153,21 @@ export function SearchResultsPage() {
   const { query, ready } = toProductQuery(filters, games.data, categories.data);
   const results = useProductSearch(query, ready);
 
-  /** เปลี่ยนตัวกรองอะไรก็กลับไปหน้า 1 ยกเว้นตอนเปลี่ยนหน้าเอง */
-  const update = (patch: Partial<SearchFilters>) => {
-    setParams(writeFilters({ ...filters, page: 1, ...patch }));
+  // ลิงก์ที่มี ?game= หรือ ?category= ต้องรอรายชื่อไปแปลง slug ถ้ารายชื่อโหลดพัง
+  // ก็ต้องบอกและให้ลองใหม่ ไม่ใช่ค้างที่ skeleton ตลอดไป
+  const lookupFailure =
+    filters.games.length > 0 && games.isError
+      ? games
+      : filters.category !== null && categories.isError
+        ? categories
+        : null;
+
+  /**
+   * เปลี่ยนตัวกรองอะไรก็กลับไปหน้า 1 — ต่อจากตัวกรองใน URL ของ render นี้
+   * (ช่องค้นหาที่หน่วงเวลาไว้เรียกผ่าน `commitQuery` จะได้ตัวของ render ล่าสุดเสมอ)
+   */
+  const update = (patch: Partial<SearchFilters>, options?: { replace?: boolean }) => {
+    setParams((current) => writeFilters({ ...readFilters(current), page: 1, ...patch }), options);
   };
 
   // ช่องค้นหาพิมพ์ได้ทันที แต่เขียนลง URL (และยิง API) หลังหยุดพิมพ์
@@ -165,14 +178,19 @@ export function SearchResultsPage() {
     setLastUrlQuery(filters.q);
     setSearchInput(filters.q);
   }
+  // setSearchParams ของ React Router ส่ง params "ของ render ที่สร้างมัน" ให้ callback ไม่ใช่ของล่าสุด
+  // timer ที่ถือ update ตัวเก่าไว้จึงเขียนทับ checkbox ที่เพิ่งกดระหว่างรอ — effect event
+  // เรียก update ของ render ล่าสุดเสมอ
+  const commitQuery = useEffectEvent((next: string) => {
+    // replace: ไม่ต้องกด back ย้อนทีละคำที่เคยพิมพ์
+    update({ q: next }, { replace: true });
+  });
   useEffect(() => {
     const next = searchInput.trim();
     if (next === filters.q) return;
-    const timer = window.setTimeout(() => update({ q: next }), TYPING_DELAY_MS);
+    const timer = window.setTimeout(() => commitQuery(next), TYPING_DELAY_MS);
     return () => window.clearTimeout(timer);
-    // update เปลี่ยนทุก render; ยิงใหม่เฉพาะตอนข้อความเปลี่ยนก็พอ
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchInput]);
+  }, [searchInput, filters.q]);
 
   const [minimumPrice, setMinimumPrice] = useState(filters.minPrice);
   const [maximumPrice, setMaximumPrice] = useState(filters.maxPrice);
@@ -193,15 +211,29 @@ export function SearchResultsPage() {
 
   const goToPage = (page: number) => (event: MouseEvent) => {
     event.preventDefault();
-    setParams(writeFilters({ ...filters, page }));
+    setParams((current) => writeFilters({ ...readFilters(current), page }));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const pageHref = (page: number) => `?${writeFilters({ ...filters, page })}`;
 
   const data = results.data;
-  const totalPages = data?.totalPages ?? 0;
   const filtered = hasActiveFilters(filters);
   const waiting = !ready || results.isPending;
+
+  // ?page= เกินจำนวนหน้าจริง (ลิงก์เก่า หรือผลลดลงหลังเปลี่ยนตัวกรอง) — พาไปหน้าสุดท้าย
+  const lastPage = Math.max(data?.totalPages ?? 1, 1);
+  const pageOverflow = data !== undefined && !results.isPlaceholderData && filters.page > lastPage;
+  useEffect(() => {
+    if (pageOverflow) {
+      setParams((current) => writeFilters({ ...readFilters(current), page: lastPage }), { replace: true });
+    }
+  }, [pageOverflow, lastPage, setParams]);
+
+  const clearFilters = () =>
+    setParams((current) => {
+      const { q, sort } = readFilters(current);
+      return writeFilters({ ...readFilters(new URLSearchParams()), q, sort });
+    });
 
   return (
     <div className="min-h-[783px] bg-muted font-sans">
@@ -219,9 +251,11 @@ export function SearchResultsPage() {
             {filters.q ? <>Search results for &quot;{filters.q}&quot;</> : "All products"}
           </h1>
           <p className="text-[12px] leading-[18px] text-muted-foreground" aria-live="polite">
-            {data && !waiting
-              ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
-              : "Searching…"}
+            {lookupFailure
+              ? ""
+              : data && !waiting
+                ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
+                : "Searching…"}
           </p>
         </header>
 
@@ -345,7 +379,7 @@ export function SearchResultsPage() {
                 type="button"
                 variant="outline"
                 className="w-full rounded-md"
-                onClick={() => setParams(writeFilters({ ...readFilters(new URLSearchParams()), q: filters.q, sort: filters.sort }))}
+                onClick={clearFilters}
               >
                 Clear filters
               </Button>
@@ -384,72 +418,82 @@ export function SearchResultsPage() {
               </div>
             </div>
 
-            {waiting ? (
+            {lookupFailure ? (
+              <ErrorState
+                error={lookupFailure.error}
+                title="โหลดตัวกรองไม่สำเร็จ"
+                onRetry={() => lookupFailure.refetch()}
+              />
+            ) : !ready ? (
               <ResultsSkeleton />
-            ) : results.isError ? (
-              <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-background p-8 text-center">
-                <p role="alert" className="text-muted-foreground">ค้นหาไม่สำเร็จ ลองใหม่อีกครั้ง</p>
-                <Button type="button" variant="outline" onClick={() => results.refetch()}>ลองอีกครั้ง</Button>
-              </div>
-            ) : data && data.items.length > 0 ? (
-              <>
-                <div
-                  className={cn(
-                    "grid grid-cols-1 gap-[21px] transition-opacity sm:grid-cols-2 xl:grid-cols-4",
-                    results.isPlaceholderData && "opacity-60",
-                  )}
-                  aria-busy={results.isPlaceholderData}
-                >
-                  {data.items.map((product) => <SearchProductCard key={product.id} product={product} />)}
-                </div>
-
-                {totalPages > 1 ? (
-                  <Pagination className="mt-8">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href={pageHref(Math.max(1, filters.page - 1))}
-                          onClick={goToPage(Math.max(1, filters.page - 1))}
-                          aria-disabled={filters.page <= 1}
-                          className={cn(filters.page <= 1 && "pointer-events-none opacity-50")}
-                        />
-                      </PaginationItem>
-                      {pageWindow(filters.page, totalPages).map((page, index) =>
-                        page === null ? (
-                          <PaginationItem key={`gap-${index}`}><PaginationEllipsis /></PaginationItem>
-                        ) : (
-                          <PaginationItem key={page}>
-                            <PaginationLink href={pageHref(page)} onClick={goToPage(page)} isActive={page === filters.page}>
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ),
-                      )}
-                      <PaginationItem>
-                        <PaginationNext
-                          href={pageHref(Math.min(totalPages, filters.page + 1))}
-                          onClick={goToPage(Math.min(totalPages, filters.page + 1))}
-                          aria-disabled={filters.page >= totalPages}
-                          className={cn(filters.page >= totalPages && "pointer-events-none opacity-50")}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                ) : null}
-              </>
             ) : (
-              <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-background p-8 text-center text-muted-foreground">
-                <p>No products match{filters.q ? ` "${filters.q}"` : ""}{filtered ? " with these filters" : ""}.</p>
-                {filtered ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setParams(writeFilters({ ...readFilters(new URLSearchParams()), q: filters.q }))}
+              <QueryBoundary
+                query={results}
+                loading={<ResultsSkeleton />}
+                errorTitle="ค้นหาไม่สำเร็จ"
+                isEmpty={(page) => page.items.length === 0}
+                empty={
+                  <EmptyState
+                    icon={SearchIcon}
+                    title={filters.q ? `No products match "${filters.q}"` : "No products found"}
+                    description={filtered ? "Try removing a filter or two." : undefined}
                   >
-                    Clear filters
-                  </Button>
-                ) : null}
-              </div>
+                    {filtered ? (
+                      <Button type="button" variant="outline" onClick={clearFilters}>
+                        Clear filters
+                      </Button>
+                    ) : null}
+                  </EmptyState>
+                }
+              >
+                {(page) => (
+                  <>
+                    <div
+                      className={cn(
+                        "grid grid-cols-1 gap-[21px] transition-opacity sm:grid-cols-2 xl:grid-cols-4",
+                        results.isPlaceholderData && "opacity-60",
+                      )}
+                      aria-busy={results.isPlaceholderData}
+                    >
+                      {page.items.map((product) => <SearchProductCard key={product.id} product={product} />)}
+                    </div>
+
+                    {page.totalPages > 1 ? (
+                      <Pagination className="mt-8">
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious
+                              href={pageHref(Math.max(1, filters.page - 1))}
+                              onClick={goToPage(Math.max(1, filters.page - 1))}
+                              aria-disabled={filters.page <= 1}
+                              className={cn(filters.page <= 1 && "pointer-events-none opacity-50")}
+                            />
+                          </PaginationItem>
+                          {pageWindow(filters.page, page.totalPages).map((number, index) =>
+                            number === null ? (
+                              <PaginationItem key={`gap-${index}`}><PaginationEllipsis /></PaginationItem>
+                            ) : (
+                              <PaginationItem key={number}>
+                                <PaginationLink href={pageHref(number)} onClick={goToPage(number)} isActive={number === filters.page}>
+                                  {number}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ),
+                          )}
+                          <PaginationItem>
+                            <PaginationNext
+                              href={pageHref(Math.min(page.totalPages, filters.page + 1))}
+                              onClick={goToPage(Math.min(page.totalPages, filters.page + 1))}
+                              aria-disabled={filters.page >= page.totalPages}
+                              className={cn(filters.page >= page.totalPages && "pointer-events-none opacity-50")}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    ) : null}
+                  </>
+                )}
+              </QueryBoundary>
             )}
           </section>
         </div>

@@ -68,13 +68,21 @@ function priceText(value: string | null): string {
 export function readFilters(params: URLSearchParams): SearchFilters {
   const page = Number(params.get("page"));
   const sort = params.get("sort");
+  let minPrice = priceText(params.get("min"));
+  let maxPrice = priceText(params.get("max"));
+  // ลิงก์ที่แก้มือหรือแชร์มาผิด (?min=500&max=100) — backend ตอบ VALIDATION_FAILED
+  // ซึ่งกดลองใหม่กี่ครั้งก็ไม่ผ่าน ทิ้งช่วงราคาไปดีกว่าให้หน้าพัง
+  if (minPrice !== "" && maxPrice !== "" && Number(minPrice) > Number(maxPrice)) {
+    minPrice = "";
+    maxPrice = "";
+  }
   return {
     q: params.get("q")?.trim() ?? "",
     games: params.getAll("game").filter(Boolean),
     category: params.get("category") || null,
     conditions: params.getAll("condition").filter(isCondition),
-    minPrice: priceText(params.get("min")),
-    maxPrice: priceText(params.get("max")),
+    minPrice,
+    maxPrice,
     inStock: params.get("inStock") === "true",
     sort: isSort(sort) ? sort : "featured",
     page: Number.isInteger(page) && page > 1 ? page : 1,
