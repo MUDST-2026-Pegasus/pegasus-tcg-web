@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import type { ProductsData } from "../products.types";
-
 type ProductBulkBarProps = {
   selectedCount: number;
-  actions: ProductsData["bulkActions"];
+  actions: { id: string; label: string }[];
   onClear: () => void;
 };
 
