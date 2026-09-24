@@ -35,7 +35,10 @@ export function SellerLayout() {
       <SidebarProvider className="min-h-0 flex-1 items-stretch">
         <SellerSidebar
           seller={toSellerIdentity(user)}
-          status={profile.data?.status}
+          // null = ยังไม่มี seller profile ถือว่ายังไม่ได้สมัคร
+          status={
+            profile.data === null ? "NOT_APPLIED" : profile.data?.status
+          }
           statusUnavailable={profile.isError}
         />
 

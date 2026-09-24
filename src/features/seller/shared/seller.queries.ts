@@ -32,14 +32,14 @@ export type PublishPermission = {
 export function usePublishPermission(): PublishPermission {
   const { data: profile, isError } = useSellerProfile();
 
-  if (!profile) {
+  if (profile === undefined) {
     return {
       canPublish: false,
       reason: isError ? "โหลดสถานะร้านไม่สำเร็จ" : "กำลังตรวจสอบสถานะร้าน",
     };
   }
   return {
-    canPublish: profile.canPublish,
+    canPublish: profile?.canPublish ?? false,
     reason: publishBlockedReason(profile),
   };
 }

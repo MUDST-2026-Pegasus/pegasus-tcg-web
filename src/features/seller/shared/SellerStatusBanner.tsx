@@ -48,7 +48,7 @@ function Banner({ tone, icon: Icon, title, children, action }: BannerProps) {
 }
 
 type SellerStatusBannerProps = {
-  profile: UseQueryResult<SellerProfile>;
+  profile: UseQueryResult<SellerProfile | null>;
 };
 
 /**
@@ -62,7 +62,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
   const { data, isError, error, refetch, isRefetching } = profile;
   const banners: ReactNode[] = [];
 
-  if (!data && isError) {
+  if (data === undefined && isError) {
     banners.push(
       <Banner
         key="error"
@@ -99,7 +99,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         และลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ
       </Banner>,
     );
-  } else if (data && !data.canPublish) {
+  } else if (data !== undefined && !data?.canPublish) {
     banners.push(
       <Banner
         key="unverified"

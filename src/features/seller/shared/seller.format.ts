@@ -53,12 +53,16 @@ export const SELLER_STATUS_LABEL: Record<SellerStatus, string> = {
 /**
  * ทำไมตอนนี้ลงขายหรือแก้ประกาศไม่ได้ — `null` = ทำได้
  * backend ตรวจซ้ำทุกครั้งที่เขียนอยู่แล้ว (`SELLER_NOT_VERIFIED`) ตรงนี้มีไว้บอกผู้ขายก่อนกด
+ *
+ * @param profile `null` = ยังไม่มี seller profile เลย
  */
-export function publishBlockedReason(profile: SellerProfile): string | null {
-  if (profile.canPublish) {
+export function publishBlockedReason(
+  profile: SellerProfile | null,
+): string | null {
+  if (profile?.canPublish) {
     return null;
   }
-  switch (profile.status) {
+  switch (profile?.status) {
     case "SUSPENDED":
       return "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ";
     case "PENDING":
