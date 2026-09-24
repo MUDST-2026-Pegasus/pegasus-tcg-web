@@ -16,6 +16,14 @@ describe('Account & Profile Flow', () => {
       }
     }).as('meRequest');
 
+    cy.intercept('GET', '**/addresses*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: []
+      }
+    }).as('addressesRequest');
+
     cy.intercept('PATCH', '**/users/profile', {
       statusCode: 200,
       body: {
