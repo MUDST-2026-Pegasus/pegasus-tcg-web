@@ -79,6 +79,8 @@ export function Navbar() {
             size="icon"
             aria-label="Search"
             className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
+            nativeButton={false}
+            render={<Link to="/search" />}
           >
             <SearchIcon className="size-5" />
           </Button>
