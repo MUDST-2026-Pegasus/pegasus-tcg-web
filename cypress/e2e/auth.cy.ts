@@ -84,6 +84,7 @@ describe('Authentication Flow', () => {
     
     // Fill out the registration form
     cy.get('input[name="username"]').type('newuser');
+    cy.get('input[name="displayName"]').type('New User');
     cy.get('input[name="email"]').type('newuser@example.com');
     cy.get('input[name="password"]').type('password123');
     cy.get('input[name="confirmPassword"]').type('password123');
