@@ -24,7 +24,7 @@ describe('Account & Profile Flow', () => {
       }
     }).as('addressesRequest');
 
-    cy.intercept('PATCH', '**/users/profile', {
+    cy.intercept('PUT', '**/users/me', {
       statusCode: 200,
       body: {
         success: true,
@@ -61,7 +61,7 @@ describe('Account & Profile Flow', () => {
     cy.contains(/edit profile/i).click();
 
     // Dialog should be open
-    cy.get('div[role="dialog"]').should('be.visible');
+    cy.get('[data-slot="dialog-content"]').should('be.visible');
     cy.get('input[name="displayName"]').should('have.value', 'John Doe');
     cy.get('#email').should('have.attr', 'disabled');
     cy.get('#email').should('have.value', 'test@example.com');
@@ -85,7 +85,7 @@ describe('Account & Profile Flow', () => {
     });
 
     // Dialog should close and success toast should appear
-    cy.get('div[role="dialog"]').should('not.exist');
+    cy.get('[data-slot="dialog-content"]').should('not.exist');
     cy.contains(/profile updated/i).should('be.visible');
   });
 });
