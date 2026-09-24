@@ -1,15 +1,25 @@
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
+import type { CardCondition } from "./products.types";
+
 /**
  * ตัวช่วยเรื่องตัวเลขที่ใช้ร่วมกันในหน้าลงขายสินค้าและหน้าเติมสต็อก
  */
 
-/**
- * "฿1,290" → 1290 — ข้อมูลจำลองหน้ารายการเก็บราคาเป็นข้อความ
- * ใช้เฉพาะใน mock ของหน้าย่อย วันที่ต่อ API จะได้ตัวเลขจาก backend ตรง ๆ
- */
-export function parseBaht(value: string): number {
-  return Number(value.replace(/[^\d.]/g, "")) || 0;
+/** `CardCondition` → ชื่อเต็มที่ผู้ขายการ์ดคุ้นกัน */
+export const CONDITION_LABEL: Record<CardCondition, string> = {
+  NM: "Near Mint",
+  LP: "Lightly Played",
+  MP: "Moderately Played",
+  HP: "Heavily Played",
+  DMG: "Damaged",
+  SEALED: "Sealed",
+};
+
+/** `:productId` ใน URL → รหัสประกาศ · พิมพ์มั่วหรือไม่ใช่ตัวเลขบวก → null */
+export function parseListingId(param: string | undefined): number | null {
+  const id = Number(param);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
 /** "1290" / "1290.5" → ตัวเลข · ช่องว่างหรือพิมพ์ไม่ครบ (".") → null */
