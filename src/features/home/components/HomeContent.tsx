@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { ItemCard } from "@/components/common/ItemCard";
+import { ErrorState, ItemCard } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -530,32 +530,29 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
   );
 }
 
+/**
+ * กล่อง error กลาง (`ErrorState`) วางในกรอบเดียวกับ section อื่น — ไม่ใช้ `QueryBoundary`
+ * ตรง ๆ เพราะมันวางกล่อง error ชิดขอบจอ ซึ่งหน้าแรกที่แต่ละ section มีระยะของตัวเองรับไม่ได้
+ */
 function SectionError({
   title,
-  onRetry,
+  query,
 }: {
   title: string;
-  onRetry: () => void;
+  query: { error: unknown; refetch: () => unknown };
 }) {
   return (
     <section
       aria-label={title}
       className="bg-secondary px-4 py-7 sm:px-6 lg:px-8"
     >
-      <div className="mx-auto flex max-w-[1216px] flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-background px-6 py-8">
-        <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-        <p role="alert" className="text-sm text-muted-foreground">
-          โหลดข้อมูลส่วนนี้ไม่สำเร็จ ลองใหม่อีกครั้ง
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="cursor-pointer"
-          onClick={onRetry}
-        >
-          ลองอีกครั้ง
-        </Button>
+      <div className="mx-auto max-w-[1216px]">
+        <ErrorState
+          error={query.error}
+          title={`โหลด ${title} ไม่สำเร็จ`}
+          onRetry={() => query.refetch()}
+          className="min-h-0 bg-background py-10"
+        />
       </div>
     </section>
   );
@@ -574,67 +571,67 @@ function HeroSection() {
 }
 
 function NewReleasesSection() {
-  const { data, isPending, isError, refetch } = useNewReleases();
+  const query = useNewReleases();
 
-  if (isPending) return <ProductGridSkeleton />;
-  if (isError) return <SectionError title="New Releases" onRetry={refetch} />;
-  if (data.length === 0) return null;
-  return <NewReleases products={data} />;
+  if (query.isPending) return <ProductGridSkeleton />;
+  if (query.isError) return <SectionError title="New Releases" query={query} />;
+  if (query.data.length === 0) return null;
+  return <NewReleases products={query.data} />;
 }
 
 function GamesSection() {
-  const { data, isPending, isError, refetch } = useGames();
+  const query = useGames();
 
-  if (isPending) return <GamesSkeleton />;
-  if (isError) return <SectionError title="Shop by Game" onRetry={refetch} />;
-  if (data.length === 0) return null;
-  return <BrowseByGame games={data} />;
+  if (query.isPending) return <GamesSkeleton />;
+  if (query.isError) return <SectionError title="Shop by Game" query={query} />;
+  if (query.data.length === 0) return null;
+  return <BrowseByGame games={query.data} />;
 }
 
 function TrendingSection() {
-  const { data, isPending, isError, refetch } = useTrending();
+  const query = useTrending();
 
-  if (isPending) return <ProductRailSkeleton />;
-  if (isError) return <SectionError title="Trending Now" onRetry={refetch} />;
-  if (data.length === 0) return null;
+  if (query.isPending) return <ProductRailSkeleton />;
+  if (query.isError) return <SectionError title="Trending Now" query={query} />;
+  if (query.data.length === 0) return null;
   return (
-    <ProductRail title="Trending Now" actionHref="/search" products={data} />
+    <ProductRail title="Trending Now" actionHref="/search" products={query.data} />
   );
 }
 
 function FeaturedSection() {
-  const { data, isPending, isError, refetch } = useFeaturedCategories();
+  const query = useFeaturedCategories();
 
-  if (isPending) return <FeaturedSkeleton />;
-  if (isError) return <SectionError title="Featured" onRetry={refetch} />;
-  if (data.length === 0) return null;
-  return <FeaturedCategories categories={data} />;
+  if (query.isPending) return <FeaturedSkeleton />;
+  if (query.isError) return <SectionError title="Featured" query={query} />;
+  if (query.data.length === 0) return null;
+  return <FeaturedCategories categories={query.data} />;
 }
 
 function PegasusPicksSection() {
-  const { data, isPending, isError, refetch } = usePegasusPicks();
+  const query = usePegasusPicks();
 
-  if (isPending) return <ProductRailSkeleton description />;
-  if (isError) return <SectionError title="Pegasus Picks" onRetry={refetch} />;
-  if (data.length === 0) return null;
+  if (query.isPending) return <ProductRailSkeleton description />;
+  if (query.isError) return <SectionError title="Pegasus Picks" query={query} />;
+  if (query.data.length === 0) return null;
   return (
     <ProductRail
       title="Pegasus Picks"
       description="Curated, verified, and shipped by Pegasus."
       actionLabel="Shop Pegasus"
       actionHref={`/store/${encodeURIComponent(env.pegasusStoreUsername)}`}
-      products={data}
+      products={query.data}
     />
   );
 }
 
 function ExploreSection() {
-  const { data, isPending, isError, refetch } = useExploreMore();
+  const query = useExploreMore();
 
-  if (isPending) return <ProductGridSkeleton explore />;
-  if (isError) return <SectionError title="More to Explore" onRetry={refetch} />;
-  if (data.length === 0) return null;
-  return <ExploreGrid products={data} />;
+  if (query.isPending) return <ProductGridSkeleton explore />;
+  if (query.isError) return <SectionError title="More to Explore" query={query} />;
+  if (query.data.length === 0) return null;
+  return <ExploreGrid products={query.data} />;
 }
 
 export function HomeContent() {

@@ -43,6 +43,14 @@ export const FALLBACK_HERO_SLIDE: HeroSlide = {
   secondaryAction: { label: "Explore Cards", href: "/search" },
 };
 
+/**
+ * ปุ่มบนสไลด์พาไปได้แค่หน้าในเว็บนี้ — `//host` กับ `/\\host` เบราว์เซอร์อ่านเป็นเว็บอื่น
+ * จึงไม่นับ (backend มี CHECK แบบเดียวกันที่ `home_banner`)
+ */
+export function isSitePath(href: string | null): href is string {
+  return href !== null && /^\/($|[^/\\])/.test(href);
+}
+
 export function toHeroSlide(banner: HomeBannerDto): HeroSlide | null {
   // สไลด์ที่ไม่มีรูปวาดไม่ได้ — ข้ามไปดีกว่าโชว์กรอบว่าง
   if (!banner.imageUrl) {
@@ -57,11 +65,11 @@ export function toHeroSlide(banner: HomeBannerDto): HeroSlide | null {
     imageAlt: banner.imageAlt ?? banner.title.replace(/\n/g, " "),
     theme: THEMES[banner.theme] ?? "campaign",
     primaryAction:
-      banner.primaryLabel && banner.primaryHref
+      banner.primaryLabel && isSitePath(banner.primaryHref)
         ? { label: banner.primaryLabel, href: banner.primaryHref }
         : undefined,
     secondaryAction:
-      banner.secondaryLabel && banner.secondaryHref
+      banner.secondaryLabel && isSitePath(banner.secondaryHref)
         ? { label: banner.secondaryLabel, href: banner.secondaryHref }
         : undefined,
   };

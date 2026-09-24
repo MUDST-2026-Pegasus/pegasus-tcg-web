@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as catalogApi from "@/features/catalog/catalog.api";
 import { catalogKeys } from "@/features/catalog/catalog.queries";
 import type { ProductQuery } from "@/features/catalog/catalog.types";
+import { hasErrorCode } from "@/lib/api";
 import { env } from "@/lib/env";
 
 import * as homeApi from "./home.api";
@@ -89,12 +90,26 @@ export function useTrending() {
   });
 }
 
-/** Pegasus Picks คือหน้าร้านของบัญชีร้าน Pegasus เอง */
+/**
+ * Pegasus Picks คือหน้าร้านของบัญชีร้าน Pegasus เอง
+ *
+ * ที่ไหนยังไม่มีบัญชีนี้ (ยังไม่ได้ seed หรือยังไม่ได้เปิดร้าน) backend ตอบ `USER_NOT_FOUND`
+ * — นับเป็นร้านว่าง section จะซ่อนไปเอง ไม่ขึ้นกล่อง error ค้างไว้ในหน้าแรก
+ */
 export function usePegasusPicks() {
   const username = env.pegasusStoreUsername;
   return useQuery({
     queryKey: homeKeys.pegasusPicks(username),
-    queryFn: () => homeApi.getStorefront(username, RAIL_COUNT),
+    queryFn: async () => {
+      try {
+        return await homeApi.getStorefront(username, RAIL_COUNT);
+      } catch (error) {
+        if (hasErrorCode(error, "USER_NOT_FOUND")) {
+          return { items: [], page: 0, size: RAIL_COUNT, totalItems: 0, totalPages: 0 };
+        }
+        throw error;
+      }
+    },
     select: (page) => page.items.map(listingToHomeProduct),
   });
 }
