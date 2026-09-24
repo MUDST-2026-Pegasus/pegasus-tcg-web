@@ -8,24 +8,30 @@ describe('Account & Profile Flow', () => {
 
     cy.intercept('GET', '**/auth/me', {
       statusCode: 200,
-      body: { 
-        id: '1', 
-        email: 'test@example.com', 
-        username: 'testuser', 
-        displayName: 'John Doe',
-        phone: '0812345678',
-        bio: 'Hello I am a collector',
-        roles: ['BUYER'] 
+      body: {
+        success: true,
+        data: { 
+          id: '1', 
+          email: 'test@example.com', 
+          username: 'testuser', 
+          displayName: 'John Doe',
+          phone: '0812345678',
+          bio: 'Hello I am a collector',
+          roles: ['BUYER'] 
+        }
       }
     }).as('meRequest');
 
     cy.intercept('PATCH', '**/users/profile', {
       statusCode: 200,
       body: {
-        id: '1',
-        displayName: 'Jane Doe', // Changed name
-        phone: '0812345678',
-        bio: 'Hello I am a collector',
+        success: true,
+        data: {
+          id: '1',
+          displayName: 'Jane Doe', // Changed name
+          phone: '0812345678',
+          bio: 'Hello I am a collector',
+        }
       }
     }).as('updateProfile');
   });

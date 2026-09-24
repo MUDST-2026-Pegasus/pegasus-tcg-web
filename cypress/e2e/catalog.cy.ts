@@ -4,26 +4,29 @@ describe('Catalog UI', () => {
     cy.intercept('GET', '**/products*', {
       statusCode: 200,
       body: {
-        data: [
-          {
-            id: 'prod-1',
-            type: 'Single Card',
-            title: 'Blue-Eyes White Dragon',
-            price: 5000,
-            imageUrl: 'https://example.com/blue-eyes.jpg'
-          },
-          {
-            id: 'prod-2',
-            type: 'Booster Box',
-            title: 'Legend of Blue Eyes White Dragon',
-            price: 15000,
-            imageUrl: 'https://example.com/booster.jpg'
+        success: true,
+        data: {
+          data: [
+            {
+              id: 'prod-1',
+              type: 'Single Card',
+              title: 'Blue-Eyes White Dragon',
+              price: 5000,
+              imageUrl: 'https://example.com/blue-eyes.jpg'
+            },
+            {
+              id: 'prod-2',
+              type: 'Booster Box',
+              title: 'Legend of Blue Eyes White Dragon',
+              price: 15000,
+              imageUrl: 'https://example.com/booster.jpg'
+            }
+          ],
+          meta: {
+            total: 2,
+            page: 1,
+            limit: 20
           }
-        ],
-        meta: {
-          total: 2,
-          page: 1,
-          limit: 20
         }
       }
     }).as('getProducts');

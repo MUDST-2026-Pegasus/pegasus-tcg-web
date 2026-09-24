@@ -31,15 +31,21 @@ describe('Authentication Flow', () => {
     cy.intercept('POST', '**/auth/login', {
       statusCode: 200,
       body: {
-        tokens: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
-        user: { id: '1', email: 'test@example.com', roles: ['BUYER'] }
+        success: true,
+        data: {
+          tokens: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
+          user: { id: '1', email: 'test@example.com', roles: ['BUYER'] }
+        }
       }
     }).as('loginRequest');
 
     // Mock the /auth/me request that happens after login
     cy.intercept('GET', '**/auth/me', {
       statusCode: 200,
-      body: { id: '1', email: 'test@example.com', username: 'testuser', displayName: 'Test User', roles: ['BUYER'] }
+      body: {
+        success: true,
+        data: { id: '1', email: 'test@example.com', username: 'testuser', displayName: 'Test User', roles: ['BUYER'] }
+      }
     }).as('meRequest');
 
     cy.visit('/login');
