@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Link } from "react-router-dom"
 
 const productImages = [
   "https://images.pokemontcg.io/swsh3/20_hires.png",
@@ -151,7 +152,7 @@ export function ProductDetailPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <Badge variant="secondary">In catalog</Badge>
-                  <Button type="button" variant="outline" size="sm">View profile</Button>
+                  <Button variant="outline" size="sm" render={<Link to={`/users/${collector.username.slice(1)}`} />}>View profile</Button>
                 </div>
               </article>
             ))}

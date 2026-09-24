@@ -1,4 +1,4 @@
-import { CircleUserRound, ClipboardList, MapPin } from "lucide-react";
+import { CircleUserRound, ClipboardList, MapPin, GalleryVerticalEnd } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ const ACCOUNT_LINKS = [
   { label: "Account Overview", to: "/account/profile", icon: CircleUserRound },
   { label: "Order History", to: "/account/orders", icon: ClipboardList },
   { label: "Address Book", to: "/account/addresses", icon: MapPin },
+  { label: "My Collection", to: "/account/collection", icon: GalleryVerticalEnd },
 ] as const;
 
 export function AccountSidebar({ user }: { user: AccountSidebarUser }) {
