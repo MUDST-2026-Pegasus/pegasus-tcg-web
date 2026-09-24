@@ -62,7 +62,6 @@ describe('RegisterForm', () => {
     await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
     
     // Select correct password inputs based on their ids
-    const passwordInputs = screen.getAllByLabelText(/password/i);
     // Assuming first is the main password, second is confirm (though label for confirm is "Confirm password")
     await userEvent.type(document.getElementById('password') as HTMLInputElement, 'password123');
     await userEvent.type(document.getElementById('confirmPassword') as HTMLInputElement, 'password123');
