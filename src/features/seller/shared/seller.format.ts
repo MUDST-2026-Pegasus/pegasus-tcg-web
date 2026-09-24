@@ -1,6 +1,8 @@
 import { initialsOf } from "@/features/account/account.format";
 import type { AuthUser } from "@/features/auth/auth.types";
 
+import type { SellerStatus } from "./seller.types";
+
 const bahtWhole = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const bahtSatang = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -38,3 +40,12 @@ export function toSellerIdentity(user: AuthUser | null): SellerIdentity {
     initials: initialsOf(user.displayName),
   };
 }
+
+/** บรรทัดใต้ชื่อใน sidebar — บอกสถานะร้านจริงจาก `/sellers/me` */
+export const SELLER_STATUS_LABEL: Record<SellerStatus, string> = {
+  NOT_APPLIED: "ยังไม่ได้สมัครเป็นผู้ขาย",
+  PENDING: "รอตรวจเอกสารยืนยันตัวตน",
+  VERIFIED: "ผู้ขายที่ยืนยันแล้ว",
+  REJECTED: "ยืนยันตัวตนไม่ผ่าน",
+  SUSPENDED: "ร้านถูกระงับ",
+};
