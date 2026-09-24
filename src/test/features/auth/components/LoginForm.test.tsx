@@ -25,7 +25,7 @@ describe('LoginForm', () => {
       mutateAsync: mockMutateAsync,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof authQueries.useLogin>);
   });
 
   it('renders login form correctly', () => {
@@ -79,7 +79,7 @@ describe('LoginForm', () => {
       mutateAsync: mockMutateAsync,
       isError: true,
       error: { status: 401, data: { message: 'Invalid credentials' } },
-    } as any);
+    } as unknown as ReturnType<typeof authQueries.useLogin>);
 
     renderWithProviders(<LoginForm />);
     

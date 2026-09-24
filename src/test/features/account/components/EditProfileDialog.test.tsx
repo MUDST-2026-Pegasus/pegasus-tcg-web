@@ -4,16 +4,20 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import { EditProfileDialog } from '@/features/account/components/EditProfileDialog';
 import * as profileQueries from '@/features/account/profile.queries';
+import type { AuthUser } from '@/features/auth/auth.types';
 
-const mockUser = {
-  id: 'user-1',
+const mockUser: AuthUser = {
+  id: 1,
   username: 'johndoe',
   email: 'john@example.com',
   displayName: 'John Doe',
-  roles: ['BUYER' as any],
+  roles: ['BUYER'],
   avatarUrl: null,
   phone: null,
   bio: null,
+  status: 'ACTIVE',
+  createdAt: '2026-01-01T00:00:00Z',
+  lastLoginAt: null,
 };
 
 describe('EditProfileDialog', () => {
@@ -26,7 +30,7 @@ describe('EditProfileDialog', () => {
       mutateAsync: mockMutateAsync,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof profileQueries.useUpdateProfile>);
   });
 
   it('renders form fields with default values', () => {
