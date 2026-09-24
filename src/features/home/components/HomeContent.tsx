@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { ItemCard } from "@/components/common/ItemCard";
 import { Badge } from "@/components/ui/badge";
@@ -10,14 +11,31 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import {
+  FeaturedSkeleton,
+  GamesSkeleton,
+  HeroSkeleton,
+  ProductGridSkeleton,
+  ProductRailSkeleton,
+} from "@/features/home/components/HomePageSkeleton";
+import { FALLBACK_HERO_SLIDE } from "@/features/home/home.mappers";
+import {
+  useExploreMore,
+  useFeaturedCategories,
+  useGames,
+  useHeroSlides,
+  useNewReleases,
+  usePegasusPicks,
+  useTrending,
+} from "@/features/home/home.queries";
 import type {
   GameCategory,
   HeroSlide,
-  HomeData,
   HomeProduct,
   ProductCategory,
   TrendingProduct,
 } from "@/features/home/home.types";
+import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 const currencyFormatter = new Intl.NumberFormat("th-TH", {
@@ -25,6 +43,10 @@ const currencyFormatter = new Intl.NumberFormat("th-TH", {
   currency: "THB",
   maximumFractionDigits: 0,
 });
+
+function formatPrice(price: number | null): string {
+  return price === null ? "Out of stock" : currencyFormatter.format(price);
+}
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
 const HERO_CAROUSEL_INTERVAL_MS = 4000;
@@ -121,15 +143,16 @@ function CarouselPagination({
 type SectionHeaderProps = {
   title: string;
   actionLabel?: string;
+  /** ปลายทางของปุ่มขวามือ; ไม่ส่งมาก็ไม่มีปุ่ม */
+  actionHref?: string;
   description?: string;
-  showAction?: boolean;
 };
 
 function SectionHeader({
   title,
   actionLabel = "View All",
+  actionHref,
   description,
-  showAction = true,
 }: SectionHeaderProps) {
   return (
     <div
@@ -148,12 +171,12 @@ function SectionHeader({
           </p>
         ) : null}
       </div>
-      {showAction ? (
+      {actionHref ? (
         <Button
-          type="button"
           variant="link"
           size="sm"
           className="h-7 shrink-0 cursor-pointer px-0 text-sm font-normal"
+          render={<Link to={actionHref} />}
         >
           {actionLabel}
         </Button>
@@ -169,11 +192,13 @@ function HomeProductCard({
   product: HomeProduct;
   rank?: number;
 }) {
+  const price = formatPrice(product.price);
+
   return (
     <div className="relative h-[260px] min-w-0">
-      <button
-        type="button"
-        aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
+      <Link
+        to={product.href}
+        aria-label={`${product.name} ราคา ${price}`}
         className="block h-full w-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ItemCard
@@ -181,10 +206,10 @@ function HomeProductCard({
           imageAlt={product.imageAlt}
           badge={product.type}
           title={product.name}
-          price={currencyFormatter.format(product.price)}
+          price={price}
           className="h-full w-full [&_img]:object-contain"
         />
-      </button>
+      </Link>
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
           {rank}
@@ -220,21 +245,25 @@ function CompactFeature({
           {slide.description}
         </p>
         <div className="flex flex-wrap items-center gap-2.5">
-          <Button
-            type="button"
-            size="lg"
-            className="h-11 w-[148px] cursor-pointer rounded-lg"
-          >
-            Shop New Releases
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="h-11 w-[126px] cursor-pointer rounded-lg"
-          >
-            Explore Cards
-          </Button>
+          {slide.primaryAction ? (
+            <Button
+              size="lg"
+              className="h-11 min-w-[148px] cursor-pointer rounded-lg"
+              render={<Link to={slide.primaryAction.href} />}
+            >
+              {slide.primaryAction.label}
+            </Button>
+          ) : null}
+          {slide.secondaryAction ? (
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-11 min-w-[126px] cursor-pointer rounded-lg"
+              render={<Link to={slide.secondaryAction.href} />}
+            >
+              {slide.secondaryAction.label}
+            </Button>
+          ) : null}
         </div>
       </div>
       <div className="order-1 h-[260px] overflow-hidden lg:order-2 lg:h-full lg:min-w-0 lg:flex-1">
@@ -299,7 +328,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="new-releases-title">
-          <SectionHeader title="New Releases" />
+          <SectionHeader title="New Releases" actionHref="/search?sort=newest" />
         </div>
         <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
           {products.map((product) => (
@@ -319,26 +348,35 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title="Shop by Game" />
+          <SectionHeader title="Shop by Game" actionHref="/search" />
         </div>
         <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
-            <button
+            <Link
               key={game.id}
-              type="button"
+              to={game.href}
               className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-shadow group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/30">
-                <img
-                  src={game.image}
-                  alt={game.imageAlt}
-                  className="size-[82px] object-contain"
-                />
+                {game.image ? (
+                  <img
+                    src={game.image}
+                    alt={game.imageAlt}
+                    className="size-[82px] object-contain"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="text-2xl font-semibold text-muted-foreground"
+                  >
+                    {game.name.charAt(0)}
+                  </span>
+                )}
               </span>
               <span className="w-full text-center text-sm text-foreground">
                 {game.name}
               </span>
-            </button>
+            </Link>
           ))}
         </div>
       </div>
@@ -351,11 +389,13 @@ function ProductRail({
   products,
   description,
   actionLabel,
+  actionHref,
 }: {
   title: string;
   products: (HomeProduct | TrendingProduct)[];
   description?: string;
   actionLabel?: string;
+  actionHref?: string;
 }) {
   return (
     <section
@@ -370,6 +410,7 @@ function ProductRail({
           title={title}
           description={description}
           actionLabel={actionLabel}
+          actionHref={actionHref}
         />
         <Carousel
           opts={{ align: "start", dragFree: true }}
@@ -410,7 +451,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title="Featured" showAction={false} />
+          <SectionHeader title="Featured" />
         </div>
         <Carousel
           setApi={setApi}
@@ -435,9 +476,9 @@ function FeaturedCategories({
                 key={category.id}
                 className="basis-[min(396.8px,calc(100vw-2rem))]"
               >
-                <button
-                  type="button"
-                  className="group h-[371px] w-full min-w-0 cursor-pointer rounded-[20px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                <Link
+                  to={category.href}
+                  className="group block h-[371px] w-full min-w-0 cursor-pointer rounded-[20px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   <Card className="h-full gap-0 rounded-[20px] border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
                     <div className="h-[272px] w-full overflow-hidden bg-muted">
@@ -453,7 +494,7 @@ function FeaturedCategories({
                       </CardTitle>
                     </CardHeader>
                   </Card>
-                </button>
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -479,7 +520,11 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader title="More to Explore" actionLabel="more" />
+          <SectionHeader
+            title="More to Explore"
+            actionLabel="more"
+            actionHref="/search"
+          />
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)] lg:gap-x-[14.653px]">
           {products.map((product) => (
@@ -491,21 +536,123 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
   );
 }
 
-export function HomeContent({ data }: { data: HomeData }) {
+function SectionError({
+  title,
+  onRetry,
+}: {
+  title: string;
+  onRetry: () => void;
+}) {
+  return (
+    <section
+      aria-label={title}
+      className="bg-secondary px-4 py-7 sm:px-6 lg:px-8"
+    >
+      <div className="mx-auto flex max-w-[1216px] flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-background px-6 py-8">
+        <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+        <p role="alert" className="text-sm text-muted-foreground">
+          โหลดข้อมูลส่วนนี้ไม่สำเร็จ ลองใหม่อีกครั้ง
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="cursor-pointer"
+          onClick={onRetry}
+        >
+          ลองอีกครั้ง
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+// ---------- sections ที่ผูกกับ API: แต่ละอันมีสถานะโหลด / พัง / ว่าง ของตัวเอง ----------
+
+/** โหลดไม่ขึ้นหรือยังไม่มีสไลด์ ก็ยังมีสไลด์ตั้งต้น หน้าแรกจะไม่เริ่มด้วยช่องว่าง */
+function HeroSection() {
+  const { data, isPending } = useHeroSlides();
+
+  if (isPending) {
+    return <HeroSkeleton />;
+  }
+  return <HeroCarousel slides={data?.length ? data : [FALLBACK_HERO_SLIDE]} />;
+}
+
+function NewReleasesSection() {
+  const { data, isPending, isError, refetch } = useNewReleases();
+
+  if (isPending) return <ProductGridSkeleton />;
+  if (isError) return <SectionError title="New Releases" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return <NewReleases products={data} />;
+}
+
+function GamesSection() {
+  const { data, isPending, isError, refetch } = useGames();
+
+  if (isPending) return <GamesSkeleton />;
+  if (isError) return <SectionError title="Shop by Game" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return <BrowseByGame games={data} />;
+}
+
+function TrendingSection() {
+  const { data, isPending, isError, refetch } = useTrending();
+
+  if (isPending) return <ProductRailSkeleton />;
+  if (isError) return <SectionError title="Trending Now" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return (
+    <ProductRail title="Trending Now" actionHref="/search" products={data} />
+  );
+}
+
+function FeaturedSection() {
+  const { data, isPending, isError, refetch } = useFeaturedCategories();
+
+  if (isPending) return <FeaturedSkeleton />;
+  if (isError) return <SectionError title="Featured" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return <FeaturedCategories categories={data} />;
+}
+
+function PegasusPicksSection() {
+  const { data, isPending, isError, refetch } = usePegasusPicks();
+
+  if (isPending) return <ProductRailSkeleton description />;
+  if (isError) return <SectionError title="Pegasus Picks" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return (
+    <ProductRail
+      title="Pegasus Picks"
+      description="Curated, verified, and shipped by Pegasus."
+      actionLabel="Shop Pegasus"
+      actionHref={`/store/${encodeURIComponent(env.pegasusStoreUsername)}`}
+      products={data}
+    />
+  );
+}
+
+function ExploreSection() {
+  const { data, isPending, isError, refetch } = useExploreMore();
+
+  if (isPending) return <ProductGridSkeleton explore />;
+  if (isError) return <SectionError title="More to Explore" onRetry={refetch} />;
+  if (data.length === 0) return null;
+  return <ExploreGrid products={data} />;
+}
+
+export function HomeContent() {
   return (
     <div className="bg-secondary font-sans">
-      <HeroCarousel slides={data.heroSlides} />
-      <NewReleases products={data.newReleases} />
-      <BrowseByGame games={data.games} />
-      <ProductRail title="Trending Now" products={data.trending} />
-      <FeaturedCategories categories={data.categories} />
-      <ProductRail
-        title="Pegasus Picks"
-        description="Curated, verified, and shipped by Pegasus."
-        actionLabel="Shop Pegasus"
-        products={data.pegasusProducts}
-      />
-      <ExploreGrid products={data.exploreMore} />
+      <HeroSection />
+      <NewReleasesSection />
+      <GamesSection />
+      <TrendingSection />
+      <FeaturedSection />
+      <PegasusPicksSection />
+      <ExploreSection />
     </div>
   );
 }
