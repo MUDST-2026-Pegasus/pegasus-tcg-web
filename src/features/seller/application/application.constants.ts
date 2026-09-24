@@ -26,10 +26,6 @@ export const BANK_ITEMS: Record<string, string> = Object.fromEntries(
   THAI_BANKS.map((bank) => [bank.code, bank.name]),
 );
 
-export const BANK_BOOK_TYPES = ["image/jpeg", "image/png"] as const;
-
-export const BANK_BOOK_MAX_BYTES = 5 * 1024 * 1024;
-
 export const BANK_BOOK_REQUIREMENTS = [
   "ชื่อบัญชี (ตรงกับชื่อด้านบน)",
   "เลขที่บัญชี",

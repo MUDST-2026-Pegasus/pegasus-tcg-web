@@ -1,94 +1,32 @@
-import { CircleCheck, CloudUpload } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type DragEvent,
-} from "react";
+import { CircleCheck, CloudUpload, RotateCw } from "lucide-react";
 
+import { FileDropzone } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { FieldError, FieldLabel } from "@/components/ui/field";
-import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import type { FileUploadState } from "@/hooks/use-file-upload";
+import { formatFileSize } from "@/lib/upload";
 
-import {
-  BANK_BOOK_REQUIREMENTS,
-  BANK_BOOK_TYPES,
-} from "../application.constants";
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024 * 1024) {
-    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import { BANK_BOOK_REQUIREMENTS } from "../application.constants";
 
 type BankBookUploadProps = {
   id: string;
-  file?: File;
+  /** `useFileUpload({ purpose: "SELLER_VERIFICATION" })` ของฟอร์ม */
+  upload: FileUploadState;
+  /** error ของฟอร์ม เช่น ยังไม่ได้แนบรูป หรือ backend ไม่รับ key */
   error?: string;
-  onFileChange: (file: File | undefined) => void;
 };
 
-/** ช่องวางรูปหน้าสมุดบัญชี + กล่องบอกว่าในรูปต้องเห็นอะไรบ้าง */
-export function BankBookUpload({
-  id,
-  file,
-  error,
-  onFileChange,
-}: BankBookUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // URL สร้างตอนเลือกไฟล์ แล้วคืนหน่วยความจำเมื่อเปลี่ยนรูปหรือออกจากหน้า
-  useEffect(() => {
-    if (!previewUrl) {
-      return;
-    }
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
-
-  const selectFile = (next: File | undefined) => {
-    if (next?.type.startsWith("image/")) {
-      const url = URL.createObjectURL(next);
-      // blob: URLs are safe — reject anything else defensively
-      setPreviewUrl(url.startsWith("blob:") ? url : null);
-    } else {
-      setPreviewUrl(null);
-    }
-    onFileChange(next);
-  };
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const picked = event.target.files?.[0];
-    if (picked) {
-      selectFile(picked);
-    }
-    // ล้างค่าไว้ ไม่งั้นเลือกไฟล์เดิมซ้ำจะไม่เกิด change
-    event.target.value = "";
-  };
-
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-    // ลากผ่าน element ลูกก็ยิง dragleave — นับเฉพาะตอนออกนอกกรอบจริง
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-      setIsDragging(false);
-    }
-  };
-
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const dropped = event.dataTransfer.files[0];
-    if (dropped) {
-      selectFile(dropped);
-    }
-  };
+/**
+ * ช่องวางรูปหน้าสมุดบัญชี + กล่องบอกว่าในรูปต้องเห็นอะไรบ้าง
+ *
+ * เลือกรูปแล้วอัปขึ้น object storage ทันทีผ่าน `useFileUpload()` ตอนกดส่งฟอร์ม
+ * จึงมีแค่ object key ที่ต้องส่งไปกับคำขอ
+ */
+export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
+  const item = upload.items[0];
+  const message = item?.error ?? error;
+  const percent = Math.round((item?.progress ?? 0) * 100);
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -100,48 +38,53 @@ export function BankBookUpload({
           รูปหน้าสมุดบัญชี หรือ หน้าแอปธนาคาร *
         </FieldLabel>
         <span className="ml-auto text-[10px] text-muted-foreground/75">
-          JPG · PNG · ไม่เกิน 5 MB
+          {upload.hint}
         </span>
       </div>
 
-      {/* อยู่นอกกรอบวางไฟล์ ไม่งั้น click ที่สั่งผ่าน ref จะวิ่งกลับขึ้นมาเปิดซ้ำ */}
-      <input
-        ref={inputRef}
-        id={id}
-        type="file"
-        accept={BANK_BOOK_TYPES.join(",")}
-        aria-invalid={Boolean(error)}
-        className="sr-only"
-        onChange={handleInputChange}
-      />
-
       <div className="flex flex-col gap-3.5 sm:flex-row">
-        <div
-          onClick={() => inputRef.current?.click()}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={cn(
-            "flex min-h-46 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed border-teal-600 bg-teal-50/70 p-5 text-center transition-colors hover:bg-teal-50",
-            isDragging && "bg-teal-100/70 hover:bg-teal-100/70",
-            error && "border-destructive bg-destructive/5 hover:bg-destructive/5",
-          )}
+        <FileDropzone
+          id={id}
+          accept={upload.accept}
+          invalid={Boolean(message)}
+          onFiles={upload.addFiles}
+          className="flex min-h-46 min-w-0 flex-1 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed border-teal-600 bg-teal-50/70 p-5 text-center transition-colors hover:bg-teal-50 data-dragging:bg-teal-100/70 data-dragging:hover:bg-teal-100/70 data-invalid:border-destructive data-invalid:bg-destructive/5 data-invalid:hover:bg-destructive/5"
         >
-          {file ? (
+          {item ? (
             <>
-              {previewUrl && (
+              {item.previewUrl && (
                 <img
-                  src={previewUrl}
+                  src={item.previewUrl}
                   alt="ตัวอย่างรูปที่เลือก"
                   className="max-h-20 max-w-full rounded-md border border-border object-contain"
                 />
               )}
               <p className="max-w-full truncate text-xs font-medium text-foreground">
-                {file.name}
+                {item.file.name}
               </p>
-              <p className="text-[10px] text-muted-foreground">
-                {formatFileSize(file.size)}
-              </p>
+
+              {item.status === "uploading" ? (
+                <div className="flex w-full max-w-48 items-center gap-2">
+                  <Progress
+                    value={percent}
+                    aria-label="กำลังอัปโหลดรูปหน้าสมุดบัญชี"
+                    className="flex-1 [&_[data-slot=progress-track]]:h-1.5"
+                  />
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    {percent}%
+                  </span>
+                </div>
+              ) : item.status === "done" ? (
+                <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <CircleCheck aria-hidden className="size-3 text-teal-600" />
+                  อัปโหลดแล้ว · {formatFileSize(item.file.size)}
+                </p>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">
+                  {formatFileSize(item.file.size)}
+                </p>
+              )}
+
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -151,6 +94,21 @@ export function BankBookUpload({
                 >
                   เปลี่ยนไฟล์
                 </Button>
+                {item.status === "error" && item.canRetry && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8.5 rounded-sm px-2.5"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      upload.retry(item.id);
+                    }}
+                  >
+                    <RotateCw data-icon="inline-start" />
+                    ลองใหม่
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="ghost"
@@ -158,10 +116,10 @@ export function BankBookUpload({
                   className="h-8.5 rounded-sm px-2.5 text-muted-foreground"
                   onClick={(event) => {
                     event.stopPropagation();
-                    selectFile(undefined);
+                    upload.remove(item.id);
                   }}
                 >
-                  ลบไฟล์
+                  {item.status === "uploading" ? "ยกเลิก" : "ลบไฟล์"}
                 </Button>
               </div>
             </>
@@ -187,7 +145,7 @@ export function BankBookUpload({
               </Button>
             </>
           )}
-        </div>
+        </FileDropzone>
 
         <div className="flex flex-col gap-2.25 rounded-lg border border-border bg-muted/30 px-3.5 py-4 sm:w-62.5">
           <p className="text-[11px] font-medium text-foreground/80">
@@ -213,7 +171,7 @@ export function BankBookUpload({
         </div>
       </div>
 
-      {error && <FieldError className="text-xs">{error}</FieldError>}
+      {message && <FieldError className="text-xs">{message}</FieldError>}
     </div>
   );
 }

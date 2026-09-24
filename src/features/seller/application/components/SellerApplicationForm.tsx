@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
@@ -82,7 +83,7 @@ export function SellerApplicationForm({
     control,
     handleSubmit,
     setError,
-    trigger,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SellerApplicationFormValues>({
     resolver: zodResolver(sellerApplicationSchema),
@@ -91,8 +92,19 @@ export function SellerApplicationForm({
       legalLastName: "",
       bankCode: "",
       bankAccountNumber: "",
+      bankBookImageKey: "",
       ...draft,
     },
+  });
+
+  // เลือกรูปแล้วอัปทันที ฟอร์มเก็บแค่ object key ที่ได้กลับมา
+  // ได้ key แล้วตรวจช่องใหม่ให้ error "กรุณาแนบรูป" หายเอง
+  const bankBook = useFileUpload({
+    purpose: "SELLER_VERIFICATION",
+    onChange: ([objectKey]) =>
+      setValue("bankBookImageKey", objectKey ?? "", {
+        shouldValidate: Boolean(objectKey),
+      }),
   });
 
   const [legalFirstName, legalLastName, bankCode] = useWatch({
@@ -120,13 +132,13 @@ export function SellerApplicationForm({
     const bank = THAI_BANKS.find((item) => item.code === values.bankCode);
 
     try {
-      // backend ยังไม่มีช่องรับรูปสมุดบัญชี รูปจึงถูกตรวจแค่ในฟอร์ม ยังไม่ได้ส่งไป
       await submitVerification.mutateAsync({
         legalFirstName: values.legalFirstName,
         legalLastName: values.legalLastName,
         bankCode: values.bankCode,
         bankName: bank?.name ?? values.bankCode,
         bankAccountNumber: values.bankAccountNumber,
+        bankBookImageKey: values.bankBookImageKey,
       });
       if (userId) {
         clearDraft(userId);
@@ -137,6 +149,23 @@ export function SellerApplicationForm({
         setError("bankAccountNumber", {
           type: "server",
           message: "เลขบัญชีนี้ถูกใช้สมัครกับผู้ขายรายอื่นแล้ว",
+        });
+        return;
+      }
+      // backend ตรวจไฟล์ที่ขึ้นไปจริงอีกรอบ — ไม่เจอ/ผิดชนิด/ใหญ่เกิน/ถูกใช้ไปแล้ว
+      // key นี้ใช้ต่อไม่ได้ ต้องอัปรูปใหม่
+      if (
+        hasErrorCode(
+          error,
+          "FILE_NOT_FOUND",
+          "FILE_TOO_LARGE",
+          "UNSUPPORTED_FILE_TYPE",
+        )
+      ) {
+        bankBook.clear();
+        setError("bankBookImageKey", {
+          type: "server",
+          message: "รูปที่แนบใช้ไม่ได้ กรุณาอัปโหลดรูปใหม่อีกครั้ง",
         });
         return;
       }
@@ -287,21 +316,10 @@ export function SellerApplicationForm({
           </Field>
         </div>
 
-        <Controller
-          control={control}
-          name="bankBook"
-          render={({ field }) => (
-            <BankBookUpload
-              id="bankBook"
-              file={field.value}
-              error={errors.bankBook?.message}
-              onFileChange={(file) => {
-                field.onChange(file);
-                // บอกทันทีถ้าไฟล์ผิดประเภทหรือใหญ่เกิน ไม่ต้องรอกดส่ง
-                void trigger("bankBook");
-              }}
-            />
-          )}
+        <BankBookUpload
+          id="bankBookImageKey"
+          upload={bankBook}
+          error={errors.bankBookImageKey?.message}
         />
 
         <Callout tone="warning" icon={TriangleAlert}>
@@ -356,11 +374,15 @@ export function SellerApplicationForm({
         </p>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || bankBook.isUploading}
           className="rounded-md px-2.5"
         >
-          {isSubmitting && <Spinner />}
-          {isSubmitting ? "กำลังส่งคำขอ…" : "ส่งคำขอสมัคร"}
+          {(isSubmitting || bankBook.isUploading) && <Spinner />}
+          {isSubmitting
+            ? "กำลังส่งคำขอ…"
+            : bankBook.isUploading
+              ? "กำลังอัปโหลดรูป…"
+              : "ส่งคำขอสมัคร"}
         </Button>
       </div>
 
