@@ -1,8 +1,7 @@
 import { useState } from "react";
 
-import { Link } from "react-router-dom";
-
 import { Button } from "@/components/ui/button";
+import { CreateListingButton } from "@/features/seller/shared/CreateListingButton";
 
 import type {
   ProductFilterId,
@@ -102,14 +101,7 @@ export function ProductsContent({ data }: ProductsContentProps) {
           <Button variant="outline" size="sm" className="rounded-md px-2.5">
             {data.actions.importLabel}
           </Button>
-          <Button
-            size="sm"
-            className="rounded-md px-2.5"
-            render={<Link to="/seller/products/new" />}
-            nativeButton={false}
-          >
-            {data.actions.createLabel}
-          </Button>
+          <CreateListingButton label={data.actions.createLabel} />
         </div>
       </div>
 
