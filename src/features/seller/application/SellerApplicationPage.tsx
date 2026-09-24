@@ -1,8 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { useAuth } from "@/features/auth/auth.queries";
+import { authKeys, useAuth } from "@/features/auth/auth.queries";
 import { cn } from "@/lib/utils";
 
 import { useLatestVerification } from "./application.queries";
@@ -17,6 +19,7 @@ import { SellerApplicationForm } from "./components/SellerApplicationForm";
  * ไม่ได้อยู่ใต้ /seller ที่บังคับบทบาท SELLER
  */
 export function SellerApplicationPage() {
+  const queryClient = useQueryClient();
   const { user, hasRole } = useAuth();
   const {
     data: latest,
@@ -25,7 +28,18 @@ export function SellerApplicationPage() {
     refetch,
   } = useLatestVerification();
 
-  if (hasRole("SELLER")) {
+  const isSeller = hasRole("SELLER");
+  const isApproved = latest?.status === "APPROVED";
+
+  useEffect(() => {
+    // แอดมินอนุมัติแล้ว แต่ `/auth/me` ใน cache ยังเป็นของก่อนได้ role
+    // ดึงใหม่ให้ได้ SELLER แล้ว redirect ข้างล่างพาเข้าหลังบ้านเอง ไม่ต้อง logout/login
+    if (isApproved && !isSeller) {
+      void queryClient.invalidateQueries({ queryKey: authKeys.me() });
+    }
+  }, [isApproved, isSeller, queryClient]);
+
+  if (isSeller) {
     return <Navigate to="/seller" replace />;
   }
 
