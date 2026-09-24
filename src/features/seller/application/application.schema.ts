@@ -1,16 +1,14 @@
 import { z } from "zod";
 
-import {
-  BANK_BOOK_MAX_BYTES,
-  BANK_BOOK_TYPES,
-  BANK_ITEMS,
-} from "./application.constants";
+import { BANK_ITEMS } from "./application.constants";
 
 /**
- * ชื่อ ธนาคาร และเลขบัญชี ตั้งให้ตรงกับ Bean Validation ของ `VerificationRequest`
- * ถ้าฝั่งโน้นแก้กติกา ต้องตามมาแก้ที่นี่
+ * ชื่อ ธนาคาร เลขบัญชี และ key ของรูป ตั้งให้ตรงกับ Bean Validation ของ
+ * `VerificationRequest` ถ้าฝั่งโน้นแก้กติกา ต้องตามมาแก้ที่นี่
  *
- * รูปสมุดบัญชีกับการยอมรับเงื่อนไขตรวจแค่ฝั่งหน้าเว็บ backend ยังไม่มีช่องรับ
+ * ตัวไฟล์รูปไม่อยู่ในฟอร์ม — `useFileUpload()` อัปขึ้น object storage และตรวจ
+ * ชนิด/ขนาดไปแล้ว ฟอร์มถือแค่ object key ที่ได้กลับมา
+ * การยอมรับเงื่อนไขตรวจแค่ฝั่งหน้าเว็บ backend ไม่มีช่องรับ
  */
 export const sellerApplicationSchema = z.object({
   legalFirstName: z
@@ -36,10 +34,10 @@ export const sellerApplicationSchema = z.object({
       (value) => value.replace(/\D/g, "").length >= 10,
       "เลขที่บัญชีต้องมีอย่างน้อย 10 หลัก",
     ),
-  bankBook: z
-    .file({ error: "กรุณาแนบรูปหน้าสมุดบัญชีหรือหน้าแอปธนาคาร" })
-    .mime([...BANK_BOOK_TYPES], { error: "รองรับเฉพาะไฟล์ JPG หรือ PNG" })
-    .max(BANK_BOOK_MAX_BYTES, { error: "ไฟล์ต้องมีขนาดไม่เกิน 5 MB" }),
+  bankBookImageKey: z
+    .string()
+    .min(1, "กรุณาแนบรูปหน้าสมุดบัญชีหรือหน้าแอปธนาคาร")
+    .max(500),
   acceptTerms: z.literal(true, {
     error: "กรุณายืนยันข้อมูลและยอมรับเงื่อนไขก่อนส่งคำขอ",
   }),
