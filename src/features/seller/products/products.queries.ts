@@ -11,6 +11,7 @@ import {
 import type { PageResponse } from "@/lib/api";
 
 import * as productsApi from "./products.api";
+import { runWithConcurrency } from "./products.bulk";
 import type {
   ListingPricePayload,
   ListingQuery,
@@ -193,5 +194,55 @@ export function useDeleteListing() {
       queryClient.removeQueries({ queryKey: listingKeys.detail(id) }),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
+  });
+}
+
+/** งานหนึ่งใบใน bulk action — เปลี่ยนสถานะ หรือตั้งราคาเอง (MANUAL) ใหม่ */
+export type BulkListingJob =
+  { id: number; status: ListingStatus } | { id: number; price: number };
+
+export type BulkListingResult = {
+  succeeded: number;
+  failed: { id: number; error: unknown }[];
+};
+
+/** ยิงพร้อมกันได้ไม่เกินเท่านี้ ดู `runWithConcurrency` */
+const BULK_CONCURRENCY = 4;
+
+function runBulkJob(job: BulkListingJob): Promise<SellerListing> {
+  return "status" in job
+    ? productsApi.changeListingStatus(job.id, job.status)
+    : productsApi.changeListingPrice(job.id, {
+        pricingMode: "MANUAL",
+        price: job.price,
+      });
+}
+
+/**
+ * แก้หลายประกาศพร้อมกัน — ไม่เดาผลล่วงหน้าเหมือนแก้ทีละใบ เพราะบางใบอาจพลาด
+ * รอจบทั้งชุดแล้วดึงใหม่ทีเดียว ใบที่พลาดคืนมาใน `failed` ให้หน้าจอบอกผู้ขาย
+ */
+export function useBulkListingUpdate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (jobs: BulkListingJob[]): Promise<BulkListingResult> => {
+      const results = await runWithConcurrency(
+        jobs,
+        BULK_CONCURRENCY,
+        runBulkJob,
+      );
+      const failed = results.flatMap((result, index) =>
+        result.status === "rejected"
+          ? [{ id: jobs[index].id, error: result.reason }]
+          : [],
+      );
+      return { succeeded: jobs.length - failed.length, failed };
+    },
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: listingKeys.details() }),
+      ]),
   });
 }

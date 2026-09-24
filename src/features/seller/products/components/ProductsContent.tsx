@@ -12,14 +12,22 @@ import { usePublishPermission } from "@/features/seller/shared/seller.queries";
 import { LISTING_STATUS_LABEL, listingErrorMessage } from "../products.format";
 import {
   LISTING_STATUSES,
+  useBulkListingUpdate,
   useChangeListingStatus,
   useDeleteListing,
   useListingCounts,
   useMyListings,
+  type BulkListingJob,
 } from "../products.queries";
-import { canMoveTo } from "../products.rules";
+import {
+  activateBlockedReason,
+  adjustPrice,
+  canBulkReprice,
+  canMoveTo,
+} from "../products.rules";
 import type { ListingStatus, SellerListingSummary } from "../products.types";
 
+import { BulkPriceDialog } from "./BulkPriceDialog";
 import { DeleteProductDialog } from "./DeleteProductDialog";
 import { ProductBulkBar } from "./ProductBulkBar";
 import { ProductFilterBar } from "./ProductFilterBar";
@@ -29,11 +37,11 @@ import { ProductTableSkeleton } from "./ProductTableSkeleton";
 
 const PAGE_SIZE = 20;
 
-const BULK_ACTIONS = [
-  { id: "edit-price", label: "แก้ไขราคาพร้อมกัน" },
-  { id: "restock", label: "เติมสต็อก" },
-  { id: "unpublish", label: "ปิดการขาย" },
-];
+function canActivate(listing: SellerListingSummary): boolean {
+  return (
+    canMoveTo(listing, "ACTIVE") && activateBlockedReason(listing) === null
+  );
+}
 
 function readStatus(value: string | null): ListingStatus | undefined {
   return LISTING_STATUSES.find((status) => status === value);
@@ -59,14 +67,17 @@ export function ProductsContent() {
   const { canPublish } = usePublishPermission();
   const changeStatus = useChangeListingStatus();
   const deleteListing = useDeleteListing();
+  const bulk = useBulkListingUpdate();
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<SellerListingSummary | null>(
     null,
   );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isBulkPriceOpen, setIsBulkPriceOpen] = useState(false);
 
   const rows = listings.data?.items ?? [];
+  const selectedRows = rows.filter((row) => selectedIds.includes(row.id));
   const totalPages = listings.data?.totalPages ?? 0;
 
   // ลบแถวสุดท้ายของหน้าสุดท้ายแล้วหน้านั้นหายไป — ถอยกลับไปหน้าสุดท้ายที่ยังมีของ
@@ -147,6 +158,51 @@ export function ProductsContent() {
     );
   }
 
+  /**
+   * ใบที่ทำไม่ได้ (สถานะไม่รองรับ ราคาตามตลาด ฯลฯ) ข้ามไปเลยและนับไว้บอกผู้ขาย
+   * ใบที่พลาดยังเลือกค้างไว้ กดซ้ำได้ทันที ใบที่สำเร็จหลุดจากการเลือก
+   */
+  function runBulk(title: string, jobs: BulkListingJob[]) {
+    const skipped = selectedRows.length - jobs.length;
+    bulk.mutate(jobs, {
+      onSuccess: ({ succeeded, failed }) => {
+        setSelectedIds(failed.map((failure) => failure.id));
+        const parts = [`สำเร็จ ${succeeded} รายการ`];
+        if (skipped > 0) parts.push(`ข้าม ${skipped} รายการที่ทำไม่ได้`);
+        if (failed.length > 0) {
+          parts.push(
+            `ไม่สำเร็จ ${failed.length} รายการ: ${listingErrorMessage(failed[0].error, "ลองใหม่อีกครั้ง")}`,
+          );
+        }
+        toast.add({
+          type: failed.length > 0 ? "error" : "success",
+          title,
+          description: parts.join(" · "),
+        });
+      },
+    });
+  }
+
+  function handleBulkStatus(target: "ACTIVE" | "PAUSED") {
+    const eligible = selectedRows.filter((row) =>
+      target === "ACTIVE" ? canActivate(row) : canMoveTo(row, target),
+    );
+    runBulk(
+      target === "ACTIVE" ? "เปิดขาย" : "พักการขาย",
+      eligible.map((row) => ({ id: row.id, status: target })),
+    );
+  }
+
+  function handleBulkPrice(percent: number) {
+    setIsBulkPriceOpen(false);
+    runBulk(
+      "ปรับราคา",
+      selectedRows
+        .filter(canBulkReprice)
+        .map((row) => ({ id: row.id, price: adjustPrice(row.price, percent) })),
+    );
+  }
+
   function handleToggleRow(id: number) {
     setSelectedIds((current) =>
       current.includes(id)
@@ -190,8 +246,18 @@ export function ProductsContent() {
       {selectedIds.length > 0 ? (
         <ProductBulkBar
           selectedCount={selectedIds.length}
-          actions={BULK_ACTIONS}
+          eligible={{
+            reprice: selectedRows.filter(canBulkReprice).length,
+            activate: selectedRows.filter(canActivate).length,
+            pause: selectedRows.filter((row) => canMoveTo(row, "PAUSED"))
+              .length,
+          }}
+          readOnly={!canPublish}
+          isPending={bulk.isPending}
           onClear={() => setSelectedIds([])}
+          onReprice={() => setIsBulkPriceOpen(true)}
+          onActivate={() => handleBulkStatus("ACTIVE")}
+          onPause={() => handleBulkStatus("PAUSED")}
         />
       ) : null}
 
@@ -249,6 +315,13 @@ export function ProductsContent() {
           />
         )}
       </QueryBoundary>
+
+      <BulkPriceDialog
+        open={isBulkPriceOpen}
+        onOpenChange={setIsBulkPriceOpen}
+        listings={selectedRows}
+        onSubmit={handleBulkPrice}
+      />
 
       <DeleteProductDialog
         listing={deleteTarget}

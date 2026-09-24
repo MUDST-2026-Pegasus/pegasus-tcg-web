@@ -1,3 +1,4 @@
+import { roundMoney } from "./products.format";
 import type { ListingStatus, SellerListingSummary } from "./products.types";
 
 /**
@@ -83,4 +84,14 @@ export function activateBlockedReason(
     return "ยังไม่มีการ์ดบนประกาศ เติมสต็อกก่อน";
   }
   return null;
+}
+
+/** ปรับราคาแบบรวมได้เฉพาะใบที่แก้ราคาในตารางได้ — ราคาเอง (MANUAL) ที่ยังไม่ปิด */
+export function canBulkReprice(listing: SellerListingSummary): boolean {
+  return listing.pricingMode === "MANUAL" && isPriceEditable(listing);
+}
+
+/** ราคาใหม่หลังปรับ % — ปัดเป็นสตางค์ ไม่ต่ำกว่า 0.01 ตาม `@DecimalMin` ของ `ListingPriceRequest` */
+export function adjustPrice(price: number, percent: number): number {
+  return Math.max(0.01, roundMoney(price * (1 + percent / 100)));
 }
