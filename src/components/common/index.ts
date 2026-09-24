@@ -5,6 +5,8 @@
 
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
+export { FileDropzone } from "./FileDropzone";
+export { FileUpload } from "./FileUpload";
 export { ItemCard, type ItemCardProps } from "./ItemCard";
 export { LoadingState } from "./LoadingState";
 export { PagePlaceholder } from "./PagePlaceholder";
