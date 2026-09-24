@@ -77,22 +77,25 @@ export function ProductsContent() {
   const [isBulkPriceOpen, setIsBulkPriceOpen] = useState(false);
 
   const rows = listings.data?.items ?? [];
+  // นับเฉพาะใบที่ยังอยู่ในหน้านี้ — ใบที่เพิ่งย้ายสถานะหลุดตัวกรองไปแล้วไม่ควรค้างในการเลือก
   const selectedRows = rows.filter((row) => selectedIds.includes(row.id));
-  const totalPages = listings.data?.totalPages ?? 0;
+  const lastPage = Math.max(listings.data?.totalPages ?? 1, 1);
+  const hasPage = listings.data !== undefined && !listings.isPlaceholderData;
 
-  // ลบแถวสุดท้ายของหน้าสุดท้ายแล้วหน้านั้นหายไป — ถอยกลับไปหน้าสุดท้ายที่ยังมีของ
+  // ลบแถวสุดท้ายของหน้าสุดท้าย หรือเปิดลิงก์เก่าที่เลขหน้าเกิน — ถอยไปหน้าสุดท้ายที่มีจริง
   useEffect(() => {
-    if (!listings.isPlaceholderData && totalPages > 0 && page > totalPages) {
+    if (hasPage && page > lastPage) {
       setSearchParams(
         (current) => {
           const next = new URLSearchParams(current);
-          next.set("page", String(totalPages));
+          if (lastPage <= 1) next.delete("page");
+          else next.set("page", String(lastPage));
           return next;
         },
         { replace: true },
       );
     }
-  }, [listings.isPlaceholderData, page, totalPages, setSearchParams]);
+  }, [hasPage, page, lastPage, setSearchParams]);
 
   function updateParams(changes: {
     status?: ListingStatus | null;
@@ -212,8 +215,8 @@ export function ProductsContent() {
   }
 
   function handleToggleAll() {
-    setSelectedIds((current) =>
-      current.length === rows.length ? [] : rows.map((row) => row.id),
+    setSelectedIds(
+      selectedRows.length === rows.length ? [] : rows.map((row) => row.id),
     );
   }
 
@@ -243,9 +246,9 @@ export function ProductsContent() {
         onStatusChange={(next) => updateParams({ status: next ?? null })}
       />
 
-      {selectedIds.length > 0 ? (
+      {selectedRows.length > 0 ? (
         <ProductBulkBar
-          selectedCount={selectedIds.length}
+          selectedCount={selectedRows.length}
           eligible={{
             reprice: selectedRows.filter(canBulkReprice).length,
             activate: selectedRows.filter(canActivate).length,
@@ -295,7 +298,7 @@ export function ProductsContent() {
         {(data) => (
           <ProductTable
             rows={data.items}
-            selectedIds={selectedIds}
+            selectedIds={selectedRows.map((row) => row.id)}
             onToggleRow={handleToggleRow}
             onToggleAll={handleToggleAll}
             onDeleteRow={handleRequestDelete}
