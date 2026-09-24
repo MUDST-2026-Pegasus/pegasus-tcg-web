@@ -49,10 +49,14 @@ export const registerSchema = z.object({
   displayName,
   email,
   password,
+  confirmPassword: z.string(),
   phone,
   acceptTerms: z.literal(true, {
     error: "Please accept the Terms of Service and Privacy Policy",
   }),
+}).refine((values) => values.password === values.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "Passwords do not match",
 });
 
 export const forgotPasswordSchema = z.object({ email });

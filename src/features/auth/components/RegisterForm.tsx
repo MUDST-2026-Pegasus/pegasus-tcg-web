@@ -33,6 +33,7 @@ export function RegisterForm() {
       displayName: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -135,14 +136,17 @@ export function RegisterForm() {
             <FieldDescription>At least 8 characters</FieldDescription>
           )}
         </Field>
-        <Field>
+        <Field data-invalid={Boolean(errors.confirmPassword) || undefined}>
           <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
           <Input
             id="confirmPassword"
             type="password"
             placeholder="Confirm your password"
+            aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"
+            {...register("confirmPassword")}
           />
+          <FieldError errors={[errors.confirmPassword]} />
         </Field>
         <Field orientation="horizontal">
           <Controller
