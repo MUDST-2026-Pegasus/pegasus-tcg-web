@@ -27,7 +27,8 @@ src/
     ui/           shadcn — CLI เขียนทับได้ ห้ามแก้เอง
     layout/       โครงหน้า: PublicLayout, DashboardLayout, AuthLayout, Navbar, Footer, AppSidebar
     common/       component กลางที่ใช้ข้าม feature — import จาก "@/components/common"
-                  QueryBoundary / LoadingState / ErrorState / EmptyState, PagePlaceholder, RouteError
+                  QueryBoundary / LoadingState / ErrorState / EmptyState, PagePlaceholder, RouteError,
+                  FileUpload / FileDropzone
   features/       งานหลักของแต่ละคนอยู่ที่นี่
     <feature>/
       pages/        หน้าที่ feature นี้เป็นเจ้าของ
@@ -35,9 +36,10 @@ src/
 
       ── หรือแบบ "โมดูลต่อหน้า" เมื่อ feature มีหลายหน้าและแต่ละหน้ามีข้อมูลของตัวเอง
          (ตอนนี้ seller ใช้แบบนี้ ดูหัวข้อ "feature ที่มีหลายหน้า" ด้านล่าง)
-  hooks/          hook ที่ใช้ร่วมกันทั้งแอป
+  hooks/          hook ที่ใช้ร่วมกันทั้งแอป เช่น useFileUpload
   lib/
     api/          ชั้นเชื่อม backend — ดูหัวข้อ "ต่อ API" ด้านล่าง
+    upload/       presign → PUT → object key — ดูหัวข้อ "อัปโหลดไฟล์" ด้านล่าง
     env.ts        ค่าจาก .env ทั้งหมดอ่านผ่านไฟล์นี้ที่เดียว
     form.ts       แปลง error จาก backend ไปแปะที่ช่องกรอก
     utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
@@ -287,6 +289,54 @@ toast({ description: getErrorMessage(error, "ทำรายการไม่�
 
 ในฟอร์ม ใช้ `applyApiErrors` จาก `@/lib/form` แปะ error ลงช่องที่ผิดให้อัตโนมัติ
 (ดูตัวอย่างเต็มที่ `features/auth/components/RegisterForm.tsx`)
+
+### อัปโหลดไฟล์ (รูป / สลิป / เอกสาร)
+
+ไฟล์ **ไม่ผ่าน API ของเรา** — เว็บขอ presigned URL จาก `POST /uploads/presign` แล้ว PUT
+ขึ้น object storage (MinIO) ตรง ๆ ได้ `objectKey` กลับมา แล้วค่อยส่ง key นั้นไปกับ endpoint
+ที่เป็นเจ้าของข้อมูล (ประกาศขาย, สลิป, คำขอคืนสินค้า ฯลฯ) ทั้งหมดนี้ห่อไว้ใน `useFileUpload()`
+แล้ว **อย่าเขียน presign / PUT เอง**
+
+```tsx
+import { FileUpload } from "@/components/common";
+import { useFileUpload } from "@/hooks/use-file-upload";
+
+const photos = useFileUpload({
+  purpose: "LISTING_IMAGE", // ตรงกับ UploadPurpose.java — ตัดสินชนิด ขนาด และสิทธิ์
+  multiple: true,
+  maxFiles: 8,
+  // ได้ key ครบชุดทุกครั้งที่มีไฟล์อัปเสร็จหรือถูกลบ เรียงตามลำดับที่เลือก
+  onChange: (keys) =>
+    setValue("imageKeys", keys, { shouldValidate: keys.length > 0 }),
+});
+
+<FileUpload id="imageKeys" upload={photos} invalid={Boolean(errors.imageKeys)} />
+<Button type="submit" disabled={isSubmitting || photos.isUploading}>บันทึก</Button>
+```
+
+ได้อะไรมาเลยโดยไม่ต้องเขียนเพิ่ม
+
+- เลือกไฟล์แล้วอัปทันที หลายไฟล์พร้อมกัน แต่ละไฟล์มี progress ยกเลิก / ลบ / ลองใหม่ได้
+- ตรวจชนิดและขนาดตาม `UPLOAD_RULES` (ลอกจาก `UploadPurpose.java`) ก่อนยิง
+  ไฟล์ผิดขึ้นเป็นรายการสีแดงพร้อมข้อความภาษาไทยว่าผิดตรงไหน
+- presigned URL หมดอายุ (storage ตอบ 403) ขอ URL ใหม่แล้วลองซ้ำให้เอง
+- ออกจากหน้าแล้วยกเลิกที่ค้างอยู่ และคืนหน่วยความจำของรูปตัวอย่างให้
+
+กติกา
+
+- ฟอร์มเก็บ **object key** ไม่ใช่ `File` และไม่ใช่ URL — schema เป็น `z.string()` / `z.array(z.string())`
+- ปิดปุ่มส่งระหว่าง `isUploading` ไม่งั้นไฟล์ที่ยังอัปไม่เสร็จจะหลุดไปจากคำขอ
+- อยากได้หน้าตาเฉพาะ ใช้ hook คู่กับ `FileDropzone` แล้ววาดรายการเอง
+  (ตัวอย่าง: `features/seller/application/components/BankBookUpload.tsx`)
+- ไม่ได้อยู่ใน React (เช่นอัปจาก util) เรียก `uploadFile(file, purpose)` จาก `@/lib/upload` ได้
+- backend เพิ่ม purpose ใหม่ ต้องเพิ่มใน `src/lib/upload/upload.types.ts` และ `upload.rules.ts` ให้ตรงกัน
+- รูปที่ backend ส่งกลับมาเป็น presigned GET อายุสั้น (เช่น `bankBookImageUrl`)
+  ห้ามเก็บลง localStorage หรือใส่ใน URL หมดอายุแล้วให้ดึงข้อมูลชิ้นนั้นใหม่
+
+ตอน dev เบราว์เซอร์ PUT ไปที่ MinIO (`localhost:9000`) ตรง ๆ MinIO จึงต้องยอม CORS จาก
+`localhost:5173` ด้วย — ใน `.env` ของ `pegasus-tcg-api` ตั้ง
+`CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173` แล้ว `docker compose up -d minio`
+ใหม่ ถ้าไม่ตั้ง อัปโหลดจะพังด้วย "เชื่อมต่อไม่ได้" ทั้งที่ presign ผ่าน
 
 ### สถานะ login
 
