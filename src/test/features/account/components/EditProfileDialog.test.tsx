@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
-import { EditProfileDialog } from './EditProfileDialog';
-import * as profileQueries from '../profile.queries';
+import { EditProfileDialog } from '@/features/account/components/EditProfileDialog';
+import * as profileQueries from '@/features/account/profile.queries';
 
 const mockUser = {
   id: 'user-1',

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { screen, render } from '@testing-library/react';
-import { ItemCard, type ItemCardProps } from './ItemCard';
+import { ItemCard, type ItemCardProps } from '@/components/common/ItemCard';
 
 describe('ItemCard', () => {
   const mockItem: ItemCardProps = {

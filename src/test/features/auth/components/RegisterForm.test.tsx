@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
-import { RegisterForm } from './RegisterForm';
-import * as authQueries from '../auth.queries';
+import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import * as authQueries from '@/features/auth/auth.queries';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
