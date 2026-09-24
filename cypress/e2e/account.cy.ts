@@ -1,12 +1,5 @@
 describe('Account & Profile Flow', () => {
   beforeEach(() => {
-    // Setup authenticated state using API mocks
-    window.localStorage.setItem('pegasus.auth.session', JSON.stringify({
-      accessToken: 'mock-access',
-      refreshToken: 'mock-refresh',
-      accessExpiresAt: Date.now() + 3600000
-    }));
-
     cy.intercept('GET', '**/auth/me', {
       statusCode: 200,
       body: {
@@ -37,9 +30,20 @@ describe('Account & Profile Flow', () => {
     }).as('updateProfile');
   });
 
+  const visitProfile = () => {
+    cy.visit('/account/profile', {
+      onBeforeLoad(win) {
+        win.localStorage.setItem('pegasus.auth.session', JSON.stringify({
+          accessToken: 'mock-access',
+          refreshToken: 'mock-refresh',
+          accessExpiresAt: Date.now() + 3600000
+        }));
+      }
+    });
+  };
+
   it('allows user to view and open edit profile dialog', () => {
-    // Assuming /account or /profile is the route for account settings
-    cy.visit('/account/profile');
+    visitProfile();
     cy.wait('@meRequest');
 
     // Should see user's display name somewhere on the page
@@ -51,11 +55,12 @@ describe('Account & Profile Flow', () => {
     // Dialog should be open
     cy.get('div[role="dialog"]').should('be.visible');
     cy.get('input[name="displayName"]').should('have.value', 'John Doe');
-    cy.get('input[name="email"]').should('be.disabled').and('have.value', 'test@example.com');
+    cy.get('#email').should('have.attr', 'disabled');
+    cy.get('#email').should('have.value', 'test@example.com');
   });
 
   it('allows user to save profile changes', () => {
-    cy.visit('/account/profile');
+    visitProfile();
     cy.wait('@meRequest');
 
     cy.contains(/edit profile/i).click();

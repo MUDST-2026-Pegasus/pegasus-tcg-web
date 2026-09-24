@@ -1,7 +1,7 @@
 describe('Catalog UI', () => {
   beforeEach(() => {
-    // Mock the catalog API request. Adjust the endpoint based on the actual API.
-    cy.intercept('GET', '**/products*', {
+    // Mock the catalog API request.
+    cy.intercept('GET', '**/api/v1/products*', {
       statusCode: 200,
       body: {
         success: true,
