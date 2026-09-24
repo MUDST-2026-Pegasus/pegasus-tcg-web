@@ -87,7 +87,7 @@ describe('Authentication Flow', () => {
     cy.get('input[name="email"]').type('newuser@example.com');
     cy.get('input[name="password"]').type('password123');
     cy.get('input[name="confirmPassword"]').type('password123');
-    cy.get('button[role="checkbox"]').click();
+    cy.get('#terms').click();
     cy.get('button[type="submit"]').click();
 
     cy.wait('@registerRequest');
