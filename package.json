@@ -10,8 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cyopen": "cypress open",
+    "cyrun": "cypress run"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
