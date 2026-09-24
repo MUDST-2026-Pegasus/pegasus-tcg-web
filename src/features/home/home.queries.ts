@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
+import * as catalogApi from "@/features/catalog/catalog.api";
+import { catalogKeys } from "@/features/catalog/catalog.queries";
+import type { ProductQuery } from "@/features/catalog/catalog.types";
 import { env } from "@/lib/env";
 
 import * as homeApi from "./home.api";
@@ -18,6 +21,8 @@ import type { HeroSlide } from "./home.types";
  * ไม่ลากทั้งหน้าลงไปด้วย
  *
  * รูปทุกรูปเป็น presigned URL อายุ 15 นาที จึงไม่ตั้ง staleTime ยาวกว่าค่ากลาง
+ *
+ * เกม หมวดหมู่ และรายการสินค้าแคชใต้ `catalogKeys` ร่วมกับหน้าค้นหา
  */
 
 export const HOME_PRODUCT_COUNT = 10;
@@ -26,14 +31,19 @@ const RAIL_COUNT = 10;
 export const homeKeys = {
   all: ["home"] as const,
   banners: () => [...homeKeys.all, "banners"] as const,
-  games: () => [...homeKeys.all, "games"] as const,
-  categories: () => [...homeKeys.all, "categories"] as const,
-  newReleases: () => [...homeKeys.all, "new-releases"] as const,
   trending: () => [...homeKeys.all, "trending"] as const,
   pegasusPicks: (username: string) =>
     [...homeKeys.all, "pegasus-picks", username] as const,
-  explore: () => [...homeKeys.all, "explore"] as const,
 };
+
+const NEW_RELEASES: ProductQuery = {
+  sort: "newest",
+  inStock: true,
+  size: HOME_PRODUCT_COUNT,
+};
+
+/** หน้าถัดจาก New Releases — ไม่ซ้ำกับแถวบนสุด */
+const EXPLORE_MORE: ProductQuery = { ...NEW_RELEASES, page: 1 };
 
 export function useHeroSlides() {
   return useQuery({
@@ -48,16 +58,16 @@ export function useHeroSlides() {
 
 export function useGames() {
   return useQuery({
-    queryKey: homeKeys.games(),
-    queryFn: homeApi.getGames,
+    queryKey: catalogKeys.games(),
+    queryFn: catalogApi.getGames,
     select: (games) => games.map(toGameCategory),
   });
 }
 
 export function useFeaturedCategories() {
   return useQuery({
-    queryKey: homeKeys.categories(),
-    queryFn: homeApi.getCategories,
+    queryKey: catalogKeys.categories(),
+    queryFn: catalogApi.getCategories,
     select: toFeaturedCategories,
   });
 }
@@ -65,13 +75,8 @@ export function useFeaturedCategories() {
 /** ของใหม่ที่ซื้อได้ตอนนี้ 10 ชิ้นแรก */
 export function useNewReleases() {
   return useQuery({
-    queryKey: homeKeys.newReleases(),
-    queryFn: () =>
-      homeApi.getProducts({
-        sort: "newest",
-        inStock: true,
-        size: HOME_PRODUCT_COUNT,
-      }),
+    queryKey: catalogKeys.products(NEW_RELEASES),
+    queryFn: () => catalogApi.getProducts(NEW_RELEASES),
     select: (page) => page.items.map(toHomeProduct),
   });
 }
@@ -94,17 +99,10 @@ export function usePegasusPicks() {
   });
 }
 
-/** หน้าถัดจาก New Releases — ไม่ซ้ำกับแถวบนสุด */
 export function useExploreMore() {
   return useQuery({
-    queryKey: homeKeys.explore(),
-    queryFn: () =>
-      homeApi.getProducts({
-        sort: "newest",
-        inStock: true,
-        page: 1,
-        size: HOME_PRODUCT_COUNT,
-      }),
+    queryKey: catalogKeys.products(EXPLORE_MORE),
+    queryFn: () => catalogApi.getProducts(EXPLORE_MORE),
     select: (page) => page.items.map(toHomeProduct),
   });
 }

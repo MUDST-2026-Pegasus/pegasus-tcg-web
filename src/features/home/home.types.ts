@@ -1,3 +1,8 @@
+import type {
+  CardCondition,
+  ProductSummaryDto,
+} from "@/features/catalog/catalog.types";
+
 // ---------- สิ่งที่ UI หน้าแรกใช้วาด ----------
 
 export type HeroAction = {
@@ -50,18 +55,6 @@ export type TrendingProduct = HomeProduct & {
 
 // ---------- สิ่งที่ backend ส่งมา (ลอกจาก dto/*.java ถ้าฝั่งนั้นแก้ ต้องแก้ตาม) ----------
 
-export type ProductType =
-  | "SINGLE_CARD"
-  | "BOOSTER_PACK"
-  | "BOOSTER_BOX"
-  | "ELITE_TRAINER_BOX"
-  | "STARTER_DECK"
-  | "BUNDLE"
-  | "ACCESSORY"
-  | "OTHER";
-
-export type CardCondition = "NM" | "LP" | "MP" | "HP" | "DMG" | "SEALED";
-
 /** `HomeBannerResponse` — `GET /home/banners` */
 export type HomeBannerDto = {
   id: number;
@@ -75,48 +68,6 @@ export type HomeBannerDto = {
   primaryHref: string | null;
   secondaryLabel: string | null;
   secondaryHref: string | null;
-};
-
-/** `Game` — `GET /games`; `logoUrl` เป็น URL ที่เปิดได้เลย (backend เซ็นให้แล้ว) */
-export type GameDto = {
-  id: number;
-  code: string;
-  name: string;
-  nameLocal: string | null;
-  slug: string;
-  logoUrl: string | null;
-  displayOrder: number;
-};
-
-/** `CategoryResponse` — `GET /categories` */
-export type CategoryDto = {
-  id: number;
-  gameId: number | null;
-  parentId: number | null;
-  code: string;
-  name: string;
-  slug: string;
-  displayOrder: number;
-  imageUrl: string | null;
-};
-
-/** `ProductSummaryResponse` — `GET /catalog/products` */
-export type ProductSummaryDto = {
-  id: number;
-  slug: string;
-  name: string;
-  nameLocal: string | null;
-  gameId: number;
-  categoryId: number;
-  cardSetId: number | null;
-  productType: ProductType;
-  cardNumber: string | null;
-  rarityCode: string | null;
-  primaryImageUrl: string | null;
-  variantCount: number;
-  /** ราคาถูกสุดที่มีขายตอนนี้ (บาท); null = ไม่มีใครขาย */
-  lowestPrice: number | null;
-  listingCount: number;
 };
 
 /** `TrendingProductResponse` — `GET /catalog/trending` */
@@ -149,13 +100,4 @@ export type PublicListingDto = {
     displayName: string;
     avatarUrl: string | null;
   };
-};
-
-export type ProductQuery = {
-  sort?: "name" | "newest" | "cardNumber";
-  inStock?: boolean;
-  gameId?: number;
-  categoryId?: number;
-  page?: number;
-  size?: number;
 };

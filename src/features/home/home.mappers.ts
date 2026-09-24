@@ -1,42 +1,27 @@
 import pegasusCampaignTable from "@/assets/home/pegasus-campaign-table.jpeg";
+import {
+  CONDITION_LABELS,
+  PRODUCT_TYPE_LABELS,
+  productHref,
+} from "@/features/catalog/catalog.mappers";
+import type {
+  CategoryDto,
+  GameDto,
+  ProductSummaryDto,
+} from "@/features/catalog/catalog.types";
 
 import type {
-  CardCondition,
-  CategoryDto,
   GameCategory,
-  GameDto,
   HeroSlide,
   HomeBannerDto,
   HomeProduct,
   ProductCategory,
-  ProductSummaryDto,
-  ProductType,
   PublicListingDto,
   TrendingProduct,
   TrendingProductDto,
 } from "./home.types";
 
 /** แปลงข้อมูลจาก backend ให้เป็นรูปที่ component หน้าแรกใช้ — ไม่มี React ในไฟล์นี้ */
-
-const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
-  SINGLE_CARD: "Single Card",
-  BOOSTER_PACK: "Booster Pack",
-  BOOSTER_BOX: "Booster Box",
-  ELITE_TRAINER_BOX: "Elite Trainer Box",
-  STARTER_DECK: "Starter Deck",
-  BUNDLE: "Bundle",
-  ACCESSORY: "Accessory",
-  OTHER: "Other",
-};
-
-const CONDITION_LABELS: Record<CardCondition, string> = {
-  NM: "Near Mint",
-  LP: "Lightly Played",
-  MP: "Moderately Played",
-  HP: "Heavily Played",
-  DMG: "Damaged",
-  SEALED: "Sealed",
-};
 
 const THEMES = {
   CAMPAIGN: "campaign",
@@ -57,10 +42,6 @@ export const FALLBACK_HERO_SLIDE: HeroSlide = {
   primaryAction: { label: "Shop New Releases", href: "/search?sort=newest" },
   secondaryAction: { label: "Explore Cards", href: "/search" },
 };
-
-export function productHref(slug: string): string {
-  return `/products/${encodeURIComponent(slug)}`;
-}
 
 export function toHeroSlide(banner: HomeBannerDto): HeroSlide | null {
   // สไลด์ที่ไม่มีรูปวาดไม่ได้ — ข้ามไปดีกว่าโชว์กรอบว่าง

@@ -11,6 +11,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { formatPrice } from "@/features/catalog/catalog.mappers";
 import {
   FeaturedSkeleton,
   GamesSkeleton,
@@ -37,16 +38,6 @@ import type {
 } from "@/features/home/home.types";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
-
-const currencyFormatter = new Intl.NumberFormat("th-TH", {
-  style: "currency",
-  currency: "THB",
-  maximumFractionDigits: 0,
-});
-
-function formatPrice(price: number | null): string {
-  return price === null ? "Out of stock" : currencyFormatter.format(price);
-}
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
 const HERO_CAROUSEL_INTERVAL_MS = 4000;
