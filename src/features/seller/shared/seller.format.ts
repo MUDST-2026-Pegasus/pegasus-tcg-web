@@ -1,7 +1,7 @@
 import { initialsOf } from "@/features/account/account.format";
 import type { AuthUser } from "@/features/auth/auth.types";
 
-import type { SellerStatus } from "./seller.types";
+import type { SellerProfile, SellerStatus } from "./seller.types";
 
 const bahtWhole = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const bahtSatang = new Intl.NumberFormat("en-US", {
@@ -49,3 +49,23 @@ export const SELLER_STATUS_LABEL: Record<SellerStatus, string> = {
   REJECTED: "ยืนยันตัวตนไม่ผ่าน",
   SUSPENDED: "ร้านถูกระงับ",
 };
+
+/**
+ * ทำไมตอนนี้ลงขายหรือแก้ประกาศไม่ได้ — `null` = ทำได้
+ * backend ตรวจซ้ำทุกครั้งที่เขียนอยู่แล้ว (`SELLER_NOT_VERIFIED`) ตรงนี้มีไว้บอกผู้ขายก่อนกด
+ */
+export function publishBlockedReason(profile: SellerProfile): string | null {
+  if (profile.canPublish) {
+    return null;
+  }
+  switch (profile.status) {
+    case "SUSPENDED":
+      return "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ";
+    case "PENDING":
+      return "รอแอดมินตรวจเอกสารยืนยันตัวตน ลงขายได้หลังได้รับอนุมัติ";
+    case "REJECTED":
+      return "เอกสารยืนยันตัวตนไม่ผ่าน ต้องยื่นใหม่และได้รับอนุมัติก่อนจึงจะลงขายได้";
+    default:
+      return "ต้องยืนยันตัวตนผู้ขายก่อนจึงจะลงขายได้";
+  }
+}

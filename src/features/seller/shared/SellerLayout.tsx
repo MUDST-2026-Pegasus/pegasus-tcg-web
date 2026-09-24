@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/features/auth/auth.queries";
 
 import { SellerSidebar } from "./SellerSidebar";
+import { SellerStatusBanner } from "./SellerStatusBanner";
 import { toSellerIdentity } from "./seller.format";
 import { useSellerProfile } from "./seller.queries";
 
@@ -44,6 +45,7 @@ export function SellerLayout() {
           </header>
 
           <div className="flex-1 bg-muted px-8 pt-7 pb-10">
+            <SellerStatusBanner profile={profile} />
             <Outlet />
           </div>
         </SidebarInset>
