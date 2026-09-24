@@ -1,3 +1,6 @@
+import { initialsOf } from "@/features/account/account.format";
+import type { AuthUser } from "@/features/auth/auth.types";
+
 const bahtWhole = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const bahtSatang = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
@@ -11,4 +14,27 @@ const bahtSatang = new Intl.NumberFormat("en-US", {
 export function formatBaht(amount: number): string {
   const formatter = Number.isInteger(amount) ? bahtWhole : bahtSatang;
   return `฿${formatter.format(amount)}`;
+}
+
+/**
+ * ชื่อและรูปของผู้ขายที่ login อยู่ — มาจากโปรไฟล์ผู้ใช้ (`useAuth()`) ไม่ใช่ `/sellers/me`
+ * เพราะโปรไฟล์ผู้ใช้คือหน้าร้าน [RQ-2] `SellerProfileResponse` จึงไม่มีฟิลด์พวกนี้โดยตั้งใจ
+ */
+export type SellerIdentity = {
+  displayName: string;
+  username: string;
+  avatarUrl: string | null;
+  initials: string;
+};
+
+export function toSellerIdentity(user: AuthUser | null): SellerIdentity {
+  if (!user) {
+    return { displayName: "", username: "", avatarUrl: null, initials: "?" };
+  }
+  return {
+    displayName: user.displayName,
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+    initials: initialsOf(user.displayName),
+  };
 }
