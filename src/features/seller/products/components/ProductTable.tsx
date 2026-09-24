@@ -3,7 +3,6 @@ import { useState, type ReactNode } from "react";
 import { Ellipsis, ImageIcon, PackagePlus, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,21 +21,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 
-import { LISTING_STATUS_LABEL, listingMeta } from "../products.format";
+import { listingMeta } from "../products.format";
 import { isLowStock } from "../products.rules";
-import type { ListingStatus, SellerListingSummary } from "../products.types";
+import type { SellerListingSummary } from "../products.types";
 
-const STATUS_BADGE: Record<ListingStatus, string> = {
-  ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
-  SOLD_OUT: "bg-[#fbe9e8] text-[#d0342c]",
-  PAUSED: "bg-[#fdf0dd] text-[#b45309]",
-  DRAFT: "bg-[#eef1f2] text-[#6b7280]",
-  DELISTED: "bg-zinc-100 text-zinc-500",
-  BLOCKED: "bg-rose-100 text-rose-700",
-};
+import { ListingPriceCell } from "./ListingPriceCell";
+import { ListingStatusCell } from "./ListingStatusCell";
 
 const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-gray-500";
 
@@ -170,16 +162,7 @@ export function ProductTable({
                 </TableCell>
 
                 <TableCell className="py-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-zinc-950">
-                      {formatBaht(row.price)}
-                    </span>
-                    {row.pricingMode === "AUTO_MEDIAN" ? (
-                      <span className="rounded bg-sky-50 px-1 text-[10px] text-sky-700">
-                        อัตโนมัติ
-                      </span>
-                    ) : null}
-                  </div>
+                  <ListingPriceCell listing={row} readOnly={readOnly} />
                 </TableCell>
 
                 <TableCell className="py-3 text-xs text-gray-400">—</TableCell>
@@ -219,14 +202,7 @@ export function ProductTable({
                 </TableCell>
 
                 <TableCell className="py-3">
-                  <Badge
-                    className={cn(
-                      "h-5 rounded-full px-2 text-xs",
-                      STATUS_BADGE[row.status],
-                    )}
-                  >
-                    {LISTING_STATUS_LABEL[row.status]}
-                  </Badge>
+                  <ListingStatusCell listing={row} readOnly={readOnly} />
                 </TableCell>
 
                 <TableCell className="py-2 pr-5">

@@ -63,3 +63,24 @@ export function deleteBlockedReason(
   }
   return null;
 }
+
+/** แก้ราคาได้ไหม — ตรงกับ `ListingStatus.open()` ประกาศที่ปิดแล้วคงราคาที่ปิดไว้ */
+export function isPriceEditable(listing: SellerListingSummary): boolean {
+  return listing.status !== "DELISTED" && listing.status !== "BLOCKED";
+}
+
+/**
+ * เปิดขาย (→ ACTIVE) ได้ไหม และถ้าไม่ได้ ทำไม — ตรงกับที่ `ListingService.publish` ปฏิเสธ
+ * ร่างที่ไม่มีการ์ดเปิดขายไม่ได้ ส่วน PAUSED ที่ไม่เหลือการ์ด backend ย้ายไป SOLD_OUT ให้แทน
+ */
+export function activateBlockedReason(
+  listing: SellerListingSummary,
+): string | null {
+  if (!listing.card.variantActive) {
+    return "การ์ดพิมพ์นี้ถูกปิดในแคตตาล็อกแล้ว";
+  }
+  if (listing.status === "DRAFT" && listing.quantityAvailable === 0) {
+    return "ยังไม่มีการ์ดบนประกาศ เติมสต็อกก่อน";
+  }
+  return null;
+}
