@@ -58,4 +58,40 @@ describe('Authentication Flow', () => {
     // Should be redirected to home page
     cy.url().should('not.include', '/login');
   });
+
+  it('simulates a successful register flow', () => {
+    // Mock the API response for register
+    cy.intercept('POST', '**/auth/register', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          tokens: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
+          user: { id: '2', email: 'newuser@example.com', roles: ['BUYER'] }
+        }
+      }
+    }).as('registerRequest');
+
+    cy.intercept('GET', '**/auth/me', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: { id: '2', email: 'newuser@example.com', username: 'newuser', displayName: 'New User', roles: ['BUYER'] }
+      }
+    }).as('meRequest');
+
+    cy.visit('/register');
+    
+    // Fill out the registration form
+    cy.get('input[name="username"]').type('newuser');
+    cy.get('input[name="email"]').type('newuser@example.com');
+    cy.get('input[name="password"]').type('password123');
+    cy.get('input[name="confirmPassword"]').type('password123');
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@registerRequest');
+    
+    // Should be redirected or show success
+    cy.url().should('not.include', '/register');
+  });
 });
