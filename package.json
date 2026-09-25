@@ -9,8 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --exclude \"src/test/integration/**\" --passWithNoTests",
+    "test:integration": "vitest run src/test/integration --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
-    "test:integration": "pnpm exec vitest run",
     "cyopen": "cypress open",
     "cyrun": "cypress run"
   },
