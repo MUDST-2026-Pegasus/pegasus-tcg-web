@@ -1,16 +1,22 @@
 import { z } from "zod";
 
-import type { CardSet, Game, GameAttribute } from "./catalog.types";
+import type {
+  CardSet,
+  CatalogCategory,
+  Game,
+  GameAttribute,
+} from "./catalog.types";
 import { ATTRIBUTE_TYPES } from "./taxonomy.format";
 import type {
   AttributePayload,
   CardSetPayload,
+  CategoryPayload,
   GamePayload,
 } from "./taxonomy.types";
 
 /**
- * ฟอร์มเกม ฟิลด์ และชุดการ์ด — กติกาตั้งให้ตรงกับ Bean Validation ใน
- * `dto/GameRequest.java`, `GameAttributeRequest.java` และ `CardSetRequest.java`
+ * ฟอร์มเกม / ฟิลด์ / ชุดการ์ด / หมวดหมู่ — กติกาตั้งให้ตรงกับ Bean Validation ใน
+ * `dto/GameRequest.java`, `GameAttributeRequest.java`, `CardSetRequest.java`, `CategoryRequest.java`
  * ถ้าฝั่งโน้นแก้ ต้องตามมาแก้ที่นี่
  *
  * ชื่อช่องตรงกับชื่อฟิลด์ใน DTO violations ที่หลุดมาจาก backend จึงแปะช่องได้เลย
@@ -263,5 +269,81 @@ export function toCardSetPayload(values: CardSetFormValues): CardSetPayload {
     releaseDate: values.releaseDate === "" ? null : values.releaseDate,
     totalCards: values.totalCards.trim() === "" ? null : Number(values.totalCards),
     logoUrl: blankToNull(values.logoUrl),
+  };
+}
+
+// ---------- หมวดหมู่ ----------
+
+/** `"all"` = ใช้กับทุกเกม (`gameId: null`) — Base UI Select ไม่รับ `null` เป็นตัวเลือก */
+export const ALL_GAMES = "all";
+/** ไม่มีหมวดแม่ (ระดับบนสุด) */
+export const NO_PARENT = "none";
+
+export const categorySchema = z.object({
+  name: requiredText("ชื่อหมวด", 100),
+  code: requiredText("รหัส", 50).regex(
+    /^[A-Za-z0-9_]+$/,
+    "ใช้ได้แค่ A-Z 0-9 และ _",
+  ),
+  slug: optionalText(120).regex(/^[a-z0-9-]*$/, "ใช้ได้แค่ a-z 0-9 และ -"),
+  /** `gameId` เป็นข้อความ หรือ `ALL_GAMES` */
+  scope: z.string().min(1),
+  /** `categoryId` เป็นข้อความ หรือ `NO_PARENT` */
+  parentId: z.string().min(1),
+  displayOrder,
+  active: z.boolean(),
+  /** key เดิม หรือ key ใหม่จากการอัปโหลด — `""` = ไม่มีรูป */
+  imageKey: z.string(),
+});
+
+export type CategoryFormValues = z.infer<typeof categorySchema>;
+
+export function toCategoryForm(
+  gameId: number,
+  category?: CatalogCategory,
+): CategoryFormValues {
+  const categoryGame = category ? category.gameId : gameId;
+  return {
+    name: category?.name ?? "",
+    code: category?.code ?? "",
+    slug: category?.slug ?? "",
+    scope: categoryGame === null ? ALL_GAMES : String(categoryGame),
+    parentId:
+      category?.parentId === null || category?.parentId === undefined
+        ? NO_PARENT
+        : String(category.parentId),
+    displayOrder: String(category?.displayOrder ?? 0),
+    active: category?.active ?? true,
+    imageKey: category?.imageKey ?? "",
+  };
+}
+
+export function toCategoryPayload(values: CategoryFormValues): CategoryPayload {
+  return {
+    gameId: values.scope === ALL_GAMES ? null : Number(values.scope),
+    parentId: values.parentId === NO_PARENT ? null : Number(values.parentId),
+    code: values.code.trim().toUpperCase(),
+    name: values.name.trim(),
+    slug: blankToNull(values.slug),
+    displayOrder: toOrder(values.displayOrder),
+    active: values.active,
+    imageKey: blankToNull(values.imageKey),
+  };
+}
+
+/** สวิตช์ "เปิดใช้งาน" ในตาราง — PUT เขียนทับทั้งแถว */
+export function categoryWithActive(
+  category: CatalogCategory,
+  active: boolean,
+): CategoryPayload {
+  return {
+    gameId: category.gameId,
+    parentId: category.parentId,
+    code: category.code,
+    name: category.name,
+    slug: category.slug,
+    displayOrder: category.displayOrder,
+    active,
+    imageKey: category.imageKey,
   };
 }

@@ -14,6 +14,7 @@ import {
   useAdminGames,
   useCardSets,
   useCatalogCounts,
+  useCategories,
   useGameAttributes,
 } from "../catalog.queries";
 import type { Game } from "../catalog.types";
@@ -23,13 +24,14 @@ import { gameWithActive } from "../taxonomy.schema";
 
 import { CardAttributesSection } from "./CardAttributesSection";
 import { CardSetsSection } from "./CardSetsSection";
+import { CategoriesSection } from "./CategoriesSection";
 import { GameFormDialog } from "./GameFormDialog";
 import { GameInfoCard } from "./GameInfoCard";
 import { GameListPanel } from "./GameListPanel";
 import { SchemaJsonDialog } from "./SchemaJsonDialog";
 
 /** แท็บของเกมที่เลือก — ค่าใน `?tab=` */
-const TABS = ["fields", "sets"] as const;
+const TABS = ["fields", "sets", "categories"] as const;
 type TaxonomyTab = (typeof TABS)[number];
 
 function readTab(value: string | null): TaxonomyTab {
@@ -39,7 +41,8 @@ function readTab(value: string | null): TaxonomyTab {
 type GameDialog = { open: boolean; game?: Game };
 
 /**
- * หน้า "เกมและคุณสมบัติการ์ด" — เกมที่ขายบนแพลตฟอร์ม และฟิลด์ของการ์ดแต่ละเกม
+ * หน้า "เกมและคุณสมบัติการ์ด" — เกมที่ขายบนแพลตฟอร์ม และของแต่ละเกม: ฟิลด์ของการ์ด
+ * ชุดการ์ด และหมวดหมู่ (แท็บละเรื่อง)
  * เกมที่เลือกกับแท็บอยู่ใน URL (`?game=<id>&tab=`) เปิดลิงก์ซ้ำแล้วกลับมาที่เดิม
  *
  * ทุกการแก้บันทึกทันทีผ่าน `AdminCatalogTaxonomyController` ไม่มีปุ่มบันทึกรวม
@@ -173,6 +176,7 @@ function TaxonomyWorkspace({
   const fieldCounts = useAttributeCounts(gameIds);
   const counts = useCatalogCounts(gameIds);
   const cardSets = useCardSets(game.id);
+  const categories = useCategories(game.id);
   const saveGame = useSaveGame();
 
   const toggleActive = (active: boolean) =>
@@ -233,6 +237,9 @@ function TaxonomyWorkspace({
             <TabsTrigger value="sets" className="flex-none">
               ชุดการ์ด{cardSets.data ? ` (${cardSets.data.length})` : ""}
             </TabsTrigger>
+            <TabsTrigger value="categories" className="flex-none">
+              หมวดหมู่{categories.data ? ` (${categories.data.length})` : ""}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="fields">
@@ -258,6 +265,16 @@ function TaxonomyWorkspace({
               errorTitle="โหลดชุดการ์ดของเกมนี้ไม่สำเร็จ"
             >
               {(list) => <CardSetsSection game={game} cardSets={list} />}
+            </QueryBoundary>
+          </TabsContent>
+
+          <TabsContent value="categories">
+            <QueryBoundary
+              query={categories}
+              loading={<TableSkeleton />}
+              errorTitle="โหลดหมวดหมู่ของเกมนี้ไม่สำเร็จ"
+            >
+              {(list) => <CategoriesSection game={game} categories={list} />}
             </QueryBoundary>
           </TabsContent>
         </Tabs>
