@@ -9,6 +9,7 @@ import {
 import * as catalogApi from "./catalog.api";
 import type {
   AdminProductQuery,
+  GameAttribute,
   ImagePayload,
   ProductDetail,
   ProductPayload,
@@ -59,6 +60,18 @@ export function useGameAttributes(gameId: number | null) {
     enabled: gameId !== null,
     staleTime: TAXONOMY_STALE_MS,
   });
+}
+
+/**
+ * registry ที่อยู่ใน cache แล้ว — สำหรับ resolver ของฟอร์ม ซึ่งรันตอน validate ไม่ใช่ตอน render
+ * จึงอ่านผ่าน hook ไม่ได้ ฟอร์มปิดปุ่มส่งไว้จนกว่า `useGameAttributes` จะโหลดเสร็จอยู่แล้ว
+ */
+export function useCachedGameAttributes() {
+  const queryClient = useQueryClient();
+  return (gameId: number): GameAttribute[] =>
+    queryClient.getQueryData<GameAttribute[]>(
+      adminCatalogKeys.attributes(gameId),
+    ) ?? [];
 }
 
 export function useCardSets(gameId: number | null) {

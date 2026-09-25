@@ -27,6 +27,27 @@ export function CatalogGridSkeleton() {
   );
 }
 
+/** หน้าต่างแก้ไขสินค้าระหว่างโหลด — หัวเรื่อง แท็บ แล้วช่องกรอกสองคอลัมน์ */
+export function CatalogProductSheetSkeleton() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-6 p-6 pr-14">
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-6 w-56" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+      <Skeleton className="h-9 w-72 rounded-full" />
+      <div className="grid gap-4 sm:grid-cols-2">
+        {Array.from({ length: 6 }, (_, index) => (
+          <div key={index} className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-full rounded-3xl" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** คอลัมน์ซ้ายระหว่างรอรายชื่อเกม — วางตรงกับ `CatalogFilterPanel` */
 export function CatalogFilterPanelSkeleton() {
   return (

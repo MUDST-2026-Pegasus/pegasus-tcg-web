@@ -15,10 +15,15 @@ import {
   CATALOG_PAGE_SIZE,
   hasNarrowingFilters,
   readFilters,
+  readProductTab,
+  readProductTarget,
   toProductQuery,
   writeFilters,
+  writeProductTarget,
   type CatalogFilters,
   type FilterChanges,
+  type ProductTab,
+  type ProductTarget,
 } from "../catalog.filters";
 import {
   formatCount,
@@ -39,6 +44,7 @@ import type { Game, ProductSort, ProductType } from "../catalog.types";
 import { CatalogFilterPanel } from "./CatalogFilterPanel";
 import { CatalogPagination } from "./CatalogPagination";
 import { CatalogProductGrid } from "./CatalogProductGrid";
+import { CatalogProductSheet } from "./CatalogProductSheet";
 import {
   CatalogFilterPanelSkeleton,
   CatalogGridSkeleton,
@@ -52,17 +58,32 @@ type UpdateFilters = (
   options?: { replace?: boolean },
 ) => void;
 
+type OpenProduct = (
+  target: ProductTarget | null,
+  tab?: ProductTab,
+  options?: { replace?: boolean },
+) => void;
+
 /**
  * หน้า "จัดการแคตตาล็อก" — ฐานข้อมูลการ์ดกลางที่ผู้ขายเลือกไปลงขาย
  * ตัวกรองทั้งหมดอยู่ใน URL (`catalog.filters.ts`) และกรอง/แบ่งหน้าที่ backend
+ * หน้าต่างเพิ่ม/แก้สินค้าก็เปิดจาก URL (`?product=new`, `?product=<id>`)
  */
 export function AdminCatalogContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = readFilters(searchParams);
+  const target = readProductTarget(searchParams);
+  const tab = readProductTab(searchParams);
   const games = useAdminGames();
 
   const updateFilters: UpdateFilters = (changes, options) =>
     setSearchParams((current) => writeFilters(current, changes), options);
+
+  const openProduct: OpenProduct = (next, nextTab, options) =>
+    setSearchParams(
+      (current) => writeProductTarget(current, next, nextTab),
+      options,
+    );
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,7 +108,11 @@ export function AdminCatalogContent() {
             </TooltipTrigger>
             <TooltipContent>ยังนำเข้าจากไฟล์ไม่ได้ในตอนนี้</TooltipContent>
           </Tooltip>
-          <Button className="rounded-md px-2.5" disabled={!games.data?.length}>
+          <Button
+            className="rounded-md px-2.5"
+            disabled={!games.data?.length}
+            onClick={() => openProduct("new")}
+          >
             + เพิ่มการ์ดใหม่
           </Button>
         </div>
@@ -117,6 +142,9 @@ export function AdminCatalogContent() {
             games={list}
             filters={filters}
             onFiltersChange={updateFilters}
+            target={target}
+            tab={tab}
+            onOpenProduct={openProduct}
           />
         )}
       </QueryBoundary>
@@ -128,10 +156,16 @@ function CatalogWorkspace({
   games,
   filters,
   onFiltersChange,
+  target,
+  tab,
+  onOpenProduct,
 }: {
   games: Game[];
   filters: CatalogFilters;
   onFiltersChange: UpdateFilters;
+  target: ProductTarget | null;
+  tab: ProductTab;
+  onOpenProduct: OpenProduct;
 }) {
   // URL ไม่ได้ระบุเกม หรือระบุเกมที่ไม่มีอยู่ → เกมแรกตามลำดับที่ backend เรียงมา
   const gameId = games.some((game) => game.id === filters.gameId)
@@ -263,7 +297,15 @@ function CatalogWorkspace({
               <EmptyState
                 title="เกมนี้ยังไม่มีสินค้าในแคตตาล็อก"
                 description="เพิ่มการ์ดใบแรกแล้วผู้ขายจะเลือกไปลงขายได้"
-              />
+              >
+                <Button
+                  size="sm"
+                  className="rounded-md px-2.5"
+                  onClick={() => onOpenProduct("new")}
+                >
+                  + เพิ่มการ์ดใหม่
+                </Button>
+              </EmptyState>
             )
           }
         >
@@ -272,6 +314,7 @@ function CatalogWorkspace({
               <CatalogProductGrid
                 products={page.items}
                 isFetching={products.isPlaceholderData}
+                onSelect={(product) => onOpenProduct(product.id)}
               />
               <CatalogPagination
                 page={filters.page}
@@ -283,6 +326,21 @@ function CatalogWorkspace({
           )}
         </QueryBoundary>
       </div>
+
+      <CatalogProductSheet
+        target={target}
+        tab={tab}
+        onTabChange={(next) =>
+          target !== null && onOpenProduct(target, next, { replace: true })
+        }
+        games={games}
+        defaultGameId={gameId}
+        // แทนที่ `?product=new` ไม่ให้กด back แล้วกลับไปเจอฟอร์มเปล่า
+        onCreated={(product) =>
+          onOpenProduct(product.id, "details", { replace: true })
+        }
+        onClose={() => onOpenProduct(null)}
+      />
     </div>
   );
 }

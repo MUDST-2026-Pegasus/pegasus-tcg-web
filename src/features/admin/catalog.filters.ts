@@ -128,6 +128,44 @@ export function hasNarrowingFilters(filters: CatalogFilters): boolean {
   );
 }
 
+// ---------- หน้าต่างแก้ไขสินค้า (`?product=<id>&tab=<tab>`) ----------
+
+/** สินค้าที่หน้าต่างแก้ไขเปิดอยู่ — `"new"` = เพิ่มใหม่ */
+export type ProductTarget = "new" | number;
+
+export const PRODUCT_TABS = ["details"] as const;
+
+export type ProductTab = (typeof PRODUCT_TABS)[number];
+
+/** `?product=` → สินค้าที่ต้องเปิด · ไม่มีหรือพิมพ์มั่ว → `null` (ปิด) */
+export function readProductTarget(params: URLSearchParams): ProductTarget | null {
+  const value = params.get("product");
+  return value === "new" ? "new" : readId(value);
+}
+
+export function readProductTab(params: URLSearchParams): ProductTab {
+  const value = params.get("tab");
+  return PRODUCT_TABS.find((tab) => tab === value) ?? "details";
+}
+
+/** เปิด/ปิดหน้าต่างแก้ไขโดยไม่แตะตัวกรองที่อยู่ข้างหลัง */
+export function writeProductTarget(
+  current: URLSearchParams,
+  target: ProductTarget | null,
+  tab: ProductTab = "details",
+): URLSearchParams {
+  const next = new URLSearchParams(current);
+  if (target === null) {
+    next.delete("product");
+    next.delete("tab");
+    return next;
+  }
+  next.set("product", String(target));
+  if (tab === "details") next.delete("tab");
+  else next.set("tab", tab);
+  return next;
+}
+
 export function toProductQuery(
   filters: CatalogFilters,
   gameId: number,
