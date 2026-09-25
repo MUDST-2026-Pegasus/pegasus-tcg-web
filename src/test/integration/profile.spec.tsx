@@ -38,11 +38,17 @@ describe("Profile Integration", () => {
     const onOpenChange = vi.fn();
 
     const mockUser = {
-      id: "1",
+      id: 1,
       email: "test@pegasus.com",
       roles: ["BUYER" as RoleCode],
       displayName: "Old Master",
-      createdAt: "2026-01-01T00:00:00Z"
+      createdAt: "2026-01-01T00:00:00Z",
+      username: "old_master",
+      bio: null,
+      phone: null,
+      avatarUrl: null,
+      status: "ACTIVE" as const,
+      lastLoginAt: null
     };
 
     render(

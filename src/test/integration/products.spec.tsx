@@ -17,39 +17,45 @@ const mockProductsData: ProductsData = {
   ],
   toolbar: {
     searchPlaceholder: "Search...",
-    columnsLabel: "Columns",
+    sortPlaceholder: "Sort by",
     sortOptions: [
       { value: "newest", label: "Newest" },
       { value: "price_asc", label: "Price (Low to High)" }
     ]
   },
   bulkActions: [
-    { id: "delete", label: "Delete Selected", variant: "destructive", icon: "trash" }
+    { id: "delete", label: "Delete Selected" }
   ],
   table: {
     columns: {
       product: "Product Name",
       price: "Price",
+      cost: "Cost",
       stock: "Stock",
+      sold: "Sold",
       status: "Status",
-      action: "Action"
+      actions: "Action"
     },
     stockUnit: "pcs",
+    selectAllLabel: "Select all",
+    selectRowLabel: "Select row",
+    editLabel: "Edit",
+    moreLabel: "More",
+    restockLabel: "Restock",
+    deleteLabel: "Delete"
   },
   pagination: {
-    pageLabel: "Page",
-    prevLabel: "Prev",
+    previousLabel: "Prev",
     nextLabel: "Next",
-    pageSizeLabel: "per page",
-    page: 1,
-    pageSize: 10,
-    totalPages: 1,
     pages: [1],
+    currentPage: 1,
   },
   deleteDialog: {
     title: "Delete Product?",
     description: "Are you sure?",
-    cancelLabel: "Cancel",
+    remainingLabel: "Remaining",
+    soldLabel: "Sold",
+    warning: "Warning!",
     unpublishLabel: "Unpublish Instead",
     confirmLabel: "Delete",
   },
@@ -57,28 +63,24 @@ const mockProductsData: ProductsData = {
     {
       id: "prod-1",
       name: "Blue Eyes White Dragon",
-      price: 1500,
+      meta: "LOB-001",
+      price: "1500",
+      cost: "1000",
       stock: 5,
+      sold: 2,
       status: "active",
       statusLabel: "Active",
-      image: "image.png",
-      setCode: "LOB-001",
-      condition: "NM",
-      language: "EN",
-      lastUpdated: "Today",
     },
     {
       id: "prod-2",
       name: "Dark Magician",
-      price: 1000,
+      meta: "LOB-005",
+      price: "1000",
+      cost: "500",
       stock: 0,
+      sold: 1,
       status: "draft",
       statusLabel: "Draft",
-      image: "image2.png",
-      setCode: "LOB-005",
-      condition: "NM",
-      language: "EN",
-      lastUpdated: "Yesterday",
     },
   ],
 };
