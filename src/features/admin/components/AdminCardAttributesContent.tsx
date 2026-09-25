@@ -22,13 +22,14 @@ import { useAttributeCounts, useSaveGame } from "../taxonomy.queries";
 import { gameWithActive } from "../taxonomy.schema";
 
 import { CardAttributesSection } from "./CardAttributesSection";
+import { CardSetsSection } from "./CardSetsSection";
 import { GameFormDialog } from "./GameFormDialog";
 import { GameInfoCard } from "./GameInfoCard";
 import { GameListPanel } from "./GameListPanel";
 import { SchemaJsonDialog } from "./SchemaJsonDialog";
 
 /** แท็บของเกมที่เลือก — ค่าใน `?tab=` */
-const TABS = ["fields"] as const;
+const TABS = ["fields", "sets"] as const;
 type TaxonomyTab = (typeof TABS)[number];
 
 function readTab(value: string | null): TaxonomyTab {
@@ -229,6 +230,9 @@ function TaxonomyWorkspace({
               คุณสมบัติการ์ด
               {attributes.data ? ` (${attributes.data.length})` : ""}
             </TabsTrigger>
+            <TabsTrigger value="sets" className="flex-none">
+              ชุดการ์ด{cardSets.data ? ` (${cardSets.data.length})` : ""}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="fields">
@@ -244,6 +248,16 @@ function TaxonomyWorkspace({
                   productCount={counts.byGame[game.id]}
                 />
               )}
+            </QueryBoundary>
+          </TabsContent>
+
+          <TabsContent value="sets">
+            <QueryBoundary
+              query={cardSets}
+              loading={<TableSkeleton />}
+              errorTitle="โหลดชุดการ์ดของเกมนี้ไม่สำเร็จ"
+            >
+              {(list) => <CardSetsSection game={game} cardSets={list} />}
             </QueryBoundary>
           </TabsContent>
         </Tabs>

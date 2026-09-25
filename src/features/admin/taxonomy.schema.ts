@@ -1,12 +1,16 @@
 import { z } from "zod";
 
-import type { Game, GameAttribute } from "./catalog.types";
+import type { CardSet, Game, GameAttribute } from "./catalog.types";
 import { ATTRIBUTE_TYPES } from "./taxonomy.format";
-import type { AttributePayload, GamePayload } from "./taxonomy.types";
+import type {
+  AttributePayload,
+  CardSetPayload,
+  GamePayload,
+} from "./taxonomy.types";
 
 /**
- * ฟอร์มเกมและฟิลด์ — กติกาตั้งให้ตรงกับ Bean Validation ใน
- * `dto/GameRequest.java` และ `GameAttributeRequest.java`
+ * ฟอร์มเกม ฟิลด์ และชุดการ์ด — กติกาตั้งให้ตรงกับ Bean Validation ใน
+ * `dto/GameRequest.java`, `GameAttributeRequest.java` และ `CardSetRequest.java`
  * ถ้าฝั่งโน้นแก้ ต้องตามมาแก้ที่นี่
  *
  * ชื่อช่องตรงกับชื่อฟิลด์ใน DTO violations ที่หลุดมาจาก backend จึงแปะช่องได้เลย
@@ -206,5 +210,58 @@ export function attributeWith(
     required: attribute.required,
     displayOrder: attribute.displayOrder,
     ...changes,
+  };
+}
+
+// ---------- ชุดการ์ด ----------
+
+export const cardSetSchema = z.object({
+  code: requiredText("รหัสชุด", 32).regex(
+    /^[A-Za-z0-9_.-]+$/,
+    "ใช้ได้แค่ A-Z 0-9 . - และ _",
+  ),
+  name: requiredText("ชื่อชุด", 150),
+  nameLocal: optionalText(150),
+  /** `<input type="date">` ให้ค่า `yyyy-MM-dd` หรือ `""` */
+  releaseDate: z
+    .string()
+    .refine(
+      (value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value),
+      "วันที่ไม่ถูกต้อง",
+    ),
+  totalCards: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value === "" || (/^\d+$/.test(value) && Number(value) > 0),
+      "เป็นจำนวนเต็มมากกว่า 0",
+    ),
+  logoUrl: optionalText(500),
+});
+
+export type CardSetFormValues = z.infer<typeof cardSetSchema>;
+
+export function toCardSetForm(cardSet?: CardSet): CardSetFormValues {
+  return {
+    code: cardSet?.code ?? "",
+    name: cardSet?.name ?? "",
+    nameLocal: cardSet?.nameLocal ?? "",
+    releaseDate: cardSet?.releaseDate ?? "",
+    totalCards:
+      cardSet?.totalCards === null || cardSet?.totalCards === undefined
+        ? ""
+        : String(cardSet.totalCards),
+    logoUrl: cardSet?.logoUrl ?? "",
+  };
+}
+
+export function toCardSetPayload(values: CardSetFormValues): CardSetPayload {
+  return {
+    code: values.code.trim().toUpperCase(),
+    name: values.name.trim(),
+    nameLocal: blankToNull(values.nameLocal),
+    releaseDate: values.releaseDate === "" ? null : values.releaseDate,
+    totalCards: values.totalCards.trim() === "" ? null : Number(values.totalCards),
+    logoUrl: blankToNull(values.logoUrl),
   };
 }
