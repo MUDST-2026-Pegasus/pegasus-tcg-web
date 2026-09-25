@@ -1,0 +1,210 @@
+import { z } from "zod";
+
+import type { Game, GameAttribute } from "./catalog.types";
+import { ATTRIBUTE_TYPES } from "./taxonomy.format";
+import type { AttributePayload, GamePayload } from "./taxonomy.types";
+
+/**
+ * ฟอร์มเกมและฟิลด์ — กติกาตั้งให้ตรงกับ Bean Validation ใน
+ * `dto/GameRequest.java` และ `GameAttributeRequest.java`
+ * ถ้าฝั่งโน้นแก้ ต้องตามมาแก้ที่นี่
+ *
+ * ชื่อช่องตรงกับชื่อฟิลด์ใน DTO violations ที่หลุดมาจาก backend จึงแปะช่องได้เลย
+ * ช่องตัวเลขเก็บเป็นข้อความในฟอร์ม แล้วค่อยแปลงตอนส่ง
+ */
+
+/** `smallint` ฝั่ง database */
+const SMALLINT_MAX = 32767;
+
+const optionalText = (max: number) =>
+  z.string().trim().max(max, `ไม่เกิน ${max} ตัวอักษร`);
+
+const requiredText = (label: string, max: number) =>
+  optionalText(max).min(1, `ต้องระบุ${label}`);
+
+const displayOrder = z
+  .string()
+  .trim()
+  .refine(
+    (value) =>
+      value === "" ||
+      (/^\d+$/.test(value) && Number(value) <= SMALLINT_MAX),
+    `เป็นเลขจำนวนเต็ม 0–${SMALLINT_MAX}`,
+  );
+
+const blankToNull = (value: string): string | null => {
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+};
+
+const toOrder = (value: string): number =>
+  value.trim() === "" ? 0 : Number(value);
+
+// ---------- เกม ----------
+
+export const gameSchema = z.object({
+  name: requiredText("ชื่อเกม", 100),
+  nameLocal: optionalText(100),
+  code: requiredText("รหัสเกม", 32).regex(
+    /^[A-Za-z0-9_]+$/,
+    "ใช้ได้แค่ A-Z 0-9 และ _",
+  ),
+  slug: optionalText(100).regex(
+    /^[a-z0-9-]*$/,
+    "ใช้ได้แค่ a-z 0-9 และ -",
+  ),
+  logoUrl: optionalText(500),
+  displayOrder,
+  active: z.boolean(),
+});
+
+export type GameFormValues = z.infer<typeof gameSchema>;
+
+export function toGameForm(game?: Game): GameFormValues {
+  return {
+    name: game?.name ?? "",
+    nameLocal: game?.nameLocal ?? "",
+    code: game?.code ?? "",
+    slug: game?.slug ?? "",
+    logoUrl: game?.logoUrl ?? "",
+    displayOrder: String(game?.displayOrder ?? 0),
+    active: game?.active ?? true,
+  };
+}
+
+export function toGamePayload(values: GameFormValues): GamePayload {
+  return {
+    code: values.code.trim().toUpperCase(),
+    name: values.name.trim(),
+    nameLocal: blankToNull(values.nameLocal),
+    slug: blankToNull(values.slug),
+    logoUrl: blankToNull(values.logoUrl),
+    displayOrder: toOrder(values.displayOrder),
+    active: values.active,
+  };
+}
+
+/** PUT เขียนทับทั้งแถว — สลับแค่ `active` ก็ต้องส่งช่องอื่นเดิมไปครบ */
+export function gameWithActive(game: Game, active: boolean): GamePayload {
+  return {
+    code: game.code,
+    name: game.name,
+    nameLocal: game.nameLocal,
+    slug: game.slug,
+    logoUrl: game.logoUrl,
+    displayOrder: game.displayOrder,
+    active,
+  };
+}
+
+// ---------- ฟิลด์ของการ์ด ----------
+
+/** `GameAttributeRequest.attrKey` */
+const ATTR_KEY = /^[a-z][a-z0-9_]*$/;
+
+/** "Card Type" → "card_type", "HP" → "hp" — ใช้เดาคีย์ให้ตอนพิมพ์ชื่อฟิลด์ */
+export function suggestAttrKey(label: string): string {
+  const key = label
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^[^a-z]+/, "")
+    .replace(/_+$/, "");
+  return key.slice(0, 50);
+}
+
+/** ตัวเลือกพิมพ์บรรทัดละตัว — ตัดช่องว่างหัวท้ายและบรรทัดว่างทิ้ง */
+export function parseOptions(text: string): string[] {
+  return text
+    .split("\n")
+    .map((option) => option.trim())
+    .filter(Boolean);
+}
+
+export const attributeSchema = z
+  .object({
+    label: requiredText("ชื่อฟิลด์", 100),
+    attrKey: requiredText("คีย์", 50).regex(
+      ATTR_KEY,
+      "ขึ้นต้นด้วย a-z แล้วตามด้วย a-z 0-9 หรือ _ เท่านั้น",
+    ),
+    dataType: z.enum(ATTRIBUTE_TYPES),
+    options: z.string(),
+    filterable: z.boolean(),
+    required: z.boolean(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.dataType !== "ENUM") {
+      return;
+    }
+    const options = parseOptions(values.options);
+    if (options.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "ฟิลด์ชนิดตัวเลือกต้องมีอย่างน้อยหนึ่งตัวเลือก",
+      });
+    } else if (options.some((option) => option.length > 100)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "แต่ละตัวเลือกยาวไม่เกิน 100 ตัวอักษร",
+      });
+    } else if (new Set(options).size !== options.length) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "มีตัวเลือกซ้ำกัน",
+      });
+    }
+  });
+
+export type AttributeFormValues = z.infer<typeof attributeSchema>;
+
+export function toAttributeForm(attribute?: GameAttribute): AttributeFormValues {
+  return {
+    label: attribute?.label ?? "",
+    attrKey: attribute?.attrKey ?? "",
+    dataType: attribute?.dataType ?? "STRING",
+    options: attribute?.options.join("\n") ?? "",
+    filterable: attribute?.filterable ?? true,
+    required: attribute?.required ?? false,
+  };
+}
+
+/**
+ * @param displayOrder ของเดิมตอนแก้ ส่วนฟิลด์ใหม่ต่อท้ายตาราง
+ * ชนิดที่ไม่ใช่ ENUM ต้องส่ง `options: []` ไม่งั้น backend ตอบ `INVALID_ATTRIBUTE_DEFINITION`
+ */
+export function toAttributePayload(
+  values: AttributeFormValues,
+  displayOrder: number,
+): AttributePayload {
+  return {
+    attrKey: values.attrKey.trim(),
+    label: values.label.trim(),
+    dataType: values.dataType,
+    options: values.dataType === "ENUM" ? parseOptions(values.options) : [],
+    filterable: values.filterable,
+    required: values.required,
+    displayOrder,
+  };
+}
+
+/** สวิตช์ในตาราง — PUT เขียนทับทั้งแถว จึงส่งช่องอื่นเดิมไปครบ */
+export function attributeWith(
+  attribute: GameAttribute,
+  changes: Partial<Pick<AttributePayload, "required" | "filterable">>,
+): AttributePayload {
+  return {
+    attrKey: attribute.attrKey,
+    label: attribute.label,
+    dataType: attribute.dataType,
+    options: attribute.options,
+    filterable: attribute.filterable,
+    required: attribute.required,
+    displayOrder: attribute.displayOrder,
+    ...changes,
+  };
+}
