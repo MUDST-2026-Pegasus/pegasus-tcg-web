@@ -18,6 +18,7 @@ import type { CatalogProduct, Game } from "../catalog.types";
 
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
+import { CatalogVariantList } from "./CatalogVariantList";
 
 type CatalogProductSheetProps = {
   /** `null` = ปิด */
@@ -114,7 +115,7 @@ function EditProductPanel({
       errorTitle="โหลดสินค้าไม่สำเร็จ"
       errorMessage="สินค้านี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้"
     >
-      {({ product }) => {
+      {({ product, variants }) => {
         const game = games.find((candidate) => candidate.id === product.gameId);
 
         return (
@@ -140,6 +141,9 @@ function EditProductPanel({
             >
               <TabsList className="mx-6">
                 <TabsTrigger value="details">ข้อมูลสินค้า</TabsTrigger>
+                <TabsTrigger value="variants">
+                  Variant ({variants.length})
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="flex min-h-0 flex-col">
@@ -149,6 +153,10 @@ function EditProductPanel({
                   defaultGameId={product.gameId}
                   onCancel={onClose}
                 />
+              </TabsContent>
+
+              <TabsContent value="variants" className="min-h-0 overflow-y-auto">
+                <CatalogVariantList product={product} variants={variants} />
               </TabsContent>
             </Tabs>
           </>

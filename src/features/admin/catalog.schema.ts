@@ -1,11 +1,14 @@
 import { z } from "zod";
 
-import { PRODUCT_TYPES } from "./catalog.format";
+import { CARD_EDITIONS, CARD_FINISHES, PRODUCT_TYPES } from "./catalog.format";
 import type {
   AttributeValue,
   CatalogProduct,
+  CatalogVariant,
   GameAttribute,
   ProductPayload,
+  ProductType,
+  VariantPayload,
 } from "./catalog.types";
 
 /**
@@ -230,4 +233,75 @@ export function splitAttributeProblems(
   }
 
   return { fields, unmatched };
+}
+
+// ---------- variant ----------
+
+/**
+ * ตรงกับ Bean Validation ใน `dto/VariantRequest.java` — ชื่อช่องตรงกับ DTO
+ * `imageUrl` ไม่มีช่องในฟอร์ม (รูปจัดการที่แท็บรูปภาพ) แต่ PUT เขียนทับทั้งแถว
+ * จึงส่งค่าเดิมกลับไปเสมอใน `toVariantPayload`
+ */
+export const variantSchema = z.object({
+  languageCode: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{2,10}$/, "ใส่รหัสภาษา 2–10 ตัวอักษร เช่น EN, JP, TH"),
+  finish: z.enum(CARD_FINISHES),
+  edition: z.enum(CARD_EDITIONS),
+  printingNote: z.string().trim().max(100, "หมายเหตุต้องไม่เกิน 100 ตัวอักษร"),
+  sku: z
+    .string()
+    .trim()
+    .max(64, "SKU ต้องไม่เกิน 64 ตัวอักษร")
+    .regex(/^[A-Za-z0-9_-]*$/, "ใช้ได้แค่ตัวอักษร ตัวเลข ขีดกลาง และขีดล่าง"),
+  barcode: z.string().trim().max(64, "บาร์โค้ดต้องไม่เกิน 64 ตัวอักษร"),
+  active: z.boolean(),
+});
+
+export type VariantFormValues = z.infer<typeof variantSchema>;
+
+/** การ์ดเดี่ยวเริ่มที่ Normal ส่วนของซีล/อุปกรณ์ไม่มี finish */
+export function emptyVariantForm(productType: ProductType): VariantFormValues {
+  return {
+    languageCode: "EN",
+    finish: productType === "SINGLE_CARD" ? "NORMAL" : "NOT_APPLICABLE",
+    edition: "NOT_APPLICABLE",
+    printingNote: "",
+    sku: "",
+    barcode: "",
+    active: true,
+  };
+}
+
+export function toVariantForm(variant: CatalogVariant): VariantFormValues {
+  return {
+    languageCode: variant.languageCode,
+    finish: variant.finish,
+    edition: variant.edition,
+    printingNote: variant.printingNote ?? "",
+    sku: variant.sku,
+    barcode: variant.barcode ?? "",
+    active: variant.active,
+  };
+}
+
+/**
+ * `sku` ว่าง = ตอนสร้างให้ backend สร้างให้ ตอนแก้คงของเดิม
+ * `imageUrl` ส่งของเดิมกลับไป ไม่งั้น PUT ล้างทิ้ง
+ */
+export function toVariantPayload(
+  values: VariantFormValues,
+  existing?: CatalogVariant,
+): VariantPayload {
+  return {
+    sku: orNull(values.sku),
+    languageCode: values.languageCode.toUpperCase(),
+    finish: values.finish,
+    edition: values.edition,
+    printingNote: orNull(values.printingNote),
+    barcode: orNull(values.barcode),
+    imageUrl: existing?.imageUrl ?? null,
+    active: values.active,
+  };
 }

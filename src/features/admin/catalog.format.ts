@@ -1,7 +1,13 @@
 import type { ProductCardData } from "@/components/common";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
-import type { ProductSort, ProductSummary, ProductType } from "./catalog.types";
+import type {
+  CardEdition,
+  CardFinish,
+  ProductSort,
+  ProductSummary,
+  ProductType,
+} from "./catalog.types";
 
 /**
  * ตัวช่วยแปลงข้อมูลแคตตาล็อกจาก backend → ข้อความที่โชว์บนจอ
@@ -48,6 +54,64 @@ export const PRODUCT_SORT_LABEL: Record<ProductSort, string> = {
   price_asc: "ราคาต่ำ-สูง",
   price_desc: "ราคาสูง-ต่ำ",
 };
+
+export const CARD_FINISHES: CardFinish[] = [
+  "NORMAL",
+  "HOLO",
+  "REVERSE_HOLO",
+  "FOIL",
+  "ETCHED",
+  "TEXTURED",
+  "NOT_APPLICABLE",
+];
+
+export const CARD_FINISH_LABEL: Record<CardFinish, string> = {
+  NORMAL: "Normal",
+  HOLO: "Holo",
+  REVERSE_HOLO: "Reverse Holo",
+  FOIL: "Foil",
+  ETCHED: "Etched",
+  TEXTURED: "Textured",
+  NOT_APPLICABLE: "ไม่มี (ของซีล/อุปกรณ์)",
+};
+
+export const CARD_EDITIONS: CardEdition[] = [
+  "NOT_APPLICABLE",
+  "FIRST_EDITION",
+  "UNLIMITED",
+  "PROMO",
+];
+
+export const CARD_EDITION_LABEL: Record<CardEdition, string> = {
+  FIRST_EDITION: "1st Edition",
+  UNLIMITED: "Unlimited",
+  PROMO: "Promo",
+  NOT_APPLICABLE: "ไม่ระบุ",
+};
+
+/**
+ * "EN / Foil / 1st Edition / Alt Art" — อ่านแบบเดียวกับ `CatalogVariant.label()`
+ * ฝั่ง backend (ที่โชว์บนบรรทัดคำสั่งซื้อ) ส่วนที่เป็น NOT_APPLICABLE ไม่แสดง
+ */
+export function variantLabel(variant: {
+  languageCode: string;
+  finish: CardFinish;
+  edition: CardEdition;
+  printingNote: string | null;
+}): string {
+  return [
+    variant.languageCode,
+    variant.finish === "NOT_APPLICABLE"
+      ? null
+      : CARD_FINISH_LABEL[variant.finish],
+    variant.edition === "NOT_APPLICABLE"
+      ? null
+      : CARD_EDITION_LABEL[variant.edition],
+    variant.printingNote,
+  ]
+    .filter(Boolean)
+    .join(" / ");
+}
 
 const NUMBER = new Intl.NumberFormat("th-TH");
 const BAHT = new Intl.NumberFormat("th-TH", {

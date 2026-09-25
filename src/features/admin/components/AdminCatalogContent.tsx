@@ -336,8 +336,9 @@ function CatalogWorkspace({
         games={games}
         defaultGameId={gameId}
         // แทนที่ `?product=new` ไม่ให้กด back แล้วกลับไปเจอฟอร์มเปล่า
+        // และพาไปแท็บ variant ต่อ เพราะสินค้าที่ไม่มี variant ยังลงขายไม่ได้
         onCreated={(product) =>
-          onOpenProduct(product.id, "details", { replace: true })
+          onOpenProduct(product.id, "variants", { replace: true })
         }
         onClose={() => onOpenProduct(null)}
       />
