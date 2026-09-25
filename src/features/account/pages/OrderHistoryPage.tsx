@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -8,7 +8,7 @@ import {
   Package,
   TriangleAlert,
 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +33,10 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
+import { useBuyerOrders } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
 
 import { toSidebarUser } from "../account.format";
@@ -44,10 +46,7 @@ export function OrderHistoryPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: pageData, isLoading, error, refetch } = useQuery({
-    queryKey: ["orders", "list"],
-    queryFn: () => ordersApi.listOrders(0, 50),
-  });
+  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
 
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
@@ -55,7 +54,19 @@ export function OrderHistoryPage() {
 
   const sidebarUser = toSidebarUser(user);
 
-  const orders = pageData?.content ?? [];
+  const orders: OrderDetails[] = useMemo(() => {
+    if (Array.isArray(ordersData)) return ordersData;
+    if (ordersData && typeof ordersData === "object") {
+      return (
+        (ordersData as any).items ??
+        (ordersData as any).content ??
+        (ordersData as any).data?.items ??
+        (ordersData as any).data ??
+        []
+      );
+    }
+    return [];
+  }, [ordersData]);
 
   const handleCancelOrder = async (orderId: number) => {
     if (!confirm("Are you sure you want to cancel this order?")) return;
@@ -68,10 +79,13 @@ export function OrderHistoryPage() {
         type: "success",
       });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-    } catch {
+    } catch (err) {
       toast.add({
         title: "Cancellation Failed",
-        description: "Could not cancel this order. Please try again.",
+        description:
+          err instanceof ApiError
+            ? err.message
+            : "Could not cancel this order. Please try again.",
         type: "error",
       });
     } finally {
@@ -190,9 +204,9 @@ function OrderCardItem({
   let statusBadgeClass = "";
 
   if (isPending) {
-    statusBadgeVariant = "destructive";
+    statusBadgeVariant = "secondary";
     statusBadgeLabel = "Pending Payment";
-    statusBadgeClass = "bg-amber-500 text-white hover:bg-amber-600";
+    statusBadgeClass = "bg-amber-500 text-white hover:bg-amber-600 border-transparent";
   } else if (isPaid) {
     statusBadgeVariant = "secondary";
     statusBadgeLabel = "Paid";

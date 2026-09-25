@@ -82,11 +82,13 @@ export interface OrderDetails {
 }
 
 export interface PageResponse<T> {
-  content: T[];
+  items: T[];
+  content?: T[];
   page: number;
   size: number;
-  totalElements: number;
+  totalElements?: number;
+  totalItems?: number;
   totalPages: number;
-  first: boolean;
-  last: boolean;
+  first?: boolean;
+  last?: boolean;
 }
