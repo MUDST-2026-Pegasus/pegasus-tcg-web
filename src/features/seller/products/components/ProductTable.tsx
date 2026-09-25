@@ -1,13 +1,8 @@
-import {
-  Ellipsis,
-  ImageIcon,
-  PackagePlus,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { useState, type ReactNode } from "react";
+
+import { Ellipsis, ImageIcon, PackagePlus, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,87 +23,105 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-import type {
-  ProductRow,
-  ProductStatus,
-  ProductsData,
-} from "../products.types";
+import { listingMeta } from "../products.format";
+import { isLowStock } from "../products.rules";
+import type { SellerListingSummary } from "../products.types";
 
-const STATUS_BADGE: Record<ProductStatus, string> = {
-  active: "bg-[#e3f4ec] text-[#12805c]",
-  low_stock: "bg-[#fdf0dd] text-[#b45309]",
-  out_of_stock: "bg-[#fbe9e8] text-[#d0342c]",
-  draft: "bg-[#eef1f2] text-[#6b7280]",
-};
+import { ListingPriceCell } from "./ListingPriceCell";
+import { ListingStatusCell } from "./ListingStatusCell";
 
 const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-gray-500";
 
+/**
+ * รูปแรกของประกาศ ถ้าไม่มีใช้รูปทางการจากแคตตาล็อก
+ * ทั้งคู่เป็น presigned URL อายุสั้น — โหลดไม่ขึ้น (หมดอายุ) ให้กลับไปใช้กรอบว่างแทนรูปแตก
+ */
+export function ListingThumb({ listing }: { listing: SellerListingSummary }) {
+  const src = listing.primaryPhotoUrl ?? listing.card.officialImageUrl;
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  if (src && src !== failedSrc) {
+    return (
+      <img
+        src={src}
+        alt=""
+        onError={() => setFailedSrc(src)}
+        className="size-10 shrink-0 rounded-md bg-gray-100 object-cover"
+      />
+    );
+  }
+  return (
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-gray-100">
+      <ImageIcon aria-hidden="true" className="size-4 text-gray-400" />
+    </div>
+  );
+}
+
 type ProductTableProps = {
-  table: ProductsData["table"];
-  pagination: ProductsData["pagination"];
-  rows: ProductRow[];
-  /** จำนวนสินค้าทั้งหมดของตัวกรองที่เลือกอยู่ ใช้โชว์ในบรรทัดสรุปท้ายตาราง */
-  totalCount: number;
-  selectedIds: string[];
-  onToggleRow: (id: string) => void;
+  rows: SellerListingSummary[];
+  selectedIds: number[];
+  onToggleRow: (id: number) => void;
   onToggleAll: () => void;
-  onDeleteRow: (row: ProductRow) => void;
+  onDeleteRow: (row: SellerListingSummary) => void;
+  /** ร้านยังแก้ประกาศไม่ได้ (`canPublish = false`) — ปุ่มที่เขียนข้อมูลถูกปิด */
+  readOnly: boolean;
+  /** กำลังดึงหน้าใหม่ แถวที่เห็นเป็นของเดิม — จางลงให้รู้ว่ากำลังโหลด */
+  isFetching: boolean;
+  /** แถบแบ่งหน้าท้ายตาราง */
+  footer: ReactNode;
 };
 
 /**
- * ตารางสินค้า
+ * ตารางประกาศขาย
  *
  * หมายเหตุ: ในดีไซน์ตารางเป็น flex กำหนดความกว้างคอลัมน์ตายตัว และทุกแถว
  * พื้นหลังเทาอ่อนเท่ากันหมด ที่นี่ใช้ <table> จริงเพื่อให้ screen reader
  * อ่านหัวคอลัมน์ได้ และให้พื้นเทาอ่อนเฉพาะแถวที่ถูกเลือก — แถวที่ไม่ได้เลือก
  * เป็นพื้นขาวคั่นด้วยเส้น ตรงกับที่ดีไซน์ตั้งใจสื่อเรื่องสถานะการเลือก
+ *
+ * คอลัมน์ "ขายแล้ว" ในดีไซน์ไม่มีที่มาใน `SellerListingSummaryResponse` จึงแสดง
+ * "ติดจอง" (`quantityReserved`) แทน ซึ่งเป็นตัวที่บอกว่าลบประกาศได้หรือยัง
+ * ส่วน "ต้นทุนเฉลี่ย" รอ SLR-04 ต่อกับคลัง ระหว่างนี้เป็น "—"
  */
 export function ProductTable({
-  table,
-  pagination,
   rows,
-  totalCount,
   selectedIds,
   onToggleRow,
   onToggleAll,
   onDeleteRow,
+  readOnly,
+  isFetching,
+  footer,
 }: ProductTableProps) {
   const allSelected = rows.length > 0 && selectedIds.length === rows.length;
 
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
-      <Table>
+      <Table
+        aria-busy={isFetching}
+        className={cn("transition-opacity", isFetching && "opacity-60")}
+      >
         <TableHeader>
           <TableRow className="border-y border-gray-100 bg-neutral-50 hover:bg-neutral-50">
             <TableHead className={cn(HEAD_CLASS, "w-8 pl-5")}>
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={onToggleAll}
-                aria-label={table.selectAllLabel}
+                aria-label="เลือกสินค้าทั้งหมดในหน้านี้"
                 className="size-3.5"
               />
             </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-72")}>
-              {table.columns.product}
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>
-              {table.columns.price}
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>
-              {table.columns.cost}
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-24")}>
-              {table.columns.stock}
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-20")}>
-              {table.columns.sold}
-            </TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-72")}>สินค้า</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-32")}>ราคาขาย</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-28")}>
-              {table.columns.status}
+              ต้นทุนเฉลี่ย
             </TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-28")}>พร้อมขาย</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-20")}>ติดจอง</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-32")}>สถานะ</TableHead>
             {/* คอลัมน์ปุ่มท้ายแถวไม่มีหัวตารางในดีไซน์ */}
             <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              <span className="sr-only">{table.columns.actions}</span>
+              <span className="sr-only">ตัวเลือกเพิ่มเติม</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -116,6 +129,8 @@ export function ProductTable({
         <TableBody className="[&_tr]:border-gray-100">
           {rows.map((row) => {
             const isSelected = selectedIds.includes(row.id);
+            const name = row.card.productName;
+            const lowStock = isLowStock(row);
 
             return (
               <TableRow
@@ -127,67 +142,67 @@ export function ProductTable({
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => onToggleRow(row.id)}
-                    aria-label={`${table.selectRowLabel}: ${row.name}`}
+                    aria-label={`เลือกสินค้า: ${name}`}
                     className="size-3.5"
                   />
                 </TableCell>
 
                 <TableCell className="py-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-gray-100">
-                      <ImageIcon
-                        aria-hidden="true"
-                        className="size-4 text-gray-400"
-                      />
-                    </div>
+                    <ListingThumb listing={row} />
                     <div className="flex min-w-0 flex-col gap-[3px]">
                       <p className="truncate text-xs font-medium text-zinc-950">
-                        {row.name}
+                        {name}
                       </p>
                       <p className="truncate text-[10px] text-gray-400">
-                        {row.meta}
+                        {listingMeta(row)}
                       </p>
                     </div>
                   </div>
                 </TableCell>
 
-                <TableCell className="py-3 text-xs font-semibold text-zinc-950">
-                  {row.price}
+                <TableCell className="py-3">
+                  <ListingPriceCell listing={row} readOnly={readOnly} />
                 </TableCell>
 
-                <TableCell className="py-3 text-xs text-gray-500">
-                  {row.cost}
-                </TableCell>
+                <TableCell className="py-3 text-xs text-gray-400">—</TableCell>
 
                 <TableCell className="py-3">
                   <div className="flex items-center gap-2">
                     <span
                       className={cn(
                         "text-xs font-semibold",
-                        row.stock === 0 ? "text-[#d0342c]" : "text-zinc-950",
+                        row.quantityAvailable === 0
+                          ? "text-[#d0342c]"
+                          : lowStock
+                            ? "text-[#b45309]"
+                            : "text-zinc-950",
                       )}
                     >
-                      {row.stock}
+                      {row.quantityAvailable}
                     </span>
-                    <span className="text-[10px] text-gray-400">
-                      {table.stockUnit}
-                    </span>
+                    <span className="text-[10px] text-gray-400">ใบ</span>
+                    {lowStock ? (
+                      <span className="text-[10px] font-medium text-[#b45309]">
+                        ใกล้หมด
+                      </span>
+                    ) : null}
                   </div>
                 </TableCell>
 
-                <TableCell className="py-3 text-xs text-gray-700">
-                  {row.sold}
+                <TableCell
+                  className={cn(
+                    "py-3 text-xs",
+                    row.quantityReserved > 0
+                      ? "text-gray-700"
+                      : "text-gray-400",
+                  )}
+                >
+                  {row.quantityReserved}
                 </TableCell>
 
                 <TableCell className="py-3">
-                  <Badge
-                    className={cn(
-                      "h-5 rounded-full px-2 text-xs",
-                      STATUS_BADGE[row.status],
-                    )}
-                  >
-                    {row.statusLabel}
-                  </Badge>
+                  <ListingStatusCell listing={row} readOnly={readOnly} />
                 </TableCell>
 
                 <TableCell className="py-2 pr-5">
@@ -195,7 +210,7 @@ export function ProductTable({
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`${table.editLabel}: ${row.name}`}
+                      aria-label={`แก้ไขสินค้า: ${name}`}
                       className="rounded-md text-slate-500"
                       render={<Link to={`/seller/products/${row.id}/edit`} />}
                       nativeButton={false}
@@ -208,14 +223,17 @@ export function ProductTable({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={`${table.moreLabel}: ${row.name}`}
+                            aria-label={`ตัวเลือกเพิ่มเติม: ${name}`}
                             className="rounded-md text-slate-500"
                           />
                         }
                       >
                         <Ellipsis className="size-6" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-auto rounded-xl">
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-auto rounded-xl"
+                      >
                         <DropdownMenuItem
                           render={
                             <Link to={`/seller/products/${row.id}/restock`} />
@@ -223,16 +241,17 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <PackagePlus />
-                          {table.restockLabel}
+                          เติมสต็อก
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           variant="destructive"
+                          disabled={readOnly}
                           onClick={() => onDeleteRow(row)}
                           className="rounded-lg text-xs"
                         >
                           <Trash2 />
-                          {table.deleteLabel}
+                          ลบสินค้า
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -244,36 +263,7 @@ export function ProductTable({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-between gap-4 border-t border-gray-100 px-5 py-3.5">
-        <p className="text-xs text-gray-500">
-          แสดง 1–{rows.length} จาก {totalCount} รายการ
-        </p>
-
-        <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            {pagination.previousLabel}
-          </Button>
-
-          {pagination.pages.map((page) => (
-            <span
-              key={page}
-              aria-current={page === pagination.currentPage ? "page" : undefined}
-              className={cn(
-                "flex size-7 items-center justify-center rounded-md text-xs font-medium",
-                page === pagination.currentPage
-                  ? "bg-teal-600 text-white"
-                  : "border border-zinc-200 bg-white text-gray-700",
-              )}
-            >
-              {page}
-            </span>
-          ))}
-
-          <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            {pagination.nextLabel}
-          </Button>
-        </div>
-      </div>
+      {footer}
     </Card>
   );
 }

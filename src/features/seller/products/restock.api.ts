@@ -1,60 +1,7 @@
-import { getProductsData } from "./products.api";
-import { parseBaht } from "./products.format";
+import { CONDITION_LABEL } from "./products.format";
+import type { SellerListing } from "./products.types";
 import { toIsoDate } from "./restock.calc";
-import type { RestockData, RestockLot } from "./restock.types";
-
-type RestockSeed = {
-  tags?: string[];
-  soldCount?: number;
-  lots: RestockLot[];
-  initialDraft?: Partial<RestockData["initialDraft"]>;
-};
-
-/**
- * ข้อมูลเฉพาะหน้าเติมสต็อกของแต่ละสินค้า — ของ Charizard ex ลอกจากดีไซน์
- * สินค้าอื่นยังไม่มีประวัติรับเข้า
- */
-const RESTOCK_SEEDS: Record<string, RestockSeed> = {
-  "charizard-ex": {
-    tags: ["Pokémon", "Near Mint", "125/197"],
-    soldCount: 34,
-    lots: [
-      {
-        id: "lot-2569-07-02",
-        receivedAt: "2026-07-02",
-        quantity: 12,
-        unitCost: 1020,
-        totalCost: 12240,
-        sourceLabel: "งาน TCG Expo",
-        averageCostAfter: 980,
-      },
-      {
-        id: "lot-2569-05-18",
-        receivedAt: "2026-05-18",
-        quantity: 16,
-        unitCost: 950,
-        totalCost: 15200,
-        sourceLabel: "ซื้อยกกล่องแล้วแยกใบ",
-        averageCostAfter: 962,
-      },
-      {
-        id: "lot-2569-04-05",
-        receivedAt: "2026-04-05",
-        quantity: 10,
-        unitCost: 980,
-        totalCost: 9800,
-        sourceLabel: "ซื้อจากผู้ขายรายย่อย",
-        averageCostAfter: 980,
-      },
-    ],
-    initialDraft: {
-      quantity: "8",
-      totalCost: "8800",
-      receivedAt: "2026-08-14",
-      reference: "INV-2569-0814",
-    },
-  },
-};
+import type { RestockData } from "./restock.types";
 
 const SOURCE_OPTIONS = [
   { value: "other_shop", label: "ซื้อจากร้านค้าอื่น" },
@@ -65,20 +12,16 @@ const SOURCE_OPTIONS = [
 ];
 
 /**
- * จุดต่อข้อมูลของหน้าเติมสต็อก — ตอนนี้ประกอบจากข้อมูลจำลองของหน้าจัดการสินค้า
- * วันที่ต่อ API จริงให้แก้เฉพาะข้างในฟังก์ชันนี้ · ไม่พบสินค้า = undefined
+ * ประกอบหน้าเติมสต็อกจากประกาศจริง (`GET /sellers/me/listings/{id}`)
+ * ประวัติรับเข้า ต้นทุนเฉลี่ย และยอดขาย ยังไม่มีที่มา — SLR-04 จะต่อกับ unit/คลัง
+ * (`POST /sellers/me/listings/{id}/units`, `/inventory/movements`) ระหว่างนี้เป็น 0 / ว่าง
  */
-export function getRestockData(productId: string): RestockData | undefined {
-  const row = getProductsData().rows.find((product) => product.id === productId);
-  if (!row) return undefined;
-
-  const seed: RestockSeed = RESTOCK_SEEDS[productId] ?? { lots: [] };
-
+export function getRestockData(listing: SellerListing): RestockData {
   return {
-    productId,
+    productId: String(listing.id),
     breadcrumb: {
       rootLabel: "จัดการสินค้า",
-      productLabel: row.name.split(" — ")[0],
+      productLabel: listing.card.productName,
       currentLabel: "เติมสต็อก",
     },
     title: "เติมสต็อก",
@@ -90,12 +33,12 @@ export function getRestockData(productId: string): RestockData | undefined {
     },
 
     product: {
-      name: row.name,
-      tags: seed.tags ?? row.meta.split(" · "),
+      name: listing.card.productName,
+      tags: [listing.card.variantLabel, CONDITION_LABEL[listing.condition]],
       stockLabel: "สต็อกปัจจุบัน",
-      stock: row.stock,
-      averageCost: parseBaht(row.cost),
-      sellingPrice: parseBaht(row.price),
+      stock: listing.quantityAvailable,
+      averageCost: 0,
+      sellingPrice: listing.price,
       unit: "ใบ",
     },
     commissionPercent: 5,
@@ -130,7 +73,7 @@ export function getRestockData(productId: string): RestockData | undefined {
     history: {
       title: "ประวัติการรับเข้าสินค้านี้",
       exportLabel: "ส่งออก CSV",
-      soldCount: seed.soldCount ?? row.sold,
+      soldCount: 0,
       columns: {
         receivedAt: "วันที่",
         quantity: "จำนวน",
@@ -141,7 +84,7 @@ export function getRestockData(productId: string): RestockData | undefined {
       },
       newBadgeLabel: "ใหม่",
       emptyLabel: "ยังไม่มีประวัติการรับเข้าสินค้านี้",
-      lots: seed.lots,
+      lots: [],
     },
 
     summary: {
@@ -170,7 +113,6 @@ export function getRestockData(productId: string): RestockData | undefined {
       source: SOURCE_OPTIONS[0].value,
       reference: "",
       note: "",
-      ...seed.initialDraft,
     },
   };
 }

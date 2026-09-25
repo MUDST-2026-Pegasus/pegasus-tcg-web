@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import { ItemCard } from "@/components/common/ItemCard";
+import { ErrorState, ItemCard } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,21 +11,33 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { formatPrice } from "@/features/catalog/catalog.mappers";
+import {
+  FeaturedSkeleton,
+  GamesSkeleton,
+  HeroSkeleton,
+  ProductGridSkeleton,
+  ProductRailSkeleton,
+} from "@/features/home/components/HomePageSkeleton";
+import { FALLBACK_HERO_SLIDE } from "@/features/home/home.mappers";
+import {
+  useExploreMore,
+  useFeaturedCategories,
+  useGames,
+  useHeroSlides,
+  useNewReleases,
+  usePegasusPicks,
+  useTrending,
+} from "@/features/home/home.queries";
 import type {
   GameCategory,
   HeroSlide,
-  HomeData,
   HomeProduct,
   ProductCategory,
   TrendingProduct,
 } from "@/features/home/home.types";
+import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
-
-const currencyFormatter = new Intl.NumberFormat("th-TH", {
-  style: "currency",
-  currency: "THB",
-  maximumFractionDigits: 0,
-});
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
 const HERO_CAROUSEL_INTERVAL_MS = 4000;
@@ -121,15 +134,16 @@ function CarouselPagination({
 type SectionHeaderProps = {
   title: string;
   actionLabel?: string;
+  /** ปลายทางของปุ่มขวามือ; ไม่ส่งมาก็ไม่มีปุ่ม */
+  actionHref?: string;
   description?: string;
-  showAction?: boolean;
 };
 
 function SectionHeader({
   title,
   actionLabel = "View All",
+  actionHref,
   description,
-  showAction = true,
 }: SectionHeaderProps) {
   return (
     <div
@@ -148,12 +162,13 @@ function SectionHeader({
           </p>
         ) : null}
       </div>
-      {showAction ? (
+      {actionHref ? (
         <Button
-          type="button"
           variant="link"
           size="sm"
           className="h-7 shrink-0 cursor-pointer px-0 text-sm font-normal"
+          nativeButton={false}
+          render={<Link to={actionHref} />}
         >
           {actionLabel}
         </Button>
@@ -169,11 +184,13 @@ function HomeProductCard({
   product: HomeProduct;
   rank?: number;
 }) {
+  const price = formatPrice(product.price);
+
   return (
     <div className="relative h-[260px] min-w-0">
-      <button
-        type="button"
-        aria-label={`${product.name} ราคา ${currencyFormatter.format(product.price)}`}
+      <Link
+        to={product.href}
+        aria-label={`${product.name} ราคา ${price}`}
         className="block h-full w-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ItemCard
@@ -181,10 +198,10 @@ function HomeProductCard({
           imageAlt={product.imageAlt}
           badge={product.type}
           title={product.name}
-          price={currencyFormatter.format(product.price)}
+          price={price}
           className="h-full w-full [&_img]:object-contain"
         />
-      </button>
+      </Link>
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
           {rank}
@@ -220,21 +237,27 @@ function CompactFeature({
           {slide.description}
         </p>
         <div className="flex flex-wrap items-center gap-2.5">
-          <Button
-            type="button"
-            size="lg"
-            className="h-11 w-[148px] cursor-pointer rounded-lg"
-          >
-            Shop New Releases
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="h-11 w-[126px] cursor-pointer rounded-lg"
-          >
-            Explore Cards
-          </Button>
+          {slide.primaryAction ? (
+            <Button
+              size="lg"
+              className="h-11 min-w-[148px] cursor-pointer rounded-lg"
+              nativeButton={false}
+              render={<Link to={slide.primaryAction.href} />}
+            >
+              {slide.primaryAction.label}
+            </Button>
+          ) : null}
+          {slide.secondaryAction ? (
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-11 min-w-[126px] cursor-pointer rounded-lg"
+              nativeButton={false}
+              render={<Link to={slide.secondaryAction.href} />}
+            >
+              {slide.secondaryAction.label}
+            </Button>
+          ) : null}
         </div>
       </div>
       <div className="order-1 h-[260px] overflow-hidden lg:order-2 lg:h-full lg:min-w-0 lg:flex-1">
@@ -299,7 +322,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="new-releases-title">
-          <SectionHeader title="New Releases" />
+          <SectionHeader title="New Releases" actionHref="/search?sort=newest" />
         </div>
         <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
           {products.map((product) => (
@@ -319,26 +342,35 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title="Shop by Game" />
+          <SectionHeader title="Shop by Game" actionHref="/search" />
         </div>
         <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
-            <button
+            <Link
               key={game.id}
-              type="button"
+              to={game.href}
               className="group flex h-40 w-[138px] shrink-0 cursor-pointer flex-col items-center gap-2.5 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <span className="flex size-[104px] items-center justify-center overflow-hidden rounded-full bg-muted transition-shadow group-hover:shadow-md group-hover:ring-2 group-hover:ring-primary/30">
-                <img
-                  src={game.image}
-                  alt={game.imageAlt}
-                  className="size-[82px] object-contain"
-                />
+                {game.image ? (
+                  <img
+                    src={game.image}
+                    alt={game.imageAlt}
+                    className="size-[82px] object-contain"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="text-2xl font-semibold text-muted-foreground"
+                  >
+                    {game.name.charAt(0)}
+                  </span>
+                )}
               </span>
               <span className="w-full text-center text-sm text-foreground">
                 {game.name}
               </span>
-            </button>
+            </Link>
           ))}
         </div>
       </div>
@@ -351,11 +383,13 @@ function ProductRail({
   products,
   description,
   actionLabel,
+  actionHref,
 }: {
   title: string;
   products: (HomeProduct | TrendingProduct)[];
   description?: string;
   actionLabel?: string;
+  actionHref?: string;
 }) {
   return (
     <section
@@ -370,6 +404,7 @@ function ProductRail({
           title={title}
           description={description}
           actionLabel={actionLabel}
+          actionHref={actionHref}
         />
         <Carousel
           opts={{ align: "start", dragFree: true }}
@@ -410,7 +445,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title="Featured" showAction={false} />
+          <SectionHeader title="Featured" />
         </div>
         <Carousel
           setApi={setApi}
@@ -435,9 +470,9 @@ function FeaturedCategories({
                 key={category.id}
                 className="basis-[min(396.8px,calc(100vw-2rem))]"
               >
-                <button
-                  type="button"
-                  className="group h-[371px] w-full min-w-0 cursor-pointer rounded-[20px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                <Link
+                  to={category.href}
+                  className="group block h-[371px] w-full min-w-0 cursor-pointer rounded-[20px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   <Card className="h-full gap-0 rounded-[20px] border border-border py-0 shadow-none ring-0 transition-[box-shadow,border-color] group-hover:border-primary/40 group-hover:shadow-md">
                     <div className="h-[272px] w-full overflow-hidden bg-muted">
@@ -453,7 +488,7 @@ function FeaturedCategories({
                       </CardTitle>
                     </CardHeader>
                   </Card>
-                </button>
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -479,7 +514,11 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
-          <SectionHeader title="More to Explore" actionLabel="more" />
+          <SectionHeader
+            title="More to Explore"
+            actionLabel="more"
+            actionHref="/search"
+          />
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)] lg:gap-x-[14.653px]">
           {products.map((product) => (
@@ -491,21 +530,120 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
   );
 }
 
-export function HomeContent({ data }: { data: HomeData }) {
+/**
+ * กล่อง error กลาง (`ErrorState`) วางในกรอบเดียวกับ section อื่น — ไม่ใช้ `QueryBoundary`
+ * ตรง ๆ เพราะมันวางกล่อง error ชิดขอบจอ ซึ่งหน้าแรกที่แต่ละ section มีระยะของตัวเองรับไม่ได้
+ */
+function SectionError({
+  title,
+  query,
+}: {
+  title: string;
+  query: { error: unknown; refetch: () => unknown };
+}) {
+  return (
+    <section
+      aria-label={title}
+      className="bg-secondary px-4 py-7 sm:px-6 lg:px-8"
+    >
+      <div className="mx-auto max-w-[1216px]">
+        <ErrorState
+          error={query.error}
+          title={`โหลด ${title} ไม่สำเร็จ`}
+          onRetry={() => query.refetch()}
+          className="min-h-0 bg-background py-10"
+        />
+      </div>
+    </section>
+  );
+}
+
+// ---------- sections ที่ผูกกับ API: แต่ละอันมีสถานะโหลด / พัง / ว่าง ของตัวเอง ----------
+
+/** โหลดไม่ขึ้นหรือยังไม่มีสไลด์ ก็ยังมีสไลด์ตั้งต้น หน้าแรกจะไม่เริ่มด้วยช่องว่าง */
+function HeroSection() {
+  const { data, isPending } = useHeroSlides();
+
+  if (isPending) {
+    return <HeroSkeleton />;
+  }
+  return <HeroCarousel slides={data?.length ? data : [FALLBACK_HERO_SLIDE]} />;
+}
+
+function NewReleasesSection() {
+  const query = useNewReleases();
+
+  if (query.isPending) return <ProductGridSkeleton />;
+  if (query.isError) return <SectionError title="New Releases" query={query} />;
+  if (query.data.length === 0) return null;
+  return <NewReleases products={query.data} />;
+}
+
+function GamesSection() {
+  const query = useGames();
+
+  if (query.isPending) return <GamesSkeleton />;
+  if (query.isError) return <SectionError title="Shop by Game" query={query} />;
+  if (query.data.length === 0) return null;
+  return <BrowseByGame games={query.data} />;
+}
+
+function TrendingSection() {
+  const query = useTrending();
+
+  if (query.isPending) return <ProductRailSkeleton />;
+  if (query.isError) return <SectionError title="Trending Now" query={query} />;
+  if (query.data.length === 0) return null;
+  return (
+    <ProductRail title="Trending Now" actionHref="/search" products={query.data} />
+  );
+}
+
+function FeaturedSection() {
+  const query = useFeaturedCategories();
+
+  if (query.isPending) return <FeaturedSkeleton />;
+  if (query.isError) return <SectionError title="Featured" query={query} />;
+  if (query.data.length === 0) return null;
+  return <FeaturedCategories categories={query.data} />;
+}
+
+function PegasusPicksSection() {
+  const query = usePegasusPicks();
+
+  if (query.isPending) return <ProductRailSkeleton description />;
+  if (query.isError) return <SectionError title="Pegasus Picks" query={query} />;
+  if (query.data.length === 0) return null;
+  return (
+    <ProductRail
+      title="Pegasus Picks"
+      description="Curated, verified, and shipped by Pegasus."
+      actionLabel="Shop Pegasus"
+      actionHref={`/store/${encodeURIComponent(env.pegasusStoreUsername)}`}
+      products={query.data}
+    />
+  );
+}
+
+function ExploreSection() {
+  const query = useExploreMore();
+
+  if (query.isPending) return <ProductGridSkeleton explore />;
+  if (query.isError) return <SectionError title="More to Explore" query={query} />;
+  if (query.data.length === 0) return null;
+  return <ExploreGrid products={query.data} />;
+}
+
+export function HomeContent() {
   return (
     <div className="bg-secondary font-sans">
-      <HeroCarousel slides={data.heroSlides} />
-      <NewReleases products={data.newReleases} />
-      <BrowseByGame games={data.games} />
-      <ProductRail title="Trending Now" products={data.trending} />
-      <FeaturedCategories categories={data.categories} />
-      <ProductRail
-        title="Pegasus Picks"
-        description="Curated, verified, and shipped by Pegasus."
-        actionLabel="Shop Pegasus"
-        products={data.pegasusProducts}
-      />
-      <ExploreGrid products={data.exploreMore} />
+      <HeroSection />
+      <NewReleasesSection />
+      <GamesSection />
+      <TrendingSection />
+      <FeaturedSection />
+      <PegasusPicksSection />
+      <ExploreSection />
     </div>
   );
 }
