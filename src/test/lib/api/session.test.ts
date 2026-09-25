@@ -83,8 +83,7 @@ describe("api session", () => {
   });
 
   it("should check if access token is expired", () => {
-    const originalNow = Date.now;
-    Date.now = vi.fn(() => 10000000); // fixed timestamp
+    vi.spyOn(Date, "now").mockReturnValue(10000000);
 
     saveSession({
       accessToken: "access-token",
@@ -101,8 +100,6 @@ describe("api session", () => {
     });
 
     expect(isAccessTokenExpired()).toBe(false); 
-
-    Date.now = originalNow;
   });
 
   it("should subscribe to session changes", () => {
@@ -144,7 +141,7 @@ describe("api session", () => {
           },
         },
       }),
-    } as any);
+    } as unknown);
 
     const token = await refreshAccessToken();
     
@@ -163,7 +160,7 @@ describe("api session", () => {
 
     vi.mocked(global.fetch).mockResolvedValueOnce({
       ok: false,
-    } as any);
+    } as unknown);
 
     const token = await refreshAccessToken();
     

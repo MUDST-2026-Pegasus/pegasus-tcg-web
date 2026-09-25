@@ -30,7 +30,7 @@ describe("useFileUpload", () => {
 
   it("should initialize correctly", () => {
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as any })
+      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
     );
 
     expect(result.current.items).toEqual([]);
@@ -45,7 +45,7 @@ describe("useFileUpload", () => {
     vi.mocked(uploadLib.validateFile).mockReturnValue("Invalid file type");
 
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as any })
+      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
     );
 
     act(() => {
@@ -60,7 +60,7 @@ describe("useFileUpload", () => {
 
   it("should handle addFiles success path", async () => {
     vi.mocked(uploadLib.validateFile).mockReturnValue(null);
-    let resolveUpload: any;
+    let resolveUpload: (value: string) => void;
     vi.mocked(uploadLib.uploadFile).mockReturnValue(
       new Promise((resolve) => {
         resolveUpload = resolve;
@@ -68,7 +68,7 @@ describe("useFileUpload", () => {
     );
 
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as any })
+      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
     );
 
     const file = new File(["dummy image"], "test.jpg", { type: "image/jpeg" });
@@ -92,7 +92,7 @@ describe("useFileUpload", () => {
 
   it("should clear items on unmount", () => {
     const { result, unmount } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as any })
+      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
     );
 
     vi.mocked(uploadLib.validateFile).mockReturnValue(null);

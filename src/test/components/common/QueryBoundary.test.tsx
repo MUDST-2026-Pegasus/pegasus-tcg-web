@@ -1,18 +1,22 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryBoundary } from "@/components/common/QueryBoundary";
 
 describe("QueryBoundary", () => {
-  const mockRefetch = vi.fn();
+  let mockRefetch: ReturnType<typeof vi.fn>;
 
-  const getQueryMock = (overrides: any) => ({
+  const getQueryMock = (overrides: unknown) => ({
     data: undefined,
     isPending: false,
     isError: false,
     error: null,
     refetch: mockRefetch,
     ...overrides,
+  });
+
+  beforeEach(() => {
+    mockRefetch = vi.fn();
   });
 
   afterEach(() => {

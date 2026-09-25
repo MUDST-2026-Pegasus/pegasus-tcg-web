@@ -14,7 +14,7 @@ vi.mock("@/lib/api/config", () => ({
 }));
 
 describe("api client", () => {
-  let mockFetch: any;
+  let mockFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockFetch = vi.fn();
@@ -26,7 +26,7 @@ describe("api client", () => {
     vi.restoreAllMocks();
   });
 
-  const createResponse = (ok: boolean, status: number, body: any) => ({
+  const createResponse = (ok: boolean, status: number, body: unknown) => ({
     ok,
     status,
     text: async () => (body === null ? "" : JSON.stringify(body)),

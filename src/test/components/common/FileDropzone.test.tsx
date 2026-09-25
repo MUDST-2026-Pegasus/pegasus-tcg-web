@@ -17,14 +17,13 @@ describe("FileDropzone", () => {
     const onFiles = vi.fn();
     const user = userEvent.setup();
 
-    render(
+    const { container } = render(
       <FileDropzone onFiles={onFiles} id="test-dropzone">
         <div data-testid="drop-area">Drop here</div>
       </FileDropzone>
     );
 
-    // Mock click on input
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = vi.spyOn(input, 'click');
 
     await user.click(screen.getByTestId("drop-area"));
@@ -36,13 +35,13 @@ describe("FileDropzone", () => {
     const user = userEvent.setup();
 
     render(
-      <FileDropzone onFiles={onFiles}>
+      <FileDropzone onFiles={onFiles} id="file-input">
         <label htmlFor="file-input">Upload</label>
       </FileDropzone>
     );
 
     const file = new File(["dummy"], "test.png", { type: "image/png" });
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = screen.getByLabelText("Upload") as HTMLInputElement;
 
     await user.upload(input, file);
     expect(onFiles).toHaveBeenCalledWith([file]);
@@ -52,13 +51,13 @@ describe("FileDropzone", () => {
     const onFiles = vi.fn();
     const user = userEvent.setup();
 
-    render(
+    const { container } = render(
       <FileDropzone onFiles={onFiles} disabled>
         <div data-testid="drop-area">Drop here</div>
       </FileDropzone>
     );
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = vi.spyOn(input, 'click');
 
     await user.click(screen.getByTestId("drop-area"));
@@ -73,9 +72,10 @@ describe("FileDropzone", () => {
       </FileDropzone>
     );
 
-    const dropArea = screen.getByTestId("drop-area").parentElement!;
+    const dropArea = screen.getByTestId("dropzone-container");
 
-    // Drag over
+    // fireEvent used intentionally: userEvent does not support
+    // drag-and-drop in jsdom (https://github.com/testing-library/user-event/issues/440)
     fireEvent.dragOver(dropArea);
     expect(dropArea).toHaveAttribute("data-dragging", "true");
 

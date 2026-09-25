@@ -12,7 +12,7 @@ describe("ApiError", () => {
   it("should create an ApiError instance correctly", () => {
     const error = new ApiError({
       status: 400,
-      code: "VALIDATION_ERROR" as any,
+      code: "VALIDATION_ERROR" as unknown,
       message: "Invalid input",
       violations: [{ field: "email", message: "Invalid format" }],
       path: "/api/test",
@@ -27,7 +27,7 @@ describe("ApiError", () => {
   });
 
   it("should identify ApiError using isApiError", () => {
-    const apiError = new ApiError({ status: 500, code: "INTERNAL_ERROR" as any, message: "Error" });
+    const apiError = new ApiError({ status: 500, code: "INTERNAL_ERROR" as unknown, message: "Error" });
     const normalError = new Error("Normal");
 
     expect(isApiError(apiError)).toBe(true);
@@ -36,21 +36,21 @@ describe("ApiError", () => {
   });
 
   it("should match error codes with hasErrorCode", () => {
-    const apiError = new ApiError({ status: 404, code: "NOT_FOUND" as any, message: "Not found" });
+    const apiError = new ApiError({ status: 404, code: "NOT_FOUND" as unknown, message: "Not found" });
     
-    expect(hasErrorCode(apiError, "NOT_FOUND" as any)).toBe(true);
-    expect(hasErrorCode(apiError, "INTERNAL_ERROR" as any, "NOT_FOUND" as any)).toBe(true);
-    expect(hasErrorCode(apiError, "BAD_REQUEST" as any)).toBe(false);
-    expect(hasErrorCode(new Error(), "NOT_FOUND" as any)).toBe(false);
+    expect(hasErrorCode(apiError, "NOT_FOUND" as unknown)).toBe(true);
+    expect(hasErrorCode(apiError, "INTERNAL_ERROR" as unknown, "NOT_FOUND" as unknown)).toBe(true);
+    expect(hasErrorCode(apiError, "BAD_REQUEST" as unknown)).toBe(false);
+    expect(hasErrorCode(new Error(), "NOT_FOUND" as unknown)).toBe(false);
   });
 
   it("should identify network error with isNetworkError", () => {
     const networkError = new ApiError({
       status: 0,
-      code: CLIENT_ERROR_CODES.NETWORK_ERROR as any,
+      code: CLIENT_ERROR_CODES.NETWORK_ERROR as unknown,
       message: "Network Error"
     });
-    const otherError = new ApiError({ status: 500, code: "SERVER_ERROR" as any, message: "Server Error" });
+    const otherError = new ApiError({ status: 500, code: "SERVER_ERROR" as unknown, message: "Server Error" });
 
     expect(isNetworkError(networkError)).toBe(true);
     expect(isNetworkError(otherError)).toBe(false);
@@ -59,7 +59,7 @@ describe("ApiError", () => {
   it("should get error message using getErrorMessage", () => {
     const fallback = "Default error";
     
-    expect(getErrorMessage(new ApiError({ status: 400, code: "ERR" as any, message: "API Failed" }), fallback)).toBe("API Failed");
+    expect(getErrorMessage(new ApiError({ status: 400, code: "ERR" as unknown, message: "API Failed" }), fallback)).toBe("API Failed");
     expect(getErrorMessage(new Error("JS Error"), fallback)).toBe("JS Error");
     expect(getErrorMessage(null, fallback)).toBe(fallback);
     expect(getErrorMessage({}, fallback)).toBe(fallback);

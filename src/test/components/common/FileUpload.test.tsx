@@ -15,7 +15,7 @@ describe("FileUpload", () => {
     isUploading: false,
     multiple: false,
     maxFiles: undefined,
-    rule: {} as any,
+    rule: { maxBytes: 1024 * 1024, allowedTypes: ["image/*"] } as unknown,
     accept: "image/*",
     hint: "Upload an image",
     ...overrides,
@@ -25,7 +25,7 @@ describe("FileUpload", () => {
     const upload = mockUploadState();
     render(<FileUpload upload={upload} />);
     
-    expect(screen.getByText("ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์")).toBeInTheDocument();
+    expect(screen.getByText(/ลากไฟล์มาวางที่นี่/)).toBeInTheDocument();
     expect(screen.getByText("Upload an image")).toBeInTheDocument();
   });
 

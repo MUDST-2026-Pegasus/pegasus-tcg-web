@@ -10,17 +10,13 @@ vi.mock("react-router-dom", () => ({
 }));
 
 describe("RouteError", () => {
-  const originalLocation = window.location;
-
   beforeEach(() => {
-    delete (window as any).location;
-    window.location = { ...originalLocation, reload: vi.fn() };
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    window.location = originalLocation;
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("renders standard error message", () => {
@@ -53,11 +49,14 @@ describe("RouteError", () => {
     vi.mocked(router.useRouteError).mockReturnValue(new Error());
     vi.mocked(router.isRouteErrorResponse).mockReturnValue(false);
     const user = userEvent.setup();
+    
+    const reloadSpy = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload: reloadSpy });
 
     render(<RouteError />);
     const button = screen.getByRole("button");
     await user.click(button);
 
-    expect(window.location.reload).toHaveBeenCalledTimes(1);
+    expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 });

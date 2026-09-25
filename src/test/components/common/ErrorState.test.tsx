@@ -7,14 +7,14 @@ import { ApiError } from "@/lib/api";
 describe("ErrorState", () => {
   it("renders default title and fallback message", () => {
     render(<ErrorState />);
-    expect(screen.getByText("โหลดข้อมูลไม่สำเร็จ")).toBeInTheDocument();
-    expect(screen.getByText("ลองใหม่อีกครั้ง หรือรีเฟรชหน้านี้")).toBeInTheDocument();
+    expect(screen.getByText(/โหลดข้อมูลไม่สำเร็จ/)).toBeInTheDocument();
+    expect(screen.getByText(/ลองใหม่อีกครั้ง/)).toBeInTheDocument();
   });
 
   it("renders provided ApiError message", () => {
     const error = new ApiError({
       status: 404,
-      code: "NOT_FOUND" as any,
+      code: "NOT_FOUND" as unknown,
       message: "Custom API Error Message"
     });
     

@@ -3,8 +3,11 @@ import { renderHook, act } from "@testing-library/react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 describe("useIsMobile", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let matchMediaMock: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let addEventListenerMock: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let removeEventListenerMock: any;
 
   beforeEach(() => {
@@ -51,7 +54,10 @@ describe("useIsMobile", () => {
     act(() => {
       vi.stubGlobal("innerWidth", 500);
       // simulate the event listener firing
-      const onChange = addEventListenerMock.mock.calls[0][1];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const changeCall = addEventListenerMock.mock.calls.find((call: any[]) => call[0] === "change");
+      const onChange = changeCall?.[1];
+      expect(onChange).toBeDefined();
       onChange();
     });
 

@@ -105,6 +105,7 @@ export function FileDropzone({
         data-dragging={isDragging || undefined}
         data-invalid={invalid || undefined}
         data-disabled={disabled || undefined}
+        data-testid="dropzone-container"
         className={cn(
           "cursor-pointer data-disabled:cursor-not-allowed data-disabled:opacity-60",
           className,
