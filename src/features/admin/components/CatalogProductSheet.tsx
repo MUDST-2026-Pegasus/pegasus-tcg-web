@@ -16,6 +16,7 @@ import { productTitle } from "../catalog.format";
 import { useAdminProduct } from "../catalog.queries";
 import type { CatalogProduct, Game } from "../catalog.types";
 
+import { CatalogImageManager } from "./CatalogImageManager";
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
 import { CatalogVariantList } from "./CatalogVariantList";
@@ -115,7 +116,7 @@ function EditProductPanel({
       errorTitle="โหลดสินค้าไม่สำเร็จ"
       errorMessage="สินค้านี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้"
     >
-      {({ product, variants }) => {
+      {({ product, variants, images }) => {
         const game = games.find((candidate) => candidate.id === product.gameId);
 
         return (
@@ -144,6 +145,7 @@ function EditProductPanel({
                 <TabsTrigger value="variants">
                   Variant ({variants.length})
                 </TabsTrigger>
+                <TabsTrigger value="images">รูปภาพ ({images.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="details" className="flex min-h-0 flex-col">
@@ -157,6 +159,15 @@ function EditProductPanel({
 
               <TabsContent value="variants" className="min-h-0 overflow-y-auto">
                 <CatalogVariantList product={product} variants={variants} />
+              </TabsContent>
+
+              <TabsContent value="images" className="min-h-0 overflow-y-auto">
+                <CatalogImageManager
+                  product={product}
+                  variants={variants}
+                  images={images}
+                  onRefresh={() => detail.refetch()}
+                />
               </TabsContent>
             </Tabs>
           </>
