@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
+    "test:integration": "pnpm exec vitest run",
     "cyopen": "cypress open",
     "cyrun": "cypress run"
   },
