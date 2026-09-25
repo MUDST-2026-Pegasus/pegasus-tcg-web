@@ -66,19 +66,19 @@ export function CheckoutPage() {
     return items.filter((item) => idSet.has(item.id));
   }, [cart, selectedCartItemIds]);
 
-  // Set default address when addresses load
-  useEffect(() => {
-    if (addresses.length > 0 && !selectedAddress) {
-      const defaultAddr =
-        addresses.find((a) => a.defaultShipping) || addresses[0];
-      setSelectedAddress(defaultAddr);
-      setTempAddressId(defaultAddr.id.toString());
-    }
+  // Derive active address during render without setting state in useEffect
+  const activeAddress = useMemo(() => {
+    return (
+      selectedAddress ??
+      addresses.find((a) => a.defaultShipping) ??
+      addresses[0] ??
+      null
+    );
   }, [addresses, selectedAddress]);
 
   const handleShippingOpenChange = (open: boolean) => {
     if (open) {
-      setTempAddressId(selectedAddress ? selectedAddress.id.toString() : null);
+      setTempAddressId(activeAddress ? activeAddress.id.toString() : null);
     }
     setIsShippingOpen(open);
   };
@@ -108,7 +108,7 @@ export function CheckoutPage() {
   const formatPrice = (price: number) => `฿${price.toLocaleString()}`;
 
   const handlePurchase = async () => {
-    if (!selectedAddress || !selectedPayment || checkoutItems.length === 0) {
+    if (!activeAddress || !selectedPayment || checkoutItems.length === 0) {
       toast.add({
         title: "Incomplete Details",
         description: "Please select a shipping address and payment method.",
@@ -120,7 +120,7 @@ export function CheckoutPage() {
     setIsSubmitting(true);
     try {
       const response = await checkoutApi.checkout({
-        shippingAddressId: selectedAddress.id,
+        shippingAddressId: activeAddress.id,
         cartItemIds: selectedCartItemIds && selectedCartItemIds.length > 0
           ? selectedCartItemIds
           : undefined,
@@ -259,8 +259,8 @@ export function CheckoutPage() {
                 </span>
                 <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors text-sm max-w-[320px]">
                   <span className="truncate">
-                    {selectedAddress
-                      ? formatAddressLines(selectedAddress).join(", ")
+                    {activeAddress
+                      ? formatAddressLines(activeAddress).join(", ")
                       : "please enter your address"}
                   </span>
                   <ChevronRight className="w-4 h-4 ml-1 opacity-70 shrink-0" />
@@ -443,7 +443,7 @@ export function CheckoutPage() {
         </Card>
 
         <Button
-          disabled={!selectedAddress || !selectedPayment || isSubmitting}
+          disabled={!activeAddress || !selectedPayment || isSubmitting}
           className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
           onClick={handlePurchase}
         >

@@ -40,7 +40,6 @@ export function PaymentSuccessPage() {
 
   useEffect(() => {
     if (!order && orderId) {
-      setIsLoading(true);
       ordersApi
         .getOrder(orderId)
         .then((res) => setOrder(res))

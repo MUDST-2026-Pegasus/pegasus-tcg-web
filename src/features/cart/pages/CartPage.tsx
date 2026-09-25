@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Lock, Minus, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,31 +19,23 @@ export function CartPage() {
   const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
 
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
-  const [initializedSelection, setInitializedSelection] = useState(false);
+  const [deselectedItemIds, setDeselectedItemIds] = useState<Set<number>>(new Set());
 
   const items = useMemo(() => cart?.items ?? [], [cart]);
 
-  // Initialize selection when cart items are first loaded
-  useEffect(() => {
-    if (items.length > 0 && !initializedSelection) {
-      setSelectedItemIds(new Set(items.map((i) => i.id)));
-      setInitializedSelection(true);
-    } else if (items.length > 0) {
-      // Retain only valid existing IDs
-      setSelectedItemIds((prev) => {
-        const next = new Set<number>();
-        const itemIds = new Set(items.map((i) => i.id));
-        for (const id of prev) {
-          if (itemIds.has(id)) next.add(id);
-        }
-        return next;
-      });
+  // Derive selection during render: all cart items are selected by default unless explicitly deselected
+  const selectedItemIds = useMemo(() => {
+    const selected = new Set<number>();
+    for (const item of items) {
+      if (!deselectedItemIds.has(item.id)) {
+        selected.add(item.id);
+      }
     }
-  }, [items, initializedSelection]);
+    return selected;
+  }, [items, deselectedItemIds]);
 
   const toggleCheck = (id: number) => {
-    setSelectedItemIds((prev) => {
+    setDeselectedItemIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -59,9 +51,9 @@ export function CartPage() {
 
   const toggleAll = () => {
     if (allChecked) {
-      setSelectedItemIds(new Set());
+      setDeselectedItemIds(new Set(items.map((item) => item.id)));
     } else {
-      setSelectedItemIds(new Set(items.map((item) => item.id)));
+      setDeselectedItemIds(new Set());
     }
   };
 

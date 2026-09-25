@@ -11,15 +11,9 @@ export const orderKeys = {
 export function useBuyerOrders(page = 0, size = 50) {
   return useQuery({
     queryKey: orderKeys.list(page, size),
-    queryFn: async () => {
+    queryFn: async (): Promise<OrderDetails[]> => {
       const response = await ordersApi.listOrders(page, size);
-      const items: OrderDetails[] =
-        (response as any)?.items ??
-        (response as any)?.content ??
-        (response as any)?.data?.items ??
-        (response as any)?.data ??
-        (Array.isArray(response) ? response : []);
-      return items;
+      return response.items ?? response.content ?? [];
     },
   });
 }

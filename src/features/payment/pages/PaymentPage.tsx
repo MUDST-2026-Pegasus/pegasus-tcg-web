@@ -37,7 +37,6 @@ export function PaymentPage() {
   // Fetch order details if not in state
   useEffect(() => {
     if (!order && orderId) {
-      setIsLoading(true);
       ordersApi
         .getOrder(orderId)
         .then((res) => {

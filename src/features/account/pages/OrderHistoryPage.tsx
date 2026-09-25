@@ -57,13 +57,13 @@ export function OrderHistoryPage() {
   const orders: OrderDetails[] = useMemo(() => {
     if (Array.isArray(ordersData)) return ordersData;
     if (ordersData && typeof ordersData === "object") {
-      return (
-        (ordersData as any).items ??
-        (ordersData as any).content ??
-        (ordersData as any).data?.items ??
-        (ordersData as any).data ??
-        []
-      );
+      const record = ordersData as Record<string, unknown>;
+      if (Array.isArray(record.items)) return record.items as OrderDetails[];
+      if (Array.isArray(record.content)) return record.content as OrderDetails[];
+      if (typeof record.data === "object" && record.data !== null) {
+        const nested = record.data as Record<string, unknown>;
+        if (Array.isArray(nested.items)) return nested.items as OrderDetails[];
+      }
     }
     return [];
   }, [ordersData]);
