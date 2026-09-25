@@ -49,7 +49,11 @@ export const adminNav: NavGroup[] = [
     label: "แคตตาล็อก",
     items: [
       { label: "จัดการแคตตาล็อก", to: "/admin/catalog", icon: LayoutGrid },
-      { label: "คุณสมบัติการ์ด", to: "/admin/card-attributes", icon: Settings2 },
+      {
+        label: "เกมและคุณสมบัติการ์ด",
+        to: "/admin/card-attributes",
+        icon: Settings2,
+      },
     ],
   },
   {
