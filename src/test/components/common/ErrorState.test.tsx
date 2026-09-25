@@ -14,7 +14,7 @@ describe("ErrorState", () => {
   it("renders provided ApiError message", () => {
     const error = new ApiError({
       status: 404,
-      code: "NOT_FOUND" as unknown,
+      code: "NOT_FOUND" as never,
       message: "Custom API Error Message"
     });
     

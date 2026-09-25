@@ -6,12 +6,12 @@ import { QueryBoundary } from "@/components/common/QueryBoundary";
 describe("QueryBoundary", () => {
   let mockRefetch: ReturnType<typeof vi.fn>;
 
-  const getQueryMock = (overrides: unknown) => ({
+  const getQueryMock = (overrides: Record<string, unknown>) => ({
     data: undefined,
     isPending: false,
     isError: false,
     error: null,
-    refetch: mockRefetch,
+    refetch: mockRefetch as unknown as () => void,
     ...overrides,
   });
 
@@ -70,7 +70,7 @@ describe("QueryBoundary", () => {
     render(
       <QueryBoundary 
         query={getQueryMock({ data: [] })} 
-        isEmpty={(data) => data.length === 0}
+        isEmpty={(data: string[]) => data.length === 0}
         empty={<div data-testid="empty-state">No Data</div>}
       >
         {() => <div>Data</div>}
@@ -83,7 +83,7 @@ describe("QueryBoundary", () => {
   it("renders children with data when successful", () => {
     render(
       <QueryBoundary query={getQueryMock({ data: ["apple", "banana"] })}>
-        {(data) => <div>Items: {data.length}</div>}
+        {(data: string[]) => <div>Items: {data.length}</div>}
       </QueryBoundary>
     );
     

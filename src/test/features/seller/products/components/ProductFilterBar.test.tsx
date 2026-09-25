@@ -7,7 +7,7 @@ import type { ProductFilter, ProductsData } from "@/features/seller/products/pro
 const MOCK_FILTERS: ProductFilter[] = [
   { id: "all", label: "All", count: 10 },
   { id: "active", label: "Active", count: 7 },
-  { id: "inactive", label: "Inactive", count: 3 },
+  { id: "inactive" as never, label: "Inactive", count: 3 },
 ];
 
 const MOCK_TOOLBAR: ProductsData["toolbar"] = {

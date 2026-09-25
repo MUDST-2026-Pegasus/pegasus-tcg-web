@@ -18,7 +18,7 @@ describe("api client", () => {
 
   beforeEach(() => {
     mockFetch = vi.fn();
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
   });
 

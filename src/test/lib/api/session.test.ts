@@ -35,7 +35,7 @@ vi.mock("@/lib/api/config", () => ({
   buildUrl: vi.fn((path) => `http://mock${path}`),
 }));
 
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 describe("api session", () => {
   beforeEach(() => {
@@ -129,7 +129,7 @@ describe("api session", () => {
       expiresIn: -10, // expired
     });
 
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         success: true,
@@ -141,12 +141,12 @@ describe("api session", () => {
           },
         },
       }),
-    } as unknown);
+    } as unknown as Response);
 
     const token = await refreshAccessToken();
     
     expect(token).toBe("new-access");
-    expect(global.fetch).toHaveBeenCalledWith("http://mock/auth/refresh", expect.any(Object));
+    expect(globalThis.fetch).toHaveBeenCalledWith("http://mock/auth/refresh", expect.any(Object));
     expect(getAccessToken()).toBe("new-access");
     expect(getRefreshToken()).toBe("new-refresh");
   });
@@ -158,9 +158,9 @@ describe("api session", () => {
       expiresIn: -10,
     });
 
-    vi.mocked(global.fetch).mockResolvedValueOnce({
+    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
       ok: false,
-    } as unknown);
+    } as unknown as Response);
 
     const token = await refreshAccessToken();
     

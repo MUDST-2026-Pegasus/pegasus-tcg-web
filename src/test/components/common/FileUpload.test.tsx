@@ -15,7 +15,7 @@ describe("FileUpload", () => {
     isUploading: false,
     multiple: false,
     maxFiles: undefined,
-    rule: { maxBytes: 1024 * 1024, allowedTypes: ["image/*"] } as unknown,
+    rule: { maxBytes: 1024 * 1024, allowedTypes: ["image/*"] } as never,
     accept: "image/*",
     hint: "Upload an image",
     ...overrides,

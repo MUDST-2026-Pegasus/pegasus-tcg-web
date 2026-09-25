@@ -20,8 +20,8 @@ vi.mock("@/lib/upload", () => {
 });
 
 // Mock URL methods
-global.URL.createObjectURL = vi.fn(() => "blob:test");
-global.URL.revokeObjectURL = vi.fn();
+globalThis.URL.createObjectURL = vi.fn(() => "blob:test");
+globalThis.URL.revokeObjectURL = vi.fn();
 
 describe("useFileUpload", () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("useFileUpload", () => {
 
   it("should initialize correctly", () => {
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
+      useFileUpload({ purpose: "TEST_PURPOSE" as never })
     );
 
     expect(result.current.items).toEqual([]);
@@ -45,7 +45,7 @@ describe("useFileUpload", () => {
     vi.mocked(uploadLib.validateFile).mockReturnValue("Invalid file type");
 
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
+      useFileUpload({ purpose: "TEST_PURPOSE" as never })
     );
 
     act(() => {
@@ -68,7 +68,7 @@ describe("useFileUpload", () => {
     );
 
     const { result } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
+      useFileUpload({ purpose: "TEST_PURPOSE" as never })
     );
 
     const file = new File(["dummy image"], "test.jpg", { type: "image/jpeg" });
@@ -92,7 +92,7 @@ describe("useFileUpload", () => {
 
   it("should clear items on unmount", () => {
     const { result, unmount } = renderHook(() =>
-      useFileUpload({ purpose: "TEST_PURPOSE" as unknown })
+      useFileUpload({ purpose: "TEST_PURPOSE" as never })
     );
 
     vi.mocked(uploadLib.validateFile).mockReturnValue(null);
