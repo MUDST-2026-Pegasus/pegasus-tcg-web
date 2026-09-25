@@ -6,15 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import { clearSession } from "@/lib/api/session";
-import { env } from "@/lib/env";
+import { createTestQueryClient } from "../utils";
 
 describe("Register Flow Integration", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
+    queryClient = createTestQueryClient();
     clearSession();
     vi.clearAllMocks();
   });
@@ -28,13 +26,6 @@ describe("Register Flow Integration", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
       text: async () => JSON.stringify({
-        success: true,
-        data: {
-          user: { id: "2", username: "new_player", email: "new@pegasus.com", roles: ["CUSTOMER"] },
-          tokens: { accessToken: "valid-token", refreshToken: "refresh", expiresIn: 3600 }
-        }
-      }),
-      json: async () => ({
         success: true,
         data: {
           user: { id: "2", username: "new_player", email: "new@pegasus.com", roles: ["CUSTOMER"] },

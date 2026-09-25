@@ -4,15 +4,14 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { EditProfileDialog } from "@/features/account/components/EditProfileDialog";
-import { env } from "@/lib/env";
+import { createTestQueryClient } from "../utils";
+import type { RoleCode } from "@/features/auth/auth.types";
 
 describe("Profile Integration", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
+    queryClient = createTestQueryClient();
     vi.clearAllMocks();
   });
 
@@ -29,17 +28,7 @@ describe("Profile Integration", () => {
         data: {
           id: "1",
           email: "test@pegasus.com",
-          roles: ["CUSTOMER"],
-          displayName: "New Master",
-          phone: "0891234567",
-        }
-      }),
-      json: async () => ({
-        success: true,
-        data: {
-          id: "1",
-          email: "test@pegasus.com",
-          roles: ["CUSTOMER"],
+          roles: ["BUYER"],
           displayName: "New Master",
           phone: "0891234567",
         }
@@ -51,7 +40,7 @@ describe("Profile Integration", () => {
     const mockUser = {
       id: "1",
       email: "test@pegasus.com",
-      roles: ["CUSTOMER"] as any,
+      roles: ["BUYER" as RoleCode],
       displayName: "Old Master",
       createdAt: "2026-01-01T00:00:00Z"
     };

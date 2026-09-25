@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
@@ -108,17 +108,16 @@ describe("ProductsContent Integration", () => {
     await user.click(screen.getByRole("button", { name: /all/i }));
 
     // 3. Selection and Bulk Bar
-    const checkboxes = screen.getAllByRole("checkbox");
-    // [0] is header, [1] is row 1 (Blue Eyes), [2] is row 2
-    await user.click(checkboxes[1]);
+    const blueEyesRow = screen.getByText("Blue Eyes White Dragon").closest("tr")!;
+    const rowCheckbox = within(blueEyesRow).getByRole("checkbox");
+    await user.click(rowCheckbox);
     
     // Bulk action bar should appear showing "1 รายการ"
     expect(screen.getByText(/1 รายการ/)).toBeInTheDocument();
 
     // Clear selection
     // Uncheck the row to clear
-    await user.click(checkboxes[1]);
-    expect(screen.queryByText(/1 รายการ/)).not.toBeInTheDocument();
+    await user.click(rowCheckbox);
     expect(screen.queryByText(/1 รายการ/)).not.toBeInTheDocument();
   });
 });

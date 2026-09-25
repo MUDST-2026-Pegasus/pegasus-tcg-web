@@ -4,15 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AddressFormDialog } from "@/features/account/components/AddressFormDialog";
-import { env } from "@/lib/env";
+import { createTestQueryClient } from "../utils";
 
 describe("Address Book Integration", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-    });
+    queryClient = createTestQueryClient();
     vi.clearAllMocks();
   });
 
@@ -25,22 +23,6 @@ describe("Address Book Integration", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
       text: async () => JSON.stringify({
-        success: true,
-        data: {
-          id: "addr-1",
-          label: "Home",
-          recipientName: "Yugi Muto",
-          phone: "0891234567",
-          line1: "123 Card Shop",
-          line2: "Domino City",
-          subdistrict: "Downtown",
-          district: "Central",
-          province: "Tokyo",
-          postalCode: "10110",
-          defaultShipping: true,
-        }
-      }),
-      json: async () => ({
         success: true,
         data: {
           id: "addr-1",
