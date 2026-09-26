@@ -2,12 +2,15 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  clearCartSession,
   clearSession,
+  getCartSession,
   getSession,
   isApiError,
   saveSession,
   subscribeSession,
 } from "@/lib/api";
+import { cartApi } from "@/features/cart/cart.api";
 
 import * as authApi from "./auth.api";
 import type {
@@ -101,6 +104,20 @@ export function useAuthSessionSync(): void {
   );
 }
 
+async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClient>) {
+  const guestSession = getCartSession();
+  if (guestSession) {
+    try {
+      await cartApi.mergeCart();
+    } catch {
+      // ignore merge failure if guest cart was already merged or empty
+    } finally {
+      clearCartSession();
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    }
+  }
+}
+
 function useSessionMutation<TPayload>(
   mutationFn: (payload: TPayload) => Promise<AuthSession>,
 ) {
@@ -108,9 +125,10 @@ function useSessionMutation<TPayload>(
 
   return useMutation({
     mutationFn,
-    onSuccess: (session) => {
+    onSuccess: async (session) => {
       saveSession(session.tokens);
       queryClient.setQueryData(authKeys.me(), session.user);
+      await syncGuestCartOnLogin(queryClient);
     },
   });
 }
