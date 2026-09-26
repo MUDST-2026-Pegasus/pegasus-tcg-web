@@ -15,6 +15,7 @@ pnpm add [dependency] # for install dep
 ```
 src/
   app/
+    providers.tsx     QueryClientProvider / Toaster / Tooltip (แทบไม่ต้องแก้)
     router.tsx        ประกอบกลุ่มเส้นทางเข้าด้วยกัน (แทบไม่ต้องแก้)
     routes/
       public.routes.tsx    เส้นทางฝั่งผู้ซื้อ
@@ -25,7 +26,9 @@ src/
   components/
     ui/           shadcn — CLI เขียนทับได้ ห้ามแก้เอง
     layout/       โครงหน้า: PublicLayout, DashboardLayout, AuthLayout, Navbar, Footer, AppSidebar
-    common/       component กลางที่ใช้ข้าม feature เช่น PagePlaceholder
+    common/       component กลางที่ใช้ข้าม feature — import จาก "@/components/common"
+                  QueryBoundary / LoadingState / ErrorState / EmptyState, PagePlaceholder, RouteError,
+                  FileUpload / FileDropzone
   features/       งานหลักของแต่ละคนอยู่ที่นี่
     <feature>/
       pages/        หน้าที่ feature นี้เป็นเจ้าของ
@@ -33,8 +36,13 @@ src/
 
       ── หรือแบบ "โมดูลต่อหน้า" เมื่อ feature มีหลายหน้าและแต่ละหน้ามีข้อมูลของตัวเอง
          (ตอนนี้ seller ใช้แบบนี้ ดูหัวข้อ "feature ที่มีหลายหน้า" ด้านล่าง)
-  hooks/          hook ที่ใช้ร่วมกันทั้งแอป
-  lib/            utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
+  hooks/          hook ที่ใช้ร่วมกันทั้งแอป เช่น useFileUpload
+  lib/
+    api/          ชั้นเชื่อม backend — ดูหัวข้อ "ต่อ API" ด้านล่าง
+    upload/       presign → PUT → object key — ดูหัวข้อ "อัปโหลดไฟล์" ด้านล่าง
+    env.ts        ค่าจาก .env ทั้งหมดอ่านผ่านไฟล์นี้ที่เดียว
+    form.ts       แปลง error จาก backend ไปแปะที่ช่องกรอก
+    utils.ts, nav-config.ts (เมนู sidebar ของ admin/seller)
   styles/         globals.css — theme token ของ shadcn ทั้งหมด
   main.tsx        entry point
 ```
@@ -45,7 +53,7 @@ src/
 
 ```ts
 import { Button } from "@/components/ui/button";
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { QueryBoundary } from "@/components/common";   // common มี barrel ใช้ชื่อโฟลเดอร์ได้เลย
 import heroImage from "@/assets/auth/register-header.jpg";
 ```
 
@@ -89,8 +97,8 @@ features/seller/
     shop.types.ts            type ของหน้านี้
     shop.api.ts              mock + getShopData()  ← จุดต่อ API จริงในอนาคต
     components/              component ที่ใช้เฉพาะหน้านี้
-  payout/
-    SellerPayoutPage.tsx     หน้าที่ยังเป็น placeholder — ไฟล์เดียวพอ
+  logout/
+    SellerLogoutPage.tsx     หน้าที่ยังเป็น placeholder — ไฟล์เดียวพอ
 ```
 
 กติกาของแบบนี้
@@ -101,6 +109,282 @@ features/seller/
   ข้ามโมดูลค่อยใช้ `@/features/seller/shared/...` — เห็นแล้วรู้ทันทีว่าอันไหนข้ามขอบเขต
 - **ข้อมูลทุกหน้าออกมาจากฟังก์ชันใน `*.api.ts`** วันที่ต่อ backend จริงแก้ข้างในฟังก์ชันนั้น
   component ไม่ต้องแก้เลย
+
+## ต่อ API
+
+backend คือ `pegasus-tcg-api` (Spring Boot) ทุก endpoint อยู่ใต้ `/api/v1`
+
+### เริ่มใช้งาน
+
+```bash
+cp .env.example .env.local   # แก้ VITE_API_PROXY_TARGET ถ้า backend ไม่ได้อยู่พอร์ต 8080
+pnpm dev
+```
+
+ตอน dev ไม่ต้องตั้ง `VITE_API_BASE_URL` — `vite.config.ts` proxy `/api` ไปให้ backend อยู่แล้ว
+เบราว์เซอร์จึงเห็นเป็น origin เดียวกัน ไม่ต้องไปยุ่งกับ CORS ฝั่ง backend
+ตอน build ขึ้น production ค่อยตั้ง `VITE_API_BASE_URL` เป็น origin จริง
+
+### ยิง request
+
+ใช้ `api` จาก `@/lib/api` อย่างเดียว อย่าเรียก `fetch` เอง เพราะตัวนี้จัดการให้แล้ว
+ทั้งการต่อ base URL, แนบ `Authorization`, แกะซอง `ApiResponse` ออกให้เหลือแต่ `data`,
+ต่ออายุ access token อัตโนมัติเมื่อเจอ 401 และแปลงทุกความผิดพลาดเป็น `ApiError`
+
+```ts
+import { api, type PageResponse } from "@/lib/api";
+
+const product = await api.get<Product>(`/products/${id}`);
+const page = await api.get<PageResponse<Product>>("/products", {
+  query: { page: 0, size: 20, game: "POKEMON" },   // ค่า null/undefined ถูกตัดทิ้งให้
+});
+await api.post<Order>("/orders", { items });
+```
+
+### วางไฟล์ยังไง
+
+หนึ่ง feature (หรือหนึ่งโมดูลหน้า) มีสามไฟล์ แยกหน้าที่กันชัด ๆ
+
+```
+features/catalog/
+  catalog.types.ts     รูปร่างข้อมูล — ลอกจาก DTO ฝั่ง backend ให้ตรง
+  catalog.api.ts       ยิงไปที่ไหน รับอะไรกลับมา (ฟังก์ชันเปล่า ๆ ไม่มี React)
+  catalog.queries.ts   query key + hook ที่ component เรียกใช้
+```
+
+`catalog.api.ts`
+
+```ts
+import { api } from "@/lib/api";
+import type { Product } from "./catalog.types";
+
+export function getProduct(id: string): Promise<Product> {
+  return api.get<Product>(`/products/${id}`);
+}
+```
+
+`catalog.queries.ts` — **query key ต้องรวมทุกค่าที่ทำให้ผลลัพธ์ต่างกัน**
+ไม่งั้นสินค้าคนละตัวจะใช้ cache ก้อนเดียวกัน
+
+```ts
+import { useQuery } from "@tanstack/react-query";
+import * as catalogApi from "./catalog.api";
+
+export const catalogKeys = {
+  all: ["catalog"] as const,
+  detail: (id: string) => [...catalogKeys.all, "detail", id] as const,
+};
+
+export function useProduct(id: string) {
+  return useQuery({
+    queryKey: catalogKeys.detail(id),
+    queryFn: () => catalogApi.getProduct(id),
+  });
+}
+```
+
+ในหน้าเพจ ไม่ต้องเขียน loading / error / empty เองทุกหน้า — ครอบด้วย `QueryBoundary`
+
+```tsx
+import { EmptyState, QueryBoundary } from "@/components/common";
+
+<QueryBoundary
+  query={products}                        // ผลจาก useQuery ส่งเข้าไปทั้งก้อน
+  loading={<ProductListSkeleton />}        // skeleton ของหน้านั้นเอง
+  isEmpty={(items) => items.length === 0}
+  empty={<EmptyState title="ยังไม่มีสินค้า" />}
+>
+  {(items) => items.map((item) => <ProductCard key={item.id} product={item} />)}
+</QueryBoundary>
+```
+
+`@/components/common` มีให้เลือกสามตัว ใช้เดี่ยว ๆ ก็ได้เมื่อ layout ไม่เข้ากับ boundary
+
+| component | ใช้เมื่อ |
+| --- | --- |
+| `LoadingState` | กำลังโหลด และหน้านั้นยังไม่มี skeleton เป็นของตัวเอง |
+| `ErrorState` | โหลดไม่สำเร็จทั้งบล็อก รับ `error` แล้วดึงข้อความจาก backend ให้เอง มีปุ่มลองใหม่ |
+| `EmptyState` | โหลดสำเร็จแต่ไม่มีข้อมูล (คนละเรื่องกับ `PagePlaceholder` ที่แปลว่ายังไม่ได้ทำหน้านี้) |
+
+ข้อความ default เป็นภาษาไทย หน้าไหนเป็นภาษาอังกฤษให้ส่ง `errorTitle` / `errorMessage` /
+`errorRetryLabel` ทับ
+
+สอง gotcha ของ `QueryBoundary`
+- query ที่ปิดด้วย `enabled: false` ค้างที่ `isPending` ตลอด เช็คเงื่อนไขนั้นก่อนแล้วค่อย render
+- refetch พังทั้งที่มีข้อมูลเก่าอยู่ จะโชว์ข้อมูลเก่าต่อ ไม่เด้ง error ทับของที่ใช้ได้
+
+ส่วนที่เขียนข้อมูลใช้ `useMutation` แล้ว `invalidateQueries` คีย์ที่เกี่ยวข้อง
+
+```ts
+const queryClient = useQueryClient();
+const addToCart = useMutation({
+  mutationFn: cartApi.addItem,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+});
+```
+
+> หน้าไหนยังไม่มี endpoint จริง ให้คงไว้เป็น mock ใน `*.api.ts` ตามเดิม
+> แต่ **เขียนเป็น `async` คืน `Promise` ตั้งแต่แรก** วันที่ backend เสร็จจะได้แก้แค่ข้างในฟังก์ชัน
+> ถ้าเขียนเป็นฟังก์ชัน sync ที่ `return MOCK` ตรง ๆ วันเปลี่ยนต้องไล่แก้ทุก component ที่เรียก
+
+### แปลง mock → API
+
+หน้าตัวอย่างที่ทำครบตามมาตรฐานนี้แล้วคือ **`features/account` (Address Book)** เปิดดูคู่กันได้
+ทำตามลำดับนี้ ห้ามข้าม — แต่ละข้อจบแล้ว `pnpm build` ต้องผ่านก่อนไปข้อถัดไป
+
+**1. ลอก type จาก DTO** สร้าง `<x>.types.ts` แล้วลอกจาก `model/*.java` (สิ่งที่ backend ส่งกลับ)
+กับ `dto/*Request.java` (สิ่งที่เราส่งไป) ทีละฟิลด์ ชื่อต้องตรงกัน
+ห้ามใช้ type ที่เดาจาก fixture เพราะ fixture เขียนไว้ให้ UI สวย ไม่ได้ตรงกับของจริง
+
+```ts
+// ลอกมาจาก `model/Address.java` ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
+export type Address = {
+  id: number;
+  label: string | null;      // ฝั่ง Java เป็น String ที่ null ได้ → `| null` ไม่ใช่ `?`
+  recipientName: string;
+};
+```
+
+จุดที่พลาดกันบ่อย: `PUT` ส่วนใหญ่ของ backend นี้ **เขียนทับทั้งก้อน ไม่ใช่ patch** ฟิลด์ไหน
+ไม่ส่งจะโดนล้างเป็นค่าว่าง ก่อนเขียน `update` ให้เปิด `*Repository.java` ดูก่อนว่าเขียนทับหมดไหม
+
+**2. สร้าง `<x>.api.ts`** ฟังก์ชันเปล่า ๆ หนึ่งตัวต่อหนึ่ง endpoint ห้ามมี React ห้ามมี state
+ห้าม import ไอคอนหรือ component (ถ้า mock เดิมมี ให้ย้ายไปไว้ฝั่ง component)
+
+**3. สร้าง `<x>.queries.ts`** query key + hook — component เรียกไฟล์นี้เท่านั้น ไม่เรียก `*.api.ts` ตรง ๆ
+ทุก mutation ต้อง `invalidateQueries` คีย์ที่กระทบ ไม่งั้นหน้าไม่อัปเดตจนกว่าจะ reload
+
+**4. เปลี่ยนหน้าเพจ** เอา `import ... from "*.fixture"` ออก เปลี่ยนมาอ่านจาก hook
+แล้วครอบด้วย `QueryBoundary`
+
+**5. skeleton** หน้าไหนมี skeleton อยู่แล้วให้ส่งตัวเดิมเข้า `loading` ไม่ต้องเขียนใหม่
+หน้าไหนยังไม่มี ให้ทำตัวที่วางตรงกับ layout จริง (ดู `AddressBookSkeleton.tsx`)
+อย่ารีบใช้ `LoadingState` ถ้าหน้ามีโครงชัดเจนอยู่แล้ว เพราะภาพจะกระโดดตอนข้อมูลมาถึง
+
+**6. ฟอร์ม** schema zod ใน `<x>.schema.ts` ตั้งกติกาให้ตรงกับ Bean Validation ของ DTO
+แล้วใช้ `applyApiErrors` รับ violations ที่หลุดมาจาก backend — ชื่อฟิลด์ฝั่ง Spring
+ตรงกับชื่อ field ใน DTO อยู่แล้ว ถ้าตั้งชื่อช่องในฟอร์มให้ตรงกัน ก็ไม่ต้อง map เอง
+
+**7. ลบ fixture** ลบ constant ที่ไม่มีใครใช้แล้วออกจาก `*.fixture.ts` ไม่ใช่แค่เลิก import
+เช็คด้วย `grep -rn "ชื่อ_FIXTURE" src` ต้องไม่เหลือ ถ้าไฟล์ fixture ว่างทั้งไฟล์ให้ลบไฟล์ทิ้ง
+
+**เสร็จแล้วเช็ค**
+
+- [ ] ไม่มี `*.fixture` เหลือใน import ของหน้านั้น
+- [ ] มีครบ loading / error / empty
+- [ ] เพิ่ม–แก้–ลบ แล้วรายการอัปเดตเองโดยไม่ต้อง reload
+- [ ] `pnpm build` กับ `pnpm lint` ผ่าน
+
+### error
+
+ทุกอย่างที่ออกมาจาก `api.*` เป็น `ApiError` เสมอ มี `status`, `code` (ตรงกับ
+`ErrorCode.java`) และ `violations` ของฟิลด์ที่ไม่ผ่าน validation
+
+```ts
+import { getErrorMessage, hasErrorCode } from "@/lib/api";
+
+if (hasErrorCode(error, "EMAIL_ALREADY_USED")) { ... }
+toast({ description: getErrorMessage(error, "ทำรายการไม่สำเร็จ") });
+```
+
+ในฟอร์ม ใช้ `applyApiErrors` จาก `@/lib/form` แปะ error ลงช่องที่ผิดให้อัตโนมัติ
+(ดูตัวอย่างเต็มที่ `features/auth/components/RegisterForm.tsx`)
+
+### อัปโหลดไฟล์ (รูป / สลิป / เอกสาร)
+
+ไฟล์ **ไม่ผ่าน API ของเรา** — เว็บขอ presigned URL จาก `POST /uploads/presign` แล้ว PUT
+ขึ้น object storage (MinIO) ตรง ๆ ได้ `objectKey` กลับมา แล้วค่อยส่ง key นั้นไปกับ endpoint
+ที่เป็นเจ้าของข้อมูล (ประกาศขาย, สลิป, คำขอคืนสินค้า ฯลฯ) ทั้งหมดนี้ห่อไว้ใน `useFileUpload()`
+แล้ว **อย่าเขียน presign / PUT เอง**
+
+```tsx
+import { FileUpload } from "@/components/common";
+import { useFileUpload } from "@/hooks/use-file-upload";
+
+const photos = useFileUpload({
+  purpose: "LISTING_IMAGE", // ตรงกับ UploadPurpose.java — ตัดสินชนิด ขนาด และสิทธิ์
+  multiple: true,
+  maxFiles: 8,
+  // ได้ key ครบชุดทุกครั้งที่มีไฟล์อัปเสร็จหรือถูกลบ เรียงตามลำดับที่เลือก
+  onChange: (keys) =>
+    setValue("imageKeys", keys, { shouldValidate: keys.length > 0 }),
+});
+
+<FileUpload id="imageKeys" upload={photos} invalid={Boolean(errors.imageKeys)} />
+<Button type="submit" disabled={isSubmitting || photos.isUploading}>บันทึก</Button>
+```
+
+ได้อะไรมาเลยโดยไม่ต้องเขียนเพิ่ม
+
+- เลือกไฟล์แล้วอัปทันที หลายไฟล์พร้อมกัน แต่ละไฟล์มี progress ยกเลิก / ลบ / ลองใหม่ได้
+- ตรวจชนิดและขนาดตาม `UPLOAD_RULES` (ลอกจาก `UploadPurpose.java`) ก่อนยิง
+  ไฟล์ผิดขึ้นเป็นรายการสีแดงพร้อมข้อความภาษาไทยว่าผิดตรงไหน
+- presigned URL หมดอายุ (storage ตอบ 403) ขอ URL ใหม่แล้วลองซ้ำให้เอง
+- ออกจากหน้าแล้วยกเลิกที่ค้างอยู่ และคืนหน่วยความจำของรูปตัวอย่างให้
+
+กติกา
+
+- ฟอร์มเก็บ **object key** ไม่ใช่ `File` และไม่ใช่ URL — schema เป็น `z.string()` / `z.array(z.string())`
+- ปิดปุ่มส่งระหว่าง `isUploading` ไม่งั้นไฟล์ที่ยังอัปไม่เสร็จจะหลุดไปจากคำขอ
+- อยากได้หน้าตาเฉพาะ ใช้ hook คู่กับ `FileDropzone` แล้ววาดรายการเอง
+  (ตัวอย่าง: `features/seller/application/components/BankBookUpload.tsx`)
+- ไม่ได้อยู่ใน React (เช่นอัปจาก util) เรียก `uploadFile(file, purpose)` จาก `@/lib/upload` ได้
+- backend เพิ่ม purpose ใหม่ ต้องเพิ่มใน `src/lib/upload/upload.types.ts` และ `upload.rules.ts` ให้ตรงกัน
+- รูปที่ backend ส่งกลับมาเป็น presigned GET อายุสั้น (เช่น `bankBookImageUrl`)
+  ห้ามเก็บลง localStorage หรือใส่ใน URL หมดอายุแล้วให้ดึงข้อมูลชิ้นนั้นใหม่
+
+ตอน dev เบราว์เซอร์ PUT ไปที่ MinIO (`localhost:9000`) ตรง ๆ MinIO จึงต้องยอม CORS จาก
+`localhost:5173` ด้วย — ใน `.env` ของ `pegasus-tcg-api` ตั้ง
+`CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173` แล้ว `docker compose up -d minio`
+ใหม่ ถ้าไม่ตั้ง อัปโหลดจะพังด้วย "เชื่อมต่อไม่ได้" ทั้งที่ presign ผ่าน
+
+### สถานะ login
+
+```tsx
+import { useAuth, useLogout } from "@/features/auth/auth.queries";
+
+const { user, isAuthenticated, isLoading, hasRole } = useAuth();
+if (hasRole("SELLER")) { ... }
+```
+
+- token เก็บใน localStorage และต่ออายุเองอัตโนมัติ — **ไม่ต้องแตะ token เอง**
+- ข้อมูลผู้ใช้อยู่ใน cache ของ TanStack Query อ่านผ่าน `useAuth()` เท่านั้น
+- แท็บอื่น login/logout แท็บนี้เห็นตามทันที
+
+หน้าที่ต้อง login ครอบด้วย `RequireAuth` ในไฟล์ route ของกลุ่มตัวเอง
+
+```tsx
+// ทั้งกลุ่ม
+element: (
+  <RequireAuth roles={["ADMIN"]}>
+    <DashboardLayout role="ADMIN" groups={adminNav} />
+  </RequireAuth>
+),
+
+// เฉพาะบางหน้าในกลุ่ม (ดู account/* ใน public.routes.tsx)
+{ element: <RequireAuth />, children: [ ... ] },
+```
+
+ตอนนี้ `/admin` บังคับ ADMIN, `/seller` บังคับ SELLER และ `/account/*` บังคับว่าต้อง login
+
+### บัญชีสำหรับ dev
+
+สมัครผ่านหน้า `/register` จะได้บทบาท BUYER ถ้าอยากได้ SELLER ด้วยให้ยิงตรง
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","username":"you_dev","displayName":"You","password":"Str0ngPassw0rd!","roles":["BUYER","SELLER"]}'
+```
+
+ส่วน ADMIN ให้ตัวเองผ่านฐานข้อมูลโดยตรง (`app_role.code = 'ADMIN'` คือ id 3)
+
+```bash
+docker exec pegasus-tcg-postgres psql -U postgres -d pegasus_tcg \
+  -c "INSERT INTO user_role (user_id, role_id) SELECT id, 3 FROM user_account WHERE username = 'you_dev';"
+```
+
+บทบาทใหม่จะติดมากับ access token รอบถัดไป — logout แล้ว login ใหม่หนึ่งครั้ง
 
 ## Layout
 
@@ -155,3 +439,31 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 - **ฟอร์มใช้ `Field` + `FieldGroup`** จาก `@/components/ui/field` ไม่ใช้ `div` + `space-y-*`
 - **ไอคอนใช้ `lucide-react`** ห้ามก๊อป SVG จาก Figma มาแปะ
 - **ระยะห่างใช้ `gap-*`** ไม่ใช้ `space-x-*` / `space-y-*`
+- **loading / error / empty ใช้ของกลาง** จาก `@/components/common` อย่าเขียน spinner หรือ
+  ข้อความ error ของตัวเองรายหน้า — ดูหัวข้อ "แปลง mock → API"
+
+## การรันเทส (Testing Guidelines)
+
+โปรเจกต์นี้ใช้ **Vitest** สำหรับ Unit/Integration Test และ **Cypress** สำหรับ E2E Test คุณสามารถรันคำสั่งเหล่านี้ผ่าน `package.json`:
+
+### คำสั่งรันเทส (Scripts)
+
+- `npm run test` — รัน Unit และ Integration Test ทั้งหมด 1 ครั้ง
+- `npm run test:unit` — รันเฉพาะ **Unit Test** (ข้ามโฟลเดอร์ `integration`)
+- `npm run test:integration` — รันเฉพาะ **Integration Test** (เฉพาะในโฟลเดอร์ `integration`)
+- `npm run test:watch` — รันเทสทั้งหมดในโหมด Watch (รันใหม่เมื่อไฟล์เปลี่ยน)
+- `npm run cyopen` — เปิด Cypress UI สำหรับเขียน/รัน E2E Test
+- `npm run cyrun` — รัน Cypress E2E Test แบบ Headless (สำหรับ CI)
+
+### วิธีอ่าน Test Report (Vitest)
+
+หลังจากรัน `npm run test` หรือ `npm run test:integration` ระบบจะสร้าง Report ออกมา 2 รูปแบบอัตโนมัติ:
+
+1. **JUnit Report** (`test-results/junit.xml`) — สำหรับให้ระบบ CI/CD (เช่น Jenkins, GitHub Actions) นำไปอ่านและแสดงผล
+2. **HTML Report** (`test-results/html/index.html`) — รายงานแบบ Dashboard สวยงามสำหรับเปิดอ่านใน Browser
+
+**วิธีเปิดดู HTML Report:**
+```bash
+npx vite preview --outDir .vitest
+```
+*(เมื่อรันคำสั่งนี้ จะได้ Local URL เช่น `http://localhost:4173/` ให้นำไปเปิดใน Browser เพื่อดู Report)*

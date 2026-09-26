@@ -4,28 +4,9 @@ export const ACCOUNT_USER = {
   email: "somchai.j@example.com",
 };
 
-export const PROFILE_FIXTURE = {
-  user: ACCOUNT_USER,
-  membership: {
-    tier: "Elite",
-    rewardPoints: "2,450",
-  },
-  latestOrder: {
-    awaitingPayment: "0",
-    toShip: "1",
-  },
-  primaryAddress: {
-    label: "Home",
-    recipient: "Somchai Jaidee",
-    phone: "(+66) 89-123-4567",
-    lines: [
-      "123/45 Sukhumvit Soi 1, Sukhumvit Road",
-      "Khlong Toei Nuea, Watthana",
-      "Bangkok 10110",
-    ],
-  },
-};
-
+/**
+ * Fixture สำหรับ Order History — จะถูกลบออกเมื่อทำ ACC-04
+ */
 export const ORDER_HISTORY_FIXTURE = {
   user: ACCOUNT_USER,
   orders: [
@@ -68,22 +49,4 @@ export const ORDER_HISTORY_FIXTURE = {
     image: string;
     status: "completed" | "shipping" | "payment";
   }>;
-};
-
-export const ADDRESS_BOOK_FIXTURE = {
-  user: ACCOUNT_USER,
-  addresses: [
-    {
-      name: "Elena Rostova",
-      phone: "+1 (555) 019-2837",
-      lines: ["1440 Corporate Way, Suite 400", "San Francisco, CA 94107", "United States"],
-      isDefault: true,
-    },
-    {
-      name: "Elena Rostova",
-      phone: "+1 (555) 837-1102",
-      lines: ["829 Logistics Blvd, Warehouse B", "Newark, NJ 07114", "United States"],
-      isDefault: false,
-    },
-  ],
 };

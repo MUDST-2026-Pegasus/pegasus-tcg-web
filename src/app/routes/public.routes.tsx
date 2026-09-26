@@ -2,6 +2,7 @@ import type { RouteObject } from "react-router-dom";
 
 import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { AboutPage } from "@/features/about/pages/AboutPage";
 import { AddressBookPage } from "@/features/account/pages/AddressBookPage";
 import { OrderHistoryPage } from "@/features/account/pages/OrderHistoryPage";
@@ -10,11 +11,16 @@ import { CartPage } from "@/features/cart/pages/CartPage";
 import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
 import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
 import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
+import { MyCollectionPage } from "@/features/collection/pages/MyCollectionPage";
+import { PublicCollectionPage } from "@/features/collection/pages/PublicCollectionPage";
 import { SearchResultsPage } from "@/features/catalog/pages/SearchResultsPage";
 import { HomePage } from "@/features/home/pages/HomePage";
+import { TermsOfServicePage } from "@/features/legal/pages/TermsOfServicePage";
+import { PrivacyPolicyPage } from "@/features/legal/pages/PrivacyPolicyPage";
 import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
 import { PaymentPage } from "@/features/payment/pages/PaymentPage";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
+import { SellerApplicationPage } from "@/features/seller/application/SellerApplicationPage";
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
@@ -33,6 +39,7 @@ export const publicRoutes: RouteObject = {
     { path: "search", element: <SearchResultsPage /> },
 
     { path: "store/:storeId", element: <StoreProfilePage /> },
+    { path: "users/:userId", element: <PublicCollectionPage /> },
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },
@@ -40,15 +47,20 @@ export const publicRoutes: RouteObject = {
     { path: "payment/success", element: <PaymentSuccessPage /> },
 
     { path: "about", element: <AboutPage /> },
+    { path: "terms-of-service", element: <TermsOfServicePage /> },
+    { path: "privacy-policy", element: <PrivacyPolicyPage /> },
 
     {
-      path: "become-a-seller",
-      element: <PagePlaceholder title="สมัครเป็นผู้ขาย" />,
+      element: <RequireAuth />,
+      children: [
+        { path: "account/profile", element: <ProfilePage /> },
+        { path: "account/orders", element: <OrderHistoryPage /> },
+        { path: "account/addresses", element: <AddressBookPage /> },
+        { path: "account/collection", element: <MyCollectionPage /> },
+        // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
+        { path: "become-a-seller", element: <SellerApplicationPage /> },
+      ],
     },
-
-    { path: "account/profile", element: <ProfilePage /> },
-    { path: "account/orders", element: <OrderHistoryPage /> },
-    { path: "account/addresses", element: <AddressBookPage /> },
 
     { path: "*", element: <PagePlaceholder title="ไม่พบหน้านี้" /> },
   ],

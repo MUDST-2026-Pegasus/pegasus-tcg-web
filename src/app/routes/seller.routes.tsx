@@ -1,12 +1,16 @@
 import type { RouteObject } from "react-router-dom";
 
+import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
 import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
+import { SellerOrderDetailPage } from "@/features/seller/orders/SellerOrderDetailPage";
 import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
 import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
+import { SellerProductCreatePage } from "@/features/seller/products/SellerProductCreatePage";
+import { SellerProductEditPage } from "@/features/seller/products/SellerProductEditPage";
+import { SellerProductRestockPage } from "@/features/seller/products/SellerProductRestockPage";
 import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
 import { SellerLayout } from "@/features/seller/shared/SellerLayout";
-import { getSellerProfile } from "@/features/seller/shared/seller.api";
 import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
 
 /**
@@ -17,12 +21,23 @@ import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
  */
 export const sellerRoutes: RouteObject = {
   path: "seller",
-  element: <SellerLayout profile={getSellerProfile()} />,
+  element: (
+    <RequireAuth roles={["SELLER"]}>
+      <SellerLayout />
+    </RequireAuth>
+  ),
   children: [
     { index: true, element: <SellerDashboardPage /> },
     { path: "shop", element: <SellerShopPage /> },
     { path: "products", element: <SellerProductsPage /> },
+    { path: "products/new", element: <SellerProductCreatePage /> },
+    {
+      path: "products/:productId/restock",
+      element: <SellerProductRestockPage />,
+    },
+    { path: "products/:productId/edit", element: <SellerProductEditPage /> },
     { path: "orders", element: <SellerOrdersPage /> },
+    { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
     { path: "logout", element: <SellerLogoutPage /> },
   ],
