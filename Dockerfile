@@ -1,14 +1,19 @@
 # Step 1: Build the React application
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install
+# Cypress is only used for e2e tests, skip downloading its binary
+ENV CYPRESS_INSTALL_BINARY=0
+
+RUN corepack enable && corepack prepare pnpm@10.6.5 --activate
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm run build
 
 FROM nginx:alpine
 
