@@ -1,7 +1,9 @@
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,10 +24,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 import type { AuthUser } from "@/features/auth/auth.types";
 
+import { initialsOf } from "../account.format";
 import { useUpdateProfile } from "../profile.queries";
 import {
   editProfileSchema,
@@ -72,20 +76,49 @@ function EditProfileForm({
   onSaved: () => void;
 }) {
   const updateProfile = useUpdateProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAvatarCleared, setIsAvatarCleared] = useState(false);
+
+  const avatarUpload = useFileUpload({
+    purpose: "AVATAR_IMAGE",
+    multiple: false,
+  });
 
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty, dirtyFields },
   } = useForm<EditProfileFormValues>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: toEditProfileForm(user),
   });
 
+  const uploadedAvatarKey = avatarUpload.objectKeys[0] ?? null;
+  const isUploading = avatarUpload.isUploading;
+  const previewItem = avatarUpload.items[0];
+  const hasUploadError = previewItem?.status === "error";
+
+  // ISSUE-002: Do not display preview if upload resulted in error
+  const avatarPreview = !isAvatarCleared
+    ? (previewItem && previewItem.status !== "error"
+        ? previewItem.previewUrl
+        : user.avatarUrl) || null
+    : null;
+
+  const initials = initialsOf(user.displayName ?? user.username ?? "U");
+
+  // ISSUE-004: Disable submit when form has no changes
+  const hasChanges =
+    isDirty || isAvatarCleared || Boolean(uploadedAvatarKey);
+
   const onSubmit = handleSubmit(async (values) => {
     try {
-      const payload = toUpdateProfilePayload(values);
+      const payload = toUpdateProfilePayload(values, {
+        newAvatarKey: uploadedAvatarKey,
+        isAvatarCleared,
+        dirtyFields,
+      });
       await updateProfile.mutateAsync(payload);
       toast.add({
         type: "success",
@@ -107,6 +140,64 @@ function EditProfileForm({
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Avatar upload / preview section */}
+      <div className="flex flex-col items-center gap-3">
+        <Avatar className="size-20">
+          {avatarPreview && <AvatarImage src={avatarPreview} alt={user.displayName ?? ""} />}
+          <AvatarFallback className="text-xl font-medium">{initials}</AvatarFallback>
+        </Avatar>
+
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={avatarUpload.accept}
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setIsAvatarCleared(false);
+                avatarUpload.addFiles(e.target.files);
+              }
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isUploading || isSubmitting}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {isUploading ? (
+              <>
+                <Spinner data-icon="inline-start" />
+                Uploading...
+              </>
+            ) : (
+              "Change photo"
+            )}
+          </Button>
+
+          {(avatarPreview || user.avatarUrl) && !isAvatarCleared && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={isUploading || isSubmitting}
+              onClick={() => {
+                setIsAvatarCleared(true);
+                avatarUpload.clear();
+              }}
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+
+        {previewItem?.status === "error" && (
+          <p className="text-xs text-destructive">{previewItem.error}</p>
+        )}
+      </div>
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
@@ -143,16 +234,14 @@ function EditProfileForm({
           <FieldError errors={[errors.phone]} />
         </Field>
 
-        <Field data-invalid={Boolean(errors.avatarUrl) || undefined}>
+        <Field className="hidden">
           <FieldLabel htmlFor="avatarUrl">Avatar URL</FieldLabel>
           <Input
             id="avatarUrl"
-            type="url"
-            placeholder="https://example.com/avatar.jpg"
+            type="text"
             aria-invalid={Boolean(errors.avatarUrl)}
             {...register("avatarUrl")}
           />
-          <FieldError errors={[errors.avatarUrl]} />
         </Field>
 
         <Field data-invalid={Boolean(errors.bio) || undefined}>
@@ -172,8 +261,11 @@ function EditProfileForm({
         <DialogClose render={<Button type="button" variant="outline" />}>
           Cancel
         </DialogClose>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Spinner data-icon="inline-start" />}
+        <Button
+          type="submit"
+          disabled={isSubmitting || isUploading || hasUploadError || !hasChanges}
+        >
+          {(isSubmitting || isUploading) && <Spinner data-icon="inline-start" />}
           Save changes
         </Button>
       </DialogFooter>
