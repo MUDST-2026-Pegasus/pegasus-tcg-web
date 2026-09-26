@@ -75,4 +75,79 @@ describe('EditProfileDialog', () => {
 
     expect(mockOnOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('disables save button when form has no changes', () => {
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    expect(saveButton).toBeDisabled();
+  });
+
+  it('sends empty avatarUrl to clear avatar when remove is clicked', async () => {
+    mockMutateAsync.mockResolvedValueOnce({});
+    const userWithAvatar: AuthUser = {
+      ...mockUser,
+      avatarUrl: 'https://storage.example.com/avatars/me.jpg',
+    };
+
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={userWithAvatar} />
+    );
+
+    const removeButton = screen.getByRole('button', { name: /remove/i });
+    await userEvent.click(removeButton);
+
+    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    expect(saveButton).toBeEnabled();
+    await userEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        displayName: 'John Doe',
+        phone: null,
+        avatarUrl: '',
+        bio: null,
+      });
+    });
+  });
+
+  it('updates bio when bio is changed', async () => {
+    mockMutateAsync.mockResolvedValueOnce({});
+
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const bioInput = screen.getByLabelText(/bio/i);
+    await userEvent.type(bioInput, 'TCG card collector');
+
+    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    expect(saveButton).toBeEnabled();
+    await userEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        displayName: 'John Doe',
+        phone: null,
+        avatarUrl: null,
+        bio: 'TCG card collector',
+      });
+    });
+  });
+
+  it('displays error alert when mutation fails', () => {
+    vi.spyOn(profileQueries, 'useUpdateProfile').mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isError: true,
+      error: new Error('Network error occurred'),
+    } as unknown as ReturnType<typeof profileQueries.useUpdateProfile>);
+
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/network error occurred/i);
+  });
 });
