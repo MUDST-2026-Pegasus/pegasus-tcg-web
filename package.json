@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --exclude \"src/test/integration/**\" --passWithNoTests",
+    "test:integration": "vitest run src/test/integration --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
     "cyopen": "cypress open",
     "cyrun": "cypress run"
@@ -53,6 +55,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/ui": "5.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "cypress": "^16.1.0",
     "eslint": "^10.9.1",

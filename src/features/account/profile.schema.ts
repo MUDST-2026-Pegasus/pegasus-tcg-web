@@ -9,20 +9,20 @@ export const editProfileSchema = z.object({
     .string()
     .trim()
     .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be at most 50 characters"),
+    .max(100, "Name must be at most 100 characters"),
   phone: z
     .string()
     .trim()
     .max(20, "Phone number must be at most 20 characters")
-    .refine((val) => !val || /^[0-9+()\-\s]+$/.test(val), "Enter a valid phone number"),
+    .refine(
+      (val) => !val || /^(\+?\d[\d()\-\s]*)?$/.test(val),
+      "Enter a valid phone number",
+    ),
   bio: z
     .string()
     .trim()
-    .max(200, "Bio must be at most 200 characters"),
-  avatarUrl: z
-    .string()
-    .trim()
-    .refine((val) => !val || /^https?:\/\/.+/.test(val), "Enter a valid image URL"),
+    .max(1000, "Bio must be at most 1000 characters"),
+  avatarUrl: z.string().trim().optional(),
 });
 
 export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
@@ -36,13 +36,47 @@ export function toEditProfileForm(user: AuthUser): EditProfileFormValues {
   };
 }
 
-const blankToNull = (value?: string) => (!value || value.trim() === "" ? null : value.trim());
+export type UpdateProfileOptions = {
+  /** S3 objectKey ที่เพิ่งอัปโหลดสำเร็จผ่าน useFileUpload (purpose AVATAR_IMAGE) */
+  newAvatarKey?: string | null;
+  /** ผู้ใช้เลือกที่จะลบรูปโปรไฟล์ออก */
+  isAvatarCleared?: boolean;
+  /** รายการฟิลด์ที่ผู้ใช้แก้ไขจริงจาก react-hook-form */
+  dirtyFields?: Partial<Record<keyof EditProfileFormValues, boolean>>;
+};
 
-export function toUpdateProfilePayload(values: EditProfileFormValues): UpdateProfilePayload {
+export function toUpdateProfilePayload(
+  values: EditProfileFormValues,
+  options?: UpdateProfileOptions,
+): UpdateProfilePayload {
+  const dirty = options?.dirtyFields;
+
+  // Selective update: ถ้ากำหนด dirtyFields มา ฟิลด์ที่ไม่ถูกแก้ไขจะส่ง null เพื่อคงค่าเดิมใน DB
+  let phone: string | null = null;
+  if (!dirty || dirty.phone) {
+    phone = values.phone.trim();
+  }
+
+  let bio: string | null = null;
+  if (!dirty || dirty.bio) {
+    bio = values.bio.trim();
+  }
+
+  let avatarUrl: string | null;
+  if (options?.isAvatarCleared) {
+    avatarUrl = ""; // Backend null-semantics: "" = clear to NULL and delete storage file
+  } else if (options?.newAvatarKey) {
+    avatarUrl = options.newAvatarKey;
+  } else if (dirty?.avatarUrl && values.avatarUrl && !values.avatarUrl.startsWith("http")) {
+    avatarUrl = values.avatarUrl.trim();
+  } else {
+    avatarUrl = null; // null = keep current avatar
+  }
+
   return {
     displayName: values.displayName.trim(),
-    phone: blankToNull(values.phone),
-    bio: blankToNull(values.bio),
-    avatarUrl: blankToNull(values.avatarUrl),
+    phone,
+    bio,
+    avatarUrl,
   };
 }
