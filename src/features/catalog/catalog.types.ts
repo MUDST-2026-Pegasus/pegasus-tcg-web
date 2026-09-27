@@ -55,6 +55,92 @@ export type ProductSummaryDto = {
   listingCount: number;
 };
 
+/** `ProductDetailResponse` — one product, its printings, and signed image URLs. */
+export type ProductDetailDto = {
+  product: {
+    id: number;
+    gameId: number;
+    categoryId: number;
+    cardSetId: number | null;
+    productType: ProductType;
+    name: string;
+    nameLocal: string | null;
+    slug: string;
+    cardNumber: string | null;
+    rarityCode: string | null;
+    description: string | null;
+    attributes: Record<string, unknown>;
+    active: boolean;
+  };
+  variants: CatalogVariantDto[];
+  images: CatalogImageDto[];
+};
+
+export type CatalogCardEffectDto = {
+  effectType: "ABILITY" | "ATTACK" | "RULE";
+  name: string;
+  effectText: string | null;
+  damage: number | null;
+  energyCost: string[];
+  displayOrder: number;
+  sourceUrl: string | null;
+};
+
+export type CatalogVariantDto = {
+  id: number;
+  catalogProductId: number;
+  sku: string;
+  languageCode: string;
+  finish: string;
+  edition: string;
+  printingNote: string | null;
+  imageUrl: string | null;
+  active: boolean;
+};
+
+export type CatalogImageDto = {
+  id: number;
+  catalogVariantId: number | null;
+  imageKey: string;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+  primary: boolean;
+};
+
+/** `PublicListingResponse` — common to product detail and the home storefront. */
+export type PublicListingDto = {
+  id: number;
+  card: {
+    variantId: number;
+    sku: string;
+    variantLabel: string;
+    productId: number;
+    productName: string;
+    productSlug: string;
+    gameId: number;
+    officialImageUrl: string | null;
+  };
+  condition: CardCondition;
+  price: number;
+  currency: string;
+  quantityAvailable: number;
+  primaryPhotoUrl: string | null;
+  seller: {
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+  };
+};
+
+/** A collector who has made at least one copy of this product public. */
+export type ProductCollectorDto = {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  quantity: number;
+};
+
 export type ProductSort =
   | "name"
   | "newest"
