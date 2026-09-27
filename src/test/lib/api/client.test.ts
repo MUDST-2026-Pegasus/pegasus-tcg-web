@@ -29,6 +29,7 @@ describe("api client", () => {
   const createResponse = (ok: boolean, status: number, body: unknown) => ({
     ok,
     status,
+    headers: new Headers(),
     text: async () => (body === null ? "" : JSON.stringify(body)),
   });
 
