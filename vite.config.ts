@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig, loadEnv } from "vite";
@@ -36,6 +37,16 @@ export default defineConfig(({ mode }) => {
             });
           },
         },
+      },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/setupTests.ts',
+      reporters: ['default', 'junit', 'html'],
+      outputFile: {
+        junit: './test-results/junit.xml',
+        html: './test-results/html/index.html'
       },
     },
   };

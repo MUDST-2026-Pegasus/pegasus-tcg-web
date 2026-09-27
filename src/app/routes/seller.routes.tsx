@@ -11,7 +11,6 @@ import { SellerProductEditPage } from "@/features/seller/products/SellerProductE
 import { SellerProductRestockPage } from "@/features/seller/products/SellerProductRestockPage";
 import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
 import { SellerLayout } from "@/features/seller/shared/SellerLayout";
-import { getSellerProfile } from "@/features/seller/shared/seller.api";
 import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
 
 /**
@@ -24,7 +23,7 @@ export const sellerRoutes: RouteObject = {
   path: "seller",
   element: (
     <RequireAuth roles={["SELLER"]}>
-      <SellerLayout profile={getSellerProfile()} />
+      <SellerLayout />
     </RequireAuth>
   ),
   children: [

@@ -441,3 +441,29 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 - **ระยะห่างใช้ `gap-*`** ไม่ใช้ `space-x-*` / `space-y-*`
 - **loading / error / empty ใช้ของกลาง** จาก `@/components/common` อย่าเขียน spinner หรือ
   ข้อความ error ของตัวเองรายหน้า — ดูหัวข้อ "แปลง mock → API"
+
+## การรันเทส (Testing Guidelines)
+
+โปรเจกต์นี้ใช้ **Vitest** สำหรับ Unit/Integration Test และ **Cypress** สำหรับ E2E Test คุณสามารถรันคำสั่งเหล่านี้ผ่าน `package.json`:
+
+### คำสั่งรันเทส (Scripts)
+
+- `npm run test` — รัน Unit และ Integration Test ทั้งหมด 1 ครั้ง
+- `npm run test:unit` — รันเฉพาะ **Unit Test** (ข้ามโฟลเดอร์ `integration`)
+- `npm run test:integration` — รันเฉพาะ **Integration Test** (เฉพาะในโฟลเดอร์ `integration`)
+- `npm run test:watch` — รันเทสทั้งหมดในโหมด Watch (รันใหม่เมื่อไฟล์เปลี่ยน)
+- `npm run cyopen` — เปิด Cypress UI สำหรับเขียน/รัน E2E Test
+- `npm run cyrun` — รัน Cypress E2E Test แบบ Headless (สำหรับ CI)
+
+### วิธีอ่าน Test Report (Vitest)
+
+หลังจากรัน `npm run test` หรือ `npm run test:integration` ระบบจะสร้าง Report ออกมา 2 รูปแบบอัตโนมัติ:
+
+1. **JUnit Report** (`test-results/junit.xml`) — สำหรับให้ระบบ CI/CD (เช่น Jenkins, GitHub Actions) นำไปอ่านและแสดงผล
+2. **HTML Report** (`test-results/html/index.html`) — รายงานแบบ Dashboard สวยงามสำหรับเปิดอ่านใน Browser
+
+**วิธีเปิดดู HTML Report:**
+```bash
+npx vite preview --outDir .vitest
+```
+*(เมื่อรันคำสั่งนี้ จะได้ Local URL เช่น `http://localhost:4173/` ให้นำไปเปิดใน Browser เพื่อดู Report)*

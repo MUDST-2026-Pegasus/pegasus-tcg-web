@@ -7,18 +7,14 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { getSellerProfile } from "../shared/seller.api";
-
 import type { DashboardData } from "./dashboard.types";
-
-const profile = getSellerProfile();
 
 /**
  * ข้อมูลตัวอย่างของหน้า "แดชบอร์ดผู้ขาย" — ลอกข้อความและตัวเลขจาก
  * Figma node 432:6773 เพื่อให้เทียบหน้าจอกับดีไซน์ได้ตรง ๆ
+ * คำทักทายไม่อยู่ในนี้ ใช้ชื่อจริงของผู้ขายที่ login อยู่
  */
-const DASHBOARD_MOCK: DashboardData = {
-  greeting: `สวัสดี, ${profile.username} 👋`,
+const DASHBOARD_MOCK: Omit<DashboardData, "greeting"> = {
   subtitle: "สรุปภาพรวมร้านของคุณ · วันพฤหัสบดีที่ 14 สิงหาคม 2569",
 
   actions: {
@@ -204,9 +200,9 @@ const DASHBOARD_MOCK: DashboardData = {
 };
 
 /**
- * จุดต่อข้อมูลของหน้าแดชบอร์ด — ตอนนี้คืนข้อมูลจำลอง
+ * จุดต่อข้อมูลของหน้าแดชบอร์ด — ตอนนี้คืนข้อมูลจำลอง ยกเว้นชื่อผู้ขาย
  * วันที่ต่อ API จริงให้แก้เฉพาะข้างในฟังก์ชันนี้ component ทุกตัวไม่ต้องแตะ
  */
-export function getDashboardData(): DashboardData {
-  return DASHBOARD_MOCK;
+export function getDashboardData(sellerName: string): DashboardData {
+  return { greeting: `สวัสดี, ${sellerName} 👋`, ...DASHBOARD_MOCK };
 }

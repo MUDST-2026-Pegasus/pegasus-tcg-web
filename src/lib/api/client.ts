@@ -5,6 +5,11 @@ import {
   isAccessTokenExpired,
   refreshAccessToken,
 } from "./session";
+import {
+  getCartSession,
+  getOrCreateCartSession,
+  setCartSession,
+} from "./cart-session";
 import type { ApiEnvelope, ApiErrorBody } from "./types";
 import { CLIENT_ERROR_CODES } from "./types";
 
@@ -79,11 +84,17 @@ async function fetchJson(
     headers["Content-Type"] = "application/json";
   }
 
-  if (init.auth) {
-    const token = getAccessToken();
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
+  const token = init.auth ? getAccessToken() : null;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  let cartSession = getCartSession();
+  if (!token && !cartSession && url.includes("/cart")) {
+    cartSession = getOrCreateCartSession();
+  }
+  if (cartSession && !headers["X-Cart-Session"]) {
+    headers["X-Cart-Session"] = cartSession;
   }
 
   let response: Response;
@@ -107,6 +118,11 @@ async function fetchJson(
       code: CLIENT_ERROR_CODES.NETWORK_ERROR,
       message: "Cannot reach the server. Please check your connection and try again.",
     });
+  }
+
+  const nextCartSession = response.headers.get("X-Cart-Session");
+  if (nextCartSession) {
+    setCartSession(nextCartSession);
   }
 
   return {

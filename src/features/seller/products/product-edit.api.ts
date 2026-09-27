@@ -1,54 +1,31 @@
 import { getProductCreateData } from "./product-create.api";
-import type { ListingDraft } from "./product-create.types";
+import type { CardCondition as FormCondition } from "./product-create.types";
 import type { ProductEditData } from "./product-edit.types";
-import { getProductsData } from "./products.api";
-import { parseBaht } from "./products.format";
+import type { CardCondition, SellerListing } from "./products.types";
 
-type ProductEditSeed = {
-  tags: string[];
-  description: string;
-  options: ListingDraft["options"];
-  /** มีเฉพาะสินค้าที่มีข้อมูลราคาตลาดในดีไซน์ */
-  hasMarketData: boolean;
-};
-
-/** ข้อมูลที่หน้ารายการไม่มี — ของ Charizard ex ใช้ชุดเดียวกับตัวอย่างหน้าลงขาย */
-const PRODUCT_EDIT_SEEDS: Record<string, ProductEditSeed> = {
-  "charizard-ex": {
-    tags: ["Pokémon", "125/197", "Double Rare", "EN"],
-    description: "เก็บใน Top Loader ตั้งแต่แกะซอง ไม่เคยเล่น",
-    options: { accept_offers: true, allow_trade: false },
-    hasMarketData: true,
-  },
+/**
+ * ฟอร์มจำลองของหน้าลงขายยังมีแค่ 4 สภาพที่ไม่ตรงกับ enum จริง — แม็ปเท่าที่ตรงกัน
+ * ที่เหลือ (MP / HP / SEALED) ปล่อยว่างให้ผู้ขายเลือกเอง จนกว่า SLR-03 จะเปลี่ยนฟอร์มเป็นค่าจริง
+ */
+const FORM_CONDITION: Partial<Record<CardCondition, FormCondition>> = {
+  NM: "near_mint",
+  LP: "lightly_played",
+  DMG: "damaged",
 };
 
 /**
- * จุดต่อข้อมูลของหน้าแก้ไขสินค้า — ตอนนี้ประกอบจากข้อมูลจำลองของหน้ารายการ
- * กับข้อความของหน้าลงขาย วันที่ต่อ API ให้แก้เฉพาะข้างในฟังก์ชันนี้ · ไม่พบสินค้า = undefined
+ * ประกอบหน้าแก้ไขสินค้าจากประกาศจริง (`GET /sellers/me/listings/{id}`) กับข้อความของหน้าลงขาย
+ * ปุ่มบันทึกยังไม่ยิงจริง — ต่อ `PUT /sellers/me/listings/{id}` ใน SLR-03
+ * ต้นทุนเฉลี่ยยังไม่มีที่มาจนกว่า SLR-04 จะต่อ unit/คลัง จึงปล่อยว่าง
  */
-export function getProductEditData(
-  productId: string,
-): ProductEditData | undefined {
-  const row = getProductsData().rows.find((product) => product.id === productId);
-  if (!row) return undefined;
-
+export function getProductEditData(listing: SellerListing): ProductEditData {
   const create = getProductCreateData();
-  const seed = PRODUCT_EDIT_SEEDS[productId];
-
-  // meta เช่น "Pokémon · Near Mint" — สินค้าที่ไม่ใช่การ์ดเดี่ยว (Sealed, Graded) จะไม่ตรงกับตัวเลือกสภาพ
-  const [game, conditionText = ""] = row.meta.split(" · ");
-  const condition =
-    create.condition.options.find((option) =>
-      option.label.startsWith(`${conditionText} (`),
-    )?.id ?? null;
-
-  const { market, ...pricing } = create.pricing;
 
   return {
-    productId,
+    productId: String(listing.id),
     breadcrumb: {
       rootLabel: "จัดการสินค้า",
-      productLabel: row.name.split(" — ")[0],
+      productLabel: listing.card.productName,
       currentLabel: "แก้ไขสินค้า",
     },
     title: "แก้ไขสินค้า",
@@ -61,15 +38,19 @@ export function getProductEditData(
 
     catalogCard: {
       title: "การ์ดในประกาศนี้",
-      name: row.name,
-      tags: seed?.tags ?? [game],
+      name: listing.card.productName,
+      tags: [
+        listing.card.variantLabel,
+        ...(listing.lotLabel ? [listing.lotLabel] : []),
+      ],
     },
     condition: create.condition,
     pricing: {
-      ...pricing,
+      ...create.pricing,
       description: "ต้นทุนและจำนวนมาจากประวัติการรับเข้า ผู้ซื้อไม่เห็นต้นทุน",
       costLabel: "ต้นทุนเฉลี่ยต่อใบ (บาท)",
-      market: seed?.hasMarketData ? market : undefined,
+      // ยังไม่มีข้อมูลราคาตลาดของการ์ดใบนี้จาก backend — ไม่โชว์ตัวเลขตลาดปลอม
+      market: undefined,
     },
     stockLock: {
       costHelper: "คำนวณจากประวัติการรับเข้าอัตโนมัติ",
@@ -81,12 +62,12 @@ export function getProductEditData(
     tip: create.tip,
 
     initialDraft: {
-      condition,
-      price: String(parseBaht(row.price)),
-      cost: String(parseBaht(row.cost)),
-      quantity: String(row.stock),
-      description: seed?.description ?? "",
-      options: seed?.options ?? { accept_offers: false, allow_trade: false },
+      condition: FORM_CONDITION[listing.condition] ?? null,
+      price: String(listing.price),
+      cost: "",
+      quantity: String(listing.quantityAvailable),
+      description: listing.publicNote ?? "",
+      options: { accept_offers: false, allow_trade: false },
     },
   };
 }

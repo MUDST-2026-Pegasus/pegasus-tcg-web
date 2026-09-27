@@ -1,16 +1,21 @@
+import { api, hasErrorCode } from "@/lib/api";
+
 import type { SellerProfile } from "./seller.types";
 
-/**
- * ข้อมูลผู้ขายตัวอย่าง — ยังเป็นข้อมูลจำลองทั้งหมด
- * เมื่อต่อ API auth จริงแล้วให้แก้เฉพาะข้างใน getSellerProfile()
- * ส่วนที่เรียกใช้ (sidebar / หน้าต่าง ๆ) ไม่ต้องแก้เลย
- */
-const SELLER_PROFILE_MOCK: SellerProfile = {
-  username: "minmin_tcg",
-  initials: "MM",
-  verifiedLabel: "ผู้ขายที่ยืนยันแล้ว",
-};
+/** component ไม่ควรเรียกไฟล์นี้ตรง ๆ ให้ผ่าน `useSellerProfile()` ใน `seller.queries.ts` */
 
-export function getSellerProfile(): SellerProfile {
-  return SELLER_PROFILE_MOCK;
+/**
+ * โปรไฟล์ผู้ขายของคนที่ login อยู่ — `null` = ยังไม่มี seller profile
+ * (backend ตอบ `SELLER_NOT_FOUND`) ซึ่งเกิดได้แม้มีบทบาท SELLER เช่นบัญชีที่ขอบทบาทตอนสมัคร
+ * ถือเป็นสถานะปกติ ไม่ใช่ error ที่กดลองใหม่แล้วจะหาย
+ */
+export async function getSellerProfile(): Promise<SellerProfile | null> {
+  try {
+    return await api.get<SellerProfile>("/sellers/me");
+  } catch (error) {
+    if (hasErrorCode(error, "SELLER_NOT_FOUND")) {
+      return null;
+    }
+    throw error;
+  }
 }

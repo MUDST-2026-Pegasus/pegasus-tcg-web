@@ -20,7 +20,9 @@ export type UploadPurpose =
   /** รูปการ์ดในคอลเลกชันของตัวเอง */
   | "COLLECTION_IMAGE"
   /** รูปหน้าสมุดบัญชีตอนสมัครผู้ขาย — ผู้สมัครยังไม่มี role SELLER จึงไม่ล็อก role */
-  | "SELLER_VERIFICATION";
+  | "SELLER_VERIFICATION"
+  /** รูปภาพอวตารโปรไฟล์ของผู้ใช้ */
+  | "AVATAR_IMAGE";
 
 /** body ของ `POST /uploads/presign` */
 export type PresignUploadPayload = {
