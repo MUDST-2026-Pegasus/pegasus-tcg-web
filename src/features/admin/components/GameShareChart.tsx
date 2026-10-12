@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { GameShareSlice } from "@/features/admin/admin.types";
+import type { GameSlice } from "../metrics.format";
 
 const SLICE_COLORS = [
   "var(--chart-2)",
@@ -20,8 +20,8 @@ const SLICE_COLORS = [
 type GameShareChartProps = {
   title: string;
   description: string;
-  slices: GameShareSlice[];
-  footnoteTitle: string;
+  slices: GameSlice[];
+  footnoteTitle: string | null;
   footnoteDescription: string;
 };
 
@@ -46,32 +46,40 @@ export function GameShareChart({
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
 
-      <ChartContainer config={chartConfig} className="h-[200px] w-full">
-        <PieChart>
-          <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-          <Pie
-            data={slices}
-            dataKey="value"
-            nameKey="name"
-            innerRadius={52}
-            outerRadius={92}
-            paddingAngle={1}
-            strokeWidth={0}
-          >
-            {slices.map((slice, index) => (
-              <Cell
-                key={slice.id}
-                fill={SLICE_COLORS[index % SLICE_COLORS.length]}
-              />
-            ))}
-          </Pie>
-        </PieChart>
-      </ChartContainer>
+      {slices.length === 0 ? (
+        <p className="flex h-[200px] items-center justify-center text-xs text-muted-foreground">
+          ยังไม่มียอดขายในเดือนนี้
+        </p>
+      ) : (
+        <ChartContainer config={chartConfig} className="h-[200px] w-full">
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+            <Pie
+              data={slices}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={52}
+              outerRadius={92}
+              paddingAngle={1}
+              strokeWidth={0}
+            >
+              {slices.map((slice, index) => (
+                <Cell
+                  key={slice.id}
+                  fill={SLICE_COLORS[index % SLICE_COLORS.length]}
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+      )}
 
       <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-medium text-card-foreground">
-          {footnoteTitle}
-        </p>
+        {footnoteTitle ? (
+          <p className="text-xs font-medium text-card-foreground">
+            {footnoteTitle}
+          </p>
+        ) : null}
         <p className="text-xs text-muted-foreground">{footnoteDescription}</p>
       </div>
     </Card>
