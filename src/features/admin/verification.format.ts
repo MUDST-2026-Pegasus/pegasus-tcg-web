@@ -120,5 +120,9 @@ export function verificationErrorMessage(
   if (hasErrorCode(error, "VERIFICATION_NOT_FOUND")) {
     return "ไม่พบคำขอนี้แล้ว";
   }
+  // คำขอสองใบใช้เลขบัญชีเดียวกันรอตรวจพร้อมกันได้ ใบแรกอนุมัติไปแล้ว ใบนี้จึงอนุมัติไม่ได้อีก
+  if (hasErrorCode(error, "BANK_ACCOUNT_ALREADY_USED")) {
+    return "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง";
+  }
   return getErrorMessage(error, fallback);
 }
