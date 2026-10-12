@@ -4,6 +4,10 @@ metadata:
   name: pegasus-frontend-service
   labels:
     app: pegasus-frontend
+    app.kubernetes.io/name: pegasus-tcg-web
+    app.kubernetes.io/instance: pegasus-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: pegasus-tcg
 spec:
   # ClusterIP: เผยแพร่ Service ภายในคลัสเตอร์
   type: ClusterIP

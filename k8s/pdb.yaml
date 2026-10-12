@@ -1,0 +1,16 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pegasus-frontend-pdb
+  labels:
+    app: pegasus-frontend
+    app.kubernetes.io/name: pegasus-tcg-web
+    app.kubernetes.io/instance: pegasus-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: pegasus-tcg
+spec:
+  # การันตีว่าต้องมีอย่างน้อย 2 Pods ที่พร้อมใช้งานเสมอขณะ Node ปิดปรับปรุง (Node Drain/Maintenance)
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: pegasus-frontend

@@ -4,6 +4,10 @@ metadata:
   name: pegasus-frontend-deployment
   labels:
     app: pegasus-frontend
+    app.kubernetes.io/name: pegasus-tcg-web
+    app.kubernetes.io/instance: pegasus-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: pegasus-tcg
     tier: frontend
 spec:
   # จำนวน Pod ที่ต้องการรัน
@@ -27,8 +31,34 @@ spec:
     metadata:
       labels:
         app: pegasus-frontend
+        app.kubernetes.io/name: pegasus-tcg-web
+        app.kubernetes.io/instance: pegasus-frontend
+        app.kubernetes.io/component: frontend
+        app.kubernetes.io/part-of: pegasus-tcg
         tier: frontend
     spec:
+      # Security: ป้องกันการ mount token ของ ServiceAccount โดยไม่จำเป็น
+      automountServiceAccountToken: false
+
+      # Pod Security: บังคับใช้ Seccomp Profile มาตรฐาน
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+
+      # High Availability: กระจาย Pods ไปยังโหนดต่างกัน (Pod Anti-Affinity)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: pegasus-frontend
+                topologyKey: kubernetes.io/hostname
+
+      # Graceful Shutdown: ให้เวลา Connection Drain ก่อนปิด Pod
+      terminationGracePeriodSeconds: 30
+
       containers:
         - name: pegasus-tcg-web
           image: pegasus-tcg-web:latest
@@ -36,6 +66,18 @@ spec:
           ports:
             - containerPort: 80
               name: http
+
+          # Container Security: จำกัดสิทธิ์ระดับ Container ป้องกัน Privilege Escalation
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+                - CHOWN
+                - SETGID
+                - SETUID
 
           # Resource Model: Requests & Limits
           resources:
@@ -66,3 +108,9 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 2
+
+          # Graceful Shutdown Hook: หน่วงเวลาเพื่อให้ Service ถอด IP ออกจาก Endpoints ก่อน Container ปิด
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
