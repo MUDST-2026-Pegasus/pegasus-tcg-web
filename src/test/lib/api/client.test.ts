@@ -2,11 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { api } from "@/lib/api/client";
 import { CLIENT_ERROR_CODES } from "@/lib/api/types";
 import * as session from "@/lib/api/session";
+import * as cartSession from "@/lib/api/cart-session";
 
 vi.mock("@/lib/api/session", () => ({
   getAccessToken: vi.fn(),
   isAccessTokenExpired: vi.fn(),
   refreshAccessToken: vi.fn(),
+}));
+
+vi.mock("@/lib/api/cart-session", () => ({
+  getCartSession: vi.fn(),
+  getOrCreateCartSession: vi.fn(),
+  setCartSession: vi.fn(),
 }));
 
 vi.mock("@/lib/api/config", () => ({
@@ -81,6 +88,47 @@ describe("api client", () => {
       expect.objectContaining({
         headers: { Accept: "application/json" }, // No Authorization
       })
+    );
+  });
+
+  it("attaches the generated guest cart session to cart writes", async () => {
+    vi.mocked(session.isAccessTokenExpired).mockReturnValue(false);
+    vi.mocked(session.getAccessToken).mockReturnValue(null);
+    vi.mocked(cartSession.getCartSession).mockReturnValue(null);
+    vi.mocked(cartSession.getOrCreateCartSession).mockReturnValue("guest-session-id");
+    mockFetch.mockResolvedValueOnce(
+      createResponse(true, 201, { success: true, data: { id: 7 } }),
+    );
+
+    await api.post("/cart/items", { listingId: 12, quantity: 1 });
+
+    expect(cartSession.getOrCreateCartSession).toHaveBeenCalledOnce();
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://mock/cart/items",
+      expect.objectContaining({
+        headers: expect.objectContaining({ "X-Cart-Session": "guest-session-id" }),
+      }),
+    );
+  });
+
+  it("keeps the guest session header on authenticated cart merge", async () => {
+    vi.mocked(session.isAccessTokenExpired).mockReturnValue(false);
+    vi.mocked(session.getAccessToken).mockReturnValue("user-token");
+    vi.mocked(cartSession.getCartSession).mockReturnValue("guest-session-id");
+    mockFetch.mockResolvedValueOnce(
+      createResponse(true, 200, { success: true, data: { items: [] } }),
+    );
+
+    await api.post("/cart/merge");
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://mock/cart/merge",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "Bearer user-token",
+          "X-Cart-Session": "guest-session-id",
+        }),
+      }),
     );
   });
 

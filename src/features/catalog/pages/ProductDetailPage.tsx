@@ -1,12 +1,15 @@
-import { useId, useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
-import { Heart, ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck, Minus, Plus, Loader2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
+import { useAuth } from "@/features/auth/auth.queries";
+import { useAddCartItem } from "@/features/cart/cart.queries";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "../catalog.mappers";
 import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
@@ -16,48 +19,6 @@ function formatPrice(amount: number, currency = "THB") {
     style: "currency",
     currency,
   }).format(amount);
-}
-
-function DisabledAction({
-                          children,
-                          reason,
- className = "",
- outline = false,
-}: {
- children: ReactNode;
- reason: string;
- className?: string;
- outline?: boolean;
-}) {
-  const tooltipId = useId();
-
-  return (
-      <div className="group relative">
-      <span
-          tabIndex={0}
-          aria-label={reason}
-          aria-describedby={tooltipId}
-          className="block rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
-      >
-        <Button
-            type="button"
-            disabled
-            variant={outline ? "outline" : "default"}
- className={`pointer-events-none w-full rounded-full disabled:opacity-100 ${className}`}
-        >
-          {children}
-        </Button>
-      </span>
-
-        <span
-            id={tooltipId}
-            role="tooltip"
-            className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-56 -translate-x-1/2 rounded-lg bg-foreground px-3 py-2 text-center text-xs text-background group-hover:block group-focus-within:block"
-        >
-        {reason}
-      </span>
-      </div>
-  );
 }
 
 function ProductImage({
@@ -165,6 +126,9 @@ function ProductDetailContent({
   onRefresh: () => void;
 }) {
   const { product, variants, images } = data;
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const addCartItem = useAddCartItem();
   const itemLabel = product.productType === "SINGLE_CARD" ? "cards" : "items";
 
   const [selectedImageId, setSelectedImageId] = useState<number | null>(
@@ -174,6 +138,11 @@ function ProductDetailContent({
   const [selectedCondition, setSelectedCondition] = useState<CardCondition | "">("");
   const [page, setPage] = useState(0);
   const [collectorPage, setCollectorPage] = useState(0);
+  const [quantitySelection, setQuantitySelection] = useState<{
+    listingId: number | null;
+    quantity: number;
+  }>({ listingId: null, quantity: 1 });
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const listingsQuery = useProductListings(product.id);
   const collectorsQuery = useProductCollectors(product.id, collectorPage);
@@ -253,10 +222,86 @@ function ProductDetailContent({
       ? [...new Set<CardCondition>(["NM", "LP", "MP", ...availableConditions])]
       : availableConditions;
   const firstListing = filteredListings[0];
+  const purchasableListing = filteredListings.find((listing) => listing.quantityAvailable > 0);
+  const availableForSelectedListing = purchasableListing?.quantityAvailable ?? 0;
+  const quantity = quantitySelection.listingId === (purchasableListing?.id ?? null)
+    ? quantitySelection.quantity
+    : 1;
+  const selectedQuantity = Math.min(quantity, Math.max(availableForSelectedListing, 1));
   const gameName = gamesQuery.data?.find((game) => game.id === product.gameId)?.name;
   const listingsReady = listingsQuery.isSuccess;
   const availableQuantity = filteredListings.reduce((sum, row) => sum + row.quantityAvailable, 0);
   const hasListings = filteredListings.length > 0;
+
+  async function addListingToCart(listingId: number, amount: number) {
+    try {
+      await addCartItem.mutateAsync({ listingId, quantity: amount });
+      toast.add({
+        title: "เพิ่มลงรถเข็นแล้ว",
+        description: `เพิ่มสินค้า ${amount} ${amount === 1 ? itemLabel.slice(0, -1) : itemLabel}`,
+        type: "success",
+      });
+      return true;
+    } catch (error) {
+      const message = error instanceof ApiError && error.status === 409
+        ? error.code === "CANNOT_BUY_OWN_LISTING"
+          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
+          : error.code === "INSUFFICIENT_STOCK"
+            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
+            : error.message
+        : error instanceof Error
+          ? error.message
+          : "เพิ่มสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง";
+      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: message, type: "error" });
+      return false;
+    }
+  }
+
+  async function handleAddToCart() {
+    if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
+    await addListingToCart(purchasableListing.id, selectedQuantity);
+  }
+
+  async function handleBuyNow() {
+    if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
+    if (isAuthLoading) return;
+    if (!isAuthenticated) {
+      navigate("/login", {
+        state: { from: { pathname: `/products/${encodeURIComponent(product.slug)}` } },
+      });
+      return;
+    }
+
+    setIsBuyingNow(true);
+    try {
+      const addedItem = await addCartItem.mutateAsync({
+        listingId: purchasableListing.id,
+        quantity: selectedQuantity,
+      });
+      // Checkout currently submits cart-item IDs to the backend. Keep the
+      // product/listing IDs for context, but identify this purchase by the
+      // exact cart item returned by the add request.
+      const params = new URLSearchParams({
+        items: String(addedItem.id),
+        productId: String(product.id),
+        listingId: String(purchasableListing.id),
+      });
+      navigate(`/checkout?${params.toString()}`);
+    } catch (error) {
+      const message = error instanceof ApiError && error.status === 409
+        ? error.code === "CANNOT_BUY_OWN_LISTING"
+          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
+          : error.code === "INSUFFICIENT_STOCK"
+            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
+            : error.message
+        : error instanceof Error
+          ? error.message
+          : "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง";
+      toast.add({ title: "ซื้อสินค้าไม่สำเร็จ", description: message, type: "error" });
+    } finally {
+      setIsBuyingNow(false);
+    }
+  }
 
   function changeVariant(value: string) {
     setSelectedVariant(value);
@@ -361,11 +406,31 @@ function ProductDetailContent({
               {listingsQuery.isError && <p role="alert" className="mt-2 text-[13px] text-muted-foreground">โหลดราคาไม่สำเร็จ</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <DisabledAction reason="ระบบซื้อสินค้ากำลังพัฒนา" className="h-14 text-base font-bold shadow-md"><ShoppingCart className="size-5" />Buy now{firstListing ? ` · ${formatPrice(firstListing.price, firstListing.currency)}` : ""}</DisabledAction>
-              <DisabledAction reason="ระบบตะกร้าสินค้ากำลังพัฒนา" className="h-14 text-base font-bold shadow-md"><ShoppingCart className="size-5" />Add to cart</DisabledAction>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold">Quantity</p>
+                <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? `${availableForSelectedListing} available from ${purchasableListing?.seller.displayName || purchasableListing?.seller.username}` : "Out of stock"}</p>
+              </div>
+              <div className="flex items-center rounded-lg border bg-white">
+                <Button type="button" variant="ghost" size="icon" aria-label="ลดจำนวนสินค้า" disabled={!purchasableListing || selectedQuantity <= 1 || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.max(1, selectedQuantity - 1) })}>
+                  <Minus className="size-4" />
+                </Button>
+                <span aria-live="polite" aria-label={`จำนวน ${selectedQuantity}`} className="min-w-10 text-center text-sm font-semibold">{selectedQuantity}</span>
+                <Button type="button" variant="ghost" size="icon" aria-label="เพิ่มจำนวนสินค้า" disabled={!purchasableListing || selectedQuantity >= availableForSelectedListing || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.min(availableForSelectedListing, selectedQuantity + 1) })}>
+                  <Plus className="size-4" />
+                </Button>
+              </div>
             </div>
-            <DisabledAction reason="ระบบรายการโปรดกำลังพัฒนา" outline className="h-12 bg-white font-semibold"><Heart className="size-4" />Add to watchlist</DisabledAction>
+            <div className="grid grid-cols-2 gap-3">
+              <Button type="button" className="h-14 text-base font-bold shadow-md" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing || isAuthLoading} onClick={() => void handleBuyNow()}>
+                {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
+                {availableForSelectedListing === 0 ? "Out of Stock" : isAuthLoading ? "Loading…" : "Buy now"}{purchasableListing ? ` · ${formatPrice(purchasableListing.price, purchasableListing.currency)}` : ""}
+              </Button>
+              <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={() => void handleAddToCart()}>
+                {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
+                {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
+              </Button>
+            </div>
             <div className="grid grid-cols-3 divide-x rounded-2xl border bg-white px-2 py-4 text-center">
               <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Tracked shipping</p></div>
               <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Buyer protection</p></div>
@@ -388,7 +453,7 @@ function ProductDetailContent({
                   <div className="min-w-0"><Link to={`/u/${encodeURIComponent(listing.seller.username)}`} className="block truncate font-bold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link><p className="mt-1 truncate text-sm text-muted-foreground">@{listing.seller.username}</p></div>
                   <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong><p className="mt-1 text-xs text-muted-foreground">{listing.card.variantLabel}</p></div>
                   <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">—</strong><p className="mt-1 text-xs text-muted-foreground">{listing.quantityAvailable} available</p></div>
-                  <div className="flex items-center justify-between gap-4 sm:justify-end"><strong className="whitespace-nowrap text-xl">{formatPrice(listing.price, listing.currency)}</strong><DisabledAction reason="ระบบตะกร้าสินค้ากำลังพัฒนา" className="h-9 px-5 text-sm">Add</DisabledAction></div>
+                  <div className="flex items-center justify-between gap-4 sm:justify-end"><strong className="whitespace-nowrap text-xl">{formatPrice(listing.price, listing.currency)}</strong><Button type="button" className="h-9 px-5 text-sm" disabled={listing.quantityAvailable <= 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button></div>
                 </article>
               ))}
             </div>

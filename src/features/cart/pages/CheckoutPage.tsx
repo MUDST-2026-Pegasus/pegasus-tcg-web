@@ -45,7 +45,7 @@ export function CheckoutPage() {
     }
   }, [isAuthenticated, isAuthLoading, navigate]);
 
-  const { data: cart, isLoading: isCartLoading } = useCart();
+  const { data: cart, isLoading: isCartLoading, isFetching: isCartFetching } = useCart();
   const { data: addresses = [], isLoading: isAddressLoading } = useAddresses();
 
   // Read item IDs from URL query params: ?items=42 or ?items=42,45, or fallback to router location state
@@ -73,15 +73,25 @@ export function CheckoutPage() {
     return [];
   }, [searchParams, location.state]);
 
+  const targetProductId = Number(searchParams.get("productId"));
+  const targetListingId = Number(searchParams.get("listingId"));
+
   // Filter cart.items to only include items matching targetItemIds
   const checkoutItems = useMemo(() => {
     const items = cart?.items ?? [];
-    if (targetItemIds.length === 0) {
-      return [];
+    if (targetItemIds.length > 0) {
+      const idSet = new Set(targetItemIds);
+      return items.filter((item) => idSet.has(item.id));
     }
-    const idSet = new Set(targetItemIds);
-    return items.filter((item) => idSet.has(item.id));
-  }, [cart, targetItemIds]);
+
+    if (targetProductId > 0 && targetListingId > 0) {
+      return items.filter(
+        (item) => item.productId === targetProductId && item.listingId === targetListingId,
+      );
+    }
+
+    return [];
+  }, [cart, targetItemIds, targetProductId, targetListingId]);
 
   // Edge Case: If checkoutItems.length === 0 after cart loads, display a toast notification and redirect back to /cart
   useEffect(() => {
@@ -89,6 +99,7 @@ export function CheckoutPage() {
       !isAuthLoading &&
       isAuthenticated &&
       !isCartLoading &&
+      !isCartFetching &&
       checkoutItems.length === 0
     ) {
       if (!hasRedirectedRef.current) {
@@ -105,6 +116,7 @@ export function CheckoutPage() {
     isAuthLoading,
     isAuthenticated,
     isCartLoading,
+    isCartFetching,
     checkoutItems.length,
     navigate,
   ]);
