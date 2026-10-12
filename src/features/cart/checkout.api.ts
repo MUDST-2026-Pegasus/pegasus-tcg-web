@@ -3,7 +3,11 @@ import type { CheckoutRequest, CheckoutResponse } from "./checkout.types";
 
 export const checkoutApi = {
   checkout: (data: CheckoutRequest, idempotencyKey?: string) => {
-    const key = idempotencyKey || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `idemp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
+    const key =
+      idempotencyKey ||
+      (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `idemp-${Date.now()}`);
     return api.post<CheckoutResponse>("/checkout", data, {
       headers: {
         "Idempotency-Key": key,
