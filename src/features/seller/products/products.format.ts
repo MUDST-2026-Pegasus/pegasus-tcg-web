@@ -3,6 +3,7 @@ import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
 import type {
   CardCondition,
+  ListingSort,
   ListingStatus,
   SellerListingSummary,
 } from "./products.types";
@@ -100,6 +101,28 @@ export const LISTING_STATUS_LABEL: Record<ListingStatus, string> = {
   SOLD_OUT: "หมดสต็อก",
   DELISTED: "ปิดการขายแล้ว",
   BLOCKED: "ถูกระงับ",
+};
+
+/** ตัวเลือกการเรียงในแถบตัวกรอง — ตัวแรกคือค่าเริ่มต้นของ backend */
+export const LISTING_SORTS: ListingSort[] = [
+  "updated",
+  "newest",
+  "price_asc",
+  "price_desc",
+  "stock_asc",
+  "stock_desc",
+  "name",
+];
+
+export const LISTING_SORT_LABEL: Record<ListingSort, string> = {
+  updated: "แก้ไขล่าสุด",
+  newest: "สร้างล่าสุด",
+  price_asc: "ราคาต่ำ → สูง",
+  price_desc: "ราคาสูง → ต่ำ",
+  // คงเหลือ = quantityAvailable ใบที่ขายได้ตอนนี้ — เรียงน้อยก่อนเพื่อหาของที่ต้องเติม
+  stock_asc: "คงเหลือน้อย → มาก",
+  stock_desc: "คงเหลือมาก → น้อย",
+  name: "ชื่อการ์ด A → Z",
 };
 
 /**

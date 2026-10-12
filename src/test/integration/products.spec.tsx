@@ -74,8 +74,12 @@ describe("ProductsContent Integration", () => {
 
     vi.mocked(sellerApi.getSellerProfile).mockResolvedValue(verifiedSeller);
     vi.mocked(productsApi.getMyListings).mockImplementation(
-      async ({ status, page, size }) => {
-        const matched = listings.filter((row) => !status || row.status === status);
+      async ({ status, q, page, size }) => {
+        const matched = listings.filter(
+          (row) =>
+            (!status || row.status === status) &&
+            (!q || row.card.productName.toLowerCase().includes(q.toLowerCase())),
+        );
         return {
           items: matched.slice(page * size, (page + 1) * size),
           page,
@@ -103,14 +107,51 @@ describe("ProductsContent Integration", () => {
       expect(screen.queryByText("Dark Magician")).not.toBeInTheDocument(),
     );
     expect(screen.getByText("Blue Eyes White Dragon")).toBeInTheDocument();
-    expect(productsApi.getMyListings).toHaveBeenCalledWith({
-      status: "ACTIVE",
-      page: 0,
-      size: 20,
-    });
+    expect(productsApi.getMyListings).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "ACTIVE", page: 0, size: 20 }),
+    );
 
     await user.click(screen.getByRole("button", { name: "ทั้งหมด 2" }));
     expect(await screen.findByText("Dark Magician")).toBeInTheDocument();
+  });
+
+  it("searches the whole shop through the backend and can clear the search", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProductsContent />, { route: "/seller/products" });
+
+    expect(await screen.findByText("Dark Magician")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" }), "blue{Enter}");
+
+    await waitFor(() =>
+      expect(screen.queryByText("Dark Magician")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByText("Blue Eyes White Dragon")).toBeInTheDocument();
+    expect(productsApi.getMyListings).toHaveBeenCalledWith(
+      expect.objectContaining({ q: "blue", page: 0 }),
+    );
+
+    await user.clear(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" }));
+    await user.type(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" }), "pikachu{Enter}");
+    expect(await screen.findByText('ไม่พบประกาศที่ตรงกับ "pikachu"')).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "ล้างคำค้น" }));
+    expect(await screen.findByText("Dark Magician")).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" })).toHaveValue("");
+  });
+
+  it("reads the sort from the URL and sends it to the backend", async () => {
+    renderWithProviders(<ProductsContent />, {
+      route: "/seller/products?sort=price_desc",
+    });
+
+    expect(await screen.findByText("Blue Eyes White Dragon")).toBeInTheDocument();
+    expect(productsApi.getMyListings).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: "price_desc", page: 0 }),
+    );
+    expect(screen.getByRole("combobox", { name: "เรียงลำดับ" })).toHaveTextContent(
+      "เรียง: ราคาสูง → ต่ำ",
+    );
   });
 
   it("shows the bulk bar while rows are selected", async () => {
