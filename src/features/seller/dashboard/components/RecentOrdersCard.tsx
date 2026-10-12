@@ -3,15 +3,17 @@ import { ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import type { OrderStatus } from "@/features/seller/shared/seller.types";
 import { cn } from "@/lib/utils";
 
-import type { OrderStatus, RecentOrders } from "../dashboard.types";
+import type { RecentOrders } from "../dashboard.types";
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
   awaiting_pack: "bg-[#fbe9e8] text-[#d0342c]",
   shipped: "bg-[#ede9fe] text-[#6d28d9]",
   awaiting_payment: "bg-[#fdf0dd] text-[#b45309]",
   completed: "bg-[#e3f4ec] text-[#12805c]",
+  cancelled: "bg-[#eef1f2] text-[#6b7280]",
 };
 
 export function RecentOrdersCard({

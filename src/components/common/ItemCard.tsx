@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import {
   Card,
   CardContent,
@@ -17,8 +19,9 @@ export type ItemCardProps = {
   badge: string;
   /** ชื่อรายการ รองรับได้สูงสุดสองบรรทัดตาม Design System */
   title: string;
-  /** ข้อความราคา เช่น ฿2,450 */
-  price: string;
+  /** ข้อความราคา เช่น ฿2,450; Collection cards intentionally have no price. */
+  price?: string;
+  footer?: ReactNode;
   /** ปลายทางสำหรับเปิดรายละเอียดรายการ; เมื่อไม่ระบุ Card จะเป็นข้อมูลแบบไม่คลิก */
   href?: string;
   className?: string;
@@ -36,6 +39,7 @@ export function ItemCard({
   badge,
   title,
   price,
+  footer,
   href,
   className,
 }: ItemCardProps) {
@@ -67,9 +71,9 @@ export function ItemCard({
         </CardTitle>
       </CardHeader>
 
-      <CardFooter className="px-5">
-        <p className="text-lg leading-6 font-semibold text-primary">{price}</p>
-      </CardFooter>
+      {price || footer ? <CardFooter className="mt-auto px-5">
+        {price ? <p className="text-lg leading-6 font-semibold text-primary">{price}</p> : footer}
+      </CardFooter> : null}
     </Card>
   );
 
@@ -80,7 +84,7 @@ export function ItemCard({
   return (
     <a
       href={href}
-      aria-label={`${title} ${price}`}
+      aria-label={[title, price].filter(Boolean).join(" ")}
       className="block w-fit max-w-full rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       {card}

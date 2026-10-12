@@ -1,5 +1,3 @@
-import type { ProductCardData } from "@/components/common/ProductCard";
-
 /* ── หน้า "ภาพรวมแพลตฟอร์ม" ─────────────────────────────────────── */
 
 export type StatAccent = "primary" | "teal" | "green";
@@ -75,64 +73,6 @@ export type AdminOverviewData = {
   };
 };
 
-/* ── หน้า "จัดการแคตตาล็อก" ─────────────────────────────────────── */
-
-/** หนึ่งเกมในรายการ "เกมทั้งหมด" ของหน้าแคตตาล็อก */
-export type CatalogGame = {
-  id: string;
-  name: string;
-  /** จำนวนการ์ดในเกมนั้น แสดงเป็นข้อความจัดรูปแบบแล้ว */
-  count: string;
-};
-
-/** ตัวเลือกในการ์ด "กรองตามชุด (Set)" */
-export type CatalogSet = {
-  id: string;
-  name: string;
-  defaultChecked?: boolean;
-};
-
-/** dropdown หนึ่งตัวบนแถบเครื่องมือ */
-export type CatalogFilterSelect = {
-  id: string;
-  /** ข้อความที่โชว์ตอนยังไม่ได้เลือกอะไร เช่น "ความหายาก: ทั้งหมด" */
-  placeholder: string;
-  options: { value: string; label: string }[];
-};
-
-export type AdminCatalogData = {
-  title: string;
-  subtitle: string;
-  games: {
-    title: string;
-    description: string;
-    /** id ของเกมที่ถูกเลือกอยู่ */
-    activeId: string;
-    items: CatalogGame[];
-  };
-  sets: {
-    title: string;
-    items: CatalogSet[];
-  };
-  summary: {
-    label: string;
-    value: string;
-    footnote: string;
-  };
-  toolbar: {
-    /** ป้ายบอกจำนวนผลลัพธ์ เช่น "แสดง 8 จาก 8,420 ใบ" */
-    resultLabel: string;
-    searchPlaceholder: string;
-    selects: CatalogFilterSelect[];
-  };
-  products: ProductCardData[];
-  pagination: {
-    label: string;
-    previousLabel: string;
-    nextLabel: string;
-  };
-};
-
 /* ── หน้า "คุณสมบัติการ์ด" ───────────────────────────────────────── */
 
 /** ชนิดข้อมูลของฟิลด์ — ค่าเดียวกับที่โชว์บน badge ในตาราง */
@@ -190,11 +130,14 @@ export type AdminCardAttributesData = {
   games: CardSchemaGame[];
 };
 
-/* ── หน้า "อนุมัติผู้ขาย" ────────────────────────────────────────── */
+/* ── ตัวย่อชื่อผู้ใช้ (ใช้ร่วมหลายหน้า) ───────────────────────────── */
 
 /**
  * สีพื้นวงกลมตัวย่อชื่อ — ชุดเดียวกับที่ใช้ในหน้าภาพรวม
  * ใช้ทั้งหน้า "อนุมัติผู้ขาย" และตารางหน้า "จัดการผู้ใช้"
+ *
+ * หมายเหตุ: type ของหน้า "อนุมัติผู้ขาย" (คำขอ/เอกสาร/สถิติ) ย้ายไปอยู่กับ
+ * data layer จริงแล้วที่ `verification.types.ts` — หน้านั้นเลิกใช้ fixture
  */
 export type SellerAvatarAccent =
   | "teal"
@@ -202,68 +145,6 @@ export type SellerAvatarAccent =
   | "amber"
   | "red"
   | "slate";
-
-/** สีจุดนำหน้าตัวเลขสรุปด้านบน และสีของ badge สถานะคำขอ */
-export type SellerApprovalTone = "pending" | "approved" | "rejected" | "total";
-
-export type SellerApprovalStat = {
-  id: string;
-  label: string;
-  value: string;
-  tone: SellerApprovalTone;
-  /** true = ช่องที่ต้องลงมือทำ ดีไซน์เน้นให้ตัวหนังสือเข้มกว่าช่องอื่น */
-  emphasis?: boolean;
-};
-
-/** เอกสาร KYC หนึ่งใบที่ผู้สมัครแนบมา */
-export type SellerDocument = {
-  id: string;
-  title: string;
-  /** บรรทัดล่างของการ์ดเอกสาร เช่น "ด้านหน้า · 1.2 MB" */
-  meta: string;
-};
-
-export type SellerApplication = {
-  id: string;
-  /** ชื่อผู้ใช้ที่ยื่นคำขอ เช่น "minmin_tcg" */
-  handle: string;
-  initials: string;
-  avatarAccent: SellerAvatarAccent;
-  /** เวลาที่ยื่นคำขอแบบข้อความ เช่น "ส่งเมื่อ 5 นาทีที่แล้ว" */
-  submittedAt: string;
-  /** ป้ายเอกสารที่แนบแล้ว โชว์บนการ์ดในคิวทางซ้าย */
-  documentTags: string[];
-  statusLabel: string;
-  statusTone: SellerApprovalTone;
-  /** บรรทัดใต้ชื่อในการ์ดรายละเอียด (วันสมัคร · อีเมล · เบอร์โทร) */
-  contactLine: string;
-  /** ข้อมูล KYC จัดเป็นตาราง 2 คอลัมน์ */
-  details: { label: string; value: string }[];
-  documents: SellerDocument[];
-  /** สรุปผลตรวจเอกสาร โชว์ในแถบปุ่มด้านล่าง */
-  review: string;
-};
-
-export type AdminSellerApprovalData = {
-  title: string;
-  subtitle: string;
-  exportLabel: string;
-  stats: SellerApprovalStat[];
-  queue: {
-    title: string;
-    sortLabel: string;
-    /** badge บนการ์ดที่กำลังเปิดดูอยู่ */
-    viewingLabel: string;
-  };
-  documentsTitle: string;
-  /** ข้อความบนการ์ดเอกสารตอนยังไม่ได้เปิดดูรูปจริง */
-  documentHint: string;
-  reviewTitle: string;
-  actions: { requestMore: string; reject: string; approve: string };
-  /** id ของคำขอที่เปิดดูอยู่ตอนเข้าหน้า */
-  defaultApplicationId: string;
-  applications: SellerApplication[];
-};
 
 /* ── หน้า "ค่าคอมมิชชั่น" ────────────────────────────────────────── */
 
@@ -364,6 +245,14 @@ export type AdminUser = {
   statusLabel: string;
 };
 
+/** dropdown หนึ่งตัวบนแถบเครื่องมือของหน้าผู้ใช้ */
+export type CatalogFilterSelect = {
+  id: string;
+  /** ข้อความที่โชว์ตอนยังไม่ได้เลือกอะไร เช่น "บทบาท: ทั้งหมด" */
+  placeholder: string;
+  options: { value: string; label: string }[];
+};
+
 /** ตัวกรองที่ถูกเลือกไว้แล้ว โชว์เป็นชิปใต้แถบเครื่องมือ */
 export type AdminUserFilterChip = {
   id: string;
@@ -377,7 +266,7 @@ export type AdminUsersData = {
   actions: { exportLabel: string; addAdminLabel: string };
   toolbar: {
     searchPlaceholder: string;
-    /** dropdown กรองบทบาท/สถานะ — โครงเดียวกับแถบเครื่องมือหน้าแคตตาล็อก */
+    /** dropdown กรองบทบาท/สถานะ */
     selects: CatalogFilterSelect[];
     advancedLabel: string;
     /** ป้ายนำหน้าแถวชิป เช่น "ตัวกรองที่ใช้:" */

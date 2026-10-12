@@ -1,5 +1,6 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { OrdersContent } from "./components/OrdersContent";
+import { getOrdersData } from "./orders.api";
 
 export function SellerOrdersPage() {
-  return <PagePlaceholder title="จัดการคำสั่งซื้อ" figmaNode="432:7629" />;
+  return <OrdersContent data={getOrdersData()} />;
 }

@@ -1,18 +1,25 @@
-import { CircleUserRound, ClipboardList, MapPin } from "lucide-react";
+import { CircleUserRound, ClipboardList, MapPin, GalleryVerticalEnd } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ACCOUNT_USER } from "@/features/account/account.fixture";
+
+/** ข้อมูลผู้ใช้เท่าที่แถบนี้ต้องใช้ — หน้าไหนมี `useAuth()` แล้วแปลงด้วย `toSidebarUser` */
+export type AccountSidebarUser = {
+  initials: string;
+  name: string;
+  email: string;
+};
 
 const ACCOUNT_LINKS = [
   { label: "Account Overview", to: "/account/profile", icon: CircleUserRound },
   { label: "Order History", to: "/account/orders", icon: ClipboardList },
   { label: "Address Book", to: "/account/addresses", icon: MapPin },
+  { label: "My Collection", to: "/account/collection", icon: GalleryVerticalEnd },
 ] as const;
 
-export function AccountSidebar({ user }: { user: typeof ACCOUNT_USER }) {
+export function AccountSidebar({ user }: { user: AccountSidebarUser }) {
   const { pathname } = useLocation();
 
   return (

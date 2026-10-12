@@ -4,7 +4,6 @@ import {
   Clock3,
   MessageSquareText,
   Star,
-  UserRoundPlus,
   UsersRound,
 } from "lucide-react";
 
@@ -47,14 +46,6 @@ export function StoreProfilePage() {
               <h1 className="max-w-md text-2xl font-semibold leading-snug">
                 {store.name}
               </h1>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg">
-                  <UserRoundPlus data-icon="inline-start" /> Follow
-                </Button>
-                <Button variant="secondary" size="lg">
-                  <MessageSquareText data-icon="inline-start" /> Chat
-                </Button>
-              </div>
             </CardContent>
           </Card>
 

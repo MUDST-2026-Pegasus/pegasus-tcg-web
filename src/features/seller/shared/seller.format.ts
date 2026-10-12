@@ -1,0 +1,75 @@
+import { initialsOf } from "@/features/account/account.format";
+import type { AuthUser } from "@/features/auth/auth.types";
+
+import type { SellerProfile, SellerStatus } from "./seller.types";
+
+const bahtWhole = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const bahtSatang = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/**
+ * ฿1,850 เมื่อเป็นจำนวนเต็ม และ ฿92.50 เมื่อมีเศษสตางค์ — ตรงกับที่ดีไซน์ใช้
+ * ใช้ทั้งหน้าจัดการคำสั่งซื้อและหน้าลงขายสินค้า
+ */
+export function formatBaht(amount: number): string {
+  const formatter = Number.isInteger(amount) ? bahtWhole : bahtSatang;
+  return `฿${formatter.format(amount)}`;
+}
+
+/**
+ * ชื่อและรูปของผู้ขายที่ login อยู่ — มาจากโปรไฟล์ผู้ใช้ (`useAuth()`) ไม่ใช่ `/sellers/me`
+ * เพราะโปรไฟล์ผู้ใช้คือหน้าร้าน [RQ-2] `SellerProfileResponse` จึงไม่มีฟิลด์พวกนี้โดยตั้งใจ
+ */
+export type SellerIdentity = {
+  displayName: string;
+  username: string;
+  avatarUrl: string | null;
+  initials: string;
+};
+
+export function toSellerIdentity(user: AuthUser | null): SellerIdentity {
+  if (!user) {
+    return { displayName: "", username: "", avatarUrl: null, initials: "?" };
+  }
+  return {
+    displayName: user.displayName,
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+    initials: initialsOf(user.displayName),
+  };
+}
+
+/** บรรทัดใต้ชื่อใน sidebar — บอกสถานะร้านจริงจาก `/sellers/me` */
+export const SELLER_STATUS_LABEL: Record<SellerStatus, string> = {
+  NOT_APPLIED: "ยังไม่ได้สมัครเป็นผู้ขาย",
+  PENDING: "รอตรวจเอกสารยืนยันตัวตน",
+  VERIFIED: "ผู้ขายที่ยืนยันแล้ว",
+  REJECTED: "ยืนยันตัวตนไม่ผ่าน",
+  SUSPENDED: "ร้านถูกระงับ",
+};
+
+/**
+ * ทำไมตอนนี้ลงขายหรือแก้ประกาศไม่ได้ — `null` = ทำได้
+ * backend ตรวจซ้ำทุกครั้งที่เขียนอยู่แล้ว (`SELLER_NOT_VERIFIED`) ตรงนี้มีไว้บอกผู้ขายก่อนกด
+ *
+ * @param profile `null` = ยังไม่มี seller profile เลย
+ */
+export function publishBlockedReason(
+  profile: SellerProfile | null,
+): string | null {
+  if (profile?.canPublish) {
+    return null;
+  }
+  switch (profile?.status) {
+    case "SUSPENDED":
+      return "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ";
+    case "PENDING":
+      return "รอแอดมินตรวจเอกสารยืนยันตัวตน ลงขายได้หลังได้รับอนุมัติ";
+    case "REJECTED":
+      return "เอกสารยืนยันตัวตนไม่ผ่าน ต้องยื่นใหม่และได้รับอนุมัติก่อนจึงจะลงขายได้";
+    default:
+      return "ต้องยืนยันตัวตนผู้ขายก่อนจึงจะลงขายได้";
+  }
+}

@@ -7,7 +7,6 @@ import {
   Package,
   Receipt,
   Settings2,
-  Shield,
   ShoppingCart,
   Store,
   Users,
@@ -50,14 +49,17 @@ export const adminNav: NavGroup[] = [
     label: "แคตตาล็อก",
     items: [
       { label: "จัดการแคตตาล็อก", to: "/admin/catalog", icon: LayoutGrid },
-      { label: "คุณสมบัติการ์ด", to: "/admin/card-attributes", icon: Settings2 },
+      {
+        label: "เกมและคุณสมบัติการ์ด",
+        to: "/admin/card-attributes",
+        icon: Settings2,
+      },
     ],
   },
   {
     label: "ความน่าเชื่อถือ",
     items: [
       { label: "อนุมัติผู้ขาย", to: "/admin/sellers", icon: BadgeCheck },
-      { label: "ตรวจสอบประกาศขาย", to: "/admin/listings", icon: Shield },
     ],
   },
   {

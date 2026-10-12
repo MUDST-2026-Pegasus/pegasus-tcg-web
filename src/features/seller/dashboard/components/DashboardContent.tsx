@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { CreateListingButton } from "@/features/seller/shared/CreateListingButton";
 
 import type { DashboardData } from "../dashboard.types";
 
@@ -25,9 +26,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
           <Button variant="outline" size="sm" className="rounded-md px-2.5">
             {data.actions.viewShopLabel}
           </Button>
-          <Button size="sm" className="rounded-md px-2.5">
-            {data.actions.createListingLabel}
-          </Button>
+          <CreateListingButton label={data.actions.createListingLabel} />
         </div>
       </div>
 

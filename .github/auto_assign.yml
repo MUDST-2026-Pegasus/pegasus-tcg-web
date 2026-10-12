@@ -3,9 +3,9 @@ addAssignees: author
 addReviewers: true
 
 reviewers:
+  - NTZ9008
   - boatngin
   - Gameinwza
-  - NTZ9008
   # - teammate3
 
 # Number of reviewers to assign (0 = all)
