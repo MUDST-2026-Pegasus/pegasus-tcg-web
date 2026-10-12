@@ -31,7 +31,7 @@ export const LISTING_STATUSES: ListingStatus[] = [
 ];
 
 /**
- * query key ต้องรวมทุกค่าที่ทำให้ผลต่างกัน — ที่นี่คือ status/page/size
+ * query key ต้องรวมทุกค่าที่ทำให้ผลต่างกัน — ที่นี่คือ status/q/sort/page/size
  * ตัวนับของแต่ละชิป (size=1) ก็อยู่ใต้ `lists()` ด้วย ล้างที่ `lists()` ทีเดียวได้ครบ
  */
 export const listingKeys = {
@@ -41,6 +41,8 @@ export const listingKeys = {
     [
       ...listingKeys.lists(),
       query.status ?? "ALL",
+      query.q ?? "",
+      query.sort ?? "updated",
       query.page,
       query.size,
     ] as const,
