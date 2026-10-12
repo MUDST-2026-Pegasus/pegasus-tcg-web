@@ -4,13 +4,13 @@
 
 ---
 
-## 📁 โครงสร้างไฟล์
+## โครงสร้างไฟล์
 * `deployment.yaml`: จัดการ ReplicaSet, Rolling Update, Resource Requests/Limits และ Probes
 * `service.yaml`: ClusterIP Service สำหรับเป็นตัวกลางกระจาย Traffic ไปยัง Pods
 
 ---
 
-## 🚀 คำสั่งสำหรับใช้งาน (kubectl)
+## คำสั่งสำหรับใช้งาน (kubectl)
 
 ### 1. Apply Manifests ทั้งหมด
 ```bash
@@ -43,7 +43,7 @@ kubectl rollout undo deployment/pegasus-frontend-deployment
 
 ---
 
-## 📌 สรุปคอนเซปต์สำคัญที่นำมาใช้จากสไลด์
+## สรุปคอนเซปต์สำคัญที่นำมาใช้จากสไลด์
 
 | คุณสมบัติ | สไลด์อ้างอิง | คำอธิบาย |
 | :--- | :--- | :--- |
