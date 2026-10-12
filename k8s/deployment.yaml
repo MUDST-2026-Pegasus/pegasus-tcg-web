@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pegasus-frontend-deployment
+  labels:
+    app: pegasus-frontend
+    tier: frontend
+spec:
+  # จำนวน Pod ที่ต้องการรัน
+  replicas: 3
+
+  # จำนวน Revision เก่าที่เก็บไว้สำหรับ Rollback
+  revisionHistoryLimit: 5
+
+  # กลยุทธ์การอัปเดตแบบ RollingUpdate เพื่อ Zero-Downtime Deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # เพิ่ม Pod ใหม่ได้สูงสุด 1 Pod ขณะ rollout
+      maxUnavailable: 0  # ต้องไม่มี Pod ที่ไม่พร้อมใช้งานระหว่าง deploy
+
+  selector:
+    matchLabels:
+      app: pegasus-frontend
+
+  template:
+    metadata:
+      labels:
+        app: pegasus-frontend
+        tier: frontend
+    spec:
+      containers:
+        - name: pegasus-tcg-web
+          image: pegasus-tcg-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+
+          # Resource Model: Requests & Limits
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          # Health Checks: Probes
+          # livenessProbe: ตรวจสอบความพร้อม หากล้มเหลว Kubelet จะ restart container
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          # readinessProbe: ตรวจสอบว่าพร้อมรับ traffic จาก Service หรือยัง
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
