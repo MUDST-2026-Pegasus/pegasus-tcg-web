@@ -97,10 +97,30 @@ export type SellerListing = Omit<SellerListingSummary, "primaryPhotoUrl"> & {
   similarListings: SimilarListing[];
 };
 
-/** query ของ `GET /sellers/me/listings` — backend ยังไม่รับคำค้นหรือการเรียง (เรียงแก้ไขล่าสุดก่อนเสมอ) */
+/**
+ * ค่าที่ `sort` รับ — `ListingService.parseSort()` ฝั่ง backend
+ * ส่งค่าอื่นได้ `VALIDATION_FAILED` ไม่ส่ง = `updated` (แก้ไขล่าสุดก่อน)
+ */
+export type ListingSort =
+  | "updated"
+  | "newest"
+  | "price_asc"
+  | "price_desc"
+  | "stock_asc"
+  | "stock_desc"
+  | "name";
+
+/** query ของ `GET /sellers/me/listings` */
 export type ListingQuery = {
   /** ไม่ใส่ = ทุกสถานะ */
   status?: ListingStatus;
+  /**
+   * ค้นทั้งร้าน ไม่สนตัวพิมพ์ ตรงตรงไหนของข้อความก็ได้ — ชื่อการ์ด ชื่อภาษาท้องถิ่น
+   * เลขการ์ด SKU และป้ายล็อตของเราเอง ไม่ใส่/ว่าง = ไม่ค้น
+   */
+  q?: string;
+  /** ไม่ใส่ = แก้ไขล่าสุดก่อน */
+  sort?: ListingSort;
   /** เริ่มที่ 0 */
   page: number;
   size: number;
