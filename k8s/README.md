@@ -27,6 +27,9 @@ kubectl get pods -l app=pegasus-frontend
 
 # ตรวจสอบ Service
 kubectl get services pegasus-frontend-service
+
+# ทดสอบเข้าใช้งานผ่าน Port-Forward (เปิดที่พอร์ต 8081 เพื่อเลี่ยงการชนกับ Backend Spring Boot 8080)
+kubectl port-forward service/pegasus-frontend-service 8081:8081
 ```
 
 ### 3. ตรวจสอบการ Rollout และประวัติ Revision (Class Week 9 - สไลด์หน้า 12)
