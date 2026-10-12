@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Plus, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,14 +25,18 @@ import type { Address } from "@/features/account/address.types";
 import { useCart, cartKeys } from "../cart.queries";
 import { checkoutApi } from "../checkout.api";
 
+interface CheckoutLocationState {
+  selectedCartItemIds?: number[];
+}
+
 export function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
-  const selectedCartItemIds = (location.state as { selectedCartItemIds?: number[] })
-    ?.selectedCartItemIds;
+  const hasRedirectedRef = useRef(false);
 
   // Protect checkout: must be authenticated
   useEffect(() => {
@@ -43,6 +47,67 @@ export function CheckoutPage() {
 
   const { data: cart, isLoading: isCartLoading } = useCart();
   const { data: addresses = [], isLoading: isAddressLoading } = useAddresses();
+
+  // Read item IDs from URL query params: ?items=42 or ?items=42,45, or fallback to router location state
+  const targetItemIds = useMemo<number[]>(() => {
+    const itemsParams = searchParams.getAll("items");
+    if (itemsParams.length > 0) {
+      const parsed = itemsParams
+        .flatMap((param) => param.split(","))
+        .map((str) => Number(str.trim()))
+        .filter((id) => Number.isInteger(id) && id > 0);
+      return Array.from(new Set(parsed));
+    }
+
+    const locationState = location.state as CheckoutLocationState | null;
+    if (
+      locationState?.selectedCartItemIds &&
+      Array.isArray(locationState.selectedCartItemIds)
+    ) {
+      const parsed = locationState.selectedCartItemIds.filter(
+        (id): id is number => typeof id === "number" && Number.isInteger(id) && id > 0,
+      );
+      return Array.from(new Set(parsed));
+    }
+
+    return [];
+  }, [searchParams, location.state]);
+
+  // Filter cart.items to only include items matching targetItemIds
+  const checkoutItems = useMemo(() => {
+    const items = cart?.items ?? [];
+    if (targetItemIds.length === 0) {
+      return [];
+    }
+    const idSet = new Set(targetItemIds);
+    return items.filter((item) => idSet.has(item.id));
+  }, [cart, targetItemIds]);
+
+  // Edge Case: If checkoutItems.length === 0 after cart loads, display a toast notification and redirect back to /cart
+  useEffect(() => {
+    if (
+      !isAuthLoading &&
+      isAuthenticated &&
+      !isCartLoading &&
+      checkoutItems.length === 0
+    ) {
+      if (!hasRedirectedRef.current) {
+        hasRedirectedRef.current = true;
+        toast.add({
+          title: "ไม่พบสินค้าที่เลือกสั่งซื้อ",
+          description: "กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า",
+          type: "warning",
+        });
+        navigate("/cart", { replace: true });
+      }
+    }
+  }, [
+    isAuthLoading,
+    isAuthenticated,
+    isCartLoading,
+    checkoutItems.length,
+    navigate,
+  ]);
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>("qr");
@@ -56,25 +121,12 @@ export function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter items to checkout
-  const checkoutItems = useMemo(() => {
-    const items = cart?.items ?? [];
-    if (!selectedCartItemIds || selectedCartItemIds.length === 0) {
-      return items;
-    }
-    const idSet = new Set(selectedCartItemIds);
-    return items.filter((item) => idSet.has(item.id));
-  }, [cart, selectedCartItemIds]);
-
-  // Derive active address during render without setting state in useEffect
-  const activeAddress = useMemo(() => {
-    return (
-      selectedAddress ??
-      addresses.find((a) => a.defaultShipping) ??
-      addresses[0] ??
-      null
-    );
-  }, [addresses, selectedAddress]);
+  // Derive active address directly during render without setting state in useEffect
+  const activeAddress =
+    selectedAddress ??
+    addresses.find((a) => a.defaultShipping) ??
+    addresses[0] ??
+    null;
 
   const handleShippingOpenChange = (open: boolean) => {
     if (open) {
@@ -119,12 +171,14 @@ export function CheckoutPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await checkoutApi.checkout({
-        shippingAddressId: activeAddress.id,
-        cartItemIds: selectedCartItemIds && selectedCartItemIds.length > 0
-          ? selectedCartItemIds
-          : undefined,
-      });
+      const idempotencyKey = crypto.randomUUID();
+      const response = await checkoutApi.checkout(
+        {
+          cartItemIds: checkoutItems.map((item) => item.id),
+          shippingAddressId: activeAddress.id,
+        },
+        idempotencyKey,
+      );
 
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
 
@@ -134,7 +188,7 @@ export function CheckoutPage() {
         type: "success",
       });
 
-      navigate("/payment", {
+      navigate(`/payment?orderId=${response.orderId}`, {
         state: {
           orderId: response.orderId,
           order: response,
@@ -189,9 +243,9 @@ export function CheckoutPage() {
     return (
       <div className="min-h-screen bg-muted py-16 px-4 flex flex-col items-center">
         <Card className="max-w-md w-full p-8 text-center flex flex-col items-center gap-4 bg-white rounded-xl">
-          <h2 className="text-xl font-bold">No Items to Checkout</h2>
-          <p className="text-sm text-muted-foreground">Your selected checkout items are empty.</p>
-          <Button onClick={() => navigate("/cart")}>Return to Cart</Button>
+          <h2 className="text-xl font-bold">ไม่พบสินค้าที่เลือกสั่งซื้อ</h2>
+          <p className="text-sm text-muted-foreground">กำลังนำคุณกลับไปยังตะกร้าสินค้า...</p>
+          <Button onClick={() => navigate("/cart")}>กลับไปยังตะกร้า</Button>
         </Card>
       </div>
     );

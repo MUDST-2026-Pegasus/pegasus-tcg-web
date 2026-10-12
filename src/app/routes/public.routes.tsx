@@ -43,7 +43,7 @@ export const publicRoutes: RouteObject = {
 
     { path: "store/:storeId", element: <StoreProfilePage /> },
     { path: "u/:username", element: <PublicSellerPage /> },
-    { path: "users/:userId", element: <PublicCollectionPage /> },
+    { path: "users/:username", element: <PublicCollectionPage /> },
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },

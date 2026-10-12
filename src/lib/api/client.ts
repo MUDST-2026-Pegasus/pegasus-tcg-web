@@ -120,7 +120,7 @@ async function fetchJson(
     });
   }
 
-  const nextCartSession = response.headers.get("X-Cart-Session");
+  const nextCartSession = response.headers?.get?.("X-Cart-Session");
   if (nextCartSession) {
     setCartSession(nextCartSession);
   }
