@@ -91,7 +91,9 @@ export function useMarketSnapshot(
 export type ListingCreateStep = "units" | "publish";
 
 /**
- * สร้างประกาศได้แล้ว แต่ใส่การ์ดหรือเปิดขายไม่ผ่าน — ไม่ลบทิ้ง (ผู้ขายกรอกมาครบแล้ว)
+ * สร้างประกาศได้แล้ว แต่ขั้นหลังไม่ผ่าน และประกาศนั้นยังค้างอยู่
+ * - `units`: ใส่การ์ดพลาด และลบฉบับร่างเปล่าที่เพิ่งสร้างทิ้งไม่สำเร็จด้วย
+ * - `publish`: มีการ์ดแล้วแต่เปิดขายพลาด — เก็บเป็นฉบับร่าง เปิดขายทีหลังได้
  * หน้าจอพาไปหน้าแก้ไขของประกาศนั้นพร้อมบอกว่าค้างตรงไหน
  */
 export class ListingPartiallyCreatedError extends Error {
@@ -119,8 +121,11 @@ export type CreateListingInput = {
  * ลงขายหนึ่งประกาศ = สามคำขอต่อกัน เพราะ backend แยกไว้แบบนั้นโดยตั้งใจ
  * 1. `POST /sellers/me/listings` → DRAFT ไม่มีการ์ด
  * 2. `POST .../{id}/units` → การ์ดแต่ละใบเข้าคลังพร้อมต้นทุน
- * 3. `PATCH .../{id}/status` ACTIVE (เฉพาะตอนกดลงขาย) — การ์ดหมดพอดีจะได้ SOLD_OUT แทน
- * ขั้น 1 พลาด = ไม่มีอะไรถูกสร้าง ขั้น 2–3 พลาด = `ListingPartiallyCreatedError`
+ * 3. `PATCH .../{id}/status` ACTIVE (เฉพาะตอนกดลงขาย)
+ *
+ * ขั้น 1 พลาด = ไม่มีอะไรถูกสร้าง · ขั้น 2 พลาด = ลบฉบับร่างเปล่าทิ้ง แล้วโยน error เดิม
+ * (violations ของ `quantity` / `unitCost` แปะช่องได้ กดส่งใหม่ได้โดยไม่เกิดประกาศซ้อน)
+ * · ขั้น 3 พลาด หรือลบไม่สำเร็จ = `ListingPartiallyCreatedError`
  */
 export function useCreateListing() {
   const queryClient = useQueryClient();
@@ -136,7 +141,12 @@ export function useCreateListing() {
       try {
         await listingFormApi.addListingUnits(created.id, units);
       } catch (error) {
-        throw new ListingPartiallyCreatedError(created, "units", error);
+        try {
+          await productsApi.deleteListing(created.id);
+        } catch {
+          throw new ListingPartiallyCreatedError(created, "units", error);
+        }
+        throw error;
       }
 
       if (!publish) {

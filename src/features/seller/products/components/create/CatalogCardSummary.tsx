@@ -4,40 +4,56 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-import type { ProductCreateData } from "../../product-create.types";
+import type { SelectedCard } from "../../listing-form.types";
 
-type CatalogCardSummaryProps = Omit<
-  ProductCreateData["catalogCard"],
-  "changeLabel"
-> & {
+type CatalogCardSummaryProps = {
+  title: string;
+  card: SelectedCard;
   /** ไม่ส่งมา = ซ่อนปุ่มเปลี่ยนการ์ด (หน้าแก้ไข — เปลี่ยนการ์ดต้องลงประกาศใหม่) */
-  changeLabel?: string;
+  onChange?: () => void;
 };
 
+/** การ์ดที่เลือกจากแคตตาล็อก — รูปทางการ ชื่อ พิมพ์ และ SKU ที่ประกาศจะชี้ไป */
 export function CatalogCardSummary({
   title,
-  changeLabel,
-  name,
-  tags,
+  card,
+  onChange,
 }: CatalogCardSummaryProps) {
+  const tags = [card.variantLabel, ...card.tags, card.sku];
+
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
-        {changeLabel ? (
-          <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            {changeLabel}
+        {onChange ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-md px-2.5"
+            onClick={onChange}
+          >
+            เปลี่ยนการ์ด
           </Button>
         ) : null}
       </div>
 
       <div className="flex items-center gap-3.5 rounded-[10px] bg-emerald-50 p-3.5">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-white">
-          <ImageIcon aria-hidden="true" className="size-6 text-slate-500" />
+        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white">
+          {card.imageUrl ? (
+            <img
+              src={card.imageUrl}
+              alt={card.productName}
+              className="size-full object-contain"
+            />
+          ) : (
+            <ImageIcon aria-hidden="true" className="size-6 text-slate-500" />
+          )}
         </div>
-
         <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
-          <p className="text-sm font-semibold text-zinc-950">{name}</p>
+          <p className="text-sm font-semibold text-zinc-950">
+            {card.productName}
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
               <Badge
