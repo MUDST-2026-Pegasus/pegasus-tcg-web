@@ -75,3 +75,27 @@ export default defineConfig([
 ])
 
 ```
+
+## Deployment
+
+This application is deployed as a Cloudflare Worker Static Asset application using [Wrangler](https://developers.cloudflare.com/workers/wrangler/).
+
+- **Worker Name**: `tcg` (configured in [`wrangler.jsonc`](wrangler.jsonc))
+- **Default Worker URL**: `https://tcg.<subdomain>.workers.dev`
+
+### Deploying to Cloudflare Workers
+
+1. Build the production assets:
+   ```bash
+   pnpm build
+   ```
+
+2. Deploy via Wrangler:
+   ```bash
+   npx wrangler deploy
+   ```
+
+## License
+
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
