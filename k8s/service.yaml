@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: pegasus-tcg
 spec:
-  # ClusterIP: เผยแพร่ Service ภายในคลัสเตอร์
-  type: ClusterIP
+  # LoadBalancer: เผยแพร่ Service สู่ภายนอกคลัสเตอร์ (บน Docker Desktop จะ bind เข้า localhost อัตโนมัติ)
+  type: LoadBalancer
   selector:
     app: pegasus-frontend
   ports:

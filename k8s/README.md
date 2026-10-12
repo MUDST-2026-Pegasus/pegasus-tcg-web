@@ -6,7 +6,7 @@
 
 ## โครงสร้างไฟล์
 * `deployment.yaml`: จัดการ ReplicaSet, Rolling Update, SecurityContext, Pod Anti-Affinity, Resource Requests/Limits, Probes และ Lifecycle Hook
-* `service.yaml`: ClusterIP Service สำหรับเป็นตัวกลางกระจาย Traffic ไปยัง Pods บนพอร์ต 8081
+* `service.yaml`: LoadBalancer Service สำหรับเผยแพร่ Traffic สู่ภายนอกและกระจายไปยัง Pods บนพอร์ต 8081 (บน Docker Desktop เข้าผ่าน localhost:8081 ได้โดยตรง)
 * `pdb.yaml`: PodDisruptionBudget ควบคุมให้มี Pods พร้อมใช้งานขั้นต่ำ 2 ตัวเสมอขณะเกิด Voluntary Disruption
 
 ---
@@ -26,12 +26,11 @@ kubectl get deployments -l app=pegasus-frontend
 # ตรวจสอบ Pods
 kubectl get pods -l app=pegasus-frontend
 
-# ตรวจสอบ Service
+# ตรวจสอบ Service (ประเภท LoadBalancer จะเปิดรับ Traffic ที่พอร์ต 8081 เข้าสู่ Pods)
 kubectl get services pegasus-frontend-service
-
-# ทดสอบเข้าใช้งานผ่าน Port-Forward (เปิดที่พอร์ต 8081 เพื่อเลี่ยงการชนกับ Backend Spring Boot 8080)
-kubectl port-forward service/pegasus-frontend-service 8081:8081
 ```
+
+เปิด Browser เข้าใช้งานได้ทันทีที่: **http://localhost:8081** (ไม่ต้องรันคำสั่ง port-forward)
 
 ### 3. ตรวจสอบการ Rollout และประวัติ Revision (Class Week 9 - สไลด์หน้า 12)
 ```bash
@@ -55,7 +54,7 @@ kubectl rollout undo deployment/pegasus-frontend-deployment
 | **RollingUpdate Strategy** | Week 9 (หน้า 11, 13-16) | ตั้งค่า `maxSurge: 1` และ `maxUnavailable: 0` เพื่อการันตี Zero-Downtime ระหว่าง Deploy เวอร์ชันใหม่ |
 | **Resource Requests & Limits** | Week 8 (หน้า 34) | กำหนด CPU/Memory ขั้นต่ำที่ Pod ต้องการ (Requests) และเพดานสูงสุดที่อนุญาตให้ใช้ (Limits) ป้องกันการแย่งทรัพยากรบน Node |
 | **Liveness & Readiness Probes** | Week 9 (หน้า 24-25) | `livenessProbe` ตรวจสอบเพื่อ Restart Pod หากค้าง, `readinessProbe` ตรวจสอบความพร้อมก่อนที่ Service จะส่ง Traffic เข้ามา |
-| **ClusterIP Service** | Week 8 (หน้า 40-42) | Static virtual IP และ internal DNS ภายใน Cluster สำหรับเข้าถึง Pods อย่างมีเสถียรภาพ บนพอร์ต 8081 |
+| **LoadBalancer Service** | Week 8 (หน้า 42-43) | เผยแพร่ Service สู่ภายนอกคลัสเตอร์ โดยมี External IP ให้บริการบนพอร์ต 8081 (บน Docker Desktop จะผูกเข้ากับ localhost:8081 อัตโนมัติ โดยไม่ต้องรัน port-forward) |
 | **Pod Anti-Affinity** | Production Best Practice | พยายามกระจาย Pods ไปยัง Host/Node ที่ต่างกัน ป้องกัน Single Point of Failure ระดับ Hardware |
 | **PodDisruptionBudget (PDB)** | Production Best Practice | การันตีว่ามี Pods ทำงานอย่างน้อย 2 ตัวเสมอเมื่อ Node ถูก Drain หรืออัปเกรด |
 | **Security Hardening** | Security Standard | ใช้ Seccomp profile, ปิด allowPrivilegeEscalation, Drop Linux Capabilities ที่ไม่จำเป็น, และปิด automount ServiceAccount Token |
