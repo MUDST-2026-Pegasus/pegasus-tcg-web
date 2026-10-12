@@ -6,8 +6,7 @@ import { QueryBoundary } from "@/components/common";
 import { hasErrorCode } from "@/lib/api";
 
 import { ProductNotFound } from "./components/ProductNotFound";
-import { ProductEditContent } from "./components/edit/ProductEditContent";
-import { getProductEditData } from "./product-edit.api";
+import { ListingEditContent } from "./components/edit/ListingEditContent";
 import { parseListingId } from "./products.format";
 import { useMyListing } from "./products.queries";
 
@@ -43,17 +42,14 @@ function ListingEditLoader({
 
   return (
     <QueryBoundary query={listing}>
-      {(data) => {
-        const edit = getProductEditData(data);
-        // key ตามสินค้า — สลับไปสินค้าอื่นแล้วค่าที่แก้ค้างไว้ต้องล้าง
-        return (
-          <ProductEditContent
-            key={edit.productId}
-            data={edit}
-            focusPrice={focusPrice}
-          />
-        );
-      }}
+      {(data) => (
+        // key ตามประกาศ — สลับไปประกาศอื่นแล้วค่าที่แก้ค้างไว้ต้องล้าง
+        <ListingEditContent
+          key={data.id}
+          listing={data}
+          focusPrice={focusPrice}
+        />
+      )}
     </QueryBoundary>
   );
 }

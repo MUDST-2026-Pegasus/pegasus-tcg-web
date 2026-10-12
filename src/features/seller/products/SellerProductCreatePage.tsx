@@ -1,6 +1,5 @@
-import { ProductCreateContent } from "./components/create/ProductCreateContent";
-import { getProductCreateData } from "./product-create.api";
+import { ListingCreateContent } from "./components/create/ListingCreateContent";
 
 export function SellerProductCreatePage() {
-  return <ProductCreateContent data={getProductCreateData()} />;
+  return <ListingCreateContent />;
 }

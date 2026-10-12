@@ -3,7 +3,10 @@ import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-import type { CreateStep } from "../../product-create.types";
+export type CreateStep = {
+  id: string;
+  label: string;
+};
 
 type CreateStepperProps = {
   steps: CreateStep[];
