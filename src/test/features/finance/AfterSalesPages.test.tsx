@@ -6,7 +6,7 @@ import { SellerReturnsPage } from "@/features/finance/SellerReturnsPage";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
-  buyerReturns: vi.fn(), requestReturn: vi.fn(), shipReturn: vi.fn(), createReview: vi.fn(),
+  buyerReturns: vi.fn(), requestReturn: vi.fn(), shipReturn: vi.fn(), createReview: vi.fn(), myReview: vi.fn(),
   sellerReturns: vi.fn(), approveReturn: vi.fn(), rejectReturn: vi.fn(), receiveReturn: vi.fn(),
   sellerReturnEvidence: vi.fn(),
 } }));
@@ -14,6 +14,16 @@ afterEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); });
 const wrapper = ({ children }: { children: React.ReactNode }) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>;
 
 describe("after sales screens", () => {
+  it("shows a saved review instead of the submit form after loading the order", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
+    vi.mocked(afterSalesApi.myReview).mockResolvedValue({ id: 8, sellerOrderId: 41, rating: 5,
+      title: "Great", comment: "Fast shipping" } as never);
+    render(<BuyerAfterSales order={{ id: 41, status: "COMPLETED", items: [] } as never} />, { wrapper });
+    expect(await screen.findByText("Fast shipping")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ส่งรีวิว" })).not.toBeInTheDocument();
+    expect(afterSalesApi.myReview).toHaveBeenCalledWith(41);
+  });
+
   it("submits a buyer return with the seller-order and selected order-item IDs", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
     vi.mocked(afterSalesApi.requestReturn).mockResolvedValue({} as never);

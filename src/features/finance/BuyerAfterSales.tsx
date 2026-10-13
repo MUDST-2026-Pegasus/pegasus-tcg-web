@@ -13,6 +13,7 @@ const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "C
 export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const cache = useQueryClient();
   const returns = useQuery({ queryKey: ["finance", "buyer-returns", order.id], queryFn: () => afterSalesApi.buyerReturns(order.id) });
+  const myReview = useQuery({ queryKey: ["finance", "my-review", order.id], queryFn: () => afterSalesApi.myReview(order.id), enabled: order.status === "COMPLETED" });
   const evidence = useFileUpload({ purpose: "RETURN_EVIDENCE", multiple: true, maxFiles: 10 });
   const [reason, setReason] = useState(reasons[0]);
   const [description, setDescription] = useState("");
@@ -21,7 +22,6 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
-  const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
   const canReturn = ["SHIPPED", "DELIVERED"].includes(order.status) && !!order.autoCompleteAt
     && Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
@@ -40,7 +40,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   async function review() {
     if (!comment.trim()) return;
     setBusy(true);
-    try { await afterSalesApi.createReview(order.id, rating, title.trim(), comment.trim()); setReviewed(true); toast.add({ type: "success", title: "ส่งรีวิวแล้ว" }); }
+    try { await afterSalesApi.createReview(order.id, rating, title.trim(), comment.trim()); await cache.invalidateQueries({ queryKey: ["finance", "my-review", order.id] }); toast.add({ type: "success", title: "ส่งรีวิวแล้ว" }); }
     catch (error) { toast.add({ type: "error", title: "ส่งรีวิวไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") }); }
     finally { setBusy(false); }
   }
@@ -63,7 +63,14 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       {evidence.items.map((item) => <p key={item.id}>{item.file.name}: {item.status === "error" ? item.error : item.status === "done" ? "อัปโหลดแล้ว" : "กำลังอัปโหลด"}</p>)}
       <Button disabled={busy || evidence.isUploading || !Object.values(quantities).some((value) => value > 0)} onClick={() => void createReturn()}>ส่งคำขอคืนสินค้า</Button>
     </div>}
-    {order.status === "COMPLETED" && !reviewed && <div className="space-y-2 rounded border p-3">
+    {order.status === "COMPLETED" && myReview.isPending && <p>กำลังโหลดรีวิว...</p>}
+    {order.status === "COMPLETED" && myReview.isError && <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void myReview.refetch()}>ลองอีกครั้ง</Button></p>}
+    {order.status === "COMPLETED" && myReview.data && <div className="space-y-1 rounded border p-3">
+      <p className="font-medium">รีวิวที่ส่งแล้ว · {myReview.data.rating} ดาว</p>
+      {myReview.data.title && <p>{myReview.data.title}</p>}
+      <p>{myReview.data.comment}</p>
+    </div>}
+    {order.status === "COMPLETED" && myReview.isSuccess && !myReview.data && <div className="space-y-2 rounded border p-3">
       <p className="font-medium">รีวิวผู้ขาย</p><select aria-label="คะแนน" className="rounded border p-2" value={rating} onChange={(e) => setRating(Number(e.target.value))}>{[5, 4, 3, 2, 1].map((score) => <option key={score} value={score}>{score} ดาว</option>)}</select>
       <Input aria-label="หัวข้อรีวิว" maxLength={150} placeholder="หัวข้อ (ไม่บังคับ)" value={title} onChange={(e) => setTitle(e.target.value)} />
       <Input aria-label="ข้อความรีวิว" placeholder="ความคิดเห็น" value={comment} onChange={(e) => setComment(e.target.value)} />

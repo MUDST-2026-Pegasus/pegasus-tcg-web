@@ -44,13 +44,15 @@ describe("TCG-394 remaining API contracts", () => {
     expect(get).toHaveBeenCalledWith("/sellers/me/returns/12/evidence");
   });
 
-  it("connects all four review operations", async () => {
+  it("connects review operations and the buyer's saved review", async () => {
     await afterSalesApi.createReview(11, 5, "Great", "Excellent seller");
+    await afterSalesApi.myReview(11);
     await afterSalesApi.publicReviews("seller.th");
     await afterSalesApi.adminReviews("seller.th");
     await afterSalesApi.replyReview(3, "Thank you");
     await afterSalesApi.setReviewVisibility(3, false);
     expect(post).toHaveBeenNthCalledWith(1, "/orders/11/reviews", { rating: 5, title: "Great", comment: "Excellent seller" });
+    expect(get).toHaveBeenCalledWith("/orders/11/reviews/mine");
     expect(get).toHaveBeenCalledWith("/u/seller.th/reviews");
     expect(get).toHaveBeenCalledWith("/admin/reviews", { query: { username: "seller.th" } });
     expect(post).toHaveBeenNthCalledWith(2, "/sellers/me/reviews/3/reply", { comment: "Thank you" });

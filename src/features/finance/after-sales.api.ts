@@ -21,6 +21,7 @@ export const afterSalesApi = {
 
   createReview: (sellerOrderId: number, rating: number, title: string, comment: string) =>
     api.post<Review>(`/orders/${sellerOrderId}/reviews`, { rating, title, comment }),
+  myReview: (sellerOrderId: number) => api.get<Review | null>(`/orders/${sellerOrderId}/reviews/mine`),
   publicReviews: (username: string) => api.get<PublicReviews>(`/u/${encodeURIComponent(username)}/reviews`),
   adminReviews: (username: string) => api.get<AdminReview[]>("/admin/reviews", { query: { username } }),
   replyReview: (id: number, comment: string) => api.post<Review>(`/sellers/me/reviews/${id}/reply`, { comment }),
