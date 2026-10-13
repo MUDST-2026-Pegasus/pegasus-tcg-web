@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useRegister } from "@/features/auth/auth.queries";
 import {
@@ -121,9 +122,8 @@ export function RegisterForm() {
         </Field>
         <Field data-invalid={Boolean(errors.password) || undefined}>
           <FieldLabel htmlFor="password">Password</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
             placeholder="Create a password"
             aria-invalid={Boolean(errors.password)}
@@ -138,9 +138,9 @@ export function RegisterForm() {
         </Field>
         <Field data-invalid={Boolean(errors.confirmPassword) || undefined}>
           <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
-          <Input
+          <PasswordInput
             id="confirmPassword"
-            type="password"
+            autoComplete="new-password"
             placeholder="Confirm your password"
             aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"

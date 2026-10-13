@@ -32,8 +32,34 @@ describe('LoginForm', () => {
     renderWithProviders(<LoginForm />);
     
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+  });
+
+  it('toggles with mouse and keyboard without losing the value or selection or submitting', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<LoginForm />);
+    const input = screen.getByLabelText(/^password$/i) as HTMLInputElement;
+    expect(input).toHaveAttribute('type', 'password');
+    await user.type(input, 'password123');
+    input.setSelectionRange(2, 5, 'backward');
+    const toggle = screen.getByRole('button', { name: 'Show password' });
+    expect(toggle).toHaveAttribute('type', 'button');
+    await user.click(toggle);
+    expect(input).toHaveAttribute('type', 'text');
+    expect(input).toHaveValue('password123');
+    expect(input).toHaveFocus();
+    expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([2, 5, 'backward']);
+    await user.tab();
+    expect(toggle).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(input).toHaveAttribute('type', 'password');
+    expect([input.selectionStart, input.selectionEnd]).toEqual([2, 5]);
+    expect(toggle).toHaveFocus();
+    await user.keyboard(' ');
+    expect(input).toHaveAttribute('type', 'text');
+    expect(screen.queryByText(/email is required/i)).not.toBeInTheDocument();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('shows validation errors for empty fields', async () => {
@@ -57,7 +83,7 @@ describe('LoginForm', () => {
     renderWithProviders(<LoginForm />);
     
     await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.type(screen.getByLabelText(/^password$/i), 'password123');
     
     const submitButton = screen.getByRole('button', { name: /log in/i });
     await userEvent.click(submitButton);
