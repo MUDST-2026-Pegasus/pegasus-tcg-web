@@ -1,9 +1,27 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
 import { useListingDetail } from "../catalog.queries";
+
+function ListingPhotos({ photos, productName }: { photos: string[]; productName: string }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  if (!photos.length) {
+    return <div className="flex min-h-80 items-center justify-center rounded-xl border bg-muted text-muted-foreground">ยังไม่มีรูปสินค้า</div>;
+  }
+
+  return <div className="space-y-3">
+    <img src={photos[selectedIndex]} alt={`${productName} ภาพที่ ${selectedIndex + 1}`} className="aspect-[3/4] w-full rounded-xl border bg-muted object-contain" />
+    {photos.length > 1 && <div className="flex gap-3 overflow-x-auto pb-2" aria-label="รูปภาพสินค้า">
+      {photos.map((url, index) => <button key={`${url}-${index}`} type="button" onClick={() => setSelectedIndex(index)} aria-label={`ดูภาพที่ ${index + 1}`} aria-pressed={selectedIndex === index} className={`size-20 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selectedIndex === index ? "border-primary" : "border-transparent hover:border-border"}`}>
+        <img src={url} alt="" className="h-full w-full object-contain" />
+      </button>)}
+    </div>}
+  </div>;
+}
 
 export function ListingDetailPage() {
   const { listingId } = useParams<{ listingId: string }>();
@@ -29,7 +47,7 @@ export function ListingDetailPage() {
   return <main className="mx-auto max-w-5xl space-y-6 px-5 py-8">
     <nav aria-label="Breadcrumb" className="flex flex-wrap gap-2 text-sm text-muted-foreground"><Link to={productHref(listing.card.productSlug)} className="hover:underline">{listing.card.productName}</Link><span>/</span><span>ประกาศขายของ {sellerName}</span></nav>
     <div className="grid gap-8 md:grid-cols-2">
-      <div className="space-y-3">{photos.length ? photos.map((url, index) => <img key={`${url}-${index}`} src={url} alt={`${listing.card.productName} ภาพที่ ${index + 1}`} className="w-full rounded-xl border bg-muted object-contain" />) : <div className="flex min-h-80 items-center justify-center rounded-xl border bg-muted text-muted-foreground">ยังไม่มีรูปสินค้า</div>}</div>
+      <ListingPhotos photos={photos} productName={listing.card.productName} />
       <section className="space-y-5">
         <div><h1 className="text-3xl font-bold">{listing.card.productName}</h1><p className="mt-2 text-sm text-muted-foreground">{listing.card.variantLabel} · {CONDITION_LABELS[listing.condition]}</p></div>
         <p className="text-3xl font-bold text-primary">{price}</p>
