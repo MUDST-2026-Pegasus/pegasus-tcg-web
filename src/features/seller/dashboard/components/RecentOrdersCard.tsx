@@ -49,14 +49,14 @@ export function RecentOrdersCard({
                   <ImageIcon aria-hidden="true" className="size-3.5 text-gray-400" />
                 </div>
 
+                {/* เลขออเดอร์ยาว (PGS-YYYYMMDD-NNNNNN-S…) ต้องตัดได้ ไม่งั้นทับราคา */}
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                  <div className="flex min-w-0 items-center gap-1.5">
-                    <p className="shrink-0 text-xs font-semibold text-zinc-950">
-                      {order.number}
-                    </p>
-                    <p className="truncate text-xs text-gray-500">· {order.buyer}</p>
-                  </div>
-                  <p className="truncate text-xs text-gray-400">{order.item}</p>
+                  <p className="truncate text-xs font-semibold text-zinc-950" title={order.number}>
+                    {order.number}
+                  </p>
+                  <p className="truncate text-xs text-gray-400">
+                    {order.buyer} · {order.item}
+                  </p>
                 </div>
 
                 <p className="shrink-0 text-xs font-semibold text-zinc-950">
