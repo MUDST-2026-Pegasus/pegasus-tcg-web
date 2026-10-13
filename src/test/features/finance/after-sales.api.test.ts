@@ -49,4 +49,9 @@ describe("TCG-394 remaining API contracts", () => {
     expect(post).toHaveBeenNthCalledWith(2, "/sellers/me/reviews/3/reply", { comment: "Thank you" });
     expect(put).toHaveBeenCalledWith("/admin/reviews/3/visibility", { visible: false });
   });
+
+  it("loads the moderation list through the admin endpoint", async () => {
+    await afterSalesApi.adminReviews("seller.th");
+    expect(get).toHaveBeenCalledWith("/admin/reviews", { query: { username: "seller.th" } });
+  });
 });
