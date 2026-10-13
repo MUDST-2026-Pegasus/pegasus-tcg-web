@@ -34,9 +34,6 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
-import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
-import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
-import { orderStatusLabel } from "../order-status.format";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
@@ -102,7 +99,6 @@ export function OrderHistoryPage() {
         <AccountSidebar user={sidebarUser} />
 
         <div className="flex min-w-0 flex-col gap-4">
-          <BuyerRefunds />
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">Order History</h1>
             <p className="text-sm text-muted-foreground">
@@ -443,8 +439,8 @@ function OrderDetailsModal({
                 Order #{order.orderNumber}
               </p>
             </div>
-            <Badge variant="outline" className="shrink-0 text-sm font-semibold">
-              {orderStatusLabel(order.status)}
+            <Badge variant="outline" className="text-sm font-semibold">
+              {order.status}
             </Badge>
           </div>
         </DialogHeader>
@@ -471,7 +467,7 @@ function OrderDetailsModal({
                 </div>
                 <div className="text-right">
                   <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium">
-                    สถานะพัสดุ: {orderStatusLabel(so.status)}
+                    Package Status: {so.status}
                   </span>
                 </div>
               </div>
@@ -524,7 +520,6 @@ function OrderDetailsModal({
                   ))}
                 </div>
               )}
-              <BuyerAfterSales order={so} />
             </div>
           ))}
         </div>
