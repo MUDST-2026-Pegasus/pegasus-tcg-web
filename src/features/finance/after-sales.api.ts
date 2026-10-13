@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { AdminReview, CommissionRule, CommissionRuleInput, PlatformSetting, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, Review } from "./after-sales.types";
+import type { CommissionRule, CommissionRuleInput, PlatformSetting, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, Review } from "./after-sales.types";
 
 export const afterSalesApi = {
   commissionRules: () => api.get<CommissionRule[]>("/admin/commission-rules"),
@@ -25,7 +25,5 @@ export const afterSalesApi = {
     api.post<Review>(`/orders/${sellerOrderId}/reviews`, { rating, title, comment }),
   myReview: (sellerOrderId: number) => api.get<Review | null>(`/orders/${sellerOrderId}/reviews/mine`),
   publicReviews: (username: string) => api.get<PublicReviews>(`/u/${encodeURIComponent(username)}/reviews`),
-  adminReviews: (username: string) => api.get<AdminReview[]>("/admin/reviews", { query: { username } }),
   replyReview: (id: number, comment: string) => api.post<Review>(`/sellers/me/reviews/${id}/reply`, { comment }),
-  setReviewVisibility: (id: number, visible: boolean) => api.put<Review>(`/admin/reviews/${id}/visibility`, { visible }),
 };
