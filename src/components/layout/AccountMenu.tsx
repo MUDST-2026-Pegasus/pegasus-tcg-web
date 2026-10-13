@@ -2,6 +2,7 @@ import { LogOutIcon, UserIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ export function AccountMenu() {
   const handleLogout = async () => {
     await logout.mutateAsync();
     navigate("/", { replace: true });
+    toast.add({ type: "success", title: "ออกจากระบบเรียบร้อยแล้ว" });
   };
 
   return (
