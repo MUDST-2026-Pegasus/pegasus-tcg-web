@@ -54,4 +54,59 @@ describe("admin commission settings", () => {
       expect.objectContaining({ scope: "GAME", gameId: 4, ratePercent: 7 })));
     expect(afterSalesApi.updateDefaultCommissionRate).not.toHaveBeenCalled();
   });
+
+  it("replaces empty zero fields and creates a rule with the selected game", async () => {
+    vi.clearAllMocks();
+    vi.mocked(useGameList).mockReturnValue({ isSuccess: true, data: [{ id: 4, name: "One Piece" }] } as never);
+    vi.mocked(useCategoryList).mockReturnValue({ isSuccess: true, data: [] } as never);
+    vi.mocked(afterSalesApi.defaultCommissionRate).mockResolvedValue({ key: "commission.default_rate", value: "5.0", description: "", updatedBy: null });
+    vi.mocked(afterSalesApi.commissionRules).mockResolvedValue([]);
+    vi.mocked(afterSalesApi.createCommissionRule).mockResolvedValue({ ...globalRule, id: 3, scope: "GAME", gameId: 4, ratePercent: 8 } as never);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><AdminCommissionPage /></QueryClientProvider>);
+    expect(await screen.findByText("One Piece")).toBeTruthy();
+    fireEvent.click(screen.getByText("กฎเพิ่มเติมและการตั้งค่าขั้นสูง"));
+    fireEvent.change(screen.getByLabelText("ขอบเขต"), { target: { value: "GAME" } });
+    const game = screen.getByLabelText("เกม") as HTMLSelectElement;
+    expect(game.textContent).toContain("One Piece");
+    fireEvent.change(game, { target: { value: "4" } });
+    const rate = screen.getByLabelText("อัตรา (%)") as HTMLInputElement;
+    const fixedFee = screen.getByLabelText("ค่าธรรมเนียมคงที่ (บาท)") as HTMLInputElement;
+    const priority = screen.getByLabelText("ลำดับความสำคัญ") as HTMLInputElement;
+    expect(rate.value).toBe("");
+    expect(fixedFee.value).toBe("");
+    expect(priority.value).toBe("");
+    fireEvent.change(rate, { target: { value: "8" } });
+    fireEvent.change(fixedFee, { target: { value: "2.50" } });
+    fireEvent.change(priority, { target: { value: "101" } });
+    expect(rate.value).toBe("8");
+    expect(fixedFee.value).toBe("2.50");
+    expect(priority.value).toBe("101");
+    fireEvent.click(screen.getByRole("button", { name: "สร้างกฎ" }));
+    await waitFor(() => expect(afterSalesApi.createCommissionRule).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: "GAME", gameId: 4, categoryId: null, ratePercent: 8, fixedFee: 2.5, priority: 101 })));
+  });
+
+  it("selects a category by name and blocks a missing selection", async () => {
+    vi.clearAllMocks();
+    vi.mocked(useGameList).mockReturnValue({ isSuccess: true, data: [{ id: 4, name: "One Piece" }] } as never);
+    vi.mocked(useCategoryList).mockReturnValue({ isSuccess: true, data: [{ id: 7, name: "กล่อง/ซองสุ่ม", gameId: 4 }] } as never);
+    vi.mocked(afterSalesApi.defaultCommissionRate).mockResolvedValue({ key: "commission.default_rate", value: "5.0", description: "", updatedBy: null });
+    vi.mocked(afterSalesApi.commissionRules).mockResolvedValue([]);
+    vi.mocked(afterSalesApi.createCommissionRule).mockResolvedValue({ ...categoryRule, id: 3 } as never);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><AdminCommissionPage /></QueryClientProvider>);
+    expect(await screen.findByText("One Piece")).toBeTruthy();
+    fireEvent.click(screen.getByText("กฎเพิ่มเติมและการตั้งค่าขั้นสูง"));
+    fireEvent.change(screen.getByLabelText("ขอบเขต"), { target: { value: "CATEGORY" } });
+    const category = screen.getByLabelText("หมวดหมู่") as HTMLSelectElement;
+    expect(category.textContent).toContain("One Piece · กล่อง/ซองสุ่ม");
+    fireEvent.click(screen.getByRole("button", { name: "สร้างกฎ" }));
+    expect(afterSalesApi.createCommissionRule).not.toHaveBeenCalled();
+    fireEvent.change(category, { target: { value: "7" } });
+    fireEvent.change(screen.getByLabelText("อัตรา (%)"), { target: { value: "7" } });
+    fireEvent.click(screen.getByRole("button", { name: "สร้างกฎ" }));
+    await waitFor(() => expect(afterSalesApi.createCommissionRule).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: "CATEGORY", categoryId: 7, gameId: null, ratePercent: 7 })));
+  });
 });

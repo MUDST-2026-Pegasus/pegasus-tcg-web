@@ -18,6 +18,16 @@ import type { CommissionRuleInput } from "@/features/finance/after-sales.types";
 const blank = (): CommissionRuleInput => ({ scope: "GLOBAL", gameId: null, categoryId: null,
   sellerProfileId: null, ratePercent: 0, fixedFee: 0, minFee: null, maxFee: null,
   priority: 0, effectiveFrom: new Date().toISOString(), effectiveTo: null, active: true });
+type RuleDraft = Omit<CommissionRuleInput, "ratePercent" | "fixedFee" | "minFee" | "maxFee" | "priority"> & {
+  ratePercent: string; fixedFee: string; minFee: string; maxFee: string; priority: string;
+};
+const blankDraft = (): RuleDraft => ({ ...blank(), ratePercent: "", fixedFee: "", minFee: "", maxFee: "", priority: "" });
+const toDraft = (rule: CommissionRuleInput): RuleDraft => ({
+  scope: rule.scope, gameId: rule.gameId, categoryId: rule.categoryId, sellerProfileId: rule.sellerProfileId,
+  ratePercent: String(rule.ratePercent), fixedFee: String(rule.fixedFee),
+  minFee: rule.minFee == null ? "" : String(rule.minFee), maxFee: rule.maxFee == null ? "" : String(rule.maxFee),
+  priority: String(rule.priority), effectiveFrom: rule.effectiveFrom, effectiveTo: rule.effectiveTo, active: rule.active,
+});
 const optionalNumber = (value: string) => value === "" ? null : Number(value);
 const money = (value: number) => `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatRate = (value: number) => Number.isInteger(value) ? value.toFixed(1) : String(value);
@@ -38,7 +48,7 @@ export function AdminCommissionPage() {
   const games = useGameList();
   const categories = useCategoryList();
   const [selected, setSelected] = useState<number | null>(null);
-  const [form, setForm] = useState<CommissionRuleInput>(blank);
+  const [form, setForm] = useState<RuleDraft>(blankDraft);
   const [busy, setBusy] = useState(false);
   const [globalRate, setGlobalRate] = useState("");
   const [categoryRates, setCategoryRates] = useState<Record<string, { rate: string; useCustom: boolean }>>({});
@@ -75,11 +85,11 @@ export function AdminCommissionPage() {
   }, [rules.data, rules.isSuccess, games.data, games.isSuccess, savedRate]);
   async function edit(id: number) {
     setBusy(true);
-    try { const current = await afterSalesApi.commissionRule(id); setSelected(id); setForm(current); }
+    try { const current = await afterSalesApi.commissionRule(id); setSelected(id); setForm(toDraft(current)); }
     catch (error) { toast.add({ type: "error", title: "โหลดรายละเอียดไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") }); }
     finally { setBusy(false); }
   }
-  const update = <K extends keyof CommissionRuleInput>(key: K, value: CommissionRuleInput[K]) => setForm((old) => ({ ...old, [key]: value }));
+  const update = <K extends keyof RuleDraft>(key: K, value: RuleDraft[K]) => setForm((old) => ({ ...old, [key]: value }));
   const refresh = async () => { await Promise.all([
     cache.invalidateQueries({ queryKey: ["finance", "commission-rules"] }),
     cache.invalidateQueries({ queryKey: ["finance", "default-commission-rate"] }),
@@ -129,11 +139,29 @@ export function AdminCommissionPage() {
   }
 
   async function save() {
+    const ratePercent = Number(form.ratePercent || 0);
+    const fixedFee = Number(form.fixedFee || 0);
+    const minFee = optionalNumber(form.minFee);
+    const maxFee = optionalNumber(form.maxFee);
+    const priority = Number(form.priority || 0);
+    const validMoney = (text: string) => text === "" || /^\d{1,12}(?:\.\d{1,2})?$/.test(text);
+    if (!validRate(form.ratePercent || "0") || !validMoney(form.fixedFee)
+      || !validMoney(form.minFee) || !validMoney(form.maxFee)
+      || (minFee != null && maxFee != null && minFee > maxFee)
+      || !Number.isInteger(priority) || priority < -32768 || priority > 32767
+      || (form.scope === "GAME" && form.gameId == null)
+      || (form.scope === "CATEGORY" && form.categoryId == null)
+      || (form.scope === "SELLER" && form.sellerProfileId == null)
+      || (form.effectiveTo != null && new Date(form.effectiveFrom) >= new Date(form.effectiveTo))) {
+      toast.add({ type: "error", title: "กรุณาตรวจข้อมูลกฎ", description: "เลือกเกมหรือหมวดหมู่ และตรวจอัตรา ค่าธรรมเนียม ลำดับความสำคัญ และวันที่" });
+      return;
+    }
+    const input: CommissionRuleInput = { ...form, ratePercent, fixedFee, minFee, maxFee, priority };
     setBusy(true);
     try {
-      if (selected === null) await afterSalesApi.createCommissionRule(form);
-      else await afterSalesApi.updateCommissionRule(selected, form);
-      await refresh(); setSelected(null); setForm(blank());
+      if (selected === null) await afterSalesApi.createCommissionRule(input);
+      else await afterSalesApi.updateCommissionRule(selected, input);
+      await refresh(); setSelected(null); setForm(blankDraft());
       toast.add({ type: "success", title: "บันทึกกฎค่าคอมมิชชันแล้ว" });
     } catch (error) { toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: getErrorMessage(error, "กรุณาตรวจข้อมูล") }); }
     finally { setBusy(false); }
@@ -161,7 +189,7 @@ export function AdminCommissionPage() {
   });
   const openAdvanced = () => {
     setSelected(null);
-    setForm({ ...blank(), scope: "CATEGORY" });
+    setForm({ ...blankDraft(), scope: "CATEGORY" });
     const advanced = document.getElementById("commission-advanced") as HTMLDetailsElement | null;
     if (advanced) { advanced.open = true; advanced.scrollIntoView({ behavior: "smooth" }); }
   };
@@ -221,16 +249,32 @@ export function AdminCommissionPage() {
     </CardContent></Card>
     <Card><CardHeader><CardTitle>{selected === null ? "เพิ่มกฎ" : `แก้ไขกฎ #${selected}`}</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">
       <label className="space-y-1">ขอบเขต<select className="w-full rounded border p-2" value={form.scope} onChange={(e) => { const scope = e.target.value as CommissionRuleInput["scope"]; setForm((old) => ({ ...old, scope, gameId: null, categoryId: null, sellerProfileId: null })); }}><option>GLOBAL</option><option>GAME</option><option>CATEGORY</option><option>SELLER</option></select></label>
-      {form.scope !== "GLOBAL" && <label className="space-y-1">{form.scope === "GAME" ? "Game ID" : form.scope === "CATEGORY" ? "Category ID" : "Seller profile ID"}<Input type="number" min="1" required value={form.gameId ?? form.categoryId ?? form.sellerProfileId ?? ""} onChange={(e) => update(form.scope === "GAME" ? "gameId" : form.scope === "CATEGORY" ? "categoryId" : "sellerProfileId", optionalNumber(e.target.value))} /></label>}
-      <label className="space-y-1">อัตรา (%)<Input type="number" min="0" max="100" step="0.001" value={form.ratePercent} onChange={(e) => update("ratePercent", Number(e.target.value))} /></label>
-      <label className="space-y-1">ค่าธรรมเนียมคงที่ (บาท)<Input type="number" min="0" step="0.01" value={form.fixedFee} onChange={(e) => update("fixedFee", Number(e.target.value))} /></label>
-      <label className="space-y-1">ขั้นต่ำ (บาท)<Input type="number" min="0" step="0.01" value={form.minFee ?? ""} onChange={(e) => update("minFee", optionalNumber(e.target.value))} /></label>
-      <label className="space-y-1">ขั้นสูง (บาท)<Input type="number" min="0" step="0.01" value={form.maxFee ?? ""} onChange={(e) => update("maxFee", optionalNumber(e.target.value))} /></label>
-      <label className="space-y-1">ลำดับความสำคัญ<Input type="number" value={form.priority} onChange={(e) => update("priority", Number(e.target.value))} /></label>
+      {form.scope === "GAME" && <label className="space-y-1">เกม
+        <select className="w-full rounded border p-2" value={form.gameId ?? ""} onChange={(e) => update("gameId", optionalNumber(e.target.value))}>
+          <option value="">เลือกเกม</option>
+          {form.gameId != null && !games.data?.some((game) => game.id === form.gameId) && <option value={form.gameId}>เกมเดิม #{form.gameId}</option>}
+          {games.data?.map((game) => <option key={game.id} value={game.id}>{game.name}</option>)}
+        </select>
+      </label>}
+      {form.scope === "CATEGORY" && <label className="space-y-1">หมวดหมู่
+        <select className="w-full rounded border p-2" value={form.categoryId ?? ""} onChange={(e) => update("categoryId", optionalNumber(e.target.value))}>
+          <option value="">เลือกหมวดหมู่</option>
+          {form.categoryId != null && !categories.data?.some((category) => category.id === form.categoryId) && <option value={form.categoryId}>หมวดหมู่เดิม #{form.categoryId}</option>}
+          {categories.data?.map((category) => <option key={category.id} value={category.id}>
+            {games.data?.find((game) => game.id === category.gameId)?.name ?? "ทุกเกม"} · {category.name}
+          </option>)}
+        </select>
+      </label>}
+      {form.scope === "SELLER" && <label className="space-y-1">Seller profile ID<Input type="number" min="1" value={form.sellerProfileId ?? ""} onChange={(e) => update("sellerProfileId", optionalNumber(e.target.value))} /></label>}
+      <label className="space-y-1">อัตรา (%)<Input type="number" min="0" max="100" step="0.001" placeholder="0" value={form.ratePercent} onChange={(e) => update("ratePercent", e.target.value)} /></label>
+      <label className="space-y-1">ค่าธรรมเนียมคงที่ (บาท)<Input type="number" min="0" step="0.01" placeholder="0" value={form.fixedFee} onChange={(e) => update("fixedFee", e.target.value)} /></label>
+      <label className="space-y-1">ขั้นต่ำ (บาท)<Input type="number" min="0" step="0.01" value={form.minFee} onChange={(e) => update("minFee", e.target.value)} /></label>
+      <label className="space-y-1">ขั้นสูง (บาท)<Input type="number" min="0" step="0.01" value={form.maxFee} onChange={(e) => update("maxFee", e.target.value)} /></label>
+      <label className="space-y-1">ลำดับความสำคัญ<Input type="number" step="1" placeholder="0" value={form.priority} onChange={(e) => update("priority", e.target.value)} /></label>
       <label className="space-y-1">เริ่มมีผล<Input type="datetime-local" value={localDateTime(form.effectiveFrom)} onChange={(e) => update("effectiveFrom", new Date(e.target.value).toISOString())} /></label>
       <label className="space-y-1">สิ้นสุด<Input type="datetime-local" value={form.effectiveTo ? localDateTime(form.effectiveTo) : ""} onChange={(e) => update("effectiveTo", e.target.value ? new Date(e.target.value).toISOString() : null)} /></label>
       <label className="flex items-center gap-2"><input type="checkbox" checked={form.active} onChange={(e) => update("active", e.target.checked)} />เปิดใช้งาน</label>
-      <div className="flex gap-2 sm:col-span-2"><Button disabled={busy} onClick={() => void save()}>{selected === null ? "สร้างกฎ" : "บันทึก"}</Button>{selected !== null && <Button variant="outline" onClick={() => { setSelected(null); setForm(blank()); }}>ยกเลิก</Button>}</div>
+      <div className="flex gap-2 sm:col-span-2"><Button disabled={busy} onClick={() => void save()}>{selected === null ? "สร้างกฎ" : "บันทึก"}</Button>{selected !== null && <Button variant="outline" onClick={() => { setSelected(null); setForm(blankDraft()); }}>ยกเลิก</Button>}</div>
     </CardContent></Card>
     </div></details>
   </div>;
