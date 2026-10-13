@@ -16,6 +16,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldTitle } from "@/components/ui/field";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { useAddresses } from "@/features/account/address.queries";
@@ -323,7 +324,14 @@ export function CheckoutPage() {
                 <span className="font-medium text-sm text-foreground">
                   Shipping Address
                 </span>
-                <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors text-sm max-w-[320px]">
+                <div
+                  className={cn(
+                    "flex items-center transition-colors text-sm max-w-[320px]",
+                    activeAddress
+                      ? "text-muted-foreground group-hover:text-foreground"
+                      : "text-destructive font-medium",
+                  )}
+                >
                   <span className="truncate">
                     {activeAddress
                       ? formatAddressLines(activeAddress).join(", ")
@@ -508,20 +516,27 @@ export function CheckoutPage() {
           </CardContent>
         </Card>
 
-        <Button
-          disabled={!activeAddress || !selectedPayment || isSubmitting}
-          className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
-          onClick={handlePurchase}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Processing...</span>
-            </div>
-          ) : (
-            "Purchase"
+        <div className="flex flex-col gap-2">
+          <Button
+            disabled={!activeAddress || !selectedPayment || isSubmitting}
+            className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
+            onClick={handlePurchase}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </div>
+            ) : (
+              "Purchase"
+            )}
+          </Button>
+          {!activeAddress && (
+            <p role="alert" className="text-sm text-destructive text-center">
+              Please add a shipping address to continue.
+            </p>
           )}
-        </Button>
+        </div>
       </div>
 
       {/* Address Form Dialog */}
