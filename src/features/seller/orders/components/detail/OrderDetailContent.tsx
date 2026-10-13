@@ -22,12 +22,14 @@ import { cn } from "@/lib/utils";
 
 import {
   CARRIER_OPTIONS,
+  RETURNS_PATH,
   addressLines,
   canAccept,
   canCancel,
   canShip,
   carrierLabel,
   formatAgo,
+  isReturnStatus,
   orderErrorMessage,
   parseShippingAddress,
   paymentRows,
@@ -71,8 +73,12 @@ function nextStepNote(detail: SellerOrderDetail): string {
       return `${ordered} · ผู้ซื้อได้รับสินค้าแล้ว เงินเข้าบัญชีร้าน`;
     case "CANCELLED":
       return `${ordered} · คำสั่งซื้อถูกยกเลิก`;
-    default:
-      return `${ordered} · อยู่ระหว่างคืนสินค้า`;
+    case "RETURN_REQUESTED":
+      return `${ordered} · ผู้ซื้อขอคืนสินค้า ตอบคำขอได้ที่หน้าคำขอคืนสินค้า`;
+    case "RETURNED":
+      return `${ordered} · ร้านได้รับสินค้าคืนแล้ว รอสรุปผลการคืนเงิน`;
+    case "REFUNDED":
+      return `${ordered} · คืนเงินให้ผู้ซื้อแล้ว`;
   }
 }
 
@@ -175,6 +181,18 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {isReturnStatus(order.status) ? (
+            // อนุมัติ/ปฏิเสธ/รับของคืนทำที่หน้าคำขอคืนสินค้า หน้านี้ดูได้อย่างเดียว
+            <Button
+              variant={order.status === "RETURN_REQUESTED" ? "default" : "outline"}
+              size="sm"
+              className="rounded-md px-2.5"
+              render={<Link to={RETURNS_PATH} />}
+              nativeButton={false}
+            >
+              {order.status === "RETURN_REQUESTED" ? "ตอบคำขอคืนสินค้า" : "ดูคำขอคืนสินค้า"}
+            </Button>
+          ) : null}
           {canCancel(order.status) ? (
             <Button
               variant="outline"

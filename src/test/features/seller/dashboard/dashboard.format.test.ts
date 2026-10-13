@@ -103,7 +103,7 @@ describe("countOrders", () => {
 describe("salesSummary", () => {
   it("highlights the selected month and averages per order", () => {
     const summary = salesSummary(dashboard());
-    expect(summary.label).toBe("ยอดขายเดือนตุลาคม");
+    expect(summary.label).toBe("ยอดขายเดือนตุลาคม (ไม่รวมค่าส่ง)");
     expect(summary.amount).toBe("฿24,850");
     expect(summary.description).toBe("จาก 56 คำสั่งซื้อ · เฉลี่ย ฿444 ต่อออเดอร์");
     expect(summary.bars.map((bar) => bar.highlighted)).toEqual([false, true]);
@@ -128,6 +128,23 @@ describe("todoList", () => {
     expect(todo.items[0]).toMatchObject({
       description: "8 ออเดอร์รอจัดส่ง",
       to: "/seller/orders?status=awaiting_pack",
+    });
+  });
+
+  it("sends each task to the page where the seller can act on it", () => {
+    const todo = todoList(
+      dashboard({
+        orders: { PAID: 1, RETURN_REQUESTED: 2, PENDING_PAYMENT: 1 },
+        reviews: { average: 4.75, count: 312, thisMonth: 2, unreplied: 3 },
+      }),
+    );
+    expect(Object.fromEntries(todo.items.map((item) => [item.id, item.to]))).toEqual({
+      pack: "/seller/orders?status=awaiting_pack",
+      // แท็บคืนสินค้าของหน้าคำสั่งซื้อดูได้อย่างเดียว อนุมัติ/ปฏิเสธต้องไปหน้านี้
+      returns: "/seller/returns",
+      restock: "/seller/products?status=ACTIVE&sort=stock_asc",
+      payment: "/seller/orders?status=awaiting_payment",
+      reviews: "/seller/reviews",
     });
   });
 
