@@ -5,9 +5,10 @@
 ---
 
 ## โครงสร้างไฟล์
-* `deployment.yaml`: จัดการ ReplicaSet, Rolling Update, SecurityContext, Pod Anti-Affinity, Resource Requests/Limits, Probes และ Lifecycle Hook
+* `deployment.yaml`: จัดการ ReplicaSet, Rolling Update, SecurityContext, Pod Anti-Affinity, Resource Requests/Limits, Probes, Lifecycle Hook และการ Mount Nginx ConfigMap
 * `service.yaml`: LoadBalancer Service สำหรับเผยแพร่ Traffic สู่ภายนอกและกระจายไปยัง Pods บนพอร์ต 8081 (บน Docker Desktop เข้าผ่าน localhost:8081 ได้โดยตรง)
 * `pdb.yaml`: PodDisruptionBudget ควบคุมให้มี Pods พร้อมใช้งานขั้นต่ำ 2 ตัวเสมอขณะเกิด Voluntary Disruption
+* `nginx-configmap.yaml`: ConfigMap คอนฟิก Nginx ทำ Reverse Proxy เส้นทาง `/api/` ไปยัง `http://pegasus-backend-service:8080` เพื่อเชื่อมต่อ Backend ภายในคลัสเตอร์
 
 ---
 
