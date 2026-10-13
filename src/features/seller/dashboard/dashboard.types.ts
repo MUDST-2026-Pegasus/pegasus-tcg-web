@@ -1,35 +1,46 @@
-import type { LucideIcon } from "lucide-react";
+import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
 
-import type {
-  OrderStatus,
-  SellerOrderStatus,
-} from "@/features/seller/shared/seller.types";
+// ---------- สิ่งที่การ์ดบนหน้าแสดง ----------
+// ประกอบใน dashboard.format.ts จากข้อมูลด้านล่าง ไม่มีไอคอนหรือ component ปน
+// ไอคอนแม็ปจาก `id` ฝั่ง component เอง เพราะไอคอนเป็นเรื่องของหน้าจอ ส่งข้าม API ไม่ได้
+
+export type Delta = {
+  label: string;
+  trend: "up" | "down" | "flat" | "new";
+};
 
 export type SalesChartBar = {
-  /** ความสูงของแท่งกราฟ หน่วย px */
-  height: number;
-  /** true = เดือน/ช่วงล่าสุด เน้นสีขาวเต็ม ที่เหลือจางกว่า */
+  /** "YYYY-MM" */
+  month: string;
+  amount: number;
+  /** ไว้ให้ screen reader / tooltip อ่าน เช่น "ต.ค. 69 ฿1,850" */
+  label: string;
+  /** true = เดือนที่เลือก เน้นสีขาวเต็ม ที่เหลือจางกว่า */
   highlighted: boolean;
 };
 
 export type SalesSummary = {
   label: string;
   amount: string;
-  delta: string;
+  /** `null` = ไม่มีอะไรให้เทียบ (ทั้งสองเดือนเป็น 0) */
+  delta: Delta | null;
   description: string;
   bars: SalesChartBar[];
   rangeStart: string;
   rangeEnd: string;
 };
 
+export type TodoKind = "pack" | "payment" | "returns" | "restock" | "reviews";
+
 export type TodoAccent = "red" | "amber" | "primary" | "gray";
 
 export type TodoItem = {
-  id: string;
-  icon: LucideIcon;
+  id: TodoKind;
   accent: TodoAccent;
   title: string;
   description: string;
+  /** `null` = ยังไม่มีหน้าให้ไปจัดการ แสดงเป็นข้อความเฉย ๆ */
+  to: string | null;
 };
 
 export type TodoList = {
@@ -37,13 +48,15 @@ export type TodoList = {
   description: string;
   count: number;
   items: TodoItem[];
+  emptyLabel: string;
 };
+
+export type StatKind = "listings" | "escrow" | "rating" | "withdrawable";
 
 export type StatAccent = "primary" | "violet" | "amber" | "green";
 
 export type StatCardData = {
-  id: string;
-  icon: LucideIcon;
+  id: StatKind;
   accent: StatAccent;
   label: string;
   value: string;
@@ -51,24 +64,26 @@ export type StatCardData = {
 };
 
 export type OrderRow = {
-  id: string;
+  id: number;
+  number: string;
   buyer: string;
   item: string;
   price: string;
-  status: OrderStatus;
+  status: SellerOrderStatus;
   statusLabel: string;
 };
 
 export type RecentOrders = {
   title: string;
   actionLabel: string;
+  emptyLabel: string;
   items: OrderRow[];
 };
 
 export type StockSeverity = "critical" | "warning";
 
 export type LowStockItem = {
-  id: string;
+  listingId: number;
   name: string;
   remainingLabel: string;
   /** สัดส่วนที่เหลือ 0-100 ใช้วาดความยาวแถบ */
@@ -78,10 +93,11 @@ export type LowStockItem = {
 
 export type LowStock = {
   title: string;
-  /** จำนวนสินค้าใกล้หมดทั้งหมด อาจมากกว่าจำนวนใน items ถ้าตัดแสดงบางส่วน */
+  /** จำนวนสินค้าใกล้หมดทั้งหมด อาจมากกว่าจำนวนใน items ที่ตัดมาแสดง */
   count: number;
   items: LowStockItem[];
   actionLabel: string;
+  emptyLabel: string;
 };
 
 export type DashboardData = {
@@ -89,6 +105,8 @@ export type DashboardData = {
   subtitle: string;
   actions: {
     viewShopLabel: string;
+    /** `null` = ยังไม่รู้ username (โหลดโปรไฟล์ไม่ทัน) ซ่อนปุ่มไว้ก่อน */
+    viewShopTo: string | null;
     createListingLabel: string;
   };
   sales: SalesSummary;
