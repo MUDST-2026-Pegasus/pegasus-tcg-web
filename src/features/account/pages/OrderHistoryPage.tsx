@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
+import { orderStatusLabel } from "../order-status.format";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
@@ -442,8 +443,8 @@ function OrderDetailsModal({
                 Order #{order.orderNumber}
               </p>
             </div>
-            <Badge variant="outline" className="text-sm font-semibold">
-              {order.status}
+            <Badge variant="outline" className="shrink-0 text-sm font-semibold">
+              {orderStatusLabel(order.status)}
             </Badge>
           </div>
         </DialogHeader>
@@ -470,7 +471,7 @@ function OrderDetailsModal({
                 </div>
                 <div className="text-right">
                   <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium">
-                    Package Status: {so.status}
+                    สถานะพัสดุ: {orderStatusLabel(so.status)}
                   </span>
                 </div>
               </div>

@@ -5,6 +5,7 @@ export type CommissionRule = {
   priority: number; effectiveFrom: string; effectiveTo: string | null; active: boolean;
 };
 export type CommissionRuleInput = Omit<CommissionRule, "id">;
+export type PlatformSetting = { key: string; value: string; description: string; updatedBy: number | null };
 
 export type ReturnRequest = {
   id: number; sellerOrderId: number; reasonCode: string; description: string | null;
@@ -12,6 +13,7 @@ export type ReturnRequest = {
   evidenceKeys: string[]; returnTrackingNumber: string | null;
   requestedAt: string; reviewedAt: string | null; receivedAt: string | null; closedAt: string | null;
 };
+export type ReturnEvidenceLink = { number: number; url: string };
 export type ReturnInput = {
   reasonCode: string; description: string; evidenceKeys: string[];
   items: Array<{ orderItemId: number; quantity: number }>;
@@ -29,3 +31,4 @@ export type PublicReviews = {
   reviews: PublicReview[];
   summary: { ratingCount: number; ratingAvg: number; count1: number; count2: number; count3: number; count4: number; count5: number } | null;
 };
+export type AdminReview = PublicReview & { sellerOrderId: number; visible: boolean };

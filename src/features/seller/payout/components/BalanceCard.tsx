@@ -8,6 +8,7 @@ import type { PayoutData } from "../payout.types";
 
 type BalanceCardProps = PayoutData["balance"] & {
   onWithdraw: () => void;
+  withdrawDisabled?: boolean;
 };
 
 export function BalanceCard({
@@ -17,6 +18,7 @@ export function BalanceCard({
   stats,
   scheduleNote,
   onWithdraw,
+  withdrawDisabled = false,
 }: BalanceCardProps) {
   return (
     <Card className="w-full min-w-0 flex-1 gap-5 rounded-2xl border-0 bg-zinc-950 p-6 text-white shadow-none ring-0">
@@ -28,6 +30,7 @@ export function BalanceCard({
 
         <Button
           onClick={onWithdraw}
+          disabled={withdrawDisabled}
           className="h-auto rounded-lg bg-teal-600 px-5 py-3 text-xs font-semibold text-white hover:bg-teal-700"
         >
           {withdrawLabel}

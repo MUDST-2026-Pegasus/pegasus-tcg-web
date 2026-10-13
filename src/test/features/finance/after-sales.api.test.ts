@@ -24,6 +24,13 @@ describe("TCG-394 remaining API contracts", () => {
     expect(remove).toHaveBeenCalledWith("/admin/commission-rules/9");
   });
 
+  it("reads and updates the platform fallback rate", async () => {
+    await afterSalesApi.defaultCommissionRate();
+    await afterSalesApi.updateDefaultCommissionRate(6.5);
+    expect(get).toHaveBeenCalledWith("/admin/settings/commission.default_rate");
+    expect(put).toHaveBeenCalledWith("/admin/settings/commission.default_rate", { value: "6.5" });
+  });
+
   it("uses seller-order and return IDs for all seven return operations", async () => {
     const input = { reasonCode: "DAMAGED", description: "damaged card", evidenceKeys: ["returns/photo.png"], items: [{ orderItemId: 23, quantity: 1 }] };
     await afterSalesApi.buyerReturns(11); await afterSalesApi.requestReturn(11, input);
@@ -39,14 +46,28 @@ describe("TCG-394 remaining API contracts", () => {
     expect(post).toHaveBeenNthCalledWith(5, "/sellers/me/returns/12/receive", { restock: false });
   });
 
-  it("connects all four review operations", async () => {
+  it("loads seller evidence through the owned return endpoint", async () => {
+    await afterSalesApi.sellerReturnEvidence(12);
+    expect(get).toHaveBeenCalledWith("/sellers/me/returns/12/evidence");
+  });
+
+  it("connects review operations and the buyer's saved review", async () => {
     await afterSalesApi.createReview(11, 5, "Great", "Excellent seller");
+    await afterSalesApi.myReview(11);
     await afterSalesApi.publicReviews("seller.th");
+    await afterSalesApi.adminReviews("seller.th");
     await afterSalesApi.replyReview(3, "Thank you");
     await afterSalesApi.setReviewVisibility(3, false);
     expect(post).toHaveBeenNthCalledWith(1, "/orders/11/reviews", { rating: 5, title: "Great", comment: "Excellent seller" });
+    expect(get).toHaveBeenCalledWith("/orders/11/reviews/mine");
     expect(get).toHaveBeenCalledWith("/u/seller.th/reviews");
+    expect(get).toHaveBeenCalledWith("/admin/reviews", { query: { username: "seller.th" } });
     expect(post).toHaveBeenNthCalledWith(2, "/sellers/me/reviews/3/reply", { comment: "Thank you" });
     expect(put).toHaveBeenCalledWith("/admin/reviews/3/visibility", { visible: false });
+  });
+
+  it("loads the moderation list through the admin endpoint", async () => {
+    await afterSalesApi.adminReviews("seller.th");
+    expect(get).toHaveBeenCalledWith("/admin/reviews", { query: { username: "seller.th" } });
   });
 });
