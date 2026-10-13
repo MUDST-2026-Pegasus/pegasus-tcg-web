@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
-import type { TopSeller } from "@/features/admin/admin.types";
+import type { TopSellerBar } from "../metrics.format";
 import { cn } from "@/lib/utils";
 
 type TopSellersCardProps = {
   title: string;
   description: string;
-  items: TopSeller[];
+  items: TopSellerBar[];
 };
 
 const HIGHLIGHT_RANK = 3;
@@ -21,6 +21,12 @@ export function TopSellersCard({
         <p className="text-[15px] font-semibold text-foreground">{title}</p>
         <p className="text-xs text-muted-foreground">{description}</p>
       </div>
+
+      {items.length === 0 ? (
+        <p className="py-6 text-center text-xs text-muted-foreground">
+          ยังไม่มีร้านค้าที่มียอดขายในเดือนนี้
+        </p>
+      ) : null}
 
       <ol className="flex flex-col gap-3.5">
         {items.map((seller, index) => {
