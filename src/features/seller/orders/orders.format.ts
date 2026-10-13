@@ -9,6 +9,8 @@ import type {
 } from "@/features/seller/shared/seller.types";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
+import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
+
 import type {
   OrderItem,
   OrderPayment,
@@ -396,6 +398,49 @@ export function initialsOf(username: string): string {
   const letters = parts.length >= 2 ? parts[0][0] + parts[1][0] : username.slice(0, 2);
   return letters.toUpperCase();
 }
+
+// ---------- คอลัมน์ขวาของหน้ารายการ ----------
+
+export type MonthlySummary = {
+  title: string;
+  rows: { id: string; label: string; value: string; tone: "default" | "muted" }[];
+  netLabel: string;
+  netValue: string;
+};
+
+/**
+ * ผลประกอบการเดือนนี้ — ตัวเลขชุดเดียวกับแดชบอร์ด (`/sellers/me/dashboard` → `month`)
+ * ยอดขายรวมค่าส่งที่ผู้ซื้อจ่าย ค่าคอมคืออัตราที่ freeze ตอน checkout
+ */
+export function monthlySummary(month: DashboardMonthSummary): MonthlySummary {
+  return {
+    title: "ผลประกอบการเดือนนี้",
+    rows: [
+      { id: "sales", label: "ยอดขายรวม", value: formatBaht(month.revenue), tone: "default" },
+      { id: "cost", label: "ต้นทุนสินค้า", value: `− ${formatBaht(roundMoney(month.cost))}`, tone: "muted" },
+      { id: "commission", label: "ค่าคอมมิชชั่น", value: `− ${formatBaht(month.commission)}`, tone: "muted" },
+    ],
+    netLabel: "กำไรสุทธิ",
+    netValue: formatBaht(roundMoney(month.net)),
+  };
+}
+
+export const SHIPPING_STEPS = {
+  title: "ขั้นตอนการจัดส่ง",
+  items: [
+    { id: "accept", label: "กดรับออเดอร์ให้ผู้ซื้อรู้ว่าเริ่มแพ็คแล้ว" },
+    { id: "pack", label: "แพ็คการ์ดด้วย Top Loader" },
+    { id: "photo", label: "ถ่ายรูปก่อนปิดกล่อง" },
+    { id: "tracking", label: "กรอกขนส่งและเลขพัสดุ" },
+    { id: "confirm", label: "กดยืนยันจัดส่ง" },
+  ],
+};
+
+export const PACKING_TIP = {
+  title: "เคล็ดลับ",
+  description:
+    "ส่งให้ทันวันที่ร้านกำหนดไว้ เงินจะเข้าบัญชีร้านเมื่อผู้ซื้อยืนยันรับสินค้า หรือครบกำหนดหลังส่ง",
+};
 
 // ---------- error ----------
 

@@ -1,97 +1,114 @@
-import { useState } from "react";
+import { EmptyState, QueryBoundary } from "@/components/common";
+import { useSellerDashboard } from "@/features/seller/dashboard/dashboard.queries";
 
-import { useSearchParams } from "react-router-dom";
-
-import { Button } from "@/components/ui/button";
-import type { OrderStatus } from "@/features/seller/shared/seller.types";
-
-import type { OrdersData } from "../orders.types";
+import {
+  PACKING_TIP,
+  SHIPPING_STEPS,
+  monthlySummary,
+  ordersSubtitle,
+  type OrderTabMeta,
+  type SortChoice,
+} from "../orders.format";
+import { useSellerOrderCounts, useSellerOrders } from "../orders.queries";
 
 import { MonthlySummaryCard } from "./MonthlySummaryCard";
 import { OrderCard } from "./OrderCard";
 import { OrderFilterBar } from "./OrderFilterBar";
+import { OrderListSkeleton } from "./OrderListSkeleton";
+import { OrderPagination } from "./OrderPagination";
 import { ShippingStepsCard } from "./ShippingStepsCard";
 import { TipCard } from "./TipCard";
 
+export const ORDERS_PAGE_SIZE = 10;
+
 type OrdersContentProps = {
-  data: OrdersData;
+  tab: OrderTabMeta;
+  search: string;
+  sort: SortChoice;
+  /** เริ่มที่ 1 */
+  page: number;
+  onTabChange: (tab: OrderTabMeta["id"]) => void;
+  onSearchChange: (search: string) => void;
+  onSortChange: (sort: SortChoice) => void;
+  onPageChange: (page: number) => void;
 };
 
-export function OrdersContent({ data }: OrdersContentProps) {
-  // ตัวกรองอยู่ใน URL (?status=) — breadcrumb หน้ารายละเอียดลิงก์กลับมาที่สถานะเดิมได้
-  // และกด back จากหน้ารายละเอียดแล้วยังอยู่แท็บเดิม
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const statusParam = searchParams.get("status");
-  const activeFilterId: OrderStatus =
-    data.filters.find((filter) => filter.id === statusParam)?.id ??
-    data.filters[0]?.id ??
-    "awaiting_pack";
-
-  const visibleOrders = data.orders.filter(
-    (order) => order.status === activeFilterId,
-  );
-
-  /** ล้างการเลือกด้วยเมื่อสลับตัวกรอง กันสับสนว่ามีของที่เลือกไว้แต่มองไม่เห็น */
-  function handleFilterChange(id: OrderStatus) {
-    setSearchParams({ status: id }, { replace: true });
-    setSelectedIds([]);
-  }
-
-  function handleToggleOrder(id: string) {
-    setSelectedIds((current) =>
-      current.includes(id)
-        ? current.filter((selectedId) => selectedId !== id)
-        : [...current, id],
-    );
-  }
+export function OrdersContent({
+  tab,
+  search,
+  sort,
+  page,
+  onTabChange,
+  onSearchChange,
+  onSortChange,
+  onPageChange,
+}: OrdersContentProps) {
+  const counts = useSellerOrderCounts();
+  const dashboard = useSellerDashboard();
+  const orders = useSellerOrders({
+    statuses: tab.statuses,
+    q: search || undefined,
+    sort: sort === "default" ? tab.sort : sort,
+    page: page - 1,
+    size: ORDERS_PAGE_SIZE,
+  });
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-zinc-950">{data.title}</h1>
-          <p className="text-xs text-gray-500">{data.subtitle}</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            {selectedIds.length > 0
-              ? `พิมพ์ใบปะหน้า ${selectedIds.length} รายการ`
-              : data.actions.printAllLabel}
-          </Button>
-          <Button size="sm" className="rounded-md px-2.5">
-            {data.actions.updateStatusLabel}
-          </Button>
-        </div>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-zinc-950">จัดการคำสั่งซื้อ</h1>
+        <p className="text-xs text-gray-500">{ordersSubtitle(counts.data)}</p>
       </div>
 
       <OrderFilterBar
-        filters={data.filters}
-        activeFilterId={activeFilterId}
-        onFilterChange={handleFilterChange}
-        sort={data.sort}
+        activeTab={tab.id}
+        onTabChange={onTabChange}
+        counts={counts.data}
+        search={search}
+        onSearchChange={onSearchChange}
+        sort={sort}
+        onSortChange={onSortChange}
       />
 
       <div className="flex flex-col items-start gap-6 lg:flex-row">
         <div className="flex w-full min-w-0 flex-1 flex-col gap-3.5">
-          {visibleOrders.map((order, index) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              labels={data.card}
-              selected={selectedIds.includes(order.id)}
-              onToggleSelect={() => handleToggleOrder(order.id)}
-              defaultOpen={index === 0}
-            />
-          ))}
+          <QueryBoundary
+            query={orders}
+            loading={<OrderListSkeleton />}
+            errorTitle="โหลดคำสั่งซื้อไม่สำเร็จ"
+            isEmpty={(result) => result.items.length === 0}
+            empty={
+              <EmptyState
+                title={search ? `ไม่พบคำสั่งซื้อที่ตรงกับ "${search}"` : `ไม่มีคำสั่งซื้อในแท็บ${tab.label}`}
+                description={search ? "ลองค้นด้วยเลขออเดอร์ หรือชื่อผู้ใช้ของผู้ซื้อ" : undefined}
+              />
+            }
+          >
+            {(result) => (
+              <>
+                {result.items.map((summary, index) => (
+                  <OrderCard
+                    key={summary.order.id}
+                    summary={summary}
+                    defaultOpen={index === 0 && page === 1}
+                  />
+                ))}
+                <OrderPagination
+                  page={page}
+                  totalPages={result.totalPages}
+                  totalItems={result.totalItems}
+                  disabled={orders.isFetching}
+                  onPageChange={onPageChange}
+                />
+              </>
+            )}
+          </QueryBoundary>
         </div>
 
         <div className="flex w-full shrink-0 flex-col gap-4 lg:w-80">
-          <ShippingStepsCard {...data.steps} />
-          <MonthlySummaryCard {...data.summary} />
-          <TipCard {...data.tip} />
+          <ShippingStepsCard {...SHIPPING_STEPS} />
+          {dashboard.data ? <MonthlySummaryCard {...monthlySummary(dashboard.data.month)} /> : null}
+          <TipCard {...PACKING_TIP} />
         </div>
       </div>
     </div>
