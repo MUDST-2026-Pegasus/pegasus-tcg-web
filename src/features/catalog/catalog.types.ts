@@ -24,6 +24,15 @@ export type GameDto = {
   displayOrder: number;
 };
 
+/** `CardSet` — `GET /card-sets?gameId=` ใหม่สุดก่อน */
+export type CardSetDto = {
+  id: number;
+  gameId: number;
+  code: string;
+  name: string;
+  nameLocal: string | null;
+};
+
 /** `CategoryResponse` — `GET /categories` */
 export type CategoryDto = {
   id: number;
@@ -163,6 +172,7 @@ export type ProductQuery = {
   q?: string;
   gameId?: number[];
   categoryId?: number;
+  cardSetId?: number;
   condition?: CardCondition[];
   minPrice?: number;
   maxPrice?: number;

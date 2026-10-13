@@ -25,7 +25,16 @@ export type CollectionItem = {
 
 export type PublicCollectionItem = Pick<CollectionItem, "id" | "card" | "photoUrl" | "condition" | "quantity">;
 
-export type CollectionVariant = { id: number; sku: string; languageCode: string; active: boolean };
+/** `CatalogVariant` — `finish` and `edition` are `NOT_APPLICABLE` where a product has neither. */
+export type CollectionVariant = {
+  id: number;
+  sku: string;
+  languageCode: string;
+  finish: string;
+  edition: string;
+  printingNote: string | null;
+  active: boolean;
+};
 
 export type CollectionPayload = {
   catalogVariantId: number;

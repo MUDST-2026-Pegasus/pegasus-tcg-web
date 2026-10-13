@@ -12,6 +12,7 @@ export const catalogKeys = {
   all: ["catalog"] as const,
   games: () => [...catalogKeys.all, "games"] as const,
   categories: () => [...catalogKeys.all, "categories"] as const,
+  cardSets: (gameId: number) => [...catalogKeys.all, "card-sets", gameId] as const,
   products: (query: ProductQuery) =>
     [...catalogKeys.all, "products", query] as const,
   product: (idOrSlug: string) => [...catalogKeys.all, "product", idOrSlug] as const,
@@ -34,6 +35,15 @@ export function useCategoryList() {
   return useQuery({
     queryKey: catalogKeys.categories(),
     queryFn: catalogApi.getCategories,
+  });
+}
+
+/** ชุดการ์ดของเกมเดียว — ยังไม่เลือกเกม (`null`) ก็ยังไม่ถาม */
+export function useCardSetList(gameId: number | null) {
+  return useQuery({
+    queryKey: catalogKeys.cardSets(gameId ?? 0),
+    queryFn: () => catalogApi.getCardSets(gameId!),
+    enabled: gameId !== null,
   });
 }
 
