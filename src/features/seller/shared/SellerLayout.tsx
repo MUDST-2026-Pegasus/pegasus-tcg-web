@@ -33,14 +33,7 @@ export function SellerLayout() {
       <Navbar />
 
       <SidebarProvider className="min-h-0 flex-1 items-stretch">
-        <SellerSidebar
-          seller={toSellerIdentity(user)}
-          // null = ยังไม่มี seller profile ถือว่ายังไม่ได้สมัคร
-          status={
-            profile.data === null ? "NOT_APPLIED" : profile.data?.status
-          }
-          statusUnavailable={profile.isError}
-        />
+        <SellerSidebar seller={toSellerIdentity(user)} />
 
         <SidebarInset className="min-w-0">
           <header className="flex h-12 shrink-0 items-center border-b border-border px-4 md:hidden">

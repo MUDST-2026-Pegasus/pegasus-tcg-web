@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 
 import { ItemCard, QueryBoundary } from "@/components/common";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth.queries";
@@ -16,6 +16,8 @@ export function PublicCollectionPage() {
   const cards = collection.data?.pages.flatMap((page) => page.items) ?? [];
   const total = collection.data?.pages[0]?.totalItems ?? 0;
   const name = isOwn ? user.displayName : username;
+  // The collection endpoint carries no owner profile, so only your own picture is known here.
+  const avatarUrl = isOwn ? user.avatarUrl : null;
 
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto flex max-w-[1440px] flex-col gap-8">
@@ -23,7 +25,7 @@ export function PublicCollectionPage() {
       <QueryBoundary query={collection} errorTitle="Could not load this collection" errorRetryLabel="Try again">
         {() => <>
           <Card className="rounded-xl shadow-none"><CardContent className="flex flex-wrap items-center gap-6 p-8">
-            <Avatar className="size-20"><AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
+            <Avatar className="size-20">{avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
             <div className="flex-1"><h1 className="text-2xl font-bold">{name}</h1><p className="text-muted-foreground">@{username}</p></div>
             <p className="text-xl font-semibold text-primary">{total} cards</p>
           </CardContent></Card>

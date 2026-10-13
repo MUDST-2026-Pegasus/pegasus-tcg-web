@@ -12,6 +12,7 @@ import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
 import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
 import { CollectorProfilePage } from "@/features/catalog/pages/CollectorProfilePage";
 import { MarketListingsPage } from "@/features/catalog/pages/MarketListingsPage";
+import { ListingDetailPage } from "@/features/catalog/pages/ListingDetailPage";
 import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
 import { MyCollectionPage } from "@/features/collection/pages/MyCollectionPage";
 import { PublicCollectionPage } from "@/features/collection/pages/PublicCollectionPage";
@@ -35,6 +36,7 @@ export const publicRoutes: RouteObject = {
     { path: "products/:productId", element: <ProductDetailPage /> },
     { path: "collectors/:username", element: <CollectorProfilePage /> },
     { path: "products/:productId/listings", element: <MarketListingsPage /> },
+    { path: "listings/:listingId", element: <ListingDetailPage /> },
     { path: "sale", element: <PagePlaceholder title="Sale" /> },
     { path: "new-arrivals", element: <PagePlaceholder title="New arrivals" /> },
     { path: "pokemon", element: <ProductListPage key="pokemon" gameCode="POKEMON" title="Pokémon" /> },

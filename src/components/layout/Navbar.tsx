@@ -89,6 +89,8 @@ export function Navbar() {
             size="icon"
             aria-label="Cart"
             className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
+            nativeButton={false}
+            render={<Link to="/cart" />}
           >
             <ShoppingCartIcon className="size-5" />
           </Button>

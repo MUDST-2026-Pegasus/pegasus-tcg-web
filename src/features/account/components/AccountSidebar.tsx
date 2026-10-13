@@ -1,7 +1,7 @@
 import { CircleUserRound, ClipboardList, MapPin, GalleryVerticalEnd } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,6 +10,7 @@ export type AccountSidebarUser = {
   initials: string;
   name: string;
   email: string;
+  avatarUrl: string | null;
 };
 
 const ACCOUNT_LINKS = [
@@ -26,6 +27,7 @@ export function AccountSidebar({ user }: { user: AccountSidebarUser }) {
     <Card className="h-fit gap-5 rounded-xl p-4 shadow-none lg:sticky lg:top-28">
       <CardHeader className="flex-row items-center gap-3 px-0">
         <Avatar className="size-14">
+          {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.name} />}
           <AvatarFallback className="text-lg">{user.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
