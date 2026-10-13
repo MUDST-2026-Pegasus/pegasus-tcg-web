@@ -2,8 +2,10 @@
  * ลอกมาจาก `pegasus-tcg-api` ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
  * - สิ่งที่ backend ส่งกลับ: `model/Game.java`, `GameAttribute.java`, `CardSet.java`,
  *   `CatalogCategory.java`, `CatalogProduct.java`, `CatalogVariant.java`,
- *   `dto/ProductSummaryResponse.java`, `ProductDetailResponse.java`, `CatalogImageResponse.java`
- * - สิ่งที่เราส่งไป: `dto/ProductRequest.java`, `VariantRequest.java`, `CatalogImageRequest.java`
+ *   `dto/ProductSummaryResponse.java`, `ProductDetailResponse.java`, `CatalogImageResponse.java`,
+ *   `CatalogCardEffectResponse.java`
+ * - สิ่งที่เราส่งไป: `dto/ProductRequest.java`, `VariantRequest.java`, `CatalogImageRequest.java`,
+ *   `CatalogCardEffectsRequest.java`
  *
  * enum ซ้ำกับ `features/catalog/catalog.types.ts` บางตัว แต่แยกไว้เป็นของ admin เอง
  * จะได้ไม่ผูกหน้าร้านกับหลังบ้านเข้าด้วยกัน — คนละเจ้าของ คนละวงจร
@@ -184,6 +186,24 @@ export type CatalogImage = {
   primary: boolean;
 };
 
+/** `CatalogCardEffectResponse.java` — `effect_type` ใน `catalog_card_effect` */
+export type CardEffectType = "ABILITY" | "ATTACK" | "RULE";
+
+/**
+ * `GET /admin/catalog/products/{id}/effects` — ส่วน Abilities & Attacks ของหน้าการ์ด
+ * เรียงตาม `displayOrder` มาแล้ว (ภาษา EN อย่างเดียว)
+ */
+export type CardEffect = {
+  effectType: CardEffectType;
+  name: string;
+  effectText: string | null;
+  damage: number | null;
+  /** สัญลักษณ์พลังงานตามลำดับบนการ์ด เช่น `["Lightning", "Colorless"]` */
+  energyCost: string[];
+  displayOrder: number;
+  sourceUrl: string | null;
+};
+
 /**
  * `GET /admin/catalog/products/{id}` — รวม variant และรูปที่ปิดใช้งานแล้วด้วย
  * ฟอร์มแก้ไขต้องโหลดจากที่นี่ก่อนเสมอ เพราะ PUT เขียนทับทั้งแถว
@@ -269,3 +289,9 @@ export type ImagePayload = {
   /** รูปแรกของสินค้าเป็นรูปหลักเสมอไม่ว่าจะส่งอะไร */
   primary: boolean;
 };
+
+/**
+ * body ของ `PUT .../effects` — ตรงกับ `CatalogCardEffectRequest.java`
+ * แทนที่ทั้งชุด ลำดับใน array คือลำดับที่แสดง ส่ง `[]` = ล้างทั้งหมด
+ */
+export type CardEffectPayload = Omit<CardEffect, "displayOrder">;

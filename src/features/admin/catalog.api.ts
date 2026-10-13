@@ -2,6 +2,8 @@ import { api, type PageResponse } from "@/lib/api";
 
 import type {
   AdminProductQuery,
+  CardEffect,
+  CardEffectPayload,
   CardSet,
   CatalogCategory,
   CatalogImage,
@@ -134,4 +136,21 @@ export function deleteImage(productId: number, imageId: number): Promise<void> {
   return api.delete<void>(
     `/admin/catalog/products/${productId}/images/${imageId}`,
   );
+}
+
+// ---------- Abilities & Attacks ----------
+
+/** ตัว admin หาเจอแม้สินค้าปิดใช้งานแล้ว ต่างจาก `/catalog/products/{id}/effects` */
+export function getCardEffects(productId: number): Promise<CardEffect[]> {
+  return api.get<CardEffect[]>(`/admin/catalog/products/${productId}/effects`);
+}
+
+/** แทนที่ทั้งชุดในครั้งเดียว — เพิ่ม ลบ สลับลำดับ ใช้ request เดียวกันหมด */
+export function saveCardEffects(
+  productId: number,
+  effects: CardEffectPayload[],
+): Promise<CardEffect[]> {
+  return api.put<CardEffect[]>(`/admin/catalog/products/${productId}/effects`, {
+    effects,
+  });
 }
