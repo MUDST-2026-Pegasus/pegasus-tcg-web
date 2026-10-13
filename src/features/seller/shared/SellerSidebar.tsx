@@ -1,11 +1,9 @@
 import { NavLink } from "react-router-dom";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -19,21 +17,15 @@ import {
 import { sellerNav } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 
-import type { SellerIdentity } from "./seller.format";
-
 const NAV_ACTIVE =
   "data-active:bg-[#e6f4f2] data-active:font-medium data-active:text-teal-600 data-active:hover:bg-[#e6f4f2] data-active:hover:text-teal-600";
 const NAV_HOVER = "hover:bg-gray-100 hover:text-gray-700";
-
-type SellerSidebarProps = {
-  seller: SellerIdentity;
-};
 
 /**
  * Sidebar เฉพาะฝั่งผู้ขาย — ดีไซน์/ขนาดตัวอักษรลอกจาก Figma node 432:6773
  * แยกจาก AppSidebar ของ admin ตรง ๆ เพื่อให้ปรับหน้าตาได้อิสระโดยไม่ต้องกังวลเรื่องผลกระทบข้ามฝั่ง
  */
-export function SellerSidebar({ seller }: SellerSidebarProps) {
+export function SellerSidebar() {
   const { isMobile } = useSidebar();
 
   return (
@@ -87,23 +79,6 @@ export function SellerSidebar({ seller }: SellerSidebarProps) {
             </SidebarGroup>
           ))}
         </SidebarContent>
-
-        <SidebarFooter className="gap-0 p-0">
-          <SidebarSeparator className="mx-0 mb-3 bg-zinc-200" />
-          <div className="flex items-center gap-2.5 px-0.5 pt-0.5 pb-3">
-            <Avatar className="size-8">
-              {seller.avatarUrl ? (
-                <AvatarImage src={seller.avatarUrl} alt="" />
-              ) : null}
-              <AvatarFallback className="bg-teal-600 text-sm font-normal text-white">
-                {seller.initials}
-              </AvatarFallback>
-            </Avatar>
-            <span className="min-w-0 truncate text-xs font-medium text-zinc-950">
-              {seller.displayName}
-            </span>
-          </div>
-        </SidebarFooter>
       </div>
     </Sidebar>
   );
