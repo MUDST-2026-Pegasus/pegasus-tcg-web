@@ -8,6 +8,7 @@ import { afterSalesApi } from "@/features/finance/after-sales.api";
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   buyerReturns: vi.fn(), requestReturn: vi.fn(), shipReturn: vi.fn(), createReview: vi.fn(),
   sellerReturns: vi.fn(), approveReturn: vi.fn(), rejectReturn: vi.fn(), receiveReturn: vi.fn(),
+  sellerReturnEvidence: vi.fn(),
 } }));
 afterEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); });
 const wrapper = ({ children }: { children: React.ReactNode }) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>;
@@ -35,5 +36,18 @@ describe("after sales screens", () => {
     fireEvent.change(screen.getByLabelText("จำนวนเงินคืน 9"), { target: { value: "100" } });
     fireEvent.click(screen.getByRole("button", { name: "อนุมัติ" }));
     await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, false));
+  });
+
+  it("opens a seller return's evidence without exposing object keys", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 12, sellerOrderId: 41,
+      status: "REQUESTED", reasonCode: "DAMAGED", description: "Bent card",
+      evidenceKeys: ["returns/private-photo.png"] }] as never);
+    vi.mocked(afterSalesApi.sellerReturnEvidence).mockResolvedValue([{ number: 1,
+      url: "https://example.test/presigned" }]);
+    render(<SellerReturnsPage />, { wrapper });
+    fireEvent.click(await screen.findByRole("button", { name: "ดูหลักฐาน 1 ไฟล์" }));
+    const link = await screen.findByRole("link", { name: "เปิดหลักฐาน 1" });
+    expect(link.getAttribute("href")).toBe("https://example.test/presigned");
+    expect(screen.queryByText(/returns\/private-photo/)).toBeNull();
   });
 });

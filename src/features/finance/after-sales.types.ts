@@ -12,6 +12,7 @@ export type ReturnRequest = {
   evidenceKeys: string[]; returnTrackingNumber: string | null;
   requestedAt: string; reviewedAt: string | null; receivedAt: string | null; closedAt: string | null;
 };
+export type ReturnEvidenceLink = { number: number; url: string };
 export type ReturnInput = {
   reasonCode: string; description: string; evidenceKeys: string[];
   items: Array<{ orderItemId: number; quantity: number }>;
