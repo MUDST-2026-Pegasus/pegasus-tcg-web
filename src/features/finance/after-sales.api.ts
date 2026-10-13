@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { AdminReview, CommissionRule, CommissionRuleInput, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, Review } from "./after-sales.types";
+import type { AdminReview, CommissionRule, CommissionRuleInput, PlatformSetting, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, Review } from "./after-sales.types";
 
 export const afterSalesApi = {
   commissionRules: () => api.get<CommissionRule[]>("/admin/commission-rules"),
@@ -7,6 +7,8 @@ export const afterSalesApi = {
   createCommissionRule: (input: CommissionRuleInput) => api.post<CommissionRule>("/admin/commission-rules", input),
   updateCommissionRule: (id: number, input: CommissionRuleInput) => api.put<CommissionRule>(`/admin/commission-rules/${id}`, input),
   deactivateCommissionRule: (id: number) => api.delete<void>(`/admin/commission-rules/${id}`),
+  defaultCommissionRate: () => api.get<PlatformSetting>("/admin/settings/commission.default_rate"),
+  updateDefaultCommissionRate: (rate: number) => api.put<PlatformSetting>("/admin/settings/commission.default_rate", { value: String(rate) }),
 
   buyerReturns: (sellerOrderId: number) => api.get<ReturnRequest[]>(`/orders/${sellerOrderId}/returns`),
   requestReturn: (sellerOrderId: number, input: ReturnInput) => api.post<ReturnRequest>(`/orders/${sellerOrderId}/returns`, input),

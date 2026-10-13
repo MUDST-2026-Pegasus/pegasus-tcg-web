@@ -5,6 +5,7 @@ export type CommissionRule = {
   priority: number; effectiveFrom: string; effectiveTo: string | null; active: boolean;
 };
 export type CommissionRuleInput = Omit<CommissionRule, "id">;
+export type PlatformSetting = { key: string; value: string; description: string; updatedBy: number | null };
 
 export type ReturnRequest = {
   id: number; sellerOrderId: number; reasonCode: string; description: string | null;
