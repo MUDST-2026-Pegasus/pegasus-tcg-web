@@ -1,3 +1,5 @@
+import { MAX_UNITS_PER_STOCK_IN } from "./listing-form.schema";
+import type { NewUnitsPayload } from "./listing-form.types";
 import { roundMoney, toNumber } from "./products.format";
 import type { RestockData, RestockDraft } from "./restock.types";
 
@@ -29,6 +31,8 @@ export function formatThaiDate(value: string): string {
 export type RestockCalculation = {
   /** กรอกจำนวน ต้นทุนรวม และวันที่ครบ บันทึกได้ */
   isValid: boolean;
+  /** จำนวนเกินที่ backend รับได้ต่อครั้ง — แสดงใต้ช่องจำนวน */
+  quantityError: string | null;
   quantity: number;
   totalCost: number;
   unitCost: number;
@@ -54,10 +58,16 @@ export function calculateRestock(
   const parsedQuantity = toNumber(draft.quantity);
   const parsedTotalCost = toNumber(draft.totalCost);
 
+  const quantityError =
+    parsedQuantity !== null && parsedQuantity > MAX_UNITS_PER_STOCK_IN
+      ? `รับเข้าได้ครั้งละไม่เกิน ${MAX_UNITS_PER_STOCK_IN} ใบ เกินนี้แบ่งบันทึกเป็นหลายล็อต`
+      : null;
+
   const isValid =
     parsedQuantity !== null &&
     Number.isInteger(parsedQuantity) &&
     parsedQuantity > 0 &&
+    quantityError === null &&
     parsedTotalCost !== null &&
     parsedTotalCost > 0 &&
     draft.receivedAt !== "";
@@ -85,6 +95,7 @@ export function calculateRestock(
 
   return {
     isValid,
+    quantityError,
     quantity,
     totalCost,
     unitCost,
@@ -95,5 +106,33 @@ export function calculateRestock(
     previousProfit,
     newProfit,
     suggestedPrice,
+  };
+}
+
+/**
+ * ฟอร์มที่ผ่านแล้ว → body ของ `POST .../units`
+ * - ต้นทุนต่อใบปัดเป็นสตางค์ (`@Digits(fraction = 2)`) ตรงกับตัวเลขที่การ์ดคำนวณโชว์
+ * - วันที่รับเข้าส่งเป็นเที่ยงคืนตามเวลาเครื่อง — วันนี้ก็ยังไม่ใช่อนาคต (`@PastOrPresent`)
+ * - backend ไม่มีช่องแหล่งที่มา / เลขอ้างอิง จึงรวมกับบันทึกไว้ใน `unitNote` ของการ์ดทุกใบ
+ */
+export function toNewUnitsPayload(
+  draft: RestockDraft,
+  result: RestockCalculation,
+  sourceLabel: string | undefined,
+): NewUnitsPayload {
+  const reference = draft.reference.trim();
+  const note = [
+    sourceLabel,
+    reference ? `อ้างอิง ${reference}` : null,
+    draft.note.trim(),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return {
+    quantity: result.quantity,
+    unitCost: result.unitCost,
+    acquiredAt: parseIsoDate(draft.receivedAt)?.toISOString(),
+    unitNote: note || null,
   };
 }
