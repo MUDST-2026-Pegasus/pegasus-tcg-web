@@ -33,6 +33,10 @@ export function useAddCollectionItem() {
   return useMutation({ mutationFn: collectionApi.addCollectionItem, onSuccess: useInvalidateCollection() });
 }
 
+export function useAddCollectionItems() {
+  return useMutation({ mutationFn: collectionApi.addCollectionItems, onSuccess: useInvalidateCollection() });
+}
+
 export function useUpdateCollectionItem() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: CollectionPayload }) => collectionApi.updateCollectionItem(id, payload),

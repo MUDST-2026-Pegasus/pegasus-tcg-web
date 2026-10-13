@@ -18,6 +18,19 @@ export function addCollectionItem(payload: CollectionPayload): Promise<Collectio
   return api.post("/collection", payload);
 }
 
+/** No batch endpoint: one POST per card, in order. A card that fails does not stop the ones after it. */
+export async function addCollectionItems(payloads: CollectionPayload[]): Promise<PromiseSettledResult<CollectionItem>[]> {
+  const results: PromiseSettledResult<CollectionItem>[] = [];
+  for (const payload of payloads) {
+    try {
+      results.push({ status: "fulfilled", value: await addCollectionItem(payload) });
+    } catch (reason) {
+      results.push({ status: "rejected", reason });
+    }
+  }
+  return results;
+}
+
 export function updateCollectionItem(id: number, payload: CollectionPayload): Promise<CollectionItem> {
   return api.put(`/collection/${id}`, payload);
 }

@@ -1,6 +1,7 @@
 import { api, type PageResponse } from "@/lib/api";
 
 import type {
+  CardSetDto,
   CategoryDto,
   GameDto,
   ProductQuery,
@@ -26,6 +27,10 @@ export function getGames(): Promise<GameDto[]> {
 
 export function getCategories(): Promise<CategoryDto[]> {
   return api.get<CategoryDto[]>("/categories", PUBLIC);
+}
+
+export function getCardSets(gameId: number): Promise<CardSetDto[]> {
+  return api.get<CardSetDto[]>("/card-sets", { ...PUBLIC, query: { gameId } });
 }
 
 export function getProducts(
