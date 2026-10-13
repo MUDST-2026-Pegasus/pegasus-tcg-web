@@ -12,7 +12,16 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Card,
   CardAction,
@@ -51,6 +60,7 @@ export function OrderHistoryPage() {
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
+  const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
 
   const sidebarUser = toSidebarUser(user);
 
@@ -90,6 +100,24 @@ export function OrderHistoryPage() {
       });
     } finally {
       setCancellingOrderId(null);
+    }
+  };
+
+  const handleConfirmReceived = async (orderId: number) => {
+    setConfirmingOrderId(orderId);
+    try {
+      const updatedOrder = await ordersApi.confirmReceived(orderId);
+      setSelectedOrderForDetails(updatedOrder);
+      await queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.add({ title: "Receipt confirmed", description: "Your order has been updated.", type: "success" });
+    } catch (err) {
+      toast.add({
+        title: "Could not confirm receipt",
+        description: err instanceof ApiError ? err.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setConfirmingOrderId(null);
     }
   };
 
@@ -156,6 +184,8 @@ export function OrderHistoryPage() {
           order={selectedOrderForDetails}
           open={!!selectedOrderForDetails}
           onClose={() => setSelectedOrderForDetails(null)}
+          onConfirmReceived={() => void handleConfirmReceived(selectedOrderForDetails.id)}
+          isConfirming={confirmingOrderId === selectedOrderForDetails.id}
         />
       )}
     </div>
@@ -397,11 +427,16 @@ function OrderDetailsModal({
   order,
   open,
   onClose,
+  onConfirmReceived,
+  isConfirming,
 }: {
   order: OrderDetails;
   open: boolean;
   onClose: () => void;
+  onConfirmReceived: () => void;
+  isConfirming: boolean;
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   // Parse address snapshot if JSON
@@ -425,21 +460,22 @@ function OrderDetailsModal({
   }
 
   const sellerOrders = order.sellerOrders ?? [];
+  const canConfirmReceived = sellerOrders.some((so) => so.status === "SHIPPED" || so.status === "DELIVERED");
 
-  return (
+  return <>
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto gap-6 p-6 rounded-2xl">
-        <DialogHeader>
+        <DialogHeader className="pr-10">
           <div className="flex justify-between items-start">
-            <div>
+            <div className="min-w-0">
               <DialogTitle className="text-2xl font-bold">
                 Order Details
               </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="mt-1 break-all text-sm text-muted-foreground">
                 Order #{order.orderNumber}
               </p>
             </div>
-            <Badge variant="outline" className="text-sm font-semibold">
+            <Badge variant="outline" className="shrink-0 text-sm font-semibold">
               {order.status}
             </Badge>
           </div>
@@ -555,17 +591,32 @@ function OrderDetailsModal({
           </div>
         </div>
 
-        <DialogFooter className="pt-2">
-          <DialogClose
-            className={buttonVariants({
-              variant: "outline",
-              className: "w-full sm:w-auto rounded-full px-6",
-            })}
-          >
+        <DialogFooter className="mt-2 border-t pt-4">
+          {canConfirmReceived && (
+            <Button onClick={() => setConfirmOpen(true)} disabled={isConfirming}>
+              {isConfirming ? <Loader2 className="size-4 animate-spin" /> : null}
+              {isConfirming ? "Confirming..." : "Confirm receipt"}
+            </Button>
+          )}
+          <DialogClose render={<Button variant="outline" className="w-full border-border sm:w-auto" />}>
             Close
           </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+    <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Confirm that you received the shipped items in this order. This completes their seller orders and releases payment to the sellers.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="border-t pt-4">
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button onClick={() => { setConfirmOpen(false); onConfirmReceived(); }}>Confirm receipt</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>;
 }
