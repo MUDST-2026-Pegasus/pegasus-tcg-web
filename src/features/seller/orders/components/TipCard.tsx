@@ -1,8 +1,9 @@
 import { Sparkles } from "lucide-react";
 
-import type { OrdersData } from "../orders.types";
-
-type TipCardProps = OrdersData["tip"];
+type TipCardProps = {
+  title: string;
+  description: string;
+};
 
 export function TipCard({ title, description }: TipCardProps) {
   return (
