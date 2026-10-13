@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,8 +57,8 @@ export function AdminCommissionPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [form, setForm] = useState<RuleDraft>(blankDraft);
   const [busy, setBusy] = useState(false);
-  const [globalRate, setGlobalRate] = useState("");
-  const [categoryRates, setCategoryRates] = useState<Record<string, { rate: string; useCustom: boolean }>>({});
+  const [globalRateDraft, setGlobalRate] = useState<string | null>(null);
+  const [categoryDrafts, setCategoryDrafts] = useState<Record<string, { rate: string; useCustom: boolean }>>({});
   const currentGlobal = rules.data?.find((rule) => rule.scope === "GLOBAL" && rule.active);
   const fallbackRate = Number(setting.data?.value?.replaceAll('"', "") ?? 0);
   const savedRate = Number(currentGlobal?.ratePercent ?? fallbackRate);
@@ -75,21 +75,18 @@ export function AdminCommissionPage() {
   ];
   const findTargetRule = (scope: "GAME" | "CATEGORY", targetId: number) => targetRules.find((rule) =>
     rule.scope === scope && (scope === "GAME" ? rule.gameId : rule.categoryId) === targetId);
-  useEffect(() => {
-    if (rules.isSuccess && setting.isSuccess) setGlobalRate(formatRate(savedRate));
-  }, [rules.isSuccess, setting.isSuccess, savedRate]);
-  useEffect(() => {
-    if (!rules.isSuccess || !games.isSuccess) return;
-    const draft: Record<string, { rate: string; useCustom: boolean }> = {};
+  const globalRate = globalRateDraft ?? (rules.isSuccess && setting.isSuccess ? formatRate(savedRate) : "");
+  const savedCategoryRates: Record<string, { rate: string; useCustom: boolean }> = {};
+  if (rules.isSuccess && games.isSuccess) {
     for (const game of games.data) {
       const rule = targetRules.find((item) => item.scope === "GAME" && item.gameId === game.id);
-      draft[`GAME:${game.id}`] = { rate: formatRate(Number(rule?.ratePercent ?? savedRate)), useCustom: !!rule?.active };
+      savedCategoryRates[`GAME:${game.id}`] = { rate: formatRate(Number(rule?.ratePercent ?? savedRate)), useCustom: !!rule?.active };
     }
     for (const rule of targetRules.filter((item) => item.scope === "CATEGORY" && item.categoryId != null)) {
-      draft[`CATEGORY:${rule.categoryId}`] = { rate: formatRate(Number(rule.ratePercent)), useCustom: !!rule.active };
+      savedCategoryRates[`CATEGORY:${rule.categoryId}`] = { rate: formatRate(Number(rule.ratePercent)), useCustom: !!rule.active };
     }
-    setCategoryRates(draft);
-  }, [rules.data, rules.isSuccess, games.data, games.isSuccess, savedRate]);
+  }
+  const categoryRates = { ...savedCategoryRates, ...categoryDrafts };
   async function edit(id: number) {
     setBusy(true);
     try { const current = await afterSalesApi.commissionRule(id); setSelected(id); setForm(toDraft(current)); }
@@ -100,7 +97,7 @@ export function AdminCommissionPage() {
   const refresh = async () => { await Promise.all([
     cache.invalidateQueries({ queryKey: ["finance", "commission-rules"] }),
     cache.invalidateQueries({ queryKey: ["finance", "default-commission-rate"] }),
-  ]); };
+  ]); setGlobalRate(null); setCategoryDrafts({}); };
 
   const validRate = (text: string) => text.trim() !== "" && Number.isFinite(Number(text))
     && Number(text) >= 0 && Number(text) <= 100 && /^\d+(?:\.\d{1,3})?$/.test(text.trim());
@@ -221,8 +218,8 @@ export function AdminCommissionPage() {
           onChange={setGlobalRate} />
         <CommissionCategoryList title="อัตราเฉพาะหมวดหมู่" description="เปิดสวิตช์เพื่อกำหนดอัตราแยกจากค่าเริ่มต้น"
           addLabel="+ เพิ่มหมวดหมู่" items={rowItems} onAdd={openAdvanced}
-          onToggle={(id, checked) => setCategoryRates((old) => ({ ...old, [id]: { rate: old[id]?.rate ?? formatRate(savedRate), useCustom: checked } }))}
-          onRateChange={(id, rate) => setCategoryRates((old) => ({ ...old, [id]: { rate, useCustom: old[id]?.useCustom ?? true } }))} />
+          onToggle={(id, checked) => setCategoryDrafts((old) => ({ ...old, [id]: { rate: (old[id] ?? savedCategoryRates[id])?.rate ?? formatRate(savedRate), useCustom: checked } }))}
+          onRateChange={(id, rate) => setCategoryDrafts((old) => ({ ...old, [id]: { rate, useCustom: (old[id] ?? savedCategoryRates[id])?.useCustom ?? true } }))} />
       </div>
       <div className="space-y-4">
         <CommissionCalcCard title="ตัวอย่างการคำนวณ" rows={[
