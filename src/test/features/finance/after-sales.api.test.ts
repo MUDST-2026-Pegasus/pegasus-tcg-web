@@ -39,6 +39,11 @@ describe("TCG-394 remaining API contracts", () => {
     expect(post).toHaveBeenNthCalledWith(5, "/sellers/me/returns/12/receive", { restock: false });
   });
 
+  it("loads seller evidence through the owned return endpoint", async () => {
+    await afterSalesApi.sellerReturnEvidence(12);
+    expect(get).toHaveBeenCalledWith("/sellers/me/returns/12/evidence");
+  });
+
   it("connects all four review operations", async () => {
     await afterSalesApi.createReview(11, 5, "Great", "Excellent seller");
     await afterSalesApi.publicReviews("seller.th");

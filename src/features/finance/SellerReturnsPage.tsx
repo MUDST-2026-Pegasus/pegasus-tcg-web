@@ -7,6 +7,19 @@ import { toast } from "@/components/ui/toast";
 import { getErrorMessage } from "@/lib/api";
 import { afterSalesApi } from "./after-sales.api";
 
+function ReturnEvidence({ returnId, count }: { returnId: number; count: number }) {
+  const [open, setOpen] = useState(false);
+  const files = useQuery({ queryKey: ["finance", "return-evidence", returnId],
+    queryFn: () => afterSalesApi.sellerReturnEvidence(returnId), enabled: open,
+    refetchOnMount: "always" });
+  if (count === 0) return null;
+  return <div className="space-y-2"><Button variant="outline" size="sm" onClick={() => setOpen((value) => !value)}>{open ? "ซ่อนหลักฐาน" : `ดูหลักฐาน ${count} ไฟล์`}</Button>
+    {open && files.isPending && <p>กำลังโหลดหลักฐาน...</p>}
+    {open && files.isError && <p role="alert">โหลดหลักฐานไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void files.refetch()}>ลองอีกครั้ง</Button></p>}
+    {open && files.data && <div className="flex flex-wrap gap-3">{files.data.map((file) => <a key={file.number} href={file.url} target="_blank" rel="noopener noreferrer" aria-label={`เปิดหลักฐาน ${file.number}`} className="block rounded border p-2 text-center text-sm hover:border-primary"><img src={file.url} alt={`หลักฐาน ${file.number}`} className="h-32 w-32 object-contain" /><span>หลักฐาน {file.number}</span></a>)}</div>}
+  </div>;
+}
+
 export function SellerReturnsPage() {
   const cache = useQueryClient();
   const [status, setStatus] = useState("");
@@ -30,7 +43,7 @@ export function SellerReturnsPage() {
     {queue.data?.map((item) => <Card key={item.id}><CardContent className="space-y-3 p-5">
       <h2 className="font-semibold">คำขอ #{item.id} · คำสั่งซื้อย่อย #{item.sellerOrderId}</h2>
       <p>{item.status} · {item.reasonCode}</p><p>{item.description}</p>
-      {item.evidenceKeys.length > 0 && <p>หลักฐาน {item.evidenceKeys.length} ไฟล์ (object keys: {item.evidenceKeys.join(", ")})</p>}
+      <ReturnEvidence returnId={item.id} count={item.evidenceKeys.length} />
       {item.status === "REQUESTED" && <div className="space-y-2 rounded border p-3">
         <select aria-label={`ผลการคืน ${item.id}`} className="rounded border p-2" value={resolutions[item.id] ?? "FULL_REFUND"} onChange={(e) => setResolutions((old) => ({ ...old, [item.id]: e.target.value as "FULL_REFUND" | "PARTIAL_REFUND" }))}><option value="FULL_REFUND">คืนเต็มจำนวน</option><option value="PARTIAL_REFUND">คืนบางส่วน</option></select>
         <Input className="max-w-48" aria-label={`จำนวนเงินคืน ${item.id}`} type="number" min="0.01" step="0.01" placeholder="ยอดคืน (บาท)" value={amounts[item.id] ?? ""} onChange={(e) => setAmounts((old) => ({ ...old, [item.id]: e.target.value }))} />
