@@ -1,64 +1,67 @@
-import alexRivera from "@/assets/about/alex-rivera.jpeg";
-import davidChen from "@/assets/about/david-chen.jpeg";
-import mayaPatelAlt from "@/assets/about/maya-patel-alt.jpeg";
-import mayaPatel from "@/assets/about/maya-patel.png";
-import sarahJenkins from "@/assets/about/sarah-jenkins.jpeg";
+import team1 from "@/assets/about/team-1.jpeg";
+import team2 from "@/assets/about/team-2.jpeg";
+import team3 from "@/assets/about/team-3.jpeg";
+import team4 from "@/assets/about/team-4.jpeg";
+import team5 from "@/assets/about/team-5.jpeg";
+import team6 from "@/assets/about/team-6.jpeg";
+import team7 from "@/assets/about/team-7.jpeg";
+import team8 from "@/assets/about/team-8.jpeg";
 
 export const aboutTeam = [
   {
-    name: "Alex Rivera",
+    name: "Wichapon Akarak",
     role: "FOUNDER & CEO",
     description:
       "Visionary leader with 15 years in tech and a lifetime passion for card collecting.",
-    image: alexRivera,
+    image: team1,
   },
   {
-    name: "Sarah Jenkins",
+    name: "Gritsada Moeithaisong",
     role: "HEAD OF AUTHENTICATION",
     description:
       "Former lead grader at top industry firms, ensuring uncompromising quality control.",
-    image: sarahJenkins,
+    image: team2,
   },
   {
-    name: "David Chen",
+    name: "Apirak Panboonchu",
     role: "COMMUNITY MANAGER",
     description:
       "Bridging the gap between our platform and the passionate players who use it.",
-    image: davidChen,
+    image: team3,
   },
   {
-    name: "Maya Patel",
+    name: "Arlif Thongrakjan",
     role: "LEAD DEVELOPER",
     description:
       "Architecting the robust infrastructure that powers our real-time Value Tracker.",
-    image: mayaPatel,
+    image: team4,
   },
   {
-    name: "Alex Rivera",
+    name: "Torntun Pookhow",
     role: "FOUNDER & CEO",
     description:
       "Visionary leader with 15 years in tech and a lifetime passion for card collecting.",
-    image: alexRivera,
+    image: team5,
   },
   {
-    name: "Sarah Jenkins",
+    name: "Chanasorn Chirapongsathon",
     role: "HEAD OF AUTHENTICATION",
     description:
       "Former lead grader at top industry firms, ensuring uncompromising quality control.",
-    image: sarahJenkins,
+    image: team6,
   },
   {
-    name: "David Chen",
+    name: "Thanapat Julakarn",
     role: "COMMUNITY MANAGER",
     description:
       "Bridging the gap between our platform and the passionate players who use it.",
-    image: davidChen,
+    image: team7,
   },
   {
-    name: "Maya Patel",
+    name: "Krittatee Kerdklinhom",
     role: "LEAD DEVELOPER",
     description:
       "Architecting the robust infrastructure that powers our real-time Value Tracker.",
-    image: mayaPatelAlt,
+    image: team8,
   },
 ] as const;

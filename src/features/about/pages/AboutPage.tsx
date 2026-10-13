@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import aboutHero from "@/assets/about/about-hero.jpeg";
-import ourStory from "@/assets/about/our-story.jpeg";
+import teamGroup from "@/assets/about/team-group.jpeg";
 import {
   Avatar,
   AvatarFallback,
@@ -54,11 +55,11 @@ export function AboutPage() {
               worldwide.
             </p>
           </div>
-          <Card className="rounded-xl p-px shadow-sm [--card-spacing:0px]">
+          <Card className="overflow-hidden rounded-xl p-px shadow-sm [--card-spacing:0px]">
             <CardContent className="p-0">
               <img
-                src={ourStory}
-                alt="Pegasus team collaborating in an office"
+                src={teamGroup}
+                alt="ภาพประกอบทีม Pegasus ในบรรยากาศกรีกโบราณ"
                 className="aspect-video w-full object-cover"
               />
             </CardContent>
@@ -83,7 +84,7 @@ export function AboutPage() {
               key={`${member.name}-${index}`}
               className="flex flex-col items-center text-center"
             >
-              <Avatar className="size-32 shadow-sm">
+              <Avatar className="size-40 shadow-sm sm:size-44">
                 <AvatarImage src={member.image} alt={member.name} />
                 <AvatarFallback>
                   {member.name
@@ -108,4 +109,3 @@ export function AboutPage() {
     </div>
   );
 }
-import { useEffect } from "react";
