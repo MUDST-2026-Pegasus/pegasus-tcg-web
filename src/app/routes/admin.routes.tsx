@@ -11,9 +11,9 @@ import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
 import { AdminPaymentsPage } from "@/features/admin/pages/AdminPaymentsPage";
 import { AdminPayoutsPage } from "@/features/admin/pages/AdminPayoutsPage";
 import { AdminRefundsPage } from "@/features/admin/pages/AdminRefundsPage";
+import { AdminReviewsPage } from "@/features/admin/pages/AdminReviewsPage";
 import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
 import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
-import { AdminReviewsPage } from "@/features/finance/AdminReviewsPage";
 import { adminNav } from "@/lib/nav-config";
 
 /**
