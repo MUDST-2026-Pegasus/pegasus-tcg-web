@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { label: "HOME", to: "/" },
   { label: "ALL PRODUCTS", to: "/products" },
-  { label: "SALE", to: "/sale" },
-  { label: "NEW ARRIVALS", to: "/new-arrivals" },
   { label: "POKEMON", to: "/pokemon" },
   { label: "ONE PIECE", to: "/one-piece" },
 ] as const;
@@ -17,11 +15,12 @@ const NAV_LINKS = [
 export function Navbar() {
   return (
     <header className="sticky top-0 z-40 h-20 border-b border-border bg-white px-10 py-3.5 backdrop-blur-[6px]">
-      <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between gap-10">
+      {/* คอลัมน์ซ้าย-ขวากว้างเท่ากัน เมนูจึงอยู่กึ่งกลางหน้าเสมอ แม้โลโก้กับกลุ่มไอคอนกว้างไม่เท่ากัน */}
+      <div className="mx-auto grid h-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-10">
         <Link
           to="/"
           aria-label="Pegasus TCG — กลับหน้าแรก"
-          className="flex h-full cursor-pointer items-center text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
+          className="flex h-full cursor-pointer items-center justify-self-start text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
         >
           pegasus
         </Link>
@@ -56,8 +55,8 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex h-full items-center gap-5">
-          {/* Language switch */}
+        <div className="flex h-full items-center gap-5 justify-self-end">
+          {/* Language switch — ปิดไว้ก่อนจนกว่าจะมีระบบ i18n จริง [TCG-467]
           <button
             type="button"
             aria-label="Switch language"
@@ -73,6 +72,7 @@ export function Navbar() {
               EN
             </span>
           </button>
+          */}
 
           <Button
             variant="ghost"
