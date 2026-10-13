@@ -133,6 +133,15 @@ export type PublicListingDto = {
   };
 };
 
+export type PublicListingDetailDto = {
+  listing: PublicListingDto & {
+    publicNote: string | null;
+    gradingCompany: string | null;
+    gradeValue: number | null;
+  };
+  photoUrls: string[];
+};
+
 /** A collector who has made at least one copy of this product public. */
 export type ProductCollectorDto = {
   username: string;

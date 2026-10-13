@@ -16,6 +16,7 @@ export const catalogKeys = {
     [...catalogKeys.all, "products", query] as const,
   product: (idOrSlug: string) => [...catalogKeys.all, "product", idOrSlug] as const,
   listings: (productId: number) => [...catalogKeys.all, "product", productId, "listings"] as const,
+  listing: (id: number) => [...catalogKeys.all, "listing", id] as const,
   collectors: (productId: number, page: number) =>
     [...catalogKeys.all, "product", productId, "collectors", page] as const,
   effects: (productId: number) =>
@@ -65,6 +66,16 @@ export function useProductListings(productId: number) {
   return useQuery({
     queryKey: catalogKeys.listings(productId),
     queryFn: ({ signal }) => catalogApi.getProductListings(productId, signal),
+  });
+}
+
+export function useListingDetail(id: number) {
+  return useQuery({
+    queryKey: catalogKeys.listing(id),
+    queryFn: ({ signal }) => catalogApi.getListingDetail(id, signal),
+    enabled: Number.isSafeInteger(id) && id > 0,
+    retry: (failureCount, error) =>
+      !(isApiError(error) && error.status === 404) && failureCount < 2,
   });
 }
 

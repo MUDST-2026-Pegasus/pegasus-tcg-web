@@ -7,6 +7,7 @@ import type {
   ProductSummaryDto,
   ProductDetailDto,
   PublicListingDto,
+  PublicListingDetailDto,
   ProductCollectorDto,
   CatalogCardEffectDto,
 } from "./catalog.types";
@@ -63,6 +64,10 @@ export async function getProductListings(
   }
 
   return listings;
+}
+
+export function getListingDetail(id: number, signal?: AbortSignal) {
+  return api.get<PublicListingDetailDto>(`/listings/${id}`, { ...PUBLIC, signal });
 }
 
 export function getProductCollectors(productId: number, page: number, signal?: AbortSignal) {
