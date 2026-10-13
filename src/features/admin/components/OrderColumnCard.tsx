@@ -1,65 +1,74 @@
 import { Store, User } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import type {
-  OrderCard,
-  OrderStatusTone,
-} from "@/features/admin/admin.types";
 import { cn } from "@/lib/utils";
 
-/**
- * โทนสีของ badge บริบท (มุมล่างซ้าย) ในการ์ด — โทนเดียวกับจุดหัวคอลัมน์
- * รอชำระเงินใช้ส้ม, รอส่ง+จัดส่งใช้น้ำเงิน/ม่วง, สำเร็จเขียว, ข้อพิพาทแดง
- */
-const CONTEXT_BADGE: Record<OrderStatusTone, string> = {
-  pending: "bg-[#fdf0dd] text-[#b45309]",
-  packing: "bg-[#e8f1fc] text-[#0058bc]",
-  shipping: "bg-[#ecebff] text-[#4f46e5]",
-  success: "bg-[#e3f4ec] text-[#12805c]",
-  dispute: "bg-[#fbe9e8] text-[#d0342c]",
-};
+import { formatBaht } from "../catalog.format";
+import {
+  formatItemCount,
+  orderContextLabel,
+  partyName,
+  type OrderTone,
+} from "../orders.format";
+import type { AdminOrderSummary, OrderBoardColumnKey } from "../orders.types";
+import { ORDER_TONE_BADGE } from "./orders.styles";
 
 type OrderColumnCardProps = {
-  card: OrderCard;
-  tone: OrderStatusTone;
+  order: AdminOrderSummary;
+  column: OrderBoardColumnKey;
+  tone: OrderTone;
+  onSelect: (order: AdminOrderSummary) => void;
 };
 
 /**
- * การ์ดใบสั่งซื้อหนึ่งใบใน Kanban
+ * การ์ดใบสั่งซื้อหนึ่งใบใน Kanban — กดแล้วเปิดรายละเอียด
  * ดีไซน์ 156.8 × 116 (padding 12) ในกริด 180.8px — คอลัมน์คุมความกว้างเอง
  */
-export function OrderColumnCard({ card, tone }: OrderColumnCardProps) {
+export function OrderColumnCard({
+  order,
+  column,
+  tone,
+  onSelect,
+}: OrderColumnCardProps) {
   return (
-    <article className="flex flex-col gap-3 rounded-[10px] border border-[#eef1f2] bg-background p-3 shadow-none">
+    <button
+      type="button"
+      onClick={() => onSelect(order)}
+      className="flex w-full flex-col gap-3 rounded-[10px] border border-[#eef1f2] bg-background p-3 text-left shadow-none transition-colors hover:border-[#d5dbdd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
       <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="font-medium text-foreground">{card.code}</span>
-        <span className="font-medium text-foreground">{card.amount}</span>
+        <span className="truncate font-medium text-foreground">
+          {order.sellerOrderNumber}
+        </span>
+        <span className="shrink-0 font-medium text-foreground">
+          {formatBaht(order.grandTotal)}
+        </span>
       </div>
 
       <div className="flex flex-col gap-[3px] text-[11px] text-muted-foreground">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <Store aria-hidden="true" className="size-4 shrink-0 text-[#9aa5ad]" />
-          <span>{card.seller}</span>
+          <span className="truncate">{partyName(order.seller)}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <User aria-hidden="true" className="size-4 shrink-0 text-[#9aa5ad]" />
-          <span>{card.buyer}</span>
+          <span className="truncate">{partyName(order.buyer)}</span>
         </div>
       </div>
 
       <div className="flex items-center justify-between gap-2">
         <Badge
           className={cn(
-            "rounded-[5px] px-2 text-[10px] font-medium",
-            CONTEXT_BADGE[tone],
+            "max-w-[70%] truncate rounded-[5px] px-2 text-[10px] font-medium",
+            ORDER_TONE_BADGE[tone],
           )}
         >
-          {card.contextLabel}
+          {orderContextLabel(column, order)}
         </Badge>
-        <span className="text-[10px] text-muted-foreground">
-          {card.itemsLabel}
+        <span className="shrink-0 text-[10px] text-muted-foreground">
+          {formatItemCount(order.itemCount)}
         </span>
       </div>
-    </article>
+    </button>
   );
 }
