@@ -327,9 +327,9 @@ export function SearchResultsPage() {
               <FieldLegend className="text-lg font-semibold">Price Range</FieldLegend>
               <form onSubmit={applyPrice} className="flex flex-col gap-3">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Minimum price" placeholder="฿ Min" value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="rounded-none border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label="Minimum price" placeholder="฿ Min" value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
                   <span className="text-muted-foreground">-</span>
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Maximum price" placeholder="฿ Max" value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="rounded-none border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label="Maximum price" placeholder="฿ Max" value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
                 </div>
                 {priceRangeInvalid ? (
                   <p role="alert" className="text-xs text-destructive">ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด</p>
