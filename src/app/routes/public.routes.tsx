@@ -37,8 +37,6 @@ export const publicRoutes: RouteObject = {
     { path: "collectors/:username", element: <CollectorProfilePage /> },
     { path: "products/:productId/listings", element: <MarketListingsPage /> },
     { path: "listings/:listingId", element: <ListingDetailPage /> },
-    { path: "sale", element: <PagePlaceholder title="Sale" /> },
-    { path: "new-arrivals", element: <PagePlaceholder title="New arrivals" /> },
     { path: "pokemon", element: <ProductListPage key="pokemon" gameCode="POKEMON" title="Pokémon" /> },
     { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
     { path: "search", element: <SearchResultsPage /> },
