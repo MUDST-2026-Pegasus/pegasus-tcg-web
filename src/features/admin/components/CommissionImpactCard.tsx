@@ -17,7 +17,7 @@ export function CommissionImpactCard({
         <TriangleAlert aria-hidden="true" className="size-[15px] shrink-0" />
         <p className="text-xs font-semibold">{title}</p>
       </div>
-      <p className="text-xs leading-snug text-[#b45309]/90">{description}</p>
+      <p className="text-[11px] leading-4 text-[#b45309]">{description}</p>
     </div>
   );
 }
