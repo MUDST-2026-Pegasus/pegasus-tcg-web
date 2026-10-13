@@ -3,7 +3,6 @@ import {
   Clock2,
   LayoutDashboard,
   LayoutGrid,
-  LogOut,
   Package,
   Receipt,
   Settings2,
@@ -19,8 +18,6 @@ export type NavItem = {
   icon: LucideIcon;
   /** true = highlight only on an exact URL match (index routes) */
   end?: boolean;
-  /** "danger" = ย้อมสีแดงตลอด (ใช้กับ "ออกจากระบบ") */
-  tone?: "default" | "danger";
 };
 
 export type NavGroup = {
@@ -95,16 +92,5 @@ export const sellerNav: NavGroup[] = [
   {
     label: "การเงิน",
     items: [{ label: "ถอนเงิน", to: "/seller/payout", icon: Wallet }],
-  },
-  {
-    label: "บัญชี",
-    items: [
-      {
-        label: "ออกจากระบบ",
-        to: "/seller/logout",
-        icon: LogOut,
-        tone: "danger",
-      },
-    ],
   },
 ];
