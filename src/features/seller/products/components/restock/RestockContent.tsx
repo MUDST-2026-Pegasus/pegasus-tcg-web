@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Info } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Breadcrumb,
@@ -12,8 +12,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 
-import { calculateRestock } from "../../restock.calc";
+import { listingErrorMessage } from "../../products.format";
+import { calculateRestock, toNewUnitsPayload } from "../../restock.calc";
+import { useRestockListing } from "../../restock.queries";
 import type { RestockData, RestockDraft } from "../../restock.types";
 
 import { ProductStockCard } from "./ProductStockCard";
@@ -30,6 +33,8 @@ type RestockContentProps = {
 };
 
 export function RestockContent({ data }: RestockContentProps) {
+  const navigate = useNavigate();
+  const restock = useRestockListing();
   const [draft, setDraft] = useState<RestockDraft>(data.initialDraft);
 
   const result = calculateRestock(data.product, data.commissionPercent, draft);
@@ -38,6 +43,29 @@ export function RestockContent({ data }: RestockContentProps) {
 
   function handleFieldChange(field: keyof RestockDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handleSave() {
+    const sourceLabel = data.form.sourceOptions.find(
+      (option) => option.value === draft.source,
+    )?.label;
+
+    try {
+      await restock.mutateAsync({
+        id: Number(data.productId),
+        payload: toNewUnitsPayload(draft, result, sourceLabel),
+      });
+      toast.add({
+        type: "success",
+        title: `รับเข้า ${result.quantity} ${data.product.unit} แล้ว`,
+      });
+      navigate(PRODUCTS_PATH);
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: listingErrorMessage(error, "บันทึกการรับเข้าไม่สำเร็จ ลองใหม่อีกครั้ง"),
+      });
+    }
   }
 
   return (
@@ -81,7 +109,8 @@ export function RestockContent({ data }: RestockContentProps) {
           <Button
             size="sm"
             className="rounded-md px-2.5"
-            disabled={!result.isValid}
+            disabled={!result.isValid || restock.isPending}
+            onClick={handleSave}
           >
             {data.actions.saveLabel}
           </Button>
@@ -95,6 +124,7 @@ export function RestockContent({ data }: RestockContentProps) {
           <RestockFormCard
             {...data.form}
             draft={draft}
+            quantityError={result.quantityError}
             onFieldChange={handleFieldChange}
           />
 
