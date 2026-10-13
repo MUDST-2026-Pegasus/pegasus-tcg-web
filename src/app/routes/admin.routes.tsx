@@ -10,6 +10,8 @@ import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
 import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
 import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
 import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
+import { AdminFinancePage } from "@/features/finance/AdminFinancePage";
+import { AdminReviewsPage } from "@/features/finance/AdminReviewsPage";
 import { adminNav } from "@/lib/nav-config";
 
 /**
@@ -33,6 +35,8 @@ export const adminRoutes: RouteObject = {
     { path: "users", element: <AdminUsersPage /> },
     { path: "orders", element: <AdminOrdersPage /> },
     { path: "commission", element: <AdminCommissionPage /> },
+    { path: "finance", element: <AdminFinancePage /> },
+    { path: "reviews", element: <AdminReviewsPage /> },
     { path: "activity-log", element: <AdminActivityLogPage /> },
   ],
 };

@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth.queries";
+import { PublicSellerReviews } from "@/features/finance/PublicSellerReviews";
 
 import { usePublicCollection } from "../collection.queries";
 
@@ -40,6 +41,7 @@ export function PublicCollectionPage() {
             onClick={() => void collection.fetchNextPage()}>Load more</Button> : null}
         </>}
       </QueryBoundary>
+      <PublicSellerReviews username={username} />
     </div>
   </main>;
 }

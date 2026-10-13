@@ -47,8 +47,6 @@ export const publicRoutes: RouteObject = {
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },
-    { path: "payment", element: <PaymentPage /> },
-    { path: "payment/success", element: <PaymentSuccessPage /> },
 
     { path: "about", element: <AboutPage /> },
     { path: "terms-of-service", element: <TermsOfServicePage /> },
@@ -57,6 +55,8 @@ export const publicRoutes: RouteObject = {
     {
       element: <RequireAuth />,
       children: [
+        { path: "payment", element: <PaymentPage /> },
+        { path: "payment/success", element: <PaymentSuccessPage /> },
         { path: "account/profile", element: <ProfilePage /> },
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },
