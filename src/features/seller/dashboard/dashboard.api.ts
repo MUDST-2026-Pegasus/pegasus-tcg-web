@@ -7,7 +7,9 @@ import {
   Wallet,
 } from "lucide-react";
 
-import type { DashboardData } from "./dashboard.types";
+import { api } from "@/lib/api";
+
+import type { DashboardData, SellerDashboard } from "./dashboard.types";
 
 /**
  * ข้อมูลตัวอย่างของหน้า "แดชบอร์ดผู้ขาย" — ลอกข้อความและตัวเลขจาก
@@ -205,4 +207,16 @@ const DASHBOARD_MOCK: Omit<DashboardData, "greeting"> = {
  */
 export function getDashboardData(sellerName: string): DashboardData {
   return { greeting: `สวัสดี, ${sellerName} 👋`, ...DASHBOARD_MOCK };
+}
+
+/**
+ * ตัวเลขแดชบอร์ดของร้านที่ login อยู่ (`SellerDashboardController.java`)
+ * component ไม่เรียกตรง ๆ ให้ผ่าน `useSellerDashboard()` ใน `dashboard.queries.ts`
+ *
+ * @param month "YYYY-MM" — ไม่ส่ง = เดือนปัจจุบันตามเวลาไทย
+ */
+export function getSellerDashboard(month?: string): Promise<SellerDashboard> {
+  return api.get<SellerDashboard>("/sellers/me/dashboard", {
+    query: { month },
+  });
 }
