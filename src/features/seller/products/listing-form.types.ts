@@ -165,8 +165,12 @@ export type CreateListingPayload = {
 export type NewUnitsPayload = {
   /** 1–100 ต่อครั้ง */
   quantity: number;
-  /** ต้นทุนต่อใบ ผู้ซื้อไม่เห็น ใช้คิดกำไร */
+  /** ต้นทุนต่อใบ ผู้ซื้อไม่เห็น ใช้คิดกำไร — ทศนิยมไม่เกิน 2 ตำแหน่ง */
   unitCost: number;
+  /** ISO-8601 พร้อม offset ห้ามเป็นอนาคต · ไม่ส่ง = เวลาที่ backend รับ */
+  acquiredAt?: string;
+  /** โน้ตของการ์ด ผู้ซื้อไม่เห็น ไม่เกิน 255 ตัวอักษร */
+  unitNote?: string | null;
 };
 
 /**
