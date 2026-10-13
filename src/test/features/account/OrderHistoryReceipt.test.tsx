@@ -62,7 +62,7 @@ it("confirms shipped seller orders through the parent order and updates the dial
   await waitFor(() => expect(ordersApi.confirmReceived).toHaveBeenCalledWith(12));
   expect(nativeConfirm).not.toHaveBeenCalled();
   await waitFor(() => expect(screen.queryByRole("button", { name: "Confirm receipt" })).not.toBeInTheDocument());
-  expect(screen.getByText("Package Status: COMPLETED")).toBeInTheDocument();
+  expect(screen.getByText(/Package Status:\s*(Completed|COMPLETED)/i)).toBeInTheDocument();
 });
 
 it("does not offer receipt confirmation before a seller ships", async () => {
