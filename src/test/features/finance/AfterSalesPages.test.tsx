@@ -43,9 +43,22 @@ describe("after sales screens", () => {
     vi.mocked(afterSalesApi.approveReturn).mockResolvedValue({} as never);
     render(<SellerReturnsPage />, { wrapper });
     await screen.findByText(/Bent card/);
+    expect(screen.getByText("รอผู้ขายตรวจสอบ · สินค้าเสียหาย")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("จำนวนเงินคืน 9"), { target: { value: "100" } });
     fireEvent.click(screen.getByRole("button", { name: "อนุมัติ" }));
     await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, false));
+  });
+
+  it("shows readable return statuses while filtering with the original API value", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 13, sellerOrderId: 41,
+      status: "AWAITING_RETURN_SHIPMENT", reasonCode: "WRONG_ITEM", description: "Wrong card",
+      evidenceKeys: [] }] as never);
+    render(<SellerReturnsPage />, { wrapper });
+    expect(await screen.findByText("รอผู้ซื้อส่งสินค้าคืน · ได้รับสินค้าผิดรายการ")).toBeTruthy();
+    expect(screen.getByRole("option", { name: "ผู้ขายได้รับสินค้าคืนแล้ว" }).getAttribute("value")).toBe("RECEIVED");
+    fireEvent.change(screen.getByRole("combobox", { name: "กรองสถานะคืนสินค้า" }),
+      { target: { value: "AWAITING_RETURN_SHIPMENT" } });
+    await waitFor(() => expect(afterSalesApi.sellerReturns).toHaveBeenCalledWith("AWAITING_RETURN_SHIPMENT"));
   });
 
   it("opens a seller return's evidence without exposing object keys", async () => {
