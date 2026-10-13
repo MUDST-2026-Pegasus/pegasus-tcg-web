@@ -7,6 +7,7 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { getErrorMessage } from "@/lib/api";
 import type { SellerOrderDetails } from "@/features/account/orders.types";
 import { afterSalesApi } from "./after-sales.api";
+import { returnReasonLabel, returnStatusLabel } from "./after-sales.format";
 
 const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "COUNTERFEIT", "OTHER"];
 
@@ -50,13 +51,13 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
     {returns.isPending && <p>กำลังโหลดคำขอคืนสินค้า...</p>}
     {returns.isError && <p role="alert">โหลดคำขอคืนสินค้าไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void returns.refetch()}>ลองอีกครั้ง</Button></p>}
     {returns.data?.map((item) => <div key={item.id} className="space-y-2 rounded border p-3">
-      <p>คำขอคืน #{item.id} · {item.status} · {item.reasonCode}</p>
+      <p>คำขอคืน #{item.id} · {returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}</p>
       {item.refundAmount != null && <p>ยอดคืน ฿{item.refundAmount}</p>}
       {item.status === "AWAITING_RETURN_SHIPMENT" && <div className="flex gap-2"><Input aria-label={`เลขพัสดุคืน ${item.id}`} placeholder="เลขพัสดุส่งคืน" value={tracking[item.id] ?? ""} onChange={(e) => setTracking((old) => ({ ...old, [item.id]: e.target.value }))} /><Button disabled={busy || !tracking[item.id]?.trim()} onClick={() => void act(() => afterSalesApi.shipReturn(order.id, item.id, tracking[item.id].trim()), "บันทึกเลขพัสดุแล้ว")}>แจ้งส่งคืน</Button></div>}
     </div>)}
     {canReturn && returns.data?.length === 0 && <div className="space-y-3 rounded border p-3">
       <p className="font-medium">ขอคืนสินค้า (ก่อนสิ้นสุดระยะคืนสินค้า)</p>
-      <select aria-label="สาเหตุคืนสินค้า" className="w-full rounded border p-2" value={reason} onChange={(e) => setReason(e.target.value)}>{reasons.map((code) => <option key={code}>{code}</option>)}</select>
+      <select aria-label="สาเหตุคืนสินค้า" className="w-full rounded border p-2" value={reason} onChange={(e) => setReason(e.target.value)}>{reasons.map((code) => <option key={code} value={code}>{returnReasonLabel(code)}</option>)}</select>
       <Input aria-label="รายละเอียดการคืน" placeholder="รายละเอียด" value={description} onChange={(e) => setDescription(e.target.value)} />
       {(order.items ?? []).map((item) => <label key={item.id} className="flex items-center gap-2">{item.productName} (สูงสุด {item.quantity})<Input className="max-w-24" type="number" min="0" max={item.quantity} value={quantities[item.id] ?? 0} onChange={(e) => setQuantities((old) => ({ ...old, [item.id]: Math.min(item.quantity, Math.max(0, Number(e.target.value))) }))} /></label>)}
       <label>หลักฐานประกอบ (ไม่บังคับ)<Input type="file" multiple accept={evidence.accept} onChange={(e) => { if (e.target.files?.length) evidence.addFiles(e.target.files); }} /></label>
