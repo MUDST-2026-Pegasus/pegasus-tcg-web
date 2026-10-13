@@ -92,7 +92,8 @@ export function salesSummary(dashboard: SellerDashboard): SalesSummary {
   const last = sales.monthly.at(-1)?.month ?? period.month;
 
   return {
-    label: `ยอดขายเดือน${thaiMonthLong(period.month)}`,
+    // ยอดนี้คือ `items_subtotal` — หน้าจัดการคำสั่งซื้อมีอีกยอดที่รวมค่าส่ง จึงต้องบอกให้ชัด
+    label: `ยอดขายเดือน${thaiMonthLong(period.month)} (ไม่รวมค่าส่ง)`,
     amount: formatBaht(sales.value),
     delta: formatDelta(sales.value, sales.previous),
     description:
@@ -113,6 +114,7 @@ export function salesSummary(dashboard: SellerDashboard): SalesSummary {
 /**
  * งานที่ร้านต้องทำ เรียงจากด่วนสุด — รายการที่เป็น 0 ไม่ขึ้น
  * ลิงก์ไปหน้าที่จัดการได้ทันที (`?status=` ตรงกับแท็บของหน้าจัดการคำสั่งซื้อ)
+ * คำขอคืนสินค้าตอบได้ที่ `/seller/returns` เท่านั้น แท็บคืนสินค้าของหน้าคำสั่งซื้อมีไว้ดูอย่างเดียว
  */
 export function todoList(dashboard: SellerDashboard): TodoList {
   const { orders, listings, reviews } = dashboard;
@@ -138,7 +140,7 @@ export function todoList(dashboard: SellerDashboard): TodoList {
         accent: "red",
         title: "ตอบคำขอคืนสินค้า",
         description: `${count.format(returns)} คำขอรอการตัดสินใจ`,
-        to: "/seller/orders?status=returns",
+        to: "/seller/returns",
       },
     },
     {
@@ -148,7 +150,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
         accent: "amber",
         title: "เติมสต็อกสินค้าที่ใกล้หมด",
         description: `${count.format(listings.lowStockCount)} รายการเหลือไม่เกิน ${listings.lowStockThreshold} ใบ`,
-        to: "/seller/products",
+        // ใกล้หมดนับเฉพาะ ACTIVE — เรียงคงเหลือน้อยก่อน ใบที่ต้องเติมจะอยู่บนสุด
+        to: "/seller/products?status=ACTIVE&sort=stock_asc",
       },
     },
     {
@@ -168,7 +171,7 @@ export function todoList(dashboard: SellerDashboard): TodoList {
         accent: "gray",
         title: "ตอบกลับรีวิว",
         description: `${count.format(reviews.unreplied)} รีวิวยังไม่ได้ตอบ`,
-        to: null,
+        to: "/seller/reviews",
       },
     },
   ];

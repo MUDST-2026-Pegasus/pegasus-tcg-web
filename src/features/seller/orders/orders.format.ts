@@ -44,18 +44,18 @@ export type OrderTabMeta = {
   sort: SellerOrderSort;
 };
 
+/** สถานะหลังการขายที่ `ReturnService` ฝั่ง backend เป็นคนขยับ — จัดการได้ที่ `/seller/returns` */
+export const RETURN_STATUSES: SellerOrderStatus[] = ["RETURN_REQUESTED", "RETURNED", "REFUNDED"];
+
+export const RETURNS_PATH = "/seller/returns";
+
 /** เรียงตามลำดับงานของร้าน แต่ละสถานะจริงอยู่ในแท็บเดียวเท่านั้น */
 export const ORDER_TABS: OrderTabMeta[] = [
   { id: "awaiting_pack", label: "รอแพ็ค", statuses: TO_PACK_STATUSES, sort: "PAID_OLDEST" },
   { id: "awaiting_payment", label: "รอชำระ", statuses: ["PENDING_PAYMENT"], sort: "OLDEST" },
   { id: "shipped", label: "กำลังจัดส่ง", statuses: ["SHIPPED", "DELIVERED"], sort: "SHIPPED_NEWEST" },
   { id: "completed", label: "สำเร็จ", statuses: ["COMPLETED"], sort: "COMPLETED_NEWEST" },
-  {
-    id: "returns",
-    label: "คืนสินค้า",
-    statuses: ["RETURN_REQUESTED", "RETURNED", "REFUNDED"],
-    sort: "NEWEST",
-  },
+  { id: "returns", label: "คืนสินค้า", statuses: RETURN_STATUSES, sort: "NEWEST" },
   { id: "cancelled", label: "ยกเลิก", statuses: ["CANCELLED"], sort: "NEWEST" },
 ];
 
@@ -122,6 +122,16 @@ export function canAccept(status: SellerOrderStatus): boolean {
 /** ตรงกับ `SellerOrderStatus.CANCELLABLE` — ส่งของออกไปแล้วยกเลิกไม่ได้ */
 export function canCancel(status: SellerOrderStatus): boolean {
   return status === "PENDING_PAYMENT" || status === "PAID" || status === "PREPARING";
+}
+
+/** อยู่ในขั้นตอนคืนสินค้า หรือจบด้วยการคืนเงิน — หน้ารายละเอียดลิงก์ไป `/seller/returns` */
+export function isReturnStatus(status: SellerOrderStatus): boolean {
+  return RETURN_STATUSES.includes(status);
+}
+
+/** คำขอคืนยังไม่ได้ข้อสรุป เงินของออเดอร์ยังถูกพักไว้ */
+export function isReturnOpen(status: SellerOrderStatus): boolean {
+  return status === "RETURN_REQUESTED" || status === "RETURNED";
 }
 
 // ---------- ที่อยู่ ----------
@@ -301,23 +311,59 @@ export type TimelineEntry = {
   done: boolean;
 };
 
+const RETURN_STEP_LABEL: Partial<Record<SellerOrderStatus, string>> = {
+  RETURN_REQUESTED: "ผู้ซื้อขอคืนสินค้า",
+  RETURNED: "ร้านได้รับสินค้าคืน",
+  REFUNDED: "คืนเงินให้ผู้ซื้อแล้ว",
+};
+
+type TimelineStep = { id: string; label: string; at: string | null };
+
+/** เวลาล่าสุดที่ออเดอร์เข้าสถานะนี้ตาม `statusHistory` — `null` = ไม่เคยเข้า */
+function enteredAt(order: SellerOrderDetails, status: SellerOrderStatus): string | null {
+  return order.statusHistory.findLast((entry) => entry.toStatus === status)?.createdAt ?? null;
+}
+
 /**
  * ขั้นที่มีเวลาแล้วนับว่าเสร็จ ขั้นแรกที่ยังไม่มีเวลาคือขั้นที่ "กำลังดำเนินการ"
- * "รับออเดอร์" ไม่บังคับ — ถ้าส่งไปแล้วโดยไม่ได้กดรับ ขั้นนั้นถูกตัดทิ้ง
+ * "รับออเดอร์" กับ "พัสดุถึงผู้ซื้อ" ไม่บังคับ — ไม่เกิดก็ถูกตัดทิ้ง
  * ออเดอร์ที่ยกเลิกตัดขั้นที่ไม่ได้เกิดทิ้ง แล้วปิดท้ายด้วยขั้นยกเลิกพร้อมเหตุผล
+ *
+ * ขั้นคืนสินค้ามาจาก `statusHistory` เพราะออเดอร์ไม่มีคอลัมน์เวลาของสถานะพวกนี้
+ * เงินปล่อยให้ร้านตอน COMPLETED เท่านั้น — พัสดุถึงแล้ว (DELIVERED) หรือกำลังคืนสินค้า
+ * เงินยังพักอยู่ จึงไม่ขึ้นว่าปล่อยเงินแล้ว และออเดอร์ที่จบด้วย REFUNDED ไม่มีขั้นปล่อยเงินเลย
  */
 export function timelineEntries(order: SellerOrderDetails, paidAt: string | null): TimelineEntry[] {
-  const steps = [
+  const returnSteps: TimelineStep[] = order.statusHistory.flatMap((entry) => {
+    const label = RETURN_STEP_LABEL[entry.toStatus];
+    return label ? [{ id: `${entry.toStatus.toLowerCase()}-${entry.id}`, label, at: entry.createdAt }] : [];
+  });
+
+  const closingSteps: TimelineStep[] = isReturnOpen(order.status)
+    ? [{ id: "return-resolution", label: "สรุปผลคำขอคืนสินค้า", at: null }]
+    : order.status === "REFUNDED"
+      ? []
+      : [
+          {
+            id: "completed",
+            label: "ผู้ซื้อได้รับสินค้า · ปล่อยเงินเข้าบัญชีร้าน",
+            at: order.completedAt ?? enteredAt(order, "COMPLETED"),
+          },
+        ];
+
+  const steps: TimelineStep[] = [
     { id: "ordered", label: "ผู้ซื้อสั่งซื้อ", at: order.createdAt },
     { id: "paid", label: "ผู้ซื้อชำระเงิน", at: paidAt },
     { id: "accepted", label: "คุณรับออเดอร์ · เริ่มแพ็ค", at: order.acceptedAt },
     { id: "shipped", label: "ส่งพัสดุและกรอกเลขพัสดุ", at: order.shippedAt },
-    {
-      id: "completed",
-      label: "ผู้ซื้อได้รับสินค้า · ปล่อยเงินเข้าบัญชีร้าน",
-      at: order.completedAt ?? order.deliveredAt,
-    },
-  ].filter((step) => step.id !== "accepted" || step.at || !order.shippedAt);
+    { id: "delivered", label: "พัสดุถึงผู้ซื้อ", at: order.deliveredAt },
+    ...returnSteps,
+    ...closingSteps,
+  ].filter(
+    (step) =>
+      (step.id !== "accepted" || step.at || !order.shippedAt) &&
+      (step.id !== "delivered" || step.at),
+  );
 
   if (order.cancelledAt) {
     return [
@@ -404,7 +450,8 @@ export function monthlySummary(month: DashboardMonthSummary): MonthlySummary {
   return {
     title: "ผลประกอบการเดือนนี้",
     rows: [
-      { id: "sales", label: "ยอดขายรวม", value: formatBaht(month.revenue), tone: "default" },
+      // แดชบอร์ดแสดงยอดเดือนเดียวกันแบบไม่รวมค่าส่ง ป้ายจึงต้องบอกว่ายอดนี้รวม
+      { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(month.revenue), tone: "default" },
       { id: "cost", label: "ต้นทุนสินค้า", value: `− ${formatBaht(roundMoney(month.cost))}`, tone: "muted" },
       { id: "commission", label: "ค่าคอมมิชชั่น", value: `− ${formatBaht(month.commission)}`, tone: "muted" },
     ],

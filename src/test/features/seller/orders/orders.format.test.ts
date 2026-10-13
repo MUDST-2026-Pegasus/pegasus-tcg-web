@@ -190,6 +190,93 @@ describe("payment, timeline and profit", () => {
     expect(entries.at(-1)?.label).toBe("ยกเลิกคำสั่งซื้อ · การ์ดเสียหาย");
   });
 
+  it("does not claim the money was released when the parcel only arrived", () => {
+    const entries = timelineEntries(
+      order({
+        status: "DELIVERED",
+        shippedAt: "2026-10-13T05:00:00Z",
+        deliveredAt: "2026-10-14T05:00:00Z",
+      }),
+      "2026-10-13T03:00:00Z",
+    );
+    expect(entries.map((entry) => [entry.id, entry.done])).toEqual([
+      ["ordered", true],
+      ["paid", true],
+      ["shipped", true],
+      ["delivered", true],
+      ["completed", false],
+    ]);
+  });
+
+  it("shows a return request from the status history and holds the payout step back", () => {
+    const entries = timelineEntries(
+      order({
+        status: "RETURN_REQUESTED",
+        shippedAt: "2026-10-13T05:00:00Z",
+        deliveredAt: "2026-10-14T05:00:00Z",
+        statusHistory: [
+          { id: 1, sellerOrderId: 41, fromStatus: "PAID", toStatus: "SHIPPED", changedBy: 3, note: null, createdAt: "2026-10-13T05:00:00Z" },
+          { id: 2, sellerOrderId: 41, fromStatus: "DELIVERED", toStatus: "RETURN_REQUESTED", changedBy: 5, note: null, createdAt: "2026-10-15T02:00:00Z" },
+        ],
+      }),
+      "2026-10-13T03:00:00Z",
+    );
+    expect(entries.map((entry) => [entry.label, entry.done])).toEqual([
+      ["ผู้ซื้อสั่งซื้อ", true],
+      ["ผู้ซื้อชำระเงิน", true],
+      ["ส่งพัสดุและกรอกเลขพัสดุ", true],
+      ["พัสดุถึงผู้ซื้อ", true],
+      ["ผู้ซื้อขอคืนสินค้า", true],
+      ["สรุปผลคำขอคืนสินค้า", false],
+    ]);
+    expect(entries.at(-1)?.detail).toBe("กำลังดำเนินการ");
+  });
+
+  it("ends a refunded order at the refund, with no payout step", () => {
+    const entries = timelineEntries(
+      order({
+        status: "REFUNDED",
+        shippedAt: "2026-10-13T05:00:00Z",
+        statusHistory: [
+          { id: 2, sellerOrderId: 41, fromStatus: "SHIPPED", toStatus: "RETURN_REQUESTED", changedBy: 5, note: null, createdAt: "2026-10-15T02:00:00Z" },
+          { id: 3, sellerOrderId: 41, fromStatus: "RETURN_REQUESTED", toStatus: "RETURNED", changedBy: 3, note: null, createdAt: "2026-10-17T02:00:00Z" },
+          { id: 4, sellerOrderId: 41, fromStatus: "RETURNED", toStatus: "REFUNDED", changedBy: null, note: null, createdAt: "2026-10-17T03:00:00Z" },
+        ],
+      }),
+      "2026-10-13T03:00:00Z",
+    );
+    expect(entries.map((entry) => entry.label)).toEqual([
+      "ผู้ซื้อสั่งซื้อ",
+      "ผู้ซื้อชำระเงิน",
+      "ส่งพัสดุและกรอกเลขพัสดุ",
+      "ผู้ซื้อขอคืนสินค้า",
+      "ร้านได้รับสินค้าคืน",
+      "คืนเงินให้ผู้ซื้อแล้ว",
+    ]);
+    expect(entries.every((entry) => entry.done)).toBe(true);
+  });
+
+  it("completes an order whose return was closed, using the history time", () => {
+    const entries = timelineEntries(
+      order({
+        status: "COMPLETED",
+        shippedAt: "2026-10-13T05:00:00Z",
+        statusHistory: [
+          { id: 2, sellerOrderId: 41, fromStatus: "SHIPPED", toStatus: "RETURN_REQUESTED", changedBy: 5, note: null, createdAt: "2026-10-15T02:00:00Z" },
+          { id: 3, sellerOrderId: 41, fromStatus: "RETURN_REQUESTED", toStatus: "COMPLETED", changedBy: 3, note: null, createdAt: "2026-10-16T02:00:00Z" },
+        ],
+      }),
+      "2026-10-13T03:00:00Z",
+    );
+    expect(entries.map((entry) => [entry.id, entry.done])).toEqual([
+      ["ordered", true],
+      ["paid", true],
+      ["shipped", true],
+      ["return_requested-2", true],
+      ["completed", true],
+    ]);
+  });
+
   it("takes commission and the frozen cost off the total", () => {
     expect(profitSummary(detail())).toEqual({
       rows: [
@@ -205,7 +292,8 @@ describe("payment, timeline and profit", () => {
   it("words the month from the dashboard numbers", () => {
     expect(monthlySummary({ revenue: 26000, cost: 16420, commission: 1242.5, net: 8337.5 })).toMatchObject({
       rows: [
-        { value: "฿26,000" },
+        // แดชบอร์ดแสดงยอดเดียวกันแบบไม่รวมค่าส่ง ป้ายต้องบอกว่ายอดนี้รวม
+        { label: "ยอดขาย (รวมค่าส่ง)", value: "฿26,000" },
         { value: "− ฿16,420" },
         { value: "− ฿1,242.50" },
       ],
