@@ -7,12 +7,13 @@ import {
   Loader2,
   Package,
   TriangleAlert,
+  X,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
@@ -26,7 +27,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -35,11 +35,17 @@ import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
+import { CancelOrderConfirmationDialog } from "../components/CancelOrderConfirmationDialog";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
 
-import { toSidebarUser } from "../account.format";
+import {
+  toSidebarUser,
+  formatOrderStatus,
+  getOrderStatusBadge,
+} from "../account.format";
+
 
 export function OrderHistoryPage() {
   const navigate = useNavigate();
@@ -50,6 +56,7 @@ export function OrderHistoryPage() {
 
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<OrderDetails | null>(null);
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
 
   const sidebarUser = toSidebarUser(user);
@@ -69,7 +76,6 @@ export function OrderHistoryPage() {
   }, [ordersData]);
 
   const handleCancelOrder = async (orderId: number) => {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
     setCancellingOrderId(orderId);
     try {
       await ordersApi.cancelOrder(orderId, "Buyer requested cancellation");
@@ -79,6 +85,7 @@ export function OrderHistoryPage() {
         type: "success",
       });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      setOrderToCancel(null);
     } catch (err) {
       toast.add({
         title: "Cancellation Failed",
@@ -142,13 +149,28 @@ export function OrderHistoryPage() {
                 order={order}
                 onViewDetails={() => setSelectedOrderForDetails(order)}
                 onPayNow={() => navigate(`/payment?orderId=${order.id}`)}
-                onCancelOrder={() => handleCancelOrder(order.id)}
+                onCancelOrder={() => setOrderToCancel(order)}
                 isCancelling={cancellingOrderId === order.id}
               />
             ))
           )}
         </div>
       </div>
+
+      {/* Cancel Order Confirmation Modal */}
+      <CancelOrderConfirmationDialog
+        open={!!orderToCancel}
+        onOpenChange={(open) => {
+          if (!open) setOrderToCancel(null);
+        }}
+        order={orderToCancel}
+        onConfirm={() => {
+          if (orderToCancel) {
+            handleCancelOrder(orderToCancel.id);
+          }
+        }}
+        isCancelling={cancellingOrderId !== null}
+      />
 
       {/* Order Details Modal */}
       {selectedOrderForDetails && (
@@ -161,6 +183,7 @@ export function OrderHistoryPage() {
     </div>
   );
 }
+
 
 function OrderCardItem({
   order,
@@ -179,10 +202,8 @@ function OrderCardItem({
 
   const status = order.status;
   const isPending = status === "PENDING_PAYMENT";
-  const isPaid = status === "PAID";
   const isShipped = status === "SHIPPED";
-  const isCompleted = status === "COMPLETED";
-  const isCancelled = status === "CANCELLED";
+  const isCompleted = status === "COMPLETED" || status === "DELIVERED";
 
   const allItems: OrderItemDetails[] = (order.sellerOrders ?? []).flatMap(
     (so) => so.items ?? [],
@@ -198,33 +219,7 @@ function OrderCardItem({
       })
     : "Recent";
 
-  let statusBadgeVariant: "default" | "secondary" | "destructive" | "outline" =
-    "secondary";
-  let statusBadgeLabel = status;
-  let statusBadgeClass = "";
-
-  if (isPending) {
-    statusBadgeVariant = "secondary";
-    statusBadgeLabel = "Pending Payment";
-    statusBadgeClass = "bg-amber-500 text-white hover:bg-amber-600 border-transparent";
-  } else if (isPaid) {
-    statusBadgeVariant = "secondary";
-    statusBadgeLabel = "Paid";
-    statusBadgeClass = "bg-blue-100 text-blue-800 hover:bg-blue-100";
-  } else if (isShipped) {
-    statusBadgeVariant = "secondary";
-    statusBadgeLabel = "Shipped";
-    statusBadgeClass = "bg-purple-100 text-purple-800 hover:bg-purple-100";
-  } else if (isCompleted) {
-    statusBadgeVariant = "secondary";
-    statusBadgeLabel = "Completed";
-    statusBadgeClass = "bg-emerald-100 text-emerald-800 hover:bg-emerald-100";
-  } else if (isCancelled) {
-    statusBadgeVariant = "outline";
-    statusBadgeLabel = "Cancelled";
-    statusBadgeClass = "text-muted-foreground";
-  }
-
+  const statusBadge = getOrderStatusBadge(status);
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   return (
@@ -247,16 +242,17 @@ function OrderCardItem({
         </div>
         <CardAction>
           <Badge
-            variant={statusBadgeVariant}
+            variant={statusBadge.variant}
             className={cn(
               "before:size-1.5 before:rounded-full before:bg-current before:content-[''] font-medium text-xs",
-              statusBadgeClass,
+              statusBadge.className,
             )}
           >
-            {statusBadgeLabel}
+            {statusBadge.label}
           </Badge>
         </CardAction>
       </CardHeader>
+
 
       <CardContent className="grid gap-6 p-4 sm:grid-cols-[96px_1fr_auto] sm:items-center">
         <div className="size-24 rounded-lg border bg-[#f4f4f5] overflow-hidden shrink-0 flex items-center justify-center p-1">
@@ -425,147 +421,164 @@ function OrderDetailsModal({
   }
 
   const sellerOrders = order.sellerOrders ?? [];
+  const statusBadge = getOrderStatusBadge(order.status);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto gap-6 p-6 rounded-2xl">
-        <DialogHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <DialogTitle className="text-2xl font-bold">
-                Order Details
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Order #{order.orderNumber}
-              </p>
-            </div>
-            <Badge variant="outline" className="text-sm font-semibold">
-              {order.status}
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-white shadow-xl"
+      >
+        {/* Sticky Header with Title, Formatted Status Badge, and Sticky "✕" Close Button */}
+        <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-white px-6 py-4 shrink-0">
+          <DialogHeader className="gap-0.5">
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
+              Order Details
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Order #{order.orderNumber}
+            </p>
+          </DialogHeader>
+          <div className="flex items-center gap-3">
+            <Badge
+              variant={statusBadge.variant}
+              className={cn(
+                "font-medium text-xs before:size-1.5 before:rounded-full before:bg-current before:content-['']",
+                statusBadge.className,
+              )}
+            >
+              {statusBadge.label}
             </Badge>
+            <DialogClose
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="size-8 rounded-full bg-secondary/80 text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer"
+                  aria-label="Close"
+                />
+              }
+            >
+              <X className="size-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
           </div>
-        </DialogHeader>
-
-        {/* Shipping Address */}
-        <div className="bg-muted/40 p-4 rounded-xl border text-sm">
-          <p className="font-semibold text-foreground mb-1">Shipping Destination</p>
-          <p className="text-muted-foreground leading-relaxed">{addressText}</p>
         </div>
 
-        {/* Sub-Orders by Seller */}
-        <div className="flex flex-col gap-6">
-          <h3 className="font-bold text-base text-foreground">Items by Seller</h3>
-          {sellerOrders.map((so) => (
-            <div key={so.id} className="border rounded-xl p-4 flex flex-col gap-3">
-              <div className="flex justify-between items-center text-sm border-b pb-2">
-                <div className="flex flex-col">
-                  <span className="font-semibold text-foreground">
-                    Seller: {so.sellerName || "Pegasus Seller"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Order #{so.sellerOrderNumber}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium">
-                    Package Status: {so.status}
-                  </span>
-                </div>
-              </div>
+        {/* Scrollable Content Body */}
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+          {/* Shipping Address */}
+          <div className="bg-muted/40 p-4 rounded-xl border text-sm">
+            <p className="font-semibold text-foreground mb-1">Shipping Destination</p>
+            <p className="text-muted-foreground leading-relaxed">{addressText}</p>
+          </div>
 
-              {/* Items */}
-              <div className="flex flex-col gap-3">
-                {(so.items ?? []).map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    <div className="size-14 rounded border bg-[#f4f4f5] overflow-hidden shrink-0 flex items-center justify-center p-1">
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.productName}
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <span className="text-[10px] text-muted-foreground">Art</span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {item.productName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {[item.variantLabel, item.condition]
-                          .filter(Boolean)
-                          .join(" • ")}{" "}
-                        • Qty: {item.quantity}
-                      </p>
-                    </div>
-                    <div className="text-sm font-bold text-foreground">
-                      {formatPrice(item.lineTotal)}
-                    </div>
+          {/* Sub-Orders by Seller */}
+          <div className="flex flex-col gap-6">
+            <h3 className="font-bold text-base text-foreground">Items by Seller</h3>
+            {sellerOrders.map((so) => (
+              <div key={so.id} className="border rounded-xl p-4 flex flex-col gap-3">
+                <div className="flex justify-between items-center text-sm border-b pb-2">
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-foreground">
+                      Seller: {so.sellerName || "Pegasus Seller"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Order #{so.sellerOrderNumber}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="text-right">
+                    <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium">
+                      Package Status: {formatOrderStatus(so.status)}
+                    </span>
+                  </div>
+                </div>
 
-              {/* Shipments info if any */}
-              {so.shipments && so.shipments.length > 0 && (
-                <div className="bg-muted/50 p-2.5 rounded-lg text-xs flex flex-col gap-1 mt-1">
-                  {so.shipments.map((ship) => (
-                    <div key={ship.id} className="flex justify-between">
-                      <span className="font-medium text-foreground">
-                        Carrier: {ship.carrierName || ship.carrierCode}
-                      </span>
-                      <span className="text-muted-foreground">
-                        Tracking: {ship.trackingNumber || "Pending"}
-                      </span>
+                {/* Items */}
+                <div className="flex flex-col gap-3">
+                  {(so.items ?? []).map((item) => (
+                    <div key={item.id} className="flex items-center gap-3">
+                      <div className="size-14 rounded border bg-[#f4f4f5] overflow-hidden shrink-0 flex items-center justify-center p-1">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.productName}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">Art</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {item.productName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {[item.variantLabel, item.condition]
+                            .filter(Boolean)
+                            .join(" • ")}{" "}
+                          • Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <div className="text-sm font-bold text-foreground">
+                        {formatPrice(item.lineTotal)}
+                      </div>
                     </div>
                   ))}
                 </div>
-              )}
+
+                {/* Shipments info if any */}
+                {so.shipments && so.shipments.length > 0 && (
+                  <div className="bg-muted/50 p-2.5 rounded-lg text-xs flex flex-col gap-1 mt-1">
+                    {so.shipments.map((ship) => (
+                      <div key={ship.id} className="flex justify-between">
+                        <span className="font-medium text-foreground">
+                          Carrier: {ship.carrierName || ship.carrierCode}
+                        </span>
+                        <span className="text-muted-foreground">
+                          Tracking: {ship.trackingNumber || "Pending"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <Separator />
+
+          {/* Pricing Summary */}
+          <div className="flex flex-col gap-2 text-sm">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Items Subtotal</span>
+              <span className="font-medium text-foreground">
+                {formatPrice(order.itemsSubtotal)}
+              </span>
             </div>
-          ))}
-        </div>
-
-        <Separator />
-
-        {/* Pricing Summary */}
-        <div className="flex flex-col gap-2 text-sm">
-          <div className="flex justify-between text-muted-foreground">
-            <span>Items Subtotal</span>
-            <span className="font-medium text-foreground">
-              {formatPrice(order.itemsSubtotal)}
-            </span>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Shipping Total</span>
-            <span className="font-medium text-foreground">
-              {formatPrice(order.shippingTotal)}
-            </span>
-          </div>
-          {order.discountTotal > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Discount</span>
-              <span>-{formatPrice(order.discountTotal)}</span>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Shipping Total</span>
+              <span className="font-medium text-foreground">
+                {formatPrice(order.shippingTotal)}
+              </span>
             </div>
-          )}
-          <Separator className="my-1" />
-          <div className="flex justify-between text-base font-bold text-foreground">
-            <span>Grand Total</span>
-            <span className="text-lg text-primary">
-              {formatPrice(order.grandTotal)}
-            </span>
+            {order.discountTotal > 0 && (
+              <div className="flex justify-between text-emerald-600">
+                <span>Discount</span>
+                <span>-{formatPrice(order.discountTotal)}</span>
+              </div>
+            )}
+            <Separator className="my-1" />
+            <div className="flex justify-between text-base font-bold text-foreground">
+              <span>Grand Total</span>
+              <span className="text-lg text-primary">
+                {formatPrice(order.grandTotal)}
+              </span>
+            </div>
           </div>
         </div>
-
-        <DialogFooter className="pt-2">
-          <DialogClose
-            className={buttonVariants({
-              variant: "outline",
-              className: "w-full sm:w-auto rounded-full px-6",
-            })}
-          >
-            Close
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
