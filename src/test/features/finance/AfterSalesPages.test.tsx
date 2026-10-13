@@ -36,6 +36,13 @@ describe("after sales screens", () => {
     }));
   });
 
+  it("shows buyer return statuses and reasons as readable labels", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{ id: 7, sellerOrderId: 41,
+      status: "AWAITING_RETURN_SHIPMENT", reasonCode: "DAMAGED", evidenceKeys: [] }] as never);
+    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />, { wrapper });
+    expect(await screen.findByText("คำขอคืน #7 · รอผู้ซื้อส่งสินค้าคืน · สินค้าเสียหาย")).toBeTruthy();
+  });
+
   it("approves a return from the seller queue with the entered amount", async () => {
     vi.spyOn(window, "confirm").mockReturnValueOnce(true);
     vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 9, sellerOrderId: 41,
