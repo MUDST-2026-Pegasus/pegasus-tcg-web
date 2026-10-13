@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { getErrorMessage } from "@/lib/api";
 import { afterSalesApi } from "./after-sales.api";
+import { returnReasonLabel, returnStatusLabel, returnStatusOptions } from "./after-sales.format";
 
 function ReturnEvidence({ returnId, count }: { returnId: number; count: number }) {
   const [open, setOpen] = useState(false);
@@ -37,12 +38,12 @@ export function SellerReturnsPage() {
     finally { setBusy(null); }
   }
   return <div className="space-y-5 p-6"><h1 className="text-2xl font-bold">คำขอคืนสินค้า</h1>
-    <select aria-label="กรองสถานะคืนสินค้า" className="rounded border p-2" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">ทุกสถานะ</option>{["REQUESTED", "AWAITING_RETURN_SHIPMENT", "IN_TRANSIT", "APPROVED", "REJECTED", "REFUNDED", "CLOSED"].map((value) => <option key={value}>{value}</option>)}</select>
+    <select aria-label="กรองสถานะคืนสินค้า" className="rounded border p-2" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">ทุกสถานะ</option>{returnStatusOptions.map((value) => <option key={value} value={value}>{returnStatusLabel(value)}</option>)}</select>
     {queue.isPending && <p>กำลังโหลด...</p>}{queue.isError && <p role="alert">โหลดคำขอไม่สำเร็จ <Button variant="outline" onClick={() => void queue.refetch()}>ลองอีกครั้ง</Button></p>}
     {queue.data?.length === 0 && <p>ไม่มีคำขอคืนสินค้า</p>}
     {queue.data?.map((item) => <Card key={item.id}><CardContent className="space-y-3 p-5">
       <h2 className="font-semibold">คำขอ #{item.id} · คำสั่งซื้อย่อย #{item.sellerOrderId}</h2>
-      <p>{item.status} · {item.reasonCode}</p><p>{item.description}</p>
+      <p>{returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}</p><p>{item.description}</p>
       <ReturnEvidence returnId={item.id} count={item.evidenceKeys.length} />
       {item.status === "REQUESTED" && <div className="space-y-2 rounded border p-3">
         <select aria-label={`ผลการคืน ${item.id}`} className="rounded border p-2" value={resolutions[item.id] ?? "FULL_REFUND"} onChange={(e) => setResolutions((old) => ({ ...old, [item.id]: e.target.value as "FULL_REFUND" | "PARTIAL_REFUND" }))}><option value="FULL_REFUND">คืนเต็มจำนวน</option><option value="PARTIAL_REFUND">คืนบางส่วน</option></select>

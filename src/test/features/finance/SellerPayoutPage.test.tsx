@@ -12,7 +12,8 @@ describe("seller payout page", () => {
   it("shows wallet and payout data, then submits a valid amount", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     vi.mocked(financeApi.wallet).mockResolvedValue({ withdrawable: 3420, balancePending: 1850,
-      balanceAvailable: 3420, reservedForPayout: 0, entries: { items: [], totalItems: 0 } });
+      balanceAvailable: 3420, reservedForPayout: 0, entries: { items: [{ id: 1, type: "SELLER_EARNING",
+        direction: "CREDIT", amount: 500, createdAt: "2026-10-13T10:00:00Z" }], totalItems: 1 } });
     vi.mocked(financeApi.myPayouts).mockResolvedValue([{ id: 12, amount: 500,
       requestedAt: "2026-10-13T10:00:00Z", status: "PAID", transferReference: "REF-12" }] as never);
     vi.mocked(financeApi.payoutAccount).mockResolvedValue({ bankName: "Test Bank",
@@ -23,6 +24,8 @@ describe("seller payout page", () => {
 
     expect(await screen.findByText("฿3,420.00")).toBeTruthy();
     expect(screen.getByText("••••7890")).toBeTruthy();
+    fireEvent.click(screen.getByText("รายการเคลื่อนไหว Wallet"));
+    expect(screen.getByText(/รายได้จากการขาย/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "ถอนเงินตอนนี้" }));
     fireEvent.change(screen.getByRole("spinbutton", { name: "จำนวนเงินที่ต้องการถอน" }),
       { target: { value: "100" } });
