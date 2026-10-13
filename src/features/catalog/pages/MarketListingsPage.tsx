@@ -105,7 +105,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
                   <div className="min-w-0">
-                    <Link to={`/u/${encodeURIComponent(listing.seller.username)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
+                    <Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(product.slug)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
                     <p className="truncate text-[11px] text-muted-foreground">@{listing.seller.username} · {listing.card.variantLabel}</p>
                   </div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
