@@ -133,7 +133,12 @@ export function hasNarrowingFilters(filters: CatalogFilters): boolean {
 /** สินค้าที่หน้าต่างแก้ไขเปิดอยู่ — `"new"` = เพิ่มใหม่ */
 export type ProductTarget = "new" | number;
 
-export const PRODUCT_TABS = ["details", "variants", "images"] as const;
+export const PRODUCT_TABS = [
+  "details",
+  "variants",
+  "images",
+  "effects",
+] as const;
 
 export type ProductTab = (typeof PRODUCT_TABS)[number];
 
