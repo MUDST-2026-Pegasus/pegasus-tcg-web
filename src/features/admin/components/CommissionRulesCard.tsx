@@ -16,7 +16,9 @@ export function CommissionRulesCard({ title, items }: CommissionRulesCardProps) 
           <li key={rule.id} className="flex items-center gap-2.5">
             <Switch
               size="sm"
-              defaultChecked={rule.active}
+              checked={rule.active}
+              disabled
+              className="disabled:opacity-100"
               aria-label={rule.label}
             />
             <span className="text-[13px] text-muted-foreground">

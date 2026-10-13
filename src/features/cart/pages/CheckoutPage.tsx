@@ -123,14 +123,14 @@ export function CheckoutPage() {
   ]);
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<string | null>("qr");
+  const [selectedPayment, setSelectedPayment] = useState<string | null>("bank_transfer");
 
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isNewAddressOpen, setIsNewAddressOpen] = useState(false);
 
   const [tempAddressId, setTempAddressId] = useState<string | null>(null);
-  const [tempPayment, setTempPayment] = useState<string | null>("qr");
+  const [tempPayment, setTempPayment] = useState<string | null>("bank_transfer");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -432,7 +432,7 @@ export function CheckoutPage() {
                 </span>
                 <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors text-sm">
                   <span>
-                    {selectedPayment === "qr" ? "Qr Payment" : "Not Selected"}
+                    {selectedPayment === "bank_transfer" ? "Bank Transfer" : "Not Selected"}
                   </span>
                   <ChevronRight className="w-4 h-4 ml-1 opacity-70" />
                 </div>
@@ -452,17 +452,17 @@ export function CheckoutPage() {
                     <Field
                       orientation="horizontal"
                       className="items-center justify-between rounded-xl border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => setTempPayment("qr")}
+                      onClick={() => setTempPayment("bank_transfer")}
                     >
                       <div className="flex items-center gap-3">
                         <div className="bg-black text-white text-[10px] font-bold w-9 h-6 flex items-center justify-center rounded uppercase">
-                          QR
+                          BANK
                         </div>
                         <FieldTitle className="font-medium text-sm">
-                          Qr Payment
+                          Bank Transfer
                         </FieldTitle>
                       </div>
-                      <RadioGroupItem value="qr" />
+                      <RadioGroupItem value="bank_transfer" />
                     </Field>
                   </RadioGroup>
                 </div>

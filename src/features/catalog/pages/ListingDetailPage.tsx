@@ -51,7 +51,7 @@ export function ListingDetailPage() {
       <section className="space-y-5">
         <div><h1 className="text-3xl font-bold">{listing.card.productName}</h1><p className="mt-2 text-sm text-muted-foreground">{listing.card.variantLabel} · {CONDITION_LABELS[listing.condition]}</p></div>
         <p className="text-3xl font-bold text-primary">{price}</p>
-        <div className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">ผู้ขาย</p><Link to={`/u/${encodeURIComponent(listing.seller.username)}`} className="font-semibold hover:underline">{sellerName}</Link></div>
+        <div className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">ผู้ขาย</p><Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(listing.card.productSlug)}`} className="font-semibold hover:underline">{sellerName}</Link></div>
         <p>จำนวนที่มี: {listing.quantityAvailable}</p>
         {listing.publicNote && <div><h2 className="font-semibold">รายละเอียดจากผู้ขาย</h2><p className="mt-1 whitespace-pre-wrap text-sm">{listing.publicNote}</p></div>}
         {listing.gradingCompany && <p>เกรด: {listing.gradingCompany}{listing.gradeValue != null ? ` ${listing.gradeValue}` : ""}</p>}

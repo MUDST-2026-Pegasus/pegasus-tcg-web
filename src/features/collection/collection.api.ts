@@ -6,8 +6,8 @@ export function getCollection(page: number): Promise<PageResponse<CollectionItem
   return api.get("/collection", { query: { page, size: 20 } });
 }
 
-export function getPublicCollection(username: string, page: number): Promise<PageResponse<PublicCollectionItem>> {
-  return api.get(`/users/${encodeURIComponent(username)}/collection`, { auth: false, query: { page, size: 20 } });
+export function getPublicCollection(username: string, page: number, size = 20, signal?: AbortSignal): Promise<PageResponse<PublicCollectionItem>> {
+  return api.get(`/users/${encodeURIComponent(username)}/collection`, { auth: false, signal, query: { page, size } });
 }
 
 export function getCollectionVariants(productId: number): Promise<CollectionVariant[]> {

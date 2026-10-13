@@ -1,8 +1,9 @@
-import { api, type PageResponse } from "@/lib/api";
+import { api, isApiError, type PageResponse } from "@/lib/api";
 
 import type {
   HomeBannerDto,
   PublicListingDto,
+  PublicProfileDto,
   TrendingProductDto,
 } from "./home.types";
 
@@ -15,6 +16,17 @@ import type {
  * ไฟล์นี้ไม่มี React — component เรียกผ่าน hook ใน `home.queries.ts`
  */
 const PUBLIC = { auth: false } as const;
+
+export async function getPublicProfile(username: string, signal?: AbortSignal): Promise<PublicProfileDto> {
+  try {
+    return await api.get<PublicProfileDto>(`/u/${encodeURIComponent(username)}`, { ...PUBLIC, signal });
+  } catch (error) {
+    // Older API versions only expose the seller inside each public listing.
+    if (!isApiError(error) || ![401, 403, 404].includes(error.status)) throw error;
+    const listings = await getStorefront(username, 1, 0, signal);
+    return listings.items[0]?.seller ?? { username, displayName: null, avatarUrl: null };
+  }
+}
 
 export function getBanners(): Promise<HomeBannerDto[]> {
   return api.get<HomeBannerDto[]>("/home/banners", PUBLIC);
