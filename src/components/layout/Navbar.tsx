@@ -56,6 +56,24 @@ export function Navbar() {
         </nav>
 
         <div className="flex h-full items-center gap-5 justify-self-end">
+          {/* Language switch — ปิดไว้ก่อนจนกว่าจะมีระบบ i18n จริง [TCG-467]
+          <button
+            type="button"
+            aria-label="Switch language"
+            className="flex h-full w-20 items-center justify-between"
+          >
+            <span className="leading-none text-xs font-bold text-sky-700">
+              TH
+            </span>
+            <span className="relative flex h-5 w-10 items-center rounded-xl bg-sky-700">
+              <span className="absolute left-[2px] size-4 rounded-full bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.18)]" />
+            </span>
+            <span className="leading-none text-xs font-semibold text-gray-500">
+              EN
+            </span>
+          </button>
+          */}
+
           <Button
             variant="ghost"
             size="icon"
