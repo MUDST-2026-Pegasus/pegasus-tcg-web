@@ -24,6 +24,13 @@ describe("TCG-394 remaining API contracts", () => {
     expect(remove).toHaveBeenCalledWith("/admin/commission-rules/9");
   });
 
+  it("reads and updates the platform fallback rate", async () => {
+    await afterSalesApi.defaultCommissionRate();
+    await afterSalesApi.updateDefaultCommissionRate(6.5);
+    expect(get).toHaveBeenCalledWith("/admin/settings/commission.default_rate");
+    expect(put).toHaveBeenCalledWith("/admin/settings/commission.default_rate", { value: "6.5" });
+  });
+
   it("uses seller-order and return IDs for all seven return operations", async () => {
     const input = { reasonCode: "DAMAGED", description: "damaged card", evidenceKeys: ["returns/photo.png"], items: [{ orderItemId: 23, quantity: 1 }] };
     await afterSalesApi.buyerReturns(11); await afterSalesApi.requestReturn(11, input);

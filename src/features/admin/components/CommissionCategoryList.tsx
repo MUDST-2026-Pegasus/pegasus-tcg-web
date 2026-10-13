@@ -4,19 +4,26 @@ import { Switch } from "@/components/ui/switch";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
 
 type CommissionCategoryListProps = AdminCommissionData["categories"];
+type EditableProps = {
+  onAdd?: () => void;
+  onToggle?: (id: string, checked: boolean) => void;
+  onRateChange?: (id: string, rate: string) => void;
+};
 
 /**
  * การ์ด "อัตราเฉพาะหมวดหมู่" — รายการหมวดที่เปิดสวิตช์ตั้งค่าอัตราแยกได้
  *
- * ช่องอัตราเป็น <input> ตัวเลข ไม่ผูก state ยังเป็น defaultValue ก่อน
- * จนกว่าจะต่อ backend
+ * ใช้ข้อมูลจาก catalog และค่ากฎที่โหลดจาก API เมื่อหน้าส่ง callback เข้ามา
  */
 export function CommissionCategoryList({
   title,
   description,
   addLabel,
   items,
-}: CommissionCategoryListProps) {
+  onAdd,
+  onToggle,
+  onRateChange,
+}: CommissionCategoryListProps & EditableProps) {
   return (
     <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-start justify-between gap-4 px-5 pt-[18px] pb-4">
@@ -24,12 +31,13 @@ export function CommissionCategoryList({
           <p className="text-[15px] font-semibold text-foreground">{title}</p>
           <p className="text-[13px] text-muted-foreground">{description}</p>
         </div>
-        <Button variant="outline" className="rounded-md px-2.5">
+        <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
           {addLabel}
         </Button>
       </div>
 
       <ul className="border-t border-[#eef1f2]">
+        {items.length === 0 && <li className="px-5 py-6 text-sm text-muted-foreground">ยังไม่มีเกมหรือหมวดหมู่ให้ตั้งค่า</li>}
         {items.map((item) => (
           <li
             key={item.id}
@@ -47,7 +55,9 @@ export function CommissionCategoryList({
             <div className="flex w-[150px] items-center gap-2.5">
               <Switch
                 size="sm"
-                defaultChecked={item.useCustom}
+                checked={item.useCustom}
+                onCheckedChange={(checked) => onToggle?.(item.id, checked)}
+                disabled={!onToggle}
                 aria-label={`ตั้งค่าอัตราเฉพาะสำหรับ ${item.name}`}
               />
               <span className="text-[13px] text-muted-foreground">
@@ -57,8 +67,13 @@ export function CommissionCategoryList({
 
             <div className="flex h-[31px] w-[110px] items-baseline gap-1 rounded-md border border-border px-3">
               <input
-                type="text"
-                defaultValue={item.rate}
+                type="number"
+                min="0"
+                max="100"
+                step="0.001"
+                value={item.rate}
+                onChange={(event) => onRateChange?.(item.id, event.target.value)}
+                disabled={!item.useCustom || !onRateChange}
                 aria-label={`อัตราค่าคอมของ ${item.name}`}
                 className="w-full min-w-0 border-none bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground"
               />
