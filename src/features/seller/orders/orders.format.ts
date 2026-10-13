@@ -3,10 +3,7 @@ import {
   TO_PACK_STATUSES,
 } from "@/features/seller/shared/order-status";
 import { formatBaht } from "@/features/seller/shared/seller.format";
-import type {
-  OrderStatus,
-  SellerOrderStatus,
-} from "@/features/seller/shared/seller.types";
+import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
 import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
@@ -27,15 +24,6 @@ import type {
  * ตัวช่วยแปลงค่าดิบจาก `/sellers/me/orders` → ข้อความบนหน้าจัดการคำสั่งซื้อ
  * ไม่มี React — ทดสอบได้ตรง ๆ
  */
-
-/** ชื่อสถานะแบบสั้น ใช้ทั้งชิปตัวกรองหน้ารายการและ breadcrumb หน้ารายละเอียด */
-export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  awaiting_pack: "รอแพ็ค",
-  awaiting_payment: "รอชำระ",
-  shipped: "กำลังจัดส่ง",
-  completed: "สำเร็จ",
-  cancelled: "ยกเลิก",
-};
 
 // ---------- แท็บ ----------
 
