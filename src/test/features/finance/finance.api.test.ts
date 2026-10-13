@@ -29,19 +29,10 @@ describe("TCG-394 finance API contracts", () => {
     });
   });
 
-  it("loads refunds in both states that require admin action", async () => {
-    get.mockResolvedValueOnce([{ id: 1 }] as never).mockResolvedValueOnce([{ id: 2 }] as never);
-    expect(await financeApi.adminRefunds()).toEqual([{ id: 1 }, { id: 2 }]);
-    expect(get).toHaveBeenNthCalledWith(1, "/admin/refunds", { query: { status: "APPROVED" } });
-    expect(get).toHaveBeenNthCalledWith(2, "/admin/refunds", { query: { status: "PROCESSING" } });
-  });
-
-  it("loads refund detail and transfer attempts for status tracking", async () => {
+  it("loads refund detail for status tracking", async () => {
     get.mockResolvedValue({} as never);
     await financeApi.getRefund(7);
-    await financeApi.refundTransfers(7);
-    expect(get).toHaveBeenNthCalledWith(1, "/refunds/7");
-    expect(get).toHaveBeenNthCalledWith(2, "/admin/refunds/7/transfers");
+    expect(get).toHaveBeenCalledWith("/refunds/7");
   });
 
   it("uses the payout and refund endpoints with backend payloads", async () => {

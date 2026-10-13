@@ -1,4 +1,4 @@
-import type { RouteObject } from "react-router-dom";
+import { Navigate, type RouteObject } from "react-router-dom";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
@@ -8,9 +8,11 @@ import { AdminCatalogPage } from "@/features/admin/pages/AdminCatalogPage";
 import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage";
 import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
 import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
+import { AdminPaymentsPage } from "@/features/admin/pages/AdminPaymentsPage";
+import { AdminPayoutsPage } from "@/features/admin/pages/AdminPayoutsPage";
+import { AdminRefundsPage } from "@/features/admin/pages/AdminRefundsPage";
 import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
 import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
-import { AdminFinancePage } from "@/features/finance/AdminFinancePage";
 import { AdminReviewsPage } from "@/features/finance/AdminReviewsPage";
 import { adminNav } from "@/lib/nav-config";
 
@@ -35,7 +37,11 @@ export const adminRoutes: RouteObject = {
     { path: "users", element: <AdminUsersPage /> },
     { path: "orders", element: <AdminOrdersPage /> },
     { path: "commission", element: <AdminCommissionPage /> },
-    { path: "finance", element: <AdminFinancePage /> },
+    { path: "payments", element: <AdminPaymentsPage /> },
+    { path: "refunds", element: <AdminRefundsPage /> },
+    { path: "payouts", element: <AdminPayoutsPage /> },
+    // หน้าเดิมที่รวมสามแท็บ — ลิงก์เก่ายังพาไปหน้าตรวจสลิป
+    { path: "finance", element: <Navigate to="/admin/payments" replace /> },
     { path: "reviews", element: <AdminReviewsPage /> },
     { path: "activity-log", element: <AdminActivityLogPage /> },
   ],

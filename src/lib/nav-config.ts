@@ -1,12 +1,15 @@
 import {
+  ArrowUpRight,
   BadgeCheck,
   Clock2,
+  FileText,
   LayoutDashboard,
   LayoutGrid,
   Package,
   Receipt,
   RotateCcw,
   Star,
+  Undo2,
   Settings2,
   ShoppingCart,
   Users,
@@ -66,8 +69,15 @@ export const adminNav: NavGroup[] = [
       { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
       { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
       { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
-      { label: "จัดการการเงิน", to: "/admin/finance", icon: Wallet },
       { label: "จัดการรีวิว", to: "/admin/reviews", icon: Star },
+    ],
+  },
+  {
+    label: "จัดการเงิน",
+    items: [
+      { label: "ตรวจสอบสลิปชำระเงิน", to: "/admin/payments", icon: FileText },
+      { label: "คืนเงิน", to: "/admin/refunds", icon: Undo2 },
+      { label: "ถอนเงินผู้ขาย", to: "/admin/payouts", icon: ArrowUpRight },
     ],
   },
   {

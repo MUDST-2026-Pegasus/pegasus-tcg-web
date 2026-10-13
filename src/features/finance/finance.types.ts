@@ -10,10 +10,6 @@ export type Payment = {
   failureReason: string | null;
 };
 
-export type PaymentReview = Pick<Payment, "id" | "salesOrderId" | "amount" | "status" | "referenceCode"> & {
-  slipUrl: string | null;
-};
-
 export type Refund = {
   id: number;
   salesOrderId: number;
@@ -28,18 +24,6 @@ export type Refund = {
   transferReference: string | null;
   requestedAt: string;
   processedAt: string | null;
-};
-
-export type RefundTransferAttempt = {
-  id: number;
-  refundId: number;
-  bankName: string | null;
-  accountName: string | null;
-  accountNumber: string | null;
-  status: string;
-  startedAt: string;
-  completedAt: string | null;
-  transferReference: string | null;
 };
 
 export type Payout = {
