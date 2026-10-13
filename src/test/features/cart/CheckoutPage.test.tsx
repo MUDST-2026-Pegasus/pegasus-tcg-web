@@ -235,6 +235,34 @@ describe("CheckoutPage", () => {
     expect(screen.getByText(/123 Pallet Town/i)).toBeInTheDocument();
   });
 
+  it("flags the missing shipping address in red and explains why Purchase is disabled", () => {
+    vi.spyOn(addressQueries, "useAddresses").mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof addressQueries.useAddresses>);
+
+    renderCheckout("/checkout?items=42");
+
+    expect(screen.getByText("please enter your address").parentElement).toHaveClass(
+      "text-destructive",
+    );
+    expect(screen.getByRole("button", { name: /^Purchase$/i })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Please add a shipping address to continue.",
+    );
+  });
+
+  it("does not show the missing address hint once an address is available", () => {
+    renderCheckout("/checkout?items=42");
+
+    expect(screen.getByText(/123 Pallet Town/i).parentElement).not.toHaveClass(
+      "text-destructive",
+    );
+    expect(screen.getByRole("button", { name: /^Purchase$/i })).toBeEnabled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("submits checkout with crypto.randomUUID idempotency key and navigates to /payment?orderId={id}", async () => {
     const user = userEvent.setup();
     const mockOrderResponse: CheckoutResponse = {
