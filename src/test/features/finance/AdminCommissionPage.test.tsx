@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
@@ -56,6 +57,7 @@ describe("admin commission settings", () => {
   });
 
   it("replaces empty zero fields and creates a rule with the selected game", async () => {
+    const user = userEvent.setup();
     vi.clearAllMocks();
     vi.mocked(useGameList).mockReturnValue({ isSuccess: true, data: [{ id: 4, name: "One Piece" }] } as never);
     vi.mocked(useCategoryList).mockReturnValue({ isSuccess: true, data: [] } as never);
@@ -66,10 +68,10 @@ describe("admin commission settings", () => {
     render(<QueryClientProvider client={client}><AdminCommissionPage /></QueryClientProvider>);
     expect(await screen.findByText("One Piece")).toBeTruthy();
     fireEvent.click(screen.getByText("กฎเพิ่มเติมและการตั้งค่าขั้นสูง"));
-    fireEvent.change(screen.getByLabelText("ขอบเขต"), { target: { value: "GAME" } });
-    const game = screen.getByLabelText("เกม") as HTMLSelectElement;
-    expect(game.textContent).toContain("One Piece");
-    fireEvent.change(game, { target: { value: "4" } });
+    await user.click(screen.getByRole("combobox", { name: "ขอบเขต" }));
+    await user.click(await screen.findByRole("option", { name: "เฉพาะเกม" }));
+    await user.click(screen.getByRole("combobox", { name: "เกม" }));
+    await user.click(await screen.findByRole("option", { name: "One Piece" }));
     const rate = screen.getByLabelText("อัตรา (%)") as HTMLInputElement;
     const fixedFee = screen.getByLabelText("ค่าธรรมเนียมคงที่ (บาท)") as HTMLInputElement;
     const priority = screen.getByLabelText("ลำดับความสำคัญ") as HTMLInputElement;
@@ -88,6 +90,7 @@ describe("admin commission settings", () => {
   });
 
   it("selects a category by name and blocks a missing selection", async () => {
+    const user = userEvent.setup();
     vi.clearAllMocks();
     vi.mocked(useGameList).mockReturnValue({ isSuccess: true, data: [{ id: 4, name: "One Piece" }] } as never);
     vi.mocked(useCategoryList).mockReturnValue({ isSuccess: true, data: [{ id: 7, name: "กล่อง/ซองสุ่ม", gameId: 4 }] } as never);
@@ -98,12 +101,14 @@ describe("admin commission settings", () => {
     render(<QueryClientProvider client={client}><AdminCommissionPage /></QueryClientProvider>);
     expect(await screen.findByText("One Piece")).toBeTruthy();
     fireEvent.click(screen.getByText("กฎเพิ่มเติมและการตั้งค่าขั้นสูง"));
-    fireEvent.change(screen.getByLabelText("ขอบเขต"), { target: { value: "CATEGORY" } });
-    const category = screen.getByLabelText("หมวดหมู่") as HTMLSelectElement;
-    expect(category.textContent).toContain("One Piece · กล่อง/ซองสุ่ม");
+    await user.click(screen.getByRole("combobox", { name: "ขอบเขต" }));
+    await user.click(await screen.findByRole("option", { name: "เฉพาะหมวดหมู่" }));
+    const category = screen.getByRole("combobox", { name: "หมวดหมู่" });
+    expect(category.textContent).toContain("เลือกหมวดหมู่");
     fireEvent.click(screen.getByRole("button", { name: "สร้างกฎ" }));
     expect(afterSalesApi.createCommissionRule).not.toHaveBeenCalled();
-    fireEvent.change(category, { target: { value: "7" } });
+    await user.click(category);
+    await user.click(await screen.findByRole("option", { name: "One Piece · กล่อง/ซองสุ่ม" }));
     fireEvent.change(screen.getByLabelText("อัตรา (%)"), { target: { value: "7" } });
     fireEvent.click(screen.getByRole("button", { name: "สร้างกฎ" }));
     await waitFor(() => expect(afterSalesApi.createCommissionRule).toHaveBeenCalledWith(
