@@ -136,7 +136,6 @@ function ProductDetailContent({
   );
   const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedCondition, setSelectedCondition] = useState<CardCondition | "">("");
-  const [page, setPage] = useState(0);
   const [collectorPage, setCollectorPage] = useState(0);
   const [quantitySelection, setQuantitySelection] = useState<{
     listingId: number | null;
@@ -194,16 +193,9 @@ function ProductDetailContent({
       )
       : variantListings;
 
-  const pageSize = 20;
-  const pageCount = Math.max(
-      1,
-      Math.ceil(filteredListings.length / pageSize),
-  );
-  const currentPage = Math.min(page, pageCount - 1);
-  const visibleListings = filteredListings.slice(
-      currentPage * pageSize,
-      (currentPage + 1) * pageSize,
-  );
+  const listingPreviewLimit = 10;
+  const visibleListings = filteredListings.slice(0, listingPreviewLimit);
+  const hasMoreListings = filteredListings.length > listingPreviewLimit;
 
   const attributes = product.attributes ?? {};
   const displayAttribute = (key: string) => {
@@ -307,12 +299,10 @@ function ProductDetailContent({
     setSelectedVariant(value);
     setSelectedCondition("");
     setSelectedImageId(null);
-    setPage(0);
   }
 
   function changeCondition(value: CardCondition | "") {
     setSelectedCondition(value);
-    setPage(0);
   }
 
   return (
@@ -440,9 +430,8 @@ function ProductDetailContent({
         </section>
 
         <section className="min-w-0 rounded-2xl border bg-white p-5 shadow-sm sm:p-7">
-          <div className="mb-6 flex items-end justify-between gap-3">
+          <div className="mb-6">
             <div><p className="text-sm font-semibold text-primary">{listingsReady ? `${availableQuantity} available` : "— available"}</p><h2 className="mt-1 text-2xl font-bold">Market listings</h2></div>
-            <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="rounded-md px-1 py-2 text-sm font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary">View all</Link>
           </div>
           {listingsQuery.isPending ? <p role="status" className="py-10 text-center text-sm text-muted-foreground">กำลังโหลดประกาศขาย...</p> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
@@ -458,7 +447,18 @@ function ProductDetailContent({
               ))}
             </div>
           )}
-          {listingsReady && pageCount > 1 && <nav aria-label="หน้าประกาศขาย" className="mt-5 flex items-center justify-between gap-3 border-t pt-4"><Button variant="outline" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>ก่อนหน้า</Button><span className="text-[13px]">{currentPage + 1} / {pageCount}</span><Button variant="outline" disabled={currentPage + 1 >= pageCount} onClick={() => setPage(currentPage + 1)}>ถัดไป</Button></nav>}
+          {listingsReady && hasMoreListings && (
+            <div className="relative mt-5 border-t pt-4">
+              <div aria-hidden="true" className="pointer-events-none flex h-12 items-center justify-between gap-4 overflow-hidden opacity-40 blur-[5px]">
+                <div className="h-4 w-1/4 rounded bg-muted-foreground/30" />
+                <div className="h-4 w-1/5 rounded bg-muted-foreground/30" />
+                <div className="h-4 w-1/6 rounded bg-muted-foreground/30" />
+              </div>
+              <div className="relative -mt-3 flex justify-center bg-gradient-to-t from-white via-white to-transparent px-3 pt-3">
+                <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">View all</Link>
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="min-w-0 rounded-2xl border bg-white p-6 shadow-none">
