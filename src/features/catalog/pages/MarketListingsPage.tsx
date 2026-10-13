@@ -103,7 +103,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
           ) : listings.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีประกาศขายสินค้านี้</p> : (
             <div className="divide-y divide-[#e3e7e8]">
               {visibleListings.map((listing) => (
-                <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_65px] sm:gap-6 sm:py-2">
+                <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
                   <div className="min-w-0">
                     <Link to={`/u/${encodeURIComponent(listing.seller.username)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
                     <p className="truncate text-[11px] text-muted-foreground">@{listing.seller.username} · {listing.card.variantLabel}</p>
@@ -111,7 +111,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block truncate text-xs font-semibold">—</span></div>
                   <strong className="text-right text-[15px]">{formatListingPrice(listing.price, listing.currency)}</strong>
-                  <span title="ระบบตะกร้าสินค้ากำลังพัฒนา" className="w-[65px]"><Button type="button" disabled className="h-8 w-full rounded-full text-xs disabled:opacity-100">Add</Button></span>
+                  <div className="flex gap-[14px]"><span title="ระบบตะกร้าสินค้ากำลังพัฒนา"><Button type="button" disabled className="h-[31.5px] w-[58.74px] px-0 text-[12.25px] disabled:opacity-100">Add</Button></span><Button className="h-[31.5px] w-[66px] rounded-full bg-[#22292B] px-0 text-[12.25px] font-normal text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>
