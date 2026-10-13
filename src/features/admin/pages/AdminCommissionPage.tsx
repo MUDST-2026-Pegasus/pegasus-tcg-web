@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { getErrorMessage, isApiError } from "@/lib/api";
@@ -40,6 +41,12 @@ const localDateTime = (value: string) => {
   const date = new Date(value);
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 };
+const scopeOptions = [
+  { value: "GLOBAL", label: "ทุกหมวดหมู่" },
+  { value: "GAME", label: "เฉพาะเกม" },
+  { value: "CATEGORY", label: "เฉพาะหมวดหมู่" },
+  { value: "SELLER", label: "เฉพาะผู้ขาย" },
+];
 
 export function AdminCommissionPage() {
   const cache = useQueryClient();
@@ -248,23 +255,34 @@ export function AdminCommissionPage() {
       </div>)}
     </CardContent></Card>
     <Card><CardHeader><CardTitle>{selected === null ? "เพิ่มกฎ" : `แก้ไขกฎ #${selected}`}</CardTitle></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">
-      <label className="space-y-1">ขอบเขต<select className="w-full rounded border p-2" value={form.scope} onChange={(e) => { const scope = e.target.value as CommissionRuleInput["scope"]; setForm((old) => ({ ...old, scope, gameId: null, categoryId: null, sellerProfileId: null })); }}><option>GLOBAL</option><option>GAME</option><option>CATEGORY</option><option>SELLER</option></select></label>
-      {form.scope === "GAME" && <label className="space-y-1">เกม
-        <select className="w-full rounded border p-2" value={form.gameId ?? ""} onChange={(e) => update("gameId", optionalNumber(e.target.value))}>
-          <option value="">เลือกเกม</option>
-          {form.gameId != null && !games.data?.some((game) => game.id === form.gameId) && <option value={form.gameId}>เกมเดิม #{form.gameId}</option>}
-          {games.data?.map((game) => <option key={game.id} value={game.id}>{game.name}</option>)}
-        </select>
-      </label>}
-      {form.scope === "CATEGORY" && <label className="space-y-1">หมวดหมู่
-        <select className="w-full rounded border p-2" value={form.categoryId ?? ""} onChange={(e) => update("categoryId", optionalNumber(e.target.value))}>
-          <option value="">เลือกหมวดหมู่</option>
-          {form.categoryId != null && !categories.data?.some((category) => category.id === form.categoryId) && <option value={form.categoryId}>หมวดหมู่เดิม #{form.categoryId}</option>}
-          {categories.data?.map((category) => <option key={category.id} value={category.id}>
-            {games.data?.find((game) => game.id === category.gameId)?.name ?? "ทุกเกม"} · {category.name}
-          </option>)}
-        </select>
-      </label>}
+      <div className="space-y-1"><label htmlFor="commission-scope" className="block">ขอบเขต</label>
+        <Select value={form.scope} onValueChange={(value) => { if (!value) return; const scope = value as CommissionRuleInput["scope"]; setForm((old) => ({ ...old, scope, gameId: null, categoryId: null, sellerProfileId: null })); }} items={scopeOptions}>
+          <SelectTrigger id="commission-scope" className="h-11 w-full rounded-xl border border-border bg-white px-4"><SelectValue /></SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} className="rounded-3xl p-1"><SelectGroup>{scopeOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectGroup></SelectContent>
+        </Select>
+      </div>
+      {form.scope === "GAME" && <div className="space-y-1"><label htmlFor="commission-game" className="block">เกม</label>
+        <Select value={form.gameId == null ? null : String(form.gameId)} onValueChange={(value) => update("gameId", value == null ? null : Number(value))}
+          items={[...(form.gameId != null && !games.data?.some((game) => game.id === form.gameId) ? [{ value: String(form.gameId), label: `เกมเดิม #${form.gameId}` }] : []), ...(games.data ?? []).map((game) => ({ value: String(game.id), label: game.name }))]}>
+          <SelectTrigger id="commission-game" className="h-11 w-full rounded-xl border border-border bg-white px-4"><SelectValue placeholder="เลือกเกม" /></SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} className="rounded-3xl p-1"><SelectGroup>
+            {form.gameId != null && !games.data?.some((game) => game.id === form.gameId) && <SelectItem value={String(form.gameId)}>เกมเดิม #{form.gameId}</SelectItem>}
+            {games.data?.map((game) => <SelectItem key={game.id} value={String(game.id)}>{game.name}</SelectItem>)}
+          </SelectGroup></SelectContent>
+        </Select>
+      </div>}
+      {form.scope === "CATEGORY" && <div className="space-y-1"><label htmlFor="commission-category" className="block">หมวดหมู่</label>
+        <Select value={form.categoryId == null ? null : String(form.categoryId)} onValueChange={(value) => update("categoryId", value == null ? null : Number(value))}
+          items={[...(form.categoryId != null && !categories.data?.some((category) => category.id === form.categoryId) ? [{ value: String(form.categoryId), label: `หมวดหมู่เดิม #${form.categoryId}` }] : []), ...(categories.data ?? []).map((category) => ({ value: String(category.id), label: `${games.data?.find((game) => game.id === category.gameId)?.name ?? "ทุกเกม"} · ${category.name}` }))]}>
+          <SelectTrigger id="commission-category" className="h-11 w-full rounded-xl border border-border bg-white px-4"><SelectValue placeholder="เลือกหมวดหมู่" /></SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} className="rounded-3xl p-1"><SelectGroup>
+            {form.categoryId != null && !categories.data?.some((category) => category.id === form.categoryId) && <SelectItem value={String(form.categoryId)}>หมวดหมู่เดิม #{form.categoryId}</SelectItem>}
+            {categories.data?.map((category) => <SelectItem key={category.id} value={String(category.id)}>
+              {games.data?.find((game) => game.id === category.gameId)?.name ?? "ทุกเกม"} · {category.name}
+            </SelectItem>)}
+          </SelectGroup></SelectContent>
+        </Select>
+      </div>}
       {form.scope === "SELLER" && <label className="space-y-1">Seller profile ID<Input type="number" min="1" value={form.sellerProfileId ?? ""} onChange={(e) => update("sellerProfileId", optionalNumber(e.target.value))} /></label>}
       <label className="space-y-1">อัตรา (%)<Input type="number" min="0" max="100" step="0.001" placeholder="0" value={form.ratePercent} onChange={(e) => update("ratePercent", e.target.value)} /></label>
       <label className="space-y-1">ค่าธรรมเนียมคงที่ (บาท)<Input type="number" min="0" step="0.01" placeholder="0" value={form.fixedFee} onChange={(e) => update("fixedFee", e.target.value)} /></label>
