@@ -3,6 +3,8 @@ import { z } from "zod";
 import { CARD_EDITIONS, CARD_FINISHES, PRODUCT_TYPES } from "./catalog.format";
 import type {
   AttributeValue,
+  CardEffect,
+  CardEffectPayload,
   CatalogProduct,
   CatalogVariant,
   GameAttribute,
@@ -304,4 +306,103 @@ export function toVariantPayload(
     imageUrl: existing?.imageUrl ?? null,
     active: values.active,
   };
+}
+
+// ---------- Abilities & Attacks ----------
+
+/**
+ * ตรงกับ Bean Validation ใน `dto/CatalogCardEffectRequest.java`
+ * ทุกช่องเก็บเป็นข้อความ — `damage` แปลงเป็นตัวเลข และ `energyCost`
+ * แยกด้วยจุลภาคตอนส่ง (`toCardEffectsPayload`)
+ */
+export const cardEffectsSchema = z.object({
+  effects: z
+    .array(
+      z.object({
+        effectType: z.enum(["ABILITY", "ATTACK", "RULE"]),
+        name: z
+          .string()
+          .trim()
+          .min(1, "ใส่ชื่อ")
+          .max(120, "ชื่อต้องไม่เกิน 120 ตัวอักษร"),
+        effectText: z
+          .string()
+          .trim()
+          .max(2000, "คำอธิบายต้องไม่เกิน 2000 ตัวอักษร"),
+        damage: z
+          .string()
+          .trim()
+          .regex(/^\d{0,6}$/, "ใส่ตัวเลข 0 ขึ้นไป หรือเว้นว่าง"),
+        energyCost: z
+          .string()
+          .trim()
+          .refine(
+            (value) => splitEnergy(value).length <= 10,
+            "พลังงานไม่เกิน 10 ตัว",
+          )
+          .refine(
+            (value) => splitEnergy(value).every((energy) => energy.length <= 20),
+            "ชื่อพลังงานแต่ละตัวต้องไม่เกิน 20 ตัวอักษร",
+          ),
+        sourceUrl: z.string().trim().max(500, "ลิงก์ต้องไม่เกิน 500 ตัวอักษร"),
+      }),
+    )
+    .max(30, "ไม่เกิน 30 รายการต่อการ์ด"),
+});
+
+export type CardEffectsFormValues = z.infer<typeof cardEffectsSchema>;
+
+export type CardEffectFormValues = CardEffectsFormValues["effects"][number];
+
+function splitEnergy(value: string): string[] {
+  return value
+    .split(",")
+    .map((energy) => energy.trim())
+    .filter((energy) => energy !== "");
+}
+
+export function emptyCardEffectForm(): CardEffectFormValues {
+  return {
+    effectType: "ATTACK",
+    name: "",
+    effectText: "",
+    damage: "",
+    energyCost: "",
+    sourceUrl: "",
+  };
+}
+
+export function toCardEffectsForm(effects: CardEffect[]): CardEffectsFormValues {
+  return {
+    effects: effects.map((effect) => ({
+      effectType: effect.effectType,
+      name: effect.name,
+      effectText: effect.effectText ?? "",
+      damage: effect.damage === null ? "" : String(effect.damage),
+      energyCost: effect.energyCost.join(", "),
+      sourceUrl: effect.sourceUrl ?? "",
+    })),
+  };
+}
+
+export function toCardEffectsPayload(
+  values: CardEffectsFormValues,
+): CardEffectPayload[] {
+  return values.effects.map((effect) => {
+    // ดาเมจกับพลังงานมีแค่ท่าโจมตี — เปลี่ยนประเภทแล้วค่าที่ค้างในช่องที่ซ่อนไปต้องไม่ติดไปด้วย
+    const isAttack = effect.effectType === "ATTACK";
+    return {
+      effectType: effect.effectType,
+      name: effect.name,
+      effectText: orNull(effect.effectText),
+      damage: isAttack && effect.damage !== "" ? Number(effect.damage) : null,
+      energyCost: isAttack ? splitEnergy(effect.energyCost) : [],
+      sourceUrl: orNull(effect.sourceUrl),
+    };
+  });
+}
+
+/** violation ของ backend ชื่อ `effects[2].name` — ฟอร์มใช้ `effects.2.name` */
+export function toCardEffectField(field: string): string {
+  return field.replace(/\[(\d+)\]/g, ".$1");
 }
