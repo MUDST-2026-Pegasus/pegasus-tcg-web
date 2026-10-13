@@ -43,6 +43,8 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
+import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
+import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
@@ -127,6 +129,7 @@ export function OrderHistoryPage() {
         <AccountSidebar user={sidebarUser} />
 
         <div className="flex min-w-0 flex-col gap-4">
+          <BuyerRefunds />
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">Order History</h1>
             <p className="text-sm text-muted-foreground">
@@ -556,6 +559,7 @@ function OrderDetailsModal({
                   ))}
                 </div>
               )}
+              <BuyerAfterSales order={so} />
             </div>
           ))}
         </div>

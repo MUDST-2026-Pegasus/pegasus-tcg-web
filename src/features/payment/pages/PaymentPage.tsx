@@ -1,278 +1,131 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Clock, QrCode, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { ApiError } from "@/lib/api/errors";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { getErrorMessage } from "@/lib/api";
 import { ordersApi } from "@/features/account/orders.api";
-import type { OrderDetails } from "@/features/account/orders.types";
-import type { CheckoutResponse } from "@/features/cart/checkout.types";
 import { cartKeys } from "@/features/cart/cart.queries";
+import type { CheckoutResponse } from "@/features/cart/checkout.types";
+import { financeApi } from "@/features/finance/finance.api";
+
+function transferAccount(raw: string | undefined): Record<string, string> {
+  try {
+    const value: unknown = JSON.parse(raw ?? "{}");
+    return value && typeof value === "object" ? value as Record<string, string> : {};
+  } catch {
+    return {};
+  }
+}
 
 export function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
+  const state = location.state as { orderId?: number; order?: CheckoutResponse } | null;
+  const orderId = Number(state?.orderId ?? searchParams.get("orderId"));
+  const validOrderId = Number.isSafeInteger(orderId) && orderId > 0;
+  const [attemptKey, setAttemptKey] = useState(() => crypto.randomUUID());
+  const [referenceCode, setReferenceCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const slip = useFileUpload({ purpose: "PAYMENT_SLIP" });
 
-  const stateData = location.state as {
-    orderId?: number;
-    order?: CheckoutResponse | OrderDetails;
-  } | null;
+  const orderQuery = useQuery({
+    queryKey: ["orders", orderId],
+    queryFn: () => ordersApi.getOrder(orderId),
+    enabled: validOrderId && !state?.order,
+  });
+  const order = state?.order ?? orderQuery.data;
+  const paymentQuery = useQuery({
+    queryKey: ["finance", "payment", orderId, attemptKey],
+    queryFn: () => financeApi.createPayment(orderId, attemptKey),
+    enabled: validOrderId,
+    retry: false,
+  });
+  const paymentId = paymentQuery.data?.id;
+  const statusQuery = useQuery({
+    queryKey: ["finance", "payment-status", paymentId],
+    queryFn: () => financeApi.getPayment(paymentId!),
+    enabled: paymentId !== undefined,
+    initialData: paymentQuery.data,
+    refetchInterval: (query) =>
+      query.state.data?.status === "AWAITING_VERIFICATION" ? 5000 : false,
+  });
+  const payment = statusQuery.data ?? paymentQuery.data;
+  const account = transferAccount(payment?.transferAccountJson);
 
-  const orderId =
-    stateData?.orderId ||
-    (searchParams.get("orderId") ? Number(searchParams.get("orderId")) : null);
-
-  const [order, setOrder] = useState<CheckoutResponse | OrderDetails | null>(
-    stateData?.order || null,
-  );
-  const [isLoading, setIsLoading] = useState(!stateData?.order && !!orderId);
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(15 * 60);
-
-  // Fetch order details if not in state
   useEffect(() => {
-    if (!order && orderId) {
-      ordersApi
-        .getOrder(orderId)
-        .then((res) => {
-          setOrder(res);
-        })
-        .catch((err) => {
-          toast.add({
-            title: "Failed to Load Order",
-            description: err instanceof ApiError ? err.message : "Error loading order",
-            type: "error",
-          });
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+    if (payment?.status === "SUCCEEDED") {
+      void queryClient.invalidateQueries({ queryKey: cartKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      navigate(`/payment/success?orderId=${orderId}&paymentId=${payment.id}`, { replace: true });
     }
-  }, [order, orderId]);
+  }, [payment?.status, payment?.id, orderId, navigate, queryClient]);
 
-  // Countdown timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!orderId) {
-      toast.add({
-        title: "No Order ID",
-        description: "Cannot process payment without an order ID.",
-        type: "error",
-      });
-      return;
-    }
-
-    setIsConfirming(true);
+  async function submitSlip() {
+    const key = slip.objectKeys[0];
+    if (!payment || !key) return;
+    setIsSubmitting(true);
     try {
-      const paidOrder = await ordersApi.payOrder(orderId);
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.add({
-        title: "Payment Confirmed",
-        description: `Order ${paidOrder.orderNumber} has been paid successfully.`,
-        type: "success",
-      });
-      navigate(`/payment/success?orderId=${orderId}`, {
-        state: {
-          orderId,
-          order: paidOrder,
-        },
-      });
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.add({
-          title: "Payment Failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        toast.add({
-          title: "Error",
-          description: "An unexpected error occurred during payment.",
-          type: "error",
-        });
-      }
+      const updated = await financeApi.attachPaymentSlip(payment.id, key, referenceCode.trim() || undefined);
+      queryClient.setQueryData(["finance", "payment-status", payment.id], updated);
+      toast.add({ type: "success", title: "ส่งหลักฐานแล้ว", description: "รอผู้ดูแลตรวจสอบการชำระเงิน" });
+    } catch (error) {
+      toast.add({ type: "error", title: "ส่งหลักฐานไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
     } finally {
-      setIsConfirming(false);
+      setIsSubmitting(false);
     }
-  };
-
-  const handleSaveQr = () => {
-    toast.add({
-      title: "QR Saved",
-      description: "PromptPay QR code has been saved to your device.",
-      type: "info",
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-muted flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground text-sm font-medium">Loading payment details...</p>
-      </div>
-    );
   }
 
-  const grandTotal = order?.grandTotal ?? 0;
-  const itemsSubtotal = order?.itemsSubtotal ?? 0;
-  const shippingTotal = order?.shippingTotal ?? 0;
-
-  // Extract first item from sellerOrders
-  const sellerOrders = order?.sellerOrders ?? [];
-  const firstSellerOrder = sellerOrders[0];
-  const firstItem = firstSellerOrder?.items?.[0];
-
-  const formatPrice = (amount: number) => `THB ${amount.toLocaleString()}`;
+  if (!validOrderId) return <p className="p-8">ไม่พบหมายเลขคำสั่งซื้อ</p>;
+  if (paymentQuery.isPending) return <p className="p-8">กำลังเตรียมข้อมูลการชำระเงิน...</p>;
+  if (paymentQuery.isError) return (
+    <div className="mx-auto max-w-xl p-8">
+      <p role="alert" className="text-destructive">{getErrorMessage(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}</p>
+      <Button className="mt-4" onClick={() => navigate("/account/orders")}>กลับไปประวัติคำสั่งซื้อ</Button>
+    </div>
+  );
+  if (!payment) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Secure Checkout</h1>
-        <p className="text-muted-foreground">
-          Scan the QR code below to complete your payment.
-        </p>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Side: QR Code */}
-        <Card className="flex-1 border-t-4 border-t-primary">
-          <CardHeader className="text-center pt-8">
-            <CardTitle className="text-2xl font-bold">PromptPay QR</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6 pb-12">
-            <div className="bg-white border-2 border-border/80 shadow-inner w-64 h-64 flex flex-col items-center justify-center p-4 rounded-xl">
-              <QrCode className="w-44 h-44 text-primary" />
-              <span className="text-xs mt-2 font-bold tracking-wider text-foreground">
-                PAY VIA QR SCAN
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                Scan to Pay | {formatPrice(grandTotal)}
-              </span>
-            </div>
-
-            <div className="text-center flex flex-col items-center gap-4">
-              <p className="font-medium text-lg">Open your banking app to scan</p>
-              <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-full text-sm font-medium">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>Pay within {formatTimer(timeRemaining)}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full mt-4 max-w-sm">
-              <Button
-                className="flex-1 rounded-full"
-                variant="default"
-                size="lg"
-                onClick={handleSaveQr}
-              >
-                Save QR
-              </Button>
-              <Button
-                className="flex-1 rounded-full"
-                variant="outline"
-                size="lg"
-                disabled={isConfirming}
-                onClick={handleConfirmPayment}
-              >
-                {isConfirming ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  "Confirm Payment"
-                )}
-              </Button>
-            </div>
+    <div className="container mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <h1 className="text-3xl font-bold">ชำระเงินด้วยการโอนธนาคาร</h1>
+      <Card>
+        <CardHeader><CardTitle>คำสั่งซื้อ {order?.orderNumber ?? `#${orderId}`}</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p>ยอดที่ต้องโอน: <strong>฿{Number(payment.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</strong></p>
+          <p>ธนาคาร: {account.bankName || "—"}</p>
+          <p>ชื่อบัญชี: {account.accountName || "—"}</p>
+          <p>เลขบัญชี: {account.accountNumber || "—"}</p>
+          {account.promptPayId && <p>PromptPay: {account.promptPayId}</p>}
+          <p>ชำระภายใน: {new Date(payment.expiresAt).toLocaleString("th-TH")}</p>
+          <p>สถานะ: {payment.status}</p>
+          {payment.failureReason && <p role="alert" className="text-destructive">{payment.failureReason}</p>}
+        </CardContent>
+      </Card>
+      {(payment.status === "PENDING" || payment.status === "AWAITING_VERIFICATION") && (
+        <Card>
+          <CardHeader><CardTitle>แนบหลักฐานการโอน</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <Input type="file" accept={slip.accept} onChange={(event) => {
+              if (event.target.files?.length) slip.addFiles(event.target.files);
+            }} />
+            {slip.items[0]?.status === "error" && <p role="alert" className="text-destructive">{slip.items[0].error}</p>}
+            <Input aria-label="เลขอ้างอิงการโอน" placeholder="เลขอ้างอิงการโอน (ถ้ามี)" value={referenceCode} onChange={(event) => setReferenceCode(event.target.value)} />
+            <Button disabled={!slip.objectKeys.length || slip.isUploading || isSubmitting} onClick={submitSlip}>
+              {isSubmitting ? "กำลังส่ง..." : "ส่งหลักฐาน"}
+            </Button>
+            {payment.status === "AWAITING_VERIFICATION" && <p>ส่งหลักฐานแล้ว กำลังรอผู้ดูแลตรวจสอบ ระบบจะอัปเดตสถานะให้อัตโนมัติ</p>}
           </CardContent>
         </Card>
-
-        {/* Right Side: Order Summary */}
-        <Card className="w-full lg:w-96 h-fit pt-6">
-          <CardHeader>
-            <CardTitle className="text-xl">Order Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-6">
-            <div className="flex gap-4">
-              <div className="w-20 h-28 bg-[#f4f4f5] rounded-md overflow-hidden shrink-0 border flex items-center justify-center p-1">
-                {firstItem?.imageUrl ? (
-                  <img
-                    src={firstItem.imageUrl}
-                    alt={firstItem.productName}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <span className="text-xs text-muted-foreground text-center px-2">
-                    TCG Card
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col gap-1 min-w-0">
-                <p className="font-bold text-sm truncate">
-                  {firstItem?.productName || "Order Items"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {[firstItem?.variantLabel, firstItem?.condition]
-                    .filter(Boolean)
-                    .join(" • ")}
-                </p>
-                <p className="font-medium mt-2">
-                  {formatPrice(firstItem ? firstItem.unitPrice : grandTotal)}
-                  {firstItem && firstItem.quantity > 1 && (
-                    <span className="text-xs text-muted-foreground">
-                      {" "}× {firstItem.quantity}
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex flex-col gap-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">{formatPrice(itemsSubtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="font-medium">{formatPrice(shippingTotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tax</span>
-                <span className="font-medium">Included</span>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center pb-4">
-              <span className="font-bold text-lg">Total</span>
-              <span className="font-bold text-xl text-primary font-heading">
-                {formatPrice(grandTotal)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      )}
+      {(payment.status === "FAILED" || payment.status === "EXPIRED" || payment.status === "CANCELLED") && (
+        <Button onClick={() => { slip.clear(); setAttemptKey(crypto.randomUUID()); }}>เริ่มการชำระเงินใหม่</Button>
+      )}
     </div>
   );
 }

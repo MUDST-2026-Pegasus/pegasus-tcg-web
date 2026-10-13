@@ -5,6 +5,8 @@ import {
   LayoutGrid,
   Package,
   Receipt,
+  RotateCcw,
+  Star,
   Settings2,
   ShoppingCart,
   Users,
@@ -64,6 +66,8 @@ export const adminNav: NavGroup[] = [
       { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
       { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
       { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
+      { label: "จัดการการเงิน", to: "/admin/finance", icon: Wallet },
+      { label: "จัดการรีวิว", to: "/admin/reviews", icon: Star },
     ],
   },
   {
@@ -87,6 +91,8 @@ export const sellerNav: NavGroup[] = [
     items: [
       { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
+      { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: RotateCcw },
+      { label: "รีวิวร้านค้า", to: "/seller/reviews", icon: Star },
     ],
   },
   {
