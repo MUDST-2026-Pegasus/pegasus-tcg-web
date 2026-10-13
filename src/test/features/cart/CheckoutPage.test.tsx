@@ -54,6 +54,7 @@ const mockCart: CartResponse = {
       variantLabel: "Holo",
       sellerName: "Store A",
       imageUrl: "https://example.com/pika.png",
+      productId: 1,
     },
     {
       id: 45,
@@ -75,6 +76,7 @@ const mockCart: CartResponse = {
       variantLabel: "1st Edition",
       sellerName: "Store B",
       imageUrl: "https://example.com/char.png",
+      productId: 2,
     },
   ],
 };
@@ -143,6 +145,7 @@ describe("CheckoutPage", () => {
     vi.spyOn(cartQueries, "useCart").mockReturnValue({
       data: mockCart,
       isLoading: false,
+      isFetching: false,
       error: null,
     } as unknown as ReturnType<typeof cartQueries.useCart>);
 
@@ -175,6 +178,13 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("฿900")).toBeInTheDocument();
   });
 
+  it("checks out only the clicked product and listing from the product query", () => {
+    renderCheckout("/checkout?productId=2&listingId=102");
+
+    expect(screen.getByText("Charizard Base Set")).toBeInTheDocument();
+    expect(screen.queryByText("Pikachu Illustrator")).not.toBeInTheDocument();
+  });
+
   it("falls back to location.state.selectedCartItemIds when query param is absent", () => {
     renderCheckout({
       pathname: "/checkout",
@@ -200,6 +210,22 @@ describe("CheckoutPage", () => {
       );
       expect(mockNavigate).toHaveBeenCalledWith("/cart", { replace: true });
     });
+  });
+
+  it("waits for a background cart refresh before deciding the selected item is missing", () => {
+    vi.spyOn(cartQueries, "useCart").mockReturnValue({
+      data: { ...mockCart, items: [] },
+      isLoading: false,
+      isFetching: true,
+      error: null,
+    } as unknown as ReturnType<typeof cartQueries.useCart>);
+
+    renderCheckout("/checkout?items=900&productId=1&listingId=101");
+
+    expect(mockNavigate).not.toHaveBeenCalledWith("/cart", { replace: true });
+    expect(toast.add).not.toHaveBeenCalledWith(
+      expect.objectContaining({ title: "ไม่พบสินค้าที่เลือกสั่งซื้อ" }),
+    );
   });
 
   it("derives activeAddress from default shipping address without useEffect setState", () => {

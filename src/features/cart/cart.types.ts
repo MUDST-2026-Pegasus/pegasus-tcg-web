@@ -18,6 +18,7 @@ export interface CartItemResponse {
   variantLabel: string | null;
   sellerName: string | null;
   imageUrl: string | null;
+  productId: number | null;
 }
 
 export interface CartResponse {

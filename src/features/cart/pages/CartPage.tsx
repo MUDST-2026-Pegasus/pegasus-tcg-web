@@ -12,6 +12,8 @@ import {
   useRemoveCartItem,
   useUpdateCartItemQuantity,
 } from "../cart.queries";
+import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
+import type { CardCondition } from "@/features/catalog/catalog.types";
 
 export function CartPage() {
   const navigate = useNavigate();
@@ -266,9 +268,13 @@ export function CartPage() {
                             {item.productName || `Listing #${item.listingId}`}
                           </h3>
                           <p className="text-muted-foreground text-sm">
-                            {[item.variantLabel, item.condition]
-                              .filter(Boolean)
-                              .join(" • ")}
+                            {item.variantLabel || "Card variant"}
+                            {item.condition && (
+                              <span>
+                                {" • Condition: "}
+                                {CONDITION_LABELS[item.condition as CardCondition] ?? item.condition}
+                              </span>
+                            )}
                           </p>
                           <p className="text-sm mt-1 text-foreground">
                             Seller:{" "}

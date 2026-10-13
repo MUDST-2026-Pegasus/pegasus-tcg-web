@@ -31,9 +31,11 @@ export function getTrending(limit: number): Promise<TrendingProductDto[]> {
 export function getStorefront(
   username: string,
   size: number,
+  page = 0,
+  signal?: AbortSignal,
 ): Promise<PageResponse<PublicListingDto>> {
   return api.get<PageResponse<PublicListingDto>>(
     `/u/${encodeURIComponent(username)}/listings`,
-    { ...PUBLIC, query: { sort: "newest", size } },
+    { ...PUBLIC, signal, query: { sort: "newest", size, page } },
   );
 }

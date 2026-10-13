@@ -25,6 +25,8 @@ describe("Register Flow Integration", () => {
     const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
+      status: 200,
+      headers: new Headers(),
       text: async () => JSON.stringify({
         success: true,
         data: {

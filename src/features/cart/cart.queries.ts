@@ -17,8 +17,8 @@ export function useAddCartItem() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: AddCartItemRequest) => cartApi.addItem(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
   });
 }
