@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clock, Loader2, Lock, Shield } from "lucide-react";
+import { Clock, FileText, Loader2, Lock, Shield, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -280,49 +280,82 @@ export function PaymentPage() {
               {/* Full-width Divider Line above Submit Button */}
               <div className="border-t border-slate-100 -mx-6 md:-mx-8 mt-8 mb-6" />
 
-              {/* Full-width Submit Payment Button across the entire card layout */}
-              <div>
-                <Button
-                  type="button"
-                  onClick={submitSlip}
-                  disabled={isButtonDisabled}
-                  className={`w-full h-12 rounded-4xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
-                    isButtonDisabled
-                      ? "bg-[#85b4d0] text-white hover:bg-[#85b4d0] cursor-not-allowed opacity-90 shadow-none"
-                      : "bg-sky-700 hover:bg-sky-800 text-white shadow-xs cursor-pointer"
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      <span>Submitting payment...</span>
-                    </>
-                  ) : isAwaitingVerification ? (
-                    <>
-                      <Lock className="size-4" />
-                      <span>Submitted for verification</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="size-4" />
-                      <span>Submit payment for verification</span>
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
-                  <Shield className="size-3.5 text-muted-foreground" />
-                  <span>Upload your slip and reference no. to continue.</span>
-                </p>
-
-                {isAwaitingVerification && (
-                  <div className="mt-3 p-3 bg-sky-50 border border-sky-100 rounded-lg text-center">
-                    <p className="text-xs text-sky-800 font-medium">
-                      หลักฐานการโอนถูกส่งแล้ว กำลังรอผู้ดูแลตรวจสอบ ระบบจะอัปเดตสถานะให้อัตโนมัติ
-                    </p>
+              {/* Full-width Action Section below the divider */}
+              {isAwaitingVerification ? (
+                <div className="space-y-4">
+                  {/* Status Announcement Card */}
+                  <div className="rounded-xl border border-sky-100 bg-sky-50/70 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                      <Clock className="size-5 animate-pulse" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left space-y-1">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h4 className="text-sm font-bold text-sky-950">
+                          ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ
+                        </h4>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-200/80 text-sky-900">
+                          Payment Under Review
+                        </span>
+                      </div>
+                      <p className="text-xs text-sky-800/90 leading-relaxed">
+                        เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Navigation Actions */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <Button
+                      type="button"
+                      onClick={() => navigate("/account/orders")}
+                      className="w-full h-11 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    >
+                      <FileText className="size-4" />
+                      <span>ดูประวัติคำสั่งซื้อ</span>
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate("/products")}
+                      className="w-full h-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <ShoppingBag className="size-4" />
+                      <span>เลือกซื้อสินค้าต่อ</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Button
+                    type="button"
+                    onClick={submitSlip}
+                    disabled={isButtonDisabled}
+                    className={`w-full h-12 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                      isButtonDisabled
+                        ? "bg-[#85b4d0] text-white hover:bg-[#85b4d0] cursor-not-allowed opacity-90 shadow-none"
+                        : "bg-sky-700 hover:bg-sky-800 text-white shadow-xs cursor-pointer"
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Submitting payment...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="size-4" />
+                        <span>Submit payment for verification</span>
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
+                    <Shield className="size-3.5 text-muted-foreground" />
+                    <span>Upload your slip and reference no. to continue.</span>
+                  </p>
+                </div>
+              )}
 
               {/* Status Alert for Failed / Expired */}
               {(payment.status === "FAILED" ||

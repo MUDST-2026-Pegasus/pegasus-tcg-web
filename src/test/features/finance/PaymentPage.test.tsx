@@ -115,8 +115,9 @@ describe("PaymentPage", () => {
 
     renderPaymentPage(42);
 
-    expect(await screen.findByText(/กำลังรอผู้ดูแลตรวจสอบ/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Submitted for verification/i })).toBeDisabled();
+    expect(await screen.findByText(/ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ดูประวัติคำสั่งซื้อ/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /เลือกซื้อสินค้าต่อ/i })).toBeInTheDocument();
   });
 
   it("allows entering reference number in step 3", async () => {
