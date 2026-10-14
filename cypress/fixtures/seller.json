@@ -1,0 +1,25 @@
+{
+  "submittedVerification": {
+    "id": 1,
+    "userId": 2,
+    "legalFirstName": "Somchai",
+    "legalLastName": "Rakdee",
+    "bankCode": "KBANK",
+    "bankName": "Kasikornbank",
+    "bankAccountNumber": "012-3-45678-9",
+    "status": "SUBMITTED",
+    "submittedAt": "2026-10-14T10:00:00Z"
+  },
+  "approvedVerification": {
+    "id": 1,
+    "userId": 2,
+    "legalFirstName": "Somchai",
+    "legalLastName": "Rakdee",
+    "bankCode": "KBANK",
+    "bankName": "Kasikornbank",
+    "bankAccountNumber": "012-3-45678-9",
+    "status": "APPROVED",
+    "submittedAt": "2026-10-14T10:00:00Z",
+    "reviewedAt": "2026-10-14T10:30:00Z"
+  }
+}
