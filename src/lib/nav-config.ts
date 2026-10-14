@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   Package,
   Receipt,
-  RotateCcw,
   Star,
   Undo2,
   Settings2,
@@ -101,7 +100,7 @@ export const sellerNav: NavGroup[] = [
     items: [
       { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
-      { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: RotateCcw },
+      { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: Undo2 },
       { label: "รีวิวร้านค้า", to: "/seller/reviews", icon: Star },
     ],
   },
