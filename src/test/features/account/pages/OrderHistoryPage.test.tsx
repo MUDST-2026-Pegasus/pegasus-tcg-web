@@ -132,12 +132,62 @@ describe("OrderHistoryPage", () => {
     } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
   });
 
-  it("renders human-readable status labels on order cards", () => {
+  it("renders the buyer-facing stage on each order card", () => {
     renderWithProviders(<OrderHistoryPage />);
 
-    // Should display human-readable "Pending Payment" and "Paid", not raw enum strings
-    expect(screen.getByText("Pending Payment")).toBeInTheDocument();
-    expect(screen.getByText("Paid")).toBeInTheDocument();
+    // Unpaid order and a paid one the seller has not shipped yet
+    expect(screen.getByText("Awaiting Payment")).toBeInTheDocument();
+    expect(screen.getByText("Preparing")).toBeInTheDocument();
+  });
+
+  it("shows Confirm Received on an in-transit order and confirms it from the card", async () => {
+    const shipped: OrderDetails = {
+      ...mockOrders[0],
+      id: 103,
+      orderNumber: "ORD-103",
+      status: "PAID",
+      paidAt: "2026-10-10T12:05:00Z",
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        id: 203,
+        salesOrderId: 103,
+        status: "SHIPPED",
+        autoCompleteAt: "2026-10-20T12:00:00Z",
+        shipments: [{
+          id: 1, sellerOrderId: 203, carrierCode: "KERRY", carrierName: "Kerry Express",
+          trackingNumber: "KEX123", status: "IN_TRANSIT", shippedAt: null,
+          estimatedDeliveryDate: null, deliveredAt: null,
+        }],
+      }],
+    };
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [shipped], isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    const confirmSpy = vi.spyOn(ordersApi, "confirmReceived").mockResolvedValue({ ...shipped, status: "COMPLETED" });
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    expect(screen.getByText("In Transit")).toBeInTheDocument();
+    expect(screen.getByText("Kerry Express KEX123")).toBeInTheDocument();
+    expect(screen.getByText(/auto-confirms on/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /cancel order/i })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: /confirm received/i }));
+    await userEvent.click(screen.getByRole("button", { name: /^confirm receipt$/i }));
+
+    await waitFor(() => expect(confirmSpy).toHaveBeenCalledWith(103));
+  });
+
+  it("hides Pay Now and Cancel while the payment slip is under review", () => {
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [{ ...mockOrders[0], paymentUnderReview: true }], isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    expect(screen.getByText("Verifying Payment")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /pay now/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /cancel order/i })).not.toBeInTheDocument();
   });
 
   it("opens custom CancelOrderConfirmationDialog without window.confirm when Cancel Order is clicked", async () => {
