@@ -44,6 +44,8 @@ import {
 import { useAcceptOrder, useShipOrder } from "../../orders.queries";
 import type { SellerOrderDetail } from "../../orders.types";
 
+import { ConfirmShipDialog } from "../ConfirmShipDialog";
+
 import { BuyerCard } from "./BuyerCard";
 import { CancelOrderDialog } from "./CancelOrderDialog";
 import { OrderProfitCard } from "./OrderProfitCard";
@@ -93,6 +95,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [packedIds, setPackedIds] = useState<number[]>([]);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [shipConfirmOpen, setShipConfirmOpen] = useState(false);
 
   const shippable = canShip(order.status);
   const tracking = trackingNumber.trim();
@@ -222,7 +225,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               size="sm"
               className="rounded-md px-2.5"
               disabled={tracking === "" || busy}
-              onClick={handleShip}
+              onClick={() => setShipConfirmOpen(true)}
             >
               {ship.isPending ? <Spinner /> : null}
               ยืนยันจัดส่ง
@@ -260,10 +263,19 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             orderCount={detail.buyerOrderCount}
             note={summary.buyerNote}
           />
-          <PaymentCard state={paymentStateOf(order.status)} rows={paymentRows(detail.payment)} />
+          <PaymentCard state={paymentStateOf(order.status, summary.paidAt)} rows={paymentRows(detail.payment)} />
           {profit ? <OrderProfitCard {...profit} /> : null}
         </div>
       </div>
+
+      <ConfirmShipDialog
+        open={shipConfirmOpen}
+        onOpenChange={setShipConfirmOpen}
+        orderNumber={order.sellerOrderNumber}
+        carrierName={carrierLabel(carrier)}
+        trackingNumber={tracking}
+        onConfirm={handleShip}
+      />
 
       <CancelOrderDialog
         open={cancelOpen}

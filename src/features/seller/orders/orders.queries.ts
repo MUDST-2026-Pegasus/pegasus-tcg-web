@@ -35,20 +35,32 @@ export const orderKeys = {
   detail: (id: number) => [...orderKeys.details(), id] as const,
 };
 
+/**
+ * ออเดอร์เปลี่ยนจากฝั่งอื่นได้ตลอด (ผู้ซื้อสั่ง/จ่าย ระบบยกเลิกเอง) ไม่ใช่แค่จากร้าน
+ * จึงไม่ใช้ staleTime 30 วิของทั้งแอป — กลับมาที่แท็บ/หน้าเดิมเมื่อไหร่ ดึงใหม่ทุกครั้ง
+ * ระหว่างรอยังเห็นชุดที่ cache ไว้ ภาพไม่กระพริบ
+ */
+const ORDERS_STALE_MS = 0;
+
 export function useSellerOrders(query: SellerOrderQuery) {
   return useQuery({
     queryKey: orderKeys.list(query),
     queryFn: () => ordersApi.getSellerOrders(query),
+    staleTime: ORDERS_STALE_MS,
     // สลับแท็บ/หน้าแล้วยังเห็นของเดิมจนกว่าชุดใหม่จะมา ภาพไม่กระพริบ
     placeholderData: keepPreviousData,
   });
 }
 
-/** ตัวเลขบนชิปตัวกรอง — endpoint เดียว GROUP BY ที่ backend */
+/**
+ * ตัวเลขบนชิปตัวกรอง — endpoint เดียว GROUP BY ที่ backend
+ * สดเท่ากับรายการ หน้าจัดการคำสั่งซื้อสั่งดึงใหม่เองทุกครั้งที่สลับแท็บ
+ */
 export function useSellerOrderCounts() {
   return useQuery({
     queryKey: orderKeys.counts(),
     queryFn: ordersApi.getSellerOrderCounts,
+    staleTime: ORDERS_STALE_MS,
   });
 }
 

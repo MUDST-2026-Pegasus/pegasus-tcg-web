@@ -8,6 +8,7 @@ const STATUS_BADGE: Record<PaymentState, string> = {
   paid: "bg-[#e3f4ec] text-[#12805c]",
   pending: "bg-[#fdf0dd] text-[#b45309]",
   refunded: "bg-[#eef1f2] text-[#6b7280]",
+  cancelled: "bg-[#eef1f2] text-[#6b7280]",
 };
 
 type PaymentCardProps = {

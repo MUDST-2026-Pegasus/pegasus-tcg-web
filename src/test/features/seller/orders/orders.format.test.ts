@@ -11,7 +11,9 @@ import {
   formatAgo,
   monthlySummary,
   orderErrorMessage,
+  ordersSubtitle,
   parseShippingAddress,
+  paymentRows,
   paymentStateOf,
   profitSummary,
   sortOf,
@@ -19,7 +21,11 @@ import {
   tabOfStatus,
   timelineEntries,
 } from "@/features/seller/orders/orders.format";
-import type { SellerOrderDetail, SellerOrderDetails } from "@/features/seller/orders/orders.types";
+import type {
+  PaymentRecordStatus,
+  SellerOrderDetail,
+  SellerOrderDetails,
+} from "@/features/seller/orders/orders.types";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
 import { ApiError } from "@/lib/api/errors";
 
@@ -86,6 +92,13 @@ describe("tabs", () => {
     expect(tabOfStatus("DELIVERED").id).toBe("shipped");
     expect(sortOf("CHEAPEST")).toBe("default");
     expect(sortOf("TOTAL_DESC")).toBe("TOTAL_DESC");
+  });
+
+  it("says it is still counting instead of showing zero while counts load", () => {
+    expect(ordersSubtitle(undefined)).toBe("กำลังนับออเดอร์…");
+    expect(ordersSubtitle({ PAID: 2, PREPARING: 1, SHIPPED: 4 })).toBe(
+      "3 ออเดอร์รอแพ็ค · 4 กำลังจัดส่ง · จัดส่งให้ทันกำหนดเพื่อรักษาคะแนนร้าน",
+    );
   });
 
   it("sums a tab's statuses, counting missing ones as zero", () => {
@@ -155,9 +168,37 @@ describe("time", () => {
 
 describe("payment, timeline and profit", () => {
   it("reads payment state from the order status", () => {
-    expect(paymentStateOf("PENDING_PAYMENT")).toBe("pending");
-    expect(paymentStateOf("SHIPPED")).toBe("paid");
-    expect(paymentStateOf("CANCELLED")).toBe("refunded");
+    expect(paymentStateOf("PENDING_PAYMENT", null)).toBe("pending");
+    expect(paymentStateOf("SHIPPED", "2026-10-13T03:00:00Z")).toBe("paid");
+    expect(paymentStateOf("CANCELLED", "2026-10-13T03:00:00Z")).toBe("refunded");
+    expect(paymentStateOf("REFUNDED", "2026-10-13T03:00:00Z")).toBe("refunded");
+  });
+
+  it("calls an order cancelled before payment just cancelled, with nothing to refund", () => {
+    expect(paymentStateOf("CANCELLED", null)).toBe("cancelled");
+  });
+
+  it("only calls the amount paid once the payment succeeded", () => {
+    const rows = (status: PaymentRecordStatus, paidAt: string | null = null) =>
+      paymentRows({ method: "BANK_TRANSFER", status, amount: 3300, paidAt }).map((row) => [row.label, row.value]);
+
+    expect(rows("SUCCEEDED", "2026-10-13T03:00:00Z")).toEqual([
+      ["ช่องทาง", "โอนผ่านธนาคาร"],
+      ["สถานะ", "ชำระสำเร็จ"],
+      ["ยอดที่ชำระ (ทั้งคำสั่งซื้อ)", "฿3,300"],
+      ["เวลาที่ชำระ", "13 ต.ค. 2569 10:00"],
+    ]);
+    // รายการถูกสร้างตั้งแต่ผู้ซื้อเปิดหน้าโอนเงิน — ยังไม่มีเงินเข้า
+    expect(rows("PENDING")).toEqual([
+      ["ช่องทาง", "โอนผ่านธนาคาร"],
+      ["สถานะ", "รอชำระ"],
+      ["ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)", "฿3,300"],
+    ]);
+    // ยกเลิกก่อนจ่าย ไม่มีเงินเข้า จึงไม่มียอดและเวลาที่ชำระ
+    expect(rows("CANCELLED")).toEqual([
+      ["ช่องทาง", "โอนผ่านธนาคาร"],
+      ["สถานะ", "ยกเลิก"],
+    ]);
   });
 
   it("marks the first step without a time as in progress", () => {

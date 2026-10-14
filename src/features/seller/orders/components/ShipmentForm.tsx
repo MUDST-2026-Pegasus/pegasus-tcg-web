@@ -22,6 +22,8 @@ import { toast } from "@/components/ui/toast";
 import { CARRIER_OPTIONS, carrierLabel, orderErrorMessage } from "../orders.format";
 import { useShipOrder } from "../orders.queries";
 
+import { ConfirmShipDialog } from "./ConfirmShipDialog";
+
 /** ตรงกับ `@Size(max = 64)` ของ `ShipOrderRequest.trackingNumber` */
 const TRACKING_MAX = 64;
 
@@ -38,6 +40,7 @@ export function ShipmentForm({ orderId, orderNumber }: ShipmentFormProps) {
   const ship = useShipOrder();
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState(CARRIER_OPTIONS[0].value);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const tracking = trackingNumber.trim();
 
@@ -111,11 +114,20 @@ export function ShipmentForm({ orderId, orderNumber }: ShipmentFormProps) {
         size="sm"
         className="rounded-md px-2.5"
         disabled={tracking === "" || ship.isPending}
-        onClick={handleConfirm}
+        onClick={() => setConfirmOpen(true)}
       >
         {ship.isPending ? <Spinner /> : null}
         ยืนยันจัดส่ง
       </Button>
+
+      <ConfirmShipDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        orderNumber={orderNumber}
+        carrierName={carrierLabel(carrier)}
+        trackingNumber={tracking}
+        onConfirm={handleConfirm}
+      />
     </>
   );
 }
