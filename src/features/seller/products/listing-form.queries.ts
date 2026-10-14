@@ -13,7 +13,7 @@ import type {
   NewUnitsPayload,
 } from "./listing-form.types";
 import * as productsApi from "./products.api";
-import { listingKeys } from "./products.queries";
+import { invalidateListingViews, listingKeys } from "./products.queries";
 import type {
   CardCondition,
   ListingPricePayload,
@@ -158,8 +158,7 @@ export function useCreateListing() {
         throw new ListingPartiallyCreatedError(created, "publish", error);
       }
     },
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
+    onSettled: () => invalidateListingViews(queryClient),
   });
 }
 
@@ -198,11 +197,6 @@ export function useUpdateListing(listingId: number) {
     },
     // ยิงไปบางส่วนแล้วพลาดก็ต้องดึงใหม่ ไม่งั้นฟอร์มเห็นของเก่าครึ่งหนึ่ง
     onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
-        queryClient.invalidateQueries({
-          queryKey: listingKeys.detail(listingId),
-        }),
-      ]),
+      invalidateListingViews(queryClient, listingKeys.detail(listingId)),
   });
 }
