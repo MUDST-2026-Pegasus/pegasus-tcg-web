@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "slug": "pikachu-ex-025-187",
+      "name": "Pikachu ex",
+      "nameLocal": "พิคาชู ex",
+      "cardNumber": "025/187",
+      "rarityCode": "RR",
+      "imageUrl": "http://localhost:8080/images/pikachu.jpg",
+      "variants": [
+        {
+          "id": 10,
+          "sku": "POKEMON-SV8A-025-187-EN-NORMAL",
+          "finish": "NORMAL",
+          "edition": "UNLIMITED",
+          "languageCode": "EN"
+        }
+      ]
+    }
+  ]
+}
