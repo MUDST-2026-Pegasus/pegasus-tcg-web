@@ -36,8 +36,12 @@ export type RestockCalculation = {
   quantity: number;
   totalCost: number;
   unitCost: number;
+  /** ต้นทุนรวมของการ์ดที่มีอยู่แล้ว (ทุกใบที่ต้นทุนเฉลี่ยครอบคลุม ไม่ใช่แค่บนประกาศนี้) */
   previousValue: number;
+  /** การ์ดพร้อมขายบนประกาศนี้หลังรับเข้า */
   newStock: number;
+  /** การ์ดทั้งหมดที่ต้นทุนเฉลี่ยใหม่ครอบคลุม — ตัวหารของต้นทุนเฉลี่ยใหม่ */
+  newCostQuantity: number;
   combinedValue: number;
   newAverageCost: number;
   previousProfit: number;
@@ -47,8 +51,11 @@ export type RestockCalculation = {
 };
 
 /**
- * ต้นทุนเฉลี่ยถ่วงน้ำหนัก (Weighted Average Cost)
- * (สต็อกเดิม × ต้นทุนเฉลี่ยเดิม + ต้นทุนรวมล็อตใหม่) ÷ (สต็อกเดิม + จำนวนล็อตใหม่)
+ * ต้นทุนเฉลี่ยถ่วงน้ำหนัก (Weighted Average Cost) — สูตรเดียวกับ `WeightedAverageCost.receive` ฝั่ง backend
+ * (ต้นทุนรวมเดิม + ต้นทุนรวมล็อตใหม่) ÷ (การ์ดเดิม + จำนวนล็อตใหม่)
+ *
+ * "การ์ดเดิม" คือทุกใบที่ต้นทุนเฉลี่ยครอบคลุม (`costQuantity`) ไม่ใช่สต็อกของประกาศนี้
+ * เพราะ backend เก็บต้นทุนต่อการ์ด + สภาพ รวมใบที่ติดจอง ใบในมือ และประกาศแฝด
  */
 export function calculateRestock(
   product: RestockData["product"],
@@ -77,11 +84,12 @@ export function calculateRestock(
   const totalCost = quantity > 0 ? (parsedTotalCost ?? 0) : 0;
   const unitCost = quantity > 0 ? roundMoney(totalCost / quantity) : 0;
 
-  const previousValue = roundMoney(product.stock * product.averageCost);
+  const previousValue = roundMoney(product.costTotal);
   const newStock = product.stock + quantity;
+  const newCostQuantity = product.costQuantity + quantity;
   const combinedValue = roundMoney(previousValue + totalCost);
   const newAverageCost =
-    newStock > 0 ? roundMoney(combinedValue / newStock) : product.averageCost;
+    newCostQuantity > 0 ? roundMoney(combinedValue / newCostQuantity) : product.averageCost;
 
   const commissionRate = commissionPercent / 100;
   const commission = roundMoney(product.sellingPrice * commissionRate);
@@ -101,6 +109,7 @@ export function calculateRestock(
     unitCost,
     previousValue,
     newStock,
+    newCostQuantity,
     combinedValue,
     newAverageCost,
     previousProfit,

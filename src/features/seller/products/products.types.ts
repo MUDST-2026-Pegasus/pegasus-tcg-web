@@ -95,6 +95,21 @@ export type SellerListing = Omit<SellerListingSummary, "primaryPhotoUrl"> & {
   createdAt: string;
   photos: ListingPhoto[];
   similarListings: SimilarListing[];
+  costBasis: ListingCostBasis;
+};
+
+/**
+ * `SellerListingResponse.CostBasis` — ต้นทุนเฉลี่ยถ่วงน้ำหนักของการ์ดใบนี้สภาพนี้ของร้าน [RQ-7]
+ * backend เก็บต่อ "การ์ด + สภาพ" ไม่ใช่ต่อประกาศ: `quantity` นับการ์ดทุกใบที่ต้นทุนนี้ครอบคลุม
+ * (บนประกาศนี้ ประกาศแฝด ใบที่ติดจอง และใบที่อยู่ในมือ) จึงอาจไม่เท่ากับจำนวนบนประกาศ
+ * ยังไม่เคยรับเข้าเลย = ทุกค่าเป็น 0
+ */
+export type ListingCostBasis = {
+  quantity: number;
+  /** ต้นทุนรวมของการ์ดชุดนั้น ทศนิยม 2 ตำแหน่ง */
+  totalCost: number;
+  /** ทศนิยม 4 ตำแหน่ง — ค่าที่ order ใช้เป็นต้นทุนตอนขาย */
+  averageUnitCost: number;
 };
 
 /**
