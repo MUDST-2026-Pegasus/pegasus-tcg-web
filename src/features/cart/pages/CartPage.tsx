@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, Lock, Minus, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, Lock, Minus, Plus } from "lucide-react";
+import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
@@ -220,9 +221,8 @@ export function CartPage() {
 
             {/* Items */}
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border text-muted-foreground gap-3">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-base font-medium">Loading your cart...</p>
+              <div role="status" aria-busy="true" aria-label="Loading your cart">
+                <ProductRowsSkeleton />
               </div>
             ) : items.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground bg-white rounded-xl border flex flex-col items-center gap-4">

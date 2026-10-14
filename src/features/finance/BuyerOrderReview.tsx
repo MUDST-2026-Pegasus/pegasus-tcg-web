@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { TextLinesSkeleton } from '@/components/common/PageSkeletons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,7 +27,7 @@ export function BuyerOrderReview({ orderId, status }: { orderId: number; status:
     onError: (error) => { toast.add({ type: 'error', title: getErrorMessage(error, 'ส่งรีวิวไม่สำเร็จ') }); },
   });
   if (status !== 'COMPLETED') return null;
-  if (review.isPending) return <p role="status">กำลังโหลดรีวิว...</p>;
+  if (review.isPending) return <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว"><TextLinesSkeleton lines={2} /></div>;
   if (review.isError) return <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void review.refetch()}>ลองอีกครั้ง</Button></p>;
   if (review.data) return <div className="space-y-2 rounded-lg border p-4">
     <p className="font-medium">รีวิวที่ส่งแล้ว</p><ReviewStars rating={review.data.rating}/>

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
 import { Badge } from "@/components/ui/badge";
@@ -176,11 +177,8 @@ export function OrderHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-xl border gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground font-medium">
-                Loading orders...
-              </p>
+            <div role="status" aria-busy="true" aria-label="Loading orders">
+              <ProductRowsSkeleton />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border gap-3 p-6">

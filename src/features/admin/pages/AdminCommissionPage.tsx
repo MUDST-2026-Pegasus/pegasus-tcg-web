@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PanelSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { getErrorMessage, isApiError } from "@/lib/api";
@@ -143,7 +144,10 @@ export function AdminCommissionPage() {
       <div className="flex gap-2"><Button variant="outline" className="rounded-md px-2.5" disabled title="ระบบยังไม่มี API ประวัติการแก้ไขค่าคอมมิชชั่น">ดูประวัติการแก้ไข</Button>
         <Button className="rounded-md px-2.5" disabled={busy || !hasChanges} onClick={() => void saveSettings()}>บันทึกการตั้งค่า</Button></div>
     </div>
-    {(rules.isPending || setting.isPending || games.isPending || categories.isPending) && <p>กำลังโหลดการตั้งค่าค่าคอมมิชชั่น...</p>}
+    {(rules.isPending || setting.isPending || games.isPending || categories.isPending) && <div role="status" aria-busy="true" aria-label="กำลังโหลดการตั้งค่าค่าคอมมิชชั่น" className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="space-y-4"><PanelSkeleton rows={1} /><PanelSkeleton rows={4} /></div>
+      <div className="space-y-4"><PanelSkeleton rows={2} /><PanelSkeleton rows={2} /></div>
+    </div>}
     {(rules.isError || setting.isError || games.isError || categories.isError) && <p role="alert" className="text-destructive">
       {isApiError(loadingError) && loadingError.status === 403
         ? "บัญชีนี้ไม่มีสิทธิ์ ADMIN สำหรับการตั้งค่าค่าคอมมิชชั่น" : "โหลดการตั้งค่าค่าคอมมิชชั่นไม่สำเร็จ"}

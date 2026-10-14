@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 
 import { ItemCard, QueryBoundary } from "@/components/common";
+import { HeadingSkeleton, ItemGridSkeleton, ProfileHeaderSkeleton } from "@/components/common/PageSkeletons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,7 +24,10 @@ export function PublicCollectionPage() {
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto flex max-w-[1440px] flex-col gap-8">
       <Button variant="outline" className="self-start" render={<Link to={isOwn ? "/account/collection" : "/search"} />}>{isOwn ? "Back to My Collection" : "Back to products"}</Button>
-      <QueryBoundary query={collection} errorTitle="Could not load this collection" errorRetryLabel="Try again">
+      <QueryBoundary query={collection} errorTitle="Could not load this collection" errorRetryLabel="Try again"
+        loading={<div role="status" aria-busy="true" aria-label="Loading collection" className="flex flex-col gap-8">
+          <ProfileHeaderSkeleton /><HeadingSkeleton /><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" />
+        </div>}>
         {() => <>
           <Card className="rounded-xl shadow-none"><CardContent className="flex flex-wrap items-center gap-6 p-8">
             <Avatar className="size-20">{avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>

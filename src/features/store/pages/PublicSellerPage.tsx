@@ -4,6 +4,7 @@ import { useLayoutEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { EmptyState, ErrorState, ItemCard } from "@/components/common";
+import { HeadingSkeleton, ItemGridSkeleton, ProfileHeaderSkeleton } from "@/components/common/PageSkeletons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,7 +74,7 @@ function Storefront({ username }: { username: string }) {
   return <main className="min-h-[580px] bg-muted px-5 py-8 font-sans sm:px-8 sm:py-12 lg:px-12">
     <div className="mx-auto flex w-full max-w-[1344px] flex-col gap-8">
       <div><Button variant="outline" className="h-[38px] rounded-lg bg-background px-3" nativeButton={false} render={<Link to={backHref} role="link" />}>{from ? "Back to product detail" : "Back to products"}</Button></div>
-      {profile.isPending ? <p role="status" className="py-12 text-center text-muted-foreground">กำลังโหลดร้านค้า...</p> : profile.isError ? (
+      {profile.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดร้านค้า" className="flex flex-col gap-8"><ProfileHeaderSkeleton /><HeadingSkeleton /><ItemGridSkeleton className={gridClassName} /></div> : profile.isError ? (
         isApiError(profile.error) && profile.error.status === 404
           ? <EmptyState title="ไม่พบผู้ขายรายนี้" />
           : <ErrorState error={profile.error} onRetry={() => void profile.refetch()} />
@@ -99,7 +100,7 @@ function Storefront({ username }: { username: string }) {
           </TabsList>
           <TabsContent value="products" className="space-y-8">
             <div><h2 className="text-xl font-semibold leading-7">Products for sale</h2><p className="mt-2 text-sm leading-5 text-muted-foreground">Browse listings from {displayName}. Choose a product to see its details.</p></div>
-            {listings.isPending ? <p role="status">กำลังโหลดสินค้า...</p> : listings.isError ? <ErrorState error={listings.error} onRetry={() => void listings.refetch()} /> : listings.data.items.length === 0 ? <EmptyState title="ยังไม่มีประกาศขาย" description="ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่" /> : (
+            {listings.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า"><ItemGridSkeleton className={gridClassName} /></div> : listings.isError ? <ErrorState error={listings.error} onRetry={() => void listings.refetch()} /> : listings.data.items.length === 0 ? <EmptyState title="ยังไม่มีประกาศขาย" description="ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่" /> : (
               <div className={gridClassName} aria-busy={listings.isFetching}>{listings.data.items.map((listing) => <ItemCard
                 key={listing.id} href={productHref(listing.card.productSlug)}
                 imageSrc={listing.primaryPhotoUrl ?? listing.card.officialImageUrl ?? undefined}
@@ -113,7 +114,7 @@ function Storefront({ username }: { username: string }) {
           </TabsContent>
           <TabsContent value="collection" className="space-y-8">
             <div><h2 className="text-xl font-semibold leading-7">Store collection</h2><p className="mt-2 text-sm leading-5 text-muted-foreground">Cards in {displayName}’s public collection. These items are not necessarily for sale.</p></div>
-            {collection.isPending ? <p role="status">กำลังโหลดคอลเลกชัน...</p> : collection.isError ? <ErrorState error={collection.error} onRetry={() => void collection.refetch()} /> : collection.data.items.length === 0 ? <EmptyState title="ยังไม่มีคอลเลกชันสาธารณะ" /> : (
+            {collection.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดคอลเลกชัน"><ItemGridSkeleton className={gridClassName} /></div> : collection.isError ? <ErrorState error={collection.error} onRetry={() => void collection.refetch()} /> : collection.data.items.length === 0 ? <EmptyState title="ยังไม่มีคอลเลกชันสาธารณะ" /> : (
               <div className={gridClassName} aria-busy={collection.isFetching}>{collection.data.items.map((item) => <ItemCard
                 key={item.id} href={productHref(item.card.productSlug)}
                 imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}

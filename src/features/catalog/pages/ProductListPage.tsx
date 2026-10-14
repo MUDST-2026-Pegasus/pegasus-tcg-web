@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { EmptyState, ErrorState } from "@/components/common";
+import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPrice, productHref } from "../catalog.mappers";
@@ -25,7 +26,9 @@ export function ProductListPage({ gameCode, title = "สินค้าทั้
       ) : gameCode && games.isSuccess && !gameId ? (
         <EmptyState title="ยังไม่มีสินค้าหมวดนี้" />
       ) : products.isPending ? (
-        <p role="status" className="py-16 text-center text-muted-foreground">กำลังโหลดสินค้า...</p>
+        <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า">
+          <ItemGridSkeleton count={8} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" imageClassName="aspect-auto h-52" />
+        </div>
       ) : products.isError ? (
         <ErrorState error={products.error} onRetry={() => void products.refetch()} />
       ) : products.data.items.length === 0 ? (

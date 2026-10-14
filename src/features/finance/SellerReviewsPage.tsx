@@ -1,8 +1,10 @@
 import { ReviewStars } from './ReviewStars';
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth/auth.queries";
 import { getErrorMessage } from "@/lib/api";
@@ -22,7 +24,7 @@ export function SellerReviewsPage() {
     finally { setBusy(null); }
   }
   return <div className="space-y-4 p-6"><h1 className="text-2xl font-bold">รีวิวร้านค้า</h1>
-    {reviews.isPending && <p>กำลังโหลด...</p>}{reviews.isError && <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" onClick={() => void reviews.refetch()}>ลองอีกครั้ง</Button></p>}
+    {reviews.isPending && <ReviewListSkeleton />}{reviews.isError && <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" onClick={() => void reviews.refetch()}>ลองอีกครั้ง</Button></p>}
     {reviews.data && <div className="flex flex-wrap items-center gap-3">
       <ReviewStars rating={reviews.data.summary?.ratingAvg ?? 0}/>
       <p>คะแนนเฉลี่ย {reviews.data.summary?.ratingAvg ?? '—'} / 5 · {reviews.data.summary?.ratingCount ?? 0} รีวิว</p>
@@ -31,5 +33,12 @@ export function SellerReviewsPage() {
     {reviews.data?.reviews.map((review) => <article key={review.id} className="space-y-2 rounded border bg-white p-4"><ReviewStars rating={review.rating}/>{review.title?.trim() && <h2 className="font-semibold">{review.title}</h2>}<p>{review.comment}</p><p className="text-sm text-muted-foreground">@{review.reviewerUsername}</p>
       {review.replyComment ? <p>คำตอบของคุณ: {review.replyComment}</p> : <div className="flex gap-2"><Input aria-label={`ตอบรีวิว ${review.id}`} placeholder="ตอบรีวิว" value={replies[review.id] ?? ""} onChange={(e) => setReplies((old) => ({ ...old, [review.id]: e.target.value }))} /><Button disabled={busy === review.id || !replies[review.id]?.trim()} onClick={() => void reply(review.id)}>ตอบ</Button></div>}
     </article>)}
+  </div>;
+}
+
+function ReviewListSkeleton() {
+  return <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว" className="space-y-4">
+    <Skeleton className="h-5 w-64 rounded-md" />
+    <ListRowsSkeleton rows={4} className="rounded border bg-white px-4" />
   </div>;
 }

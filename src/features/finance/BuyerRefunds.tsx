@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +76,7 @@ function RefundDetails({ refund }: { refund: Refund }) {
   return (
     <div className="space-y-2">
       <Button variant="outline" size="sm" onClick={() => setOpen(!open)}>{open ? "ปิดรายละเอียด" : "ดูรายละเอียดล่าสุด"}</Button>
-      {open && detail.isPending && <p>กำลังโหลดรายละเอียด...</p>}
+      {open && detail.isPending && <div role="status" aria-busy="true" aria-label="กำลังโหลดรายละเอียด"><TextLinesSkeleton lines={3} /></div>}
       {open && detail.isError && <p role="alert" className="text-destructive">โหลดรายละเอียดไม่สำเร็จ</p>}
       {open && detail.data && <div className="space-y-2 text-sm">
         <p>สถานะล่าสุด: {refundStatusLabel(detail.data.status)}</p>

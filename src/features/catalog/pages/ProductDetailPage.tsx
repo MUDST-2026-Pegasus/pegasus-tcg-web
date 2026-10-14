@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck, Minus, Plus, Loader2 } from "lucide-react";
 
+import { DetailPageSkeleton, ListRowsSkeleton, TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,11 +68,7 @@ export function ProductDetailPage() {
   }
 
   if (productQuery.isPending) {
-    return (
-        <div role="status" className="p-8 text-center">
-          กำลังโหลดสินค้า...
-        </div>
-    );
+    return <DetailPageSkeleton label="กำลังโหลดสินค้า" />;
   }
 
   if (productQuery.isError) {
@@ -433,7 +430,7 @@ function ProductDetailContent({
           <div className="mb-6">
             <div><p className="text-sm font-semibold text-primary">{listingsReady ? `${availableQuantity} available` : "— available"}</p><h2 className="mt-1 text-2xl font-bold">Market listings</h2></div>
           </div>
-          {listingsQuery.isPending ? <p role="status" className="py-10 text-center text-sm text-muted-foreground">กำลังโหลดประกาศขาย...</p> : listingsQuery.isError ? (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={4} /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
           ) : !hasListings ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีผู้ขายสำหรับตัวเลือกนี้</p> : (
             <div className="divide-y">
@@ -467,7 +464,7 @@ function ProductDetailContent({
             <p className="text-xs leading-4 text-muted-foreground">People who have made this {product.productType === "SINGLE_CARD" ? "card" : "product"} public · {collectorsQuery.data?.totalItems ?? "—"} collectors</p>
           </div>
           {collectorsQuery.isPending ? (
-            <p role="status" className="py-10 text-center text-sm text-muted-foreground">กำลังโหลดนักสะสม...</p>
+            <div role="status" aria-busy="true" aria-label="กำลังโหลดนักสะสม"><ListRowsSkeleton rows={3} /></div>
           ) : collectorsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center">
               <p>โหลดรายชื่อนักสะสมไม่สำเร็จ</p>
@@ -516,7 +513,7 @@ function ProductDetailContent({
             <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none"><CardContent className="p-6 sm:p-7">
               <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />Abilities &amp; Attacks</h2>
               {effectsQuery.isPending ? (
-                <p role="status" className="text-sm text-muted-foreground">กำลังโหลดความสามารถการ์ด...</p>
+                <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>
               ) : effectsQuery.isError ? (
                 <div role="alert" className="space-y-2 text-sm"><p>โหลดความสามารถการ์ดไม่สำเร็จ</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>ลองใหม่</Button></div>
               ) : effects.length === 0 ? (

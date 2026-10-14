@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import { DetailPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
@@ -32,7 +33,7 @@ export function ListingDetailPage() {
     return <div role="alert" className="p-10 text-center">ไม่พบประกาศขายนี้</div>;
   }
   if (query.isPending) {
-    return <div role="status" className="p-10 text-center">กำลังโหลดประกาศขาย...</div>;
+    return <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />;
   }
   if (query.isError) {
     const notFound = query.error instanceof ApiError && query.error.status === 404;

@@ -2,7 +2,9 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
+import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
@@ -28,7 +30,7 @@ export function MarketListingsPage() {
   const productQuery = useProductDetail(productId);
 
   if (productQuery.isPending) {
-    return <div role="status" className="bg-[#f4f4f5] px-5 py-12 text-center text-sm">กำลังโหลดสินค้า...</div>;
+    return <MarketListingsSkeleton />;
   }
 
   if (productQuery.isError) {
@@ -43,6 +45,30 @@ export function MarketListingsPage() {
   }
 
   return <MarketListingsContent key={productQuery.data.product.id} data={productQuery.data} />;
+}
+
+/** วางตรงกับ MarketListingsContent — breadcrumb, หัวข้อ, การ์ดสรุปสินค้า, รายการประกาศขาย */
+function MarketListingsSkeleton() {
+  return (
+    <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า" className="min-h-full bg-[#f4f4f5]">
+      <div className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
+        <Skeleton className="h-3.5 w-56 rounded-md" />
+        <Skeleton className="h-9 w-64 rounded-lg" />
+        <div className="flex items-center gap-[18px] rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:p-[22px]">
+          <Skeleton className="h-[140px] w-[130px] shrink-0 rounded-[10px]" />
+          <div className="flex flex-1 flex-col gap-3">
+            <Skeleton className="h-5 w-40 rounded-full" />
+            <Skeleton className="h-7 w-3/5 rounded-md" />
+            <Skeleton className="h-3.5 w-28 rounded-md" />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:p-[22px]">
+          <Skeleton className="mb-3 h-7 w-48 rounded-md" />
+          <ListRowsSkeleton rows={6} className="divide-[#e3e7e8]" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function MarketListingsContent({ data }: { data: ProductDetailDto }) {
@@ -98,7 +124,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
             <p className="text-xs font-semibold text-primary">{listingsQuery.isSuccess ? `${listings.length} available` : "— available"}</p>
             <h2 id="listing-heading" className="text-[22px] font-bold leading-7">Market listings</h2>
           </div>
-          {listingsQuery.isPending ? <p role="status" className="py-12 text-center text-sm text-muted-foreground">กำลังโหลดประกาศขาย...</p> : listingsQuery.isError ? (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={6} className="divide-[#e3e7e8]" /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-10 text-center text-sm"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
           ) : listings.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีประกาศขายสินค้านี้</p> : (
             <div className="divide-y divide-[#e3e7e8]">

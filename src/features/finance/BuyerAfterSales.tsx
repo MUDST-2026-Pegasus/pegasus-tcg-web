@@ -1,6 +1,7 @@
 import { BuyerOrderReview } from './BuyerOrderReview';
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
@@ -37,7 +38,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   }
   return <section className="space-y-3 border-t pt-3 text-sm">
     <h4 className="font-semibold">คืนสินค้าและรีวิวร้าน</h4>
-    {returns.isPending && <p>กำลังโหลดคำขอคืนสินค้า...</p>}
+    {returns.isPending && <div role="status" aria-busy="true" aria-label="กำลังโหลดคำขอคืนสินค้า"><TextLinesSkeleton lines={2} /></div>}
     {returns.isError && <p role="alert">โหลดคำขอคืนสินค้าไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void returns.refetch()}>ลองอีกครั้ง</Button></p>}
     {returns.data?.map((item) => <div key={item.id} className="space-y-2 rounded border p-3">
       <p>คำขอคืน #{item.id} · {returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}</p>

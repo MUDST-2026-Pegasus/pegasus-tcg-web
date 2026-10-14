@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Plus, Loader2 } from "lucide-react";
+import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -245,9 +246,8 @@ export function CheckoutPage() {
 
   if (isAuthLoading || isCartLoading || isAddressLoading) {
     return (
-      <div className="min-h-screen bg-muted flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground text-sm font-medium">Preparing checkout...</p>
+      <div className="min-h-screen bg-muted">
+        <FormPageSkeleton label="Preparing checkout" />
       </div>
     );
   }

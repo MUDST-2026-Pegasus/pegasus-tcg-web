@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 
 import { QueryBoundary } from "@/components/common";
+import { FormBodySkeleton } from "@/components/common/PageSkeletons";
 import { hasErrorCode } from "@/lib/api";
 
 import { ProductNotFound } from "./components/ProductNotFound";
@@ -41,7 +42,14 @@ function ListingEditLoader({
   }
 
   return (
-    <QueryBoundary query={listing}>
+    <QueryBoundary
+      query={listing}
+      loading={
+        <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย">
+          <FormBodySkeleton />
+        </div>
+      }
+    >
       {(data) => (
         // key ตามประกาศ — สลับไปประกาศอื่นแล้วค่าที่แก้ค้างไว้ต้องล้าง
         <ListingEditContent

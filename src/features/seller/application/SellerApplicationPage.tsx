@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
+import { PanelSkeleton } from "@/components/common/PageSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { authKeys, useAuth } from "@/features/auth/auth.queries";
 import { cn } from "@/lib/utils";
 
@@ -55,8 +56,11 @@ export function SellerApplicationPage() {
         )}
       >
         {isPending ? (
-          <div className="flex min-h-[40svh] items-center justify-center">
-            <Spinner className="size-8 text-muted-foreground" />
+          <div role="status" aria-busy="true" aria-label="กำลังโหลดใบสมัคร" className="flex flex-col gap-4.5">
+            <Skeleton className="h-8 w-64 rounded-lg" />
+            <Skeleton className="h-4 w-96 max-w-full rounded-md" />
+            <PanelSkeleton rows={4} />
+            <PanelSkeleton rows={2} />
           </div>
         ) : submitted ? (
           <ApplicationStatusView

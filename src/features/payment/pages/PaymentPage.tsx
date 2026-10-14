@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock, FileText, Loader2, Lock, Shield, ShoppingBag } from "lucide-react";
+import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -162,14 +163,7 @@ export function PaymentPage() {
   }
 
   if (paymentQuery.isPending) {
-    return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 space-y-3">
-        <Loader2 className="size-8 animate-spin text-sky-700" />
-        <p className="text-sm text-muted-foreground font-medium">
-          กำลังเตรียมข้อมูลการชำระเงิน...
-        </p>
-      </div>
-    );
+    return <FormPageSkeleton label="กำลังเตรียมข้อมูลการชำระเงิน" />;
   }
 
   if (paymentQuery.isError) {

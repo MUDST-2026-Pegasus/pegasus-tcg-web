@@ -3,7 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PanelSkeleton, TableSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { financeApi } from "@/features/finance/finance.api";
@@ -68,7 +70,7 @@ export function SellerPayoutPage() {
 
   return <div className="space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">ถอนเงิน</h1><p className="text-xs text-muted-foreground">ยอดเงินจากการขายและประวัติการโอนเข้าบัญชีธนาคาร</p></div><Button variant="outline" size="sm" disabled={!payouts.data?.length} onClick={exportHistory}>ดาวน์โหลดใบสรุป</Button></div>
-    {(wallet.isPending || payouts.isPending || account.isPending) && <p>กำลังโหลดข้อมูลการเงิน...</p>}
+    {(wallet.isPending || payouts.isPending || account.isPending) && <PayoutSkeleton />}
     {(wallet.isError || payouts.isError || (account.isError && !missingAccount)) && <p role="alert" className="text-destructive">โหลดข้อมูลไม่สำเร็จ <Button variant="outline" onClick={() => { void wallet.refetch(); void payouts.refetch(); void account.refetch(); }}>ลองอีกครั้ง</Button></p>}
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       {wallet.data && <BalanceCard label="ยอดเงินพร้อมถอน" amount={money(available)} withdrawLabel="ถอนเงินตอนนี้" onWithdraw={() => setShowRequest(true)} withdrawDisabled={!account.data || available <= 0}
@@ -85,5 +87,16 @@ export function SellerPayoutPage() {
       {history.length === 0 ? <p className="py-4 text-sm text-muted-foreground">ยังไม่มีรายการถอนเงินในช่วงที่เลือก</p> : <table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y bg-neutral-50 text-muted-foreground"><tr><th className="p-3">วันที่ทำรายการ</th><th>รหัสรายการ</th><th>จำนวนเงิน</th><th>ปลายทาง</th><th>สถานะ</th><th>อ้างอิงการโอน</th></tr></thead><tbody>{history.map((payout) => <tr key={payout.id} className="border-b"><td className="p-3">{new Date(payout.requestedAt).toLocaleString("th-TH")}</td><td>#{payout.id}</td><td className="font-semibold">{money(payout.amount)}</td><td>{account.data ? `${account.data.bankName} ${maskAccount(account.data.accountNumber)}` : "—"}</td><td><Badge variant={payout.status === "PAID" ? "secondary" : payout.status === "REJECTED" || payout.status === "FAILED" ? "destructive" : "outline"}>{payoutStatus[payout.status] ?? payout.status}</Badge></td><td>{payout.transferReference ?? payout.rejectionReason ?? "—"}</td></tr>)}</tbody></table>}
     </CardContent></Card>
     <details className="rounded-lg border p-4"><summary className="cursor-pointer font-medium">รายการเคลื่อนไหว Wallet</summary><div className="mt-3 space-y-2">{wallet.data?.entries.items.length === 0 && <p className="text-sm text-muted-foreground">ยังไม่มีรายการ</p>}{wallet.data?.entries.items.map((entry) => <div key={entry.id} className="flex justify-between border-b py-2 text-sm"><span>{walletEntryLabel(entry.type)} · {new Date(entry.createdAt).toLocaleString("th-TH")}</span><span>{entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}</span></div>)}</div></details>
+  </div>;
+}
+
+/** วางตรงกับยอดเงิน + บัญชีรับเงิน + ประวัติ ระหว่างรอ wallet / payouts / account */
+function PayoutSkeleton() {
+  return <div role="status" aria-busy="true" aria-label="กำลังโหลดข้อมูลการเงิน" className="space-y-6">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <Skeleton className="h-56 rounded-2xl" />
+      <PanelSkeleton rows={2} className="rounded-xl" />
+    </div>
+    <TableSkeleton rows={4} columns={4} />
   </div>;
 }

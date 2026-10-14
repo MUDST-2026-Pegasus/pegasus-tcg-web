@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import { ItemCard, QueryBoundary } from "@/components/common";
+import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -61,7 +62,8 @@ export function MyCollectionPage() {
         </div>
       </div>
       {error ? <p role="alert" className="mb-4 text-sm text-destructive">{error}</p> : null}
-      <QueryBoundary query={collection} errorTitle="Could not load your collection" errorRetryLabel="Try again">
+      <QueryBoundary query={collection} errorTitle="Could not load your collection" errorRetryLabel="Try again"
+        loading={<div role="status" aria-busy="true" aria-label="Loading your collection"><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
         {() => <>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
