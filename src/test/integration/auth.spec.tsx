@@ -25,6 +25,8 @@ describe("Auth Flow Integration", () => {
     const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
+      status: 200,
+      headers: new Headers(),
       text: async () => JSON.stringify({
         success: true,
         data: {
@@ -47,7 +49,7 @@ describe("Auth Flow Integration", () => {
 
     // 1. Fill out the form
     await user.type(screen.getByLabelText(/email/i), "test@pegasus.com");
-    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.type(screen.getByLabelText(/^password$/i), "password123");
 
     // 2. Submit
     await user.click(screen.getByRole("button", { name: /log in/i }));

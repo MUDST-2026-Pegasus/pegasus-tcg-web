@@ -11,7 +11,8 @@ import { SellerProductEditPage } from "@/features/seller/products/SellerProductE
 import { SellerProductRestockPage } from "@/features/seller/products/SellerProductRestockPage";
 import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
 import { SellerLayout } from "@/features/seller/shared/SellerLayout";
-import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
+import { SellerReturnsPage } from "@/features/finance/SellerReturnsPage";
+import { SellerReviewsPage } from "@/features/finance/SellerReviewsPage";
 
 /**
  * หลังบ้านฝั่งผู้ขาย — ใช้ SellerLayout ของตัวเอง (sidebar แยกจาก admin)
@@ -28,7 +29,6 @@ export const sellerRoutes: RouteObject = {
   ),
   children: [
     { index: true, element: <SellerDashboardPage /> },
-    { path: "shop", element: <SellerShopPage /> },
     { path: "products", element: <SellerProductsPage /> },
     { path: "products/new", element: <SellerProductCreatePage /> },
     {
@@ -39,6 +39,8 @@ export const sellerRoutes: RouteObject = {
     { path: "orders", element: <SellerOrdersPage /> },
     { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
+    { path: "returns", element: <SellerReturnsPage /> },
+    { path: "reviews", element: <SellerReviewsPage /> },
     { path: "logout", element: <SellerLogoutPage /> },
   ],
 };

@@ -6,8 +6,8 @@ export function getCollection(page: number): Promise<PageResponse<CollectionItem
   return api.get("/collection", { query: { page, size: 20 } });
 }
 
-export function getPublicCollection(username: string, page: number): Promise<PageResponse<PublicCollectionItem>> {
-  return api.get(`/users/${encodeURIComponent(username)}/collection`, { auth: false, query: { page, size: 20 } });
+export function getPublicCollection(username: string, page: number, size = 20, signal?: AbortSignal): Promise<PageResponse<PublicCollectionItem>> {
+  return api.get(`/users/${encodeURIComponent(username)}/collection`, { auth: false, signal, query: { page, size } });
 }
 
 export function getCollectionVariants(productId: number): Promise<CollectionVariant[]> {
@@ -16,6 +16,19 @@ export function getCollectionVariants(productId: number): Promise<CollectionVari
 
 export function addCollectionItem(payload: CollectionPayload): Promise<CollectionItem> {
   return api.post("/collection", payload);
+}
+
+/** No batch endpoint: one POST per card, in order. A card that fails does not stop the ones after it. */
+export async function addCollectionItems(payloads: CollectionPayload[]): Promise<PromiseSettledResult<CollectionItem>[]> {
+  const results: PromiseSettledResult<CollectionItem>[] = [];
+  for (const payload of payloads) {
+    try {
+      results.push({ status: "fulfilled", value: await addCollectionItem(payload) });
+    } catch (reason) {
+      results.push({ status: "rejected", reason });
+    }
+  }
+  return results;
 }
 
 export function updateCollectionItem(id: number, payload: CollectionPayload): Promise<CollectionItem> {

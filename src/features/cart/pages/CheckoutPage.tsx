@@ -16,6 +16,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Field, FieldTitle } from "@/components/ui/field";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { useAddresses } from "@/features/account/address.queries";
@@ -45,7 +46,7 @@ export function CheckoutPage() {
     }
   }, [isAuthenticated, isAuthLoading, navigate]);
 
-  const { data: cart, isLoading: isCartLoading } = useCart();
+  const { data: cart, isLoading: isCartLoading, isFetching: isCartFetching } = useCart();
   const { data: addresses = [], isLoading: isAddressLoading } = useAddresses();
 
   // Read item IDs from URL query params: ?items=42 or ?items=42,45, or fallback to router location state
@@ -73,15 +74,25 @@ export function CheckoutPage() {
     return [];
   }, [searchParams, location.state]);
 
+  const targetProductId = Number(searchParams.get("productId"));
+  const targetListingId = Number(searchParams.get("listingId"));
+
   // Filter cart.items to only include items matching targetItemIds
   const checkoutItems = useMemo(() => {
     const items = cart?.items ?? [];
-    if (targetItemIds.length === 0) {
-      return [];
+    if (targetItemIds.length > 0) {
+      const idSet = new Set(targetItemIds);
+      return items.filter((item) => idSet.has(item.id));
     }
-    const idSet = new Set(targetItemIds);
-    return items.filter((item) => idSet.has(item.id));
-  }, [cart, targetItemIds]);
+
+    if (targetProductId > 0 && targetListingId > 0) {
+      return items.filter(
+        (item) => item.productId === targetProductId && item.listingId === targetListingId,
+      );
+    }
+
+    return [];
+  }, [cart, targetItemIds, targetProductId, targetListingId]);
 
   // Edge Case: If checkoutItems.length === 0 after cart loads, display a toast notification and redirect back to /cart
   useEffect(() => {
@@ -89,6 +100,7 @@ export function CheckoutPage() {
       !isAuthLoading &&
       isAuthenticated &&
       !isCartLoading &&
+      !isCartFetching &&
       checkoutItems.length === 0
     ) {
       if (!hasRedirectedRef.current) {
@@ -105,19 +117,20 @@ export function CheckoutPage() {
     isAuthLoading,
     isAuthenticated,
     isCartLoading,
+    isCartFetching,
     checkoutItems.length,
     navigate,
   ]);
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<string | null>("qr");
+  const [selectedPayment, setSelectedPayment] = useState<string | null>("bank_transfer");
 
   const [isShippingOpen, setIsShippingOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isNewAddressOpen, setIsNewAddressOpen] = useState(false);
 
   const [tempAddressId, setTempAddressId] = useState<string | null>(null);
-  const [tempPayment, setTempPayment] = useState<string | null>("qr");
+  const [tempPayment, setTempPayment] = useState<string | null>("bank_transfer");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -311,7 +324,14 @@ export function CheckoutPage() {
                 <span className="font-medium text-sm text-foreground">
                   Shipping Address
                 </span>
-                <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors text-sm max-w-[320px]">
+                <div
+                  className={cn(
+                    "flex items-center transition-colors text-sm max-w-[320px]",
+                    activeAddress
+                      ? "text-muted-foreground group-hover:text-foreground"
+                      : "text-destructive font-medium",
+                  )}
+                >
                   <span className="truncate">
                     {activeAddress
                       ? formatAddressLines(activeAddress).join(", ")
@@ -412,7 +432,7 @@ export function CheckoutPage() {
                 </span>
                 <div className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors text-sm">
                   <span>
-                    {selectedPayment === "qr" ? "Qr Payment" : "Not Selected"}
+                    {selectedPayment === "bank_transfer" ? "Bank Transfer" : "Not Selected"}
                   </span>
                   <ChevronRight className="w-4 h-4 ml-1 opacity-70" />
                 </div>
@@ -432,17 +452,17 @@ export function CheckoutPage() {
                     <Field
                       orientation="horizontal"
                       className="items-center justify-between rounded-xl border p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => setTempPayment("qr")}
+                      onClick={() => setTempPayment("bank_transfer")}
                     >
                       <div className="flex items-center gap-3">
                         <div className="bg-black text-white text-[10px] font-bold w-9 h-6 flex items-center justify-center rounded uppercase">
-                          QR
+                          BANK
                         </div>
                         <FieldTitle className="font-medium text-sm">
-                          Qr Payment
+                          Bank Transfer
                         </FieldTitle>
                       </div>
-                      <RadioGroupItem value="qr" />
+                      <RadioGroupItem value="bank_transfer" />
                     </Field>
                   </RadioGroup>
                 </div>
@@ -496,20 +516,27 @@ export function CheckoutPage() {
           </CardContent>
         </Card>
 
-        <Button
-          disabled={!activeAddress || !selectedPayment || isSubmitting}
-          className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
-          onClick={handlePurchase}
-        >
-          {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Processing...</span>
-            </div>
-          ) : (
-            "Purchase"
+        <div className="flex flex-col gap-2">
+          <Button
+            disabled={!activeAddress || !selectedPayment || isSubmitting}
+            className="w-full h-[52px] rounded-xl text-base font-semibold disabled:bg-[#e4e4e7] disabled:text-[#a1a1aa] disabled:opacity-100 transition-colors bg-primary hover:bg-primary/90 text-white"
+            onClick={handlePurchase}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </div>
+            ) : (
+              "Purchase"
+            )}
+          </Button>
+          {!activeAddress && (
+            <p role="alert" className="text-sm text-destructive text-center">
+              Please add a shipping address to continue.
+            </p>
           )}
-        </Button>
+        </div>
       </div>
 
       {/* Address Form Dialog */}

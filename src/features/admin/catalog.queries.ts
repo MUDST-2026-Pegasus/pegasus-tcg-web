@@ -6,9 +6,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import { catalogKeys } from "@/features/catalog/catalog.queries";
+
 import * as catalogApi from "./catalog.api";
 import type {
   AdminProductQuery,
+  CardEffect,
+  CardEffectPayload,
   GameAttribute,
   ImagePayload,
   ProductDetail,
@@ -39,6 +43,8 @@ export const adminCatalogKeys = {
     [...adminCatalogKeys.products(), "count", gameId] as const,
   detail: (productId: number) =>
     [...adminCatalogKeys.all, "detail", productId] as const,
+  effects: (productId: number) =>
+    [...adminCatalogKeys.all, "effects", productId] as const,
 };
 
 /** เกม ชุด หมวด และช่องของเกมแทบไม่เปลี่ยนระหว่างใช้หน้า — ไม่ต้องดึงใหม่บ่อย */
@@ -236,5 +242,35 @@ export function useDeleteImage(productId: number) {
   return useMutation({
     mutationFn: (imageId: number) => catalogApi.deleteImage(productId, imageId),
     onSettled: () => invalidate(productId),
+  });
+}
+
+// ---------- Abilities & Attacks ----------
+
+export function useCardEffects(productId: number) {
+  return useQuery({
+    queryKey: adminCatalogKeys.effects(productId),
+    queryFn: () => catalogApi.getCardEffects(productId),
+  });
+}
+
+/**
+ * บันทึกทั้งชุด — ผลที่ได้กลับมาคือรายการที่เก็บจริง ใส่ cache ของ admin ได้เลย
+ * และล้าง cache ของหน้าการ์ดฝั่งร้าน (`catalogKeys.effects`) ให้เห็นของใหม่ทันที
+ */
+export function useSaveCardEffects(productId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (effects: CardEffectPayload[]) =>
+      catalogApi.saveCardEffects(productId, effects),
+    onSuccess: (effects) => {
+      queryClient.setQueryData<CardEffect[]>(
+        adminCatalogKeys.effects(productId),
+        effects,
+      );
+      return queryClient.invalidateQueries({
+        queryKey: catalogKeys.effects(productId),
+      });
+    },
   });
 }

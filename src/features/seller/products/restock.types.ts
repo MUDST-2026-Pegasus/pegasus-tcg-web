@@ -42,8 +42,15 @@ export type RestockData = {
     name: string;
     tags: string[];
     stockLabel: string;
+    /** การ์ดที่พร้อมขายบนประกาศนี้ — แสดงเป็นสต็อกปัจจุบัน */
     stock: number;
     averageCost: number;
+    /**
+     * การ์ดทั้งหมดที่ต้นทุนเฉลี่ยนี้ครอบคลุม (`costBasis.quantity`) และต้นทุนรวมของมัน
+     * ใช้คิดต้นทุนเฉลี่ยใหม่ให้ตรงกับที่ backend คิดจริง ไม่ใช่ `stock` ของประกาศเดียว
+     */
+    costQuantity: number;
+    costTotal: number;
     sellingPrice: number;
     /** หน่วยต่อท้ายจำนวน เช่น "ใบ" */
     unit: string;

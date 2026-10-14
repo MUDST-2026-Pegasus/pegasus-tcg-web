@@ -11,6 +11,7 @@ import {
   subscribeSession,
 } from "@/lib/api";
 import { cartApi } from "@/features/cart/cart.api";
+import { toast } from "@/components/ui/toast";
 
 import * as authApi from "./auth.api";
 import type {
@@ -109,10 +110,15 @@ async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClien
   if (guestSession) {
     try {
       await cartApi.mergeCart();
-    } catch {
-      // ignore merge failure if guest cart was already merged or empty
-    } finally {
       clearCartSession();
+    } catch {
+      // Keep the session key so a transient failure does not orphan the guest cart.
+      toast.add({
+        title: "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ",
+        description: "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
+        type: "error",
+      });
+    } finally {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     }
   }

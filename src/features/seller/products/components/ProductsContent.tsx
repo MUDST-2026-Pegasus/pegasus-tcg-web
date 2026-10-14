@@ -9,7 +9,11 @@ import { toast } from "@/components/ui/toast";
 import { CreateListingButton } from "@/features/seller/shared/CreateListingButton";
 import { usePublishPermission } from "@/features/seller/shared/seller.queries";
 
-import { LISTING_STATUS_LABEL, listingErrorMessage } from "../products.format";
+import {
+  LISTING_SORTS,
+  LISTING_STATUS_LABEL,
+  listingErrorMessage,
+} from "../products.format";
 import {
   LISTING_STATUSES,
   useBulkListingUpdate,
@@ -25,7 +29,11 @@ import {
   canBulkReprice,
   canMoveTo,
 } from "../products.rules";
-import type { ListingStatus, SellerListingSummary } from "../products.types";
+import type {
+  ListingSort,
+  ListingStatus,
+  SellerListingSummary,
+} from "../products.types";
 
 import { BulkPriceDialog } from "./BulkPriceDialog";
 import { DeleteProductDialog } from "./DeleteProductDialog";
@@ -47,6 +55,11 @@ function readStatus(value: string | null): ListingStatus | undefined {
   return LISTING_STATUSES.find((status) => status === value);
 }
 
+/** ไม่มีหรือพิมพ์มั่ว = แก้ไขล่าสุดก่อน (ค่าเริ่มต้นของ backend) */
+function readSort(value: string | null): ListingSort {
+  return LISTING_SORTS.find((sort) => sort === value) ?? "updated";
+}
+
 /** หน้าใน URL เริ่มที่ 1 ให้คนอ่านรู้เรื่อง — backend เริ่มที่ 0 */
 function readPage(value: string | null): number {
   const page = Number(value);
@@ -54,15 +67,24 @@ function readPage(value: string | null): number {
 }
 
 /**
- * หน้าจัดการสินค้า — ตัวกรองสถานะกับเลขหน้าอยู่ใน URL (`?status=ACTIVE&page=2`)
- * แชร์ลิงก์หรือกด back แล้วได้หน้าเดิม และทุกอย่างกรอง/แบ่งหน้าที่ backend
+ * หน้าจัดการสินค้า — สถานะ คำค้น การเรียง และเลขหน้าอยู่ใน URL
+ * (`?status=ACTIVE&q=charizard&sort=price_asc&page=2`) แชร์ลิงก์หรือกด back แล้วได้หน้าเดิม
+ * และทุกอย่างค้น/กรอง/เรียง/แบ่งหน้าที่ backend
  */
 export function ProductsContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const status = readStatus(searchParams.get("status"));
+  const search = searchParams.get("q")?.trim() ?? "";
+  const sort = readSort(searchParams.get("sort"));
   const page = readPage(searchParams.get("page"));
 
-  const listings = useMyListings({ status, page: page - 1, size: PAGE_SIZE });
+  const listings = useMyListings({
+    status,
+    q: search || undefined,
+    sort,
+    page: page - 1,
+    size: PAGE_SIZE,
+  });
   const counts = useListingCounts();
   const { canPublish } = usePublishPermission();
   const changeStatus = useChangeListingStatus();
@@ -99,6 +121,8 @@ export function ProductsContent() {
 
   function updateParams(changes: {
     status?: ListingStatus | null;
+    q?: string;
+    sort?: ListingSort;
     page?: number;
   }) {
     setSearchParams((current) => {
@@ -106,6 +130,19 @@ export function ProductsContent() {
       if (changes.status !== undefined) {
         if (changes.status === null) next.delete("status");
         else next.set("status", changes.status);
+        next.delete("page");
+      }
+      if (changes.q !== undefined) {
+        const q = changes.q.trim();
+        // พิมพ์ต่อแค่ช่องว่างท้ายคำ = คำค้นเดิม ไม่ต้องกลับหน้า 1 หรือล้างที่เลือกไว้
+        if (q === (current.get("q")?.trim() ?? "")) return current;
+        if (q === "") next.delete("q");
+        else next.set("q", q);
+        next.delete("page");
+      }
+      if (changes.sort !== undefined) {
+        if (changes.sort === "updated") next.delete("sort");
+        else next.set("sort", changes.sort);
         next.delete("page");
       }
       if (changes.page !== undefined) {
@@ -244,6 +281,10 @@ export function ProductsContent() {
         counts={counts}
         activeStatus={status}
         onStatusChange={(next) => updateParams({ status: next ?? null })}
+        search={search}
+        onSearchChange={(q) => updateParams({ q })}
+        sort={sort}
+        onSortChange={(next) => updateParams({ sort: next })}
       />
 
       {selectedRows.length > 0 ? (
@@ -270,7 +311,36 @@ export function ProductsContent() {
         errorTitle="โหลดรายการสินค้าไม่สำเร็จ"
         isEmpty={(page) => page.items.length === 0}
         empty={
-          status ? (
+          search ? (
+            <EmptyState
+              icon={PackageSearch}
+              title={`ไม่พบประกาศที่ตรงกับ "${search}"`}
+              description={
+                status
+                  ? `ค้นเฉพาะสถานะ${LISTING_STATUS_LABEL[status]} — ลองคำอื่น หรือค้นทุกสถานะ`
+                  : "ค้นจากชื่อการ์ด ชื่อภาษาท้องถิ่น เลขการ์ด SKU และป้ายล็อต"
+              }
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-md px-2.5"
+                onClick={() => updateParams({ q: "" })}
+              >
+                ล้างคำค้น
+              </Button>
+              {status ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-md px-2.5"
+                  onClick={() => updateParams({ status: null })}
+                >
+                  ค้นทุกสถานะ
+                </Button>
+              ) : null}
+            </EmptyState>
+          ) : status ? (
             <EmptyState
               icon={PackageSearch}
               title={`ไม่มีประกาศที่${LISTING_STATUS_LABEL[status]}`}

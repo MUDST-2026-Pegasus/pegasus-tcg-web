@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { CreateListingButton } from "@/features/seller/shared/CreateListingButton";
 
@@ -23,14 +25,22 @@ export function DashboardContent({ data }: DashboardContentProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            {data.actions.viewShopLabel}
-          </Button>
+          {data.actions.viewShopTo ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md px-2.5"
+              render={<Link to={data.actions.viewShopTo} />}
+              nativeButton={false}
+            >
+              {data.actions.viewShopLabel}
+            </Button>
+          ) : null}
           <CreateListingButton label={data.actions.createListingLabel} />
         </div>
       </div>
 
-      <div className="flex flex-col items-start gap-4 lg:flex-row">
+      <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start">
         <SalesCard {...data.sales} />
         <TodoCard {...data.todo} />
       </div>
@@ -41,7 +51,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
         ))}
       </div>
 
-      <div className="flex flex-col items-start gap-4 lg:flex-row">
+      <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start">
         <RecentOrdersCard {...data.recentOrders} />
         <LowStockCard {...data.lowStock} />
       </div>

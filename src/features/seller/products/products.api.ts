@@ -15,12 +15,18 @@ import type {
  * ไฟล์นี้ไม่มี React — component เรียกผ่าน hook ใน `products.queries.ts`
  */
 
-/** แก้ไขล่าสุดก่อนเสมอ — backend ยังไม่รับ `sort` หรือคำค้น */
+/** ค้นหา กรอง เรียง และแบ่งหน้าที่ backend ทั้งหมด — ค่าว่างถูกตัดออกจาก URL ให้เอง */
 export function getMyListings(
   query: ListingQuery,
 ): Promise<PageResponse<SellerListingSummary>> {
   return api.get<PageResponse<SellerListingSummary>>("/sellers/me/listings", {
-    query: { status: query.status, page: query.page, size: query.size },
+    query: {
+      status: query.status,
+      q: query.q,
+      sort: query.sort,
+      page: query.page,
+      size: query.size,
+    },
   });
 }
 

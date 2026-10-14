@@ -1,9 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-import type { OrderDetail } from "../../order-detail.types";
+import type { TimelineEntry } from "../../orders.format";
 
-type OrderTimelineCardProps = OrderDetail["timeline"];
+type OrderTimelineCardProps = {
+  title: string;
+  entries: TimelineEntry[];
+};
 
 export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
   return (
@@ -15,26 +18,16 @@ export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
           const isLast = index === entries.length - 1;
 
           return (
-            <li
-              key={entry.id}
-              className={cn("flex items-start gap-3.5", !isLast && "pb-3.5")}
-            >
+            <li key={entry.id} className={cn("flex items-start gap-3.5", !isLast && "pb-3.5")}>
               <div aria-hidden="true" className="flex w-4 flex-col items-center">
                 <span
                   className={cn(
                     "size-2.5 rounded-full border-2",
-                    entry.done
-                      ? "border-teal-600 bg-teal-600"
-                      : "border-zinc-200 bg-white",
+                    entry.done ? "border-teal-600 bg-teal-600" : "border-zinc-200 bg-white",
                   )}
                 />
                 {isLast ? null : (
-                  <span
-                    className={cn(
-                      "h-7 w-0.5",
-                      entry.done ? "bg-zinc-200" : "bg-gray-100",
-                    )}
-                  />
+                  <span className={cn("h-7 w-0.5", entry.done ? "bg-zinc-200" : "bg-gray-100")} />
                 )}
               </div>
 
@@ -42,9 +35,7 @@ export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
                 <p
                   className={cn(
                     "text-xs",
-                    entry.done
-                      ? "font-medium text-zinc-950"
-                      : "font-normal text-gray-400",
+                    entry.done ? "font-medium text-zinc-950" : "font-normal text-gray-400",
                   )}
                 >
                   {entry.label}

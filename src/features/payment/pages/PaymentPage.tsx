@@ -1,277 +1,394 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Clock, FileText, Loader2, Lock, Shield, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Clock, QrCode, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
-import { ApiError } from "@/lib/api/errors";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { getErrorMessage } from "@/lib/api";
 import { ordersApi } from "@/features/account/orders.api";
-import type { OrderDetails } from "@/features/account/orders.types";
-import type { CheckoutResponse } from "@/features/cart/checkout.types";
 import { cartKeys } from "@/features/cart/cart.queries";
+import type { CheckoutResponse } from "@/features/cart/checkout.types";
+import { financeApi } from "@/features/finance/finance.api";
+import { PaymentQrCard } from "../components/PaymentQrCard";
+import { PaymentSteps } from "../components/PaymentSteps";
+import { PaymentOrderSummary, type OrderItemSummaryData } from "../components/PaymentOrderSummary";
+
+function transferAccount(raw: string | undefined): Record<string, string> {
+  try {
+    const value: unknown = JSON.parse(raw ?? "{}");
+    return value && typeof value === "object" ? (value as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function usePaymentCountdown(expiresAt: string | undefined, defaultTime = "14:59") {
+  const [timeLeft, setTimeLeft] = useState(defaultTime);
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    const target = new Date(expiresAt).getTime();
+    if (Number.isNaN(target)) return;
+
+    function tick() {
+      const diffInSeconds = Math.floor((target - Date.now()) / 1000);
+      if (diffInSeconds <= 0) {
+        setTimeLeft("00:00");
+        return;
+      }
+      const minutes = Math.floor(diffInSeconds / 60);
+      const seconds = diffInSeconds % 60;
+      setTimeLeft(
+        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`,
+      );
+    }
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt, defaultTime]);
+
+  return timeLeft;
+}
 
 export function PaymentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
+  const state = location.state as { orderId?: number; order?: CheckoutResponse } | null;
+  const orderId = Number(state?.orderId ?? searchParams.get("orderId"));
+  const validOrderId = Number.isSafeInteger(orderId) && orderId > 0;
+  const [attemptKey, setAttemptKey] = useState(() => crypto.randomUUID());
+  const [referenceCode, setReferenceCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const slip = useFileUpload({ purpose: "PAYMENT_SLIP" });
 
-  const stateData = location.state as {
-    orderId?: number;
-    order?: CheckoutResponse | OrderDetails;
-  } | null;
+  const orderQuery = useQuery({
+    queryKey: ["orders", orderId],
+    queryFn: () => ordersApi.getOrder(orderId),
+    enabled: validOrderId && !state?.order,
+  });
+  const order = state?.order ?? orderQuery.data;
 
-  const orderId =
-    stateData?.orderId ||
-    (searchParams.get("orderId") ? Number(searchParams.get("orderId")) : null);
+  const paymentQuery = useQuery({
+    queryKey: ["finance", "payment", orderId, attemptKey],
+    queryFn: () => financeApi.createPayment(orderId, attemptKey),
+    enabled: validOrderId,
+    retry: false,
+  });
+  const paymentId = paymentQuery.data?.id;
 
-  const [order, setOrder] = useState<CheckoutResponse | OrderDetails | null>(
-    stateData?.order || null,
-  );
-  const [isLoading, setIsLoading] = useState(!stateData?.order && !!orderId);
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(15 * 60);
+  const statusQuery = useQuery({
+    queryKey: ["finance", "payment-status", paymentId],
+    queryFn: () => financeApi.getPayment(paymentId!),
+    enabled: paymentId !== undefined,
+    initialData: paymentQuery.data,
+    refetchInterval: (query) =>
+      query.state.data?.status === "AWAITING_VERIFICATION" ? 5000 : false,
+  });
+  const payment = statusQuery.data ?? paymentQuery.data;
+  const account = transferAccount(payment?.transferAccountJson);
+  const timeLeft = usePaymentCountdown(payment?.expiresAt);
 
-  // Fetch order details if not in state
   useEffect(() => {
-    if (!order && orderId) {
-      ordersApi
-        .getOrder(orderId)
-        .then((res) => {
-          setOrder(res);
-        })
-        .catch((err) => {
-          toast.add({
-            title: "Failed to Load Order",
-            description: err instanceof ApiError ? err.message : "Error loading order",
-            type: "error",
-          });
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [order, orderId]);
-
-  // Countdown timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!orderId) {
-      toast.add({
-        title: "No Order ID",
-        description: "Cannot process payment without an order ID.",
-        type: "error",
+  useEffect(() => {
+    if (payment?.status === "SUCCEEDED") {
+      void queryClient.invalidateQueries({ queryKey: cartKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["orders"] });
+      navigate(`/payment/success?orderId=${orderId}&paymentId=${payment.id}`, {
+        replace: true,
       });
-      return;
     }
+  }, [payment?.status, payment?.id, orderId, navigate, queryClient]);
 
-    setIsConfirming(true);
+  async function submitSlip() {
+    const key = slip.objectKeys[0];
+    if (!payment || !key) return;
+    setIsSubmitting(true);
     try {
-      const paidOrder = await ordersApi.payOrder(orderId);
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      const updated = await financeApi.attachPaymentSlip(
+        payment.id,
+        key,
+        referenceCode.trim() || undefined,
+      );
+      queryClient.setQueryData(["finance", "payment-status", payment.id], updated);
       toast.add({
-        title: "Payment Confirmed",
-        description: `Order ${paidOrder.orderNumber} has been paid successfully.`,
         type: "success",
+        title: "ส่งหลักฐานแล้ว",
+        description: "รอผู้ดูแลตรวจสอบการชำระเงิน",
       });
-      navigate(`/payment/success?orderId=${orderId}`, {
-        state: {
-          orderId,
-          order: paidOrder,
-        },
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "ส่งหลักฐานไม่สำเร็จ",
+        description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
       });
-    } catch (err) {
-      if (err instanceof ApiError) {
-        toast.add({
-          title: "Payment Failed",
-          description: err.message,
-          type: "error",
-        });
-      } else {
-        toast.add({
-          title: "Error",
-          description: "An unexpected error occurred during payment.",
-          type: "error",
-        });
-      }
     } finally {
-      setIsConfirming(false);
+      setIsSubmitting(false);
     }
-  };
+  }
 
-  const handleSaveQr = () => {
-    toast.add({
-      title: "QR Saved",
-      description: "PromptPay QR code has been saved to your device.",
-      type: "info",
-    });
-  };
+  const sellerOrders = order?.sellerOrders;
+  const summaryItems = useMemo<OrderItemSummaryData[] | undefined>(() => {
+    if (!sellerOrders?.length) return undefined;
+    return sellerOrders.flatMap((so) =>
+      so.items.map((item) => ({
+        id: item.id,
+        productName: item.productName,
+        variantLabel: item.variantLabel,
+        condition: item.condition,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        lineTotal: item.lineTotal,
+        imageUrl: item.imageUrl,
+      })),
+    );
+  }, [sellerOrders]);
 
-  if (isLoading) {
+  if (!validOrderId) {
     return (
-      <div className="min-h-screen bg-muted flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground text-sm font-medium">Loading payment details...</p>
+      <div className="container mx-auto max-w-xl p-8 text-center">
+        <p className="text-muted-foreground">ไม่พบหมายเลขคำสั่งซื้อ</p>
+        <Button className="mt-4" onClick={() => navigate("/account/orders")}>
+          กลับไปประวัติคำสั่งซื้อ
+        </Button>
       </div>
     );
   }
 
-  const grandTotal = order?.grandTotal ?? 0;
-  const itemsSubtotal = order?.itemsSubtotal ?? 0;
-  const shippingTotal = order?.shippingTotal ?? 0;
-
-  // Extract first item from sellerOrders
-  const sellerOrders = order?.sellerOrders ?? [];
-  const firstSellerOrder = sellerOrders[0];
-  const firstItem = firstSellerOrder?.items?.[0];
-
-  const formatPrice = (amount: number) => `THB ${amount.toLocaleString()}`;
-
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Secure Checkout</h1>
-        <p className="text-muted-foreground">
-          Scan the QR code below to complete your payment.
+  if (paymentQuery.isPending) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 space-y-3">
+        <Loader2 className="size-8 animate-spin text-sky-700" />
+        <p className="text-sm text-muted-foreground font-medium">
+          กำลังเตรียมข้อมูลการชำระเงิน...
         </p>
       </div>
+    );
+  }
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Side: QR Code */}
-        <Card className="flex-1 border-t-4 border-t-primary">
-          <CardHeader className="text-center pt-8">
-            <CardTitle className="text-2xl font-bold">PromptPay QR</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6 pb-12">
-            <div className="bg-white border-2 border-border/80 shadow-inner w-64 h-64 flex flex-col items-center justify-center p-4 rounded-xl">
-              <QrCode className="w-44 h-44 text-primary" />
-              <span className="text-xs mt-2 font-bold tracking-wider text-foreground">
-                PAY VIA QR SCAN
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                Scan to Pay | {formatPrice(grandTotal)}
-              </span>
-            </div>
+  if (paymentQuery.isError) {
+    return (
+      <div className="container mx-auto max-w-xl p-8 text-center">
+        <p role="alert" className="text-destructive font-medium">
+          {getErrorMessage(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}
+        </p>
+        <Button className="mt-4" onClick={() => navigate("/account/orders")}>
+          กลับไปประวัติคำสั่งซื้อ
+        </Button>
+      </div>
+    );
+  }
 
-            <div className="text-center flex flex-col items-center gap-4">
-              <p className="font-medium text-lg">Open your banking app to scan</p>
-              <div className="flex items-center gap-2 bg-muted px-4 py-2 rounded-full text-sm font-medium">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>Pay within {formatTimer(timeRemaining)}</span>
-              </div>
-            </div>
+  if (!payment) return null;
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full mt-4 max-w-sm">
-              <Button
-                className="flex-1 rounded-full"
-                variant="default"
-                size="lg"
-                onClick={handleSaveQr}
-              >
-                Save QR
-              </Button>
-              <Button
-                className="flex-1 rounded-full"
-                variant="outline"
-                size="lg"
-                disabled={isConfirming}
-                onClick={handleConfirmPayment}
-              >
-                {isConfirming ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing...</span>
-                  </div>
-                ) : (
-                  "Confirm Payment"
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+  const orderNumber =
+    order?.orderNumber ?? (orderId ? `ORD-${orderId}` : "ORD-10241");
+  const formattedAmount = Number(payment.amount).toLocaleString("th-TH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-        {/* Right Side: Order Summary */}
-        <Card className="w-full lg:w-96 h-fit pt-6">
-          <CardHeader>
-            <CardTitle className="text-xl">Order Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-6">
-            <div className="flex gap-4">
-              <div className="w-20 h-28 bg-[#f4f4f5] rounded-md overflow-hidden shrink-0 border flex items-center justify-center p-1">
-                {firstItem?.imageUrl ? (
-                  <img
-                    src={firstItem.imageUrl}
-                    alt={firstItem.productName}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <span className="text-xs text-muted-foreground text-center px-2">
-                    TCG Card
+  const uploadedItem = slip.items[0];
+  const hasUploadedSlip = Boolean(slip.objectKeys.length > 0 && uploadedItem?.status === "done");
+  const isAwaitingVerification = payment.status === "AWAITING_VERIFICATION";
+
+  const isButtonDisabled =
+    !hasUploadedSlip ||
+    slip.isUploading ||
+    isSubmitting ||
+    isAwaitingVerification;
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F8FAFC]/50 py-6 md:py-8">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+            Secure Checkout
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Pay with PromptPay, then upload your slip so we can confirm your order.
+          </p>
+        </div>
+
+        {/* Two-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Payment Card (lg:col-span-8) */}
+          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
+            {/* Top Accent Stripe - Same color as Pegasus Logo (sky-700) */}
+            <div className="h-1 bg-sky-700 w-full" />
+
+            <div className="p-6 md:p-8">
+              {/* Card Header: Amount Due and Expiration Badge */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+                    AMOUNT DUE
                   </span>
-                )}
-              </div>
-              <div className="flex flex-col gap-1 min-w-0">
-                <p className="font-bold text-sm truncate">
-                  {firstItem?.productName || "Order Items"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {[firstItem?.variantLabel, firstItem?.condition]
-                    .filter(Boolean)
-                    .join(" • ")}
-                </p>
-                <p className="font-medium mt-2">
-                  {formatPrice(firstItem ? firstItem.unitPrice : grandTotal)}
-                  {firstItem && firstItem.quantity > 1 && (
-                    <span className="text-xs text-muted-foreground">
-                      {" "}× {firstItem.quantity}
+                  <p className="text-3xl font-extrabold text-foreground tracking-tight mt-0.5">
+                    THB {formattedAmount}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Order #{orderNumber} · Pay exactly this amount
+                  </p>
+                </div>
+
+                {/* Expiration Timer Badge */}
+                <div className="inline-flex items-center gap-2.5 bg-[#FFF6ED] border border-[#FFE8D1] rounded-full px-4 py-2 self-start sm:self-center">
+                  <Clock className="size-4.5 text-amber-600 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-medium text-amber-600 leading-tight">
+                      Expires in
                     </span>
-                  )}
-                </p>
+                    <span className="text-sm font-bold text-amber-900 leading-tight">
+                      {timeLeft}
+                    </span>
+                  </div>
+                </div>
               </div>
+
+              {/* Full-width Divider Line below Header */}
+              <div className="border-t border-slate-100 -mx-6 md:-mx-8 my-6" />
+
+              {/* Card Body: QR Scan & 3 Steps in 2 Columns */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                {/* Left: QR Code Scan Section */}
+                <div className="md:col-span-5 flex justify-center">
+                  <PaymentQrCard
+                    orderNumber={orderNumber}
+                    account={account}
+                  />
+                </div>
+
+                {/* Right: 3 Steps Timeline */}
+                <div className="md:col-span-7">
+                  <PaymentSteps
+                    amount={payment.amount}
+                    slip={slip}
+                    referenceCode={referenceCode}
+                    onReferenceCodeChange={setReferenceCode}
+                  />
+                </div>
+              </div>
+
+              {/* Full-width Divider Line above Submit Button */}
+              <div className="border-t border-slate-100 -mx-6 md:-mx-8 mt-8 mb-6" />
+
+              {/* Full-width Action Section below the divider */}
+              {isAwaitingVerification ? (
+                <div className="space-y-4">
+                  {/* Status Announcement Card */}
+                  <div className="rounded-xl border border-sky-100 bg-sky-50/70 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                      <Clock className="size-5 animate-pulse" />
+                    </div>
+                    <div className="flex-1 text-center sm:text-left space-y-1">
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h4 className="text-sm font-bold text-sky-950">
+                          ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ
+                        </h4>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-200/80 text-sky-900">
+                          Payment Under Review
+                        </span>
+                      </div>
+                      <p className="text-xs text-sky-800/90 leading-relaxed">
+                        เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Navigation Actions */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <Button
+                      type="button"
+                      onClick={() => navigate("/account/orders")}
+                      className="w-full h-11 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                    >
+                      <FileText className="size-4" />
+                      <span>ดูประวัติคำสั่งซื้อ</span>
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate("/products")}
+                      className="w-full h-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <ShoppingBag className="size-4" />
+                      <span>เลือกซื้อสินค้าต่อ</span>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Button
+                    type="button"
+                    onClick={submitSlip}
+                    disabled={isButtonDisabled}
+                    className={`w-full h-12 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                      isButtonDisabled
+                        ? "bg-[#85b4d0] text-white hover:bg-[#85b4d0] cursor-not-allowed opacity-90 shadow-none"
+                        : "bg-sky-700 hover:bg-sky-800 text-white shadow-xs cursor-pointer"
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="size-4 animate-spin" />
+                        <span>Submitting payment...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="size-4" />
+                        <span>Submit payment for verification</span>
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
+                    <Shield className="size-3.5 text-muted-foreground" />
+                    <span>Upload your slip and reference no. to continue.</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Status Alert for Failed / Expired */}
+              {(payment.status === "FAILED" ||
+                payment.status === "EXPIRED" ||
+                payment.status === "CANCELLED") && (
+                <div className="mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-center space-y-3">
+                  <p role="alert" className="text-sm font-medium text-destructive">
+                    {payment.failureReason || `การชำระเงินสถานะ: ${payment.status}`}
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      slip.clear();
+                      setAttemptKey(crypto.randomUUID());
+                    }}
+                  >
+                    เริ่มการชำระเงินใหม่
+                  </Button>
+                </div>
+              )}
             </div>
+          </div>
 
-            <Separator />
-
-            <div className="flex flex-col gap-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">{formatPrice(itemsSubtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="font-medium">{formatPrice(shippingTotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tax</span>
-                <span className="font-medium">Included</span>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex justify-between items-center pb-4">
-              <span className="font-bold text-lg">Total</span>
-              <span className="font-bold text-xl text-primary font-heading">
-                {formatPrice(grandTotal)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Right Column: Order Summary Card (lg:col-span-4) */}
+          <div className="lg:col-span-4 sticky top-6">
+            <PaymentOrderSummary
+              items={summaryItems}
+              subtotal={order?.itemsSubtotal}
+              shippingTotal={order?.shippingTotal}
+              grandTotal={payment.amount ?? order?.grandTotal}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

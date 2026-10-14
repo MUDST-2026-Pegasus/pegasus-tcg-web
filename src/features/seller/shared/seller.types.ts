@@ -34,10 +34,22 @@ export type SellerProfile = {
   createdAt: string;
 };
 
-/** สถานะคำสั่งซื้อฝั่งผู้ขาย — ใช้ทั้งการ์ดคำสั่งซื้อล่าสุดในแดชบอร์ดและหน้าจัดการคำสั่งซื้อ */
-export type OrderStatus =
-  | "awaiting_pack"
-  | "shipped"
-  | "awaiting_payment"
-  | "completed"
-  | "cancelled";
+/**
+ * สถานะคำสั่งซื้อของร้าน (`seller_order.status`) ตามที่ backend ส่งมา
+ * ลอกจาก `model/SellerOrderStatus.java` — ถ้าฝั่งนั้นเพิ่มสถานะ ไฟล์นี้ต้องเพิ่มตาม
+ */
+export type SellerOrderStatus =
+  /** สั่งแล้ว การ์ดถูกจองไว้ แต่ยังไม่ได้เงิน */
+  | "PENDING_PAYMENT"
+  /** จ่ายแล้ว เงินพักใน escrow รอร้านแพ็ค */
+  | "PAID"
+  /** ร้านกดรับออเดอร์แล้ว กำลังแพ็ค */
+  | "PREPARING"
+  | "SHIPPED"
+  | "DELIVERED"
+  /** ผู้ซื้อยืนยันรับ (หรือครบกำหนด) เงินปล่อยให้ร้านแล้ว */
+  | "COMPLETED"
+  | "CANCELLED"
+  | "RETURN_REQUESTED"
+  | "RETURNED"
+  | "REFUNDED";

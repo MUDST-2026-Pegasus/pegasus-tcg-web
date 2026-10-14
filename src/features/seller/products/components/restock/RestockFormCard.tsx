@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -40,8 +41,12 @@ const thaiMonthYear = new Intl.DateTimeFormat("th-TH", {
   year: "numeric",
 });
 
+/** ไม่ให้ `unitNote` (แหล่งที่มา · อ้างอิง · บันทึก) เกิน 255 ตัวอักษรของ backend */
+const NOTE_MAX_LENGTH = 150;
+
 type RestockFormCardProps = RestockData["form"] & {
   draft: RestockDraft;
+  quantityError: string | null;
   onFieldChange: (field: keyof RestockDraft, value: string) => void;
 };
 
@@ -60,6 +65,7 @@ export function RestockFormCard({
   noteLabel,
   notePlaceholder,
   draft,
+  quantityError,
   onFieldChange,
 }: RestockFormCardProps) {
   const quantityId = useId();
@@ -89,12 +95,16 @@ export function RestockFormCard({
           <AmountInput
             id={quantityId}
             required
-            maxLength={6}
+            maxLength={3}
             allowDecimal={false}
             value={draft.quantity}
             onValueChange={(value) => onFieldChange("quantity", value)}
+            aria-invalid={Boolean(quantityError) || undefined}
             className={FIELD_CLASS}
           />
+          <FieldError className="text-[10px] leading-normal">
+            {quantityError}
+          </FieldError>
         </Field>
 
         <Field className="flex-1 gap-1.5">
@@ -211,6 +221,7 @@ export function RestockFormCard({
         <Textarea
           id={noteId}
           placeholder={notePlaceholder}
+          maxLength={NOTE_MAX_LENGTH}
           value={draft.note}
           onChange={(event) => onFieldChange("note", event.target.value)}
           className="min-h-16 rounded-lg border-input bg-background px-2.5 py-2 text-sm placeholder:text-gray-400"

@@ -13,8 +13,8 @@ const SOURCE_OPTIONS = [
 
 /**
  * ประกอบหน้าเติมสต็อกจากประกาศจริง (`GET /sellers/me/listings/{id}`)
- * ประวัติรับเข้า ต้นทุนเฉลี่ย และยอดขาย ยังไม่มีที่มา — SLR-04 จะต่อกับ unit/คลัง
- * (`POST /sellers/me/listings/{id}/units`, `/inventory/movements`) ระหว่างนี้เป็น 0 / ว่าง
+ * ต้นทุนเฉลี่ยมาจาก `costBasis` ของประกาศ — ตัวเดียวกับที่ backend ใช้เป็นต้นทุนตอนขาย
+ * ประวัติรับเข้าและยอดขายยังไม่มีที่มา (`/inventory/movements`) ระหว่างนี้เป็นว่าง / 0
  */
 export function getRestockData(listing: SellerListing): RestockData {
   return {
@@ -37,7 +37,9 @@ export function getRestockData(listing: SellerListing): RestockData {
       tags: [listing.card.variantLabel, CONDITION_LABEL[listing.condition]],
       stockLabel: "สต็อกปัจจุบัน",
       stock: listing.quantityAvailable,
-      averageCost: 0,
+      averageCost: listing.costBasis.averageUnitCost,
+      costQuantity: listing.costBasis.quantity,
+      costTotal: listing.costBasis.totalCost,
       sellingPrice: listing.price,
       unit: "ใบ",
     },

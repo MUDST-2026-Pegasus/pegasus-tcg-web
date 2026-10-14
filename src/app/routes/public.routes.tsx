@@ -10,6 +10,9 @@ import { ProfilePage } from "@/features/account/pages/ProfilePage";
 import { CartPage } from "@/features/cart/pages/CartPage";
 import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
 import { ProductDetailPage } from "@/features/catalog/pages/ProductDetailPage";
+import { CollectorProfilePage } from "@/features/catalog/pages/CollectorProfilePage";
+import { MarketListingsPage } from "@/features/catalog/pages/MarketListingsPage";
+import { ListingDetailPage } from "@/features/catalog/pages/ListingDetailPage";
 import { ProductListPage } from "@/features/catalog/pages/ProductListPage";
 import { MyCollectionPage } from "@/features/collection/pages/MyCollectionPage";
 import { PublicCollectionPage } from "@/features/collection/pages/PublicCollectionPage";
@@ -18,6 +21,7 @@ import { HomePage } from "@/features/home/pages/HomePage";
 import { TermsOfServicePage } from "@/features/legal/pages/TermsOfServicePage";
 import { PrivacyPolicyPage } from "@/features/legal/pages/PrivacyPolicyPage";
 import { StoreProfilePage } from "@/features/store/pages/StoreProfilePage";
+import { PublicSellerPage } from "@/features/store/pages/PublicSellerPage";
 import { PaymentPage } from "@/features/payment/pages/PaymentPage";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
 import { SellerApplicationPage } from "@/features/seller/application/SellerApplicationPage";
@@ -28,23 +32,21 @@ export const publicRoutes: RouteObject = {
   children: [
     { index: true, element: <HomePage /> },
 
-    { path: "products", element: <ProductListPage /> },
+    { path: "products", element: <ProductListPage key="all" /> },
     { path: "products/:productId", element: <ProductDetailPage /> },
-    // หมวดหมู่ที่ Navbar ลิงก์ไป — ใช้ ProductListPage ตัวเดียวกัน
-    // แยก path เพื่อให้ NavLink ไฮไลต์เมนูที่ถูกต้อง
-    { path: "sale", element: <ProductListPage /> },
-    { path: "new-arrivals", element: <ProductListPage /> },
-    { path: "pokemon", element: <ProductListPage /> },
-    { path: "one-piece", element: <ProductListPage /> },
+    { path: "collectors/:username", element: <CollectorProfilePage /> },
+    { path: "products/:productId/listings", element: <MarketListingsPage /> },
+    { path: "listings/:listingId", element: <ListingDetailPage /> },
+    { path: "pokemon", element: <ProductListPage key="pokemon" gameCode="POKEMON" title="Pokémon" /> },
+    { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
     { path: "search", element: <SearchResultsPage /> },
 
     { path: "store/:storeId", element: <StoreProfilePage /> },
+    { path: "u/:username", element: <PublicSellerPage /> },
     { path: "users/:username", element: <PublicCollectionPage /> },
 
     { path: "cart", element: <CartPage /> },
     { path: "checkout", element: <CheckoutPage /> },
-    { path: "payment", element: <PaymentPage /> },
-    { path: "payment/success", element: <PaymentSuccessPage /> },
 
     { path: "about", element: <AboutPage /> },
     { path: "terms-of-service", element: <TermsOfServicePage /> },
@@ -53,6 +55,8 @@ export const publicRoutes: RouteObject = {
     {
       element: <RequireAuth />,
       children: [
+        { path: "payment", element: <PaymentPage /> },
+        { path: "payment/success", element: <PaymentSuccessPage /> },
         { path: "account/profile", element: <ProfilePage /> },
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },

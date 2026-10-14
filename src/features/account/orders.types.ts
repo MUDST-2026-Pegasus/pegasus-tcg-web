@@ -65,7 +65,7 @@ export interface OrderDetails {
   id: number;
   orderNumber: string;
   buyerId: number;
-  status: "PENDING_PAYMENT" | "PAID" | "SHIPPED" | "COMPLETED" | "CANCELLED" | string;
+  status: "PENDING_PAYMENT" | "PAID" | "PARTIALLY_COMPLETED" | "COMPLETED" | "CANCELLED" | "REFUNDED" | string;
   currency: string;
   itemsSubtotal: number;
   shippingTotal: number;
@@ -79,6 +79,10 @@ export interface OrderDetails {
   completedAt: string | null;
   cancelledAt: string | null;
   sellerOrders: SellerOrderDetails[];
+  /** A transfer slip is waiting for admin review: no paying again, no cancelling. */
+  paymentUnderReview?: boolean;
+  /** Last moment a paid order can be cancelled; null before payment. */
+  cancellableUntil?: string | null;
 }
 
 export interface PageResponse<T> {

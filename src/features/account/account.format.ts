@@ -15,11 +15,20 @@ export function initialsOf(name: string): string {
 /** ผู้ใช้ที่ login อยู่ → ข้อมูลที่ `AccountSidebar` ต้องใช้ */
 export function toSidebarUser(user: AuthUser | null): AccountSidebarUser {
   if (!user) {
-    return { initials: "?", name: "", email: "" };
+    return { initials: "?", name: "", email: "", avatarUrl: null };
   }
   return {
     initials: initialsOf(user.displayName),
     name: user.displayName,
     email: user.email,
+    avatarUrl: user.avatarUrl,
   };
 }
+
+export {
+  formatOrderStatus,
+  getOrderStatusBadge,
+  ORDER_STATUS_LABELS,
+  snakeCaseToTitleCase,
+} from "./orders.format";
+

@@ -1,7 +1,13 @@
 import type {
-  CardCondition,
   ProductSummaryDto,
 } from "@/features/catalog/catalog.types";
+export type { PublicListingDto } from "@/features/catalog/catalog.types";
+
+export type PublicProfileDto = {
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+};
 
 // ---------- สิ่งที่ UI หน้าแรกใช้วาด ----------
 
@@ -75,29 +81,4 @@ export type TrendingProductDto = {
   rank: number;
   unitsSold: number;
   product: ProductSummaryDto;
-};
-
-/** `PublicListingResponse` — `GET /u/{username}/listings` */
-export type PublicListingDto = {
-  id: number;
-  card: {
-    variantId: number;
-    sku: string;
-    variantLabel: string;
-    productId: number;
-    productName: string;
-    productSlug: string;
-    gameId: number;
-    officialImageUrl: string | null;
-  };
-  condition: CardCondition;
-  price: number;
-  currency: string;
-  quantityAvailable: number;
-  primaryPhotoUrl: string | null;
-  seller: {
-    username: string;
-    displayName: string;
-    avatarUrl: string | null;
-  };
 };

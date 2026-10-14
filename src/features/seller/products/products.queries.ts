@@ -8,6 +8,7 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 
+import { dashboardKeys } from "@/features/seller/dashboard/dashboard.queries";
 import type { PageResponse } from "@/lib/api";
 
 import * as productsApi from "./products.api";
@@ -31,7 +32,7 @@ export const LISTING_STATUSES: ListingStatus[] = [
 ];
 
 /**
- * query key ต้องรวมทุกค่าที่ทำให้ผลต่างกัน — ที่นี่คือ status/page/size
+ * query key ต้องรวมทุกค่าที่ทำให้ผลต่างกัน — ที่นี่คือ status/q/sort/page/size
  * ตัวนับของแต่ละชิป (size=1) ก็อยู่ใต้ `lists()` ด้วย ล้างที่ `lists()` ทีเดียวได้ครบ
  */
 export const listingKeys = {
@@ -41,6 +42,8 @@ export const listingKeys = {
     [
       ...listingKeys.lists(),
       query.status ?? "ALL",
+      query.q ?? "",
+      query.sort ?? "updated",
       query.page,
       query.size,
     ] as const,
@@ -144,6 +147,23 @@ function restoreRows(
 }
 
 /**
+ * ทุกที่ที่แก้ประกาศ (หน้านี้ หน้าลงขาย/แก้ไข หน้าเติมสต็อก) จบด้วยฟังก์ชันนี้
+ * ตารางกับตัวนับบนชิปดึงใหม่ทั้งหมด และประกาศใบที่แก้ถ้าส่ง `detailKey` มา
+ *
+ * แดชบอร์ดนับจากประกาศด้วย (สินค้าที่ลงขาย, สต็อกใกล้หมด) และเก็บไว้ 1 นาที
+ * ถ้าไม่สั่งตรงนี้ ผู้ขายกลับไปดูจะเห็นเลขเก่า — ตอนแก้ประกาศแดชบอร์ดไม่ได้เปิดอยู่
+ * การสั่งจึงแค่ทำเครื่องหมายว่าเก่า ไม่ยิงเพิ่ม และไม่ return promise ของมัน
+ * การบันทึกจะได้รอแค่ตารางที่ผู้ขายกำลังดู (แบบเดียวกับ `settle` ของหน้าคำสั่งซื้อ)
+ */
+export function invalidateListingViews(queryClient: QueryClient, detailKey?: QueryKey) {
+  void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
+    ...(detailKey ? [queryClient.invalidateQueries({ queryKey: detailKey })] : []),
+  ]);
+}
+
+/**
  * ทุก mutation จบด้วยการดึงใหม่ทั้งหน้าและตัวนับ — ค่าที่เดาไว้ล่วงหน้าอาจไม่ตรงของจริง
  * เช่น เปิดขายประกาศ PAUSED ที่ไม่เหลือการ์ด backend ย้ายไป SOLD_OUT แทน ACTIVE
  */
@@ -151,10 +171,7 @@ function settle(queryClient: QueryClient, id: number, updated?: SellerListing) {
   if (updated) {
     queryClient.setQueryData(listingKeys.detail(id), updated);
   }
-  return Promise.all([
-    queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
-    queryClient.invalidateQueries({ queryKey: listingKeys.detail(id) }),
-  ]);
+  return invalidateListingViews(queryClient, listingKeys.detail(id));
 }
 
 export function useChangeListingPrice() {
@@ -192,8 +209,7 @@ export function useDeleteListing() {
     mutationFn: (id: number) => productsApi.deleteListing(id),
     onSuccess: (_result, id) =>
       queryClient.removeQueries({ queryKey: listingKeys.detail(id) }),
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
+    onSettled: () => invalidateListingViews(queryClient),
   });
 }
 
@@ -239,10 +255,6 @@ export function useBulkListingUpdate() {
       );
       return { succeeded: jobs.length - failed.length, failed };
     },
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: listingKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: listingKeys.details() }),
-      ]),
+    onSettled: () => invalidateListingViews(queryClient, listingKeys.details()),
   });
 }

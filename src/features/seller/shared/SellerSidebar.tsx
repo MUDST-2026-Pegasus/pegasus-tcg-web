@@ -1,11 +1,9 @@
 import { NavLink } from "react-router-dom";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -16,36 +14,18 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { sellerNav } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
-
-import { SELLER_STATUS_LABEL, type SellerIdentity } from "./seller.format";
-import type { SellerStatus } from "./seller.types";
 
 const NAV_ACTIVE =
   "data-active:bg-[#e6f4f2] data-active:font-medium data-active:text-teal-600 data-active:hover:bg-[#e6f4f2] data-active:hover:text-teal-600";
 const NAV_HOVER = "hover:bg-gray-100 hover:text-gray-700";
-const NAV_DANGER =
-  "text-red-600 hover:bg-red-50 hover:text-red-600 data-active:bg-red-50 data-active:text-red-600 data-active:hover:bg-red-50 data-active:hover:text-red-600";
-
-type SellerSidebarProps = {
-  seller: SellerIdentity;
-  /** `undefined` ระหว่างรอ `/sellers/me` */
-  status: SellerStatus | undefined;
-  /** โหลด `/sellers/me` ไม่สำเร็จ — ไม่ต้องโชว์ skeleton ค้างไว้ */
-  statusUnavailable: boolean;
-};
 
 /**
  * Sidebar เฉพาะฝั่งผู้ขาย — ดีไซน์/ขนาดตัวอักษรลอกจาก Figma node 432:6773
  * แยกจาก AppSidebar ของ admin ตรง ๆ เพื่อให้ปรับหน้าตาได้อิสระโดยไม่ต้องกังวลเรื่องผลกระทบข้ามฝั่ง
  */
-export function SellerSidebar({
-  seller,
-  status,
-  statusUnavailable,
-}: SellerSidebarProps) {
+export function SellerSidebar() {
   const { isMobile } = useSidebar();
 
   return (
@@ -73,7 +53,7 @@ export function SellerSidebar({
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0.5">
-                  {group.items.map(({ label, to, icon: Icon, end, tone }) => (
+                  {group.items.map(({ label, to, icon: Icon, end }) => (
                     <SidebarMenuItem key={to}>
                       <NavLink to={to} end={end}>
                         {({ isActive }) => (
@@ -83,9 +63,8 @@ export function SellerSidebar({
                             render={<span />}
                             className={cn(
                               "h-auto gap-2.5 rounded-lg px-2.5 py-2 text-xs font-normal text-gray-700 [&_svg]:size-6",
-                              tone === "danger"
-                                ? NAV_DANGER
-                                : [NAV_HOVER, NAV_ACTIVE],
+                              NAV_HOVER,
+                              NAV_ACTIVE,
                             )}
                           >
                             <Icon />
@@ -100,39 +79,6 @@ export function SellerSidebar({
             </SidebarGroup>
           ))}
         </SidebarContent>
-
-        <SidebarFooter className="gap-0 p-0">
-          <SidebarSeparator className="mx-0 mb-3 bg-zinc-200" />
-          <div className="flex items-center gap-2.5 px-0.5 pt-0.5 pb-3">
-            <Avatar className="size-8">
-              {seller.avatarUrl ? (
-                <AvatarImage src={seller.avatarUrl} alt="" />
-              ) : null}
-              <AvatarFallback className="bg-teal-600 text-sm font-normal text-white">
-                {seller.initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-xs font-medium text-zinc-950">
-                {seller.displayName}
-              </span>
-              {status ? (
-                <span
-                  className={cn(
-                    "text-xs font-normal",
-                    status === "SUSPENDED" ? "text-red-600" : "text-gray-500",
-                  )}
-                >
-                  {SELLER_STATUS_LABEL[status]}
-                </span>
-              ) : statusUnavailable ? (
-                <span className="text-xs font-normal text-gray-500">—</span>
-              ) : (
-                <Skeleton className="mt-1 h-3 w-24" />
-              )}
-            </div>
-          </div>
-        </SidebarFooter>
       </div>
     </Sidebar>
   );

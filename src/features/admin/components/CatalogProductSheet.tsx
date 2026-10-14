@@ -16,6 +16,7 @@ import { productTitle } from "../catalog.format";
 import { useAdminProduct } from "../catalog.queries";
 import type { CatalogProduct, Game } from "../catalog.types";
 
+import { CatalogCardEffectEditor } from "./CatalogCardEffectEditor";
 import { CatalogImageManager } from "./CatalogImageManager";
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
@@ -118,6 +119,9 @@ function EditProductPanel({
     >
       {({ product, variants, images }) => {
         const game = games.find((candidate) => candidate.id === product.gameId);
+        const hasEffects = product.productType === "SINGLE_CARD";
+        // ลิงก์ `?tab=effects` ของสินค้าที่ไม่ใช่การ์ดเดี่ยว ไม่มีแท็บให้เปิด
+        const shownTab = tab === "effects" && !hasEffects ? "details" : tab;
 
         return (
           <>
@@ -136,16 +140,20 @@ function EditProductPanel({
             </SheetHeader>
 
             <Tabs
-              value={tab}
+              value={shownTab}
               onValueChange={(next) => onTabChange(next as ProductTab)}
               className="min-h-0 flex-1 gap-4"
             >
-              <TabsList className="mx-6">
+              {/* สี่แท็บกว้างกว่าจอมือถือ — เลื่อนข้างในแทนการล้นออกนอกหน้าต่าง */}
+              <TabsList className="mx-6 max-w-[calc(100%-3rem)] justify-start overflow-x-auto [scrollbar-width:none]">
                 <TabsTrigger value="details">ข้อมูลสินค้า</TabsTrigger>
                 <TabsTrigger value="variants">
                   Variant ({variants.length})
                 </TabsTrigger>
                 <TabsTrigger value="images">รูปภาพ ({images.length})</TabsTrigger>
+                {hasEffects && (
+                  <TabsTrigger value="effects">Abilities &amp; Attacks</TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="details" className="flex min-h-0 flex-col">
@@ -169,6 +177,16 @@ function EditProductPanel({
                   onRefresh={() => detail.refetch()}
                 />
               </TabsContent>
+
+              {/* หน้าการ์ดฝั่งร้านโชว์กล่องนี้เฉพาะการ์ดเดี่ยว */}
+              {hasEffects && (
+                <TabsContent value="effects" className="flex min-h-0 flex-col">
+                  <CatalogCardEffectEditor
+                    productId={product.id}
+                    onClose={onClose}
+                  />
+                </TabsContent>
+              )}
             </Tabs>
           </>
         );

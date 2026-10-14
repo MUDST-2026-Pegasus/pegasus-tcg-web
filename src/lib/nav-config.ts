@@ -1,14 +1,17 @@
 import {
+  ArrowUpRight,
   BadgeCheck,
   Clock2,
+  FileText,
   LayoutDashboard,
   LayoutGrid,
-  LogOut,
   Package,
   Receipt,
+  RotateCcw,
+  Star,
+  Undo2,
   Settings2,
   ShoppingCart,
-  Store,
   Users,
   Wallet,
   type LucideIcon,
@@ -20,8 +23,6 @@ export type NavItem = {
   icon: LucideIcon;
   /** true = highlight only on an exact URL match (index routes) */
   end?: boolean;
-  /** "danger" = ย้อมสีแดงตลอด (ใช้กับ "ออกจากระบบ") */
-  tone?: "default" | "danger";
 };
 
 export type NavGroup = {
@@ -68,6 +69,15 @@ export const adminNav: NavGroup[] = [
       { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
       { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
       { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
+      { label: "จัดการรีวิว", to: "/admin/reviews", icon: Star },
+    ],
+  },
+  {
+    label: "จัดการเงิน",
+    items: [
+      { label: "ตรวจสอบสลิปชำระเงิน", to: "/admin/payments", icon: FileText },
+      { label: "คืนเงิน", to: "/admin/refunds", icon: Undo2 },
+      { label: "ถอนเงินผู้ขาย", to: "/admin/payouts", icon: ArrowUpRight },
     ],
   },
   {
@@ -89,24 +99,14 @@ export const sellerNav: NavGroup[] = [
   {
     label: "ร้านค้า",
     items: [
-      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
       { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
+      { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: RotateCcw },
+      { label: "รีวิวร้านค้า", to: "/seller/reviews", icon: Star },
     ],
   },
   {
     label: "การเงิน",
     items: [{ label: "ถอนเงิน", to: "/seller/payout", icon: Wallet }],
-  },
-  {
-    label: "บัญชี",
-    items: [
-      {
-        label: "ออกจากระบบ",
-        to: "/seller/logout",
-        icon: LogOut,
-        tone: "danger",
-      },
-    ],
   },
 ];

@@ -37,6 +37,29 @@ describe('RegisterForm', () => {
     expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
   });
 
+  it('toggles password and confirmation independently without submitting', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+    const password = screen.getByLabelText(/^password$/i);
+    const confirmation = screen.getByLabelText(/^confirm password$/i);
+    await user.type(password, 'password123');
+    await user.type(confirmation, 'password123');
+    expect(password).toHaveAttribute('type', 'password');
+    expect(confirmation).toHaveAttribute('type', 'password');
+    const toggles = screen.getAllByRole('button', { name: 'Show password' });
+    await user.click(toggles[0]);
+    expect(password).toHaveAttribute('type', 'text');
+    expect(confirmation).toHaveAttribute('type', 'password');
+    await user.click(toggles[1]);
+    await user.click(toggles[0]);
+    expect(password).toHaveAttribute('type', 'password');
+    expect(confirmation).toHaveAttribute('type', 'text');
+    expect(password).toHaveValue('password123');
+    expect(confirmation).toHaveValue('password123');
+    expect(screen.queryByText(/Email is required/i)).not.toBeInTheDocument();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
+  });
+
   it('shows validation errors for empty fields', async () => {
     renderWithProviders(<RegisterForm />);
     

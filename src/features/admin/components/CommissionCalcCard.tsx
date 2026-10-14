@@ -14,22 +14,22 @@ export function CommissionCalcCard({
 }: CommissionCalcCardProps) {
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-[#090b0c] px-5 py-5 text-white">
-      <p className="text-sm font-semibold">{title}</p>
+      <p className="text-[13px] font-semibold">{title}</p>
 
-      <dl className="flex flex-col gap-[11px] text-[13px] text-white/85">
+      <dl className="flex flex-col gap-[11px] text-xs">
         {rows.map((row) => (
           <div key={row.id} className="flex items-center justify-between gap-4">
-            <dt>{row.label}</dt>
+            <dt className="text-[#9aa5ad]">{row.label}</dt>
             <dd className="font-medium tabular-nums">{row.value}</dd>
           </div>
         ))}
       </dl>
 
-      <div className="h-px bg-white/15" />
+      <div className="h-px bg-[#2c3336]" />
 
       <div className="flex items-baseline justify-between gap-4">
-        <span className="text-sm text-white/85">{totalLabel}</span>
-        <span className="text-2xl font-bold tabular-nums">{totalValue}</span>
+        <span className="text-[13px] font-medium">{totalLabel}</span>
+        <span className="text-xl font-bold tracking-[-0.4px] tabular-nums">{totalValue}</span>
       </div>
     </section>
   );

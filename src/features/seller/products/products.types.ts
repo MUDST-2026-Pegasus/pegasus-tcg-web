@@ -95,12 +95,47 @@ export type SellerListing = Omit<SellerListingSummary, "primaryPhotoUrl"> & {
   createdAt: string;
   photos: ListingPhoto[];
   similarListings: SimilarListing[];
+  costBasis: ListingCostBasis;
 };
 
-/** query ของ `GET /sellers/me/listings` — backend ยังไม่รับคำค้นหรือการเรียง (เรียงแก้ไขล่าสุดก่อนเสมอ) */
+/**
+ * `SellerListingResponse.CostBasis` — ต้นทุนเฉลี่ยถ่วงน้ำหนักของการ์ดใบนี้สภาพนี้ของร้าน [RQ-7]
+ * backend เก็บต่อ "การ์ด + สภาพ" ไม่ใช่ต่อประกาศ: `quantity` นับการ์ดทุกใบที่ต้นทุนนี้ครอบคลุม
+ * (บนประกาศนี้ ประกาศแฝด ใบที่ติดจอง และใบที่อยู่ในมือ) จึงอาจไม่เท่ากับจำนวนบนประกาศ
+ * ยังไม่เคยรับเข้าเลย = ทุกค่าเป็น 0
+ */
+export type ListingCostBasis = {
+  quantity: number;
+  /** ต้นทุนรวมของการ์ดชุดนั้น ทศนิยม 2 ตำแหน่ง */
+  totalCost: number;
+  /** ทศนิยม 4 ตำแหน่ง — ค่าที่ order ใช้เป็นต้นทุนตอนขาย */
+  averageUnitCost: number;
+};
+
+/**
+ * ค่าที่ `sort` รับ — `ListingService.parseSort()` ฝั่ง backend
+ * ส่งค่าอื่นได้ `VALIDATION_FAILED` ไม่ส่ง = `updated` (แก้ไขล่าสุดก่อน)
+ */
+export type ListingSort =
+  | "updated"
+  | "newest"
+  | "price_asc"
+  | "price_desc"
+  | "stock_asc"
+  | "stock_desc"
+  | "name";
+
+/** query ของ `GET /sellers/me/listings` */
 export type ListingQuery = {
   /** ไม่ใส่ = ทุกสถานะ */
   status?: ListingStatus;
+  /**
+   * ค้นทั้งร้าน ไม่สนตัวพิมพ์ ตรงตรงไหนของข้อความก็ได้ — ชื่อการ์ด ชื่อภาษาท้องถิ่น
+   * เลขการ์ด SKU และป้ายล็อตของเราเอง ไม่ใส่/ว่าง = ไม่ค้น
+   */
+  q?: string;
+  /** ไม่ใส่ = แก้ไขล่าสุดก่อน */
+  sort?: ListingSort;
   /** เริ่มที่ 0 */
   page: number;
   size: number;

@@ -3,21 +3,27 @@ import { ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import type { OrderDetail } from "../../order-detail.types";
+import { itemMeta } from "../../orders.format";
+import type { OrderItem } from "../../orders.types";
 
-type PackingListCardProps = OrderDetail["items"] & {
-  packedIds: string[];
-  onTogglePacked: (id: string) => void;
+type PackingListCardProps = {
+  title: string;
+  countLabel: string;
+  items: OrderItem[];
+  /** true = โชว์ช่องติ๊กไว้เช็กว่าหยิบชิ้นไหนใส่กล่องแล้ว (จำไว้ฝั่งหน้าจอเท่านั้น) */
+  packable: boolean;
+  packedIds: number[];
+  onTogglePacked: (id: number) => void;
 };
 
 /** รายการสินค้าในออเดอร์ — ตอนรอแพ็คมีช่องติ๊กไว้เช็กของที่หยิบใส่กล่องแล้ว */
 export function PackingListCard({
   title,
   countLabel,
+  items,
   packable,
-  packedLabel,
-  rows,
   packedIds,
   onTogglePacked,
 }: PackingListCardProps) {
@@ -31,34 +37,38 @@ export function PackingListCard({
       </div>
 
       <ul className="flex flex-col">
-        {rows.map((row) => (
+        {items.map((item) => (
           <li
-            key={row.id}
+            key={item.id}
             className="flex items-center gap-3.5 border-t border-gray-100 px-5 py-3.5"
           >
             {packable ? (
               <Checkbox
-                checked={packedIds.includes(row.id)}
-                onCheckedChange={() => onTogglePacked(row.id)}
-                aria-label={`${packedLabel}: ${row.name}`}
+                checked={packedIds.includes(item.id)}
+                onCheckedChange={() => onTogglePacked(item.id)}
+                aria-label={`แพ็คแล้ว: ${item.productName}`}
               />
             ) : null}
 
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-gray-100">
-              <ImageIcon aria-hidden="true" className="size-5 text-slate-500" />
+            <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100">
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt="" className="size-full object-cover" />
+              ) : (
+                <ImageIcon aria-hidden="true" className="size-5 text-slate-500" />
+              )}
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <p className="truncate text-xs font-medium text-zinc-950">
-                {row.name}
+              <p className="truncate text-xs font-medium text-zinc-950">{item.productName}</p>
+              <p className="truncate text-xs text-gray-400">
+                {[item.gameName, itemMeta(item)].filter(Boolean).join(" · ")}
               </p>
-              <p className="truncate text-xs text-gray-400">{row.meta}</p>
             </div>
 
-            <p className="shrink-0 text-xs text-gray-700">{row.quantityLabel}</p>
+            <p className="shrink-0 text-xs text-gray-700">×{item.quantity}</p>
 
             <p className="w-24 shrink-0 text-right text-xs font-semibold text-zinc-950">
-              {row.unitPrice}
+              {formatBaht(item.unitPrice)}
             </p>
           </li>
         ))}
