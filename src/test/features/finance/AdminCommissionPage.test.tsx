@@ -9,7 +9,7 @@ import { useCategoryList, useGameList } from "@/features/catalog/catalog.queries
 
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   commissionRules: vi.fn(), commissionRule: vi.fn(), createCommissionRule: vi.fn(),
-  updateCommissionRule: vi.fn(), deactivateCommissionRule: vi.fn(),
+  updateCommissionRule: vi.fn(), deactivateCommissionRule: vi.fn(), deleteCommissionRule: vi.fn(),
   defaultCommissionRate: vi.fn(), updateDefaultCommissionRate: vi.fn(),
 } }));
 vi.mock("@/features/catalog/catalog.queries", () => ({ useGameList: vi.fn(), useCategoryList: vi.fn() }));
@@ -143,6 +143,31 @@ describe("admin commission settings", () => {
     await user.click(await within(dialog).findByRole("button", { name: "ปิดใช้งานกฎ #2" }));
     await user.click(within(dialog).getByRole("button", { name: "ยืนยัน" }));
     await waitFor(() => expect(afterSalesApi.deactivateCommissionRule).toHaveBeenCalledWith(2));
+  }, POPUP_TIMEOUT);
+
+  it("deletes rules from the list and from the edit form after confirming", async () => {
+    const user = userEvent.setup();
+    const sellerRule = { ...globalRule, id: 9, scope: "SELLER" as const, sellerProfileId: 12, ratePercent: 3 };
+    renderPage([globalRule, categoryRule, sellerRule], [{ id: 7, name: "กล่อง/ซองสุ่ม", gameId: null }]);
+    vi.mocked(afterSalesApi.deleteCommissionRule).mockResolvedValue(undefined);
+    expect(await screen.findByText("กล่อง/ซองสุ่ม")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /จัดการกฎทั้งหมด/ }));
+    const dialog = await screen.findByRole("dialog");
+
+    await user.click(within(dialog).getByRole("button", { name: "ลบกฎ #9" }));
+    expect(within(dialog).getByText("ลบกฎนี้ถาวร? กู้คืนไม่ได้")).toBeTruthy();
+    await user.click(within(dialog).getByRole("button", { name: "ยกเลิก" }));
+    expect(afterSalesApi.deleteCommissionRule).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole("button", { name: "ลบกฎ #9" }));
+    await user.click(within(dialog).getByRole("button", { name: "ยืนยัน" }));
+    await waitFor(() => expect(afterSalesApi.deleteCommissionRule).toHaveBeenCalledWith(9));
+    expect(afterSalesApi.deactivateCommissionRule).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: "แก้ไขกฎ #1" }));
+    await user.click(within(dialog).getByRole("button", { name: "ลบกฎ" }));
+    await user.click(within(dialog).getByRole("button", { name: "ยืนยัน" }));
+    await waitFor(() => expect(afterSalesApi.deleteCommissionRule).toHaveBeenCalledWith(1));
+    expect(await within(dialog).findByText("กฎค่าคอมมิชชั่น")).toBeTruthy();
   }, POPUP_TIMEOUT);
 
   it("shows a missing seller from the API and clears it once the form changes", async () => {

@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
-import { ArrowLeft, Pencil, Plus, Power, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Power, Trash2, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ type CommissionRuleDialogProps = {
   rules: CommissionRule[];
   games: GameDto[];
   categories: CategoryDto[];
-  /** โหลดกฎใหม่หลังสร้าง/แก้/ปิด — ไม่ล้างค่าที่แอดมินพิมพ์ค้างไว้บนหน้า */
+  /** โหลดกฎใหม่หลังสร้าง/แก้/ปิด/ลบ — ไม่ล้างค่าที่แอดมินพิมพ์ค้างไว้บนหน้า */
   onChanged: () => Promise<unknown>;
 };
 
@@ -98,7 +98,7 @@ export function CommissionRuleDialog({
     setView("form");
   }
 
-  async function run(action: () => Promise<unknown>, success: string) {
+  async function run(action: () => Promise<unknown>, success: string, failure = "บันทึกไม่สำเร็จ") {
     setBusy(true);
     try {
       await action();
@@ -107,7 +107,7 @@ export function CommissionRuleDialog({
       return true;
     } catch (error) {
       if (hasErrorCode(error, "SELLER_NOT_FOUND")) setServerErrors({ target: "ไม่พบร้านค้ารหัสนี้" });
-      toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: ruleErrorMessage(error) });
+      toast.add({ type: "error", title: failure, description: ruleErrorMessage(error) });
       return false;
     } finally {
       setBusy(false);
@@ -131,17 +131,23 @@ export function CommissionRuleDialog({
     ? run(() => { const { id, ...input } = rule; return afterSalesApi.updateCommissionRule(id, { ...input, active: true }); },
       `เปิดใช้งานกฎ #${rule.id} แล้ว`)
     : run(() => afterSalesApi.deactivateCommissionRule(rule.id), `ปิดใช้งานกฎ #${rule.id} แล้ว`);
+  // ลบถาวร — คำสั่งซื้อเดิมเก็บอัตราและยอดค่าคอมที่คิดไว้ตอนสั่งซื้อ จึงไม่กระทบย้อนหลัง
+  const remove = (rule: CommissionRule) =>
+    run(() => afterSalesApi.deleteCommissionRule(rule.id), `ลบกฎ #${rule.id} แล้ว`, "ลบไม่สำเร็จ");
+  async function removeEditing() {
+    if (editing && await remove(editing)) setView("list");
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[min(90vh,820px)] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-[820px]">
         {view === "list"
           ? <RuleList rules={rules} busy={busy} targetName={targetName} onAdd={() => openForm(null)}
-            onEdit={openForm} onSetActive={setActive} />
+            onEdit={openForm} onSetActive={setActive} onDelete={remove} />
           : <RuleForm draft={draft} setDraft={changeDraft} editing={editing} rules={rules} busy={busy}
             errors={{ ...(submitted ? validateDraft(draft) : {}), ...serverErrors }}
             games={games} categories={categories} categoryLabel={categoryLabel} targetName={targetName}
-            onBack={() => setView("list")} onSubmit={submit} />}
+            onBack={() => setView("list")} onSubmit={submit} onDelete={removeEditing} />}
       </DialogContent>
     </Dialog>
   );
@@ -156,12 +162,15 @@ type RuleListProps = {
   onAdd: () => void;
   onEdit: (rule: CommissionRule) => void;
   onSetActive: (rule: CommissionRule, active: boolean) => Promise<boolean>;
+  onDelete: (rule: CommissionRule) => Promise<boolean>;
 };
 
-function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive }: RuleListProps) {
+type PendingAction = { id: number; action: "deactivate" | "delete" };
+
+function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelete }: RuleListProps) {
   const [scope, setScope] = useState<RuleScope | "ALL">("ALL");
   const [showInactive, setShowInactive] = useState(false);
-  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [pending, setPending] = useState<PendingAction | null>(null);
   const now = new Date();
   const visible = rules
     .filter((rule) => scope === "ALL" || rule.scope === scope)
@@ -224,21 +233,23 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive }: RuleL
               </p>
             </div>
 
-            {confirmId === rule.id
-              ? <div className="flex items-center gap-2 rounded-lg bg-[#fdf0dd] px-3 py-1.5">
-                <span className="text-xs text-[#b45309]">ปิดใช้งานกฎนี้?</span>
-                <Button size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={() => setConfirmId(null)}>ยกเลิก</Button>
-                <Button size="xs" variant="destructive" className="rounded-md" disabled={busy}
-                  onClick={async () => { if (await onSetActive(rule, false)) setConfirmId(null); }}>ยืนยัน</Button>
-              </div>
+            {pending?.id === rule.id
+              ? <ConfirmBar busy={busy} onCancel={() => setPending(null)}
+                message={pending.action === "delete" ? "ลบกฎนี้ถาวร? กู้คืนไม่ได้" : "ปิดใช้งานกฎนี้?"}
+                onConfirm={async () => {
+                  const done = pending.action === "delete" ? await onDelete(rule) : await onSetActive(rule, false);
+                  if (done) setPending(null);
+                }} />
               : <div className="flex items-center gap-1.5">
                 <Button size="sm" variant="outline" className="rounded-md px-2.5" disabled={busy}
                   aria-label={`แก้ไขกฎ #${rule.id}`} onClick={() => onEdit(rule)}><Pencil />แก้ไข</Button>
                 {rule.active
                   ? <Button size="sm" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
-                    aria-label={`ปิดใช้งานกฎ #${rule.id}`} onClick={() => setConfirmId(rule.id)}><Power />ปิด</Button>
+                    aria-label={`ปิดใช้งานกฎ #${rule.id}`} onClick={() => setPending({ id: rule.id, action: "deactivate" })}><Power />ปิด</Button>
                   : <Button size="sm" variant="ghost" className="rounded-md px-2.5" disabled={busy}
                     aria-label={`เปิดใช้งานกฎ #${rule.id}`} onClick={() => void onSetActive(rule, true)}><Power />เปิด</Button>}
+                <Button size="icon-sm" variant="ghost" className="rounded-md text-destructive" disabled={busy}
+                  aria-label={`ลบกฎ #${rule.id}`} title="ลบกฎ" onClick={() => setPending({ id: rule.id, action: "delete" })}><Trash2 /></Button>
               </div>}
           </li>
         );
@@ -262,12 +273,14 @@ type RuleFormProps = {
   targetName: (rule: CommissionRule) => string;
   onBack: () => void;
   onSubmit: (event: FormEvent) => void;
+  onDelete: () => Promise<void>;
 };
 
 function RuleForm({
-  draft, setDraft, editing, rules, busy, errors, games, categories, categoryLabel, targetName, onBack, onSubmit,
+  draft, setDraft, editing, rules, busy, errors, games, categories, categoryLabel, targetName, onBack, onSubmit, onDelete,
 }: RuleFormProps) {
   const id = useId();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [samplePrice, setSamplePrice] = useState("1290");
   const update = <K extends keyof RuleDraft>(key: K, value: RuleDraft[K]) => setDraft((old) => ({ ...old, [key]: value }));
   const typed = (key: keyof RuleDraft, pattern: RegExp) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -446,7 +459,14 @@ function RuleForm({
         </aside>
       </div>
 
-      <div className="flex items-center justify-end gap-2 border-t border-[#eef1f2] px-6 py-4">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#eef1f2] px-6 py-4">
+        {editing && <div className="mr-auto">
+          {confirmDelete
+            ? <ConfirmBar busy={busy} message={`ลบกฎ #${editing.id} ถาวร? กู้คืนไม่ได้`}
+              onCancel={() => setConfirmDelete(false)} onConfirm={onDelete} />
+            : <Button type="button" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
+              onClick={() => setConfirmDelete(true)}><Trash2 />ลบกฎ</Button>}
+        </div>}
         <Button type="button" variant="outline" className="rounded-md px-2.5" disabled={busy} onClick={onBack}>ยกเลิก</Button>
         <Button type="submit" className="rounded-md px-2.5" disabled={busy}>
           {busy ? "กำลังบันทึก..." : editing ? "บันทึกการแก้ไข" : "สร้างกฎ"}
@@ -454,6 +474,17 @@ function RuleForm({
       </div>
     </form>
   );
+}
+
+function ConfirmBar({ message, busy, onCancel, onConfirm }: {
+  message: string; busy: boolean; onCancel: () => void; onConfirm: () => Promise<unknown>;
+}) {
+  return <div className="flex items-center gap-2 rounded-lg bg-[#fdf0dd] px-3 py-1.5">
+    <span className="text-xs text-[#b45309]">{message}</span>
+    <Button type="button" size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={onCancel}>ยกเลิก</Button>
+    <Button type="button" size="xs" variant="destructive" className="rounded-md" disabled={busy}
+      onClick={() => void onConfirm()}>ยืนยัน</Button>
+  </div>;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
