@@ -10,17 +10,18 @@ const remove = vi.mocked(api.delete);
 beforeEach(() => { vi.clearAllMocks(); get.mockResolvedValue({} as never); post.mockResolvedValue({} as never); put.mockResolvedValue({} as never); remove.mockResolvedValue({} as never); });
 
 describe("TCG-394 remaining API contracts", () => {
-  it("connects all five commission rule operations", async () => {
+  it("connects all six commission rule operations", async () => {
     const rule = { scope: "GLOBAL" as const, gameId: null, categoryId: null, sellerProfileId: null,
       ratePercent: 5, fixedFee: 0, minFee: null, maxFee: null, priority: 0,
       effectiveFrom: "2026-10-13T00:00:00Z", effectiveTo: null, active: true };
     await afterSalesApi.commissionRules(); await afterSalesApi.commissionRule(9);
     await afterSalesApi.createCommissionRule(rule); await afterSalesApi.updateCommissionRule(9, rule);
-    await afterSalesApi.deactivateCommissionRule(9);
+    await afterSalesApi.deactivateCommissionRule(9); await afterSalesApi.deleteCommissionRule(9);
     expect(get).toHaveBeenNthCalledWith(1, "/admin/commission-rules");
     expect(get).toHaveBeenNthCalledWith(2, "/admin/commission-rules/9");
     expect(post).toHaveBeenCalledWith("/admin/commission-rules", rule);
     expect(put).toHaveBeenCalledWith("/admin/commission-rules/9", rule);
+    expect(post).toHaveBeenCalledWith("/admin/commission-rules/9/deactivate");
     expect(remove).toHaveBeenCalledWith("/admin/commission-rules/9");
   });
 
