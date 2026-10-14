@@ -3,9 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   ChevronUp,
+  CircleCheck,
+  Clock,
   Download,
   Loader2,
   Package,
+  RotateCcw,
+  Truck,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -44,12 +48,21 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
-import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
+import { OrderRefunds } from "@/features/finance/BuyerRefunds";
+import { useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
+import {
+  canBuyerCancel,
+  confirmableSellerOrders,
+  firstTracking,
+  formatOrderDateTime,
+  nextAutoCompleteAt,
+  orderStage,
+} from "../order-stage";
 
 import {
   formatOrderStatus,
@@ -63,6 +76,7 @@ export function OrderHistoryPage() {
   const { user } = useAuth();
 
   const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
+  const refunds = useBuyerRefunds();
 
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
@@ -71,6 +85,7 @@ export function OrderHistoryPage() {
     useState<OrderDetails | null>(null);
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<OrderDetails | null>(null);
 
   const sidebarUser = toSidebarUser(user);
 
@@ -145,7 +160,12 @@ export function OrderHistoryPage() {
         <AccountSidebar user={sidebarUser} />
 
         <div className="flex min-w-0 flex-col gap-4">
-          <BuyerRefunds />
+          {refunds.isError && (
+            <p role="alert" className="rounded-xl border bg-white p-3 text-sm text-destructive">
+              โหลดข้อมูลการคืนเงินไม่สำเร็จ{" "}
+              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>ลองใหม่</Button>
+            </p>
+          )}
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">Order History</h1>
             <p className="text-sm text-muted-foreground">
@@ -190,7 +210,9 @@ export function OrderHistoryPage() {
                 onViewDetails={() => setSelectedOrderForDetails(order)}
                 onPayNow={() => navigate(`/payment?orderId=${order.id}`)}
                 onCancelOrder={() => handleOpenCancelModal(order)}
+                onConfirmReceived={() => setConfirmTarget(order)}
                 isCancelling={cancellingOrderId === order.id}
+                isConfirming={confirmingOrderId === order.id}
               />
             ))
           )}
@@ -217,10 +239,33 @@ export function OrderHistoryPage() {
           order={selectedOrderForDetails}
           open={!!selectedOrderForDetails}
           onClose={() => setSelectedOrderForDetails(null)}
-          onConfirmReceived={() => void handleConfirmReceived(selectedOrderForDetails.id)}
+          onConfirmReceived={() => setConfirmTarget(selectedOrderForDetails)}
           isConfirming={confirmingOrderId === selectedOrderForDetails.id}
         />
       )}
+
+      <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="border-t pt-4">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button
+              onClick={() => {
+                const target = confirmTarget;
+                setConfirmTarget(null);
+                if (target) void handleConfirmReceived(target.id);
+              }}
+            >
+              Confirm receipt
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -230,20 +275,25 @@ function OrderCardItem({
   onViewDetails,
   onPayNow,
   onCancelOrder,
+  onConfirmReceived,
   isCancelling,
+  isConfirming,
 }: {
   order: OrderDetails;
   onViewDetails: () => void;
   onPayNow: () => void;
   onCancelOrder: () => void;
+  onConfirmReceived: () => void;
   isCancelling: boolean;
+  isConfirming: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const status = order.status;
-  const isPending = status === "PENDING_PAYMENT";
-  const isShipped = status === "SHIPPED";
-  const isCompleted = status === "COMPLETED" || status === "DELIVERED";
+  const { stage, label, badgeClassName } = orderStage(order);
+  const canCancel = canBuyerCancel(order);
+  const autoCompleteAt = nextAutoCompleteAt(order);
+  const tracking = firstTracking(order);
+  const cancelReason = (order.sellerOrders ?? []).find((so) => so.cancelReason)?.cancelReason;
 
   const allItems: OrderItemDetails[] = (order.sellerOrders ?? []).flatMap(
     (so) => so.items ?? [],
@@ -259,14 +309,14 @@ function OrderCardItem({
       })
     : "Recent";
 
-  const statusBadge = getOrderStatusBadge(order.status);
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   return (
     <Card
+      data-stage={stage}
       className={cn(
         "gap-0 overflow-hidden rounded-xl border py-0 shadow-none bg-white",
-        isPending && "border-[#ff95004d]",
+        stage === "AWAITING_PAYMENT" && "border-[#ff95004d]",
       )}
     >
       <CardHeader className="rounded-none border-b bg-[#faf9fe] px-4 py-3">
@@ -282,13 +332,13 @@ function OrderCardItem({
         </div>
         <CardAction>
           <Badge
-            variant={statusBadge.variant}
+            variant="secondary"
             className={cn(
               "before:size-1.5 before:rounded-full before:bg-current before:content-[''] font-medium text-xs",
-              statusBadge.className,
+              badgeClassName,
             )}
           >
-            {statusBadge.label}
+            {label}
           </Badge>
         </CardAction>
       </CardHeader>
@@ -337,23 +387,14 @@ function OrderCardItem({
             </button>
           )}
 
-          {isShipped && (
-            <div className="mt-3 flex items-center gap-2">
-              <Progress
-                value={60}
-                className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1"
-              />
-              <span className="text-[10px] font-medium text-muted-foreground">
-                In Transit
-              </span>
-            </div>
-          )}
-
-          {isPending && (
-            <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-[#ff9500]">
-              <TriangleAlert className="size-3.5" /> Payment due in 24 hours
-            </p>
-          )}
+          <StageHint
+            stage={stage}
+            canCancel={canCancel}
+            cancellableUntil={order.cancellableUntil ?? null}
+            autoCompleteAt={autoCompleteAt}
+            tracking={tracking}
+            cancelReason={cancelReason ?? null}
+          />
         </div>
 
         <div className="sm:text-right">
@@ -394,14 +435,16 @@ function OrderCardItem({
         </div>
       )}
 
+      <OrderRefunds salesOrderId={order.id} />
+
       <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
-          {isCompleted && (
+          {stage === "COMPLETED" && (
             <Button variant="link" size="sm" className="px-0">
               Download Invoice <Download data-icon="inline-end" />
             </Button>
           )}
-          {isPending && (
+          {canCancel && (
             <Button
               variant="destructive"
               size="xs"
@@ -417,15 +460,106 @@ function OrderCardItem({
           <Button variant="outline" size="sm" onClick={onViewDetails}>
             View Details
           </Button>
-          {isPending && (
+          {stage === "AWAITING_PAYMENT" && (
             <Button size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white">
               Pay Now
+            </Button>
+          )}
+          {stage === "IN_TRANSIT" && (
+            <Button size="sm" onClick={onConfirmReceived} disabled={isConfirming}>
+              {isConfirming ? "Confirming..." : "Confirm Received"}
+            </Button>
+          )}
+          {stage === "COMPLETED" && (
+            <Button size="sm" onClick={onViewDetails}>
+              Write a Review
             </Button>
           )}
         </div>
       </CardFooter>
     </Card>
   );
+}
+
+/** One-line status note under the item, telling the buyer what happens next. */
+function StageHint({
+  stage,
+  canCancel,
+  cancellableUntil,
+  autoCompleteAt,
+  tracking,
+  cancelReason,
+}: {
+  stage: ReturnType<typeof orderStage>["stage"];
+  canCancel: boolean;
+  cancellableUntil: string | null;
+  autoCompleteAt: string | null;
+  tracking: { carrier: string; trackingNumber: string } | null;
+  cancelReason: string | null;
+}) {
+  const base = "mt-2 flex items-center gap-1 text-xs font-semibold";
+  switch (stage) {
+    case "AWAITING_PAYMENT":
+      return (
+        <p className={cn(base, "text-[#ff9500]")}>
+          <TriangleAlert className="size-3.5" /> Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically
+        </p>
+      );
+    case "PAYMENT_REVIEW":
+      return (
+        <p className={cn(base, "text-amber-700")}>
+          <Clock className="size-3.5" /> Slip received — we are verifying your payment
+        </p>
+      );
+    case "PREPARING":
+      return (
+        <p className={cn(base, "text-muted-foreground")}>
+          <Package className="size-3.5" /> Seller is preparing your order
+          {canCancel && cancellableUntil && ` • Cancel before ${formatOrderDateTime(cancellableUntil)}`}
+        </p>
+      );
+    case "IN_TRANSIT":
+      return (
+        <div className="mt-3 flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Progress
+              value={66}
+              className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1"
+            />
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : "In Transit"}
+            </span>
+          </div>
+          {autoCompleteAt && (
+            <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <Truck className="size-3" /> Auto-confirms on {formatOrderDateTime(autoCompleteAt)} unless you request a return
+            </p>
+          )}
+        </div>
+      );
+    case "RETURN_IN_PROGRESS":
+      return (
+        <p className={cn(base, "text-orange-700")}>
+          <RotateCcw className="size-3.5" /> Return in progress — payment to the seller is on hold until it is settled
+        </p>
+      );
+    case "COMPLETED":
+      return (
+        <p className={cn(base, "text-emerald-700")}>
+          <CircleCheck className="size-3.5" /> Delivered — cards added to your collection
+        </p>
+      );
+    case "CANCELLED":
+      return cancelReason ? (
+        <p className={cn(base, "text-muted-foreground")}>Cancelled: {cancelReason}</p>
+      ) : null;
+    case "REFUNDED":
+      return (
+        <p className={cn(base, "text-violet-700")}>
+          <RotateCcw className="size-3.5" /> Refund issued — track the transfer in the refund panel below
+        </p>
+      );
+  }
 }
 
 function OrderDetailsModal({
@@ -441,7 +575,6 @@ function OrderDetailsModal({
   onConfirmReceived?: () => void;
   isConfirming?: boolean;
 }) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   // Parse address snapshot if JSON
@@ -465,8 +598,8 @@ function OrderDetailsModal({
   }
 
   const sellerOrders = order.sellerOrders ?? [];
-  const canConfirmReceived = sellerOrders.some((so) => so.status === "SHIPPED" || so.status === "DELIVERED");
-  const statusBadge = getOrderStatusBadge(order.status);
+  const canConfirmReceived = confirmableSellerOrders(order).length > 0;
+  const { label: stageLabel, badgeClassName } = orderStage(order);
 
   return (
     <>
@@ -488,10 +621,10 @@ function OrderDetailsModal({
 
             <div className="flex items-center gap-3">
               <Badge
-                variant={statusBadge.variant}
-                className={cn("text-sm font-semibold shrink-0", statusBadge.className)}
+                variant="secondary"
+                className={cn("text-sm font-semibold shrink-0", badgeClassName)}
               >
-                {statusBadge.label}
+                {stageLabel}
               </Badge>
               <DialogClose
                 render={
@@ -531,9 +664,17 @@ function OrderDetailsModal({
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs bg-muted px-2 py-0.5 rounded font-medium">
+                      <Badge
+                        variant={getOrderStatusBadge(so.status).variant}
+                        className={cn("text-xs font-medium", getOrderStatusBadge(so.status).className)}
+                      >
                         Package Status: {formatOrderStatus(so.status)}
-                      </span>
+                      </Badge>
+                      {so.autoCompleteAt && ["SHIPPED", "DELIVERED"].includes(so.status) && (
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          Auto-confirms {formatOrderDateTime(so.autoCompleteAt)}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -569,6 +710,10 @@ function OrderDetailsModal({
                       </div>
                     ))}
                   </div>
+
+                  {so.cancelReason && (
+                    <p className="text-xs text-muted-foreground">Cancel reason: {so.cancelReason}</p>
+                  )}
 
                   {/* Shipments info if any */}
                   {so.shipments && so.shipments.length > 0 && (
@@ -624,7 +769,7 @@ function OrderDetailsModal({
 
             {canConfirmReceived && (
               <div className="flex justify-end pt-2 border-t">
-                <Button onClick={() => setConfirmOpen(true)} disabled={isConfirming}>
+                <Button onClick={onConfirmReceived} disabled={isConfirming}>
                   {isConfirming ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
                   {isConfirming ? "Confirming..." : "Confirm receipt"}
                 </Button>
@@ -634,27 +779,6 @@ function OrderDetailsModal({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Confirm that you received the shipped items in this order. This completes their seller orders and releases payment to the sellers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="border-t pt-4">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              onClick={() => {
-                setConfirmOpen(false);
-                onConfirmReceived?.();
-              }}
-            >
-              Confirm receipt
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
