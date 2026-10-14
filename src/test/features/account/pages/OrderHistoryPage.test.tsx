@@ -252,6 +252,24 @@ describe("OrderHistoryPage", () => {
     });
   });
 
+  it("asks for the refund bank account right after cancelling, without a reload", async () => {
+    vi.spyOn(ordersApi, "cancelOrder").mockResolvedValue({ ...mockOrders[0], status: "CANCELLED" });
+    vi.spyOn(financeApi, "myRefunds")
+      .mockResolvedValueOnce([])
+      .mockResolvedValue([{
+        id: 11, salesOrderId: 101, sellerOrderId: null, amount: 540, reason: "Buyer requested cancellation",
+        status: "APPROVED", method: "BANK_TRANSFER", bankName: null, accountName: null,
+        accountNumber: null, transferReference: null, requestedAt: "2026-10-10T12:10:00Z", processedAt: null,
+      }]);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    await userEvent.click(screen.getByRole("button", { name: /cancel order/i }));
+    await userEvent.click(screen.getByRole("button", { name: /confirm cancel/i }));
+
+    expect(await screen.findByRole("textbox", { name: "เลขบัญชีสำหรับคืนเงิน 11" })).toBeInTheDocument();
+  });
+
   it("opens View Details modal with sticky close button, formatted status, and no bottom close button", async () => {
     renderWithProviders(<OrderHistoryPage />);
 

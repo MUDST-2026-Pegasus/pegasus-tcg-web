@@ -49,7 +49,7 @@ import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
-import { useBuyerRefunds } from "@/features/finance/refunds.queries";
+import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
@@ -122,6 +122,8 @@ export function OrderHistoryPage() {
       setIsCancelModalOpen(false);
       setSelectedOrderToCancel(null);
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      // Cancelling a paid order opens a refund that needs the buyer's bank account.
+      queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     } catch (err) {
       toast.add({
         title: "Cancellation Failed",
