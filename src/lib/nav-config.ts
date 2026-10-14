@@ -12,6 +12,7 @@ import {
   Undo2,
   Settings2,
   ShoppingCart,
+  Store,
   Users,
   Wallet,
   type LucideIcon,
@@ -99,6 +100,7 @@ export const sellerNav: NavGroup[] = [
   {
     label: "ร้านค้า",
     items: [
+      { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
       { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
       { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: RotateCcw },

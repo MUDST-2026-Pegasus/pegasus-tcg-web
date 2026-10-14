@@ -8,7 +8,7 @@ export const editProfileSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .min(2, "Name must be at least 2 characters")
+    .min(1, "Name must not be blank")
     .max(100, "Name must be at most 100 characters"),
   phone: z
     .string()

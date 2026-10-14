@@ -1,3 +1,4 @@
+import { BuyerOrderReview } from './BuyerOrderReview';
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -14,15 +15,11 @@ const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "C
 export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const cache = useQueryClient();
   const returns = useQuery({ queryKey: ["finance", "buyer-returns", order.id], queryFn: () => afterSalesApi.buyerReturns(order.id) });
-  const myReview = useQuery({ queryKey: ["finance", "my-review", order.id], queryFn: () => afterSalesApi.myReview(order.id), enabled: order.status === "COMPLETED" });
   const evidence = useFileUpload({ purpose: "RETURN_EVIDENCE", multiple: true, maxFiles: 10 });
   const [reason, setReason] = useState(reasons[0]);
   const [description, setDescription] = useState("");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [tracking, setTracking] = useState<Record<number, string>>({});
-  const [rating, setRating] = useState(5);
-  const [title, setTitle] = useState("");
-  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const canReturn = ["SHIPPED", "DELIVERED"].includes(order.status) && !!order.autoCompleteAt
     && Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
@@ -38,14 +35,6 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
     if (!items.length) return;
     await act(() => afterSalesApi.requestReturn(order.id, { reasonCode: reason, description, evidenceKeys: evidence.objectKeys, items }), "ส่งคำขอคืนสินค้าแล้ว");
   }
-  async function review() {
-    if (!comment.trim()) return;
-    setBusy(true);
-    try { await afterSalesApi.createReview(order.id, rating, title.trim(), comment.trim()); await cache.invalidateQueries({ queryKey: ["finance", "my-review", order.id] }); toast.add({ type: "success", title: "ส่งรีวิวแล้ว" }); }
-    catch (error) { toast.add({ type: "error", title: "ส่งรีวิวไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") }); }
-    finally { setBusy(false); }
-  }
-
   return <section className="space-y-3 border-t pt-3 text-sm">
     <h4 className="font-semibold">คืนสินค้าและรีวิวร้าน</h4>
     {returns.isPending && <p>กำลังโหลดคำขอคืนสินค้า...</p>}
@@ -64,18 +53,6 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       {evidence.items.map((item) => <p key={item.id}>{item.file.name}: {item.status === "error" ? item.error : item.status === "done" ? "อัปโหลดแล้ว" : "กำลังอัปโหลด"}</p>)}
       <Button disabled={busy || evidence.isUploading || !Object.values(quantities).some((value) => value > 0)} onClick={() => void createReturn()}>ส่งคำขอคืนสินค้า</Button>
     </div>}
-    {order.status === "COMPLETED" && myReview.isPending && <p>กำลังโหลดรีวิว...</p>}
-    {order.status === "COMPLETED" && myReview.isError && <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void myReview.refetch()}>ลองอีกครั้ง</Button></p>}
-    {order.status === "COMPLETED" && myReview.data && <div className="space-y-1 rounded border p-3">
-      <p className="font-medium">รีวิวที่ส่งแล้ว · {myReview.data.rating} ดาว</p>
-      {myReview.data.title && <p>{myReview.data.title}</p>}
-      <p>{myReview.data.comment}</p>
-    </div>}
-    {order.status === "COMPLETED" && myReview.isSuccess && !myReview.data && <div className="space-y-2 rounded border p-3">
-      <p className="font-medium">รีวิวผู้ขาย</p><select aria-label="คะแนน" className="rounded border p-2" value={rating} onChange={(e) => setRating(Number(e.target.value))}>{[5, 4, 3, 2, 1].map((score) => <option key={score} value={score}>{score} ดาว</option>)}</select>
-      <Input aria-label="หัวข้อรีวิว" maxLength={150} placeholder="หัวข้อ (ไม่บังคับ)" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <Input aria-label="ข้อความรีวิว" placeholder="ความคิดเห็น" value={comment} onChange={(e) => setComment(e.target.value)} />
-      <Button disabled={busy || !comment.trim()} onClick={() => void review()}>ส่งรีวิว</Button>
-    </div>}
+    <BuyerOrderReview orderId={order.id} status={order.status}/>
   </section>;
 }

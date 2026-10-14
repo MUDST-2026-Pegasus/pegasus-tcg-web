@@ -1,3 +1,4 @@
+import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
 import type { RouteObject } from "react-router-dom";
 
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
@@ -29,6 +30,7 @@ export const sellerRoutes: RouteObject = {
   ),
   children: [
     { index: true, element: <SellerDashboardPage /> },
+    { path: "shop", element: <SellerShopPage /> },
     { path: "products", element: <SellerProductsPage /> },
     { path: "products/new", element: <SellerProductCreatePage /> },
     {

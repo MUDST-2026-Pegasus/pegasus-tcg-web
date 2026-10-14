@@ -1,3 +1,4 @@
+import { afterSalesApi } from '@/features/finance/after-sales.api';
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Routes, Route } from "react-router-dom";
 import { screen, waitFor, within } from "@testing-library/react";
@@ -10,6 +11,7 @@ import { ApiError } from "@/lib/api";
 
 vi.mock("@/features/home/home.api", () => ({ getPublicProfile: vi.fn(), getStorefront: vi.fn() }));
 vi.mock("@/features/collection/collection.api", () => ({ getPublicCollection: vi.fn() }));
+vi.mock('@/features/finance/after-sales.api', () => ({ afterSalesApi: { publicReviews: vi.fn() } }));
 const card = { variantId: 1, sku: "A", variantLabel: "Normal", productId: 1, productName: "Charizard", productSlug: "charizard", gameId: 1, officialImageUrl: null };
 const listing = { id: 1, card, condition: "NM" as const, price: 4200, currency: "THB", quantityAvailable: 3, primaryPhotoUrl: null, seller: { username: "cardvault", displayName: "CardVault BKK", avatarUrl: null } };
 const page = <T,>(items: T[], totalItems = items.length) => ({ items, page: 0, size: 6, totalItems, totalPages: Math.ceil(totalItems / 6) });
@@ -73,5 +75,25 @@ describe("PublicSellerPage", () => {
     expect(await screen.findByText("ไม่พบผู้ขายรายนี้")).toBeInTheDocument();
     expect(getPublicCollection).not.toHaveBeenCalled();
   });
-});
+  it('displays a shared contact phone in the profile header', async () => {
+    vi.mocked(getPublicProfile).mockResolvedValue({ username: 'cardvault', displayName: 'CardVault BKK', avatarUrl: null, phone: '081-234-5678' });
+    renderStore();
+    expect(await screen.findByRole('link', { name: '081-234-5678' })).toHaveAttribute('href', 'tel:0812345678');
+    expect(screen.getByText('Phone number :')).toBeInTheDocument();
+  });
+  it('does not render a private phone', async () => {
+    vi.mocked(getPublicProfile).mockResolvedValue({ username: 'cardvault', displayName: 'CardVault BKK', avatarUrl: null, phone: null });
+    renderStore();
+    await screen.findByRole('heading', { name: 'CardVault BKK' });
+    expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
+  });
+  it('shows real seller reviews in the reviews tab', async () => {
+    vi.mocked(afterSalesApi.publicReviews).mockResolvedValue({ summary: { ratingCount: 1, ratingAvg: 4, count1: 0, count2: 0, count3: 0, count4: 1, count5: 0 }, reviews: [{ id: 7, rating: 4, title: 'Great', comment: 'Arrived safely', reviewerUsername: 'buyer', replyComment: null, createdAt: '' }] });
+    const interaction = userEvent.setup();
+    renderStore();
+    await interaction.click(await screen.findByRole('tab', { name: 'รีวิวร้านค้า' }));
+    expect(await screen.findByText('Arrived safely')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'รีวิวจากคำสั่งซื้อของฉัน' })).toHaveAttribute('href', '/account/orders');
+    expect(afterSalesApi.publicReviews).toHaveBeenCalledWith('cardvault');
+  });});
 
