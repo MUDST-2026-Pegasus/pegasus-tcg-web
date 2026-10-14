@@ -3,6 +3,8 @@ import { Link, NavLink } from "react-router-dom";
 
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/features/cart/cart.queries";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -13,6 +15,9 @@ const NAV_LINKS = [
 ] as const;
 
 export function Navbar() {
+  const { data: cart } = useCart();
+  const cartQuantity = cart?.totalQuantity ?? 0;
+
   return (
     <header className="sticky top-0 z-40 h-20 border-b border-border bg-white px-10 py-3.5 backdrop-blur-[6px]">
       {/* คอลัมน์ซ้าย-ขวากว้างเท่ากัน เมนูจึงอยู่กึ่งกลางหน้าเสมอ แม้โลโก้กับกลุ่มไอคอนกว้างไม่เท่ากัน */}
@@ -87,12 +92,20 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Cart"
-            className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
+            aria-label={cart ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น` : "ตะกร้าสินค้า"}
+            className="relative flex cursor-pointer items-center justify-center overflow-visible text-sky-700 hover:text-sky-700"
             nativeButton={false}
             render={<Link to="/cart" />}
           >
             <ShoppingCartIcon className="size-5" />
+            {cartQuantity > 0 && (
+              <Badge
+                aria-hidden="true"
+                className="absolute -right-1.5 -top-1.5 h-5 min-w-5 rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white"
+              >
+                {cartQuantity > 99 ? "99+" : cartQuantity}
+              </Badge>
+            )}
           </Button>
           <AccountMenu />
         </div>
