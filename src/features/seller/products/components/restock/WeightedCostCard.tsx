@@ -29,7 +29,8 @@ export function WeightedCostCard({
     {
       id: "previous",
       label: previousLotLabel,
-      detail: `${product.stock} ${unit} × ${formatBaht(product.averageCost)}`,
+      // ต้นทุนเฉลี่ยครอบคลุมการ์ดทุกใบของการ์ดนี้สภาพนี้ ไม่ใช่แค่บนประกาศนี้
+      detail: `${product.costQuantity} ${unit} × ${formatBaht(product.averageCost)}`,
       value: formatBaht(result.previousValue),
     },
     {
@@ -41,7 +42,7 @@ export function WeightedCostCard({
     {
       id: "total",
       label: totalLabel,
-      detail: `${result.newStock} ${unit}`,
+      detail: `${result.newCostQuantity} ${unit}`,
       value: formatBaht(result.combinedValue),
     },
   ];
@@ -80,7 +81,7 @@ export function WeightedCostCard({
         <div className="flex flex-col gap-1">
           <p className="text-xs font-medium text-white">{newAverageLabel}</p>
           <p className="text-xs text-gray-400">
-            {formatBaht(result.combinedValue)} ÷ {result.newStock} {unit}
+            {formatBaht(result.combinedValue)} ÷ {result.newCostQuantity} {unit}
           </p>
         </div>
 
