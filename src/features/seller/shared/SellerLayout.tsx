@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 
+import { PageTransition } from "@/components/common/PageTransition";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 import {
@@ -40,7 +41,9 @@ export function SellerLayout() {
 
           <div className={isShop ? "min-w-0 flex-1 bg-[#f6f8f9] px-4 pt-7 pb-10 md:px-8" : "flex-1 bg-muted px-8 pt-7 pb-10"}>
             {!isShop && <SellerStatusBanner profile={profile} />}
-            <Outlet />
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
           </div>
         </SidebarInset>
       </SidebarProvider>

@@ -1,23 +1,31 @@
-import { SellerShopPage } from "@/features/seller/shop/SellerShopPage";
 import type { RouteObject } from "react-router-dom";
 
+import { lazyPage } from "@/app/lazy-page";
+import { DashboardPageSkeleton, FormBodySkeleton } from "@/components/common/PageSkeletons";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
-import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
-import { SellerLogoutPage } from "@/features/seller/logout/SellerLogoutPage";
-import { SellerOrderDetailPage } from "@/features/seller/orders/SellerOrderDetailPage";
-import { SellerOrdersPage } from "@/features/seller/orders/SellerOrdersPage";
-import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
-import { SellerProductCreatePage } from "@/features/seller/products/SellerProductCreatePage";
-import { SellerProductEditPage } from "@/features/seller/products/SellerProductEditPage";
-import { SellerProductRestockPage } from "@/features/seller/products/SellerProductRestockPage";
-import { SellerProductsPage } from "@/features/seller/products/SellerProductsPage";
+import { DashboardSkeleton } from "@/features/seller/dashboard/components/DashboardSkeleton";
+import { OrderDetailSkeleton } from "@/features/seller/orders/components/detail/OrderDetailSkeleton";
 import { SellerLayout } from "@/features/seller/shared/SellerLayout";
-import { SellerReturnsPage } from "@/features/finance/SellerReturnsPage";
-import { SellerReviewsPage } from "@/features/finance/SellerReviewsPage";
+
+const pageSkeleton = <DashboardPageSkeleton />;
+const formSkeleton = <FormBodySkeleton />;
+
+const SellerDashboardPage = lazyPage(() => import("@/features/seller/dashboard/SellerDashboardPage").then((m) => m.SellerDashboardPage), <DashboardSkeleton />);
+const SellerShopPage = lazyPage(() => import("@/features/seller/shop/SellerShopPage").then((m) => m.SellerShopPage), pageSkeleton);
+const SellerProductsPage = lazyPage(() => import("@/features/seller/products/SellerProductsPage").then((m) => m.SellerProductsPage), pageSkeleton);
+const SellerProductCreatePage = lazyPage(() => import("@/features/seller/products/SellerProductCreatePage").then((m) => m.SellerProductCreatePage), formSkeleton);
+const SellerProductRestockPage = lazyPage(() => import("@/features/seller/products/SellerProductRestockPage").then((m) => m.SellerProductRestockPage), formSkeleton);
+const SellerProductEditPage = lazyPage(() => import("@/features/seller/products/SellerProductEditPage").then((m) => m.SellerProductEditPage), formSkeleton);
+const SellerOrdersPage = lazyPage(() => import("@/features/seller/orders/SellerOrdersPage").then((m) => m.SellerOrdersPage), pageSkeleton);
+const SellerOrderDetailPage = lazyPage(() => import("@/features/seller/orders/SellerOrderDetailPage").then((m) => m.SellerOrderDetailPage), <OrderDetailSkeleton />);
+const SellerPayoutPage = lazyPage(() => import("@/features/seller/payout/SellerPayoutPage").then((m) => m.SellerPayoutPage), pageSkeleton);
+const SellerReturnsPage = lazyPage(() => import("@/features/finance/SellerReturnsPage").then((m) => m.SellerReturnsPage), pageSkeleton);
+const SellerReviewsPage = lazyPage(() => import("@/features/finance/SellerReviewsPage").then((m) => m.SellerReviewsPage), pageSkeleton);
+const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ขาย — ใช้ SellerLayout ของตัวเอง (sidebar แยกจาก admin)
- * แต่ละหน้าเป็นโมดูลของตัวเองใน features/seller/<หน้า>/
+ * แต่ละหน้าเป็นโมดูลของตัวเองใน features/seller/<หน้า>/ และแยก chunk ด้วย lazyPage
  *
  * เจ้าของไฟล์นี้: คนที่ทำ feature seller — แก้ได้เลยโดยไม่ชนกับคนอื่น
  */

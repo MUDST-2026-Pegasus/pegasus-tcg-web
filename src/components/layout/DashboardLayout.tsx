@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 
+import { PageTransition } from "@/components/common/PageTransition";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
@@ -32,7 +33,9 @@ export function DashboardLayout({ role, groups }: DashboardLayoutProps) {
           </header>
 
           <div className="flex-1 bg-muted px-8 pt-7 pb-10">
-            <Outlet />
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
           </div>
         </SidebarInset>
       </SidebarProvider>
