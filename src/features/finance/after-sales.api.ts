@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { CommissionRule, CommissionRuleInput, PlatformSetting, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, Review } from "./after-sales.types";
+import type { CommissionRule, CommissionRuleInput, PlatformSetting, PublicReviews, ReturnEvidenceLink, ReturnInput, ReturnRequest, SellerReturnRequest, Review } from "./after-sales.types";
 
 export const afterSalesApi = {
   commissionRules: () => api.get<CommissionRule[]>("/admin/commission-rules"),
@@ -15,7 +15,7 @@ export const afterSalesApi = {
   requestReturn: (sellerOrderId: number, input: ReturnInput) => api.post<ReturnRequest>(`/orders/${sellerOrderId}/returns`, input),
   shipReturn: (sellerOrderId: number, returnId: number, trackingNumber: string) =>
     api.post<ReturnRequest>(`/orders/${sellerOrderId}/returns/${returnId}/ship`, { trackingNumber }),
-  sellerReturns: (status?: string) => api.get<ReturnRequest[]>("/sellers/me/returns", status ? { query: { status } } : undefined),
+  sellerReturns: (status?: string) => api.get<SellerReturnRequest[]>("/sellers/me/returns", status ? { query: { status } } : undefined),
   sellerReturnEvidence: (id: number) => api.get<ReturnEvidenceLink[]>(`/sellers/me/returns/${id}/evidence`),
   approveReturn: (id: number, resolution: "FULL_REFUND" | "PARTIAL_REFUND", refundAmount: number, requireShipBack: boolean) =>
     api.post<ReturnRequest>(`/sellers/me/returns/${id}/approve`, { resolution, refundAmount, requireShipBack }),
