@@ -141,6 +141,16 @@ describe("OrderHistoryPage", () => {
     expect(screen.getByText("Preparing")).toBeInTheDocument();
   });
 
+  it("opens the linked order details and closes without reopening the query link", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(ordersApi, "getOrder").mockResolvedValue(mockOrders[0]);
+    renderWithProviders(<OrderHistoryPage />, { route: "/account/orders?orderId=101" });
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(ordersApi.getOrder).toHaveBeenCalledWith(101);
+    await user.click(screen.getByRole("button", { name: /close/i }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
   it("shows Confirm Received on an in-transit order and confirms it from the card", async () => {
     const shipped: OrderDetails = {
       ...mockOrders[0],

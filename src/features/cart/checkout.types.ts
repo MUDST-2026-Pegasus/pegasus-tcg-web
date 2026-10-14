@@ -46,3 +46,26 @@ export interface CheckoutRequest {
   buyerNote?: string | null;
   cartItemIds?: number[] | null;
 }
+
+export interface ShippingQuoteOption {
+  id: number;
+  name: string;
+  carrierCode: string | null;
+  baseFee: number;
+  perItemFee: number;
+  freeThreshold: number | null;
+  estDaysMin: number | null;
+  estDaysMax: number | null;
+  fee: number;
+  free: boolean;
+  amountToFree: number | null;
+}
+
+export interface ShippingQuote {
+  sellerProfileId: number;
+  sellerName: string;
+  itemCount: number;
+  itemsSubtotal: number;
+  defaultOptionId: number | null;
+  options: ShippingQuoteOption[];
+}
