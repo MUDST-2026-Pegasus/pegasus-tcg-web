@@ -7,6 +7,7 @@ export type PublicProfileDto = {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  phone?: string | null;
 };
 
 // ---------- สิ่งที่ UI หน้าแรกใช้วาด ----------

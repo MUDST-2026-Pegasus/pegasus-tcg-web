@@ -1,3 +1,4 @@
+import { PublicSellerReviews } from '@/features/finance/PublicSellerReviews';
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useLayoutEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -42,7 +43,7 @@ function Storefront({ username }: { username: string }) {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [username]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") === "collection" ? "collection" : "products";
+  const activeTab = ["collection", "reviews"].includes(searchParams.get("tab") ?? "") ? searchParams.get("tab")! : "products";
   const [listingPage, setListingPage] = useState(0);
   const [collectionPage, setCollectionPage] = useState(0);
   const profile = useQuery({
@@ -83,16 +84,18 @@ function Storefront({ username }: { username: string }) {
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1"><h1 className="break-words text-2xl font-bold leading-8">{displayName}</h1><p className="mt-2 break-all text-base text-muted-foreground">@{username}</p></div>
+          {profile.data.phone && <p className="col-span-2 break-words text-sm text-muted-foreground sm:mx-4">Phone number : <a className="font-medium text-foreground hover:underline" href={`tel:${profile.data.phone.replace(/[^+\d]/g, "")}`}>{profile.data.phone}</a></p>}
           <p className="col-span-2 text-xl font-semibold leading-7 text-primary sm:ml-auto">{forSale ?? "—"} for sale · {collected ?? "—"} collected</p>
         </section>
         <Tabs value={activeTab} onValueChange={(value) => {
           const next = new URLSearchParams(searchParams);
-          if (value === "collection") next.set("tab", "collection"); else next.delete("tab");
+          if (value === "products") next.delete("tab"); else next.set("tab", value);
           setSearchParams(next, { preventScrollReset: true });
         }} className="gap-8">
           <TabsList aria-label="Store inventory" className="h-auto! max-w-full flex-wrap justify-start gap-3 rounded-none bg-transparent p-0">
             <TabsTrigger value="products" className={tabClassName}>Products for sale ({forSale ?? "—"})</TabsTrigger>
             <TabsTrigger value="collection" className={tabClassName}>Collection ({collected ?? "—"})</TabsTrigger>
+            <TabsTrigger value="reviews" className={tabClassName}>รีวิวร้านค้า</TabsTrigger>
           </TabsList>
           <TabsContent value="products" className="space-y-8">
             <div><h2 className="text-xl font-semibold leading-7">Products for sale</h2><p className="mt-2 text-sm leading-5 text-muted-foreground">Browse listings from {displayName}. Choose a product to see its details.</p></div>
@@ -121,6 +124,7 @@ function Storefront({ username }: { username: string }) {
             )}
             {collection.data && <Pagination page={collectionPage} totalPages={collection.data.totalPages} pending={collection.isFetching} onChange={setCollectionPage} />}
           </TabsContent>
+          <TabsContent value="reviews"><PublicSellerReviews username={username}/></TabsContent>
         </Tabs>
       </>}
     </div>

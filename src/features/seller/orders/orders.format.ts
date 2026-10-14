@@ -1,3 +1,4 @@
+import { CARRIER_OPTIONS } from "../shared/carriers";
 import {
   SELLER_ORDER_STATUS_LABEL,
   TO_PACK_STATUSES,
@@ -103,14 +104,7 @@ export function sortOf(value: string | null): SortChoice {
 // ---------- ขนส่ง ----------
 
 /** `carrierCode` ที่ส่งไปกับ `ShipOrderRequest` — ชื่อที่ผู้ซื้อเห็นคือ `label` */
-export const CARRIER_OPTIONS: { value: string; label: string }[] = [
-  { value: "KERRY", label: "Kerry Express" },
-  { value: "FLASH", label: "Flash Express" },
-  { value: "JT", label: "J&T Express" },
-  { value: "SPX", label: "SPX Express" },
-  { value: "THAILAND_POST_EMS", label: "ไปรษณีย์ไทย EMS" },
-  { value: "THAILAND_POST", label: "ไปรษณีย์ไทย ลงทะเบียน" },
-];
+export { CARRIER_OPTIONS } from "../shared/carriers";
 
 export function carrierLabel(code: string): string {
   return CARRIER_OPTIONS.find((option) => option.value === code)?.label ?? code;

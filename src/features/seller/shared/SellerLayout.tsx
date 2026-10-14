@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
@@ -21,6 +21,7 @@ import { useSellerProfile } from "./seller.queries";
  */
 export function SellerLayout() {
   const profile = useSellerProfile();
+  const isShop = useLocation().pathname === "/seller/shop";
 
   return (
     <div
@@ -37,8 +38,8 @@ export function SellerLayout() {
             <SidebarTrigger />
           </header>
 
-          <div className="flex-1 bg-muted px-8 pt-7 pb-10">
-            <SellerStatusBanner profile={profile} />
+          <div className={isShop ? "min-w-0 flex-1 bg-[#f6f8f9] px-4 pt-7 pb-10 md:px-8" : "flex-1 bg-muted px-8 pt-7 pb-10"}>
+            {!isShop && <SellerStatusBanner profile={profile} />}
             <Outlet />
           </div>
         </SidebarInset>
