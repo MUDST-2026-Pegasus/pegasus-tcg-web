@@ -73,8 +73,14 @@ export function countOf(counts: SellerOrderCounts | undefined, statuses: SellerO
   return statuses.reduce((sum, status) => sum + (counts?.[status] ?? 0), 0);
 }
 
-/** "8 ออเดอร์รอแพ็ค · 34 กำลังจัดส่ง" — ตัวเลขชุดเดียวกับชิป */
+/**
+ * "8 ออเดอร์รอแพ็ค · 34 กำลังจัดส่ง" — ตัวเลขชุดเดียวกับชิป
+ * ระหว่างโหลดห้ามขึ้น 0 ผู้ขายจะเข้าใจว่าไม่มีงาน ทั้งที่อาจมีออเดอร์รออยู่
+ */
 export function ordersSubtitle(counts: SellerOrderCounts | undefined): string {
+  if (counts === undefined) {
+    return "กำลังนับออเดอร์…";
+  }
   const toPack = countOf(counts, TO_PACK_STATUSES);
   const shipping = countOf(counts, ["SHIPPED", "DELIVERED"]);
   return `${toPack} ออเดอร์รอแพ็ค · ${shipping} กำลังจัดส่ง · จัดส่งให้ทันกำหนดเพื่อรักษาคะแนนร้าน`;
@@ -230,14 +236,18 @@ export function shipByLabel(shipBy: string): string {
 
 // ---------- การชำระเงิน ----------
 
-export type PaymentState = "paid" | "pending" | "refunded";
+export type PaymentState = "paid" | "pending" | "refunded" | "cancelled";
 
-/** ดูจากสถานะออเดอร์ ไม่ใช่จาก payment record — ออเดอร์คือสิ่งที่ร้านต้องตัดสินใจ */
-export function paymentStateOf(status: SellerOrderStatus): PaymentState {
+/**
+ * ดูจากสถานะออเดอร์ ไม่ใช่จาก payment record — ออเดอร์คือสิ่งที่ร้านต้องตัดสินใจ
+ * ยกเลิกก่อนผู้ซื้อจ่าย (`paidAt` ว่าง) ไม่มีเงินให้คืน จึงเป็นแค่ "ยกเลิก"
+ */
+export function paymentStateOf(status: SellerOrderStatus, paidAt: string | null): PaymentState {
   switch (status) {
     case "PENDING_PAYMENT":
       return "pending";
     case "CANCELLED":
+      return paidAt ? "refunded" : "cancelled";
     case "REFUNDED":
       return "refunded";
     default:
@@ -249,6 +259,7 @@ export const PAYMENT_STATE_LABEL: Record<PaymentState, string> = {
   paid: "ชำระแล้ว",
   pending: "รอชำระ",
   refunded: "ยกเลิก / คืนเงิน",
+  cancelled: "ยกเลิก",
 };
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
@@ -267,15 +278,29 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentRecordStatus, string> = {
   EXPIRED: "หมดเวลา",
 };
 
+/**
+ * ชื่อแถวยอดเงินตามสถานะของรายการชำระ — ไม่มีชื่อ = ไม่แสดงยอด
+ * ระบบสร้างรายการชำระไว้ตั้งแต่ผู้ซื้อเปิดหน้าโอนเงิน ยอดจึงมีอยู่แม้เงินยังไม่เข้า
+ * เรียกว่า "ยอดที่ชำระ" ได้เฉพาะตอนสำเร็จ ส่วนรายการที่ล้มเหลว/ยกเลิก/หมดเวลาไม่มีเงินเข้าเลย
+ */
+const PAYMENT_AMOUNT_LABEL: Partial<Record<PaymentRecordStatus, string>> = {
+  SUCCEEDED: "ยอดที่ชำระ (ทั้งคำสั่งซื้อ)",
+  PENDING: "ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)",
+  AWAITING_VERIFICATION: "ยอดที่แจ้งโอน (ทั้งคำสั่งซื้อ)",
+};
+
 export function paymentRows(payment: OrderPayment | null): { id: string; label: string; value: string }[] {
   if (!payment) {
     return [{ id: "status", label: "สถานะ", value: "ผู้ซื้อยังไม่ได้ชำระ" }];
   }
+  const amountLabel = PAYMENT_AMOUNT_LABEL[payment.status];
   return [
     { id: "method", label: "ช่องทาง", value: PAYMENT_METHOD_LABEL[payment.method] ?? payment.method },
     { id: "status", label: "สถานะ", value: PAYMENT_STATUS_LABEL[payment.status] ?? payment.status },
-    { id: "amount", label: "ยอดที่ชำระ (ทั้งคำสั่งซื้อ)", value: formatBaht(payment.amount) },
-    { id: "paid-at", label: "เวลาที่ชำระ", value: payment.paidAt ? formatDateTime(payment.paidAt) : "—" },
+    ...(amountLabel ? [{ id: "amount", label: amountLabel, value: formatBaht(payment.amount) }] : []),
+    ...(payment.paidAt
+      ? [{ id: "paid-at", label: "เวลาที่ชำระ", value: formatDateTime(payment.paidAt) }]
+      : []),
   ];
 }
 

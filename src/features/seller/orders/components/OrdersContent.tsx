@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { useSellerDashboard } from "@/features/seller/dashboard/dashboard.queries";
 
@@ -53,6 +55,27 @@ export function OrdersContent({
     size: ORDERS_PAGE_SIZE,
   });
 
+  const lastPage = Math.max(orders.data?.totalPages ?? 1, 1);
+  // ระหว่างโหลดหน้าใหม่ `data` ยังเป็นของหน้าเดิม — ใช้ตัดสินเลขหน้าไม่ได้
+  const hasPage = orders.data !== undefined && !orders.isPlaceholderData;
+
+  // เลขหน้าเกินหน้าสุดท้าย (เพิ่งส่งของใบสุดท้ายของหน้านั้น หรือเปิดลิงก์เก่า) — ถอยไปหน้าสุดท้ายที่มีจริง
+  // หน้าว่างไม่มีแถบเปลี่ยนหน้า ถ้าไม่ถอยให้ ผู้ขายจะติดอยู่ตรงนั้นจนกว่าจะแก้ URL เอง
+  useEffect(() => {
+    if (hasPage && page > lastPage) {
+      onPageChange(lastPage);
+    }
+  }, [hasPage, page, lastPage, onPageChange]);
+
+  /**
+   * รายการของแท็บใหม่ดึงสดทุกครั้ง ตัวเลขบนชิปต้องดึงตาม ไม่งั้นออเดอร์ที่เพิ่งเข้ามา
+   * ขึ้นในรายการแต่ชิปยังเป็นเลขเก่า (เช่น "รอชำระ 0" ทั้งที่มี 1 ใบ)
+   */
+  function handleTabChange(next: OrderTabMeta["id"]) {
+    void counts.refetch();
+    onTabChange(next);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -62,7 +85,7 @@ export function OrdersContent({
 
       <OrderFilterBar
         activeTab={tab.id}
-        onTabChange={onTabChange}
+        onTabChange={handleTabChange}
         counts={counts.data}
         search={search}
         onSearchChange={onSearchChange}

@@ -48,6 +48,7 @@ const PAYMENT_TEXT: Record<PaymentState, string> = {
   paid: "text-[#12805c]",
   pending: "text-[#b45309]",
   refunded: "text-gray-400",
+  cancelled: "text-gray-400",
 };
 
 type OrderCardProps = {
@@ -71,7 +72,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
   const [initiallyOpen] = useState(defaultOpen);
 
   const urgentLabel = deadlineLabel(order.status, summary.shipBy, now);
-  const payment = paymentStateOf(order.status);
+  const payment = paymentStateOf(order.status, summary.paidAt);
   const detailPath = `/seller/orders/${order.id}`;
   const shipment = order.shipments[0];
   const address = addressLines(parseShippingAddress(summary.shippingAddressSnapshot));
