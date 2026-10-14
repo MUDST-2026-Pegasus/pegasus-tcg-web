@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { getErrorMessage } from "@/lib/api";
 import { financeApi } from "./finance.api";
 import type { Refund } from "./finance.types";
 import { refundMethodLabel, refundStatusLabel } from "./refund.format";
+import { refundKeys, useBuyerRefunds } from "./refunds.queries";
 
 function RefundDestination({ refund }: { refund: Refund }) {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ function RefundDestination({ refund }: { refund: Refund }) {
     setSaving(true);
     try {
       const updated = await financeApi.setRefundDestination(refund.id, bankName.trim(), accountName.trim(), accountNumber.trim());
-      queryClient.setQueryData<Refund[]>(["finance", "my-refunds"], (current) =>
+      queryClient.setQueryData<Refund[]>(refundKeys.mine, (current) =>
         current?.map((item) => item.id === refund.id ? updated : item));
       queryClient.setQueryData(["finance", "refund", refund.id], updated);
       setEditing(false);
@@ -51,14 +52,15 @@ function RefundDestination({ refund }: { refund: Refund }) {
     </div>
   );
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
+    <div className="grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
       <Input aria-label={`ธนาคารสำหรับคืนเงิน ${refund.id}`} placeholder="ธนาคาร" value={bankName} onChange={(event) => setBankName(event.target.value)} />
       <Input aria-label={`ชื่อบัญชีสำหรับคืนเงิน ${refund.id}`} placeholder="ชื่อบัญชี" value={accountName} onChange={(event) => setAccountName(event.target.value)} />
       <Input aria-label={`เลขบัญชีสำหรับคืนเงิน ${refund.id}`} placeholder="เลขบัญชี" value={accountNumber} onChange={(event) => setAccountNumber(event.target.value)} />
-      <Button className="sm:col-span-3" disabled={saving || !hasChanges || !bankName.trim() || !accountName.trim() || !accountNumber.trim()} onClick={() => void save()}>
+      <Button disabled={saving || !hasChanges || !bankName.trim() || !accountName.trim() || !accountNumber.trim()} onClick={() => void save()}>
         {saving ? "กำลังบันทึก..." : "บันทึกบัญชีรับเงินคืน"}
       </Button>
-      {hasDestination && <Button variant="outline" className="sm:col-span-3" disabled={saving} onClick={() => setEditing(false)}>ยกเลิกการแก้ไข</Button>}
+      <p className="text-xs text-muted-foreground sm:col-span-4">กรอกบัญชีที่จะรับเงินคืน แอดมินจะโอนให้หลังบันทึก — แก้ไขได้จนกว่าจะเริ่มโอน</p>
+      {hasDestination && <Button variant="outline" className="sm:col-span-4" disabled={saving} onClick={() => setEditing(false)}>ยกเลิกการแก้ไข</Button>}
     </div>
   );
 }
@@ -85,25 +87,36 @@ function RefundDetails({ refund }: { refund: Refund }) {
   );
 }
 
-export function BuyerRefunds() {
-  const refunds = useQuery({ queryKey: ["finance", "my-refunds"], queryFn: financeApi.myRefunds });
+/**
+ * Refunds of one order, shown inside that order's card rather than as a list of
+ * their own: a refund only makes sense next to the order it pays back.
+ */
+export function OrderRefunds({ salesOrderId }: { salesOrderId: number }) {
+  const refunds = useBuyerRefunds();
+  const mine = refunds.data?.filter((refund) => refund.salesOrderId === salesOrderId) ?? [];
+  if (mine.length === 0) return null;
   return (
-    <Card>
-      <CardHeader><CardTitle>การคืนเงิน</CardTitle></CardHeader>
-      <CardContent className="space-y-4">
-        {refunds.isPending && <p>กำลังโหลดข้อมูลการคืนเงิน...</p>}
-        {refunds.isError && <p role="alert" className="text-destructive">โหลดข้อมูลการคืนเงินไม่สำเร็จ <Button variant="link" onClick={() => void refunds.refetch()}>ลองใหม่</Button></p>}
-        {refunds.data?.length === 0 && <p>ยังไม่มีรายการคืนเงิน</p>}
-        {refunds.data?.map((refund) => (
-          <div key={refund.id} className="space-y-3 border-b pb-4">
-            <p className="font-medium">คำสั่งซื้อ #{refund.salesOrderId} · คืน ฿{Number(refund.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</p>
-            <p className="text-sm">สถานะ: {refundStatusLabel(refund.status)} · เหตุผล: {refund.reason}</p>
-            {refund.transferReference && <p className="text-sm">เลขอ้างอิงการโอน: {refund.transferReference}</p>}
-            <RefundDetails refund={refund} />
-            {refund.method === "BANK_TRANSFER" && refund.status === "APPROVED" && <RefundDestination refund={refund} />}
+    <section aria-label="การคืนเงิน" className="flex flex-col gap-4 border-t bg-violet-50/60 px-4 py-3.5 text-sm">
+      {mine.map((refund) => (
+        <div key={refund.id} className="flex flex-col gap-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-semibold text-foreground">
+                การคืนเงิน ฿{Number(refund.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                เหตุผล: {refund.reason} · {refundMethodLabel(refund.method)}
+              </p>
+              {refund.transferReference && (
+                <p className="text-xs text-muted-foreground">เลขอ้างอิงการโอน: {refund.transferReference}</p>
+              )}
+            </div>
+            <Badge variant="outline" className="shrink-0 bg-white">{refundStatusLabel(refund.status)}</Badge>
           </div>
-        ))}
-      </CardContent>
-    </Card>
+          {refund.method === "BANK_TRANSFER" && refund.status === "APPROVED" && <RefundDestination refund={refund} />}
+          <RefundDetails refund={refund} />
+        </div>
+      ))}
+    </section>
   );
 }

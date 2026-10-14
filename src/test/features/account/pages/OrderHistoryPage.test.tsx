@@ -7,6 +7,7 @@ import { OrderHistoryPage } from "@/features/account/pages/OrderHistoryPage";
 import * as orderQueries from "@/features/account/orders.queries";
 import { ordersApi } from "@/features/account/orders.api";
 import * as authQueries from "@/features/auth/auth.queries";
+import { financeApi } from "@/features/finance/finance.api";
 import type { OrderDetails } from "@/features/account/orders.types";
 
 const mockOrders: OrderDetails[] = [
@@ -176,6 +177,21 @@ describe("OrderHistoryPage", () => {
     await userEvent.click(screen.getByRole("button", { name: /^confirm receipt$/i }));
 
     await waitFor(() => expect(confirmSpy).toHaveBeenCalledWith(103));
+  });
+
+  it("shows a refund inside the card of the order it belongs to", async () => {
+    vi.spyOn(financeApi, "myRefunds").mockResolvedValue([{
+      id: 9, salesOrderId: 102, sellerOrderId: null, amount: 840, reason: "Out of stock",
+      status: "PROCESSED", method: "BANK_TRANSFER", bankName: null, accountName: null,
+      accountNumber: null, transferReference: "TRX-1", requestedAt: "2026-10-09T11:00:00Z", processedAt: null,
+    }]);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    const panel = await screen.findByRole("region", { name: "การคืนเงิน" });
+    expect(panel.closest("[data-stage]")?.textContent).toContain("ORD-102");
+    expect(panel.textContent).toContain("TRX-1");
+    expect(screen.getAllByRole("region", { name: "การคืนเงิน" })).toHaveLength(1);
   });
 
   it("hides Pay Now and Cancel while the payment slip is under review", () => {

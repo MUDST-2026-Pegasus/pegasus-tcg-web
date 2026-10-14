@@ -48,7 +48,8 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
-import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
+import { OrderRefunds } from "@/features/finance/BuyerRefunds";
+import { useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
@@ -75,6 +76,7 @@ export function OrderHistoryPage() {
   const { user } = useAuth();
 
   const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
+  const refunds = useBuyerRefunds();
 
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
@@ -158,7 +160,12 @@ export function OrderHistoryPage() {
         <AccountSidebar user={sidebarUser} />
 
         <div className="flex min-w-0 flex-col gap-4">
-          <BuyerRefunds />
+          {refunds.isError && (
+            <p role="alert" className="rounded-xl border bg-white p-3 text-sm text-destructive">
+              โหลดข้อมูลการคืนเงินไม่สำเร็จ{" "}
+              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>ลองใหม่</Button>
+            </p>
+          )}
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-foreground">Order History</h1>
             <p className="text-sm text-muted-foreground">
@@ -428,6 +435,8 @@ function OrderCardItem({
         </div>
       )}
 
+      <OrderRefunds salesOrderId={order.id} />
+
       <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
           {stage === "COMPLETED" && (
@@ -547,7 +556,7 @@ function StageHint({
     case "REFUNDED":
       return (
         <p className={cn(base, "text-violet-700")}>
-          <RotateCcw className="size-3.5" /> Refund issued — see Refunds above for the transfer status
+          <RotateCcw className="size-3.5" /> Refund issued — track the transfer in the refund panel below
         </p>
       );
   }

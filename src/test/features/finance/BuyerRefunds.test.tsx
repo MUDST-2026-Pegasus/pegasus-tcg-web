@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BuyerRefunds } from "@/features/finance/BuyerRefunds";
+import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { financeApi } from "@/features/finance/finance.api";
 import type { Refund } from "@/features/finance/finance.types";
 import { orderStatusLabel } from "@/features/account/order-status.format";
@@ -17,11 +17,11 @@ const refund: Refund = {
   requestedAt: "2026-10-13T00:00:00Z", processedAt: null,
 };
 
-function setup(data: Refund) {
-  vi.mocked(financeApi.myRefunds).mockResolvedValue([data]);
+function setup(data: Refund, others: Refund[] = []) {
+  vi.mocked(financeApi.myRefunds).mockResolvedValue([data, ...others]);
   vi.mocked(financeApi.getRefund).mockResolvedValue(data);
   return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <BuyerRefunds />
+    <OrderRefunds salesOrderId={23} />
   </QueryClientProvider>);
 }
 
@@ -30,7 +30,7 @@ afterEach(() => { vi.clearAllMocks(); });
 describe("buyer refunds", () => {
   it("translates API statuses and methods while keeping the saved destination read only", async () => {
     setup(refund);
-    expect(await screen.findByText(/สถานะ: อนุมัติแล้ว/)).toBeTruthy();
+    expect(await screen.findByText("อนุมัติแล้ว")).toBeTruthy();
     expect(screen.getByText(/บันทึกบัญชีรับเงินคืนแล้ว/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "บันทึกบัญชีรับเงินคืน" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "ดูรายละเอียดล่าสุด" }));
@@ -57,8 +57,23 @@ describe("buyer refunds", () => {
 
   it("does not offer account editing after transfer processing starts", async () => {
     setup({ ...refund, status: "PROCESSING" });
-    expect(await screen.findByText(/สถานะ: กำลังโอนเงินคืน/)).toBeTruthy();
+    expect(await screen.findByText("กำลังโอนเงินคืน")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "แก้ไขบัญชีรับเงินคืน" })).toBeNull();
+  });
+
+  it("shows only the refunds of its own order", async () => {
+    setup(refund, [{ ...refund, id: 14, salesOrderId: 99, amount: 777 }]);
+    expect(await screen.findByText("การคืนเงิน ฿500.00")).toBeTruthy();
+    expect(screen.queryByText(/฿777/)).toBeNull();
+  });
+
+  it("renders nothing for an order without refunds", async () => {
+    vi.mocked(financeApi.myRefunds).mockResolvedValue([{ ...refund, salesOrderId: 99 }]);
+    const { container } = render(<QueryClientProvider client={new QueryClient()}>
+      <OrderRefunds salesOrderId={23} />
+    </QueryClientProvider>);
+    await waitFor(() => expect(financeApi.myRefunds).toHaveBeenCalled());
+    expect(container.querySelector("section")).toBeNull();
   });
 
   it("translates buyer order status codes", () => {
