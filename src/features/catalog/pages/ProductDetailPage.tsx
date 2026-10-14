@@ -491,7 +491,7 @@ function ProductDetailContent({
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <Badge variant="secondary">In catalog</Badge>
-                    <Button variant="outline" size="sm" render={<Link to={`/collectors/${encodeURIComponent(collector.username)}?from=${encodeURIComponent(product.slug)}`} state={{ displayName: collector.displayName, avatarUrl: collector.avatarUrl }} />}>View profile</Button>
+                    <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>View profile</Button>
                   </div>
                 </article>
               ))}

@@ -58,6 +58,7 @@ function renderPage() {
           <Route path="/products/:productId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckoutTarget />} />
           <Route path="/login" element={<p>Login reached</p>} />
+          <Route path="/u/:username" element={<CollectionTarget />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -67,6 +68,11 @@ function renderPage() {
 function CheckoutTarget() {
   const [params] = useSearchParams();
   return <p>Checkout reached {params.toString()}</p>;
+}
+
+function CollectionTarget() {
+  const [params] = useSearchParams();
+  return <p>Collection reached {params.toString()}</p>;
 }
 
 describe("ProductDetailPage cart actions", () => {
@@ -156,6 +162,22 @@ describe("ProductDetailPage cart actions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Buy now/ }));
     expect(screen.getByText("Login reached")).toBeInTheDocument();
+  });
+
+  it("opens a collector's public collection from View profile", () => {
+    vi.spyOn(catalogQueries, "useProductCollectors").mockReturnValue({
+      data: { items: [{ username: "ice5", displayName: "Ice", avatarUrl: null, quantity: 1 }], totalItems: 1, totalPages: 1 },
+      isPending: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as never);
+
+    renderPage();
+
+    const profileLink = screen.getByRole("link", { name: "View profile" });
+    expect(profileLink).toHaveAttribute("href", "/u/ice5?tab=collection");
+    fireEvent.click(profileLink);
+    expect(screen.getByText("Collection reached tab=collection")).toBeInTheDocument();
   });
 
   it("adds the selected listing and sends logged-in buyers to checkout using the returned cart item id", async () => {
