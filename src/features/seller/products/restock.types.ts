@@ -1,3 +1,5 @@
+import type { CardCondition } from "./products.types";
+
 /** ล็อตที่เคยรับเข้าแล้ว — แสดงในตารางประวัติ */
 export type RestockLot = {
   id: string;
@@ -7,8 +9,8 @@ export type RestockLot = {
   unitCost: number;
   totalCost: number;
   sourceLabel: string;
-  /** ต้นทุนเฉลี่ยของสินค้าหลังรับล็อตนี้ */
-  averageCostAfter: number;
+  /** ต้นทุนเฉลี่ยของสินค้าหลังรับล็อตนี้ — `null` = ล็อตเก่าที่ระบบยังไม่ได้เก็บค่านี้ */
+  averageCostAfter: number | null;
 };
 
 export type SelectOption = { value: string; label: string };
@@ -26,6 +28,8 @@ export type RestockDraft = {
 
 export type RestockData = {
   productId: string;
+  /** ประวัติรับเข้าอ่านตามการ์ดพิมพ์ + สภาพ เพราะต้นทุนเฉลี่ยคิดรวมทุกประกาศของร้าน */
+  market: { variantId: number; condition: CardCondition };
   breadcrumb: {
     rootLabel: string;
     /** ชื่อสั้นของสินค้า เช่น "Charizard ex" */
@@ -84,8 +88,6 @@ export type RestockData = {
   history: {
     title: string;
     exportLabel: string;
-    /** จำนวนที่ขายไปแล้วทั้งหมด ใช้ในบรรทัดสรุปใต้หัวตาราง */
-    soldCount: number;
     columns: {
       receivedAt: string;
       quantity: string;
@@ -96,8 +98,8 @@ export type RestockData = {
     };
     newBadgeLabel: string;
     emptyLabel: string;
-    /** เรียงใหม่สุดก่อน */
-    lots: RestockLot[];
+    errorLabel: string;
+    loadMoreLabel: string;
   };
   summary: {
     title: string;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { SellerListing } from "@/features/seller/products/products.types";
-import { getRestockData } from "@/features/seller/products/restock.api";
+import { getRestockData, toRestockLot } from "@/features/seller/products/restock.api";
 import { calculateRestock } from "@/features/seller/products/restock.calc";
 import type { RestockDraft } from "@/features/seller/products/restock.types";
 
@@ -77,5 +77,51 @@ describe("restock preview", () => {
     const result = calculateRestock(data.product, data.commissionPercent, draft("4", "1000"));
 
     expect(result.newAverageCost).toBe(250);
+  });
+});
+
+describe("restock history", () => {
+  it("reads history by printing and condition, since the average covers every listing", () => {
+    expect(getRestockData(listing()).market).toEqual({ variantId: 43, condition: "LP" });
+  });
+
+  it("turns a backend lot into a table row on the day the seller picked", () => {
+    const row = toRestockLot({
+      id: 501,
+      movementType: "RESTOCK",
+      receivedAt: "2026-10-01T09:00:00+07:00",
+      quantity: 2,
+      unitCost: 800,
+      totalCost: 1600,
+      averageCostAfter: 600,
+      note: "ซื้อจากร้านค้าอื่น · อ้างอิง R-12",
+      listingId: 126,
+    });
+
+    expect(row).toEqual({
+      id: "501",
+      receivedAt: "2026-10-01",
+      quantity: 2,
+      unitCost: 800,
+      totalCost: 1600,
+      sourceLabel: "ซื้อจากร้านค้าอื่น · อ้างอิง R-12",
+      averageCostAfter: 600,
+    });
+  });
+
+  it("keeps an unknown average as null for lots booked before it was recorded", () => {
+    const row = toRestockLot({
+      id: 7,
+      movementType: "INITIAL_STOCK",
+      receivedAt: "2026-09-12T10:00:00+07:00",
+      quantity: 4,
+      unitCost: 500,
+      totalCost: 2000,
+      averageCostAfter: null,
+      note: null,
+      listingId: 126,
+    });
+
+    expect(row).toMatchObject({ averageCostAfter: null, sourceLabel: "" });
   });
 });
