@@ -94,6 +94,7 @@ describe("ProductDetailPage cart actions", () => {
       isSuccess: true,
       refetch: vi.fn(),
     } as never);
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: [] } as never);
     vi.spyOn(catalogQueries, "useProductCollectors").mockReturnValue({
       data: { items: [], totalItems: 0, totalPages: 0 },
       isPending: false,
@@ -220,18 +221,56 @@ describe("ProductDetailPage cart actions", () => {
       isSuccess: true,
       refetch: vi.fn(),
     } as never);
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: [
+      { catalogVariantId: 10, condition: "NM", medianPrice: 3000, statDate: "2026-10-15", change30dPercent: null, lastSold: null, lowSample: false },
+      { catalogVariantId: 11, condition: "NM", medianPrice: 2500, statDate: "2026-10-15", change30dPercent: null, lastSold: null, lowSample: false },
+    ] } as never);
     const user = userEvent.setup();
     renderPage();
 
     const dropdown = screen.getByRole("combobox", { name: "Select variant" });
     expect(dropdown).toHaveTextContent("All variants");
+    expect(screen.getByText("฿3,000.00")).toBeInTheDocument();
     expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Seller")).toBeInTheDocument();
 
     await user.click(dropdown);
     await user.click(await screen.findByRole("option", { name: "JA" }));
 
     expect(dropdown).toHaveTextContent("JA");
+    expect(screen.getByText("฿2,500.00")).toBeInTheDocument();
     expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Tokyo Shop")).toBeInTheDocument();
     expect(screen.queryByLabelText("ดูรายละเอียดสินค้าของ Seller")).not.toBeInTheDocument();
+  });
+
+  it("shows market data for the cheapest matching variant and condition", async () => {
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: [
+      { catalogVariantId: 10, condition: "NM", medianPrice: 3000, statDate: "2026-10-15", change30dPercent: 4.8, lastSold: { price: 2900, soldAt: "2026-10-14T12:00:00" }, lowSample: true },
+      { catalogVariantId: 10, condition: "LP", medianPrice: 2000, statDate: "2026-10-15", change30dPercent: -5, lastSold: null, lowSample: false },
+    ] } as never);
+    vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({ data: [listing, { ...listing, id: 56, condition: "LP", price: 90 }], isPending: false, isError: false, isSuccess: true } as never);
+    renderPage();
+
+    expect(screen.getByText("฿3,000.00")).toBeInTheDocument();
+    expect(screen.getByText("↑ 4.8%")).toBeInTheDocument();
+    expect(screen.getByText("฿2,900.00")).toBeInTheDocument();
+    expect(screen.getByText(/ข้อมูลราคายังน้อย/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByText("Lightly Played")[0].closest("button")!);
+    expect(screen.getByText("฿2,000.00")).toBeInTheDocument();
+    expect(screen.getByText("↓ 5%")).toBeInTheDocument();
+    expect(screen.getByText("Last sold").parentElement).toHaveTextContent("—");
+  });
+
+  it("shows dashes when market data is missing", () => {
+    renderPage();
+    expect(screen.getByText("Market price").parentElement).toHaveTextContent("—");
+    expect(screen.getByText("Last sold").parentElement).toHaveTextContent("—");
+  });
+
+  it("keeps the product visible when the market API fails", () => {
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: undefined, isError: true } as never);
+    renderPage();
+    expect(screen.getByText("Pikachu ex", { selector: "h1" })).toBeInTheDocument();
+    expect(screen.getByText("Market price").parentElement).toHaveTextContent("—");
   });
 });

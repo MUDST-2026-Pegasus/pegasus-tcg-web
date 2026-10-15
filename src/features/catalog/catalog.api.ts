@@ -7,6 +7,7 @@ import type {
   ProductQuery,
   ProductSummaryDto,
   ProductDetailDto,
+  ProductMarketDto,
   PublicListingDto,
   PublicListingDetailDto,
   ProductCollectorDto,
@@ -47,6 +48,10 @@ export function getProductDetail(idOrSlug: string, signal?: AbortSignal) {
     `/catalog/products/${encodeURIComponent(idOrSlug)}`,
     { ...PUBLIC, signal },
   );
+}
+
+export function getProductMarket(productId: number, signal?: AbortSignal) {
+  return api.get<ProductMarketDto[]>(`/catalog/products/${productId}/market`, { ...PUBLIC, signal });
 }
 
 /** Read every page so condition counts and seller rows are complete. */

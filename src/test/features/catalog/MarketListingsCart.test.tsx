@@ -88,6 +88,7 @@ describe("MarketListingsPage Add button", () => {
     } as never);
     vi.spyOn(catalogQueries, "useGameList").mockReturnValue({ data: [] } as never);
     mockListings([listing]);
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: [] } as never);
     addItem.mockResolvedValue({ id: 900 } as never);
   });
 
@@ -126,5 +127,13 @@ describe("MarketListingsPage Add button", () => {
     renderPage();
 
     expect(addButton()).toBeDisabled();
+  });
+
+  it("shows market price for the cheapest listing", () => {
+    vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: [
+      { catalogVariantId: 10, condition: "SEALED", medianPrice: 3000, statDate: "2026-10-15", change30dPercent: 1, lastSold: null, lowSample: false },
+    ] } as never);
+    renderPage();
+    expect(screen.getByText("฿3,000")).toBeInTheDocument();
   });
 });

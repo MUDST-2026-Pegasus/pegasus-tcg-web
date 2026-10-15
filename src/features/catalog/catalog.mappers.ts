@@ -1,4 +1,4 @@
-import type { CardCondition, ProductType } from "./catalog.types";
+import type { CardCondition, ProductMarketDto, ProductType, PublicListingDto } from "./catalog.types";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
@@ -37,4 +37,8 @@ export function formatPrice(price: number | null | undefined): string {
   return price === null || price === undefined
     ? "Out of stock"
     : priceFormatter.format(price);
+}
+export function marketForListing(market: ProductMarketDto[] | undefined, listing: PublicListingDto | undefined) {
+  if (!listing) return undefined;
+  return market?.find((row) => row.catalogVariantId === listing.card.variantId && row.condition === listing.condition);
 }
