@@ -1,102 +1,100 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreditCard } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { PanelSkeleton, TableSkeleton } from "@/components/common/PageSkeletons";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { financeApi } from "@/features/finance/finance.api";
+import type { Payout, Wallet } from "@/features/finance/finance.types";
+import { dashboardKeys } from "@/features/seller/dashboard/dashboard.queries";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
-import { BalanceCard } from "./components/BalanceCard";
-import { walletEntryLabel } from "./payout.format";
+import { PayoutBalance } from "./components/PayoutBalance";
+import { PayoutDetailSheet } from "./components/PayoutDetailSheet";
+import { PayoutRequestDialog } from "./components/PayoutRequestDialog";
+import { formatThaiDateTime, maskAccount, money, payoutDetail, payoutStatus, payoutStatuses, PAYOUT_MINIMUM, validatePayoutAmount, walletEntryLabel } from "./payout.format";
 
-const money = (value: number) => `฿${Number(value).toLocaleString("th-TH", { minimumFractionDigits: 2 })}`;
-const maskAccount = (value: string) => value.length > 4 ? `••••${value.slice(-4)}` : value;
-const payoutStatus: Record<string, string> = { REQUESTED: "รอตรวจสอบ", APPROVED: "อนุมัติแล้ว", PROCESSING: "กำลังโอน", PAID: "โอนสำเร็จ", REJECTED: "ปฏิเสธ", FAILED: "โอนไม่สำเร็จ", CANCELLED: "ยกเลิก" };
+const blankWallet: Wallet = { balanceAvailable: 0, balancePending: 0, reservedForPayout: 0, withdrawable: 0, entries: { items: [], totalItems: 0 } };
+const activeStatuses = new Set(["REQUESTED", "APPROVED", "PROCESSING"]);
+const PAGE_SIZE = 20;
+
+function StatusBadge({ status }: { status: string }) { const badge = payoutStatus(status); return <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${badge.className}`}>● {badge.label}</span>; }
+
+function PayoutTracker({ payouts, onSelect }: { payouts: Payout[]; onSelect: (payout: Payout) => void }) {
+  if (!payouts.length) return null;
+  const total = payouts.reduce((sum, payout) => sum + Number(payout.amount), 0);
+  return <Card className="gap-0 rounded-xl border bg-white py-0"><div className="border-b px-5 py-4"><h2 className="font-semibold">คำขอที่ยังไม่โอน</h2><p className="text-xs text-muted-foreground">ยอดรวม {money(total)} ถูกกันไว้ ยังไม่ถูกตัดจากกระเป๋า</p></div><div className="space-y-3 p-5">{payouts.map((payout) => {
+    const step = payout.status === "REQUESTED" ? 1 : payout.status === "APPROVED" ? 2 : 3;
+    return <button key={payout.id} type="button" onClick={() => onSelect(payout)} className="grid w-full items-center gap-4 rounded-lg border p-4 text-left hover:bg-slate-50 md:grid-cols-[190px_minmax(0,1fr)_80px]"><div className="space-y-1"><div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">#{payout.id}</span><StatusBadge status={payout.status}/></div><strong className="block">{money(payout.amount)}</strong><p className="text-xs text-muted-foreground">{payoutDetail(payout)}</p></div><div className="grid grid-cols-4 gap-1 text-center text-[11px]">{["ส่งคำขอ", "แอดมินอนุมัติ", "กำลังโอน", "โอนสำเร็จ"].map((label, index) => <div key={label}><div className={`mx-auto mb-1 size-3 rounded-full ${index < step ? "bg-teal-600" : "bg-slate-200"}`}/><span className={index < step ? "font-medium text-teal-700" : "text-muted-foreground"}>{label}</span>{index === 0 && <p className="text-muted-foreground">{formatThaiDateTime(payout.requestedAt)}</p>}{index === 1 && payout.approvedAt && <p className="text-muted-foreground">{formatThaiDateTime(payout.approvedAt)}</p>}</div>)}</div><span className="text-right text-xs text-teal-700">รายละเอียด ›</span></button>;
+  })}</div></Card>;
+}
 
 export function SellerPayoutPage() {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(0);
+  const [tab, setTab] = useState<"payouts" | "wallet">("payouts");
+  const [filter, setFilter] = useState("ALL");
   const [amount, setAmount] = useState("");
   const [showRequest, setShowRequest] = useState(false);
-  const [year, setYear] = useState("all");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const wallet = useQuery({ queryKey: ["finance", "wallet"], queryFn: financeApi.wallet });
+  const [selected, setSelected] = useState<Payout | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [conflict, setConflict] = useState<string | null>(null);
+  const wallet = useQuery({ queryKey: ["finance", "wallet", page], queryFn: () => financeApi.wallet(page, PAGE_SIZE) });
   const payouts = useQuery({ queryKey: ["finance", "payouts"], queryFn: financeApi.myPayouts });
-  const account = useQuery({
-    queryKey: ["finance", "payout-account"],
-    queryFn: financeApi.payoutAccount,
-    retry: false,
-  });
+  const account = useQuery({ queryKey: ["finance", "payout-account"], queryFn: financeApi.payoutAccount, retry: false });
   const missingAccount = account.isError && hasErrorCode(account.error, "PAYOUT_ACCOUNT_NOT_FOUND");
-  const needsVerification = [wallet.error, payouts.error, account.error].some((error) =>
-    error && (hasErrorCode(error, "SELLER_NOT_FOUND") || hasErrorCode(error, "SELLER_NOT_VERIFIED")));
-  const available = Number(wallet.data?.withdrawable ?? 0);
-  const requested = Number(amount);
-  const validAmount = /^\d+(?:\.\d{1,2})?$/.test(amount) && requested > 0 && requested <= available;
-  const paidTotal = payouts.data?.filter((payout) => payout.status === "PAID").reduce((sum, payout) => sum + Number(payout.amount), 0) ?? 0;
-  const years = Array.from(new Set(payouts.data?.map((payout) => String(new Date(payout.requestedAt).getFullYear())) ?? [])).sort().reverse();
-  const history = payouts.data?.filter((payout) => year === "all" || String(new Date(payout.requestedAt).getFullYear()) === year) ?? [];
+  const unverified = [wallet.error, payouts.error, account.error].some((error) => error && hasErrorCode(error, "SELLER_NOT_VERIFIED"));
+  const sellerNotFound = [wallet.error, payouts.error, account.error].some((error) => error && hasErrorCode(error, "SELLER_NOT_FOUND"));
+  const otherError = [wallet.error, payouts.error, account.error].some((error) => error && !["PAYOUT_ACCOUNT_NOT_FOUND", "SELLER_NOT_VERIFIED", "SELLER_NOT_FOUND"].some((code) => hasErrorCode(error, code)));
+  const data = wallet.data ?? blankWallet;
+  const allPayouts = payouts.data ?? [];
+  const active = allPayouts.filter((payout) => activeStatuses.has(payout.status));
+  const paidTotal = allPayouts.filter((payout) => payout.status === "PAID").reduce((sum, payout) => sum + Number(payout.amount), 0);
+  const history = filter === "ALL" ? allPayouts : allPayouts.filter((payout) => payout.status === filter);
+  const blockedReason = missingAccount ? "ยังไม่มีบัญชีรับเงิน — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้" : unverified ? "สถานะร้านยังไม่ใช่ 'ยืนยันแล้ว' — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้" : Number(data.withdrawable) < PAYOUT_MINIMUM ? `ต้องมียอดถอนได้อย่างน้อย ${money(PAYOUT_MINIMUM)} จึงจะส่งคำขอได้` : null;
+  const selectedCurrent = selected && (allPayouts.find((payout) => payout.id === selected.id) ?? selected);
 
+  function openRequest(value = "") { setAmount(value); setConflict(null); setSelected(null); setShowRequest(true); }
   async function requestPayout() {
-    if (!validAmount || !account.data || !window.confirm(`ยืนยันการขอถอน ${money(requested)} ไปยังบัญชี ${account.data.accountNumber}?`)) return;
-    setIsSubmitting(true);
+    if (submitting || !account.data || validatePayoutAmount(amount, Number(data.withdrawable))) return;
+    setSubmitting(true); setConflict(null);
     try {
-      await financeApi.requestPayout(requested);
-      setAmount("");
-      setShowRequest(false);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["finance", "wallet"] }),
-        queryClient.invalidateQueries({ queryKey: ["finance", "payouts"] }),
-      ]);
-      toast.add({ type: "success", title: "ส่งคำขอถอนแล้ว", description: "รอผู้ดูแลดำเนินการโอนเงิน" });
+      const created = await financeApi.requestPayout(Number(amount));
+      queryClient.setQueriesData<Wallet>({ queryKey: ["finance", "wallet"] }, (current) => current ? {
+        ...current,
+        withdrawable: Math.max(0, Number(current.withdrawable) - Number(created.amount)),
+        reservedForPayout: Number(current.reservedForPayout) + Number(created.amount),
+      } : current);
+      queryClient.setQueryData<Payout[]>(["finance", "payouts"], (current) => current ? [created, ...current] : current);
+      setShowRequest(false); setAmount("");
+      toast.add({ type: "success", title: `ส่งคำขอถอน #${created.id} แล้ว`, description: `${money(created.amount)} ถูกกันไว้ รอแอดมินตรวจสอบ` });
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ["finance", "wallet"] }), queryClient.invalidateQueries({ queryKey: ["finance", "payouts"] }), queryClient.invalidateQueries({ queryKey: dashboardKeys.all })]);
     } catch (error) {
-      toast.add({ type: "error", title: "ขอถอนเงินไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (hasErrorCode(error, "INSUFFICIENT_BALANCE")) {
+        const latest = await wallet.refetch();
+        const latestAmount = Number(latest.data?.withdrawable ?? data.withdrawable);
+        setConflict(`ยอดถอนได้เปลี่ยนไปแล้ว กรุณาตรวจสอบจำนวนเงินอีกครั้ง · ยอดล่าสุดคือ ${money(latestAmount)}`);
+      } else {
+        toast.add({ type: "error", title: "ขอถอนเงินไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
+        if (["VALIDATION_FAILED", "PAYOUT_BELOW_MINIMUM", "SELLER_NOT_VERIFIED", "PAYOUT_ACCOUNT_NOT_FOUND"].some((code) => hasErrorCode(error, code))) {
+          void Promise.all([wallet.refetch(), payouts.refetch(), account.refetch()]);
+        }
+      }
+    } finally { setSubmitting(false); }
   }
 
-  function exportHistory() {
-    const rows = [["id", "requested_at", "amount", "status", "transfer_reference"], ...history.map((payout) => [String(payout.id), payout.requestedAt, String(payout.amount), payout.status, payout.transferReference ?? ""])];
-    const csv = "\uFEFF" + rows.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(",")).join("\r\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const link = document.createElement("a"); link.href = url; link.download = `payouts-${year}.csv`; link.click(); URL.revokeObjectURL(url);
-  }
-
-  if (needsVerification) return <div className="space-y-6"><div><h1 className="text-2xl font-bold">ถอนเงิน</h1><p className="text-xs text-muted-foreground">ยอดเงินจากการขายและประวัติการโอนเข้าบัญชีธนาคาร</p></div><Card><CardHeader><CardTitle>ยังไม่พร้อมถอนเงิน</CardTitle></CardHeader><CardContent className="text-sm text-muted-foreground">กรุณาสมัครและยืนยันตัวตนผู้ขายก่อน ระบบจึงจะสร้างบัญชีรับเงินและเปิด Wallet ให้ใช้งาน</CardContent></Card></div>;
-
-  return <div className="space-y-6">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-bold">ถอนเงิน</h1><p className="text-xs text-muted-foreground">ยอดเงินจากการขายและประวัติการโอนเข้าบัญชีธนาคาร</p></div><Button variant="outline" size="sm" disabled={!payouts.data?.length} onClick={exportHistory}>ดาวน์โหลดใบสรุป</Button></div>
-    {(wallet.isPending || payouts.isPending || account.isPending) && <PayoutSkeleton />}
-    {(wallet.isError || payouts.isError || (account.isError && !missingAccount)) && <p role="alert" className="text-destructive">โหลดข้อมูลไม่สำเร็จ <Button variant="outline" onClick={() => { void wallet.refetch(); void payouts.refetch(); void account.refetch(); }}>ลองอีกครั้ง</Button></p>}
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      {wallet.data && <BalanceCard label="ยอดเงินพร้อมถอน" amount={money(available)} withdrawLabel="ถอนเงินตอนนี้" onWithdraw={() => setShowRequest(true)} withdrawDisabled={!account.data || available <= 0}
-        stats={[{ id: "processing", label: "กำลังดำเนินการ", value: money(wallet.data.reservedForPayout) }, { id: "pending", label: "รอครบกำหนด", value: money(wallet.data.balancePending) }, { id: "paid", label: "ถอนสะสมทั้งหมด", value: money(paidTotal) }]}
-        scheduleNote="คำขอถอนเงินต้องรอผู้ดูแลตรวจสอบและยืนยันการโอน" />}
-      <Card className="gap-3 rounded-xl p-5"><div className="flex justify-between"><h2 className="text-sm font-semibold">บัญชีรับเงิน</h2>{account.data && <Badge className="bg-green-100 text-emerald-700">ยืนยันแล้ว</Badge>}</div>
-        {account.data ? <div className="space-y-3 rounded-lg border bg-neutral-50 p-4"><div className="flex items-center gap-3"><CreditCard className="size-6 text-teal-600" /><div><p className="font-medium">{account.data.bankName}</p><p className="text-sm text-muted-foreground">{maskAccount(account.data.accountNumber)}</p></div></div><div className="border-t pt-2"><p className="text-xs text-muted-foreground">ชื่อบัญชี</p><p className="text-sm">{account.data.accountName}</p></div></div>
-          : <p className="text-sm text-muted-foreground">{missingAccount ? "ยังไม่มีบัญชีรับเงินที่ยืนยันแล้ว" : "กำลังตรวจสอบบัญชีรับเงิน"}</p>}
-        <p className="text-xs text-muted-foreground">บัญชีนี้มาจากการยืนยันตัวตนของผู้ขาย การเปลี่ยนบัญชีต้องยืนยันใหม่</p>
-      </Card>
-    </div>
-    {showRequest && <Card><CardHeader><CardTitle>ขอถอนเงิน</CardTitle></CardHeader><CardContent className="space-y-3"><p className="text-sm">ยอดพร้อมถอน {money(available)} · บัญชีปลายทาง {account.data ? maskAccount(account.data.accountNumber) : "ยังไม่พร้อม"}</p><Input aria-label="จำนวนเงินที่ต้องการถอน" type="number" min="0.01" max={available} step="0.01" inputMode="decimal" placeholder="จำนวนเงินที่ต้องการถอน" value={amount} onChange={(event) => setAmount(event.target.value)} /><div className="flex gap-2"><Button disabled={!validAmount || !account.data || isSubmitting} onClick={() => void requestPayout()}>{isSubmitting ? "กำลังส่งคำขอ..." : "ยืนยันคำขอถอนเงิน"}</Button><Button variant="outline" onClick={() => setShowRequest(false)}>ยกเลิก</Button></div><p className="text-xs text-muted-foreground">ระบบจะกันยอดเงินไว้เมื่อส่งคำขอ และหักเงินจริงเมื่อผู้ดูแลยืนยันการโอน</p></CardContent></Card>}
-    <Card className="gap-0"><CardHeader><div className="flex flex-wrap items-center justify-between gap-2"><div><CardTitle>ประวัติการถอนเงิน</CardTitle><p className="text-xs text-muted-foreground">{history.length} รายการ · ยอดรวม {money(history.reduce((sum, payout) => sum + Number(payout.amount), 0))}</p></div><div className="flex gap-2"><select aria-label="เลือกปี" className="rounded-md border px-3 text-sm" value={year} onChange={(event) => setYear(event.target.value)}><option value="all">ทุกปี</option>{years.map((value) => <option key={value} value={value}>ปี {Number(value) + 543}</option>)}</select><Button variant="outline" size="sm" disabled={!history.length} onClick={exportHistory}>ส่งออก CSV</Button></div></div></CardHeader><CardContent className="overflow-x-auto">
-      {history.length === 0 ? <p className="py-4 text-sm text-muted-foreground">ยังไม่มีรายการถอนเงินในช่วงที่เลือก</p> : <table className="w-full min-w-[680px] text-left text-sm"><thead className="border-y bg-neutral-50 text-muted-foreground"><tr><th className="p-3">วันที่ทำรายการ</th><th>รหัสรายการ</th><th>จำนวนเงิน</th><th>ปลายทาง</th><th>สถานะ</th><th>อ้างอิงการโอน</th></tr></thead><tbody>{history.map((payout) => <tr key={payout.id} className="border-b"><td className="p-3">{new Date(payout.requestedAt).toLocaleString("th-TH")}</td><td>#{payout.id}</td><td className="font-semibold">{money(payout.amount)}</td><td>{account.data ? `${account.data.bankName} ${maskAccount(account.data.accountNumber)}` : "—"}</td><td><Badge variant={payout.status === "PAID" ? "secondary" : payout.status === "REJECTED" || payout.status === "FAILED" ? "destructive" : "outline"}>{payoutStatus[payout.status] ?? payout.status}</Badge></td><td>{payout.transferReference ?? payout.rejectionReason ?? "—"}</td></tr>)}</tbody></table>}
-    </CardContent></Card>
-    <details className="rounded-lg border p-4"><summary className="cursor-pointer font-medium">รายการเคลื่อนไหว Wallet</summary><div className="mt-3 space-y-2">{wallet.data?.entries.items.length === 0 && <p className="text-sm text-muted-foreground">ยังไม่มีรายการ</p>}{wallet.data?.entries.items.map((entry) => <div key={entry.id} className="flex justify-between border-b py-2 text-sm"><span>{walletEntryLabel(entry.type)} · {new Date(entry.createdAt).toLocaleString("th-TH")}</span><span>{entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}</span></div>)}</div></details>
-  </div>;
-}
-
-/** วางตรงกับยอดเงิน + บัญชีรับเงิน + ประวัติ ระหว่างรอ wallet / payouts / account */
-function PayoutSkeleton() {
-  return <div role="status" aria-busy="true" aria-label="กำลังโหลดข้อมูลการเงิน" className="space-y-6">
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <Skeleton className="h-56 rounded-2xl" />
-      <PanelSkeleton rows={2} className="rounded-xl" />
-    </div>
-    <TableSkeleton rows={4} columns={4} />
+  if (sellerNotFound) return <div className="space-y-6"><h1 className="text-2xl font-bold">ถอนเงิน</h1><Card className="p-6"><h2 className="font-semibold">ยังไม่พร้อมถอนเงิน</h2><p className="text-sm text-muted-foreground">กรุณาสมัครและยืนยันตัวตนผู้ขายก่อน</p></Card></div>;
+  return <div className="space-y-6"><header><h1 className="text-2xl font-bold">ถอนเงิน</h1><p className="text-sm text-muted-foreground">ขอถอนยอดเงินจากการขายเข้าบัญชีธนาคารที่ยืนยันแล้ว — แอดมินตรวจสอบและโอนให้ด้วยตนเอง</p></header>
+    {(wallet.isPending || payouts.isPending || account.isPending) && <div role="status" aria-label="กำลังโหลดข้อมูลการเงิน" className="space-y-6"><div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]"><Skeleton className="h-64 rounded-xl"/><PanelSkeleton rows={3}/></div><TableSkeleton rows={4} columns={5}/></div>}
+    {otherError && <p role="alert" className="flex items-center gap-3 text-sm text-destructive">โหลดข้อมูลไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => { void wallet.refetch(); void payouts.refetch(); void account.refetch(); }}>ลองอีกครั้ง</Button></p>}
+    {!(wallet.isPending || payouts.isPending || account.isPending) && <><div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]"><PayoutBalance wallet={data} pendingCount={active.length} blockedReason={blockedReason} onWithdraw={() => openRequest()}/><Card className="gap-4 rounded-xl p-5"><div className="flex items-center justify-between gap-2"><h2 className="font-semibold">บัญชีรับเงิน</h2><span className={`rounded-full px-2 py-1 text-xs ${account.data ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{account.data ? "ยืนยันแล้ว" : "ยังไม่มี"}</span></div>{account.data ? <div className="space-y-3 rounded-lg bg-[#f0f3f3] p-4 text-sm"><div className="flex gap-3"><CreditCard className="size-5 text-teal-700"/><div><strong>{account.data.bankName}</strong><p>{maskAccount(account.data.accountNumber)}</p></div></div><div className="border-t pt-2"><p className="text-xs text-muted-foreground">ชื่อบัญชี</p><p>{account.data.accountName}</p></div><div><p className="text-xs text-muted-foreground">ยืนยันเมื่อ</p><p>{formatThaiDateTime(account.data.verifiedAt)}</p></div></div> : <p className="text-sm text-muted-foreground">ยังไม่มีบัญชีรับเงินที่ยืนยันแล้ว</p>}<p className="text-xs text-muted-foreground">เงินจะโอนเข้าบัญชีนี้เท่านั้น หากต้องการใช้บัญชีใหม่ กรุณาส่งเอกสารยืนยันอีกครั้ง</p><Link className="inline-flex items-center rounded-md border px-3 py-2 text-xs font-medium hover:bg-slate-50" to="/become-a-seller">{missingAccount ? "ยืนยันตัวตนและบัญชีธนาคาร" : "ส่งยืนยันบัญชีใหม่"}</Link></Card></div>
+    <PayoutTracker payouts={active} onSelect={setSelected}/>
+    <Card className="gap-0 overflow-hidden rounded-xl py-0"><div className="flex gap-5 border-b px-5"><button type="button" className={`py-4 text-sm ${tab === "payouts" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("payouts")}>คำขอถอนเงิน</button><button type="button" className={`py-4 text-sm ${tab === "wallet" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("wallet")}>รายการเคลื่อนไหวกระเป๋า</button></div>
+    {tab === "payouts" ? <><div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><h2 className="font-semibold">คำขอถอนเงิน</h2><p className="text-xs text-muted-foreground">{allPayouts.length} คำขอ · โอนสำเร็จแล้วรวม {money(paidTotal)}</p></div><select aria-label="สถานะคำขอ" className="rounded-md border bg-white px-3 py-2 text-sm" value={filter} onChange={(event) => setFilter(event.target.value)}><option value="ALL">สถานะ: ทั้งหมด</option>{Object.entries(payoutStatuses).map(([value, status]) => <option key={value} value={value}>{status.label}</option>)}</select></div>{history.length ? <div className="overflow-x-auto"><table className="w-full min-w-[740px] text-left text-sm"><thead className="bg-[#f0f3f3] text-xs text-muted-foreground"><tr><th className="px-5 py-3">วันที่ขอ</th><th>เลขที่</th><th>จำนวนเงิน</th><th>สถานะ</th><th>รายละเอียด</th><th className="pr-5"> </th></tr></thead><tbody>{history.map((payout) => <tr key={payout.id} className="cursor-pointer border-t hover:bg-slate-50" onClick={() => setSelected(payout)}><td className="px-5 py-4">{formatThaiDateTime(payout.requestedAt)}</td><td>#{payout.id}</td><td className="font-semibold">{money(payout.amount)}</td><td><StatusBadge status={payout.status}/></td><td className={payout.status === "REJECTED" || payout.status === "FAILED" ? "text-red-700" : ""}>{payoutDetail(payout)}</td><td className="pr-5"><button type="button" className="text-teal-700 hover:underline" onClick={() => setSelected(payout)}>ดูรายละเอียด ›</button></td></tr>)}</tbody></table></div> : <CardContent className="py-12 text-center"><p className="font-semibold">ยังไม่มีคำขอถอนเงิน</p><p className="mt-1 text-sm text-muted-foreground">เมื่อมียอดถอนได้อย่างน้อย {money(PAYOUT_MINIMUM)} คุณสามารถส่งคำขอถอนเงินได้ที่ปุ่มด้านบน</p></CardContent>}</> : <><div className="px-5 py-4"><h2 className="font-semibold">รายการเคลื่อนไหวกระเป๋า</h2><p className="text-xs text-muted-foreground">ทุกการเปลี่ยนแปลงยอดในกระเป๋า เรียงล่าสุดก่อน · ยอดที่ขอถอนจะขึ้นที่นี่เมื่อโอนสำเร็จเท่านั้น</p></div><div className="overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm"><thead className="bg-[#f0f3f3] text-xs text-muted-foreground"><tr><th className="px-5 py-3">วันที่</th><th>รายการ</th><th>อ้างอิง</th><th className="text-right">จำนวน</th><th className="pr-5 text-right">คงเหลือ</th></tr></thead><tbody>{data.entries.items.map((entry) => { const linked = entry.referenceType === "PAYOUT" ? allPayouts.find((payout) => payout.id === entry.referenceId) : null; return <tr key={entry.id} className="border-t"><td className="px-5 py-4">{formatThaiDateTime(entry.createdAt)}</td><td className="font-medium">{walletEntryLabel(entry.type)}</td><td>{linked ? <button type="button" className="text-teal-700 hover:underline" onClick={() => setSelected(linked)}>คำขอถอน #{linked.id}</button> : entry.referenceId ? `${entry.referenceType ?? "รายการ"} #${entry.referenceId}` : "—"}</td><td className={`text-right font-semibold ${entry.direction === "CREDIT" ? "text-emerald-700" : "text-red-600"}`}>{entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}</td><td className="pr-5 text-right text-muted-foreground">{money(entry.balanceAfter)}</td></tr>; })}</tbody></table>{!data.entries.items.length && <p className="p-8 text-center text-sm text-muted-foreground">ยังไม่มีรายการเคลื่อนไหว</p>}</div><div className="flex items-center justify-between border-t px-5 py-3 text-xs text-muted-foreground"><p>แสดง {data.entries.totalItems ? page * PAGE_SIZE + 1 : 0}–{Math.min((page + 1) * PAGE_SIZE, data.entries.totalItems)} จาก {data.entries.totalItems} รายการ</p><div className="flex gap-2"><Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>ก่อนหน้า</Button><Button variant="outline" size="sm" disabled={(page + 1) * PAGE_SIZE >= data.entries.totalItems} onClick={() => setPage((value) => value + 1)}>ถัดไป</Button></div></div></>}
+    </Card></>}
+    {account.data && <PayoutRequestDialog open={showRequest} onOpenChange={setShowRequest} amount={amount} onAmountChange={(value) => { setAmount(value); setConflict(null); }} withdrawable={Number(data.withdrawable)} account={account.data} submitting={submitting} conflict={conflict} onSubmit={() => void requestPayout()}/>}
+    <PayoutDetailSheet payout={selectedCurrent} account={account.data ?? null} onClose={() => setSelected(null)} onRetry={(value) => openRequest(value.toFixed(2))}/>
   </div>;
 }
