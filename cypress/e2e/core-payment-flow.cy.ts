@@ -175,13 +175,13 @@ describe('Core Payment & Checkout Flow', () => {
     cy.wait('@getSucceededPayment');
 
     // Asserts success message and order details
-    cy.contains('h1', 'ชำระเงินสำเร็จ').should('be.visible');
+    cy.contains('h1', 'Payment Successful').should('be.visible');
     cy.contains('ORD-101').should('be.visible');
-    cy.contains('ยอดชำระ ฿1,050.00').should('be.visible');
+    cy.contains('THB 1,050.00').should('be.visible');
 
     // Link to order history
-    cy.contains('a', 'ดูประวัติคำสั่งซื้อ')
+    cy.contains('a', 'View Order Details')
       .should('be.visible')
-      .should('have.attr', 'href', '/account/orders');
+      .should('have.attr', 'href', '/account/orders?orderId=101');
   });
 });
