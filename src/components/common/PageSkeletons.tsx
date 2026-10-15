@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -358,23 +359,189 @@ export function ArticlePageSkeleton({ label = "กำลังโหลดหน
   );
 }
 
-/** หน้า login / register — การ์ดกลางจอ */
-export function AuthPageSkeleton() {
+/** คลาสความกว้างและการ์ดสำหรับหน้า Auth (Login / Register) ให้ตรงกับหน้าจริง */
+export const CARD_WIDTH_CLASS = "w-full max-w-2xl";
+export const CARD_CONTAINER_CLASS =
+  "relative w-full max-w-2xl gap-0 overflow-hidden rounded-xl border border-border bg-card p-0 shadow-sm [--card-spacing:0px]";
+export const AUTH_CARD_WIDTH_CLASS = CARD_WIDTH_CLASS;
+export const AUTH_CARD_CONTAINER_CLASS = CARD_CONTAINER_CLASS;
+
+/** หน้า login — การ์ดขนาด max-w-2xl พร้อม banner สูง 220px และ 2 ช่องกรอก */
+export function LoginPageSkeleton({
+  label = "กำลังโหลดหน้าเข้าสู่ระบบ...",
+  className,
+}: {
+  label?: string;
+  className?: string;
+} = {}) {
   return (
-    <PageStatus
-      label="กำลังโหลด"
-      className="relative z-10 flex w-full max-w-md flex-col gap-5 rounded-2xl border bg-card p-8 shadow-sm"
+    <Card
+      role="status"
+      aria-busy="true"
+      aria-label={label}
+      className={cn(CARD_CONTAINER_CLASS, className)}
     >
-      <Skeleton className="mx-auto h-8 w-40 rounded-lg" />
-      <Skeleton className="mx-auto h-4 w-56 rounded-md" />
-      {Array.from({ length: 2 }, (_, i) => (
-        <div key={i} className="flex flex-col gap-2">
-          <Skeleton className="h-3.5 w-20 rounded-md" />
-          <Skeleton className="h-10 w-full rounded-lg" />
+      <span className="sr-only">{label}</span>
+
+      {/* Header Banner: h-[220px] matching real LoginPage */}
+      <div className="relative h-[220px] shrink-0 overflow-hidden bg-muted/40" aria-hidden="true">
+        <Skeleton className="size-full rounded-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <div className="absolute bottom-4 left-6 right-6">
+          <Skeleton className="h-10 w-64 max-w-full rounded-lg" tone="contrast" />
         </div>
-      ))}
-      <Skeleton className="h-11 w-full rounded-lg" />
-    </PageStatus>
+      </div>
+
+      {/* Body: p-8 matching real LoginPage */}
+      <div className="p-8" aria-hidden="true">
+        <div className="flex w-full flex-col gap-5">
+          <div className="flex flex-col gap-5">
+            {/* Email Field */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-12 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+
+            {/* Password Field */}
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-16 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <Skeleton className="h-12 w-full rounded-lg" />
+
+          {/* Footer Section */}
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="h-px w-full bg-border" />
+            <Skeleton className="mx-auto h-4 w-52 rounded-md" />
+          </div>
+
+          {/* Back Home Link */}
+          <Skeleton className="mx-auto h-4 w-28 rounded-md" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** หน้า register — การ์ดขนาด max-w-2xl พร้อม banner สูง 256px (h-64) และ 5 ช่องกรอก */
+export function RegisterPageSkeleton({
+  label = "กำลังโหลดหน้าลงทะเบียน...",
+  className,
+}: {
+  label?: string;
+  className?: string;
+} = {}) {
+  return (
+    <Card
+      role="status"
+      aria-busy="true"
+      aria-label={label}
+      className={cn(CARD_CONTAINER_CLASS, className)}
+    >
+      <span className="sr-only">{label}</span>
+
+      {/* Header Banner: h-64 (256px) matching real RegisterPage */}
+      <div className="relative h-64 shrink-0 overflow-hidden bg-muted/40" aria-hidden="true">
+        <Skeleton className="size-full rounded-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 p-6">
+          <Skeleton className="h-8 w-60 max-w-full rounded-lg" tone="contrast" />
+          <Skeleton className="h-4 w-4/5 max-w-md rounded-md" tone="contrast" />
+        </div>
+      </div>
+
+      {/* Body: p-8 matching real RegisterPage */}
+      <div className="flex flex-col gap-6 p-8" aria-hidden="true">
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex w-full flex-col gap-7">
+            {/* 1. Username Field */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-20 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+
+            {/* 2. Display Name Field */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-24 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+
+            {/* 3. Email Field */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-12 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+
+            {/* 4. Password Field (with description) */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-16 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+              <Skeleton className="h-3.5 w-32 rounded-md" />
+            </div>
+
+            {/* 5. Confirm Password Field */}
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-4 w-32 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-lg" />
+            </div>
+
+            {/* Checkbox agreement */}
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-4.5 shrink-0 rounded-sm" />
+              <Skeleton className="h-4 w-3/4 max-w-sm rounded-md" />
+            </div>
+
+            {/* Action Button */}
+            <Skeleton className="h-12 w-full rounded-lg" />
+          </div>
+
+          {/* Already have an account */}
+          <Skeleton className="mx-auto h-4 w-52 rounded-md" />
+
+          {/* Back to Home Link */}
+          <Skeleton className="mx-auto h-4 w-28 rounded-md" />
+
+          {/* Disclaimer text */}
+          <div className="pt-2">
+            <Skeleton className="mx-auto h-3 w-4/5 max-w-xs rounded-md" />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+export type AuthPageSkeletonProps = {
+  variant?: "login" | "register";
+  label?: string;
+  className?: string;
+};
+
+/**
+ * หน้า login / register — การ์ดกลางจอ
+ * รองรับ variant="login" (default) หรือ "register" เพื่อขนาดและโครงสร้างที่ตรงกับหน้าจริง
+ */
+export function AuthPageSkeleton({
+  variant = "login",
+  label,
+  className,
+}: AuthPageSkeletonProps = {}) {
+  if (variant === "register") {
+    return (
+      <RegisterPageSkeleton
+        label={label ?? "กำลังโหลดหน้าลงทะเบียน..."}
+        className={className}
+      />
+    );
+  }
+  return (
+    <LoginPageSkeleton
+      label={label ?? "กำลังโหลดหน้าเข้าสู่ระบบ..."}
+      className={className}
+    />
   );
 }
 
