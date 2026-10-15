@@ -13,7 +13,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
@@ -52,6 +52,8 @@ import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
+import { afterSalesApi } from "@/features/finance/after-sales.api";
+import { reviewKeys } from "@/features/finance/reviews.queries";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
@@ -309,6 +311,18 @@ function OrderCardItem({
   const autoCompleteAt = nextAutoCompleteAt(order);
   const tracking = firstTracking(order);
   const cancelReason = (order.sellerOrders ?? []).find((so) => so.cancelReason)?.cancelReason;
+  // Only completed parcels can be reviewed, once each: a refunded or cancelled seller
+  // in the same order, or one already reviewed, must not keep the button up.
+  const reviewable = stage === "COMPLETED"
+    ? (order.sellerOrders ?? []).filter((so) => so.status === "COMPLETED")
+    : [];
+  const myReviews = useQueries({
+    queries: reviewable.map((so) => ({
+      queryKey: reviewKeys.mine(so.id),
+      queryFn: () => afterSalesApi.myReview(so.id),
+    })),
+  });
+  const canReview = myReviews.some((review) => review.isSuccess && !review.data);
 
   const allItems: OrderItemDetails[] = (order.sellerOrders ?? []).flatMap(
     (so) => so.items ?? [],
@@ -485,7 +499,7 @@ function OrderCardItem({
               {isConfirming ? "Confirming..." : "Confirm Received"}
             </Button>
           )}
-          {stage === "COMPLETED" && (
+          {canReview && (
             <Button size="sm" onClick={onViewDetails}>
               Write a Review
             </Button>
