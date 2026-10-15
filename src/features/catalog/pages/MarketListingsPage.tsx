@@ -10,8 +10,8 @@ import { toast } from "@/components/ui/toast";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
-import { CONDITION_LABELS, productHref } from "../catalog.mappers";
-import { useGameList, useProductDetail, useProductListings } from "../catalog.queries";
+import { CONDITION_LABELS, marketForListing, productHref } from "../catalog.mappers";
+import { useGameList, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 
 const PAGE_SIZE = 20;
@@ -77,9 +77,11 @@ function MarketListingsSkeleton() {
 function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   const { product, images } = data;
   const listingsQuery = useProductListings(product.id);
+  const marketQuery = useProductMarket(product.id);
   const gamesQuery = useGameList();
   const [page, setPage] = useState(0);
   const listings = listingsQuery.data ?? [];
+  const market = marketForListing(marketQuery.data, listings[0]);
   const pageCount = Math.max(1, Math.ceil(listings.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
   const visibleListings = listings.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
@@ -134,7 +136,8 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
           </div>
           <div className="shrink-0 text-left sm:text-right">
             <p className="text-xs text-muted-foreground">Market price</p>
-            <p className="mt-1 text-[28px] font-bold leading-8">—</p>
+            <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatListingPrice(market.medianPrice, listings[0].currency) : "—"}</p>
+            {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">ข้อมูลราคายังน้อย</p>}
           </div>
         </section>
 

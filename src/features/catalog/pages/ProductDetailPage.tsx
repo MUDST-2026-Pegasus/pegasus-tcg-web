@@ -20,8 +20,8 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
-import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "../catalog.mappers";
-import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings } from "../catalog.queries";
+import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
@@ -160,6 +160,7 @@ function ProductDetailContent({
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const listingsQuery = useProductListings(product.id);
+  const marketQuery = useProductMarket(product.id);
   const collectorsQuery = useProductCollectors(product.id, collectorPage);
   const effectsQuery = useProductCardEffects(product.id);
   const gamesQuery = useGameList();
@@ -230,6 +231,8 @@ function ProductDetailContent({
       ? [...new Set<CardCondition>(["NM", "LP", "MP", ...availableConditions])]
       : availableConditions;
   const firstListing = filteredListings[0];
+  const market = marketForListing(marketQuery.data, firstListing);
+  const change30d = market?.change30dPercent;
   const purchasableListing = filteredListings.find((listing) => listing.quantityAvailable > 0);
   const availableForSelectedListing = purchasableListing?.quantityAvailable ?? 0;
   const quantity = quantitySelection.listingId === (purchasableListing?.id ?? null)
@@ -354,11 +357,12 @@ function ProductDetailContent({
             <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div><p className="text-sm font-medium text-muted-foreground">Market price</p><p className="mt-1 text-4xl font-bold">—</p></div>
-                  <div className="rounded-xl bg-muted px-3 py-2 text-right text-xs font-semibold text-muted-foreground"><span className="block text-sm">—</span>last 30 days</div>
+                  <div><p className="text-sm font-medium text-muted-foreground">Market price</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
+                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`}</span>last 30 days</div>
                 </div>
+                {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
-                  <div><span className="block text-xs text-muted-foreground">Last sold</span><strong>—</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">Last sold</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">Listed from</span><strong>{listingsReady && firstListing ? formatPrice(firstListing.price, firstListing.currency) : "—"}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">Available</span><strong>{listingsReady ? `${availableQuantity} ${itemLabel}` : "—"}</strong></div>
                 </div>
