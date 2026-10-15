@@ -64,7 +64,7 @@ const mockSetting: PlatformSetting = {
   key: "payment.slip_auto_approve",
   value: "false",
   description: "Auto approve slips",
-  updatedAt: "2026-10-15T00:00:00Z",
+  updatedBy: 1,
 };
 
 describe("AdminPaymentsPage", () => {
@@ -77,7 +77,7 @@ describe("AdminPaymentsPage", () => {
       key: "payment.transfer_account",
       value: JSON.stringify({ bankName: "กสิกรไทย", accountName: "Pegasus TCG", accountNumber: "1234567890" }),
       description: "Transfer Account",
-      updatedAt: "2026-10-15T00:00:00Z",
+      updatedBy: 1,
     });
   });
 

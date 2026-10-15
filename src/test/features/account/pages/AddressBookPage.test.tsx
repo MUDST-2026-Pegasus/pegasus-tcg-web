@@ -7,7 +7,7 @@ import { AddressBookPage } from "@/features/account/pages/AddressBookPage";
 import * as addressApi from "@/features/account/address.api";
 import * as authQueries from "@/features/auth/auth.queries";
 import type { Address } from "@/features/account/address.types";
-import type { UserProfile } from "@/features/auth/auth.types";
+import type { AuthUser } from "@/features/auth/auth.types";
 
 vi.mock("@/features/account/address.api", () => ({
   getAddresses: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock("@/features/account/address.api", () => ({
   deleteAddress: vi.fn(),
 }));
 
-const mockUser: UserProfile = {
+const mockUser: AuthUser = {
   id: 1,
   email: "ash@pokemon.com",
   username: "ashketchum",
@@ -75,9 +75,9 @@ describe("AddressBookPage", () => {
       user: mockUser,
       isAuthenticated: true,
       isLoading: false,
-      login: vi.fn(),
-      logout: vi.fn(),
-    } as any);
+      roles: ["BUYER"],
+      hasRole: vi.fn().mockReturnValue(true),
+    });
   });
 
   afterEach(() => {

@@ -98,14 +98,14 @@ describe("Payment Components", () => {
         grandTotal: 1500,
         status: "PAID",
         sellerOrders: [],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof ordersApi.getOrder>>);
 
       vi.mocked(financeApi.getPayment).mockResolvedValue({
         id: 201,
         salesOrderId: 101,
         status: "SUCCEEDED",
         amount: 1500,
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof financeApi.getPayment>>);
 
       renderWithProviders(<PaymentSuccessPage />, {
         route: "/payment/success?orderId=101&paymentId=201",
@@ -126,14 +126,14 @@ describe("Payment Components", () => {
         grandTotal: 800,
         status: "PENDING_PAYMENT",
         sellerOrders: [],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof ordersApi.getOrder>>);
 
       vi.mocked(financeApi.getPayment).mockResolvedValue({
         id: 202,
         salesOrderId: 102,
         status: "AWAITING_VERIFICATION",
         amount: 800,
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof financeApi.getPayment>>);
 
       renderWithProviders(<PaymentSuccessPage />, {
         route: "/payment/success?orderId=102&paymentId=202",

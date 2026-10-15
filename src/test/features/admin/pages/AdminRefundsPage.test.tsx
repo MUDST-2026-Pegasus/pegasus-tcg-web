@@ -37,6 +37,8 @@ const mockSummary: RefundSummary = {
 const mockRefunds: AdminRefund[] = [
   {
     id: 301,
+    salesOrderId: 301,
+    sellerOrderId: 301,
     orderNumber: "ORD-20261015-301",
     sellerOrderNumber: "S-ORD-301",
     seller: { id: 5, username: "cardseller", displayName: "Card Kingdom" },
@@ -44,7 +46,7 @@ const mockRefunds: AdminRefund[] = [
     returnRequestId: null,
     resolution: null,
     amount: 1200,
-    currency: "THB",
+    reason: "Damaged card received",
     status: "APPROVED",
     method: "BANK_TRANSFER",
     bankName: "กสิกรไทย",

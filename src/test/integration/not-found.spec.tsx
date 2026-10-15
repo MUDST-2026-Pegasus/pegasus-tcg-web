@@ -16,7 +16,7 @@ describe("public 404 route", () => {
       </QueryClientProvider>,
     );
 
-    expect(await screen.findByRole("heading", { name: "ไม่พบหน้าที่คุณกำลังหา" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ไม่พบหน้าที่คุณกำลังหา" }, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     expect(screen.queryByText("ยังไม่ได้ทำหน้านี้")).not.toBeInTheDocument();

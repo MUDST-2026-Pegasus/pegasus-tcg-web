@@ -65,10 +65,10 @@ const mockCategories: CatalogCategory[] = [
     parentId: null,
     code: "CARDS",
     name: "Trading Cards",
-    nameLocal: "การ์ดสะสม",
     slug: "trading-cards",
     displayOrder: 1,
     active: true,
+    imageKey: null,
   },
 ];
 
@@ -81,7 +81,7 @@ describe("AdminCardAttributesPage", () => {
       size: 1,
       totalItems: 0,
       totalPages: 0,
-    } as PageResponse<any>);
+    } as unknown as PageResponse<never>);
   });
 
   it("renders page title, game list, attribute fields, and supports tab switching", async () => {
