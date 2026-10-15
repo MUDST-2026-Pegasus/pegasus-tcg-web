@@ -10,6 +10,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useLogin } from "@/features/auth/auth.queries";
+import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { loginSchema, type LoginFormValues } from "@/features/auth/auth.schema";
 import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
@@ -102,6 +103,7 @@ export function LoginForm() {
           </Link>
         </p>
       </div>
+      <BackHomeLink />
     </form>
   );
 }
