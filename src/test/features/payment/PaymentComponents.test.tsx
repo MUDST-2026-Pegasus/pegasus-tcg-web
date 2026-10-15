@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { PaymentQrCard } from "@/features/payment/components/PaymentQrCard";
 import { PaymentOrderSummary } from "@/features/payment/components/PaymentOrderSummary";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";

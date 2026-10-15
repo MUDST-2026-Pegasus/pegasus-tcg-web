@@ -171,6 +171,7 @@ describe("Home Mappers", () => {
     it("maps TrendingProductDto with rank", () => {
       const trending: TrendingProductDto = {
         rank: 1,
+        unitsSold: 10,
         product,
       };
 
@@ -187,12 +188,17 @@ describe("Home Mappers", () => {
         condition: "NM",
         price: 500,
         currency: "THB",
+        quantityAvailable: 1,
         primaryPhotoUrl: "https://example.com/seller-photo.jpg",
+        seller: {
+          username: "kaiba",
+          displayName: "Seto Kaiba",
+          avatarUrl: null,
+        },
         card: {
           variantId: 1,
           sku: "LOB-001",
           variantLabel: "Ultra Rare",
-          variantActive: true,
           productId: 1,
           productName: "Blue-Eyes",
           productSlug: "blue-eyes",
