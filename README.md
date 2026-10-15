@@ -21,7 +21,7 @@ React 19, TypeScript 6, Vite 8, React Router 7, Tailwind CSS 4, shadcn/ui, TanSt
 
 ## Get started
 
-Install **Node.js 22** and **pnpm 10.6.5**. The API is optional for browsing the frontend, but features that request live data need it running locally on port `8080` or at the proxy target you configure below.
+Install **Node.js 22** and **pnpm 10.6.5**. The API is optional for browsing the frontend, but features that request live data need it running locally on port `8080` or at the `VITE_API_BASE_URL` you configure below.
 
 ```bash
 git clone https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web.git
@@ -38,7 +38,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open **http://localhost:5173**. By default, Vite sends `/api` requests to `http://localhost:8080`; change `VITE_API_PROXY_TARGET` in `.env.local` if your API runs elsewhere. Leave `VITE_API_BASE_URL` empty for local development so requests use this proxy. Restart the dev server after changing environment values.
+Open **http://localhost:5173**. The browser calls the API directly at `VITE_API_BASE_URL` (default `http://localhost:8080`); there is no dev proxy, so the API's `CORS_ALLOWED_ORIGINS` must include `http://localhost:5173` (it does by default). Restart the dev server after changing environment values.
 
 > **Windows PowerShell:** use `Copy-Item .env.example .env.local` in place of `cp` if needed.
 
@@ -48,8 +48,7 @@ Copy these from [`.env.example`](.env.example). Values beginning with `VITE_` ar
 
 | Variable | Local default / example | Purpose |
 | --- | --- | --- |
-| `VITE_API_PROXY_TARGET` | `http://localhost:8080` | Backend target for Vite's development `/api` proxy. |
-| `VITE_API_BASE_URL` | Empty | Optional backend origin prepended to `/api/v1` requests; leave empty in local development. A deployed frontend needs a reachable backend origin or a reverse proxy for `/api`. |
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend origin prepended to `/api/v1` requests (falls back to `http://localhost:8080` when empty). Set it to the deployed API origin at build time; that origin must allow the frontend in its CORS settings. |
 | `VITE_PEGASUS_STORE_USERNAME` | Empty (`pegasus_official` fallback) | Store username used for Pegasus Picks on the home page. |
 
 ## Everyday commands
@@ -110,7 +109,7 @@ To build and serve the static frontend with Nginx:
 docker compose up --build -d
 ```
 
-Open **http://localhost:4433** and stop it with `docker compose down`. This container serves the frontend only. Its current Nginx configuration does not proxy `/api`, and Vite variables are baked in at build time. For a working API in a Docker deployment, configure a reverse proxy for `/api` or build the frontend with a reachable `VITE_API_BASE_URL`.
+Open **http://localhost:4433** and stop it with `docker compose down`. This container serves the frontend only. Its current Nginx configuration does not proxy `/api`, and Vite variables are baked in at build time. For a working API in a Docker deployment, build the frontend with a reachable `VITE_API_BASE_URL`.
 
 ## Contributors
 
