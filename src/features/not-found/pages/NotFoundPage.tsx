@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import "./not-found.css";
 
 const quickLinks = [
   { label: "Pokémon", to: "/pokemon" },
@@ -29,19 +30,19 @@ export function NotFoundPage() {
   }
 
   return (
-    <section className="flex min-h-[620px] flex-col items-center bg-muted px-4 pb-20 pt-16 text-center sm:pb-28 sm:pt-24">
+    <section className="not-found-page flex min-h-[620px] flex-col items-center bg-muted px-4 pb-20 pt-16 text-center sm:pb-28 sm:pt-24">
       <div className="flex w-full max-w-xl flex-col items-center">
-        <div aria-hidden="true" className="flex h-40 items-center justify-center gap-2 sm:h-[190px] sm:gap-5">
-          <span className="text-[104px] font-black leading-none tracking-[-0.04em] text-primary sm:text-[148px]">4</span>
-          <div className="relative h-[142px] w-[120px] shrink-0 sm:h-[190px] sm:w-40">
-            <div className="absolute left-2 top-3 h-[120px] w-[86px] -rotate-9 rounded-xl border-[1.5px] border-border bg-card sm:left-2 sm:top-4 sm:h-[156px] sm:w-28" />
-            <div className="absolute left-7 top-2 h-[120px] w-[86px] rotate-6 rounded-xl border-[2.5px] border-primary bg-card shadow-lg sm:left-9 sm:top-3 sm:h-[156px] sm:w-28">
-              <div className="absolute inset-x-1.5 top-1.5 flex h-[79px] items-center justify-center rounded-lg bg-primary/10 text-[44px] font-black text-primary sm:inset-x-2 sm:top-2 sm:h-[104px] sm:text-[56px]">?</div>
-              <div className="absolute bottom-5 left-2 h-1.5 w-1/2 rounded-full bg-border sm:bottom-6" />
-              <div className="absolute bottom-2.5 left-2 h-1.5 w-1/3 rounded-full bg-border sm:bottom-3" />
+        <div aria-hidden="true" className="not-found-illustration">
+          <span className="not-found-digit">4</span>
+          <div className="not-found-card-stack">
+            <div className="not-found-card-back" />
+            <div className="not-found-card-front">
+              <div className="not-found-card-art">?</div>
+              <div className="not-found-card-line not-found-card-line-long" />
+              <div className="not-found-card-line not-found-card-line-short" />
             </div>
           </div>
-          <span className="text-[104px] font-black leading-none tracking-[-0.04em] text-primary sm:text-[148px]">4</span>
+          <span className="not-found-digit">4</span>
         </div>
 
         <div className="mt-7 space-y-2.5">
