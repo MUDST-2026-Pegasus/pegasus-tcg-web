@@ -46,6 +46,7 @@ const MyCollectionPage = lazyPage(() => import("@/features/collection/pages/MyCo
 const SellerApplicationPage = lazyPage(() => import("@/features/seller/application/SellerApplicationPage").then((m) => m.SellerApplicationPage), <FormPageSkeleton />);
 const NotFoundPage = lazyPage(() => import("@/features/not-found/pages/NotFoundPage").then((m) => m.NotFoundPage), <ArticlePageSkeleton />);
 
+
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
   element: <PublicLayout />,

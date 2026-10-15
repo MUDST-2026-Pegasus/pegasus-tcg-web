@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "feat/**", "fix/**"]
   pull_request:
     branches: ["main", "develop"]
 
@@ -15,9 +15,9 @@ permissions:
 
 jobs:
   quality:
-    name: Lint / Type Check / Build
+    name: Lint / Type Check / Tests / Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -46,6 +46,21 @@ jobs:
 
       - name: Type check
         run: pnpm exec tsc -b --noEmit
+
+      - name: Run Unit Tests
+        run: pnpm test:unit
+
+      - name: Run Integration Tests
+        run: pnpm test:integration
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Build
         run: pnpm build
