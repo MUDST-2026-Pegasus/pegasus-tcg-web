@@ -56,7 +56,7 @@ export function MyCollectionPage() {
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div><h1 className="text-3xl font-bold">My Collection</h1><p className="mt-1 text-muted-foreground">{total} cards in your collection.</p></div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" render={<Link to={`/users/${user.username}`} />}>View public profile</Button>
+          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>View public profile</Button>
           <Button variant="outline" render={<Link to="/account/profile" />}>My Account</Button>
           <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> Add Card</Button>
         </div>
