@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 
@@ -7,6 +8,7 @@ import { cartApi } from "@/features/cart/cart.api";
 import { CartPage } from "@/features/cart/pages/CartPage";
 import type { CartResponse } from "@/features/cart/cart.types";
 import { createTestQueryClient, render } from "@/test/utils";
+import { toast } from "@/components/ui/toast";
 
 const cart: CartResponse = {
   id: 1,
@@ -47,6 +49,7 @@ describe("CartPage item details", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(toast, "add").mockImplementation(vi.fn());
     getCart.mockResolvedValue(cart);
   });
 
@@ -63,5 +66,63 @@ describe("CartPage item details", () => {
     expect(screen.getByText("English / Holo")).toBeInTheDocument();
     expect(screen.getByText((_, element) => element?.tagName === "P" && element.textContent?.includes("Near Mint") === true)).toBeInTheDocument();
     expect(screen.getByText("Seller Store")).toBeInTheDocument();
+  });
+
+  function renderCart() {
+    return render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter><CartPage /></MemoryRouter>
+      </QueryClientProvider>,
+    );
+  }
+
+  it.each([80, 120])("requires explicit acceptance of a changed price (%s) before checkout", async (price) => {
+    const user = userEvent.setup();
+    const changedCart = { ...cart, items: [{ ...cart.items[0], currentPrice: price, priceChanged: true }] };
+    const acceptedCart = { ...cart, itemsSubtotal: price, items: [{ ...changedCart.items[0], unitPriceAtAdd: price, priceChanged: false }] };
+    getCart.mockResolvedValue(changedCart);
+    const accept = vi.spyOn(cartApi, "acceptPrices").mockImplementation(async () => {
+      getCart.mockResolvedValue(acceptedCart);
+      return acceptedCart;
+    });
+    renderCart();
+    expect(await screen.findByText("ราคาสินค้าบางรายการเปลี่ยนแปลง")).toBeInTheDocument();
+    expect(screen.getByText(`Price updated: ฿100 → ฿${price}`)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeDisabled();
+    expect(screen.getByText("กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "ยอมรับราคาใหม่" }));
+    expect(accept).toHaveBeenCalledWith([10]);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeEnabled());
+    expect(screen.queryByText(/Price updated:/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ยอมรับราคาใหม่" })).not.toBeInTheDocument();
+    expect(screen.getByText(`฿${price + 50}`)).toBeInTheDocument();
+  });
+
+  it.each([
+    { priceChanged: true, purchasable: true },
+    { priceChanged: false, purchasable: false },
+  ])("allows other items to checkout after deselecting a blocked item: %j", async (flags) => {
+    const user = userEvent.setup();
+    getCart.mockResolvedValue({ ...cart, items: [
+      { ...cart.items[0], ...flags },
+      { ...cart.items[0], id: 11, productName: "Charizard" },
+    ] });
+    renderCart();
+    await screen.findByRole("heading", { name: "Pikachu ex" });
+    expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeDisabled();
+    if (!flags.purchasable) expect(screen.getByText("กรุณานำสินค้าที่ไม่พร้อมจำหน่ายออก หรือยกเลิกเลือกก่อนสั่งซื้อ")).toBeInTheDocument();
+    await user.click(screen.getByRole("checkbox", { name: "เลือก Pikachu ex" }));
+    expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeEnabled();
+  });
+
+  it("keeps checkout blocked when accepting prices fails", async () => {
+    const user = userEvent.setup();
+    getCart.mockResolvedValue({ ...cart, items: [{ ...cart.items[0], priceChanged: true, currentPrice: 80 }] });
+    vi.spyOn(cartApi, "acceptPrices").mockRejectedValue(new Error("offline"));
+    renderCart();
+    await user.click(await screen.findByRole("button", { name: "ยอมรับราคาใหม่" }));
+    await waitFor(() => expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "ยอมรับราคาใหม่ไม่สำเร็จ" })));
+    expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "ยอมรับราคาใหม่" })).toBeEnabled();
   });
 });

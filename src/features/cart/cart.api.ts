@@ -9,6 +9,9 @@ import type {
 export const cartApi = {
   getCart: () => api.get<CartResponse>("/cart"),
 
+  acceptPrices: (cartItemIds?: number[]) =>
+    api.post<CartResponse>("/cart/items/accept-prices", { cartItemIds }),
+
   addItem: (data: AddCartItemRequest) =>
     api.post<CartItemResponse>("/cart/items", data),
 

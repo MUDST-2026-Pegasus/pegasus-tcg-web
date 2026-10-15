@@ -13,6 +13,7 @@ vi.mock("@/components/ui/toast", () => ({
 vi.mock("@/features/cart/cart.api", () => ({
   cartApi: {
     getCart: vi.fn(),
+    acceptPrices: vi.fn(),
     addItem: vi.fn(),
     updateQuantity: vi.fn(),
     removeItem: vi.fn(),
