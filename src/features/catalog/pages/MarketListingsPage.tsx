@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { addToCartErrorMessage } from "@/features/cart/cart.format";
+import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
 import { useGameList, useProductDetail, useProductListings } from "../catalog.queries";
-import type { ProductDetailDto } from "../catalog.types";
+import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 
 const PAGE_SIZE = 20;
 
@@ -84,6 +87,22 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   const imageUrl = image?.url ?? listings[0]?.card.officialImageUrl;
   const gameName = gamesQuery.data?.find((game) => game.id === product.gameId)?.name;
   const title = `${product.name}${product.cardNumber ? ` #${product.cardNumber.split("/")[0]}` : ""}`;
+  const addCartItem = useAddCartItem();
+  const addingListingId = addCartItem.isPending ? addCartItem.variables?.listingId : undefined;
+
+  /** ปุ่ม Add ใส่ทีละ 1 ชิ้น — อยากได้หลายชิ้นปรับจำนวนต่อในตะกร้า */
+  async function addListingToCart(listing: PublicListingDto) {
+    try {
+      await addCartItem.mutateAsync({ listingId: listing.id, quantity: 1 });
+      toast.add({
+        title: "เพิ่มลงรถเข็นแล้ว",
+        description: `${listing.seller.displayName || listing.seller.username} · ${CONDITION_LABELS[listing.condition]}`,
+        type: "success",
+      });
+    } catch (error) {
+      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
+    }
+  }
 
   return (
     <div className="min-h-full bg-[#f4f4f5] font-sans text-foreground">
@@ -137,7 +156,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block truncate text-xs font-semibold">—</span></div>
                   <strong className="text-right text-[15px]">{formatListingPrice(listing.price, listing.currency)}</strong>
-                  <div className="flex gap-[14px]"><span title="ระบบตะกร้าสินค้ากำลังพัฒนา"><Button type="button" disabled className="h-[31.5px] w-[58.74px] px-0 text-[12.25px] disabled:opacity-100">Add</Button></span><Button className="h-[31.5px] w-[66px] rounded-full bg-[#22292B] px-0 text-[12.25px] font-normal text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="flex gap-[14px]"><Button type="button" className="h-[31.5px] w-[58.74px] px-0 text-[12.25px]" disabled={addCartItem.isPending || listing.quantityAvailable < 1} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={() => void addListingToCart(listing)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-[31.5px] w-[66px] rounded-full bg-[#22292B] px-0 text-[12.25px] font-normal text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>
