@@ -45,7 +45,7 @@ export type Wallet = {
   reservedForPayout: number;
   withdrawable: number;
   entries: {
-    items: Array<{ id: number; type: string; direction: string; amount: number; createdAt: string }>;
+    items: Array<{ id: number; type: string; direction: string; amount: number; createdAt: string; balanceAfter: number; referenceType: string | null; referenceId: number | null }>;
     totalItems: number;
   };
 };
@@ -54,4 +54,5 @@ export type PayoutAccount = {
   bankName: string;
   accountName: string;
   accountNumber: string;
+  verifiedAt: string | null;
 };
