@@ -59,6 +59,7 @@ describe("seller payout page", () => {
     expect(await screen.findByText("฿3,420.00")).toBeTruthy();
     expect(screen.getByText("••••7890")).toBeTruthy();
     expect(screen.getByText("฿5,420.00")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "ส่งยืนยันบัญชีใหม่" }).getAttribute("href")).toBe("/seller/verification");
     fireEvent.click(screen.getByRole("button", { name: "ขอถอนเงิน" }));
     const dialog = screen.getByRole("dialog", { name: "ขอถอนเงิน" });
     const input = within(dialog).getByRole("textbox", { name: "จำนวนเงินที่ต้องการถอน" });
@@ -110,5 +111,17 @@ describe("seller payout page", () => {
     renderPage();
     expect(await screen.findByText(/สถานะร้านยังไม่ใช่/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "ขอถอนเงิน" }).hasAttribute("disabled")).toBe(true);
+  });
+  it("does not show zero balances or empty history when finance APIs are unavailable", async () => {
+    const unavailable = new ApiError({ status: 403, code: "SELLER_NOT_VERIFIED", message: "Not verified" });
+    vi.mocked(financeApi.wallet).mockRejectedValue(unavailable);
+    vi.mocked(financeApi.myPayouts).mockRejectedValue(unavailable);
+    vi.mocked(financeApi.payoutAccount).mockRejectedValue(unavailable);
+    renderPage();
+    expect(await screen.findByText("ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน")).toBeTruthy();
+    expect(screen.queryByText("฿0.00")).toBeNull();
+    expect(screen.queryByText("ยังไม่มีคำขอถอนเงิน")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
+    expect(screen.getByText("ยังโหลดรายการเคลื่อนไหวกระเป๋าไม่ได้")).toBeTruthy();
   });
 });
