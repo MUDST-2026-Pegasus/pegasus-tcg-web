@@ -151,10 +151,10 @@ describe('Core Finance & Payout Flow', () => {
 
     // Header & balance assertions
     cy.contains('h1', 'ถอนเงิน').should('be.visible');
-    cy.contains('ยอดเงินพร้อมถอน').should('be.visible');
+    cy.contains('ยอดถอนได้ตอนนี้').should('be.visible');
     cy.contains('12,000.00').should('be.visible');
-    cy.contains('กำลังดำเนินการ').should('be.visible');
-    cy.contains('รอครบกำหนด').should('be.visible');
+    cy.contains('กันไว้สำหรับคำขอถอน').should('be.visible');
+    cy.contains('รอผู้ซื้อยืนยันรับสินค้า').should('be.visible');
 
     // Payout account assertions
     cy.contains('บัญชีรับเงิน').should('be.visible');
@@ -163,7 +163,7 @@ describe('Core Finance & Payout Flow', () => {
     cy.contains('นาย สมชาย ขายดี').should('be.visible');
 
     // History assertions
-    cy.contains('ประวัติการถอนเงิน').should('be.visible');
+    cy.contains('คำขอถอนเงิน').should('be.visible');
     cy.contains('#101').should('be.visible');
     cy.contains('5,000.00').should('be.visible');
     cy.contains('โอนสำเร็จ').should('be.visible');
@@ -198,21 +198,21 @@ describe('Core Finance & Payout Flow', () => {
     cy.on('window:confirm', () => true);
 
     // Open payout request modal/card
-    cy.contains('button', 'ถอนเงินตอนนี้').click();
+    cy.contains('button', 'ขอถอนเงิน').click();
     cy.contains('ขอถอนเงิน').should('be.visible');
 
     // Enter payout amount
     cy.get('input[aria-label="จำนวนเงินที่ต้องการถอน"]').clear().type('2500');
 
     // Submit payout
-    cy.contains('button', 'ยืนยันคำขอถอนเงิน').click();
+    cy.contains('button', 'ยืนยันขอถอน').click();
 
     cy.wait('@requestPayout').its('request.body').should('deep.include', {
       amount: 2500,
     });
 
     // Check success notification
-    cy.contains('ส่งคำขอถอนแล้ว').should('be.visible');
+    cy.contains('ส่งคำขอถอน #102 แล้ว').should('be.visible');
   });
 
   it('expands wallet transaction log', () => {
@@ -221,7 +221,7 @@ describe('Core Finance & Payout Flow', () => {
     cy.wait('@getWallet');
 
     // Click wallet movements details
-    cy.contains('รายการเคลื่อนไหว Wallet').click();
+    cy.contains('button', 'รายการเคลื่อนไหวกระเป๋า').click();
     cy.contains('+฿3,500.00').should('be.visible');
   });
 });
