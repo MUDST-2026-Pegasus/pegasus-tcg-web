@@ -1,8 +1,8 @@
-name: Cypress E2E & Component Tests
+name: Cypress E2E Tests
 
 on:
   push:
-    branches: ["main", "develop", "feat/**"]
+    branches: ["main", "develop", "feat/**", "fix/**"]
   pull_request:
     branches: ["main", "develop"]
 
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   test:
-    name: Vitest & Cypress Tests
+    name: Cypress E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -48,9 +48,6 @@ jobs:
 
       - name: Install Cypress binary
         run: pnpm exec cypress install
-
-      - name: Run Vitest Component Tests
-        run: pnpm vitest run src/test/features/cart/CartSummary.test.tsx src/test/features/payment/PromptPayModal.test.tsx
 
       - name: Build Web Application
         run: pnpm build

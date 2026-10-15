@@ -13,6 +13,7 @@
     "test:unit": "vitest run --exclude \"src/test/integration/**\" --passWithNoTests",
     "test:integration": "vitest run src/test/integration --passWithNoTests",
     "test:watch": "vitest --passWithNoTests",
+    "test:e2e": "cypress run",
     "cyopen": "cypress open",
     "cyrun": "cypress run"
   },
