@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const sections = [
   {
@@ -35,11 +35,52 @@ const sections = [
 ];
 
 export function TermsOfServicePage() {
+  const [activeId, setActiveId] = useState("01");
+  const isManualScroll = useRef(false);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isManualScroll.current) return;
+
+      const scrollPosition = window.scrollY + 140;
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 50;
+
+      if (atBottom) {
+        setActiveId(sections[sections.length - 1].id);
+        return;
+      }
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(`section-${sections[i].id}`);
+        if (el && el.offsetTop <= scrollPosition) {
+          setActiveId(sections[i].id);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
   const handleScrollToSection = (id: string) => {
+    setActiveId(id);
+    isManualScroll.current = true;
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isManualScroll.current = false;
+    }, 800);
+
     const element = document.getElementById(`section-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -76,9 +117,10 @@ export function TermsOfServicePage() {
                 {sections.map((section) => (
                   <li key={section.id}>
                     <button
+                      type="button"
                       onClick={() => handleScrollToSection(section.id)}
                       className="flex items-center gap-3 text-left transition-colors hover:text-foreground text-muted-foreground data-[active=true]:text-foreground data-[active=true]:font-medium"
-                      data-active={section.id === "01"} // Simple visual for 'Introduction' to match image
+                      data-active={section.id === activeId}
                     >
                       <span className="font-semibold text-primary">{section.id}</span>
                       {section.title}
@@ -93,7 +135,7 @@ export function TermsOfServicePage() {
           <main className="flex-1 rounded-xl border border-border/50 bg-background p-8 shadow-sm md:p-10">
             <div className="space-y-10">
               {sections.map((section, index) => (
-                <div key={section.id} id={`section-${section.id}`}>
+                <div key={section.id} id={`section-${section.id}`} className="scroll-mt-24">
                   <h2 className="flex items-center gap-3 text-xl font-bold text-foreground">
                     <span className="text-[15px] font-semibold text-primary">{section.id}</span>
                     {section.title}
