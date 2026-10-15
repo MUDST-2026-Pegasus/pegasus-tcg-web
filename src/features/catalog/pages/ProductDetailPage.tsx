@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
+import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "../catalog.mappers";
 import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings } from "../catalog.queries";
@@ -232,16 +233,7 @@ function ProductDetailContent({
       });
       return true;
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "เพิ่มสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: message, type: "error" });
+      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
       return false;
     }
   }
@@ -277,16 +269,11 @@ function ProductDetailContent({
       });
       navigate(`/checkout?${params.toString()}`);
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "ซื้อสินค้าไม่สำเร็จ", description: message, type: "error" });
+      toast.add({
+        title: "ซื้อสินค้าไม่สำเร็จ",
+        description: addToCartErrorMessage(error, "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง"),
+        type: "error",
+      });
     } finally {
       setIsBuyingNow(false);
     }
