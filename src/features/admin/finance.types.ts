@@ -8,6 +8,8 @@ export type FinanceParty = {
   id: number;
   username: string;
   displayName: string;
+  /** presigned GET อายุสั้น ห้ามเก็บ — `null` = ยังไม่ได้ตั้งรูปโปรไฟล์ */
+  avatarUrl: string | null;
 };
 
 export type BankAccount = {

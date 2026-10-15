@@ -44,6 +44,7 @@ const mockVerification: Verification = {
   reviewedBy: null,
   reviewedAt: null,
   rejectionReason: null,
+  sellerAvatarUrl: null,
 };
 
 function mockQueuePage(items: Verification[]): PageResponse<Verification> {

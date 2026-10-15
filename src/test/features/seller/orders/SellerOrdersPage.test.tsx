@@ -45,7 +45,7 @@ function summary(id: number, sellerOrderNumber: string): SellerOrderSummary {
       sellerName: null,
     },
     orderNumber: sellerOrderNumber.replace(/-S\d+$/, ""),
-    buyer: { id: 5, username: "nattapong_p", displayName: "Nattapong" },
+    buyer: { id: 5, username: "nattapong_p", displayName: "Nattapong", avatarUrl: null },
     paidAt: "2026-10-13T03:00:00Z",
     shipBy: null,
     shippingAddressSnapshot: null,
