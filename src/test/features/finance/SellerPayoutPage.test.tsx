@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { SellerPayoutPage } from "@/features/seller/payout/SellerPayoutPage";
@@ -57,7 +57,7 @@ describe("seller payout page", () => {
   it("shows real wallet values and submits only a valid request", async () => {
     renderPage();
     expect(await screen.findByText("฿3,420.00")).toBeTruthy();
-    expect(screen.getByText("••••7890")).toBeTruthy();
+    expect(await screen.findByText("••••7890")).toBeTruthy();
     expect(screen.getByText("฿5,420.00")).toBeTruthy();
     expect(screen.getByRole("link", { name: "ส่งยืนยันบัญชีใหม่" }).getAttribute("href")).toBe("/seller/verification");
     fireEvent.click(screen.getByRole("button", { name: "ขอถอนเงิน" }));
@@ -80,6 +80,22 @@ describe("seller payout page", () => {
     fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
     expect(screen.getByText("+฿500.00")).toBeTruthy();
     expect(screen.getByText("แสดง 1–1 จาก 1 รายการ")).toBeTruthy();
+  });
+  it("keeps the payout page visible while the next wallet ledger page loads", async () => {
+    let resolveNext!: (value: Wallet) => void;
+    vi.mocked(financeApi.wallet).mockImplementation((page) => page === 0
+      ? Promise.resolve({ ...wallet, entries: { ...wallet.entries, totalItems: 21 } })
+      : new Promise<Wallet>((resolve) => { resolveNext = resolve; }));
+    renderPage();
+    await screen.findByText("฿3,420.00");
+    fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
+    fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
+    expect(screen.getByText("฿3,420.00")).toBeTruthy();
+    expect(screen.getByText("กำลังโหลดรายการ...")).toBeTruthy();
+    expect(screen.queryByRole("status", { name: "กำลังโหลดข้อมูลการเงิน" })).toBeNull();
+    await act(async () => resolveNext({ ...wallet, entries: { items: [], totalItems: 21 } }));
+    expect(await screen.findByText("แสดง 21–21 จาก 21 รายการ")).toBeTruthy();
+    expect(financeApi.wallet).toHaveBeenCalledWith(1, 20);
   });
   it("blocks withdrawal below the minimum", async () => {
     vi.mocked(financeApi.wallet).mockResolvedValue({ ...wallet, withdrawable: 50 });
