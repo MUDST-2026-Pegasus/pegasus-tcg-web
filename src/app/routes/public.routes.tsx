@@ -12,6 +12,7 @@ import {
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { HomePageSkeleton } from "@/features/home/components/HomePageSkeleton";
+import { StoreRedirect } from "@/features/store/components/StoreRedirect";
 
 /*
  * ทุกหน้าแยก chunk ด้วย lazyPage — ระหว่างโหลดโค้ดจะเห็น skeleton ทรงเดียวกับหน้านั้น
@@ -26,7 +27,6 @@ const MarketListingsPage = lazyPage(() => import("@/features/catalog/pages/Marke
 const ListingDetailPage = lazyPage(() => import("@/features/catalog/pages/ListingDetailPage").then((m) => m.ListingDetailPage), <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />);
 const SearchResultsPage = lazyPage(() => import("@/features/catalog/pages/SearchResultsPage").then((m) => m.SearchResultsPage), <CatalogPageSkeleton label="กำลังโหลดผลการค้นหา" />);
 
-const StoreProfilePage = lazyPage(() => import("@/features/store/pages/StoreProfilePage").then((m) => m.StoreProfilePage), <ProfilePageSkeleton label="กำลังโหลดร้านค้า" />);
 const PublicSellerPage = lazyPage(() => import("@/features/store/pages/PublicSellerPage").then((m) => m.PublicSellerPage), <ProfilePageSkeleton label="กำลังโหลดร้านค้า" />);
 const PublicCollectionPage = lazyPage(() => import("@/features/collection/pages/PublicCollectionPage").then((m) => m.PublicCollectionPage), <ProfilePageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 
@@ -61,7 +61,7 @@ export const publicRoutes: RouteObject = {
     { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
     { path: "search", element: <SearchResultsPage /> },
 
-    { path: "store/:storeId", element: <StoreProfilePage /> },
+    { path: "store/:storeId", element: <StoreRedirect /> },
     { path: "u/:username", element: <PublicSellerPage /> },
     { path: "users/:username", element: <PublicCollectionPage /> },
 

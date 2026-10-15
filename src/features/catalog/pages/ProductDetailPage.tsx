@@ -7,13 +7,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
+import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "../catalog.mappers";
 import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+
+/** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
+const ALL_VARIANTS = "all";
 
 function formatPrice(amount: number, currency = "THB") {
   return new Intl.NumberFormat("th-TH", {
@@ -127,6 +139,13 @@ function ProductDetailContent({
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
   const itemLabel = product.productType === "SINGLE_CARD" ? "cards" : "items";
+  const variantItems = [
+    { value: ALL_VARIANTS, label: "All variants" },
+    ...variants.map((variant) => ({
+      value: String(variant.id),
+      label: [variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / "),
+    })),
+  ];
 
   const [selectedImageId, setSelectedImageId] = useState<number | null>(
       null,
@@ -232,16 +251,7 @@ function ProductDetailContent({
       });
       return true;
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "เพิ่มสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: message, type: "error" });
+      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
       return false;
     }
   }
@@ -277,16 +287,11 @@ function ProductDetailContent({
       });
       navigate(`/checkout?${params.toString()}`);
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "ซื้อสินค้าไม่สำเร็จ", description: message, type: "error" });
+      toast.add({
+        title: "ซื้อสินค้าไม่สำเร็จ",
+        description: addToCartErrorMessage(error, "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง"),
+        type: "error",
+      });
     } finally {
       setIsBuyingNow(false);
     }
@@ -361,11 +366,23 @@ function ProductDetailContent({
             </Card>
 
             <div>
-              <label htmlFor="variant" className="mb-3 block font-bold">Select variant</label>
-              <select id="variant" value={selectedVariant} onChange={(event) => changeVariant(event.target.value)} className="h-12 w-full rounded-xl border bg-white px-4 text-sm">
-                <option value="">All variants</option>
-                {variants.map((variant) => <option key={variant.id} value={variant.id}>{[variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / ")}</option>)}
-              </select>
+              <p className="mb-3 font-bold">Select variant</p>
+              <Select
+                items={variantItems}
+                value={selectedVariant || ALL_VARIANTS}
+                onValueChange={(value) => changeVariant(!value || value === ALL_VARIANTS ? "" : value)}
+              >
+                <SelectTrigger aria-label="Select variant" className="h-12 w-full rounded-xl border-border bg-white px-4">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {variantItems.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
