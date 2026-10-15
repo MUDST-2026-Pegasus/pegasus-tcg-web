@@ -619,7 +619,7 @@ function PegasusPicksSection() {
       title="Pegasus Picks"
       description="Curated, verified, and shipped by Pegasus."
       actionLabel="Shop Pegasus"
-      actionHref={`/store/${encodeURIComponent(env.pegasusStoreUsername)}`}
+      actionHref={`/u/${encodeURIComponent(env.pegasusStoreUsername)}`}
       products={query.data}
     />
   );
