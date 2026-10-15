@@ -50,6 +50,7 @@ export type Review = {
 };
 export type PublicReview = Pick<Review, "id" | "rating" | "title" | "comment" | "replyComment" | "createdAt"> & {
   reviewerUsername: string;
+  repliedAt?: string | null;
 };
 export type PublicReviews = {
   reviews: PublicReview[];

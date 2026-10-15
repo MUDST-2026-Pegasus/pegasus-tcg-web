@@ -20,7 +20,7 @@ describe("public 404 route", () => {
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     expect(screen.queryByText("ยังไม่ได้ทำหน้านี้")).not.toBeInTheDocument();
-    expect(document.title).toContain("ไม่พบหน้านี้");
+    await waitFor(() => expect(document.title).toContain("ไม่พบหน้านี้"));
     for (const [name, href] of [
       ["กลับหน้าแรก", "/"],
       ["ดูสินค้าทั้งหมด", "/products"],
