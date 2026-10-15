@@ -11,7 +11,7 @@ export function LoginPage() {
         alt=""
         className="absolute inset-0 size-full object-cover opacity-10"
       />
-      <Card className="relative w-full max-w-[672px] gap-0 rounded-xl p-0 shadow-sm [--card-spacing:0px]">
+      <Card className="relative w-full max-w-2xl gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-sm [--card-spacing:0px]">
         <div className="relative h-[220px] shrink-0 overflow-hidden">
           <img
             src={loginHeader}
