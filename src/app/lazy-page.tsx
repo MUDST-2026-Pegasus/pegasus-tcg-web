@@ -1,5 +1,7 @@
 import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
 
+import { InitialRouteReady } from "@/app/InitialRouteReady";
+
 /**
  * แยกโค้ดของหน้าออกเป็น chunk ของตัวเอง แล้วโชว์ skeleton ระหว่างโหลด
  *
@@ -28,6 +30,7 @@ export function lazyPage<P extends object>(
     return (
       <Suspense fallback={fallback}>
         <Page {...props} />
+        <InitialRouteReady />
       </Suspense>
     );
   }
