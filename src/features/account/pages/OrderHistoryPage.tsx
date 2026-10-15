@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronUp,
@@ -13,7 +13,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
@@ -73,6 +73,14 @@ import {
 
 export function OrderHistoryPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedOrderId = Number(searchParams.get("orderId"));
+  const linkedOrder = useQuery({
+    queryKey: ["orders", linkedOrderId],
+    queryFn: () => ordersApi.getOrder(linkedOrderId),
+    enabled: Number.isSafeInteger(linkedOrderId) && linkedOrderId > 0,
+    retry: false,
+  });
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -87,6 +95,7 @@ export function OrderHistoryPage() {
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<OrderDetails | null>(null);
+  const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
 
   const sidebarUser = toSidebarUser(user);
 
@@ -234,13 +243,19 @@ export function OrderHistoryPage() {
       />
 
       {/* Order Details Modal */}
-      {selectedOrderForDetails && (
+      {detailOrder && (
         <OrderDetailsModal
-          order={selectedOrderForDetails}
-          open={!!selectedOrderForDetails}
-          onClose={() => setSelectedOrderForDetails(null)}
-          onConfirmReceived={() => setConfirmTarget(selectedOrderForDetails)}
-          isConfirming={confirmingOrderId === selectedOrderForDetails.id}
+          order={detailOrder}
+          open={!!detailOrder}
+          onClose={() => {
+            setSelectedOrderForDetails(null);
+            setSearchParams((current) => {
+              current.delete("orderId");
+              return current;
+            }, { replace: true });
+          }}
+          onConfirmReceived={() => setConfirmTarget(detailOrder)}
+          isConfirming={confirmingOrderId === detailOrder.id}
         />
       )}
 

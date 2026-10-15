@@ -39,6 +39,7 @@ type AddressFormDialogProps = {
   onOpenChange: (open: boolean) => void;
   /** ไม่ส่งมา = เพิ่มที่อยู่ใหม่ */
   address?: Address;
+  onSaved?: (address: Address) => void;
 };
 
 /**
@@ -51,12 +52,13 @@ export function AddressFormDialog({
   open,
   onOpenChange,
   address,
+  onSaved,
 }: AddressFormDialogProps) {
   const isEdit = address !== undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? "Edit Address" : "Add New Address"}
@@ -68,7 +70,10 @@ export function AddressFormDialog({
         <AddressForm
           key={address?.id ?? "new"}
           address={address}
-          onSaved={() => onOpenChange(false)}
+          onSaved={(saved) => {
+            onSaved?.(saved);
+            onOpenChange(false);
+          }}
         />
       </DialogContent>
     </Dialog>
@@ -80,7 +85,7 @@ function AddressForm({
   onSaved,
 }: {
   address?: Address;
-  onSaved: () => void;
+  onSaved: (address: Address) => void;
 }) {
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -100,12 +105,10 @@ function AddressForm({
     const payload = toAddressPayload(values, address);
 
     try {
-      if (address) {
-        await updateAddress.mutateAsync({ addressId: address.id, payload });
-      } else {
-        await createAddress.mutateAsync(payload);
-      }
-      onSaved();
+      const saved = address
+        ? await updateAddress.mutateAsync({ addressId: address.id, payload })
+        : await createAddress.mutateAsync(payload);
+      onSaved(saved);
     } catch (error) {
       // ชื่อฟิลด์ใน violations ตรงกับชื่อช่องอยู่แล้ว ไม่ต้อง map
       // ตัวที่ไม่มีช่องรับผิดชอบจะไปโผล่ที่ Alert ด้านบนฟอร์มแทน

@@ -11,7 +11,6 @@ export interface CartItem {
 
 export const CART_PAGE_FIXTURE: {
   items: CartItem[];
-  shippingCost: number;
 } = {
   items: [
     {
@@ -35,7 +34,6 @@ export const CART_PAGE_FIXTURE: {
       image: "/luffy.jpg",
     }
   ],
-  shippingCost: 150,
 };
 
 export const CHECKOUT_PAGE_FIXTURE = {
@@ -45,7 +43,6 @@ export const CHECKOUT_PAGE_FIXTURE = {
     condition: "PSA 10",
   },
   fees: {
-    shipping: "฿597",
     purchase: "฿113",
     authentication: "฿0",
     taxes: "Pay at the door",
@@ -61,7 +58,6 @@ export const CHECKOUT_PAGE_FIXTURE = {
     condition: string;
   };
   fees: {
-    shipping: string;
     purchase: string;
     authentication: string;
     taxes: string;

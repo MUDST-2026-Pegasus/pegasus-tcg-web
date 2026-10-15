@@ -9,6 +9,7 @@ import { getErrorMessage } from "@/lib/api";
 
 import { toSidebarUser } from "../account.format";
 import { useAddresses, useSetDefaultAddress } from "../address.queries";
+import { MAX_ADDRESSES } from "../address.format";
 import type { Address } from "../address.types";
 import { AccountSidebar } from "../components/AccountSidebar";
 import { AddressBookSkeleton } from "../components/AddressBookSkeleton";
@@ -54,7 +55,7 @@ export function AddressBookPage() {
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-semibold">Address Book</h1>
-            <Button onClick={() => setEditing("new")}>
+            <Button disabled={(addresses.data?.length ?? 0) >= MAX_ADDRESSES} onClick={() => setEditing("new")}>
               <Plus data-icon="inline-start" /> Add New Address
             </Button>
           </div>
@@ -93,7 +94,7 @@ export function AddressBookPage() {
                     }
                   />
                 ))}
-                <Button
+                {items.length < MAX_ADDRESSES && <Button
                   variant="outline"
                   className="h-64 flex-col gap-3 border-dashed text-center"
                   onClick={() => setEditing("new")}
@@ -105,7 +106,7 @@ export function AddressBookPage() {
                   <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
                     Save a new shipping destination for faster checkout.
                   </span>
-                </Button>
+                </Button>}
               </div>
             )}
           </QueryBoundary>
