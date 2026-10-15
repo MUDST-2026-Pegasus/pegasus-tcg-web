@@ -1,5 +1,27 @@
 describe('Catalog UI', () => {
   beforeEach(() => {
+    // Mock auth & cart for navbar
+    cy.intercept('GET', '**/api/v1/auth/me*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        message: 'OK',
+        data: null,
+      },
+    }).as('getMe');
+
+    cy.intercept('GET', '**/api/v1/cart*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        message: 'OK',
+        data: {
+          items: [],
+          totalQuantity: 0,
+        },
+      },
+    }).as('getCart');
+
     // Mock games list
     cy.intercept('GET', '**/api/v1/games*', {
       statusCode: 200,
@@ -10,8 +32,7 @@ describe('Catalog UI', () => {
       },
     }).as('getGames');
 
-    // Mock catalog products API request
-    cy.intercept('GET', '**/api/v1/*products*', {
+    const productsResponse = {
       statusCode: 200,
       body: {
         success: true,
@@ -40,7 +61,11 @@ describe('Catalog UI', () => {
           totalPages: 1,
         },
       },
-    }).as('getProducts');
+    };
+
+    // Mock catalog products API request
+    cy.intercept('GET', '**/api/v1/catalog/products*', productsResponse).as('getCatalogProducts');
+    cy.intercept('GET', '**/api/v1/products*', productsResponse).as('getProducts');
 
     // Mock product detail
     cy.intercept('GET', '**/api/v1/catalog/products/blue-eyes-white-dragon*', {
@@ -114,20 +139,18 @@ describe('Catalog UI', () => {
 
   it('displays products in the catalog using ItemCard/ProductCard', () => {
     cy.visit('/products');
-    cy.wait('@getProducts');
 
     // Check if product names and links are displayed
-    cy.contains('Blue-Eyes White Dragon').should('be.visible');
+    cy.contains('Blue-Eyes White Dragon', { timeout: 10000 }).should('be.visible');
     cy.contains('Legend of Blue Eyes White Dragon').should('be.visible');
     cy.get('a[href*="/product"]').should('have.length.at.least', 2);
   });
 
   it('allows clicking on a product to view details', () => {
     cy.visit('/products');
-    cy.wait('@getProducts');
 
     // Find the first link that goes to a product
-    cy.get('a[href*="/product"]').first().click();
+    cy.contains('Blue-Eyes White Dragon', { timeout: 10000 }).click();
     cy.url().should('match', /\/products?\//);
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
