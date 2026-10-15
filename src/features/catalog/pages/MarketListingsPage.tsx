@@ -3,10 +3,12 @@ import { ChevronRight, Loader2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import { initialsOf } from "@/features/account/account.format";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
@@ -152,9 +154,15 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
             <div className="divide-y divide-[#e3e7e8]">
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
-                  <div className="min-w-0">
-                    <Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(product.slug)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
-                    <p className="truncate text-[11px] text-muted-foreground">@{listing.seller.username} · {listing.card.variantLabel}</p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar size="default">
+                      {listing.seller.avatarUrl && <AvatarImage src={listing.seller.avatarUrl} alt="" />}
+                      <AvatarFallback>{initialsOf(listing.seller.displayName || listing.seller.username)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(product.slug)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
+                      <p className="truncate text-[11px] text-muted-foreground">@{listing.seller.username} · {listing.card.variantLabel}</p>
+                    </div>
                   </div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block truncate text-xs font-semibold">—</span></div>

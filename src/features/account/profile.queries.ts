@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { authKeys } from "@/features/auth/auth.queries";
 import type { AuthUser } from "@/features/auth/auth.types";
+import { catalogKeys } from "@/features/catalog/catalog.queries";
 
 import * as profileApi from "./profile.api";
 import type { UpdateProfilePayload } from "./profile.types";
@@ -19,6 +20,7 @@ export function useUpdateProfile() {
       );
       queryClient.invalidateQueries({ queryKey: authKeys.me() });
       queryClient.invalidateQueries({ queryKey: ['public-profile', updatedUser.username] });
+      queryClient.invalidateQueries({ queryKey: catalogKeys.all });
     },
   });
 }
