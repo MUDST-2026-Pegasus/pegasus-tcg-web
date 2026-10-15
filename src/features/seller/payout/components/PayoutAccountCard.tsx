@@ -1,5 +1,4 @@
 import { CreditCard } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import type { PayoutAccount } from "@/features/finance/finance.types";
 import { formatThaiDateTime, maskAccount } from "../payout.format";
@@ -50,9 +49,9 @@ export function PayoutAccountCard({ account, missingAccount }: Props) {
       <p className="text-xs text-muted-foreground">
         เงินจะโอนเข้าบัญชีนี้เท่านั้น หากต้องการใช้บัญชีใหม่ กรุณาส่งเอกสารยืนยันอีกครั้ง
       </p>
-      <Link className="inline-flex items-center rounded-md border px-3 py-2 text-xs font-medium hover:bg-slate-50" to="/seller/verification">
+      <button type="button" disabled title="ยังไม่เปิดให้ใช้งาน" className="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
         {missingAccount ? "ยืนยันตัวตนและบัญชีธนาคาร" : "ส่งยืนยันบัญชีใหม่"}
-      </Link>
+      </button>
     </Card>
   );
 }

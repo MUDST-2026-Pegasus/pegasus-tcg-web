@@ -59,7 +59,7 @@ describe("seller payout page", () => {
     expect(await screen.findByText("฿3,420.00")).toBeTruthy();
     expect(await screen.findByText("••••7890")).toBeTruthy();
     expect(screen.getByText("฿5,420.00")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "ส่งยืนยันบัญชีใหม่" }).getAttribute("href")).toBe("/seller/verification");
+    expect(screen.getByRole("button", { name: "ส่งยืนยันบัญชีใหม่" }).hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "ขอถอนเงิน" }));
     const dialog = screen.getByRole("dialog", { name: "ขอถอนเงิน" });
     const input = within(dialog).getByRole("textbox", { name: "จำนวนเงินที่ต้องการถอน" });
@@ -120,7 +120,7 @@ describe("seller payout page", () => {
     renderPage();
     expect(await screen.findByText(/ยังไม่มีบัญชีรับเงิน —/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "ขอถอนเงิน" }).hasAttribute("disabled")).toBe(true);
-    expect(screen.getByRole("link", { name: "ยืนยันตัวตนและบัญชีธนาคาร" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "ยืนยันตัวตนและบัญชีธนาคาร" }).hasAttribute("disabled")).toBe(true);
   });
   it("locks withdrawal when the seller is not verified", async () => {
     vi.mocked(financeApi.payoutAccount).mockRejectedValue(new ApiError({ status: 403, code: "SELLER_NOT_VERIFIED", message: "Not verified" }));
