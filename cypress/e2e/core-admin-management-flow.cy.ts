@@ -205,6 +205,30 @@ describe('Core Admin Management Flow', () => {
       },
     }).as('refreshToken');
 
+    // Navbar cart query
+    cy.intercept('GET', '**/api/v1/cart*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: { id: 1, items: [], totalQuantity: 0, itemsSubtotal: 0 },
+      },
+    }).as('getCart');
+
+    // Admin verifications query on overview
+    cy.intercept('GET', '**/api/v1/admin/verifications*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [],
+          page: 0,
+          size: 20,
+          totalItems: 0,
+          totalPages: 0,
+        },
+      },
+    }).as('getVerifications');
+
     // Overview endpoints
     cy.intercept('GET', '**/api/v1/admin/metrics/overview*', {
       statusCode: 200,
@@ -227,7 +251,15 @@ describe('Core Admin Management Flow', () => {
       },
     }).as('getUserCounts');
 
-    cy.intercept('GET', '**/api/v1/admin/users*', {
+    cy.intercept('GET', '**/api/v1/admin/users?*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: mockUsers,
+      },
+    }).as('getUsersQuery');
+
+    cy.intercept('GET', '**/api/v1/admin/users', {
       statusCode: 200,
       body: {
         success: true,
@@ -244,7 +276,21 @@ describe('Core Admin Management Flow', () => {
       },
     }).as('getOrderBoard');
 
-    cy.intercept('GET', '**/api/v1/admin/orders*', {
+    cy.intercept('GET', '**/api/v1/admin/orders?*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [],
+          page: 0,
+          size: 20,
+          totalItems: 0,
+          totalPages: 0,
+        },
+      },
+    }).as('getOrdersQuery');
+
+    cy.intercept('GET', '**/api/v1/admin/orders', {
       statusCode: 200,
       body: {
         success: true,
