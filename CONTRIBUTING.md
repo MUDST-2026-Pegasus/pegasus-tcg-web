@@ -117,13 +117,13 @@ backend คือ `pegasus-tcg-api` (Spring Boot) ทุก endpoint อยู�
 ### เริ่มใช้งาน
 
 ```bash
-cp .env.example .env.local   # แก้ VITE_API_PROXY_TARGET ถ้า backend ไม่ได้อยู่พอร์ต 8080
+cp .env.example .env.local   # แก้ VITE_API_BASE_URL ถ้า backend ไม่ได้อยู่พอร์ต 8080
 pnpm dev
 ```
 
-ตอน dev ไม่ต้องตั้ง `VITE_API_BASE_URL` — `vite.config.ts` proxy `/api` ไปให้ backend อยู่แล้ว
-เบราว์เซอร์จึงเห็นเป็น origin เดียวกัน ไม่ต้องไปยุ่งกับ CORS ฝั่ง backend
-ตอน build ขึ้น production ค่อยตั้ง `VITE_API_BASE_URL` เป็น origin จริง
+ไม่มี proxy แล้ว — เบราว์เซอร์ยิงตรงไปที่ `VITE_API_BASE_URL` (ปล่อยว่าง = `http://localhost:8080`)
+backend จึงต้องยอม CORS จาก `http://localhost:5173` ซึ่ง `CORS_ALLOWED_ORIGINS` ของ `pegasus-tcg-api` มีให้อยู่แล้วโดยค่าเริ่มต้น
+ตอน build ขึ้น production ตั้ง `VITE_API_BASE_URL` เป็น origin จริงของ backend
 
 ### ยิง request
 
