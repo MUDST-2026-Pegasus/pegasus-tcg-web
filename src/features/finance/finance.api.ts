@@ -13,7 +13,7 @@ export const financeApi = {
   getRefund: (id: number) => api.get<Refund>(`/refunds/${id}`),
   setRefundDestination: (id: number, bankName: string, accountName: string, accountNumber: string) =>
     api.put<Refund>(`/refunds/${id}/destination`, { bankName, accountName, accountNumber }),
-  wallet: () => api.get<Wallet>("/me/wallet"),
+  wallet: (page = 0, size = 20) => api.get<Wallet>(`/me/wallet?page=${page}&size=${size}`),
   myPayouts: () => api.get<Payout[]>("/sellers/me/payouts"),
   payoutAccount: () => api.get<PayoutAccount>("/sellers/me/payout-account"),
   requestPayout: (amount: number) => api.post<Payout>("/sellers/me/payouts", { amount }),
