@@ -1,3 +1,4 @@
+import { InitialRouteReady } from "@/app/InitialRouteReady";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 type PagePlaceholderProps = {
@@ -14,6 +15,7 @@ type PagePlaceholderProps = {
 export function PagePlaceholder({ title, figmaNode }: PagePlaceholderProps) {
   return (
     <Empty className="min-h-[60svh]">
+      <InitialRouteReady />
       <EmptyHeader>
         <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
