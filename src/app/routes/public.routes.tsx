@@ -1,7 +1,6 @@
 import type { RouteObject } from "react-router-dom";
 
 import { lazyPage } from "@/app/lazy-page";
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 import {
   AccountPageSkeleton,
   ArticlePageSkeleton,
@@ -45,6 +44,7 @@ const OrderHistoryPage = lazyPage(() => import("@/features/account/pages/OrderHi
 const AddressBookPage = lazyPage(() => import("@/features/account/pages/AddressBookPage").then((m) => m.AddressBookPage), <AccountPageSkeleton label="กำลังโหลดที่อยู่" />);
 const MyCollectionPage = lazyPage(() => import("@/features/collection/pages/MyCollectionPage").then((m) => m.MyCollectionPage), <CatalogPageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 const SellerApplicationPage = lazyPage(() => import("@/features/seller/application/SellerApplicationPage").then((m) => m.SellerApplicationPage), <FormPageSkeleton />);
+const NotFoundPage = lazyPage(() => import("@/features/not-found/pages/NotFoundPage").then((m) => m.NotFoundPage), <ArticlePageSkeleton />);
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
@@ -86,6 +86,6 @@ export const publicRoutes: RouteObject = {
       ],
     },
 
-    { path: "*", element: <PagePlaceholder title="ไม่พบหน้านี้" /> },
+    { path: "*", element: <NotFoundPage /> },
   ],
 };
