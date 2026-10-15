@@ -1,22 +1,26 @@
 describe('Account & Profile Flow', () => {
   beforeEach(() => {
-    cy.intercept('GET', '**/auth/me', {
+    cy.intercept('GET', '**/api/v1/auth/me*', {
       statusCode: 200,
       body: {
         success: true,
         data: { 
-          id: '1', 
+          id: 1, 
           email: 'test@example.com', 
           username: 'testuser', 
           displayName: 'John Doe',
           phone: '0812345678',
           bio: 'Hello I am a collector',
-          roles: ['BUYER'] 
+          roles: ['BUYER'],
+          status: 'ACTIVE',
+          avatarUrl: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          lastLoginAt: '2026-01-01T00:00:00Z'
         }
       }
     }).as('meRequest');
 
-    cy.intercept('GET', '**/addresses*', {
+    cy.intercept('GET', '**/api/v1/addresses*', {
       statusCode: 200,
       body: {
         success: true,
@@ -24,15 +28,39 @@ describe('Account & Profile Flow', () => {
       }
     }).as('addressesRequest');
 
-    cy.intercept('PUT', '**/users/me', {
+    cy.intercept('GET', '**/api/v1/cart*', {
       statusCode: 200,
       body: {
         success: true,
         data: {
-          id: '1',
+          id: 1,
+          userId: 1,
+          sessionKey: null,
+          currency: 'THB',
+          items: [],
+          totalQuantity: 0,
+          itemsSubtotal: 0,
+          expiresAt: null
+        }
+      }
+    }).as('cartRequest');
+
+    cy.intercept('PUT', '**/api/v1/users/me*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          id: 1,
+          email: 'test@example.com',
+          username: 'testuser',
           displayName: 'Jane Doe', // Changed name
           phone: '0812345678',
           bio: 'Hello I am a collector',
+          roles: ['BUYER'],
+          status: 'ACTIVE',
+          avatarUrl: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          lastLoginAt: '2026-01-01T00:00:00Z'
         }
       }
     }).as('updateProfile');
@@ -72,9 +100,10 @@ describe('Account & Profile Flow', () => {
     cy.wait('@meRequest');
 
     cy.contains(/edit profile/i).click();
+    cy.get('[data-slot="dialog-content"]').should('be.visible');
 
     // Edit display name
-    cy.get('input[name="displayName"]').clear().type('Jane Doe');
+    cy.get('input[name="displayName"]').should('be.enabled').clear().type('Jane Doe');
     
     // Save changes
     cy.get('button[type="submit"]').contains(/save changes/i).click();
