@@ -103,18 +103,7 @@ export function sortOf(value: string | null): SortChoice {
 // ---------- ขนส่ง ----------
 
 /** `carrierCode` ที่ส่งไปกับ `ShipOrderRequest` — ชื่อที่ผู้ซื้อเห็นคือ `label` */
-export const CARRIER_OPTIONS: { value: string; label: string }[] = [
-  { value: "KERRY", label: "Kerry Express" },
-  { value: "FLASH", label: "Flash Express" },
-  { value: "JT", label: "J&T Express" },
-  { value: "SPX", label: "SPX Express" },
-  { value: "THAILAND_POST_EMS", label: "ไปรษณีย์ไทย EMS" },
-  { value: "THAILAND_POST", label: "ไปรษณีย์ไทย ลงทะเบียน" },
-];
-
-export function carrierLabel(code: string): string {
-  return CARRIER_OPTIONS.find((option) => option.value === code)?.label ?? code;
-}
+export { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
 
 /** ส่งได้ทั้งจาก PAID (ข้ามการกดรับ) และ PREPARING */
 export function canShip(status: SellerOrderStatus): boolean {

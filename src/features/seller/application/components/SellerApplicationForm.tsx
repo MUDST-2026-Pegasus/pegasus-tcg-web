@@ -66,11 +66,15 @@ type SellerApplicationFormProps = {
   userId?: number;
   /** คำขอครั้งก่อนที่ถูกปฏิเสธ ถ้ามี */
   rejection?: Verification;
+  mode?: "application" | "payout-account";
+  returnTo?: string;
 };
 
 export function SellerApplicationForm({
   userId,
   rejection,
+  mode = "application",
+  returnTo,
 }: SellerApplicationFormProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -119,6 +123,10 @@ export function SellerApplicationForm({
   }, [userId, legalFirstName, legalLastName, bankCode]);
 
   const handleBack = () => {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     // เปิดลิงก์ตรง ๆ จะไม่มีหน้าก่อนหน้าให้ย้อนกลับ
     if (location.key === "default") {
       navigate("/");
@@ -382,7 +390,7 @@ export function SellerApplicationForm({
             ? "กำลังส่งคำขอ…"
             : bankBook.isUploading
               ? "กำลังอัปโหลดรูป…"
-              : "ส่งคำขอสมัคร"}
+              : mode === "payout-account" ? "ส่งยืนยันบัญชีใหม่" : "ส่งคำขอสมัคร"}
         </Button>
       </div>
 

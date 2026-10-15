@@ -13,6 +13,30 @@ export type ReturnRequest = {
   evidenceKeys: string[]; returnTrackingNumber: string | null;
   requestedAt: string; reviewedAt: string | null; receivedAt: string | null; closedAt: string | null;
 };
+export type SellerReturnItem = {
+  returnItemId: number;
+  orderItemId: number;
+  cardName: string;
+  variantLabel: string;
+  conditionCode: string;
+  imageUrl: string | null;
+  unitPrice: number;
+  quantityReturned: number;
+  quantityOrdered: number;
+  restock: boolean;
+};
+export type BuyerSummary = {
+  username: string;
+  displayName: string;
+};
+export type SellerReturnRequest = ReturnRequest & {
+  sellerOrderNumber: string;
+  buyer: BuyerSummary;
+  sellerOrderGrandTotal: number;
+  deliveredAt: string | null;
+  autoCompleteAt: string | null;
+  items: SellerReturnItem[];
+};
 export type ReturnEvidenceLink = { number: number; url: string };
 export type ReturnInput = {
   reasonCode: string; description: string; evidenceKeys: string[];
@@ -26,6 +50,7 @@ export type Review = {
 };
 export type PublicReview = Pick<Review, "id" | "rating" | "title" | "comment" | "replyComment" | "createdAt"> & {
   reviewerUsername: string;
+  repliedAt?: string | null;
 };
 export type PublicReviews = {
   reviews: PublicReview[];

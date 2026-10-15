@@ -10,6 +10,7 @@
 export type UpdateProfilePayload = {
   displayName?: string;
   phone?: string | null;
+  phonePublic?: boolean;
   bio?: string | null;
   avatarUrl?: string | null;
 };

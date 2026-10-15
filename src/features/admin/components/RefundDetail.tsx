@@ -276,7 +276,7 @@ function RefundSteps({
                 placeholder="พิมพ์เลขบัญชีปลายทาง เช่น 1234567890"
                 value={accountNumber}
                 onChange={(event) => setAccountNumber(event.target.value)}
-                className="h-9 flex-1 rounded-md bg-background"
+                className="h-9 flex-1 rounded-md border-input bg-background"
               />
               <Button
                 size="sm"
@@ -314,7 +314,7 @@ function RefundSteps({
                 disabled={!processing}
                 maxLength={64}
                 onChange={(event) => setReference(event.target.value)}
-                className="h-9 flex-1 rounded-md bg-background"
+                className="h-9 flex-1 rounded-md border-input bg-background"
               />
               <Button
                 variant="outline"

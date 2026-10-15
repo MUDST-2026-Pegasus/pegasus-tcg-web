@@ -1,3 +1,5 @@
+import type { PageResponse } from "@/lib/api";
+
 /**
  * หน้าลงขาย / แก้ประกาศ — ลอกมาจาก `pegasus-tcg-api` ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
  * - แคตตาล็อก (public): `dto/ProductSummaryResponse.java`, `ProductDetailResponse.java`,
@@ -183,4 +185,32 @@ export type ListingDetailsPayload = {
   lotLabel: string | null;
   publicNote: string | null;
   imageKeys: string[];
+};
+
+/**
+ * `GET /sellers/me/inventory/stock-ins` — `dto/StockInHistoryResponse.java`
+ * ประวัติรับเข้าของการ์ดพิมพ์นี้ในสภาพนี้ของร้าน (ต้นทุนเฉลี่ยคิดรวมทุกประกาศ จึงไม่ได้กรองตามประกาศ)
+ */
+export type StockInHistory = {
+  /** การ์ดที่รับเข้าทั้งหมดทุกหน้า */
+  receivedTotal: number;
+  /** ส่งออกไปกับพัสดุแล้ว หักใบที่ถูกคืนกลับมา */
+  soldTotal: number;
+  lots: PageResponse<StockInLot>;
+};
+
+/** หนึ่งครั้งที่รับเข้า — backend รวมแถวรายใบของล็อตเดียวกันให้แล้ว */
+export type StockInLot = {
+  id: number;
+  movementType: "INITIAL_STOCK" | "RESTOCK";
+  /** วันที่ผู้ขายกรอกตอนรับเข้า (ISO-8601 พร้อม offset) */
+  receivedAt: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  /** `null` = ล็อตที่บันทึกก่อนระบบเก็บค่านี้ */
+  averageCostAfter: number | null;
+  /** แหล่งที่มา · เลขอ้างอิง · โน้ต ที่ส่งไปเป็น `unitNote` */
+  note: string | null;
+  listingId: number | null;
 };

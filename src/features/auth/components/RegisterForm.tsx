@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useRegister } from "@/features/auth/auth.queries";
+import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import {
   registerSchema,
   type RegisterFormValues,
@@ -186,7 +187,8 @@ export function RegisterForm() {
           Log in
         </Link>
       </p>
-      <p className="text-center text-xs tracking-[0.24px] text-muted-foreground">
+      <BackHomeLink />
+      <p className="pt-2 text-center text-xs tracking-[0.24px] text-muted-foreground">
         We keep your information safe. We never use your information outside of
         Pegasus TCG.
       </p>

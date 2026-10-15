@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import {
   Card,
@@ -22,7 +23,7 @@ export type ItemCardProps = {
   /** ข้อความราคา เช่น ฿2,450; Collection cards intentionally have no price. */
   price?: string;
   footer?: ReactNode;
-  /** ปลายทางสำหรับเปิดรายละเอียดรายการ; เมื่อไม่ระบุ Card จะเป็นข้อมูลแบบไม่คลิก */
+  /** path ในแอปสำหรับเปิดรายละเอียดรายการ (นำทางด้วย router ไม่รีโหลดหน้า); เมื่อไม่ระบุ Card จะเป็นข้อมูลแบบไม่คลิก */
   href?: string;
   className?: string;
 };
@@ -82,12 +83,12 @@ export function ItemCard({
   }
 
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       aria-label={[title, price].filter(Boolean).join(" ")}
       className="block w-fit max-w-full rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       {card}
-    </a>
+    </Link>
   );
 }

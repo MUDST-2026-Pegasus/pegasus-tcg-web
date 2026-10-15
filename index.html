@@ -4,9 +4,53 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/jpeg" href="/site-icon.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pegasus-tcg-web</title>
+    <title>PEGASUS TCG</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #fff; }
+      #pegasus-splash {
+        position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+        background: #fff; color: #172329; font-family: Arial, sans-serif;
+        transition: opacity 300ms ease;
+      }
+      #pegasus-splash.is-leaving { opacity: 0; pointer-events: none; }
+      .pegasus-splash-content { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      .pegasus-splash-logo { display: block; width: min(32vw, 112px); height: auto; }
+      .pegasus-splash-name { font-size: 20px; font-weight: 800; letter-spacing: .22em; }
+      @media (prefers-reduced-motion: reduce) {
+        #pegasus-splash { transition: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="pegasus-splash" role="status" aria-label="กำลังเปิด PEGASUS TCG">
+      <div class="pegasus-splash-content" aria-hidden="true">
+        <picture>
+          <source srcset="/site-icon.jpg" media="(prefers-reduced-motion: reduce)" />
+          <img class="pegasus-splash-logo" src="/pegasus-gallop.gif" width="224" height="273" alt="" />
+        </picture>
+        <span class="pegasus-splash-name">PEGASUS</span>
+      </div>
+    </div>
+    <script>
+      (() => {
+        const splash = document.getElementById("pegasus-splash");
+        const started = performance.now();
+        let dismissed = false;
+        window.addEventListener("pegasus:route-ready", () => {
+          if (dismissed) return;
+          dismissed = true;
+          // Let the resolved page paint before fading the overlay.
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            setTimeout(() => {
+              splash.classList.add("is-leaving");
+              const remove = () => splash.remove();
+              if (matchMedia("(prefers-reduced-motion: reduce)").matches) remove();
+              else splash.addEventListener("transitionend", remove, { once: true });
+            }, Math.max(0, 500 - (performance.now() - started)));
+          }));
+        }, { once: true });
+      })();
+    </script>
     <div id="root"></div>
     <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
     <script type="module" src="/src/main.tsx"></script>

@@ -18,6 +18,7 @@ export type AuthUser = {
   displayName: string;
   bio: string | null;
   phone: string | null;
+  phonePublic?: boolean;
   avatarUrl: string | null;
   status: UserStatus;
   roles: RoleCode[];

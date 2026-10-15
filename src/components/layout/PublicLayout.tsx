@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 
+import { PageTransition } from "@/components/common/PageTransition";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -12,7 +13,9 @@ export function PublicLayout() {
     <div className="flex min-h-svh flex-col">
       <Navbar />
       <main className="flex-1">
-        <Outlet />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </main>
       <Footer />
     </div>

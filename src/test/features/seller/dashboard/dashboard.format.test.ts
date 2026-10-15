@@ -144,7 +144,7 @@ describe("todoList", () => {
       returns: "/seller/returns",
       restock: "/seller/products?status=ACTIVE&sort=stock_asc",
       payment: "/seller/orders?status=awaiting_payment",
-      reviews: "/seller/reviews",
+      reviews: "/seller/reviews?tab=unreplied",
     });
   });
 

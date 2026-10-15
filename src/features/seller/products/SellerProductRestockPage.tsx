@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { QueryBoundary } from "@/components/common";
+import { FormBodySkeleton } from "@/components/common/PageSkeletons";
 import { hasErrorCode } from "@/lib/api";
 
 import { ProductNotFound } from "./components/ProductNotFound";
@@ -33,7 +34,14 @@ function ListingRestockLoader({ listingId }: { listingId: number }) {
   }
 
   return (
-    <QueryBoundary query={listing}>
+    <QueryBoundary
+      query={listing}
+      loading={
+        <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า">
+          <FormBodySkeleton />
+        </div>
+      }
+    >
       {(data) => {
         const restock = getRestockData(data);
         // key ตามสินค้า — สลับไปสินค้าอื่นแล้วค่าที่กรอกค้างไว้ต้องล้าง

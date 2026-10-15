@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { refundKeys } from "@/features/finance/refunds.queries";
 import { ordersApi } from "./orders.api";
 import type { OrderDetails } from "./orders.types";
 
@@ -35,6 +36,8 @@ export function useCancelOrder() {
       ordersApi.cancelOrder(orderId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      // Cancelling a paid order opens a refund that needs the buyer's bank account.
+      queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     },
   });
 }

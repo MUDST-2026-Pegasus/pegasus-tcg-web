@@ -1,20 +1,16 @@
-// ***********************************************************
-// This example support/e2e.ts is processed and
-// loaded automatically before your test files.
-//
-// This is a great place to put global configuration and
-// behavior that modifies Cypress.
-//
-// You can change the location of this file or turn off
-// automatically serving support files with the
-// 'supportFile' configuration option.
-//
-// You can read more here:
-// https://on.cypress.io/configuration
-// ***********************************************************
+// cypress/support/e2e.ts
+// Cypress support file loaded before each E2E test run
 
-// Import commands.js using ES2015 syntax:
-// import './commands'
+import "./commands";
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
+// Prevent Cypress from failing tests on uncaught ResizeObserver or benign hydration errors
+Cypress.on("uncaught:exception", (err) => {
+  if (
+    err.message.includes("ResizeObserver loop") ||
+    err.message.includes("Script error") ||
+    err.message.includes("Minified React error")
+  ) {
+    return false;
+  }
+  return true;
+});

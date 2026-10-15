@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { SellerReturnsPage } from "@/features/finance/SellerReturnsPage";
@@ -36,6 +37,19 @@ describe("after sales screens", () => {
     }));
   });
 
+  it("sends the return reason picked from the dropdown", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
+    vi.mocked(afterSalesApi.requestReturn).mockResolvedValue({} as never);
+    const user = userEvent.setup();
+    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
+      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
+    await user.click(screen.getByRole("combobox", { name: "สาเหตุคืนสินค้า" }));
+    await user.click(await screen.findByRole("option", { name: "สินค้าเสียหาย" }));
+    fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
+    await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalledWith(41, expect.objectContaining({ reasonCode: "DAMAGED" })));
+  });
+
   it("shows buyer return statuses and reasons as readable labels", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{ id: 7, sellerOrderId: 41,
       status: "AWAITING_RETURN_SHIPMENT", reasonCode: "DAMAGED", evidenceKeys: [] }] as never);
@@ -43,41 +57,73 @@ describe("after sales screens", () => {
     expect(await screen.findByText("คำขอคืน #7 · รอผู้ซื้อส่งสินค้าคืน · สินค้าเสียหาย")).toBeTruthy();
   });
 
-  it("approves a return from the seller queue with the entered amount", async () => {
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
-    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 9, sellerOrderId: 41,
-      status: "REQUESTED", reasonCode: "DAMAGED", description: "Bent card", evidenceKeys: [] }] as never);
+  it("approves a return from the seller queue with the custom modal", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{
+      id: 9,
+      sellerOrderId: 41,
+      sellerOrderNumber: "ORD-100",
+      buyer: { username: "kandypop", displayName: "Kandy" },
+      sellerOrderGrandTotal: 100,
+      status: "REQUESTED",
+      reasonCode: "DAMAGED",
+      description: "Bent card",
+      evidenceKeys: [],
+      items: [],
+      requestedAt: "2026-10-10T10:00:00Z",
+    }] as never);
     vi.mocked(afterSalesApi.approveReturn).mockResolvedValue({} as never);
     render(<SellerReturnsPage />, { wrapper });
     await screen.findByText(/Bent card/);
-    expect(screen.getByText("รอผู้ขายตรวจสอบ · สินค้าเสียหาย")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("จำนวนเงินคืน 9"), { target: { value: "100" } });
-    fireEvent.click(screen.getByRole("button", { name: "อนุมัติ" }));
-    await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, false));
+    expect(screen.getByText("รอคุณตัดสิน")).toBeTruthy();
+    expect(screen.getByText("สินค้าเสียหาย")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /อนุมัติคืนเงิน ฿100/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /ยืนยันอนุมัติคืนเงิน ฿100/ }));
+    await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, true));
   });
 
-  it("shows readable return statuses while filtering with the original API value", async () => {
-    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 13, sellerOrderId: 41,
-      status: "AWAITING_RETURN_SHIPMENT", reasonCode: "WRONG_ITEM", description: "Wrong card",
-      evidenceKeys: [] }] as never);
+  it("shows readable return statuses and switches tabs client-side", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{
+      id: 13,
+      sellerOrderId: 41,
+      sellerOrderNumber: "ORD-101",
+      buyer: { username: "rare.gems", displayName: "Rare Gems" },
+      sellerOrderGrandTotal: 500,
+      status: "AWAITING_RETURN_SHIPMENT",
+      reasonCode: "WRONG_ITEM",
+      description: "Wrong card",
+      evidenceKeys: [],
+      items: [],
+      requestedAt: "2026-10-10T10:00:00Z",
+    }] as never);
     render(<SellerReturnsPage />, { wrapper });
-    expect(await screen.findByText("รอผู้ซื้อส่งสินค้าคืน · ได้รับสินค้าผิดรายการ")).toBeTruthy();
-    expect(screen.getByRole("option", { name: "ผู้ขายได้รับสินค้าคืนแล้ว" }).getAttribute("value")).toBe("RECEIVED");
-    fireEvent.change(screen.getByRole("combobox", { name: "กรองสถานะคืนสินค้า" }),
-      { target: { value: "AWAITING_RETURN_SHIPMENT" } });
-    await waitFor(() => expect(afterSalesApi.sellerReturns).toHaveBeenCalledWith("AWAITING_RETURN_SHIPMENT"));
+    fireEvent.click(await screen.findByRole("button", { name: /รอผู้ซื้อส่งคืน \(1\)/ }));
+    expect(await screen.findByText("RT-13")).toBeTruthy();
+    expect(screen.getByText("รอผู้ซื้อส่งคืน")).toBeTruthy();
   });
 
-  it("opens a seller return's evidence without exposing object keys", async () => {
-    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{ id: 12, sellerOrderId: 41,
-      status: "REQUESTED", reasonCode: "DAMAGED", description: "Bent card",
-      evidenceKeys: ["returns/private-photo.png"] }] as never);
-    vi.mocked(afterSalesApi.sellerReturnEvidence).mockResolvedValue([{ number: 1,
-      url: "https://example.test/presigned" }]);
+  it("opens a seller return's evidence preview modal without exposing object keys", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{
+      id: 12,
+      sellerOrderId: 41,
+      sellerOrderNumber: "ORD-102",
+      buyer: { username: "sora.trades", displayName: "Sora" },
+      sellerOrderGrandTotal: 640,
+      status: "REQUESTED",
+      reasonCode: "DAMAGED",
+      description: "Bent card",
+      evidenceKeys: ["returns/private-photo.png"],
+      items: [],
+      requestedAt: "2026-10-10T10:00:00Z",
+    }] as never);
+    vi.mocked(afterSalesApi.sellerReturnEvidence).mockResolvedValue([{
+      number: 1,
+      url: "https://example.test/presigned",
+    }]);
     render(<SellerReturnsPage />, { wrapper });
-    fireEvent.click(await screen.findByRole("button", { name: "ดูหลักฐาน 1 ไฟล์" }));
-    const link = await screen.findByRole("link", { name: "เปิดหลักฐาน 1" });
-    expect(link.getAttribute("href")).toBe("https://example.test/presigned");
+    const thumbBtn = await screen.findByRole("button", { name: "เปิดดูหลักฐาน 1" });
+    fireEvent.click(thumbBtn);
+    const modalImg = await screen.findByAltText("หลักฐานขนาดเต็ม 1");
+    expect(modalImg.getAttribute("src")).toBe("https://example.test/presigned");
     expect(screen.queryByText(/returns\/private-photo/)).toBeNull();
   });
 });

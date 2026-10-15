@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 
 import { ItemCard } from "@/components/common/ItemCard";
+import { ProfilePageSkeleton } from "@/components/common/PageSkeletons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { api, isApiError, type PageResponse } from "@/lib/api";
@@ -58,7 +59,7 @@ export function CollectorProfilePage() {
   });
 
   if (!username) return <main className="bg-muted/60 p-12 text-center"><h1 className="text-2xl font-bold">ไม่พบผู้ใช้</h1></main>;
-  if (collection.isPending) return <main role="status" className="bg-muted/60 p-12 text-center text-muted-foreground">กำลังโหลดโปรไฟล์นักสะสม...</main>;
+  if (collection.isPending) return <ProfilePageSkeleton label="กำลังโหลดโปรไฟล์นักสะสม" />;
   if (collection.isError) {
     const notFound = isApiError(collection.error) && collection.error.status === 404;
     return <main role="alert" className="min-h-[580px] bg-muted/60 p-12 text-center"><h1 className="text-2xl font-bold">{notFound ? "ไม่พบโปรไฟล์นักสะสม" : "โหลดโปรไฟล์ไม่สำเร็จ"}</h1>{!notFound && <Button className="mt-5" onClick={() => void collection.refetch()}>ลองใหม่</Button>}</main>;

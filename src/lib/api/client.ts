@@ -172,6 +172,7 @@ function unwrap<T>(response: RawResponse, path: string): T {
       code: detail?.code ?? `HTTP_${status}`,
       message: envelope.message || `Request failed (HTTP ${status})`,
       violations: detail?.violations ?? [],
+      details: detail?.details,
       path: detail?.path ?? path,
     });
   }

@@ -1,57 +1,1613 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "@/components/ui/toast";
-import { getErrorMessage } from "@/lib/api";
-import { afterSalesApi } from "./after-sales.api";
-import { returnReasonLabel, returnStatusLabel, returnStatusOptions } from "./after-sales.format";
+import {
+  AlertTriangle,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Image as ImageIcon,
+  Info,
+  Lock,
+  Package,
+  RotateCcw,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 
-function ReturnEvidence({ returnId, count }: { returnId: number; count: number }) {
-  const [open, setOpen] = useState(false);
-  const files = useQuery({ queryKey: ["finance", "return-evidence", returnId],
-    queryFn: () => afterSalesApi.sellerReturnEvidence(returnId), enabled: open,
-    refetchOnMount: "always" });
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
+
+import { afterSalesApi } from "./after-sales.api";
+import {
+  formatAgo,
+  formatBaht,
+  formatBahtShort,
+  mapReturnErrorMessage,
+  returnReasonLabel,
+  sellerReturnStatusConfig,
+} from "./after-sales.format";
+import {
+  calculatePresetPercentage,
+  calculateReturnedCardsTotal,
+  calculateTabCounts,
+  categorizeReturns,
+  sortReturns,
+  validatePartialRefundAmount,
+  type TabCategory,
+} from "./after-sales.helpers";
+import type { ReturnEvidenceLink, SellerReturnRequest } from "./after-sales.types";
+
+/**
+ * Evidence thumbnail viewer with click-to-preview
+ */
+function ReturnEvidenceGrid({
+  returnId,
+  count,
+  onImageClick,
+}: {
+  returnId: number;
+  count: number;
+  onImageClick: (link: ReturnEvidenceLink, list: ReturnEvidenceLink[]) => void;
+}) {
+  const { data: evidence, isLoading } = useQuery({
+    queryKey: ["finance", "return-evidence", returnId],
+    queryFn: () => afterSalesApi.sellerReturnEvidence(returnId),
+    staleTime: 5 * 60 * 1000,
+  });
+
   if (count === 0) return null;
-  return <div className="space-y-2"><Button variant="outline" size="sm" onClick={() => setOpen((value) => !value)}>{open ? "ซ่อนหลักฐาน" : `ดูหลักฐาน ${count} ไฟล์`}</Button>
-    {open && files.isPending && <p>กำลังโหลดหลักฐาน...</p>}
-    {open && files.isError && <p role="alert">โหลดหลักฐานไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void files.refetch()}>ลองอีกครั้ง</Button></p>}
-    {open && files.data && <div className="flex flex-wrap gap-3">{files.data.map((file) => <a key={file.number} href={file.url} target="_blank" rel="noopener noreferrer" aria-label={`เปิดหลักฐาน ${file.number}`} className="block rounded border p-2 text-center text-sm hover:border-primary"><img src={file.url} alt={`หลักฐาน ${file.number}`} className="h-32 w-32 object-contain" /><span>หลักฐาน {file.number}</span></a>)}</div>}
-  </div>;
+
+  return (
+    <div className="space-y-2 pt-1">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">หลักฐานจากผู้ซื้อ · {count} ไฟล์</span>
+        <span>กดรูปเพื่อดูขนาดเต็ม</span>
+      </div>
+      {isLoading ? (
+        <div className="flex gap-2">
+          {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
+            <div key={i} className="h-20 w-20 animate-pulse rounded-lg bg-muted" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2.5">
+          {evidence?.map((file) => (
+            <button
+              key={file.number}
+              type="button"
+              onClick={() => onImageClick(file, evidence)}
+              className="group relative flex h-20 w-20 flex-col items-center justify-center rounded-lg border border-border bg-muted/40 p-1.5 transition-all hover:border-primary hover:shadow-xs focus:outline-hidden"
+              aria-label={`เปิดดูหลักฐาน ${file.number}`}
+            >
+              <img
+                src={file.url}
+                alt={`หลักฐาน ${file.number}`}
+                className="h-12 w-12 rounded object-cover transition-transform group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <span className="mt-1 text-[10px] text-muted-foreground group-hover:text-primary">
+                หลักฐาน {file.number}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
+/**
+ * Custom Approve Modal
+ */
+function ApproveReturnModal({
+  open,
+  onOpenChange,
+  item,
+  amount,
+  resolution,
+  requireShipBack,
+  onConfirm,
+  loading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: SellerReturnRequest | null;
+  amount: number;
+  resolution: "FULL_REFUND" | "PARTIAL_REFUND";
+  requireShipBack: boolean;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  if (!item) return null;
+
+  const sellerOrderGrandTotal = item.sellerOrderGrandTotal;
+  const sellerRemainingPayout = Math.max(0, sellerOrderGrandTotal - amount);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <ShieldCheck className="size-5 text-primary" />
+            ยืนยันการอนุมัติคำขอคืนเงิน
+          </DialogTitle>
+          <DialogDescription>
+            คำขอ RT-{item.id} · คำสั่งซื้อย่อย {item.sellerOrderNumber} ({item.buyer.username})
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3.5 py-2 text-sm">
+          <div className="rounded-lg bg-muted/50 p-3.5 space-y-2 border border-border">
+            <div className="flex justify-between text-muted-foreground">
+              <span>ยอดคำสั่งซื้อย่อย:</span>
+              <span className="font-semibold text-foreground">{formatBaht(sellerOrderGrandTotal)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>ยอดคืนเงินให้ผู้ซื้อ:</span>
+              <span className="font-bold text-primary">
+                {formatBaht(amount)} ({resolution === "FULL_REFUND" ? "คืนเต็มจำนวน" : "คืนบางส่วน"})
+              </span>
+            </div>
+            <div className="flex justify-between text-muted-foreground border-t border-border pt-2">
+              <span>ผลต่อเงินของคุณ:</span>
+              <span className="font-medium text-foreground">
+                {resolution === "FULL_REFUND"
+                  ? "ไม่ได้รับเงินจากออเดอร์นี้"
+                  : `ได้รับส่วนที่เหลือ ~${formatBaht(sellerRemainingPayout)} (ก่อนหักคอมมิชชั่น)`}
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-foreground space-y-1">
+            <p className="font-semibold">เงื่อนไขการส่งสินค้าคืน:</p>
+            <p>
+              {requireShipBack
+                ? "✓ ผู้ซื้อต้องจัดส่งสินค้าคืนให้คุณก่อน จึงจะได้รับเงินคืน โดยคุณจะต้องตรวจสอบสินค้าเมื่อพัสดุมาถึง"
+                : "⚡ ไม่ต้องส่งสินค้าคืน — ระบบจะเริ่มกระบวนการคืนเงินให้ผู้ซื้อทันทีหลังคุณอนุมัติ"}
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose render={<Button variant="outline" disabled={loading} />}>
+            ยกเลิก
+          </DialogClose>
+          <Button
+            disabled={loading}
+            onClick={onConfirm}
+          >
+            {loading ? "กำลังบันทึก..." : `ยืนยันอนุมัติคืนเงิน ${formatBahtShort(amount)}`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Custom Reject Modal (Destructive)
+ */
+function RejectReturnModal({
+  open,
+  onOpenChange,
+  item,
+  onConfirm,
+  loading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: SellerReturnRequest | null;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  if (!item) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg text-destructive">
+            <AlertTriangle className="size-5 text-destructive" />
+            ยืนยันการปฏิเสธคำขอคืนสินค้า
+          </DialogTitle>
+          <DialogDescription>
+            คำขอ RT-{item.id} · คำสั่งซื้อย่อย {item.sellerOrderNumber} ({item.buyer.username})
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3 py-2 text-sm">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-foreground space-y-2">
+            <p className="font-semibold text-destructive">คำเตือนสำคัญ:</p>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li>การปฏิเสธคำขอไม่สามารถยกเลิกหรือแก้ไขได้ในภายหลัง</li>
+              <li>ผู้ซื้อจะไม่สามารถเปิดคำขอคืนสินค้าสำหรับคำสั่งซื้อย่อยนี้ซ้ำได้อีก</li>
+              <li>ระบบ Escrow จะนับเวลาถอยหลังเพื่อโอนเงินให้คุณตามกำหนดเดิม</li>
+            </ul>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            กรุณาตรวจสอบหลักฐานและข้อความจากผู้ซื้ออย่างรอบคอบก่อนตัดสินใจปฏิเสธ
+          </p>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose render={<Button variant="outline" disabled={loading} />}>
+            ยกเลิก
+          </DialogClose>
+          <Button
+            variant="destructive"
+            disabled={loading}
+            onClick={onConfirm}
+          >
+            {loading ? "กำลังดำเนินการ..." : "ยืนยันปฏิเสธคำขอ"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Custom Confirm Receipt Modal
+ */
+function ConfirmReceiptModal({
+  open,
+  onOpenChange,
+  item,
+  restock,
+  onConfirm,
+  loading,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: SellerReturnRequest | null;
+  restock: boolean;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  if (!item) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg text-foreground">
+            <Package className="size-5 text-primary" />
+            ยืนยันการได้รับสินค้าคืน
+          </DialogTitle>
+          <DialogDescription>
+            คำขอ RT-{item.id} · คำสั่งซื้อย่อย {item.sellerOrderNumber}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3.5 py-2 text-sm">
+          <div className="rounded-lg bg-muted/50 p-3.5 space-y-2 border border-border">
+            <p className="text-foreground">
+              คุณได้ตรวจสอบพัสดุและได้รับสินค้าคืนครบถ้วนเรียบร้อยแล้ว
+            </p>
+            <div className="flex justify-between text-xs text-muted-foreground border-t border-border pt-2">
+              <span>การนำกลับเข้าสต็อก:</span>
+              <span className="font-semibold text-foreground">
+                {restock ? "นำการ์ดกลับเข้าสต็อกเพื่อขายต่อ" : "ไม่นำกลับเข้าสต็อก"}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>ยอดเงินที่จะคืนผู้ซื้อ:</span>
+              <span className="font-semibold text-primary">
+                {formatBaht(item.refundAmount ?? item.sellerOrderGrandTotal)}
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ
+          </p>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <DialogClose render={<Button variant="outline" disabled={loading} />}>
+            ยกเลิก
+          </DialogClose>
+          <Button
+            disabled={loading}
+            onClick={onConfirm}
+          >
+            {loading ? "กำลังบันทึก..." : "ยืนยันรับสินค้าและปล่อยเงินคืน"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Image Preview Modal for evidence
+ */
+function EvidencePreviewModal({
+  open,
+  onOpenChange,
+  activeLink,
+  allLinks,
+  onSelectLink,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  activeLink: ReturnEvidenceLink | null;
+  allLinks: ReturnEvidenceLink[];
+  onSelectLink: (link: ReturnEvidenceLink) => void;
+}) {
+  if (!activeLink) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl p-4 sm:p-6">
+        <DialogHeader>
+          <DialogTitle className="text-base font-medium text-foreground">
+            หลักฐานจากผู้ซื้อ #{activeLink.number} จาก {allLinks.length} ไฟล์
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-lg bg-muted/40 p-2">
+          <img
+            src={activeLink.url}
+            alt={`หลักฐานขนาดเต็ม ${activeLink.number}`}
+            className="max-h-[60vh] w-auto max-w-full rounded object-contain"
+          />
+        </div>
+
+        {allLinks.length > 1 && (
+          <div className="flex justify-center gap-2 overflow-x-auto pt-2">
+            {allLinks.map((link) => (
+              <button
+                key={link.number}
+                type="button"
+                onClick={() => onSelectLink(link)}
+                className={cn(
+                  "h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 transition-all",
+                  link.number === activeLink.number
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                )}
+              >
+                <img
+                  src={link.url}
+                  alt={`หลักฐาน ${link.number}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Return Policy Modal
+ */
+function ReturnPolicyModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold text-foreground">นโยบายและขั้นตอนการคืนสินค้า</DialogTitle>
+          <DialogDescription>
+            ข้อกำหนดและเงื่อนไขสำหรับคำขอคืนสินค้าบนแพลตฟอร์ม Pegasus TCG
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2 text-sm text-muted-foreground leading-relaxed">
+          <div className="space-y-1">
+            <h4 className="font-semibold text-foreground">1. การเปิดคำขอคืนสินค้า</h4>
+            <p className="text-xs">
+              ผู้ซื้อสามารถเปิดคำขอคืนสินค้าได้ภายในกำหนดหลังคำสั่งซื้อขึ้นสถานะจัดส่ง/ส่งถึงแล้ว ก่อนที่ระบบ Escrow จะปล่อยเงินให้ร้านค้า
+            </p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-semibold text-foreground">2. การพิจารณาและหลักฐาน</h4>
+            <p className="text-xs">
+              ร้านค้ามีสิทธิ์ตรวจสอบภาพถ่ายหรือคลิปวิดีโอหลักฐานสภาพการ์ด และเลือกอนุมัติแบบคืนเต็มจำนวน, คืนบางส่วน หรือปฏิเสธคำขอ
+            </p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-semibold text-foreground">3. การส่งสินค้าคืน</h4>
+            <p className="text-xs">
+              หากร้านค้าเลือกให้ผู้ซื้อส่งสินค้าคืน ผู้ซื้อจะต้องจัดส่งและระบุเลขพัสดุในระบบ จากนั้นร้านค้าต้องตรวจสอบและกดยืนยันการรับสินค้าเพื่อปล่อยเงินคืน
+            </p>
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-semibold text-foreground">4. ผลกระทบทางการเงิน</h4>
+            <p className="text-xs">
+              เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกระงับ (Hold) ไว้ในระบบ Escrow จนกว่าจะได้ข้อสรุป หากปฏิเสธคำขอ เงินจะถูกปล่อยให้ร้านค้าตามกำหนดเดิม
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <DialogClose render={<Button className="w-full sm:w-auto" />}>
+            เข้าใจแล้ว
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Main Seller Returns Page Component
+ */
 export function SellerReturnsPage() {
   const cache = useQueryClient();
-  const [status, setStatus] = useState("");
-  const [amounts, setAmounts] = useState<Record<number, string>>({});
-  const [resolutions, setResolutions] = useState<Record<number, "FULL_REFUND" | "PARTIAL_REFUND">>({});
-  const [shipBack, setShipBack] = useState<Record<number, boolean>>({});
-  const [restock, setRestock] = useState<Record<number, boolean>>({});
-  const [busy, setBusy] = useState<number | null>(null);
-  const queue = useQuery({ queryKey: ["finance", "seller-returns", status], queryFn: () => afterSalesApi.sellerReturns(status || undefined) });
 
-  async function act(id: number, action: () => Promise<unknown>, message: string) {
-    setBusy(id);
-    try { await action(); await cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }); toast.add({ type: "success", title: message }); }
-    catch (error) { toast.add({ type: "error", title: "ดำเนินการไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") }); }
-    finally { setBusy(null); }
-  }
-  return <div className="space-y-5 p-6"><h1 className="text-2xl font-bold">คำขอคืนสินค้า</h1>
-    <select aria-label="กรองสถานะคืนสินค้า" className="rounded border p-2" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">ทุกสถานะ</option>{returnStatusOptions.map((value) => <option key={value} value={value}>{returnStatusLabel(value)}</option>)}</select>
-    {queue.isPending && <p>กำลังโหลด...</p>}{queue.isError && <p role="alert">โหลดคำขอไม่สำเร็จ <Button variant="outline" onClick={() => void queue.refetch()}>ลองอีกครั้ง</Button></p>}
-    {queue.data?.length === 0 && <p>ไม่มีคำขอคืนสินค้า</p>}
-    {queue.data?.map((item) => <Card key={item.id}><CardContent className="space-y-3 p-5">
-      <h2 className="font-semibold">คำขอ #{item.id} · คำสั่งซื้อย่อย #{item.sellerOrderId}</h2>
-      <p>{returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}</p><p>{item.description}</p>
-      <ReturnEvidence returnId={item.id} count={item.evidenceKeys.length} />
-      {item.status === "REQUESTED" && <div className="space-y-2 rounded border p-3">
-        <select aria-label={`ผลการคืน ${item.id}`} className="rounded border p-2" value={resolutions[item.id] ?? "FULL_REFUND"} onChange={(e) => setResolutions((old) => ({ ...old, [item.id]: e.target.value as "FULL_REFUND" | "PARTIAL_REFUND" }))}><option value="FULL_REFUND">คืนเต็มจำนวน</option><option value="PARTIAL_REFUND">คืนบางส่วน</option></select>
-        <Input className="max-w-48" aria-label={`จำนวนเงินคืน ${item.id}`} type="number" min="0.01" step="0.01" placeholder="ยอดคืน (บาท)" value={amounts[item.id] ?? ""} onChange={(e) => setAmounts((old) => ({ ...old, [item.id]: e.target.value }))} />
-        <label className="flex gap-2"><input type="checkbox" checked={shipBack[item.id] ?? false} onChange={(e) => setShipBack((old) => ({ ...old, [item.id]: e.target.checked }))} />ต้องส่งสินค้าคืนก่อน</label>
-        <div className="flex gap-2"><Button disabled={busy === item.id || !(Number(amounts[item.id]) > 0)} onClick={() => { if (window.confirm(`อนุมัติคืนเงิน ฿${amounts[item.id]} สำหรับคำขอ #${item.id}?`)) void act(item.id, () => afterSalesApi.approveReturn(item.id, resolutions[item.id] ?? "FULL_REFUND", Number(amounts[item.id]), shipBack[item.id] ?? false), "อนุมัติคำขอแล้ว"); }}>อนุมัติ</Button><Button variant="destructive" disabled={busy === item.id} onClick={() => { if (window.confirm("ปฏิเสธคำขอคืนสินค้า?")) void act(item.id, () => afterSalesApi.rejectReturn(item.id), "ปฏิเสธแล้ว"); }}>ปฏิเสธ</Button></div>
-      </div>}
-      {item.status === "IN_TRANSIT" && <div className="space-y-2"><p>เลขพัสดุคืน: {item.returnTrackingNumber}</p><label className="flex gap-2"><input type="checkbox" checked={restock[item.id] ?? false} onChange={(e) => setRestock((old) => ({ ...old, [item.id]: e.target.checked }))} />นำสินค้ากลับเข้าสต็อก</label><Button disabled={busy === item.id} onClick={() => { if (window.confirm("ยืนยันว่าได้รับสินค้าคืนแล้ว?")) void act(item.id, () => afterSalesApi.receiveReturn(item.id, restock[item.id] ?? false), "รับสินค้าคืนแล้ว"); }}>ยืนยันรับสินค้า</Button></div>}
-    </CardContent></Card>)}
-  </div>;
+  // Queries
+  const {
+    data: allReturns = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["finance", "seller-returns"],
+    queryFn: () => afterSalesApi.sellerReturns(),
+  });
+
+  // Client-side categorization & tab counts
+  const categorized = useMemo(() => categorizeReturns(allReturns), [allReturns]);
+  const tabCounts = useMemo(() => calculateTabCounts(allReturns), [allReturns]);
+
+  // States
+  const [activeTab, setActiveTab] = useState<TabCategory>("action_required");
+  const [sortOrder, setSortOrder] = useState<"longest_first" | "newest_first">("longest_first");
+  const [explicitExpandedId, setExplicitExpandedId] = useState<number | null | undefined>(undefined);
+
+  // Form states per card
+  const [resolutions, setResolutions] = useState<Record<number, "FULL_REFUND" | "PARTIAL_REFUND">>({});
+  const [partialAmounts, setPartialAmounts] = useState<Record<number, string>>({});
+  const [shipBackMap, setShipBackMap] = useState<Record<number, boolean>>({});
+  const [restockMap, setRestockMap] = useState<Record<number, boolean>>({});
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  // Modal states
+  const [approveModalItem, setApproveModalItem] = useState<SellerReturnRequest | null>(null);
+  const [rejectModalItem, setRejectModalItem] = useState<SellerReturnRequest | null>(null);
+  const [receiveModalItem, setReceiveModalItem] = useState<SellerReturnRequest | null>(null);
+  const [policyModalOpen, setPolicyModalOpen] = useState(false);
+
+  // Evidence preview modal
+  const [evidencePreview, setEvidencePreview] = useState<{
+    link: ReturnEvidenceLink | null;
+    list: ReturnEvidenceLink[];
+  }>({ link: null, list: [] });
+
+  // Sorted list for current active tab
+  const currentTabReturns = useMemo(() => {
+    return sortReturns(categorized[activeTab], sortOrder);
+  }, [categorized, activeTab, sortOrder]);
+
+  // Derived effective expanded ID (auto-expands first item in action_required tab unless user toggles)
+  const effectiveExpandedId = useMemo(() => {
+    if (explicitExpandedId !== undefined) {
+      return explicitExpandedId;
+    }
+    if (activeTab === "action_required" && currentTabReturns.length > 0) {
+      return currentTabReturns[0].id;
+    }
+    return null;
+  }, [explicitExpandedId, activeTab, currentTabReturns]);
+
+  // Copy tracking number helper
+  const handleCopyTracking = (tracking: string) => {
+    void navigator.clipboard.writeText(tracking);
+    toast.add({
+      type: "success",
+      title: "คัดลอกเลขพัสดุแล้ว",
+      description: tracking,
+    });
+  };
+
+  // Determine currently active return for the 5-step widget
+  const activeExpandedReturn = useMemo(() => {
+    if (effectiveExpandedId) {
+      const found = allReturns.find((r) => r.id === effectiveExpandedId);
+      if (found) return found;
+    }
+    return currentTabReturns[0] ?? allReturns[0] ?? null;
+  }, [effectiveExpandedId, allReturns, currentTabReturns]);
+
+  // Calculate dynamic active step (1 to 5)
+  const currentStep = useMemo(() => {
+    if (!activeExpandedReturn) return 2;
+    switch (activeExpandedReturn.status) {
+      case "REQUESTED":
+        return 2;
+      case "AWAITING_RETURN_SHIPMENT":
+        return 3;
+      case "IN_TRANSIT":
+        return 4;
+      case "APPROVED":
+      case "RECEIVED":
+        return 5;
+      case "REFUNDED":
+      case "CLOSED":
+        return 6; // all completed
+      case "REJECTED":
+        return 2;
+      default:
+        return 2;
+    }
+  }, [activeExpandedReturn]);
+
+  // Pending Escrow total and sub-order count
+  const pendingFundsSummary = useMemo(() => {
+    const pendingStatuses = ["REQUESTED", "AWAITING_RETURN_SHIPMENT", "IN_TRANSIT", "APPROVED", "RECEIVED"];
+    const pendingList = allReturns.filter((r) => pendingStatuses.includes(r.status));
+    const total = pendingList.reduce((sum, r) => sum + (Number(r.sellerOrderGrandTotal) || 0), 0);
+    return {
+      count: pendingList.length,
+      total,
+    };
+  }, [allReturns]);
+
+  // Actions
+  const handleApproveConfirm = async () => {
+    if (!approveModalItem) return;
+    const id = approveModalItem.id;
+    const resolution = resolutions[id] ?? "FULL_REFUND";
+    const amount =
+      resolution === "FULL_REFUND"
+        ? approveModalItem.sellerOrderGrandTotal
+        : parseFloat(partialAmounts[id] || "0");
+    const requireShipBack = shipBackMap[id] ?? true;
+
+    setBusyId(id);
+    try {
+      await afterSalesApi.approveReturn(id, resolution, amount, requireShipBack);
+      await Promise.all([
+        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
+      ]);
+      toast.add({
+        type: "success",
+        title: "อนุมัติคำขอคืนเงินเรียบร้อยแล้ว",
+        description: `คำขอ RT-${id} จำนวนเงิน ${formatBaht(amount)}`,
+      });
+      setApproveModalItem(null);
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "ดำเนินการไม่สำเร็จ",
+        description: mapReturnErrorMessage(error),
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectModalItem) return;
+    const id = rejectModalItem.id;
+
+    setBusyId(id);
+    try {
+      await afterSalesApi.rejectReturn(id);
+      await Promise.all([
+        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
+      ]);
+      toast.add({
+        type: "success",
+        title: "ปฏิเสธคำขอคืนสินค้าแล้ว",
+        description: `คำขอ RT-${id} ถูกปฏิเสธ ระบบจะโอนเงิน Escrow ตามกำหนดเดิม`,
+      });
+      setRejectModalItem(null);
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "ดำเนินการไม่สำเร็จ",
+        description: mapReturnErrorMessage(error),
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleReceiveConfirm = async () => {
+    if (!receiveModalItem) return;
+    const id = receiveModalItem.id;
+    const restock = restockMap[id] ?? true;
+
+    setBusyId(id);
+    try {
+      await afterSalesApi.receiveReturn(id, restock);
+      await Promise.all([
+        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
+        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
+      ]);
+      toast.add({
+        type: "success",
+        title: "ยืนยันรับสินค้าคืนสำเร็จ",
+        description: `ระบบปล่อยเงินคืนให้ผู้ซื้อ และ${restock ? "นำการ์ดกลับเข้าสต็อกเรียบร้อยแล้ว" : "ไม่นำกลับเข้าสต็อก"}`,
+      });
+      setReceiveModalItem(null);
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: "ดำเนินการไม่สำเร็จ",
+        description: mapReturnErrorMessage(error),
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex flex-col gap-6">
+        {/* Page Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-zinc-950">
+              คำขอคืนสินค้า
+            </h1>
+            <p className="text-xs text-gray-500">
+              {tabCounts.action_required} คำขอรอคุณดำเนินการ · เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกพักไว้จนกว่าจะจบเรื่อง
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPolicyModalOpen(true)}
+            className="self-start sm:self-auto rounded-lg bg-background text-xs font-medium"
+          >
+            นโยบายการคืนสินค้า
+          </Button>
+        </div>
+
+        {/* Pill Tabs & Sorting */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("action_required");
+                setExplicitExpandedId(undefined);
+              }}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "action_required"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              ต้องดำเนินการ ({tabCounts.action_required})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("awaiting_shipment");
+                setExplicitExpandedId(undefined);
+              }}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "awaiting_shipment"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              รอผู้ซื้อส่งคืน ({tabCounts.awaiting_shipment})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("awaiting_refund");
+                setExplicitExpandedId(undefined);
+              }}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "awaiting_refund"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              รอคืนเงิน ({tabCounts.awaiting_refund})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("completed");
+                setExplicitExpandedId(undefined);
+              }}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "completed"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              เสร็จสิ้น ({tabCounts.completed})
+            </button>
+          </div>
+
+          <div className="self-end sm:self-auto">
+            <NativeSelect
+              aria-label="เรียงลำดับคำขอคืนสินค้า"
+              size="sm"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as "longest_first" | "newest_first")}
+              className="rounded-lg border-input bg-background text-xs font-medium text-foreground"
+            >
+              <option value="longest_first">เรียง: รอนานสุดก่อน</option>
+              <option value="newest_first">เรียง: ใหม่สุดก่อน</option>
+            </NativeSelect>
+          </div>
+        </div>
+
+        {/* Loading and Error states */}
+        {isLoading && (
+          <div className="space-y-4 py-8">
+            <div className="h-32 w-full animate-pulse rounded-xl bg-card border border-border" />
+            <div className="h-24 w-full animate-pulse rounded-xl bg-card border border-border" />
+          </div>
+        )}
+
+        {isError && (
+          <div
+            role="alert"
+            className="flex flex-col items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center"
+          >
+            <XCircle className="size-8 text-destructive mb-2" />
+            <p className="text-sm font-semibold text-destructive">โหลดคำขอคืนสินค้าไม่สำเร็จ</p>
+            <p className="text-xs text-muted-foreground mt-1">กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void refetch()}
+              className="mt-4 border-destructive/30 text-destructive hover:bg-destructive/10"
+            >
+              ลองอีกครั้ง
+            </Button>
+          </div>
+        )}
+
+        {/* Main Content Layout: Left (List) & Right (Widgets) */}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Return Request Cards */}
+            <div className="lg:col-span-8 space-y-4">
+              {currentTabReturns.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <RotateCcw className="size-6" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-semibold text-foreground">ไม่มีคำขอในหมวดนี้</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    เมื่อมีคำขอคืนสินค้าในสถานะนี้ รายการจะปรากฏที่นี่โดยอัตโนมัติ
+                  </p>
+                </div>
+              ) : (
+                currentTabReturns.map((item, index) => {
+                  const isExpanded = effectiveExpandedId === item.id;
+                  const isActionRequiredTab = activeTab === "action_required";
+                  const isHighlighted = isActionRequiredTab && (index === 0 || isExpanded);
+                  const statusConf = sellerReturnStatusConfig(item.status);
+
+                  // Card form states
+                  const resolution = resolutions[item.id] ?? "FULL_REFUND";
+                  const partialAmountStr = partialAmounts[item.id] ?? "";
+                  const shipBack = shipBackMap[item.id] ?? true;
+                  const restock = restockMap[item.id] ?? true;
+                  const isBusy = busyId === item.id;
+
+                  // Validation for partial refund
+                  const partialVal = validatePartialRefundAmount(
+                    partialAmountStr,
+                    item.sellerOrderGrandTotal
+                  );
+                  const isPartialValid = resolution === "FULL_REFUND" || partialVal.valid;
+                  const activeRefundAmount =
+                    resolution === "FULL_REFUND"
+                      ? item.sellerOrderGrandTotal
+                      : parseFloat(partialAmountStr || "0");
+
+                  return (
+                    <Card
+                      key={item.id}
+                      className={cn(
+                        "gap-0 overflow-hidden rounded-xl border py-0 ring-0 transition-all duration-200",
+                        isHighlighted && isExpanded
+                          ? "border-amber-500/70 shadow-none inset-ring-1 inset-ring-amber-500/30"
+                          : "border-border shadow-none"
+                      )}
+                    >
+                      {/* Accordion Card Header */}
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-expanded={isExpanded}
+                        onClick={() => setExplicitExpandedId(isExpanded ? null : item.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setExplicitExpandedId(isExpanded ? null : item.id);
+                          }
+                        }}
+                        className="flex cursor-pointer items-center justify-between p-4 sm:p-5 transition-colors hover:bg-muted/40 select-none"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm sm:text-base text-foreground tracking-tight">
+                              RT-{item.id}
+                            </span>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[11px] font-medium leading-none",
+                                statusConf.className
+                              )}
+                            >
+                              {statusConf.label}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <span>{item.sellerOrderNumber}</span>
+                            <span className="mx-1.5">·</span>
+                            <span className="text-foreground font-medium">
+                              {item.buyer?.username ?? "buyer"}
+                            </span>
+                            <span className="mx-1.5">·</span>
+                            <span>
+                              {item.status === "IN_TRANSIT"
+                                ? `อนุมัติเมื่อ ${formatAgo(item.reviewedAt ?? item.requestedAt)}`
+                                : `เปิดคำขอเมื่อ ${formatAgo(item.requestedAt)}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3.5">
+                          <div className="text-right">
+                            <div className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                              {formatBahtShort(item.sellerOrderGrandTotal)}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {item.refundAmount && item.resolution === "PARTIAL_REFUND"
+                                ? `คืนบางส่วน ${formatBahtShort(item.refundAmount)}`
+                                : "ยอดออเดอร์ย่อย"}
+                            </div>
+                          </div>
+                          <div className="text-muted-foreground hover:text-foreground transition-colors">
+                            {isExpanded ? (
+                              <ChevronUp className="size-5" />
+                            ) : (
+                              <ChevronDown className="size-5" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Accordion Card Body */}
+                      {isExpanded && (
+                        <CardContent className="border-t border-border p-4 sm:p-5 pt-4 space-y-5">
+                          {/* Case 1: REQUESTED (Decision Box) */}
+                          {item.status === "REQUESTED" && (
+                            <>
+                              {/* Reason & Description */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-foreground">
+                                    เหตุผลจากผู้ซื้อ
+                                  </span>
+                                  <Badge
+                                    variant="destructive"
+                                    className="bg-destructive/10 text-destructive border-destructive/20 text-[11px] font-medium"
+                                  >
+                                    {returnReasonLabel(item.reasonCode)}
+                                  </Badge>
+                                </div>
+                                {item.description && (
+                                  <p className="text-xs sm:text-sm text-muted-foreground bg-muted/40 rounded-lg p-3 border border-border leading-relaxed italic">
+                                    "{item.description}"
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Items to return */}
+                              <div className="space-y-2">
+                                <div className="text-xs font-semibold text-foreground">
+                                  สินค้าที่ขอคืน · {item.items?.length ?? 0} รายการ
+                                </div>
+                                <div className="divide-y divide-border rounded-lg border border-border bg-card">
+                                  {item.items && item.items.length > 0 ? (
+                                    item.items.map((cardItem) => (
+                                      <div
+                                        key={cardItem.returnItemId}
+                                        className="flex items-center justify-between p-3"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-muted/30 overflow-hidden shadow-2xs">
+                                            {cardItem.imageUrl ? (
+                                              <img
+                                                src={cardItem.imageUrl}
+                                                alt={cardItem.cardName}
+                                                className="h-full w-full object-contain"
+                                              />
+                                            ) : (
+                                              <ImageIcon className="size-5 text-muted-foreground" />
+                                            )}
+                                          </div>
+                                          <div className="space-y-0.5">
+                                            <div className="text-xs sm:text-sm font-medium text-foreground">
+                                              {cardItem.cardName}
+                                              {cardItem.variantLabel ? ` — ${cardItem.variantLabel}` : ""}
+                                            </div>
+                                            <div className="text-[11px] text-muted-foreground">
+                                              {cardItem.conditionCode} · คืน {cardItem.quantityReturned} จาก{" "}
+                                              {cardItem.quantityOrdered} ใบ
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="text-right text-xs sm:text-sm font-semibold text-foreground">
+                                          {formatBahtShort(cardItem.unitPrice * cardItem.quantityReturned)}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="p-3 text-xs text-muted-foreground">
+                                      ไม่พบรายการสินค้าที่ระบุคืน
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Evidence Grid */}
+                              {item.evidenceKeys && item.evidenceKeys.length > 0 && (
+                                <ReturnEvidenceGrid
+                                  returnId={item.id}
+                                  count={item.evidenceKeys.length}
+                                  onImageClick={(link, list) =>
+                                    setEvidencePreview({ link, list })
+                                  }
+                                />
+                              )}
+
+                              {/* Decision Action Box */}
+                              <div className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-5 shadow-2xs">
+                                <div className="text-sm font-bold text-foreground">
+                                  ตัดสินคำขอ
+                                </div>
+
+                                {/* Radio Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                  <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() =>
+                                      setResolutions((prev) => ({
+                                        ...prev,
+                                        [item.id]: "FULL_REFUND",
+                                      }))
+                                    }
+                                    className={cn(
+                                      "flex items-start gap-3 rounded-xl border p-3.5 cursor-pointer transition-all",
+                                      resolution === "FULL_REFUND"
+                                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                        : "border-border hover:border-border/80 bg-card"
+                                    )}
+                                  >
+                                    <div
+                                      className={cn(
+                                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                                        resolution === "FULL_REFUND"
+                                          ? "border-primary"
+                                          : "border-muted-foreground"
+                                      )}
+                                    >
+                                      {resolution === "FULL_REFUND" && (
+                                        <div className="h-2 w-2 rounded-full bg-primary" />
+                                      )}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                      <div className="text-xs sm:text-sm font-semibold text-foreground">
+                                        คืนเต็มจำนวน
+                                      </div>
+                                      <div className="text-[11px] text-muted-foreground">
+                                        {formatBahtShort(item.sellerOrderGrandTotal)} · เท่ากับยอดออเดอร์ย่อย
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() =>
+                                      setResolutions((prev) => ({
+                                        ...prev,
+                                        [item.id]: "PARTIAL_REFUND",
+                                      }))
+                                    }
+                                    className={cn(
+                                      "flex items-start gap-3 rounded-xl border p-3.5 cursor-pointer transition-all",
+                                      resolution === "PARTIAL_REFUND"
+                                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                        : "border-border hover:border-border/80 bg-card"
+                                    )}
+                                  >
+                                    <div
+                                      className={cn(
+                                        "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                                        resolution === "PARTIAL_REFUND"
+                                          ? "border-primary"
+                                          : "border-muted-foreground"
+                                      )}
+                                    >
+                                      {resolution === "PARTIAL_REFUND" && (
+                                        <div className="h-2 w-2 rounded-full bg-primary" />
+                                      )}
+                                    </div>
+                                    <div className="space-y-0.5">
+                                      <div className="text-xs sm:text-sm font-semibold text-foreground">
+                                        คืนบางส่วน
+                                      </div>
+                                      <div className="text-[11px] text-muted-foreground">
+                                        ระบุยอดที่น้อยกว่า {formatBahtShort(item.sellerOrderGrandTotal)}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Amount Input Row */}
+                                <div className="space-y-2">
+                                  <label
+                                    htmlFor={`amount-${item.id}`}
+                                    className="text-xs font-semibold text-foreground"
+                                  >
+                                    ยอดคืนเงิน
+                                  </label>
+
+                                  {resolution === "FULL_REFUND" ? (
+                                    <div className="flex items-center gap-2">
+                                      <div className="relative max-w-xs flex-1">
+                                        <Input
+                                          id={`amount-${item.id}`}
+                                          readOnly
+                                          disabled
+                                          value={formatBaht(item.sellerOrderGrandTotal)}
+                                          className="bg-muted text-muted-foreground font-medium text-xs sm:text-sm"
+                                        />
+                                      </div>
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <Lock className="size-3.5" />
+                                        <span>ล็อคไว้เมื่อคืนเต็มจำนวน</span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div className="relative max-w-xs">
+                                        <Input
+                                          id={`amount-${item.id}`}
+                                          type="number"
+                                          step="0.01"
+                                          min="0.01"
+                                          max={item.sellerOrderGrandTotal - 0.01}
+                                          placeholder="0.00"
+                                          value={partialAmountStr}
+                                          onChange={(e) =>
+                                            setPartialAmounts((prev) => ({
+                                              ...prev,
+                                              [item.id]: e.target.value,
+                                            }))
+                                          }
+                                          className={cn(
+                                            "text-xs sm:text-sm font-medium",
+                                            !partialVal.valid && partialAmountStr
+                                              ? "border-destructive focus-visible:ring-destructive/30"
+                                              : ""
+                                          )}
+                                        />
+                                      </div>
+
+                                      {/* Quick Preset Buttons */}
+                                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                        <span className="text-[11px] text-muted-foreground">ลัดยอด:</span>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setPartialAmounts((prev) => ({
+                                              ...prev,
+                                              [item.id]: String(
+                                                calculatePresetPercentage(25, item.sellerOrderGrandTotal)
+                                              ),
+                                            }))
+                                          }
+                                          className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        >
+                                          25% ({formatBahtShort(calculatePresetPercentage(25, item.sellerOrderGrandTotal))})
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setPartialAmounts((prev) => ({
+                                              ...prev,
+                                              [item.id]: String(
+                                                calculatePresetPercentage(50, item.sellerOrderGrandTotal)
+                                              ),
+                                            }))
+                                          }
+                                          className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        >
+                                          50% ({formatBahtShort(calculatePresetPercentage(50, item.sellerOrderGrandTotal))})
+                                        </button>
+                                        {calculateReturnedCardsTotal(item.items) <
+                                          item.sellerOrderGrandTotal &&
+                                          calculateReturnedCardsTotal(item.items) > 0 && (
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                setPartialAmounts((prev) => ({
+                                                  ...prev,
+                                                  [item.id]: String(
+                                                    calculateReturnedCardsTotal(item.items)
+                                                  ),
+                                                }))
+                                              }
+                                              className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                                            >
+                                              ตามราคาสินค้าที่ขอคืน ({formatBahtShort(calculateReturnedCardsTotal(item.items))})
+                                            </button>
+                                          )}
+                                      </div>
+
+                                      {!partialVal.valid && partialAmountStr && (
+                                        <p className="text-xs font-medium text-destructive">
+                                          {partialVal.error}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Ship Back Toggle Switch */}
+                                <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3">
+                                  <Switch
+                                    id={`shipBack-${item.id}`}
+                                    checked={shipBack}
+                                    onCheckedChange={(checked) =>
+                                      setShipBackMap((prev) => ({
+                                        ...prev,
+                                        [item.id]: checked,
+                                      }))
+                                    }
+                                  />
+                                  <div className="space-y-0.5">
+                                    <label
+                                      htmlFor={`shipBack-${item.id}`}
+                                      className="text-xs sm:text-sm font-semibold text-foreground cursor-pointer"
+                                    >
+                                      ให้ผู้ซื้อส่งสินค้าคืนก่อนคืนเงิน
+                                    </label>
+                                    <p className="text-[11px] text-muted-foreground leading-normal">
+                                      ปิดไว้ถ้าไม่ต้องการรับของคืน เช่น ผู้ซื้อไม่ได้รับสินค้า — ระบบจะสร้างรายการคืนเงินทันทีที่อนุมัติ
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Financial Outcome Notice Banner & Buttons */}
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2 border-t border-border">
+                                  <div className="flex items-start gap-1.5 text-xs text-muted-foreground max-w-sm">
+                                    <Info className="size-4 shrink-0 text-muted-foreground mt-0.5" />
+                                    <span>
+                                      ผลต่อคุณ:{" "}
+                                      <strong className="font-semibold text-foreground">
+                                        {resolution === "FULL_REFUND"
+                                          ? `ไม่ได้รับเงินจากออเดอร์นี้ ${shipBack ? "· การ์ดกลับเข้าสต็อกให้ตอนยืนยันรับของ" : ""}`
+                                          : `ได้รับส่วนต่าง ${formatBahtShort(Math.max(0, item.sellerOrderGrandTotal - activeRefundAmount))} หลังหักค่าคอมมิชชั่น`}
+                                      </strong>
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      disabled={isBusy}
+                                      onClick={() => setRejectModalItem(item)}
+                                      className="border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-medium"
+                                    >
+                                      ปฏิเสธคำขอ
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      disabled={isBusy || !isPartialValid || activeRefundAmount <= 0}
+                                      onClick={() => setApproveModalItem(item)}
+                                      className="text-xs font-semibold px-4 shadow-xs"
+                                    >
+                                      อนุมัติคืนเงิน {formatBahtShort(activeRefundAmount)}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {/* Case 2: IN_TRANSIT */}
+                          {item.status === "IN_TRANSIT" && (
+                            <div className="space-y-4">
+                              {/* Tracking Box */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-4">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card border border-border text-foreground shadow-2xs">
+                                    <Package className="size-5" />
+                                  </div>
+                                  <div className="space-y-0.5">
+                                    <div className="text-xs font-semibold text-muted-foreground">
+                                      เลขพัสดุส่งคืนจากผู้ซื้อ
+                                    </div>
+                                    <div className="text-xs sm:text-sm font-bold text-foreground">
+                                      {item.returnTrackingNumber ?? "ไม่มีเลขพัสดุ"}
+                                      <span className="font-normal text-muted-foreground ml-2">
+                                        · ของที่ต้องได้รับ:{" "}
+                                        {item.items?.map((i) => `${i.cardName} ×${i.quantityReturned}`).join(", ") ||
+                                          "การ์ดที่ส่งคืน"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {item.returnTrackingNumber && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleCopyTracking(item.returnTrackingNumber!)}
+                                    className="self-start sm:self-auto text-xs"
+                                  >
+                                    <Copy className="size-3.5 mr-1.5" />
+                                    คัดลอก
+                                  </Button>
+                                )}
+                              </div>
+
+                              {/* Restock Toggle & Confirm Button */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                                <div className="flex items-start gap-3">
+                                  <Switch
+                                    id={`restock-${item.id}`}
+                                    checked={restock}
+                                    onCheckedChange={(checked) =>
+                                      setRestockMap((prev) => ({
+                                        ...prev,
+                                        [item.id]: checked,
+                                      }))
+                                    }
+                                  />
+                                  <div className="space-y-0.5">
+                                    <label
+                                      htmlFor={`restock-${item.id}`}
+                                      className="text-xs sm:text-sm font-semibold text-foreground cursor-pointer"
+                                    >
+                                      นำการ์ดกลับเข้าสต็อก
+                                    </label>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      ได้รับทุกใบในสภาพดี · ปิดไว้ถ้าการ์ดเสียหายจนขายต่อไม่ได้
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <Button
+                                  size="sm"
+                                  disabled={isBusy}
+                                  onClick={() => setReceiveModalItem(item)}
+                                  className="text-xs font-semibold px-4 shadow-xs self-end sm:self-auto"
+                                >
+                                  ยืนยันได้รับสินค้าคืน
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Case 3: Other Statuses (Informative Status Callout) */}
+                          {item.status !== "REQUESTED" && item.status !== "IN_TRANSIT" && (
+                            <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-xs sm:text-sm text-foreground">
+                                  สถานะคำขอ: {statusConf.label}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground leading-relaxed">
+                                {item.status === "AWAITING_RETURN_SHIPMENT" &&
+                                  "คำขอได้รับการอนุมัติแล้ว และกำลังรอผู้ซื้อจัดส่งสินค้าคืนพร้อมกรอกเลขพัสดุในระบบ"}
+                                {item.status === "APPROVED" &&
+                                  "คำขอได้รับการอนุมัติโดยไม่ต้องส่งสินค้าคืน ระบบกำลังดำเนินการคืนเงินให้แก่ผู้ซื้อ"}
+                                {item.status === "RECEIVED" &&
+                                  "คุณได้ยืนยันการรับสินค้าคืนแล้ว ระบบกำลังดำเนินการโอนเงินคืนให้แก่ผู้ซื้อ"}
+                                {item.status === "REFUNDED" &&
+                                  "ระบบได้คืนเงินให้แก่ผู้ซื้อเรียบร้อยแล้ว กระบวนการคืนสินค้าเสร็จสมบูรณ์"}
+                                {item.status === "REJECTED" &&
+                                  "คำขอนี้ถูกปฏิเสธ ระบบ Escrow ได้กลับสู่ขั้นตอนการนับเวลาเพื่อจ่ายเงินให้ร้านค้าตามปกติ"}
+                                {item.status === "CLOSED" &&
+                                  "คำขอคืนสินค้านี้ถูกปิดการดำเนินการแล้ว"}
+                              </p>
+                              {item.returnTrackingNumber && (
+                                <div className="text-xs text-muted-foreground pt-1">
+                                  เลขพัสดุส่งคืน:{" "}
+                                  <span className="font-medium text-foreground">
+                                    {item.returnTrackingNumber}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Right Column: Widgets */}
+            <div className="lg:col-span-4 space-y-4">
+              {/* Widget 1: Steps to Return (ขั้นตอนการคืนสินค้า) */}
+              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
+                <CardContent className="p-5 space-y-4">
+                  <h3 className="font-bold text-sm text-foreground">
+                    ขั้นตอนการคืนสินค้า
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Step 1 */}
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <Check className="size-3 stroke-[3]" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-semibold text-foreground">
+                          1. ผู้ซื้อเปิดคำขอพร้อมหลักฐาน
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                          currentStep === 2
+                            ? "border-2 border-primary text-primary bg-primary/10"
+                            : currentStep > 2
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground bg-muted/50"
+                        )}
+                      >
+                        {currentStep > 2 ? <Check className="size-3 stroke-[3]" /> : "2"}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div
+                          className={cn(
+                            "text-xs font-semibold",
+                            currentStep === 2 ? "text-primary font-bold" : "text-foreground"
+                          )}
+                        >
+                          คุณอนุมัติหรือปฏิเสธ
+                        </div>
+                        <div className="text-[11px] text-muted-foreground leading-tight">
+                          ไม่มีกำหนดเวลา แต่มีผลถูกหักเงินจนกว่าจะตัดสิน
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                          currentStep === 3
+                            ? "border-2 border-primary text-primary bg-primary/10"
+                            : currentStep > 3
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground bg-muted/50"
+                        )}
+                      >
+                        {currentStep > 3 ? <Check className="size-3 stroke-[3]" /> : "3"}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div
+                          className={cn(
+                            "text-xs font-semibold",
+                            currentStep === 3 ? "text-primary font-bold" : "text-foreground"
+                          )}
+                        >
+                          ผู้ซื้อส่งของคืน
+                        </div>
+                        <div className="text-[11px] text-muted-foreground leading-tight">
+                          เฉพาะเมื่อคุณให้ส่งคืน
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 4 */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                          currentStep === 4
+                            ? "border-2 border-primary text-primary bg-primary/10"
+                            : currentStep > 4
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground bg-muted/50"
+                        )}
+                      >
+                        {currentStep > 4 ? <Check className="size-3 stroke-[3]" /> : "4"}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div
+                          className={cn(
+                            "text-xs font-semibold",
+                            currentStep === 4 ? "text-primary font-bold" : "text-foreground"
+                          )}
+                        >
+                          คุณยืนยันได้รับของ
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 5 */}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                          currentStep === 5
+                            ? "border-2 border-primary text-primary bg-primary/10"
+                            : currentStep > 5
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-muted-foreground bg-muted/50"
+                        )}
+                      >
+                        {currentStep > 5 ? <Check className="size-3 stroke-[3]" /> : "5"}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div
+                          className={cn(
+                            "text-xs font-semibold",
+                            currentStep === 5 ? "text-primary font-bold" : "text-foreground"
+                          )}
+                        >
+                          ระบบคืนเงินให้ผู้ซื้อ
+                        </div>
+                        <div className="text-[11px] text-muted-foreground leading-tight">
+                          ถ้าผู้ซื้อโอนเงินมา แอดมินจะโอนคืนให้
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Widget 2: Pending Funds Summary (เงินที่รอผลคำขอคืน) */}
+              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
+                <CardContent className="p-5 space-y-3.5">
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-foreground">
+                        เงินที่รอผลคำขอคืน
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {pendingFundsSummary.count} ออเดอร์ย่อย
+                      </p>
+                    </div>
+                    <div className="text-xl font-bold text-amber-600 dark:text-amber-400 tracking-tight">
+                      {formatBahtShort(pendingFundsSummary.total)}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-border pt-3 space-y-2 text-xs">
+                    <div className="text-[11px] font-semibold text-muted-foreground">
+                      ผลต่อเงินของคุณเมื่อจบเรื่อง
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">คืนเต็มจำนวน</span>
+                      <span className="font-medium text-destructive">ไม่ได้รับเงินออเดอร์นี้</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">คืนบางส่วน</span>
+                      <span className="font-medium text-amber-600 dark:text-amber-400">ได้ส่วนที่เหลือ หลังหักค่าคอม</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">ปฏิเสธ</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">ได้เต็มจำนวนตามกำหนดเดิม</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Widget 3: Warning Box (ตรวจหลักฐานก่อนปฏิเสธ) */}
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
+                  <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                  <span>ตรวจหลักฐานก่อนปฏิเสธ</span>
+                </div>
+                <p className="text-[11px] text-amber-800/90 dark:text-amber-300 leading-relaxed">
+                  กดปฏิเสธแล้วแก้ไขไม่ได้ และผู้ซื้อจะเปิดคำขอของออเดอร์นี้ซ้ำไม่ได้อีก
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Confirmation & Preview Modals */}
+      <ApproveReturnModal
+        open={!!approveModalItem}
+        onOpenChange={(open) => !open && setApproveModalItem(null)}
+        item={approveModalItem}
+        amount={
+          approveModalItem
+            ? resolutions[approveModalItem.id] === "PARTIAL_REFUND"
+              ? parseFloat(partialAmounts[approveModalItem.id] || "0")
+              : approveModalItem.sellerOrderGrandTotal
+            : 0
+        }
+        resolution={
+          approveModalItem ? resolutions[approveModalItem.id] ?? "FULL_REFUND" : "FULL_REFUND"
+        }
+        requireShipBack={
+          approveModalItem ? shipBackMap[approveModalItem.id] ?? true : true
+        }
+        onConfirm={handleApproveConfirm}
+        loading={busyId !== null}
+      />
+
+      <RejectReturnModal
+        open={!!rejectModalItem}
+        onOpenChange={(open) => !open && setRejectModalItem(null)}
+        item={rejectModalItem}
+        onConfirm={handleRejectConfirm}
+        loading={busyId !== null}
+      />
+
+      <ConfirmReceiptModal
+        open={!!receiveModalItem}
+        onOpenChange={(open) => !open && setReceiveModalItem(null)}
+        item={receiveModalItem}
+        restock={receiveModalItem ? restockMap[receiveModalItem.id] ?? true : true}
+        onConfirm={handleReceiveConfirm}
+        loading={busyId !== null}
+      />
+
+      <EvidencePreviewModal
+        open={!!evidencePreview.link}
+        onOpenChange={(open) => !open && setEvidencePreview({ link: null, list: [] })}
+        activeLink={evidencePreview.link}
+        allLinks={evidencePreview.list}
+        onSelectLink={(link) => setEvidencePreview((prev) => ({ ...prev, link }))}
+      />
+
+      <ReturnPolicyModal
+        open={policyModalOpen}
+        onOpenChange={setPolicyModalOpen}
+      />
+    </div>
+  );
 }

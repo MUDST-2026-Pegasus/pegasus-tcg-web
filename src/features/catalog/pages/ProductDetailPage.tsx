@@ -2,17 +2,30 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck, Minus, Plus, Loader2 } from "lucide-react";
 
+import { DetailPageSkeleton, ListRowsSkeleton, TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
+import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "../catalog.mappers";
 import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+
+/** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
+const ALL_VARIANTS = "all";
 
 function formatPrice(amount: number, currency = "THB") {
   return new Intl.NumberFormat("th-TH", {
@@ -67,11 +80,7 @@ export function ProductDetailPage() {
   }
 
   if (productQuery.isPending) {
-    return (
-        <div role="status" className="p-8 text-center">
-          กำลังโหลดสินค้า...
-        </div>
-    );
+    return <DetailPageSkeleton label="กำลังโหลดสินค้า" />;
   }
 
   if (productQuery.isError) {
@@ -130,6 +139,13 @@ function ProductDetailContent({
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
   const itemLabel = product.productType === "SINGLE_CARD" ? "cards" : "items";
+  const variantItems = [
+    { value: ALL_VARIANTS, label: "All variants" },
+    ...variants.map((variant) => ({
+      value: String(variant.id),
+      label: [variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / "),
+    })),
+  ];
 
   const [selectedImageId, setSelectedImageId] = useState<number | null>(
       null,
@@ -235,16 +251,7 @@ function ProductDetailContent({
       });
       return true;
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "เพิ่มสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: message, type: "error" });
+      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
       return false;
     }
   }
@@ -280,16 +287,11 @@ function ProductDetailContent({
       });
       navigate(`/checkout?${params.toString()}`);
     } catch (error) {
-      const message = error instanceof ApiError && error.status === 409
-        ? error.code === "CANNOT_BUY_OWN_LISTING"
-          ? "ไม่สามารถซื้อสินค้าที่คุณเป็นผู้ขายเองได้"
-          : error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง"
-            : error.message
-        : error instanceof Error
-          ? error.message
-          : "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง";
-      toast.add({ title: "ซื้อสินค้าไม่สำเร็จ", description: message, type: "error" });
+      toast.add({
+        title: "ซื้อสินค้าไม่สำเร็จ",
+        description: addToCartErrorMessage(error, "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง"),
+        type: "error",
+      });
     } finally {
       setIsBuyingNow(false);
     }
@@ -364,11 +366,23 @@ function ProductDetailContent({
             </Card>
 
             <div>
-              <label htmlFor="variant" className="mb-3 block font-bold">Select variant</label>
-              <select id="variant" value={selectedVariant} onChange={(event) => changeVariant(event.target.value)} className="h-12 w-full rounded-xl border bg-white px-4 text-sm">
-                <option value="">All variants</option>
-                {variants.map((variant) => <option key={variant.id} value={variant.id}>{[variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / ")}</option>)}
-              </select>
+              <p className="mb-3 font-bold">Select variant</p>
+              <Select
+                items={variantItems}
+                value={selectedVariant || ALL_VARIANTS}
+                onValueChange={(value) => changeVariant(!value || value === ALL_VARIANTS ? "" : value)}
+              >
+                <SelectTrigger aria-label="Select variant" className="h-12 w-full rounded-xl border-border bg-white px-4">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {variantItems.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -433,7 +447,7 @@ function ProductDetailContent({
           <div className="mb-6">
             <div><p className="text-sm font-semibold text-primary">{listingsReady ? `${availableQuantity} available` : "— available"}</p><h2 className="mt-1 text-2xl font-bold">Market listings</h2></div>
           </div>
-          {listingsQuery.isPending ? <p role="status" className="py-10 text-center text-sm text-muted-foreground">กำลังโหลดประกาศขาย...</p> : listingsQuery.isError ? (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={4} /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
           ) : !hasListings ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีผู้ขายสำหรับตัวเลือกนี้</p> : (
             <div className="divide-y">
@@ -467,7 +481,7 @@ function ProductDetailContent({
             <p className="text-xs leading-4 text-muted-foreground">People who have made this {product.productType === "SINGLE_CARD" ? "card" : "product"} public · {collectorsQuery.data?.totalItems ?? "—"} collectors</p>
           </div>
           {collectorsQuery.isPending ? (
-            <p role="status" className="py-10 text-center text-sm text-muted-foreground">กำลังโหลดนักสะสม...</p>
+            <div role="status" aria-busy="true" aria-label="กำลังโหลดนักสะสม"><ListRowsSkeleton rows={3} /></div>
           ) : collectorsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center">
               <p>โหลดรายชื่อนักสะสมไม่สำเร็จ</p>
@@ -516,7 +530,7 @@ function ProductDetailContent({
             <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none"><CardContent className="p-6 sm:p-7">
               <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />Abilities &amp; Attacks</h2>
               {effectsQuery.isPending ? (
-                <p role="status" className="text-sm text-muted-foreground">กำลังโหลดความสามารถการ์ด...</p>
+                <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>
               ) : effectsQuery.isError ? (
                 <div role="alert" className="space-y-2 text-sm"><p>โหลดความสามารถการ์ดไม่สำเร็จ</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>ลองใหม่</Button></div>
               ) : effects.length === 0 ? (

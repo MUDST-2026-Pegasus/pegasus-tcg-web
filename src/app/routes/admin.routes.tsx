@@ -1,24 +1,30 @@
 import { Navigate, type RouteObject } from "react-router-dom";
 
+import { lazyPage } from "@/app/lazy-page";
+import { DashboardPageSkeleton } from "@/components/common/PageSkeletons";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
-import { AdminActivityLogPage } from "@/features/admin/pages/AdminActivityLogPage";
-import { AdminCardAttributesPage } from "@/features/admin/pages/AdminCardAttributesPage";
-import { AdminCatalogPage } from "@/features/admin/pages/AdminCatalogPage";
-import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage";
-import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
-import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
-import { AdminPaymentsPage } from "@/features/admin/pages/AdminPaymentsPage";
-import { AdminPayoutsPage } from "@/features/admin/pages/AdminPayoutsPage";
-import { AdminRefundsPage } from "@/features/admin/pages/AdminRefundsPage";
-import { AdminReviewsPage } from "@/features/admin/pages/AdminReviewsPage";
-import { AdminSellerApprovalPage } from "@/features/admin/pages/AdminSellerApprovalPage";
-import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
 import { adminNav } from "@/lib/nav-config";
+
+const pageSkeleton = <DashboardPageSkeleton />;
+
+const AdminOverviewPage = lazyPage(() => import("@/features/admin/pages/AdminOverviewPage").then((m) => m.AdminOverviewPage), pageSkeleton);
+const AdminCatalogPage = lazyPage(() => import("@/features/admin/pages/AdminCatalogPage").then((m) => m.AdminCatalogPage), pageSkeleton);
+const AdminCardAttributesPage = lazyPage(() => import("@/features/admin/pages/AdminCardAttributesPage").then((m) => m.AdminCardAttributesPage), pageSkeleton);
+const AdminSellerApprovalPage = lazyPage(() => import("@/features/admin/pages/AdminSellerApprovalPage").then((m) => m.AdminSellerApprovalPage), pageSkeleton);
+const AdminUsersPage = lazyPage(() => import("@/features/admin/pages/AdminUsersPage").then((m) => m.AdminUsersPage), pageSkeleton);
+const AdminOrdersPage = lazyPage(() => import("@/features/admin/pages/AdminOrdersPage").then((m) => m.AdminOrdersPage), pageSkeleton);
+const AdminCommissionPage = lazyPage(() => import("@/features/admin/pages/AdminCommissionPage").then((m) => m.AdminCommissionPage), pageSkeleton);
+const AdminPaymentsPage = lazyPage(() => import("@/features/admin/pages/AdminPaymentsPage").then((m) => m.AdminPaymentsPage), pageSkeleton);
+const AdminRefundsPage = lazyPage(() => import("@/features/admin/pages/AdminRefundsPage").then((m) => m.AdminRefundsPage), pageSkeleton);
+const AdminPayoutsPage = lazyPage(() => import("@/features/admin/pages/AdminPayoutsPage").then((m) => m.AdminPayoutsPage), pageSkeleton);
+const AdminReviewsPage = lazyPage(() => import("@/features/admin/pages/AdminReviewsPage").then((m) => m.AdminReviewsPage), pageSkeleton);
+const AdminActivityLogPage = lazyPage(() => import("@/features/admin/pages/AdminActivityLogPage").then((m) => m.AdminActivityLogPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ดูแลระบบ — ใช้ DashboardLayout (Sidebar + topbar + Footer)
  * เมนู sidebar มาจาก adminNav ใน @/lib/nav-config
+ * แต่ละหน้าแยก chunk ด้วย lazyPage (ดู @/app/lazy-page)
  *
  * เจ้าของไฟล์นี้: คนที่ทำ feature admin — แก้ได้เลยโดยไม่ชนกับคนอื่น
  */

@@ -30,7 +30,7 @@ export function SellerApprovalStats({
       aria-label="กรองคำขอตามสถานะ"
       className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-[#eef1f2] xl:grid-cols-4"
     >
-      {VERIFICATION_STATUSES.map((status) => {
+      {VERIFICATION_STATUSES.map((status, index) => {
         const meta = VERIFICATION_STATUS_META[status];
         const isActive = status === active;
 
@@ -42,9 +42,13 @@ export function SellerApprovalStats({
             aria-selected={isActive}
             onClick={() => onSelect(status)}
             className={cn(
-              "flex flex-col gap-1.5 bg-background px-5 py-4 text-left transition-colors outline-none",
+              "flex flex-col gap-1.5 border-[3px] border-transparent bg-background px-[17px] py-[13px] text-left transition-colors outline-none",
+              index === 0 && "rounded-tl-[11px] xl:rounded-bl-[11px]",
+              index === 1 && "rounded-tr-[11px] xl:rounded-tr-none",
+              index === 2 && "rounded-bl-[11px] xl:rounded-bl-none",
+              index === 3 && "rounded-br-[11px] xl:rounded-tr-[11px]",
               isActive
-                ? "ring-2 ring-inset ring-[#0058bc]"
+                ? "border-[#0058bc]"
                 : "hover:bg-[#fafbfb] focus-visible:bg-[#fafbfb]",
             )}
           >

@@ -18,6 +18,7 @@ export function useUpdateProfile() {
         old ? { ...old, ...updatedUser } : updatedUser,
       );
       queryClient.invalidateQueries({ queryKey: authKeys.me() });
+      queryClient.invalidateQueries({ queryKey: ['public-profile', updatedUser.username] });
     },
   });
 }

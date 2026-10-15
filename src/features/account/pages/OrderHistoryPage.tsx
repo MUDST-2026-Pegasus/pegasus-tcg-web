@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronUp,
@@ -13,8 +13,9 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
 import { Badge } from "@/components/ui/badge";
@@ -49,8 +50,10 @@ import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
-import { useBuyerRefunds } from "@/features/finance/refunds.queries";
+import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
+import { afterSalesApi } from "@/features/finance/after-sales.api";
+import { reviewKeys } from "@/features/finance/reviews.queries";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
@@ -72,6 +75,14 @@ import {
 
 export function OrderHistoryPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedOrderId = Number(searchParams.get("orderId"));
+  const linkedOrder = useQuery({
+    queryKey: ["orders", linkedOrderId],
+    queryFn: () => ordersApi.getOrder(linkedOrderId),
+    enabled: Number.isSafeInteger(linkedOrderId) && linkedOrderId > 0,
+    retry: false,
+  });
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -86,6 +97,7 @@ export function OrderHistoryPage() {
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<OrderDetails | null>(null);
+  const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
 
   const sidebarUser = toSidebarUser(user);
 
@@ -122,6 +134,8 @@ export function OrderHistoryPage() {
       setIsCancelModalOpen(false);
       setSelectedOrderToCancel(null);
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      // Cancelling a paid order opens a refund that needs the buyer's bank account.
+      queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     } catch (err) {
       toast.add({
         title: "Cancellation Failed",
@@ -174,11 +188,8 @@ export function OrderHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-xl border gap-3">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground font-medium">
-                Loading orders...
-              </p>
+            <div role="status" aria-busy="true" aria-label="Loading orders">
+              <ProductRowsSkeleton />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border gap-3 p-6">
@@ -234,13 +245,19 @@ export function OrderHistoryPage() {
       />
 
       {/* Order Details Modal */}
-      {selectedOrderForDetails && (
+      {detailOrder && (
         <OrderDetailsModal
-          order={selectedOrderForDetails}
-          open={!!selectedOrderForDetails}
-          onClose={() => setSelectedOrderForDetails(null)}
-          onConfirmReceived={() => setConfirmTarget(selectedOrderForDetails)}
-          isConfirming={confirmingOrderId === selectedOrderForDetails.id}
+          order={detailOrder}
+          open={!!detailOrder}
+          onClose={() => {
+            setSelectedOrderForDetails(null);
+            setSearchParams((current) => {
+              current.delete("orderId");
+              return current;
+            }, { replace: true });
+          }}
+          onConfirmReceived={() => setConfirmTarget(detailOrder)}
+          isConfirming={confirmingOrderId === detailOrder.id}
         />
       )}
 
@@ -294,6 +311,18 @@ function OrderCardItem({
   const autoCompleteAt = nextAutoCompleteAt(order);
   const tracking = firstTracking(order);
   const cancelReason = (order.sellerOrders ?? []).find((so) => so.cancelReason)?.cancelReason;
+  // Only completed parcels can be reviewed, once each: a refunded or cancelled seller
+  // in the same order, or one already reviewed, must not keep the button up.
+  const reviewable = stage === "COMPLETED"
+    ? (order.sellerOrders ?? []).filter((so) => so.status === "COMPLETED")
+    : [];
+  const myReviews = useQueries({
+    queries: reviewable.map((so) => ({
+      queryKey: reviewKeys.mine(so.id),
+      queryFn: () => afterSalesApi.myReview(so.id),
+    })),
+  });
+  const canReview = myReviews.some((review) => review.isSuccess && !review.data);
 
   const allItems: OrderItemDetails[] = (order.sellerOrders ?? []).flatMap(
     (so) => so.items ?? [],
@@ -470,7 +499,7 @@ function OrderCardItem({
               {isConfirming ? "Confirming..." : "Confirm Received"}
             </Button>
           )}
-          {stage === "COMPLETED" && (
+          {canReview && (
             <Button size="sm" onClick={onViewDetails}>
               Write a Review
             </Button>

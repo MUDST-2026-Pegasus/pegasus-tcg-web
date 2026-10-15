@@ -1,5 +1,6 @@
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 
+import { InitialRouteReady } from "@/app/InitialRouteReady";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -20,6 +21,7 @@ export function RouteError() {
 
   return (
     <Empty className="min-h-svh">
+      <InitialRouteReady />
       <EmptyHeader>
         <EmptyTitle>หน้านี้มีปัญหา</EmptyTitle>
         <EmptyDescription>{detail}</EmptyDescription>

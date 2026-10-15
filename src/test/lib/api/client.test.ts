@@ -222,4 +222,14 @@ describe("api client", () => {
       violations: [{ field: "name", message: "Required" }],
     });
   });
+
+  it("preserves seller details so checkout can identify the changed shipping option", async () => {
+    mockFetch.mockResolvedValueOnce(createResponse(false, 400, {
+      success: false, message: "Shipping option is inactive",
+      data: { code: "SHIPPING_OPTION_INVALID", details: { sellerProfileId: 2, shippingOptionId: 21 } },
+    }));
+    await expect(api.post("/checkout", {})).rejects.toMatchObject({
+      status: 400, code: "SHIPPING_OPTION_INVALID", details: { sellerProfileId: 2, shippingOptionId: 21 },
+    });
+  });
 });
