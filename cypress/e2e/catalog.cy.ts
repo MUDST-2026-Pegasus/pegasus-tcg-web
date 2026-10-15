@@ -16,8 +16,14 @@ describe('Catalog UI', () => {
         success: true,
         message: 'OK',
         data: {
+          id: 1,
+          userId: 1,
+          sessionKey: null,
+          currency: 'THB',
           items: [],
           totalQuantity: 0,
+          itemsSubtotal: 0,
+          expiresAt: null,
         },
       },
     }).as('getCart');
