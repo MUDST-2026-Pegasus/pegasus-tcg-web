@@ -238,44 +238,56 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("meAdmin");
 
-    cy.intercept("GET", "**/api/v1/admin/verifications?status=SUBMITTED*", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          items: [
-            {
-              id: 1,
-              userId: 2,
-              username: "somchai_seller",
-              legalFirstName: "Somchai",
-              legalLastName: "Rakdee",
-              bankCode: "KBANK",
-              bankName: "Kasikornbank",
-              bankAccountNumber: "012-3-45678-9",
-              status: "SUBMITTED",
-              submittedAt: "2026-10-15T00:00:00Z",
+    cy.intercept("GET", "**/api/v1/admin/verifications*", (req) => {
+      const url = new URL(req.url);
+      const status = url.searchParams.get("status");
+      if (status === "SUBMITTED") {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [
+                {
+                  id: 1,
+                  userId: 2,
+                  username: "somchai_seller",
+                  legalFirstName: "Somchai",
+                  legalLastName: "Rakdee",
+                  bankCode: "KBANK",
+                  bankName: "Kasikornbank",
+                  bankAccountNumber: "012-3-45678-9",
+                  status: "SUBMITTED",
+                  submittedAt: "2026-10-15T00:00:00Z",
+                },
+              ],
+              totalItems: 1,
+              totalPages: 1,
+              total: 1,
+              page: 0,
+              size: 20,
+              pageSize: 20,
             },
-          ],
-          total: 1,
-          page: 0,
-          pageSize: 20,
-        },
-      },
+          },
+        });
+      } else {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              total: 0,
+              page: 0,
+              size: 20,
+              pageSize: 20,
+            },
+          },
+        });
+      }
     }).as("getQueue");
-
-    cy.intercept("GET", "**/api/v1/admin/verifications/counts", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          submitted: 1,
-          underReview: 0,
-          approved: 0,
-          rejected: 0,
-        },
-      },
-    }).as("getCounts");
 
     cy.visit("/admin/sellers", {
       onBeforeLoad(win) {
@@ -310,44 +322,56 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("meAdmin");
 
-    cy.intercept("GET", "**/api/v1/admin/verifications?status=SUBMITTED*", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          items: [
-            {
-              id: 1,
-              userId: 2,
-              username: "somchai_seller",
-              legalFirstName: "Somchai",
-              legalLastName: "Rakdee",
-              bankCode: "KBANK",
-              bankName: "Kasikornbank",
-              bankAccountNumber: "012-3-45678-9",
-              status: "SUBMITTED",
-              submittedAt: "2026-10-15T00:00:00Z",
+    cy.intercept("GET", "**/api/v1/admin/verifications*", (req) => {
+      const url = new URL(req.url);
+      const status = url.searchParams.get("status");
+      if (status === "SUBMITTED") {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [
+                {
+                  id: 1,
+                  userId: 2,
+                  username: "somchai_seller",
+                  legalFirstName: "Somchai",
+                  legalLastName: "Rakdee",
+                  bankCode: "KBANK",
+                  bankName: "Kasikornbank",
+                  bankAccountNumber: "012-3-45678-9",
+                  status: "SUBMITTED",
+                  submittedAt: "2026-10-15T00:00:00Z",
+                },
+              ],
+              totalItems: 1,
+              totalPages: 1,
+              total: 1,
+              page: 0,
+              size: 20,
+              pageSize: 20,
             },
-          ],
-          total: 1,
-          page: 0,
-          pageSize: 20,
-        },
-      },
+          },
+        });
+      } else {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              total: 0,
+              page: 0,
+              size: 20,
+              pageSize: 20,
+            },
+          },
+        });
+      }
     }).as("getQueue");
-
-    cy.intercept("GET", "**/api/v1/admin/verifications/counts", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          submitted: 1,
-          underReview: 0,
-          approved: 0,
-          rejected: 0,
-        },
-      },
-    }).as("getCounts");
 
     cy.intercept("POST", "**/api/v1/admin/verifications/1/start-review", {
       statusCode: 200,
