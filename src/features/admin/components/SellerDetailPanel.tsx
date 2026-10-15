@@ -82,6 +82,7 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
           <SellerAvatar
             initials={initialsFor(verification)}
             accent={avatarAccentFor(verification)}
+            src={verification.sellerAvatarUrl}
             className="size-[52px]"
           />
 

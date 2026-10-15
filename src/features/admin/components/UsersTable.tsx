@@ -116,6 +116,7 @@ export function UsersTable({
                     <SellerAvatar
                       initials={userInitials(user)}
                       accent={userAccent(user)}
+                      src={user.avatarUrl}
                       className="size-7"
                     />
                     <div className="flex min-w-0 flex-col gap-0.5">
