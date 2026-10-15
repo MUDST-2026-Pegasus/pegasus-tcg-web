@@ -37,6 +37,25 @@ describe('RegisterForm', () => {
     expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
   });
 
+  it('opens legal pages from their links while the agreement checkbox stays separate', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+
+    const terms = screen.getByRole('link', { name: 'Terms of Service' });
+    const privacy = screen.getByRole('link', { name: 'Privacy Policy' });
+    expect(terms).toHaveAttribute('href', '/terms-of-service');
+    expect(privacy).toHaveAttribute('href', '/privacy-policy');
+    expect(terms).toHaveAttribute('target', '_blank');
+    expect(privacy).toHaveAttribute('target', '_blank');
+
+    const agreement = screen.getByRole('checkbox');
+    expect(agreement).not.toBeChecked();
+    await user.click(screen.getByText('I agree to the Pegasus'));
+    expect(agreement).toBeChecked();
+    await user.click(screen.getByText('I agree to the Pegasus'));
+    expect(agreement).not.toBeChecked();
+  });
+
   it('toggles password and confirmation independently without submitting', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RegisterForm />);

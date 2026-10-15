@@ -165,11 +165,18 @@ export function RegisterForm() {
               />
             )}
           />
-          <FieldLabel htmlFor="terms" className="font-normal">
-            I agree to the Pegasus{" "}
-            <span className="text-primary">Terms of Service</span> and{" "}
-            <span className="text-primary">Privacy Policy</span>
-          </FieldLabel>
+          <span className="text-sm leading-snug">
+            <FieldLabel htmlFor="terms" className="inline cursor-pointer font-normal">
+              I agree to the Pegasus
+            </FieldLabel>{" "}
+            <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </span>
         </Field>
         <FieldError errors={[errors.acceptTerms]} />
         <Button
