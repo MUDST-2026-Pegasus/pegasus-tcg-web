@@ -7,6 +7,7 @@ import type {
   ListingDetailsPayload,
   MarketListing,
   NewUnitsPayload,
+  StockInHistory,
   VariantLookup,
 } from "./listing-form.types";
 import type { CardCondition, SellerListing } from "./products.types";
@@ -87,4 +88,15 @@ export function updateListingDetails(
   payload: ListingDetailsPayload,
 ): Promise<SellerListing> {
   return api.put<SellerListing>(`/sellers/me/listings/${listingId}`, payload);
+}
+
+/** ประวัติรับเข้าทีละล็อต ใหม่สุดก่อน — ของทั้งร้านสำหรับการ์ดพิมพ์นี้ในสภาพนี้ */
+export function getStockIns(
+  variantId: number,
+  condition: CardCondition,
+  page: number,
+): Promise<StockInHistory> {
+  return api.get<StockInHistory>("/sellers/me/inventory/stock-ins", {
+    query: { variantId, condition, page, size: 20 },
+  });
 }

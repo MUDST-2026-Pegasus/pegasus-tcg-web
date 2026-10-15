@@ -136,6 +136,7 @@ export function RestockContent({ data }: RestockContentProps) {
 
           <RestockHistoryCard
             {...data.history}
+            market={data.market}
             unit={data.product.unit}
             sourceOptions={data.form.sourceOptions}
             draft={draft}

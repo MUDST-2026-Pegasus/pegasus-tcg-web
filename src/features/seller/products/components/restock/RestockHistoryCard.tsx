@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -12,14 +13,17 @@ import {
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 
+import { toRestockLot } from "../../restock.api";
 import type { RestockCalculation } from "../../restock.calc";
 import { formatThaiDate } from "../../restock.calc";
+import { useStockIns } from "../../restock.queries";
 import type { RestockData, RestockDraft, RestockLot } from "../../restock.types";
 
 const HEAD_CLASS = "h-auto px-3 py-2.5 text-xs font-medium text-gray-500";
 const CELL_CLASS = "px-3 py-3 text-xs";
 
 type RestockHistoryCardProps = RestockData["history"] & {
+  market: RestockData["market"];
   unit: string;
   sourceOptions: RestockData["form"]["sourceOptions"];
   draft: RestockDraft;
@@ -29,15 +33,17 @@ type RestockHistoryCardProps = RestockData["history"] & {
 /**
  * ประวัติการรับเข้า — แถวบนสุดพื้นเทาคือล็อตที่กำลังกรอก (ยังไม่บันทึก)
  * โชว์ก็ต่อเมื่อกรอกครบ ตัวเลขสรุปใต้หัวตารางนับแถวนี้รวมด้วย
+ * ล็อตที่บันทึกแล้วโหลดเองจาก `useStockIns` โหลดไม่ขึ้นก็ไม่กระทบฟอร์มรับเข้า
  */
 export function RestockHistoryCard({
   title,
   exportLabel,
-  soldCount,
   columns,
   newBadgeLabel,
   emptyLabel,
-  lots,
+  errorLabel,
+  loadMoreLabel,
+  market,
   unit,
   sourceOptions,
   draft,
@@ -57,8 +63,15 @@ export function RestockHistoryCard({
       }
     : null;
 
+  const stockIns = useStockIns(market.variantId, market.condition);
+  const firstPage = stockIns.data?.pages[0];
+  const lots = stockIns.data?.pages.flatMap((page) => page.lots.items.map(toRestockLot)) ?? [];
+
   const rows = pendingLot ? [pendingLot, ...lots] : lots;
-  const receivedCount = rows.reduce((sum, lot) => sum + lot.quantity, 0);
+  const pendingQuantity = pendingLot?.quantity ?? 0;
+  const lotCount = (firstPage?.lots.totalItems ?? 0) + (pendingLot ? 1 : 0);
+  const receivedCount = (firstPage?.receivedTotal ?? 0) + pendingQuantity;
+  const soldCount = firstPage?.soldTotal ?? 0;
 
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
@@ -66,7 +79,7 @@ export function RestockHistoryCard({
         <div className="flex flex-col gap-[3px]">
           <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
           <p className="text-xs text-gray-500">
-            {rows.length} ล็อต · รับเข้าสะสม {receivedCount} {unit} · ขายไปแล้ว{" "}
+            {lotCount} ล็อต · รับเข้าสะสม {receivedCount} {unit} · ขายไปแล้ว{" "}
             {soldCount} {unit}
           </p>
         </div>
@@ -93,7 +106,27 @@ export function RestockHistoryCard({
         </TableHeader>
 
         <TableBody className="[&_tr]:border-gray-100">
-          {rows.length === 0 ? (
+          {stockIns.isPending ? <HistorySkeletonRows /> : null}
+
+          {stockIns.isError ? (
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={6} className="py-6 text-center text-xs text-gray-500">
+                <div role="alert" className="flex flex-col items-center gap-2">
+                  {errorLabel}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-md px-2.5"
+                    onClick={() => void stockIns.refetch()}
+                  >
+                    ลองอีกครั้ง
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : null}
+
+          {stockIns.isSuccess && rows.length === 0 ? (
             <TableRow className="hover:bg-transparent">
               <TableCell
                 colSpan={6}
@@ -139,13 +172,41 @@ export function RestockHistoryCard({
                 <TableCell
                   className={cn(CELL_CLASS, "pr-5 font-semibold text-zinc-950")}
                 >
-                  {formatBaht(lot.averageCostAfter)}
+                  {lot.averageCostAfter === null ? "—" : formatBaht(lot.averageCostAfter)}
                 </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
+
+      {stockIns.hasNextPage ? (
+        <div className="flex justify-center border-t border-gray-100 px-5 py-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-2.5"
+            disabled={stockIns.isFetchingNextPage}
+            onClick={() => void stockIns.fetchNextPage()}
+          >
+            {loadMoreLabel}
+          </Button>
+        </div>
+      ) : null}
     </Card>
+  );
+}
+
+function HistorySkeletonRows() {
+  return (
+    <>
+      {[0, 1, 2].map((row) => (
+        <TableRow key={row} aria-hidden="true" className="hover:bg-transparent">
+          <TableCell colSpan={6} className="px-5 py-3">
+            <Skeleton className="h-4 w-full rounded-md" />
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   );
 }
