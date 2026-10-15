@@ -171,7 +171,7 @@ export function todoList(dashboard: SellerDashboard): TodoList {
         accent: "gray",
         title: "ตอบกลับรีวิว",
         description: `${count.format(reviews.unreplied)} รีวิวยังไม่ได้ตอบ`,
-        to: "/seller/reviews",
+        to: "/seller/reviews?tab=unreplied",
       },
     },
   ];
