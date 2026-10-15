@@ -8,6 +8,8 @@ import * as orderQueries from "@/features/account/orders.queries";
 import { ordersApi } from "@/features/account/orders.api";
 import * as authQueries from "@/features/auth/auth.queries";
 import { financeApi } from "@/features/finance/finance.api";
+import { afterSalesApi } from "@/features/finance/after-sales.api";
+import type { Review } from "@/features/finance/after-sales.types";
 import type { OrderDetails } from "@/features/account/orders.types";
 
 const mockOrders: OrderDetails[] = [
@@ -187,6 +189,46 @@ describe("OrderHistoryPage", () => {
     await userEvent.click(screen.getByRole("button", { name: /^confirm receipt$/i }));
 
     await waitFor(() => expect(confirmSpy).toHaveBeenCalledWith(103));
+  });
+
+  it("offers Write a Review only while a completed seller is still unreviewed", async () => {
+    const twoSellers: OrderDetails = {
+      ...mockOrders[0],
+      id: 104,
+      orderNumber: "ORD-104",
+      status: "COMPLETED",
+      paidAt: "2026-10-10T12:05:00Z",
+      sellerOrders: [
+        { ...mockOrders[0].sellerOrders[0], id: 204, salesOrderId: 104, status: "COMPLETED" },
+        { ...mockOrders[0].sellerOrders[0], id: 205, salesOrderId: 104, status: "REFUNDED" },
+      ],
+    };
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [twoSellers], isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    const mine = vi.spyOn(afterSalesApi, "myReview").mockResolvedValue({ id: 1, rating: 5 } as Review);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    await waitFor(() => expect(mine).toHaveBeenCalledWith(204));
+    expect(mine).not.toHaveBeenCalledWith(205);
+    expect(screen.getByText("Completed")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /write a review/i })).not.toBeInTheDocument();
+  });
+
+  it("shows Write a Review when a completed seller has no review yet", async () => {
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [{
+        ...mockOrders[0], id: 105, status: "COMPLETED",
+        sellerOrders: [{ ...mockOrders[0].sellerOrders[0], id: 206, salesOrderId: 105, status: "COMPLETED" }],
+      }],
+      isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    vi.spyOn(afterSalesApi, "myReview").mockResolvedValue(null);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    expect(await screen.findByRole("button", { name: /write a review/i })).toBeInTheDocument();
   });
 
   it("shows a refund inside the card of the order it belongs to", async () => {
