@@ -8,10 +8,11 @@ import { toast } from '@/components/ui/toast';
 import { getErrorMessage } from '@/lib/api';
 import { afterSalesApi } from './after-sales.api';
 import { RatingInput, ReviewStars } from './ReviewStars';
+import { reviewKeys } from './reviews.queries';
 
 export function BuyerOrderReview({ orderId, status }: { orderId: number; status: string }) {
   const cache = useQueryClient();
-  const key = ['finance', 'my-review', orderId] as const;
+  const key = reviewKeys.mine(orderId);
   const review = useQuery({ queryKey: key, queryFn: () => afterSalesApi.myReview(orderId), enabled: status === 'COMPLETED' });
   const [rating, setRating] = useState(5);
   const [title, setTitle] = useState('');
