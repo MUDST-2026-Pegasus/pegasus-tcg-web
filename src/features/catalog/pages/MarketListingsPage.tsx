@@ -11,12 +11,14 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, marketForListing, productHref } from "../catalog.mappers";
+import { ListingSeller } from "../ListingSeller";
+import { formatListingDelivery, formatListingPrice } from "../listing.format";
 import { useGameList, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 
 const PAGE_SIZE = 20;
 
-function formatListingPrice(amount: number, currency: string) {
+function formatMarketPrice(amount: number, currency: string) {
   return new Intl.NumberFormat("th-TH", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
@@ -136,7 +138,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
           </div>
           <div className="shrink-0 text-left sm:text-right">
             <p className="text-xs text-muted-foreground">Market price</p>
-            <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatListingPrice(market.medianPrice, listings[0].currency) : "—"}</p>
+            <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatMarketPrice(market.medianPrice, listings[0].currency) : "—"}</p>
             {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">ข้อมูลราคายังน้อย</p>}
           </div>
         </section>
@@ -152,14 +154,11 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
             <div className="divide-y divide-[#e3e7e8]">
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
-                  <div className="min-w-0">
-                    <Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(product.slug)}`} className="block truncate text-sm font-semibold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
-                    <p className="truncate text-[11px] text-muted-foreground">@{listing.seller.username} · {listing.card.variantLabel}</p>
-                  </div>
+                  <ListingSeller seller={listing.seller} productSlug={product.slug} />
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
-                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block truncate text-xs font-semibold">—</span></div>
-                  <strong className="text-right text-[15px]">{formatListingPrice(listing.price, listing.currency)}</strong>
-                  <div className="flex gap-[14px]"><Button type="button" className="h-[31.5px] w-[58.74px] px-0 text-[12.25px]" disabled={addCartItem.isPending || listing.quantityAvailable < 1} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={() => void addListingToCart(listing)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-[31.5px] w-[66px] rounded-full bg-[#22292B] px-0 text-[12.25px] font-normal text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
+                  <strong className="text-right text-[15px]">{formatListingPrice(listing.price)}</strong>
+                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery.optionCount === 0} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={() => void addListingToCart(listing)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>

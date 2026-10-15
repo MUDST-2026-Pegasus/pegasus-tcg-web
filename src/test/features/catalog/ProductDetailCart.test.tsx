@@ -47,7 +47,8 @@ const listing = {
   currency: "THB",
   quantityAvailable: 3,
   primaryPhotoUrl: null,
-  seller: { username: "seller", displayName: "Seller", avatarUrl: null },
+  seller: { username: "seller", displayName: "Seller", avatarUrl: null, verified: false, ratingAvg: null, ratingCount: 0, salesCount: 0 },
+  delivery: { fastestEstDaysMin: 1, fastestEstDaysMax: 1, freeShipping: false, optionCount: 1 },
 };
 
 function renderPage() {
@@ -159,6 +160,23 @@ describe("ProductDetailPage cart actions", () => {
     outOfStockButtons.forEach((button) => expect(button).toBeDisabled());
   });
 
+  it("shows a new seller without zero stars and disables listing Add without shipping", () => {
+    vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
+      data: [{ ...listing, delivery: { ...listing.delivery, optionCount: 0 } }],
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as never);
+    renderPage();
+
+    expect(screen.getByText("ร้านใหม่")).toBeInTheDocument();
+    expect(screen.queryByText("★ 0.0")).not.toBeInTheDocument();
+    expect(screen.getByText("ยังไม่ตั้งค่าการจัดส่ง")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
+    expect(screen.getByText("100")).toBeInTheDocument();
+  });
+
   it("sends guests to login before Buy Now", () => {
     renderPage();
 
@@ -214,7 +232,7 @@ describe("ProductDetailPage cart actions", () => {
     vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
       data: [
         listing,
-        { ...listing, id: 56, card: { ...listing.card, variantId: 11 }, seller: { username: "tokyo", displayName: "Tokyo Shop", avatarUrl: null } },
+        { ...listing, id: 56, card: { ...listing.card, variantId: 11 }, seller: { ...listing.seller, username: "tokyo", displayName: "Tokyo Shop" } },
       ],
       isPending: false,
       isError: false,
