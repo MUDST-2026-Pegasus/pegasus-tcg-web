@@ -17,6 +17,7 @@ export type FieldViolation = {
 /** ส่งมาใน `data` ตอน `success === false` */
 export type ApiErrorBody = {
   code: string;
+  details?: Record<string, unknown>;
   path?: string;
   timestamp?: string;
   violations?: FieldViolation[];

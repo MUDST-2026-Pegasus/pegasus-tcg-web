@@ -1,5 +1,7 @@
 import type { Address } from "./address.types";
 
+export const MAX_ADDRESSES = 10;
+
 const present = (part: string | null): part is string =>
   part !== null && part.trim() !== "";
 

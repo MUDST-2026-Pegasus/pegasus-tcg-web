@@ -1,0 +1,107 @@
+/* Keep the illustration's dimensions stable in the dev server as well as production. */
+main:has(.not-found-page),
+main:has(.not-found-page) > div {
+  display: flex;
+  flex-direction: column;
+}
+
+main:has(.not-found-page) > div,
+.not-found-page {
+  flex: 1;
+}
+
+.not-found-page {
+  padding-top: 96px;
+  padding-bottom: 112px;
+}
+
+.not-found-page h1 { font-size: 30px; }
+.not-found-page form[role="search"] { max-width: 400px; }
+
+.not-found-illustration {
+  display: flex;
+  height: 190px;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.not-found-digit {
+  flex: none;
+  color: var(--primary);
+  font-size: 148px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.not-found-card-stack {
+  position: relative;
+  width: 160px;
+  height: 190px;
+  flex: none;
+}
+
+.not-found-card-back,
+.not-found-card-front {
+  position: absolute;
+  width: 112px;
+  height: 156px;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.not-found-card-back {
+  top: 16px;
+  left: 8px;
+  transform: rotate(-9deg);
+  border: 1.5px solid var(--border);
+}
+
+.not-found-card-front {
+  top: 12px;
+  left: 36px;
+  transform: rotate(6deg);
+  border: 2.5px solid var(--primary);
+  box-shadow: 0 10px 24px -4px rgb(13 26 51 / 12%);
+}
+
+.not-found-card-art {
+  position: absolute;
+  inset: 7px 7px auto;
+  display: flex;
+  height: 104px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  color: var(--primary);
+  font-size: 56px;
+  font-weight: 900;
+}
+
+.not-found-card-line {
+  position: absolute;
+  left: 7px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.not-found-card-line-long { top: 120px; width: 64px; }
+.not-found-card-line-short { top: 132px; width: 40px; }
+
+@media (max-width: 639px) {
+  .not-found-page { padding-top: 64px; padding-bottom: 80px; }
+  .not-found-page h1 { font-size: 24px; }
+  .not-found-illustration { height: 142px; gap: 8px; }
+  .not-found-digit { font-size: 104px; }
+  .not-found-card-stack { width: 120px; height: 142px; }
+  .not-found-card-back,
+  .not-found-card-front { width: 86px; height: 120px; }
+  .not-found-card-back { top: 12px; left: 8px; }
+  .not-found-card-front { top: 8px; left: 28px; }
+  .not-found-card-art { inset: 6px 6px auto; height: 79px; font-size: 44px; }
+  .not-found-card-line-long { top: 91px; width: 45px; }
+  .not-found-card-line-short { top: 103px; width: 28px; }
+}

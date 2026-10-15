@@ -8,6 +8,7 @@ export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly violations: FieldViolation[];
   readonly path?: string;
+  readonly details: Record<string, unknown>;
 
   constructor(init: {
     status: number;
@@ -15,6 +16,7 @@ export class ApiError extends Error {
     message: string;
     violations?: FieldViolation[];
     path?: string;
+    details?: Record<string, unknown>;
   }) {
     super(init.message);
     this.name = "ApiError";
@@ -22,6 +24,7 @@ export class ApiError extends Error {
     this.code = init.code;
     this.violations = init.violations ?? [];
     this.path = init.path;
+    this.details = init.details ?? {};
   }
 }
 

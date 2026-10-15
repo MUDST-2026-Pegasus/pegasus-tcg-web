@@ -1,0 +1,23 @@
+{
+  "admin": {
+    "id": 1,
+    "email": "admin@example.com",
+    "username": "admin_user",
+    "displayName": "Platform Admin",
+    "roles": ["ADMIN"]
+  },
+  "seller": {
+    "id": 2,
+    "email": "somchai.seller@example.com",
+    "username": "somchai_seller",
+    "displayName": "Somchai Cards Shop",
+    "roles": ["BUYER", "SELLER"]
+  },
+  "buyer": {
+    "id": 3,
+    "email": "somying.buyer@example.com",
+    "username": "somying_buyer",
+    "displayName": "Somying Collector",
+    "roles": ["BUYER"]
+  }
+}

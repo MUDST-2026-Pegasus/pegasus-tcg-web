@@ -1,7 +1,6 @@
-import type { RouteObject } from "react-router-dom";
+import { Navigate, useParams, type RouteObject } from "react-router-dom";
 
 import { lazyPage } from "@/app/lazy-page";
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
 import {
   AccountPageSkeleton,
   ArticlePageSkeleton,
@@ -27,7 +26,6 @@ const MarketListingsPage = lazyPage(() => import("@/features/catalog/pages/Marke
 const ListingDetailPage = lazyPage(() => import("@/features/catalog/pages/ListingDetailPage").then((m) => m.ListingDetailPage), <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />);
 const SearchResultsPage = lazyPage(() => import("@/features/catalog/pages/SearchResultsPage").then((m) => m.SearchResultsPage), <CatalogPageSkeleton label="กำลังโหลดผลการค้นหา" />);
 
-const StoreProfilePage = lazyPage(() => import("@/features/store/pages/StoreProfilePage").then((m) => m.StoreProfilePage), <ProfilePageSkeleton label="กำลังโหลดร้านค้า" />);
 const PublicSellerPage = lazyPage(() => import("@/features/store/pages/PublicSellerPage").then((m) => m.PublicSellerPage), <ProfilePageSkeleton label="กำลังโหลดร้านค้า" />);
 const PublicCollectionPage = lazyPage(() => import("@/features/collection/pages/PublicCollectionPage").then((m) => m.PublicCollectionPage), <ProfilePageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 
@@ -45,6 +43,13 @@ const OrderHistoryPage = lazyPage(() => import("@/features/account/pages/OrderHi
 const AddressBookPage = lazyPage(() => import("@/features/account/pages/AddressBookPage").then((m) => m.AddressBookPage), <AccountPageSkeleton label="กำลังโหลดที่อยู่" />);
 const MyCollectionPage = lazyPage(() => import("@/features/collection/pages/MyCollectionPage").then((m) => m.MyCollectionPage), <CatalogPageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 const SellerApplicationPage = lazyPage(() => import("@/features/seller/application/SellerApplicationPage").then((m) => m.SellerApplicationPage), <FormPageSkeleton />);
+const NotFoundPage = lazyPage(() => import("@/features/not-found/pages/NotFoundPage").then((m) => m.NotFoundPage), <ArticlePageSkeleton />);
+
+/** หน้าร้านเดิม /store/:storeId ถูกลบแล้ว — ลิงก์เก่า (เช่นปุ่มในแบนเนอร์หน้าแรก) พาไปหน้าร้านจริงที่ /u/:username */
+function StoreRedirect() {
+  const { storeId = "" } = useParams();
+  return <Navigate to={`/u/${encodeURIComponent(storeId)}`} replace />;
+}
 
 /** เส้นทางฝั่งผู้ซื้อ / หน้าสาธารณะ — ใช้ PublicLayout (Navbar + Footer) */
 export const publicRoutes: RouteObject = {
@@ -61,7 +66,7 @@ export const publicRoutes: RouteObject = {
     { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
     { path: "search", element: <SearchResultsPage /> },
 
-    { path: "store/:storeId", element: <StoreProfilePage /> },
+    { path: "store/:storeId", element: <StoreRedirect /> },
     { path: "u/:username", element: <PublicSellerPage /> },
     { path: "users/:username", element: <PublicCollectionPage /> },
 
@@ -86,6 +91,6 @@ export const publicRoutes: RouteObject = {
       ],
     },
 
-    { path: "*", element: <PagePlaceholder title="ไม่พบหน้านี้" /> },
+    { path: "*", element: <NotFoundPage /> },
   ],
 };

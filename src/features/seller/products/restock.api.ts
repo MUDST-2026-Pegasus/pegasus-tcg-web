@@ -1,7 +1,8 @@
+import type { StockInLot } from "./listing-form.types";
 import { CONDITION_LABEL } from "./products.format";
 import type { SellerListing } from "./products.types";
 import { toIsoDate } from "./restock.calc";
-import type { RestockData } from "./restock.types";
+import type { RestockData, RestockLot } from "./restock.types";
 
 const SOURCE_OPTIONS = [
   { value: "other_shop", label: "ซื้อจากร้านค้าอื่น" },
@@ -14,11 +15,12 @@ const SOURCE_OPTIONS = [
 /**
  * ประกอบหน้าเติมสต็อกจากประกาศจริง (`GET /sellers/me/listings/{id}`)
  * ต้นทุนเฉลี่ยมาจาก `costBasis` ของประกาศ — ตัวเดียวกับที่ backend ใช้เป็นต้นทุนตอนขาย
- * ประวัติรับเข้าและยอดขายยังไม่มีที่มา (`/inventory/movements`) ระหว่างนี้เป็นว่าง / 0
+ * ประวัติรับเข้าโหลดแยกด้วย `useStockIns` ตาม `market` แล้วแปลงแถวด้วย `toRestockLot`
  */
 export function getRestockData(listing: SellerListing): RestockData {
   return {
     productId: String(listing.id),
+    market: { variantId: listing.card.variantId, condition: listing.condition },
     breadcrumb: {
       rootLabel: "จัดการสินค้า",
       productLabel: listing.card.productName,
@@ -75,7 +77,6 @@ export function getRestockData(listing: SellerListing): RestockData {
     history: {
       title: "ประวัติการรับเข้าสินค้านี้",
       exportLabel: "ส่งออก CSV",
-      soldCount: 0,
       columns: {
         receivedAt: "วันที่",
         quantity: "จำนวน",
@@ -86,7 +87,8 @@ export function getRestockData(listing: SellerListing): RestockData {
       },
       newBadgeLabel: "ใหม่",
       emptyLabel: "ยังไม่มีประวัติการรับเข้าสินค้านี้",
-      lots: [],
+      errorLabel: "โหลดประวัติการรับเข้าไม่สำเร็จ",
+      loadMoreLabel: "ดูเพิ่ม",
     },
 
     summary: {
@@ -116,5 +118,22 @@ export function getRestockData(listing: SellerListing): RestockData {
       reference: "",
       note: "",
     },
+  };
+}
+
+/**
+ * ล็อตจาก backend → แถวในตารางประวัติ
+ * วันที่ตัดเหลือวันตามเวลาเครื่อง (backend ส่งมาพร้อม offset) ให้ตรงกับที่ผู้ขายเลือกในฟอร์ม
+ * แหล่งที่มา เลขอ้างอิง และโน้ตถูกรวมเป็นข้อความเดียวตอนบันทึก (`toNewUnitsPayload`) จึงแสดงทั้งก้อน
+ */
+export function toRestockLot(lot: StockInLot): RestockLot {
+  return {
+    id: String(lot.id),
+    receivedAt: toIsoDate(new Date(lot.receivedAt)),
+    quantity: lot.quantity,
+    unitCost: lot.unitCost,
+    totalCost: lot.totalCost,
+    sourceLabel: lot.note ?? "",
+    averageCostAfter: lot.averageCostAfter,
   };
 }

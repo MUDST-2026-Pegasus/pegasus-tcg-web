@@ -666,15 +666,15 @@ export function SellerReturnsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <div>
+      <div className="flex flex-col gap-6">
         {/* Page Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-zinc-950">
               คำขอคืนสินค้า
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+            <p className="text-xs text-gray-500">
               {tabCounts.action_required} คำขอรอคุณดำเนินการ · เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกพักไว้จนกว่าจะจบเรื่อง
             </p>
           </div>
@@ -682,15 +682,15 @@ export function SellerReturnsPage() {
             variant="outline"
             size="sm"
             onClick={() => setPolicyModalOpen(true)}
-            className="self-start sm:self-auto rounded-lg text-xs font-medium"
+            className="self-start sm:self-auto rounded-lg bg-background text-xs font-medium"
           >
             นโยบายการคืนสินค้า
           </Button>
         </div>
 
         {/* Pill Tabs & Sorting */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -698,10 +698,10 @@ export function SellerReturnsPage() {
                 setExplicitExpandedId(undefined);
               }}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "action_required"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
               ต้องดำเนินการ ({tabCounts.action_required})
@@ -713,10 +713,10 @@ export function SellerReturnsPage() {
                 setExplicitExpandedId(undefined);
               }}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "awaiting_shipment"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
               รอผู้ซื้อส่งคืน ({tabCounts.awaiting_shipment})
@@ -728,10 +728,10 @@ export function SellerReturnsPage() {
                 setExplicitExpandedId(undefined);
               }}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "awaiting_refund"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
               รอคืนเงิน ({tabCounts.awaiting_refund})
@@ -743,10 +743,10 @@ export function SellerReturnsPage() {
                 setExplicitExpandedId(undefined);
               }}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "completed"
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
               เสร็จสิ้น ({tabCounts.completed})
@@ -759,7 +759,7 @@ export function SellerReturnsPage() {
               size="sm"
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as "longest_first" | "newest_first")}
-              className="text-xs font-medium text-foreground bg-card border border-border rounded-lg shadow-2xs"
+              className="rounded-lg border-input bg-background text-xs font-medium text-foreground"
             >
               <option value="longest_first">เรียง: รอนานสุดก่อน</option>
               <option value="newest_first">เรียง: ใหม่สุดก่อน</option>
@@ -838,10 +838,10 @@ export function SellerReturnsPage() {
                     <Card
                       key={item.id}
                       className={cn(
-                        "overflow-hidden rounded-xl bg-card border transition-all duration-200",
+                        "gap-0 overflow-hidden rounded-xl border py-0 ring-0 transition-all duration-200",
                         isHighlighted && isExpanded
-                          ? "border-amber-500/70 shadow-sm ring-1 ring-amber-500/30"
-                          : "border-border shadow-2xs hover:border-border/80"
+                          ? "border-amber-500/70 shadow-none inset-ring-1 inset-ring-amber-500/30"
+                          : "border-border shadow-none"
                       )}
                     >
                       {/* Accordion Card Header */}
@@ -1370,7 +1370,7 @@ export function SellerReturnsPage() {
             {/* Right Column: Widgets */}
             <div className="lg:col-span-4 space-y-4">
               {/* Widget 1: Steps to Return (ขั้นตอนการคืนสินค้า) */}
-              <Card className="rounded-xl border border-border bg-card shadow-2xs">
+              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
                 <CardContent className="p-5 space-y-4">
                   <h3 className="font-bold text-sm text-foreground">
                     ขั้นตอนการคืนสินค้า
@@ -1506,7 +1506,7 @@ export function SellerReturnsPage() {
               </Card>
 
               {/* Widget 2: Pending Funds Summary (เงินที่รอผลคำขอคืน) */}
-              <Card className="rounded-xl border border-border bg-card shadow-2xs">
+              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
                 <CardContent className="p-5 space-y-3.5">
                   <div className="flex items-baseline justify-between">
                     <div>

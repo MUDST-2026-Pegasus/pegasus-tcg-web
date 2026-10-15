@@ -1,4 +1,3 @@
-import { CARRIER_OPTIONS } from "../shared/carriers";
 import {
   SELLER_ORDER_STATUS_LABEL,
   TO_PACK_STATUSES,
@@ -104,11 +103,7 @@ export function sortOf(value: string | null): SortChoice {
 // ---------- ขนส่ง ----------
 
 /** `carrierCode` ที่ส่งไปกับ `ShipOrderRequest` — ชื่อที่ผู้ซื้อเห็นคือ `label` */
-export { CARRIER_OPTIONS } from "../shared/carriers";
-
-export function carrierLabel(code: string): string {
-  return CARRIER_OPTIONS.find((option) => option.value === code)?.label ?? code;
-}
+export { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
 
 /** ส่งได้ทั้งจาก PAID (ข้ามการกดรับ) และ PREPARING */
 export function canShip(status: SellerOrderStatus): boolean {

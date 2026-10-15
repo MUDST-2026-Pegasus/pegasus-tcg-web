@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { screen, render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { ItemCard, type ItemCardProps } from '@/components/common/ItemCard';
 
 describe('ItemCard', () => {
@@ -24,7 +25,7 @@ describe('ItemCard', () => {
   });
 
   it('renders as a link when href is provided', () => {
-    render(<ItemCard {...mockItem} href="/product/123" />);
+    render(<ItemCard {...mockItem} href="/product/123" />, { wrapper: MemoryRouter });
 
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/product/123');
