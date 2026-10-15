@@ -150,6 +150,16 @@ export type PublicListingDto = {
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
+    verified: boolean;
+    ratingAvg: number | null;
+    ratingCount: number;
+    salesCount: number;
+  };
+  delivery: {
+    fastestEstDaysMin: number | null;
+    fastestEstDaysMax: number | null;
+    freeShipping: boolean;
+    optionCount: number;
   };
 };
 

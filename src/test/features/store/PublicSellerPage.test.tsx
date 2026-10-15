@@ -45,7 +45,12 @@ const listing = {
     username: "cardvault",
     displayName: "CardVault BKK",
     avatarUrl: null,
+    verified: false,
+    ratingAvg: null,
+    ratingCount: 0,
+    salesCount: 0,
   },
+  delivery: { fastestEstDaysMin: null, fastestEstDaysMax: null, freeShipping: false, optionCount: 0 },
 };
 
 const page = <T,>(items: T[], totalItems = items.length) => ({

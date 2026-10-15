@@ -47,7 +47,8 @@ const listing = {
   currency: "THB",
   quantityAvailable: 2,
   primaryPhotoUrl: null,
-  seller: { username: "pegasus_official", displayName: "Pegasus Official", avatarUrl: null },
+  seller: { username: "pegasus_official", displayName: "Pegasus Official", avatarUrl: null, verified: true, ratingAvg: 4.9, ratingCount: 10, salesCount: 1200 },
+  delivery: { fastestEstDaysMin: 1, fastestEstDaysMax: 2, freeShipping: false, optionCount: 1 },
 };
 
 function mockListings(rows: typeof listing[]) {
@@ -135,5 +136,22 @@ describe("MarketListingsPage Add button", () => {
     ] } as never);
     renderPage();
     expect(screen.getByText("฿3,000")).toBeInTheDocument();
+  });
+
+  it("shows seller reputation and delivery from the listing API", () => {
+    renderPage();
+
+    expect(screen.getByLabelText("ร้านค้ายืนยันแล้ว")).toBeInTheDocument();
+    expect(screen.getByText("★ 4.9 · 1.2k sales")).toBeInTheDocument();
+    expect(screen.getByText("Ships in 1–2 days")).toBeInTheDocument();
+    expect(screen.getByText("5,590")).toBeInTheDocument();
+  });
+
+  it("disables Add when the seller has no delivery option", () => {
+    mockListings([{ ...listing, delivery: { ...listing.delivery, optionCount: 0 } }]);
+    renderPage();
+
+    expect(screen.getByText("ยังไม่ตั้งค่าการจัดส่ง")).toBeInTheDocument();
+    expect(addButton()).toBeDisabled();
   });
 });

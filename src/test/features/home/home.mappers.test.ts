@@ -194,7 +194,12 @@ describe("Home Mappers", () => {
           username: "kaiba",
           displayName: "Seto Kaiba",
           avatarUrl: null,
+          verified: false,
+          ratingAvg: null,
+          ratingCount: 0,
+          salesCount: 0,
         },
+        delivery: { fastestEstDaysMin: null, fastestEstDaysMax: null, freeShipping: false, optionCount: 0 },
         card: {
           variantId: 1,
           sku: "LOB-001",
