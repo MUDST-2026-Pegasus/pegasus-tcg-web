@@ -97,10 +97,12 @@ describe("Payment Components", () => {
         orderNumber: "ORD-101",
         grandTotal: 1500,
         status: "PAID",
+        sellerOrders: [],
       } as any);
 
       vi.mocked(financeApi.getPayment).mockResolvedValue({
         id: 201,
+        salesOrderId: 101,
         status: "SUCCEEDED",
         amount: 1500,
       } as any);
@@ -109,12 +111,11 @@ describe("Payment Components", () => {
         route: "/payment/success?orderId=101&paymentId=201",
       });
 
-      expect(await screen.findByText("ชำระเงินสำเร็จ")).toBeInTheDocument();
-      expect(screen.getByText("ORD-101")).toBeInTheDocument();
-      expect(screen.getByText(/ยอดชำระ ฿1,500.00/)).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "ดูประวัติคำสั่งซื้อ" })).toHaveAttribute(
+      expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
+      expect(screen.getByText("Order Number: #ORD-101")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "View Order Details" })).toHaveAttribute(
         "href",
-        "/account/orders",
+        "/account/orders?orderId=101",
       );
     });
 
@@ -124,10 +125,12 @@ describe("Payment Components", () => {
         orderNumber: "ORD-102",
         grandTotal: 800,
         status: "PENDING_PAYMENT",
+        sellerOrders: [],
       } as any);
 
       vi.mocked(financeApi.getPayment).mockResolvedValue({
         id: 202,
+        salesOrderId: 102,
         status: "AWAITING_VERIFICATION",
         amount: 800,
       } as any);
@@ -136,11 +139,9 @@ describe("Payment Components", () => {
         route: "/payment/success?orderId=102&paymentId=202",
       });
 
-      expect(await screen.findByText("กำลังตรวจสอบการชำระเงิน")).toBeInTheDocument();
-      expect(await screen.findByText("ORD-102")).toBeInTheDocument();
-      expect(
-        screen.getByText(/ยังไม่มีการยืนยันการชำระเงิน กรุณาตรวจสอบสถานะในประวัติคำสั่งซื้อ/),
-      ).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Payment Under Review" })).toBeInTheDocument();
+      expect(screen.getByText("Order Number: #ORD-102")).toBeInTheDocument();
+      expect(screen.getByText("ได้รับข้อมูลแล้ว กำลังรอการยืนยันการชำระเงิน")).toBeInTheDocument();
     });
   });
 });
