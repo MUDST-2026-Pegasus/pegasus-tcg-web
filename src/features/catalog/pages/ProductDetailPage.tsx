@@ -20,9 +20,8 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
+import { initialsOf } from "@/features/account/account.format";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
-import { ListingSeller } from "../ListingSeller";
-import { formatListingDelivery, formatListingPrice } from "../listing.format";
 import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 
@@ -458,11 +457,20 @@ function ProductDetailContent({
           ) : !hasListings ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีผู้ขายสำหรับตัวเลือกนี้</p> : (
             <div className="divide-y">
               {visibleListings.map((listing) => (
-                <article key={listing.id} className="grid gap-4 py-5 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,.8fr)_minmax(0,.9fr)_auto] sm:items-center">
-                  <ListingSeller seller={listing.seller} productSlug={product.slug} />
-                  <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><strong className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]">{formatListingPrice(listing.price)}</strong><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                <article key={listing.id} className="grid gap-4 py-5 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,.8fr)_minmax(0,.8fr)_auto] sm:items-center">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Avatar size="default">
+                      {listing.seller.avatarUrl && <AvatarImage src={listing.seller.avatarUrl} alt="" />}
+                      <AvatarFallback>{initialsOf(listing.seller.displayName || listing.seller.username)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(product.slug)}`} className="block truncate font-bold hover:text-primary hover:underline">{listing.seller.displayName || listing.seller.username}</Link>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">@{listing.seller.username}</p>
+                    </div>
+                  </div>
+                  <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong><p className="mt-1 text-xs text-muted-foreground">{listing.card.variantLabel}</p></div>
+                  <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">—</strong><p className="mt-1 text-xs text-muted-foreground">{listing.quantityAvailable} available</p></div>
+                  <div className="flex items-center gap-[14px] sm:justify-end"><strong className="whitespace-nowrap text-[17.5px] leading-[24.5px]">{new Intl.NumberFormat("th-TH", { style: "currency", currency: listing.currency, maximumFractionDigits: 0 }).format(listing.price)}</strong><Button type="button" className="h-[31.5px] w-[58.74px] px-0 text-[12.25px]" disabled={listing.quantityAvailable <= 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button className="h-[31.5px] w-[66px] rounded-full bg-[#22292B] px-0 text-[12.25px] font-normal text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>
@@ -502,7 +510,7 @@ function ProductDetailContent({
                   <div className="flex min-w-0 items-center gap-3">
                     <Avatar size="lg">
                       {collector.avatarUrl && <AvatarImage src={collector.avatarUrl} alt="" />}
-                      <AvatarFallback>{(collector.displayName || collector.username).split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{initialsOf(collector.displayName || collector.username)}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
                       <h3 className="truncate text-sm font-semibold leading-5">{collector.displayName || collector.username}</h3>

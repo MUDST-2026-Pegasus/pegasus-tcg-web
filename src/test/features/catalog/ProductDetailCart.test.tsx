@@ -291,4 +291,56 @@ describe("ProductDetailPage cart actions", () => {
     expect(screen.getByText("Pikachu ex", { selector: "h1" })).toBeInTheDocument();
     expect(screen.getByText("Market price").parentElement).toHaveTextContent("—");
   });
+
+  it("renders collector avatar image when avatarUrl is present and initials fallback when null", () => {
+    vi.spyOn(catalogQueries, "useProductCollectors").mockReturnValue({
+      data: {
+        items: [
+          { username: "card_kingdom_th", displayName: "Card Kingdom TH", avatarUrl: "https://storage.pegasus.test/ck.jpg", quantity: 2 },
+          { username: "no_avatar", displayName: "Ash Ketchum", avatarUrl: null, quantity: 1 },
+        ],
+        totalItems: 2,
+        totalPages: 1,
+      },
+      isPending: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as never);
+
+    const { container } = renderPage();
+
+    expect(screen.getByText("Card Kingdom TH")).toBeInTheDocument();
+    expect(screen.getByText("Ash Ketchum")).toBeInTheDocument();
+    expect(screen.getByText("AK")).toBeInTheDocument();
+    const avatars = container.querySelectorAll('[data-slot="avatar"]');
+    expect(avatars.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders seller avatar image in market listings when avatarUrl is present and initials fallback when null", () => {
+    vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
+      data: [
+        {
+          ...listing,
+          id: 55,
+          seller: { username: "card_kingdom_th", displayName: "Card Kingdom TH", avatarUrl: "https://storage.pegasus.test/seller-ck.jpg" },
+        },
+        {
+          ...listing,
+          id: 56,
+          seller: { username: "plain_seller", displayName: "Plain Seller", avatarUrl: null },
+        },
+      ],
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as never);
+
+    const { container } = renderPage();
+
+    expect(screen.getByText("Plain Seller")).toBeInTheDocument();
+    expect(screen.getByText("PS")).toBeInTheDocument();
+    const avatars = container.querySelectorAll('[data-slot="avatar"]');
+    expect(avatars.length).toBeGreaterThanOrEqual(2);
+  });
 });
