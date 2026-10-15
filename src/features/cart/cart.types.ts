@@ -4,7 +4,7 @@ export interface CartItemResponse {
   listingId: number;
   quantity: number;
   unitPriceAtAdd: number;
-  currentPrice: number;
+  currentPrice: number | null;
   priceChanged: boolean;
   purchasable: boolean;
   quantityAvailable: number | null;
