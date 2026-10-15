@@ -16,6 +16,7 @@ interface PaymentStepsProps {
   slip: FileUploadState;
   referenceCode: string;
   onReferenceCodeChange: (value: string) => void;
+  disabled?: boolean;
 }
 
 export function PaymentSteps({
@@ -23,6 +24,7 @@ export function PaymentSteps({
   slip,
   referenceCode,
   onReferenceCodeChange,
+  disabled = false,
 }: PaymentStepsProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -66,8 +68,10 @@ export function PaymentSteps({
         ref={fileInputRef}
         type="file"
         accept={slip.accept}
+        disabled={disabled}
         className="hidden"
         onChange={(e) => {
+          if (disabled) return;
           if (e.target.files?.length) {
             slip.addFiles(e.target.files);
           }
@@ -114,32 +118,57 @@ export function PaymentSteps({
           {!uploadedItem ? (
             <div
               role="button"
-              tabIndex={0}
-              onClick={() => fileInputRef.current?.click()}
+              aria-disabled={disabled}
+              tabIndex={disabled ? -1 : 0}
+              onClick={() => {
+                if (!disabled) fileInputRef.current?.click();
+              }}
               onKeyDown={(e) => {
+                if (disabled) return;
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   fileInputRef.current?.click();
                 }
               }}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`mt-2.5 border-2 border-dashed rounded-xl p-4 flex items-center gap-3.5 transition-colors cursor-pointer ${
-                isDragOver
-                  ? "border-sky-700 bg-sky-50/50"
-                  : "border-slate-200 bg-white hover:bg-slate-50/60"
+              onDragOver={(e) => {
+                if (disabled) return;
+                handleDragOver(e);
+              }}
+              onDragLeave={(e) => {
+                if (disabled) return;
+                handleDragLeave(e);
+              }}
+              onDrop={(e) => {
+                if (disabled) return;
+                handleDrop(e);
+              }}
+              className={`mt-2.5 border-2 border-dashed rounded-xl p-4 flex items-center gap-3.5 transition-colors ${
+                disabled
+                  ? "border-slate-200 bg-slate-50/80 cursor-not-allowed opacity-60"
+                  : isDragOver
+                  ? "border-sky-700 bg-sky-50/50 cursor-pointer"
+                  : "border-slate-200 bg-white hover:bg-slate-50/60 cursor-pointer"
               }`}
             >
-              <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center shrink-0">
+              <div
+                className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                  disabled ? "bg-slate-100 text-slate-400" : "bg-sky-50 text-sky-700"
+                }`}
+              >
                 <CloudUpload className="size-5" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs">
-                  <span className="text-sky-700 font-semibold hover:underline">
-                    Click to upload
-                  </span>{" "}
-                  <span className="text-slate-500 font-normal">or drag &amp; drop</span>
+                  {disabled ? (
+                    <span className="text-slate-500 font-medium">Payment submitted</span>
+                  ) : (
+                    <>
+                      <span className="text-sky-700 font-semibold hover:underline">
+                        Click to upload
+                      </span>{" "}
+                      <span className="text-slate-500 font-normal">or drag &amp; drop</span>
+                    </>
+                  )}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   JPG, PNG or PDF · up to 5 MB
@@ -188,33 +217,35 @@ export function PaymentSteps({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
-                {uploadedItem.canRetry && (
+              {!disabled && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {uploadedItem.canRetry && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-slate-500 hover:text-slate-800"
+                      onClick={() => slip.retry(uploadedItem.id)}
+                      title="Retry upload"
+                    >
+                      <RefreshCw className="size-3.5" />
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-8 text-slate-500 hover:text-slate-800"
-                    onClick={() => slip.retry(uploadedItem.id)}
-                    title="Retry upload"
+                    className="size-8 text-slate-400 hover:text-destructive"
+                    onClick={() => {
+                      slip.remove(uploadedItem.id);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    title="Remove file"
                   >
-                    <RefreshCw className="size-3.5" />
+                    <Trash2 className="size-3.5" />
                   </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 text-slate-400 hover:text-destructive"
-                  onClick={() => {
-                    slip.remove(uploadedItem.id);
-                    if (fileInputRef.current) fileInputRef.current.value = "";
-                  }}
-                  title="Remove file"
-                >
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -249,8 +280,9 @@ export function PaymentSteps({
             aria-label="เลขอ้างอิงการโอน"
             placeholder="e.g. 2026101400051234"
             value={referenceCode}
+            disabled={disabled}
             onChange={(e) => onReferenceCodeChange(e.target.value)}
-            className="mt-2 text-sm rounded-lg border-slate-200 bg-white placeholder:text-slate-400"
+            className="mt-2 text-sm rounded-lg border-slate-200 bg-white placeholder:text-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
       </div>

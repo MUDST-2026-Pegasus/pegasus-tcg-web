@@ -191,6 +191,8 @@ export function PaymentPage() {
   const uploadedItem = slip.items[0];
   const hasUploadedSlip = Boolean(slip.objectKeys.length > 0 && uploadedItem?.status === "done");
   const isAwaitingVerification = payment.status === "AWAITING_VERIFICATION";
+  const isPaymentLocked =
+    isSubmitting || isAwaitingVerification || payment.status !== "PENDING";
 
   const isButtonDisabled =
     !hasUploadedSlip ||
@@ -267,6 +269,7 @@ export function PaymentPage() {
                     slip={slip}
                     referenceCode={referenceCode}
                     onReferenceCodeChange={setReferenceCode}
+                    disabled={isPaymentLocked}
                   />
                 </div>
               </div>

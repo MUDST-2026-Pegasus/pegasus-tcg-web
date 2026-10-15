@@ -1,8 +1,8 @@
-# Pegasus TCG Web 🃏
+# Pegasus TCG Web
 
 ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white) ![License](https://img.shields.io/badge/license-Apache--2.0-blue)
 
-Welcome to the frontend for **Pegasus TCG**, a trading card marketplace. This guide will help you get the app running and find the right place to make your first change. ✨
+Welcome to the frontend for **Pegasus TCG**, a trading card marketplace. This guide will help you get the app running and find the right place to make your first change.
 
 ## What is here?
 
@@ -19,7 +19,7 @@ The seller and admin routes require the corresponding account role. Some public-
 
 React 19, TypeScript 6, Vite 8, React Router 7, Tailwind CSS 4, shadcn/ui, TanStack Query, Vitest, and Cypress. The frontend talks to the separate [Pegasus TCG API](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-api) under `/api/v1`.
 
-## Get started 🚀
+## Get started
 
 Install **Node.js 22** and **pnpm 10.6.5**. The API is optional for browsing the frontend, but features that request live data need it running locally on port `8080` or at the proxy target you configure below.
 
@@ -69,7 +69,7 @@ Copy these from [`.env.example`](.env.example). Values beginning with `VITE_` ar
 
 Cypress expects the app at `http://localhost:5173`. Start `pnpm dev` in one terminal, then run `pnpm cyrun` in another. If the Cypress binary is missing, run `pnpm exec cypress install` first. The E2E workflow in `.github/workflows/e2e-cypress.yml` builds the app and starts a preview server before running Cypress.
 
-## Find your way around 🧭
+## Find your way around
 
 ```text
 src/
@@ -87,7 +87,7 @@ nginx/              Static-site server configuration for Docker
 
 Features include product discovery, shopping cart and checkout, account management, seller inventory and orders, and admin operations. Route definitions live in `src/app/routes/`; the feature implementations live in `src/features/`.
 
-## Working on a feature 🤝
+## Working on a feature
 
 1. Create a ticket branch from the latest `develop` (for example, `feat/TCG-123-short-description`). Open your PR against `develop`.
 2. Add or update the route in the appropriate file under `src/app/routes/`, and keep page code inside its feature folder.
@@ -95,14 +95,14 @@ Features include product discovery, shopping cart and checkout, account manageme
 4. Add relevant tests. Run `pnpm lint`, `pnpm build`, and the tests for your change before opening the PR.
 5. Follow the team conventions in [CONTRIBUTING.md](CONTRIBUTING.md). This project is covered by the [Apache 2.0 license](LICENSE).
 
-### Handy tips 💡
+### Handy tips
 
 - `@/` points to `src/`, so `@/components/common` is easier to follow than long relative imports.
 - Shared shadcn/ui components live in `src/components/ui/`; use the shadcn CLI (`pnpm exec shadcn add <component>`) to add generated components. Keep page-specific styling near the feature.
 - `QueryBoundary` from `@/components/common` handles query loading, error, and empty states. A disabled query can remain pending, so check its `enabled` condition before rendering the boundary.
 - App-wide light and dark theme tokens are in `src/styles/globals.css`. Prefer existing tokens and component classes over hard-coded colors.
 
-## Docker 🐳
+## Docker
 
 To build and serve the static frontend with Nginx:
 
@@ -112,7 +112,7 @@ docker compose up --build -d
 
 Open **http://localhost:4433** and stop it with `docker compose down`. This container serves the frontend only. Its current Nginx configuration does not proxy `/api`, and Vite variables are baked in at build time. For a working API in a Docker deployment, configure a reverse proxy for `/api` or build the frontend with a reachable `VITE_API_BASE_URL`.
 
-## Contributors ❤️
+## Contributors
 
 Thanks to everyone building Pegasus together!
 
