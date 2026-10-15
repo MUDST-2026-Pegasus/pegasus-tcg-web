@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes, useSearchParams } from "react-router-dom";
 
@@ -194,5 +195,43 @@ describe("ProductDetailPage cart actions", () => {
 
     expect(await screen.findByText("Checkout reached items=900&productId=1&listingId=55")).toBeInTheDocument();
     expect(addItem).toHaveBeenCalledWith({ listingId: 55, quantity: 1 });
+  });
+
+  it("filters market listings by the variant picked from the dropdown", async () => {
+    const variant = { catalogProductId: 1, imageUrl: null, active: true, edition: "NOT_APPLICABLE", printingNote: null };
+    vi.spyOn(catalogQueries, "useProductDetail").mockReturnValue({
+      data: {
+        ...product,
+        variants: [
+          { ...variant, id: 10, sku: "PIK-025-EN", languageCode: "EN", finish: "HOLO" },
+          { ...variant, id: 11, sku: "PIK-025-JA", languageCode: "JA", finish: "NOT_APPLICABLE" },
+        ],
+      },
+      isPending: false,
+      isError: false,
+    } as never);
+    vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
+      data: [
+        listing,
+        { ...listing, id: 56, card: { ...listing.card, variantId: 11 }, seller: { username: "tokyo", displayName: "Tokyo Shop", avatarUrl: null } },
+      ],
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as never);
+    const user = userEvent.setup();
+    renderPage();
+
+    const dropdown = screen.getByRole("combobox", { name: "Select variant" });
+    expect(dropdown).toHaveTextContent("All variants");
+    expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Seller")).toBeInTheDocument();
+
+    await user.click(dropdown);
+    await user.click(await screen.findByRole("option", { name: "JA" }));
+
+    expect(dropdown).toHaveTextContent("JA");
+    expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Tokyo Shop")).toBeInTheDocument();
+    expect(screen.queryByLabelText("ดูรายละเอียดสินค้าของ Seller")).not.toBeInTheDocument();
   });
 });

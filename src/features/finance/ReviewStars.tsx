@@ -1,9 +1,32 @@
 import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function ReviewStars({ rating }: { rating: number }) {
-  return <span className="inline-flex gap-0.5" role="img" aria-label={`${rating} จาก 5 ดาว`}>
-    {[1, 2, 3, 4, 5].map((score) => <Star key={score} aria-hidden className={`size-4 ${score <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}/>)}
-  </span>;
+export function ReviewStars({
+  rating,
+  className,
+  starClassName,
+}: {
+  rating: number;
+  className?: string;
+  starClassName?: string;
+}) {
+  return (
+    <span className={cn("inline-flex gap-0.5", className)} role="img" aria-label={`${rating} จาก 5 ดาว`}>
+      {[1, 2, 3, 4, 5].map((score) => (
+        <Star
+          key={score}
+          aria-hidden
+          className={cn(
+            "size-4",
+            score <= Math.round(rating)
+              ? "fill-amber-400 text-amber-400"
+              : "text-muted-foreground/30",
+            starClassName,
+          )}
+        />
+      ))}
+    </span>
+  );
 }
 export function RatingInput({ value, onChange, disabled }: { value: number; onChange: (rating: number) => void; disabled?: boolean }) {
   return <fieldset disabled={disabled} className="space-y-2">
