@@ -347,6 +347,38 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getAddresses");
 
+    // หน้า checkout ขอค่าส่งของแต่ละร้านก่อน — ปุ่มสั่งซื้อจะกดได้เมื่อมีตัวเลือกจัดส่งครบทุกร้าน
+    cy.intercept("POST", "**/api/v1/checkout/shipping-quotes", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: [
+          {
+            sellerProfileId: 10,
+            sellerName: "Somchai Cards Shop",
+            itemCount: 1,
+            itemsSubtotal: 250,
+            defaultOptionId: 7,
+            options: [
+              {
+                id: 7,
+                name: "Kerry Express",
+                carrierCode: "KERRY",
+                baseFee: 50,
+                perItemFee: 0,
+                freeThreshold: null,
+                estDaysMin: 1,
+                estDaysMax: 3,
+                fee: 50,
+                free: false,
+                amountToFree: null,
+              },
+            ],
+          },
+        ],
+      },
+    }).as("getShippingQuotes");
+
     cy.intercept("POST", "**/api/v1/checkout", {
       statusCode: 201,
       body: {
@@ -406,13 +438,20 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
 
     cy.wait("@getCartCheckout");
     cy.wait("@getAddresses");
+    cy.wait("@getShippingQuotes");
 
-    cy.contains(/Review & Purchase/i).should("be.visible");
+    cy.contains("h1", "ตรวจสอบและสั่งซื้อ").should("be.visible");
     cy.contains(/88\/1 ถนนพหลโยธิน/i).should("be.visible");
+    // 250 + ค่าส่ง 50
+    cy.get('[data-testid="checkout-grand-total"]').should("contain.text", "300");
 
     // Click Purchase button
-    cy.contains("button", /Purchase/i).click({ force: true });
-    cy.wait("@placeOrder");
+    cy.contains("button", "สั่งซื้อและไปชำระเงิน").should("be.enabled").click();
+    cy.wait("@placeOrder").its("request.body").should("deep.equal", {
+      cartItemIds: [101],
+      shippingAddressId: 1,
+      shippingOptionBySeller: { 10: 7 },
+    });
 
     // Navigates to payment page
     cy.url().should("include", "/payment");
