@@ -58,7 +58,7 @@ describe('Core Home & Storefront Flow', () => {
             id: 2,
             code: 'PKM',
             name: 'Pokemon TCG',
-            slug: 'pokemon-tcg',
+            slug: 'pokemon',
             logoUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
             displayOrder: 2,
           },
@@ -66,22 +66,22 @@ describe('Core Home & Storefront Flow', () => {
       },
     }).as('getGames');
 
-    cy.intercept('GET', '**/api/v1/categories*', {
+    cy.intercept('GET', '**/api/v1/home/featured-sellers*', {
       statusCode: 200,
       body: {
         success: true,
         data: [
           {
             id: 1,
-            code: 'SINGLE',
-            name: 'Single Cards',
-            slug: 'single-cards',
-            imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
-            displayOrder: 1,
+            name: 'Card Master Shop',
+            slug: 'cardmaster',
+            avatarUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=100',
+            rating: 4.9,
+            itemCount: 120,
           },
         ],
       },
-    }).as('getCategories');
+    }).as('getFeaturedSellers');
 
     cy.intercept('GET', '**/api/v1/catalog/trending*', {
       statusCode: 200,
@@ -134,6 +134,65 @@ describe('Core Home & Storefront Flow', () => {
         data: { items: [], page: 0, size: 10, totalItems: 0, totalPages: 0 },
       },
     }).as('getPegasusPicks');
+
+    cy.intercept('GET', '**/api/v1/u/*/collection*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: { items: [], page: 0, size: 6, totalItems: 0, totalPages: 0 },
+      },
+    }).as('getCollection');
+
+    cy.intercept('GET', '**/api/v1/u/cardmaster/listings*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [
+            {
+              id: 101,
+              card: {
+                variantId: 1,
+                sku: 'PKM-001',
+                variantLabel: 'Holo',
+                productId: 50,
+                productName: 'Charizard Base Set Holo',
+                productSlug: 'charizard-base-set-holo',
+                gameId: 1,
+                officialImageUrl: null,
+              },
+              condition: 'NM',
+              price: 15000,
+              currency: 'THB',
+              quantityAvailable: 2,
+              primaryPhotoUrl: null,
+              seller: {
+                username: 'cardmaster',
+                displayName: 'Card Master Shop',
+                avatarUrl: null,
+              },
+            },
+          ],
+          page: 0,
+          size: 6,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      },
+    }).as('getStoreListings');
+
+    cy.intercept('GET', '**/api/v1/u/cardmaster*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          username: 'cardmaster',
+          displayName: 'Card Master Shop',
+          avatarUrl: null,
+          phone: null,
+        },
+      },
+    }).as('getStoreProfile');
   });
 
   it('renders home page with hero carousel, games, and featured products', () => {
@@ -155,17 +214,19 @@ describe('Core Home & Storefront Flow', () => {
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
 
-  it('renders store profile page with store info, statistics, and recommended items', () => {
-    cy.visit('/store/1');
+  it('redirects store link to public seller storefront with products and profile', () => {
+    cy.visit('/store/cardmaster');
 
-    // Asserts store name and stats
-    cy.contains('Nx Gallery - Card Game & Board Game Cafe').should('be.visible');
-    cy.contains('Products').should('be.visible');
-    cy.contains('Followers').should('be.visible');
-    cy.contains('Rating').should('be.visible');
+    // Verifies redirect to public seller route
+    cy.url().should('include', '/u/cardmaster');
+    cy.wait('@getStoreProfile');
+    cy.wait('@getStoreListings');
 
-    // Asserts recommended section
-    cy.contains('h2', 'Recommended for You').should('be.visible');
-    cy.contains('Pokemon Booster Box (Thai)').should('be.visible');
+    // Asserts store profile information
+    cy.contains('Card Master Shop').should('be.visible');
+    cy.contains('Products for sale').should('be.visible');
+
+    // Asserts seller's listed item
+    cy.contains('Charizard Base Set Holo').should('be.visible');
   });
 });
