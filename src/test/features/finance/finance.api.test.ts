@@ -45,4 +45,10 @@ describe("TCG-394 finance API contracts", () => {
       bankName: "Test Bank", accountName: "Buyer", accountNumber: "12345",
     });
   });
+
+  it("requests wallet entries with page and size", async () => {
+    get.mockResolvedValue({} as never);
+    await financeApi.wallet(2, 20);
+    expect(get).toHaveBeenCalledWith("/me/wallet?page=2&size=20");
+  });
 });
