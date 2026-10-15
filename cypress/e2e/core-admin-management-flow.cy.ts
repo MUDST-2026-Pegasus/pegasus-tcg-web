@@ -338,6 +338,7 @@ describe('Core Admin Management Flow', () => {
 
     // 5. Card Attributes Page
     visitAuthenticated('/admin/card-attributes');
+    cy.wait('@getGameAttributes');
     cy.contains('เกมและคุณสมบัติการ์ด').should('be.visible');
     cy.contains('HP').should('be.visible');
   });
