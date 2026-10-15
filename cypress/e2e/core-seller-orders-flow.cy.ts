@@ -125,6 +125,20 @@ describe('Core Seller Orders Flow', () => {
       },
     }).as('getMe');
 
+    cy.intercept('POST', '**/api/v1/auth/refresh*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          tokens: {
+            accessToken: 'mock-seller-token',
+            refreshToken: 'mock-refresh-token',
+            expiresIn: 3600,
+          },
+        },
+      },
+    }).as('refreshToken');
+
     cy.intercept('GET', '**/api/v1/cart*', {
       statusCode: 200,
       body: {
@@ -132,6 +146,23 @@ describe('Core Seller Orders Flow', () => {
         data: { id: 1, items: [], totalQuantity: 0, itemsSubtotal: 0 },
       },
     }).as('getCart');
+
+    cy.intercept('GET', '**/api/v1/sellers/me/dashboard*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          period: { month: '2026-10', from: '2026-10-01', to: '2026-10-31' },
+          sales: { value: 2550, previous: 0, orderCount: 1, previousOrderCount: 0, monthly: [] },
+          month: { revenue: 2550, cost: 0, commission: 50, net: 2500 },
+          orders: { PAID: 1 },
+          listings: { active: 1, publishedThisMonth: 1, lowStockThreshold: 2, lowStockCount: 0, lowStock: [] },
+          reviews: { average: 5.0, count: 1, thisMonth: 1, unreplied: 0 },
+          wallet: { withdrawable: 2500, pending: 0 },
+          recentOrders: [],
+        },
+      },
+    }).as('getSellerDashboard');
 
     cy.intercept('GET', '**/api/v1/sellers/me', {
       statusCode: 200,
