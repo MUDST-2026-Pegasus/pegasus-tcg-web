@@ -1,0 +1,82 @@
+{
+  "singleSellerCart": {
+    "id": 1,
+    "itemsSubtotal": 250,
+    "totalQuantity": 1,
+    "currency": "THB",
+    "items": [
+      {
+        "id": 101,
+        "listingId": 1,
+        "quantity": 1,
+        "unitPriceAtAdd": 250,
+        "currentPrice": 250,
+        "priceChanged": false,
+        "purchasable": true,
+        "quantityAvailable": 5,
+        "sellerProfileId": 10,
+        "sellerName": "Somchai Cards Shop",
+        "productName": "Pikachu ex",
+        "variantLabel": "SV8A · Super Rare",
+        "condition": "NM",
+        "imageUrl": "http://localhost:8080/images/pikachu.jpg"
+      }
+    ]
+  },
+  "multiSellerCart": {
+    "id": 2,
+    "itemsSubtotal": 850,
+    "totalQuantity": 3,
+    "currency": "THB",
+    "items": [
+      {
+        "id": 201,
+        "listingId": 1,
+        "quantity": 1,
+        "unitPriceAtAdd": 250,
+        "currentPrice": 250,
+        "priceChanged": false,
+        "purchasable": true,
+        "quantityAvailable": 5,
+        "sellerProfileId": 10,
+        "sellerName": "Somchai Cards Shop",
+        "productName": "Pikachu ex",
+        "variantLabel": "SV8A · Super Rare",
+        "condition": "NM",
+        "imageUrl": "http://localhost:8080/images/pikachu.jpg"
+      },
+      {
+        "id": 202,
+        "listingId": 2,
+        "quantity": 1,
+        "unitPriceAtAdd": 400,
+        "currentPrice": 400,
+        "priceChanged": false,
+        "purchasable": true,
+        "quantityAvailable": 2,
+        "sellerProfileId": 20,
+        "sellerName": "Bangkok TCG Hub",
+        "productName": "Charizard ex",
+        "variantLabel": "MEW · SAR",
+        "condition": "NM",
+        "imageUrl": "http://localhost:8080/images/charizard.jpg"
+      },
+      {
+        "id": 203,
+        "listingId": 3,
+        "quantity": 1,
+        "unitPriceAtAdd": 200,
+        "currentPrice": 200,
+        "priceChanged": false,
+        "purchasable": true,
+        "quantityAvailable": 3,
+        "sellerProfileId": 30,
+        "sellerName": "Siam Card Collector",
+        "productName": "Mew ex",
+        "variantLabel": "MEW · SR",
+        "condition": "LP",
+        "imageUrl": "http://localhost:8080/images/mew.jpg"
+      }
+    ]
+  }
+}

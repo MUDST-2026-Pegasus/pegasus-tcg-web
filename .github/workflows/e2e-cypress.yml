@@ -1,0 +1,76 @@
+name: Cypress E2E & Component Tests
+
+on:
+  push:
+    branches: ["main", "develop", "feat/**"]
+  pull_request:
+    branches: ["main", "develop"]
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Vitest & Cypress Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.5
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-cache-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            cypress-cache-${{ runner.os }}-
+
+      - name: Install Cypress binary
+        run: pnpm exec cypress install
+
+      - name: Run Vitest Component Tests
+        run: pnpm vitest run src/test/features/cart/CartSummary.test.tsx src/test/features/payment/PromptPayModal.test.tsx
+
+      - name: Build Web Application
+        run: pnpm build
+
+      - name: Start Vite Preview Server
+        run: pnpm preview --port 5173 &
+        env:
+          PORT: 5173
+
+      - name: Wait for Preview Server
+        run: npx wait-on http://localhost:5173
+
+      - name: Run Cypress E2E Tests
+        run: pnpm exec cypress run --browser chrome --headless
+
+      - name: Upload Cypress Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
