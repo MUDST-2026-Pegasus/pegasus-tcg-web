@@ -31,6 +31,8 @@ import { initialsOf, toSidebarUser } from "../account.format";
 import { formatAddressLines } from "../address.format";
 import { useAddresses } from "../address.queries";
 import type { Address } from "../address.types";
+import { formatOrderDateTime, orderStage } from "../order-stage";
+import { useBuyerOrders } from "../orders.queries";
 import { AccountSidebar } from "../components/AccountSidebar";
 import { EditProfileDialog } from "../components/EditProfileDialog";
 
@@ -81,22 +83,62 @@ function ProfileSummary({ user }: { user: AuthUser }) {
 }
 
 function OrderStatus() {
+  const orders = useBuyerOrders(0, 1);
+  const latestOrder = orders.data?.[0];
+  const stage = latestOrder ? orderStage(latestOrder) : null;
+
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
         <CardTitle className="text-xl font-semibold">Latest Order Status</CardTitle>
         <CardAction>
-          <Button variant="link" render={<Link to="/account/orders" />}>
+          <Button variant="link" nativeButton={false} render={<Link to="/account/orders" />}>
             View All <ArrowRight data-icon="inline-end" />
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex min-h-52 items-center justify-center">
-        <EmptyState
-          icon={Package}
-          title="No recent orders"
-          description="Your latest order tracking will appear here once you make a purchase."
-        />
+      <CardContent className="min-h-52">
+        {orders.isLoading ? (
+          <div className="flex flex-col gap-4" aria-busy="true">
+            <Skeleton className="h-6 w-40 rounded-md" />
+            <Skeleton className="h-4 w-52 rounded-md" />
+            <Skeleton className="h-16 w-full rounded-md" />
+          </div>
+        ) : orders.isError ? (
+          <div className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
+            <p className="text-sm text-destructive">Could not load your latest order.</p>
+            <Button variant="outline" onClick={() => void orders.refetch()}>
+              <RotateCw data-icon="inline-start" /> Try again
+            </Button>
+          </div>
+        ) : latestOrder && stage ? (
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">Order #{latestOrder.orderNumber}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatOrderDateTime(latestOrder.placedAt)}
+                </p>
+              </div>
+              <Badge className={stage.badgeClassName}>{stage.label}</Badge>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-t pt-4">
+              <span className="text-sm text-muted-foreground">Order total</span>
+              <span className="font-semibold">฿{latestOrder.grandTotal.toLocaleString()}</span>
+            </div>
+            <Button variant="outline" nativeButton={false} className="w-full" render={<Link to={`/account/orders?orderId=${latestOrder.id}`} />}>
+              View Order Details <ArrowRight data-icon="inline-end" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex min-h-52 items-center justify-center">
+            <EmptyState
+              icon={Package}
+              title="No recent orders"
+              description="Your latest order tracking will appear here once you make a purchase."
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
