@@ -143,6 +143,25 @@ describe('Core Home & Storefront Flow', () => {
       },
     }).as('getCollection');
 
+    cy.intercept('GET', '**/api/v1/u/*/reviews*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          reviews: [],
+          summary: {
+            ratingCount: 0,
+            ratingAvg: 0,
+            count1: 0,
+            count2: 0,
+            count3: 0,
+            count4: 0,
+            count5: 0,
+          },
+        },
+      },
+    }).as('getStoreReviews');
+
     cy.intercept('GET', '**/api/v1/u/cardmaster/listings*', {
       statusCode: 200,
       body: {
@@ -224,7 +243,7 @@ describe('Core Home & Storefront Flow', () => {
 
     // Asserts store profile information
     cy.contains('Card Master Shop').should('be.visible');
-    cy.contains('Products for sale').should('be.visible');
+    cy.contains('สินค้าที่วางขาย').should('be.visible');
 
     // Asserts seller's listed item
     cy.contains('Charizard Base Set Holo').should('be.visible');

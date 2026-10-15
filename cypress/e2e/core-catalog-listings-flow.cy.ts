@@ -206,10 +206,11 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
     cy.contains('Charizard Base Set').should('be.visible');
 
     // 4. Switch to Reviews Tab
-    cy.contains('รีวิวร้านค้า').click();
-    cy.contains('คะแนนเฉลี่ย 5 / 5').should('be.visible');
+    cy.contains('รีวิวจากผู้ซื้อ').click();
+    cy.contains('5.0').should('be.visible');
     cy.contains('การ์ดสวยตรงปก').should('be.visible');
     cy.contains('แพ็คของดีมาก จัดส่งไว แนะนำเลยครับ').should('be.visible');
-    cy.contains('ผู้ขายตอบ: ขอบคุณที่อุดหนุนครับ!').should('be.visible');
+    cy.contains('ร้านค้าตอบกลับ').should('be.visible');
+    cy.contains('ขอบคุณที่อุดหนุนครับ!').should('be.visible');
   });
 });
