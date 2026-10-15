@@ -19,6 +19,7 @@ const SellerProductEditPage = lazyPage(() => import("@/features/seller/products/
 const SellerOrdersPage = lazyPage(() => import("@/features/seller/orders/SellerOrdersPage").then((m) => m.SellerOrdersPage), pageSkeleton);
 const SellerOrderDetailPage = lazyPage(() => import("@/features/seller/orders/SellerOrderDetailPage").then((m) => m.SellerOrderDetailPage), <OrderDetailSkeleton />);
 const SellerPayoutPage = lazyPage(() => import("@/features/seller/payout/SellerPayoutPage").then((m) => m.SellerPayoutPage), pageSkeleton);
+const SellerVerificationPage = lazyPage(() => import("@/features/seller/payout/SellerVerificationPage").then((m) => m.SellerVerificationPage), formSkeleton);
 const SellerReturnsPage = lazyPage(() => import("@/features/finance/SellerReturnsPage").then((m) => m.SellerReturnsPage), pageSkeleton);
 const SellerReviewsPage = lazyPage(() => import("@/features/finance/SellerReviewsPage").then((m) => m.SellerReviewsPage), pageSkeleton);
 const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
@@ -49,6 +50,7 @@ export const sellerRoutes: RouteObject = {
     { path: "orders", element: <SellerOrdersPage /> },
     { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
+    { path: "verification", element: <SellerVerificationPage /> },
     { path: "returns", element: <SellerReturnsPage /> },
     { path: "reviews", element: <SellerReviewsPage /> },
     { path: "logout", element: <SellerLogoutPage /> },
