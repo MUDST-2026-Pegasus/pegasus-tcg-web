@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AlertCircle, Lock, Minus, Plus } from "lucide-react";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
@@ -313,9 +313,18 @@ export function CartPage() {
                           </p>
                           <p className="text-sm mt-1 text-foreground">
                             Seller:{" "}
-                            <span className="text-primary font-medium">
-                              {item.sellerName || "Pegasus Seller"}
-                            </span>
+                            {item.sellerUsername ? (
+                              <Link
+                                to={`/u/${encodeURIComponent(item.sellerUsername)}`}
+                                className="text-primary font-medium hover:underline focus-visible:underline"
+                              >
+                                {item.sellerName || item.sellerUsername}
+                              </Link>
+                            ) : (
+                              <span className="text-primary font-medium">
+                                {item.sellerName || "Pegasus Seller"}
+                              </span>
+                            )}
                           </p>
 
                           {item.priceChanged && (
