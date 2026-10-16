@@ -257,6 +257,7 @@ export function PaymentPage() {
                 {/* Left: QR Code Scan Section */}
                 <div className="md:col-span-5 flex justify-center">
                   <PaymentQrCard
+                    amount={payment.amount}
                     orderNumber={orderNumber}
                     account={account}
                   />

@@ -135,6 +135,9 @@ describe("PaymentPage Integration Flow", () => {
     expect(screen.getByText("PromptPay ID 081-999-8888")).toBeInTheDocument();
     expect(screen.getByText("Pegasus TCG Co., Ltd.")).toBeInTheDocument();
 
+    expect(screen.getByText("Scan to Pay | ฿1,050.00")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "PromptPay QR Code" }).querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
+
     // Order items
     expect(screen.getByText("Blue-Eyes White Dragon")).toBeInTheDocument();
     expect(screen.getByText(/Ultra Rare · Near Mint/)).toBeInTheDocument();
