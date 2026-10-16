@@ -30,6 +30,7 @@ describe("after sales screens", () => {
     vi.mocked(afterSalesApi.requestReturn).mockResolvedValue({} as never);
     render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
       items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    fireEvent.click(await screen.findByRole("button", { name: /ขอคืนสินค้า/ }));
     fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
     await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalledWith(41, {
@@ -43,6 +44,7 @@ describe("after sales screens", () => {
     const user = userEvent.setup();
     render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
       items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    fireEvent.click(await screen.findByRole("button", { name: /ขอคืนสินค้า/ }));
     fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
     await user.click(screen.getByRole("combobox", { name: "สาเหตุคืนสินค้า" }));
     await user.click(await screen.findByRole("option", { name: "สินค้าเสียหาย" }));

@@ -26,7 +26,7 @@ describe("orders.format", () => {
       expect(formatOrderStatus("PREPARING")).toBe("Processing");
       expect(formatOrderStatus("PROCESSING")).toBe("Processing");
       expect(formatOrderStatus("SHIPPED")).toBe("Shipped");
-      expect(formatOrderStatus("DELIVERED")).toBe("Completed");
+      expect(formatOrderStatus("DELIVERED")).toBe("Delivered");
       expect(formatOrderStatus("COMPLETED")).toBe("Completed");
       expect(formatOrderStatus("CANCELLED")).toBe("Cancelled");
       expect(formatOrderStatus("CANCELED")).toBe("Cancelled");
@@ -86,7 +86,7 @@ describe("orders.format", () => {
       expect(compResult.className).toContain("bg-emerald-100");
 
       const delivResult = getOrderStatusBadge("DELIVERED");
-      expect(delivResult.label).toBe("Completed");
+      expect(delivResult.label).toBe("Delivered");
       expect(delivResult.variant).toBe("secondary");
       expect(delivResult.className).toContain("bg-emerald-100");
     });
