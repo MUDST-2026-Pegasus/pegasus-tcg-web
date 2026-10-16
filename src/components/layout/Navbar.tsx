@@ -27,7 +27,7 @@ export function Navbar() {
           aria-label="Pegasus TCG — กลับหน้าแรก"
           className="flex h-full cursor-pointer items-center justify-self-start text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
         >
-          pegasus
+          ommyomami
         </Link>
 
         <nav className="flex h-full items-center justify-center gap-8">
@@ -92,7 +92,11 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={cart ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น` : "ตะกร้าสินค้า"}
+            aria-label={
+              cart
+                ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น`
+                : "ตะกร้าสินค้า"
+            }
             className="relative flex cursor-pointer items-center justify-center overflow-visible text-sky-700 hover:text-sky-700"
             nativeButton={false}
             render={<Link to="/cart" />}
