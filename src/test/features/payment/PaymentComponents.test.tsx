@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { PaymentQrCard } from "@/features/payment/components/PaymentQrCard";
 import { PaymentOrderSummary } from "@/features/payment/components/PaymentOrderSummary";
 import { PaymentSuccessPage } from "@/features/payment/pages/PaymentSuccessPage";
@@ -19,12 +19,14 @@ vi.mock("@/features/finance/finance.api", () => ({
   },
 }));
 
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+
 describe("Payment Components", () => {
   describe("PaymentQrCard", () => {
     it("renders QR code SVG, amount text, and PromptPay ID", () => {
       renderWithProviders(
         <PaymentQrCard
-          amountText="฿1,450.00"
+          amount={1450}
           orderNumber="ORD-999"
           account={{
             accountName: "Pegasus Store Co.",
@@ -41,10 +43,55 @@ describe("Payment Components", () => {
       expect(screen.getByRole("button", { name: /Save QR/i })).toBeInTheDocument();
     });
 
+    it("changes QR modules when the amount changes", () => {
+      const { rerender } = renderWithProviders(<PaymentQrCard amount={150} account={{ promptPayId: "0812345678" }} />);
+      const before = screen.getByRole("img", { name: "PromptPay QR Code" }).innerHTML;
+      rerender(<PaymentQrCard amount={151} account={{ promptPayId: "0812345678" }} />);
+      expect(screen.getByRole("img", { name: "PromptPay QR Code" }).innerHTML).not.toBe(before);
+    });
+
+    it("exports a PNG after embedding and loading the logo", async () => {
+      let imageSource = "";
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(["logo"], { type: "image/jpeg" }) }));
+      vi.stubGlobal("Image", class {
+        onload?: () => void;
+        set src(value: string) { imageSource = value; queueMicrotask(() => this.onload?.()); }
+      });
+      const drawImage = vi.fn();
+      vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+      const png = new Blob(["png"], { type: "image/png" });
+      const toBlob = vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((callback) => callback(png));
+      const createUrl = vi.fn().mockReturnValue("blob:qr");
+      const originalCreate = URL.createObjectURL;
+      URL.createObjectURL = createUrl;
+      const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+        expect(this.download).toBe("pegasus-qr-ORD-999.png");
+      });
+      try {
+        renderWithProviders(<PaymentQrCard amount={1450} orderNumber="ORD-999" account={{ promptPayId: "0812345678" }} />);
+        fireEvent.click(screen.getByRole("button", { name: "Save QR" }));
+        await waitFor(() => expect(click).toHaveBeenCalledOnce());
+        expect(decodeURIComponent(imageSource)).toContain("data:image/jpeg;base64,");
+        expect(decodeURIComponent(imageSource)).not.toContain('href="/site-icon.jpg"');
+        expect(drawImage).toHaveBeenCalledOnce();
+        expect(toBlob).toHaveBeenCalledWith(expect.any(Function), "image/png");
+        expect(createUrl).toHaveBeenCalledWith(png);
+      } finally {
+        URL.createObjectURL = originalCreate;
+      }
+    });
+
+    it("reports logo loading failure without downloading an incomplete QR", async () => {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+      renderWithProviders(<PaymentQrCard amount={1450} account={{ promptPayId: "0812345678" }} />);
+      fireEvent.click(screen.getByRole("button", { name: "Save QR" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("บันทึก QR ไม่สำเร็จ");
+    });
+
     it("renders bank name and account number when bank details are provided", () => {
       renderWithProviders(
         <PaymentQrCard
-          amountText="฿500.00"
+          amount={500}
           account={{
             accountName: "Pegasus Store Co.",
             bankName: "Kasikornbank",
@@ -54,6 +101,8 @@ describe("Payment Components", () => {
       );
 
       expect(screen.getByText("Kasikornbank · 123-4-56789-0")).toBeInTheDocument();
+      expect(screen.queryByRole("img", { name: "PromptPay QR Code" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /Save QR/i })).not.toBeInTheDocument();
     });
   });
 
