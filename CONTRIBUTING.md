@@ -123,7 +123,8 @@ pnpm dev
 
 ไม่มี proxy แล้ว — เบราว์เซอร์ยิงตรงไปที่ `VITE_API_BASE_URL` (ปล่อยว่าง = `http://localhost:8080`)
 backend จึงต้องยอม CORS จาก `http://localhost:5173` ซึ่ง `CORS_ALLOWED_ORIGINS` ของ `pegasus-tcg-api` มีให้อยู่แล้วโดยค่าเริ่มต้น
-ตอน build ขึ้น production ตั้ง `VITE_API_BASE_URL` เป็น origin จริงของ backend
+production build ที่ไม่ได้ตั้งค่า (เช่นใน CI) จะยิง `/api` ที่ origin เดียวกับหน้าเว็บ — Ingress ส่งต่อให้ api เอง
+ตั้ง `VITE_API_BASE_URL` ตอน build เฉพาะเมื่อ backend อยู่คนละ origin
 
 ### ยิง request
 
