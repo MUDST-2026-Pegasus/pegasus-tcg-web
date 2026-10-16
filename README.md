@@ -48,7 +48,7 @@ Copy these from [`.env.example`](.env.example). Values beginning with `VITE_` ar
 
 | Variable | Local default / example | Purpose |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend origin prepended to `/api/v1` requests (falls back to `http://localhost:8080` when empty). Set it to the deployed API origin at build time; that origin must allow the frontend in its CORS settings. |
+| `VITE_API_BASE_URL` | `http://localhost:8080` | Backend origin prepended to `/api/v1` requests. When empty, `pnpm dev` uses `http://localhost:8080` and a production build calls `/api` on the page's own origin (the Kubernetes Ingress routes it to the API), so one image works on any host. Set it at build time only when the API lives on another origin; that origin must allow the frontend in its CORS settings. |
 | `VITE_PEGASUS_STORE_USERNAME` | Empty (`pegasus_official` fallback) | Store username used for Pegasus Picks on the home page. |
 
 ## Everyday commands
@@ -109,7 +109,7 @@ To build and serve the static frontend with Nginx:
 docker compose up --build -d
 ```
 
-Open **http://localhost:4433** and stop it with `docker compose down`. This container serves the frontend only. Its current Nginx configuration does not proxy `/api`, and Vite variables are baked in at build time. For a working API in a Docker deployment, build the frontend with a reachable `VITE_API_BASE_URL`.
+Open **http://localhost:4433** and stop it with `docker compose down`. This container serves the frontend only. Its current Nginx configuration does not proxy `/api`, and Vite variables are baked in at build time. `docker-compose.yml` therefore builds it with `VITE_API_BASE_URL=http://localhost:8080`, the API running on your machine.
 
 ## Contributors
 

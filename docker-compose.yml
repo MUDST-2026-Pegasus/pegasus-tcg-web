@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # This nginx does not proxy /api: call the API running on the host.
+        VITE_API_BASE_URL: http://localhost:8080
     ports:
       - "4433:80"
     container_name: pegasus-tcg-web
