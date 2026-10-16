@@ -184,4 +184,95 @@ describe('Core Payment & Checkout Flow', () => {
       .should('be.visible')
       .should('have.attr', 'href', '/account/orders?orderId=101');
   });
+
+  it('uploads payment slip, enters reference code, and submits payment for verification', () => {
+    cy.intercept('GET', '**/api/v1/orders/101*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: mockOrderData,
+      },
+    }).as('getOrder');
+
+    cy.intercept('POST', '**/api/v1/payments', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: mockPaymentData,
+      },
+    }).as('createPayment');
+
+    cy.intercept('GET', '**/api/v1/payments/201*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: mockPaymentData,
+      },
+    }).as('getPayment');
+
+    cy.intercept('POST', '**/api/v1/uploads/presign*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          uploadUrl: 'https://minio.example.com/mock-slip-upload',
+          objectKey: 'payments/slip-201.jpg',
+          expiresIn: 900,
+        },
+      },
+    }).as('presignSlip');
+
+    cy.intercept('PUT', 'https://minio.example.com/mock-slip-upload*', {
+      statusCode: 200,
+      body: '',
+    }).as('uploadSlipToStorage');
+
+    cy.intercept('POST', '**/api/v1/payments/201/slip*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          ...mockPaymentData,
+          status: 'AWAITING_VERIFICATION',
+          referenceCode: '202610160001',
+        },
+      },
+    }).as('attachSlip');
+
+    visitAuthenticated('/payment?orderId=101');
+
+    cy.wait('@getMe');
+    cy.wait('@getOrder');
+    cy.wait('@createPayment');
+
+    // Upload slip image
+    cy.get('input[type="file"]').selectFile(
+      {
+        contents: Cypress.Buffer.from('mock slip image bytes'),
+        fileName: 'transfer-slip.jpg',
+        mimeType: 'image/jpeg',
+      },
+      { force: true },
+    );
+
+    cy.wait('@presignSlip');
+    cy.wait('@uploadSlipToStorage');
+    cy.contains('Ready').should('be.visible');
+
+    // Enter reference number
+    cy.get('input[aria-label="เลขอ้างอิงการโอน"]').type('202610160001');
+
+    // Submit payment for verification
+    cy.contains('button', 'Submit payment for verification')
+      .should('not.be.disabled')
+      .click();
+
+    cy.wait('@attachSlip').its('request.body').should('deep.equal', {
+      slipImageKey: 'payments/slip-201.jpg',
+      referenceCode: '202610160001',
+    });
+
+    cy.contains('ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ').should('be.visible');
+    cy.contains('Payment Under Review').should('be.visible');
+  });
 });
