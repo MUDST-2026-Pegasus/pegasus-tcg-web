@@ -152,6 +152,14 @@ describe('Core Account Orders Flow', () => {
         data: [],
       },
     }).as('getReturns');
+
+    cy.intercept('GET', '**/api/v1/orders/*/reviews/mine*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: null,
+      },
+    }).as('getMyReview');
   });
 
   it('displays orders list and opens order details modal', () => {
@@ -237,5 +245,73 @@ describe('Core Account Orders Flow', () => {
 
     cy.wait('@cancelOrder');
     cy.contains('Order Cancelled').should('be.visible');
+  });
+
+  it('submits a seller review on a completed order from the order details modal', () => {
+    const mockOrderCompleted = {
+      ...mockOrderPending,
+      status: 'COMPLETED',
+      completedAt: '2026-10-16T08:00:00Z',
+      sellerOrders: [
+        {
+          ...mockOrderPending.sellerOrders[0],
+          status: 'COMPLETED',
+          completedAt: '2026-10-16T08:00:00Z',
+        },
+      ],
+    };
+
+    cy.intercept('GET', '**/api/v1/orders?*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [mockOrderCompleted],
+          totalItems: 1,
+          totalPages: 1,
+          page: 0,
+          size: 50,
+        },
+      },
+    }).as('getCompletedOrders');
+
+    cy.intercept('POST', '**/api/v1/orders/501/reviews*', {
+      statusCode: 201,
+      body: {
+        success: true,
+        data: {
+          id: 901,
+          sellerOrderId: 501,
+          rating: 5,
+          title: 'ประทับใจมาก',
+          comment: 'การ์ดแท้ แพ็คแน่นหนา ส่งไวครับ',
+          replyComment: null,
+          visible: true,
+          createdAt: '2026-10-16T09:00:00Z',
+          repliedAt: null,
+        },
+      },
+    }).as('createReview');
+
+    visitAuthenticated('/account/orders');
+    cy.wait('@getCompletedOrders');
+
+    cy.contains('button', 'View Details').click();
+    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('be.visible');
+    cy.wait('@getMyReview');
+
+    cy.contains('h4', 'รีวิวผู้ขาย').scrollIntoView().should('be.visible');
+    cy.get('input[aria-label="หัวข้อรีวิว"]').type('ประทับใจมาก');
+    cy.get('textarea[aria-label="ข้อความรีวิว"]').type('การ์ดแท้ แพ็คแน่นหนา ส่งไวครับ');
+    cy.contains('button', 'ส่งรีวิว').click();
+
+    cy.wait('@createReview').its('request.body').should('deep.equal', {
+      rating: 5,
+      title: 'ประทับใจมาก',
+      comment: 'การ์ดแท้ แพ็คแน่นหนา ส่งไวครับ',
+    });
+
+    cy.contains('รีวิวที่ส่งแล้ว').should('be.visible');
+    cy.contains('การ์ดแท้ แพ็คแน่นหนา ส่งไวครับ').should('be.visible');
   });
 });

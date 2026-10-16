@@ -130,20 +130,32 @@ describe('Core Seller Portal Flow', () => {
       },
     }).as('getDashboard');
 
-    cy.intercept('GET', '**/api/v1/sellers/me/verification*', {
+    cy.intercept('GET', '**/api/v1/sellers/me/verifications*', {
       statusCode: 200,
       body: {
         success: true,
-        data: {
-          status: 'APPROVED',
-          legalFirstName: 'สมชาย',
-          legalLastName: 'ขายการ์ด',
-          bankBookImageKey: 'key-123',
-        },
+        data: [
+          {
+            id: 1,
+            sellerProfileId: 10,
+            status: 'APPROVED',
+            legalFirstName: 'สมชาย',
+            legalLastName: 'ขายการ์ด',
+            bankCode: 'KBANK',
+            bankName: 'กสิกรไทย',
+            bankAccountNumber: '1234567890',
+            bankBookImageKey: 'key-123',
+            bankBookImageUrl: null,
+            submittedAt: '2026-01-01T00:00:00Z',
+            reviewedBy: 1,
+            reviewedAt: '2026-01-01T01:00:00Z',
+            rejectionReason: null,
+          },
+        ],
       },
-    }).as('getVerification');
+    }).as('getVerifications');
 
-    cy.intercept('GET', '**/api/v1/me/payout-account*', {
+    cy.intercept('GET', '**/api/v1/sellers/me/payout-account*', {
       statusCode: 200,
       body: {
         success: true,
@@ -151,10 +163,33 @@ describe('Core Seller Portal Flow', () => {
           bankCode: 'KBANK',
           bankName: 'กสิกรไทย',
           accountNumber: '1234567890',
-          accountHolderName: 'สมชาย ขายการ์ด',
+          accountName: 'สมชาย ขายการ์ด',
+          verifiedAt: '2026-01-01T01:00:00Z',
         },
       },
     }).as('getPayoutAccount');
+
+    cy.intercept('GET', '**/api/v1/sellers/me/shipping-options*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: [
+          {
+            id: 1,
+            sellerProfileId: 10,
+            name: 'Kerry Express Standard',
+            carrierCode: 'KERRY',
+            baseFee: 50,
+            perItemFee: 0,
+            freeThreshold: 1000,
+            estDaysMin: 1,
+            estDaysMax: 2,
+            active: true,
+            displayOrder: 1,
+          },
+        ],
+      },
+    }).as('getShippingOptions');
 
     cy.intercept('GET', '**/api/v1/sellers/me/listings*', {
       statusCode: 200,
@@ -211,14 +246,29 @@ describe('Core Seller Portal Flow', () => {
     cy.contains('15,000').should('be.visible');
   });
 
-  it('navigates to shop settings page and displays shop information', () => {
+  it('navigates to shop settings page and displays shop information and shipping options', () => {
     visitAuthenticated('/seller/shop');
 
     cy.wait('@getMe');
     cy.wait('@getSellerProfile');
+    cy.wait('@getShippingOptions');
 
     cy.contains('จัดการร้านค้า').should('be.visible');
     cy.contains('ร้านค้าเปิดใช้งาน').should('be.visible');
     cy.contains('Card Master Shop').should('be.visible');
+    cy.contains('Kerry Express Standard').should('be.visible');
+  });
+
+  it('renders seller payout account verification page (/seller/verification)', () => {
+    visitAuthenticated('/seller/verification');
+
+    cy.wait('@getMe');
+    cy.wait('@getSellerProfile');
+    cy.wait('@getVerifications');
+
+    cy.contains('h1', 'ยืนยันบัญชีรับเงิน').should('be.visible');
+    cy.get('input[name="legalFirstName"]').should('be.visible');
+    cy.get('input[name="legalLastName"]').should('be.visible');
+    cy.get('input[name="bankAccountNumber"]').should('be.visible');
   });
 });

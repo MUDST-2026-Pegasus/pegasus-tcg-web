@@ -65,4 +65,14 @@ describe('Core Legal and About Pages Flow', () => {
     cy.url().should('include', '/privacy-policy');
     cy.contains('h1', 'Privacy Policy').should('be.visible');
   });
+
+  it('renders 404 Not Found page on unknown routes and navigates back', () => {
+    cy.visit('/unknown-route-that-does-not-exist-404');
+
+    cy.contains('ERROR 404 · PAGE NOT FOUND').should('be.visible');
+    cy.contains('h1', 'ไม่พบหน้าที่คุณกำลังหา').should('be.visible');
+    cy.contains('a', 'ดูสินค้าทั้งหมด').should('have.attr', 'href', '/products');
+  });
 });
+
+

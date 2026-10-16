@@ -98,6 +98,21 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
   });
 
   it("3. Catalog & Search: buyer explores cards in the catalog", () => {
+    cy.intercept("GET", "**/api/v1/games*", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: [
+          { id: 1, code: "POKEMON", name: "Pokémon", nameLocal: "โปเกมอน", slug: "pokemon", logoUrl: null, displayOrder: 1 },
+        ],
+      },
+    }).as("getGames");
+
+    cy.intercept("GET", "**/api/v1/categories*", {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    }).as("getCategories");
+
     cy.intercept("GET", "**/api/v1/catalog/products*", {
       statusCode: 200,
       body: {
@@ -111,7 +126,8 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
               nameLocal: "พิคาชู ex",
               cardNumber: "025/187",
               rarityCode: "RR",
-              minPrice: 250,
+              lowestPrice: 250,
+              primaryImageUrl: null,
             },
             {
               id: 2,
@@ -120,61 +136,133 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
               nameLocal: "ลิซาร์ดอน ex",
               cardNumber: "006/165",
               rarityCode: "SAR",
-              minPrice: 500,
+              lowestPrice: 500,
+              primaryImageUrl: null,
             },
           ],
-          total: 2,
+          totalItems: 2,
+          totalPages: 1,
           page: 0,
-          pageSize: 20,
+          size: 20,
         },
       },
     }).as("getProducts");
 
     cy.visit("/products");
-    cy.get("body").should("be.visible");
+    cy.wait("@getProducts");
+    cy.contains("Pikachu ex").should("be.visible");
+    cy.contains("Charizard ex").should("be.visible");
   });
 
   it("4. Product Details & Add to Cart: buyer views card and adds it to cart", () => {
-    cy.intercept("GET", "**/api/v1/catalog/products/pikachu-ex-025-187", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          id: 1,
-          slug: "pikachu-ex-025-187",
-          name: "Pikachu ex",
-          nameLocal: "พิคาชู ex",
-          cardNumber: "025/187",
-          rarityCode: "RR",
-          description: "Lightning Tera Pokémon ex with 200 HP",
-          variants: [
-            {
-              id: 10,
-              sku: "POKEMON-SV8A-025-187-EN-NORMAL",
-              languageCode: "EN",
-              finish: "NORMAL",
-            },
-          ],
-        },
-      },
-    }).as("getProductDetail");
-
-    cy.intercept("GET", "**/api/v1/catalog/products/*/listings*", {
+    cy.intercept("GET", "**/api/v1/games*", {
       statusCode: 200,
       body: {
         success: true,
         data: [
-          {
-            id: 1,
-            sellerProfileId: 10,
-            sellerName: "Somchai Cards Shop",
-            price: 250,
-            condition: "NM",
-            quantityAvailable: 5,
-          },
+          { id: 1, code: "POKEMON", name: "Pokémon", nameLocal: "โปเกมอน", slug: "pokemon", logoUrl: null, displayOrder: 1 },
         ],
       },
+    }).as("getGames");
+
+    cy.intercept("GET", "**/api/v1/cart*", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: { id: 1, items: [], itemsSubtotal: 0, totalQuantity: 0, currency: "THB" },
+      },
+    }).as("getCartInitial");
+
+    cy.intercept("GET", "**/api/v1/catalog/products/pikachu-ex-025-187*", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          product: {
+            id: 1,
+            gameId: 1,
+            categoryId: 1,
+            cardSetId: 1,
+            productType: "SINGLE_CARD",
+            slug: "pikachu-ex-025-187",
+            name: "Pikachu ex",
+            nameLocal: "พิคาชู ex",
+            cardNumber: "025/187",
+            rarityCode: "RR",
+            description: "Lightning Tera Pokémon ex with 200 HP",
+            attributes: {},
+            active: true,
+          },
+          variants: [
+            {
+              id: 10,
+              catalogProductId: 1,
+              sku: "POKEMON-SV8A-025-187-EN-NORMAL",
+              languageCode: "en",
+              finish: "Normal",
+              edition: "Unlimited",
+              printingNote: null,
+              imageUrl: null,
+              active: true,
+            },
+          ],
+          images: [],
+        },
+      },
+    }).as("getProductDetail");
+
+    cy.intercept("GET", "**/api/v1/listings*", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [
+            {
+              id: 1,
+              card: {
+                variantId: 10,
+                sku: "POKEMON-SV8A-025-187-EN-NORMAL",
+                variantLabel: "Normal",
+                productId: 1,
+                productName: "Pikachu ex",
+                productSlug: "pikachu-ex-025-187",
+                gameId: 1,
+                officialImageUrl: null,
+              },
+              condition: "NM",
+              price: 250,
+              currency: "THB",
+              quantityAvailable: 5,
+              primaryPhotoUrl: null,
+              seller: {
+                username: "somchai_seller",
+                displayName: "Somchai Cards Shop",
+                avatarUrl: null,
+                verified: true,
+                ratingAvg: 4.9,
+                ratingCount: 12,
+                salesCount: 80,
+              },
+              delivery: {
+                fastestEstDaysMin: 1,
+                fastestEstDaysMax: 2,
+                freeShipping: false,
+                optionCount: 1,
+              },
+            },
+          ],
+          page: 0,
+          size: 100,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      },
     }).as("getListings");
+
+    cy.intercept("GET", "**/api/v1/catalog/products/*/market*", {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    });
 
     cy.intercept("GET", "**/api/v1/catalog/products/*/effects*", {
       statusCode: 200,
@@ -183,7 +271,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
 
     cy.intercept("GET", "**/api/v1/catalog/products/*/collectors*", {
       statusCode: 200,
-      body: { success: true, data: { items: [], total: 0 } },
+      body: { success: true, data: { items: [], totalItems: 0, totalPages: 1, page: 0, size: 20 } },
     });
 
     cy.intercept("POST", "**/api/v1/cart/items", {
@@ -212,7 +300,16 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     });
 
-    cy.get("body").should("be.visible");
+    cy.wait("@getProductDetail");
+    cy.wait("@getListings");
+    cy.contains("Pikachu ex").should("be.visible");
+    cy.contains("Somchai Cards Shop").should("be.visible");
+
+    cy.contains("button", /^Add$/i).first().click();
+    cy.wait("@addToCart").its("request.body").should("deep.equal", {
+      listingId: 1,
+      quantity: 1,
+    });
   });
 
   it("5. Shopping Cart: displays multi-seller items and accurate order summary", () => {
