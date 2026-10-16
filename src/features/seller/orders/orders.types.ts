@@ -84,6 +84,8 @@ export type OrderBuyer = {
   id: number;
   username: string;
   displayName: string | null;
+  /** presigned GET อายุสั้น ห้ามเก็บ — `null` = ผู้ซื้อไม่มีรูปโปรไฟล์ */
+  avatarUrl: string | null;
 };
 
 /** หนึ่งแถวในหน้ารายการ */

@@ -45,6 +45,8 @@ export type Verification = {
   reviewedBy: number | null;
   reviewedAt: string | null;
   rejectionReason: string | null;
+  /** รูปโปรไฟล์ของผู้สมัคร — presigned GET อายุสั้น ห้ามเก็บ, `null` = ไม่มีรูป */
+  sellerAvatarUrl: string | null;
 };
 
 /** body ของ `POST /{id}/reject` — ตรงกับ `RejectVerificationRequest.java` */

@@ -59,7 +59,7 @@ const mockOrderDetail: SellerOrderDetail = {
       sellerName: "Card Master Shop",
     },
     orderNumber: "ORD-101",
-    buyer: { id: 5, username: "buyeruser", displayName: "Buyer User" },
+    buyer: { id: 5, username: "buyeruser", displayName: "Buyer User", avatarUrl: null },
     paidAt: "2026-10-14T09:30:00Z",
     shipBy: "2026-10-16T09:30:00Z",
     shippingAddressSnapshot: JSON.stringify({

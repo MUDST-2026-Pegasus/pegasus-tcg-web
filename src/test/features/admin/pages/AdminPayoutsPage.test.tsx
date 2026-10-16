@@ -38,7 +38,7 @@ const mockPayouts: AdminPayout[] = [
   {
     id: 201,
     sellerProfileId: 10,
-    seller: { id: 10, username: "cardseller", displayName: "Card Kingdom" },
+    seller: { id: 10, username: "cardseller", displayName: "Card Kingdom", avatarUrl: null },
     amount: 3500,
     currency: "THB",
     status: "REQUESTED",

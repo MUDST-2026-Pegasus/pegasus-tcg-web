@@ -38,7 +38,7 @@ const mockPayments: PaymentReview[] = [
     id: 101,
     salesOrderId: 501,
     orderNumber: "ORD-20261015-001",
-    buyer: { id: 10, username: "buyer1", displayName: "Buyer One" },
+    buyer: { id: 10, username: "buyer1", displayName: "Buyer One", avatarUrl: null },
     amount: 1500,
     unpaidTotal: 1500,
     status: "AWAITING_VERIFICATION",
@@ -53,7 +53,7 @@ const mockPayments: PaymentReview[] = [
       {
         sellerOrderId: 701,
         sellerOrderNumber: "S-ORD-001",
-        seller: { id: 20, username: "seller1", displayName: "Card Shop" },
+        seller: { id: 20, username: "seller1", displayName: "Card Shop", avatarUrl: null },
         grandTotal: 1500,
       },
     ],

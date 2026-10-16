@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -22,6 +22,7 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
 
       <div className="flex items-center gap-2.5">
         <Avatar className="size-9">
+          {buyer.avatarUrl && <AvatarImage src={buyer.avatarUrl} alt="" />}
           <AvatarFallback className="bg-sky-700 text-sm font-normal text-white">
             {initialsOf(buyer.username)}
           </AvatarFallback>

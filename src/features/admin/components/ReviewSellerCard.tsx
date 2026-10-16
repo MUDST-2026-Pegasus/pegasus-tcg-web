@@ -29,7 +29,12 @@ export function ReviewSellerCard({
       className="flex w-full shrink-0 flex-col gap-4 rounded-xl border border-border bg-background p-5 lg:w-[340px]"
     >
       <div className="flex items-center gap-3">
-        <SellerAvatar initials={initialsOf(username)} accent="teal" className="size-[38px]" />
+        <SellerAvatar
+          initials={initialsOf(username)}
+          accent="teal"
+          src={profile?.avatarUrl}
+          className="size-[38px]"
+        />
         <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
           <p className="truncate text-[15px] font-bold text-foreground">{username}</p>
           {profile === undefined ? (
