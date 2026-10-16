@@ -131,4 +131,22 @@ describe("PaymentPage", () => {
     await userEvent.type(refInput, "2026101400051234");
     expect(refInput).toHaveValue("2026101400051234");
   });
+
+  it("disables upload and reference input when payment status is not pending", async () => {
+    const awaitingPayment = {
+      ...payment,
+      status: "AWAITING_VERIFICATION",
+    };
+    vi.mocked(financeApi.createPayment).mockResolvedValue(awaitingPayment);
+    vi.mocked(financeApi.getPayment).mockResolvedValue(awaitingPayment);
+    vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "ORD-42" } as never);
+
+    renderPaymentPage(42);
+
+    expect(await screen.findByText("Payment submitted")).toBeInTheDocument();
+    const refInput = screen.getByLabelText("เลขอ้างอิงการโอน");
+    expect(refInput).toBeDisabled();
+    const dropzone = screen.getByRole("button", { name: /payment submitted/i });
+    expect(dropzone).toHaveAttribute("aria-disabled", "true");
+  });
 });

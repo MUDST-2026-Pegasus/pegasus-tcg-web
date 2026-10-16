@@ -37,6 +37,7 @@ export function ReviewModerationCard({
         <SellerAvatar
           initials={initialsOf(review.reviewerUsername)}
           accent="teal"
+          src={review.reviewerAvatarUrl}
           className={cn("size-[38px]", hidden && "opacity-50")}
         />
         <div className="flex min-w-0 flex-1 flex-col gap-[3px]">

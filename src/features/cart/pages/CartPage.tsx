@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
 import {
   useCart,
+  useAcceptCartPrices,
   useRemoveCartItem,
   useUpdateCartItemQuantity,
 } from "../cart.queries";
@@ -21,6 +22,7 @@ export function CartPage() {
   const { data: cart, isLoading, error, refetch } = useCart();
   const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
+  const acceptPricesMutation = useAcceptCartPrices();
 
   const [deselectedItemIds, setDeselectedItemIds] = useState<Set<number>>(new Set());
 
@@ -138,6 +140,25 @@ export function CartPage() {
     [items, selectedItemIds],
   );
 
+  const changedItems = items.filter((item) => item.priceChanged && item.purchasable);
+  const hasSelectedPriceChanges = checkedItems.some((item) => item.priceChanged);
+  const hasSelectedUnavailableItems = checkedItems.some((item) => !item.purchasable);
+  const checkoutBlocked = hasSelectedPriceChanges || hasSelectedUnavailableItems;
+  const handleAcceptPrices = () => {
+    acceptPricesMutation.mutate(changedItems.map((item) => item.id), {
+      onSuccess: () => {
+        toast.add({ title: "ยอมรับราคาใหม่แล้ว", type: "success" });
+      },
+      onError: (error) => {
+        toast.add({
+          title: "ยอมรับราคาใหม่ไม่สำเร็จ",
+          description: error instanceof ApiError ? error.message : "กรุณาลองอีกครั้ง",
+          type: "error",
+        });
+      },
+    });
+  };
+
   const subtotal = useMemo(
     () =>
       checkedItems.reduce(
@@ -159,7 +180,7 @@ export function CartPage() {
   const formatPrice = (price: number) => `฿${price.toLocaleString()}`;
 
   const handleProceedToCheckout = () => {
-    if (checkedItems.length === 0) return;
+    if (checkedItems.length === 0 || checkoutBlocked || isLoading || acceptPricesMutation.isPending) return;
     navigate("/checkout", {
       state: {
         selectedCartItemIds: Array.from(selectedItemIds),
@@ -185,6 +206,19 @@ export function CartPage() {
             </div>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Retry
+            </Button>
+          </div>
+        )}
+
+        {changedItems.length > 0 && (
+          <div role="alert" className="flex flex-wrap items-center gap-3 p-4 bg-amber-50 text-amber-900 border border-amber-200 rounded-xl">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">ราคาสินค้าบางรายการเปลี่ยนแปลง</p>
+              <p className="text-sm">ตรวจสอบราคาเดิม → ราคาใหม่ แล้วกดยอมรับราคาใหม่ หรือยกเลิกเลือกรายการนั้นก่อนสั่งซื้อ</p>
+            </div>
+            <Button variant="outline" disabled={acceptPricesMutation.isPending} onClick={handleAcceptPrices}>
+              {acceptPricesMutation.isPending ? "กำลังยอมรับราคาใหม่..." : "ยอมรับราคาใหม่"}
             </Button>
           </div>
         )}
@@ -244,6 +278,7 @@ export function CartPage() {
                     <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                       <div className="flex items-center gap-4 sm:gap-6 self-start sm:self-auto h-full mt-2 sm:mt-0">
                         <Checkbox
+                          aria-label={`เลือก ${item.productName || `Listing #${item.listingId}`}`}
                           checked={isItemChecked}
                           onCheckedChange={() => toggleCheck(item.id)}
                         />
@@ -285,7 +320,7 @@ export function CartPage() {
 
                           {item.priceChanged && (
                             <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 w-fit mt-1">
-                              Price updated from ฿{item.unitPriceAtAdd.toLocaleString()}
+                              Price updated: {formatPrice(item.unitPriceAtAdd)} → {item.currentPrice == null ? "ไม่พร้อมจำหน่าย" : formatPrice(item.currentPrice)}
                             </p>
                           )}
 
@@ -382,11 +417,19 @@ export function CartPage() {
 
               <Button
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg py-6 rounded-full shadow-md"
-                disabled={checkedItems.length === 0 || isLoading}
+                disabled={checkedItems.length === 0 || isLoading || checkoutBlocked || acceptPricesMutation.isPending}
+                aria-describedby={checkoutBlocked ? "checkout-blocked-reason" : undefined}
                 onClick={handleProceedToCheckout}
               >
                 Proceed to Checkout
               </Button>
+
+              {checkoutBlocked && (
+                <div id="checkout-blocked-reason" className="text-sm text-destructive" role="status">
+                  {hasSelectedPriceChanges && <p>กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ</p>}
+                  {hasSelectedUnavailableItems && <p>กรุณานำสินค้าที่ไม่พร้อมจำหน่ายออก หรือยกเลิกเลือกก่อนสั่งซื้อ</p>}
+                </div>
+              )}
 
               <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm font-medium mt-2">
                 <Lock className="w-4 h-4" />

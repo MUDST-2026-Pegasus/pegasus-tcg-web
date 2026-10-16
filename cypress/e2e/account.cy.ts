@@ -45,6 +45,34 @@ describe('Account & Profile Flow', () => {
       }
     }).as('cartRequest');
 
+    cy.intercept('POST', '**/api/v1/auth/refresh*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          tokens: {
+            accessToken: 'mock-access',
+            refreshToken: 'mock-refresh',
+            expiresIn: 3600,
+          },
+        },
+      },
+    }).as('refreshToken');
+
+    cy.intercept('GET', '**/api/v1/orders*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [],
+          page: 0,
+          size: 1,
+          totalItems: 0,
+          totalPages: 0,
+        },
+      },
+    }).as('ordersRequest');
+
     cy.intercept('PUT', '**/api/v1/users/me*', {
       statusCode: 200,
       body: {
@@ -103,7 +131,8 @@ describe('Account & Profile Flow', () => {
     cy.get('[data-slot="dialog-content"]').should('be.visible');
 
     // Edit display name
-    cy.get('input[name="displayName"]').should('be.enabled').clear().type('Jane Doe');
+    cy.get('input[name="displayName"]').should('be.enabled').clear();
+    cy.get('input[name="displayName"]').type('Jane Doe');
     
     // Save changes
     cy.get('button[type="submit"]').contains(/save changes/i).click();

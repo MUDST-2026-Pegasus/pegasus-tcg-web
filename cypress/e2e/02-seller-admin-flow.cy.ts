@@ -238,44 +238,56 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("meAdmin");
 
-    cy.intercept("GET", "**/api/v1/admin/verifications?status=SUBMITTED*", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          items: [
-            {
-              id: 1,
-              userId: 2,
-              username: "somchai_seller",
-              legalFirstName: "Somchai",
-              legalLastName: "Rakdee",
-              bankCode: "KBANK",
-              bankName: "Kasikornbank",
-              bankAccountNumber: "012-3-45678-9",
-              status: "SUBMITTED",
-              submittedAt: "2026-10-15T00:00:00Z",
+    cy.intercept("GET", "**/api/v1/admin/verifications*", (req) => {
+      const url = new URL(req.url);
+      const status = url.searchParams.get("status");
+      if (status === "SUBMITTED") {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [
+                {
+                  id: 1,
+                  userId: 2,
+                  username: "somchai_seller",
+                  legalFirstName: "Somchai",
+                  legalLastName: "Rakdee",
+                  bankCode: "KBANK",
+                  bankName: "Kasikornbank",
+                  bankAccountNumber: "012-3-45678-9",
+                  status: "SUBMITTED",
+                  submittedAt: "2026-10-15T00:00:00Z",
+                },
+              ],
+              totalItems: 1,
+              totalPages: 1,
+              total: 1,
+              page: 0,
+              size: 20,
+              pageSize: 20,
             },
-          ],
-          total: 1,
-          page: 0,
-          pageSize: 20,
-        },
-      },
+          },
+        });
+      } else {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              total: 0,
+              page: 0,
+              size: 20,
+              pageSize: 20,
+            },
+          },
+        });
+      }
     }).as("getQueue");
-
-    cy.intercept("GET", "**/api/v1/admin/verifications/counts", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          submitted: 1,
-          underReview: 0,
-          approved: 0,
-          rejected: 0,
-        },
-      },
-    }).as("getCounts");
 
     cy.visit("/admin/sellers", {
       onBeforeLoad(win) {
@@ -296,6 +308,26 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
   });
 
   it("5. Admin Approval: admin inspects and approves verification", () => {
+    const mockSubmittedVerification = {
+      id: 1,
+      sellerProfileId: 10,
+      userId: 2,
+      username: "somchai_seller",
+      legalFirstName: "Somchai",
+      legalLastName: "Rakdee",
+      bankCode: "KBANK",
+      bankName: "Kasikornbank",
+      bankAccountNumber: "0123456789",
+      bankBookImageKey: "verifications/bankbook.jpg",
+      bankBookImageUrl: null,
+      status: "SUBMITTED",
+      submittedAt: "2026-10-15T00:00:00Z",
+      reviewedBy: null,
+      reviewedAt: null,
+      rejectionReason: null,
+      sellerAvatarUrl: null,
+    };
+
     cy.intercept("GET", "**/api/v1/auth/me", {
       statusCode: 200,
       body: {
@@ -310,58 +342,69 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("meAdmin");
 
-    cy.intercept("GET", "**/api/v1/admin/verifications?status=SUBMITTED*", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          items: [
-            {
-              id: 1,
-              userId: 2,
-              username: "somchai_seller",
-              legalFirstName: "Somchai",
-              legalLastName: "Rakdee",
-              bankCode: "KBANK",
-              bankName: "Kasikornbank",
-              bankAccountNumber: "012-3-45678-9",
-              status: "SUBMITTED",
-              submittedAt: "2026-10-15T00:00:00Z",
+    cy.intercept("GET", "**/api/v1/admin/verifications*", (req) => {
+      const url = new URL(req.url);
+      const status = url.searchParams.get("status");
+      if (status === "SUBMITTED") {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [mockSubmittedVerification],
+              totalItems: 1,
+              totalPages: 1,
+              total: 1,
+              page: 0,
+              size: 20,
+              pageSize: 20,
             },
-          ],
-          total: 1,
-          page: 0,
-          pageSize: 20,
-        },
-      },
+          },
+        });
+      } else {
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              items: [],
+              totalItems: 0,
+              totalPages: 0,
+              total: 0,
+              page: 0,
+              size: 20,
+              pageSize: 20,
+            },
+          },
+        });
+      }
     }).as("getQueue");
-
-    cy.intercept("GET", "**/api/v1/admin/verifications/counts", {
-      statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          submitted: 1,
-          underReview: 0,
-          approved: 0,
-          rejected: 0,
-        },
-      },
-    }).as("getCounts");
 
     cy.intercept("POST", "**/api/v1/admin/verifications/1/start-review", {
       statusCode: 200,
       body: {
         success: true,
         data: {
-          id: 1,
-          userId: 2,
-          legalFirstName: "Somchai",
-          legalLastName: "Rakdee",
+          ...mockSubmittedVerification,
           status: "UNDER_REVIEW",
+          reviewedBy: 1,
+          reviewedAt: "2026-10-15T01:00:00Z",
         },
       },
     }).as("startReview");
+
+    cy.intercept("POST", "**/api/v1/admin/verifications/1/approve", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          ...mockSubmittedVerification,
+          status: "APPROVED",
+          reviewedBy: 1,
+          reviewedAt: "2026-10-15T01:05:00Z",
+        },
+      },
+    }).as("approveVerification");
 
     cy.visit("/admin/sellers", {
       onBeforeLoad(win) {
@@ -377,6 +420,11 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
     });
 
     cy.wait("@getQueue");
-    cy.contains(/Somchai Rakdee|somchai_seller/i).should("be.visible");
+    cy.contains(/Somchai Rakdee/i).should("be.visible").click();
+    cy.wait("@startReview");
+
+    cy.contains("button", "อนุมัติเปิดร้าน").should("be.visible").click();
+    cy.wait("@approveVerification");
+    cy.contains(/อนุมัติแล้ว/i).should("be.visible");
   });
 });

@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { SellerAvatarAccent } from "@/features/admin/admin.types";
 import { cn } from "@/lib/utils";
 
@@ -13,20 +13,24 @@ const AVATAR_ACCENT: Record<SellerAvatarAccent, string> = {
 type SellerAvatarProps = {
   initials: string;
   accent: SellerAvatarAccent;
+  /** รูปโปรไฟล์จริง — ไม่มีหรือโหลดไม่ขึ้นก็กลับไปแสดงตัวย่อ */
+  src?: string | null;
   className?: string;
 };
 
 /**
- * วงกลมตัวย่อชื่อผู้สมัคร ใช้ทั้งในคิวทางซ้าย (38px) และการ์ดรายละเอียด (52px)
+ * วงกลมรูปโปรไฟล์ (หรือตัวย่อชื่อถ้าไม่มีรูป) ใช้ทั้งในคิวทางซ้าย (38px) และการ์ดรายละเอียด (52px)
  * ดีไซน์ไม่มีเส้นขอบรอบวงกลม เลยปิดเส้นที่ ui/avatar ใส่มาให้เป็นค่าเริ่มต้น
  */
 export function SellerAvatar({
   initials,
   accent,
+  src,
   className,
 }: SellerAvatarProps) {
   return (
     <Avatar className={cn("shrink-0 after:border-0", className)}>
+      {src && <AvatarImage src={src} alt="" />}
       <AvatarFallback
         className={cn("text-sm text-white", AVATAR_ACCENT[accent])}
       >

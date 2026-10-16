@@ -206,6 +206,49 @@ describe("CheckoutPage", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
+  it("redirects changed selected prices to cart before requesting shipping quotes", async () => {
+    vi.spyOn(cartQueries, "useCart").mockReturnValue({
+      data: { ...mockCart, items: mockCart.items.map(item => ({ ...item, priceChanged: true, currentPrice: 200 })) },
+      isLoading: false, isFetching: false, error: null,
+    } as unknown as ReturnType<typeof cartQueries.useCart>);
+    renderCheckout("/checkout?items=42");
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/cart", { replace: true }));
+    expect(checkoutApi.getShippingQuotes).not.toHaveBeenCalled();
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "ราคาสินค้ามีการเปลี่ยนแปลง" }));
+    expect(screen.queryByText("โหลดตัวเลือกจัดส่งไม่สำเร็จ")).not.toBeInTheDocument();
+  });
+
+  it("ignores changed prices on unselected items", async () => {
+    vi.spyOn(cartQueries, "useCart").mockReturnValue({
+      data: { ...mockCart, items: mockCart.items.map(item => item.id === 45 ? { ...item, priceChanged: true } : item) },
+      isLoading: false, isFetching: false, error: null,
+    } as unknown as ReturnType<typeof cartQueries.useCart>);
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(checkoutApi.getShippingQuotes).toHaveBeenCalledWith([42]);
+  });
+
+  it("redirects unavailable selected items without requesting quotes", async () => {
+    vi.spyOn(cartQueries, "useCart").mockReturnValue({
+      data: { ...mockCart, items: mockCart.items.map(item => ({ ...item, purchasable: false })) },
+      isLoading: false, isFetching: false, error: null,
+    } as unknown as ReturnType<typeof cartQueries.useCart>);
+    renderCheckout("/checkout?items=42");
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/cart", { replace: true }));
+    expect(checkoutApi.getShippingQuotes).not.toHaveBeenCalled();
+  });
+
+  it("handles a price change detected by shipping quotes after the cart loaded", async () => {
+    vi.spyOn(checkoutApi, "getShippingQuotes").mockRejectedValue(new ApiError({
+      status: 409, code: "CART_PRICE_CHANGED", message: "Price changed",
+    }));
+    renderCheckout("/checkout?items=42");
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/cart", { replace: true }));
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "ราคาสินค้ามีการเปลี่ยนแปลง" }));
+    expect(screen.queryByText("โหลดตัวเลือกจัดส่งไม่สำเร็จ")).not.toBeInTheDocument();
+  });
+
   it("shows two skeletons and hides the total until shipping is loaded", () => {
     vi.spyOn(checkoutApi, "getShippingQuotes").mockReturnValue(new Promise(() => {}));
     renderCheckout("/checkout?items=42");
@@ -370,6 +413,23 @@ describe("CheckoutPage", () => {
     await user.click(purchase());
     await waitFor(() => expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "สินค้าไม่เพียงพอ", type: "error" })));
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("returns to cart for explicit acceptance if the price changes while placing the order", async () => {
+    const user = userEvent.setup();
+    const submit = vi.spyOn(checkoutApi, "checkout").mockRejectedValue(new ApiError({
+      status: 409, code: "CART_PRICE_CHANGED", message: "Price changed",
+    }));
+    const view = renderCheckout("/checkout?items=42");
+    const invalidate = vi.spyOn(view.queryClient, "invalidateQueries");
+    await ready();
+    await user.click(purchase());
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/cart"));
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({
+      title: "ราคาสินค้ามีการเปลี่ยนแปลง", description: "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง",
+    }));
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: cartQueries.cartKeys.all });
+    expect(submit).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the replacement default when a previously removed option appears again", async () => {

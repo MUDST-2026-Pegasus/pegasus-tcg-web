@@ -1,4 +1,5 @@
 import { CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Payout } from "@/features/finance/finance.types";
 import { formatThaiDateTime, money, payoutDetail, payoutStatuses, PAYOUT_MINIMUM } from "../payout.format";
 import { PayoutStatusBadge } from "./PayoutStatusBadge";
@@ -9,6 +10,11 @@ type Props = {
   onFilterChange: (filter: string) => void;
   onSelect: (payout: Payout) => void;
 };
+
+const statusOptions = [
+  { value: "ALL", label: "สถานะ: ทั้งหมด" },
+  ...Object.entries(payoutStatuses).map(([value, status]) => ({ value, label: status.label })),
+];
 
 export function PayoutHistory({ payouts, filter, onFilterChange, onSelect }: Props) {
   if (!payouts) {
@@ -27,10 +33,20 @@ export function PayoutHistory({ payouts, filter, onFilterChange, onSelect }: Pro
           <h2 className="font-semibold">คำขอถอนเงิน</h2>
           <p className="text-xs text-muted-foreground">{payouts.length} คำขอ · โอนสำเร็จแล้วรวม {money(paidTotal)}</p>
         </div>
-        <select aria-label="สถานะคำขอ" className="rounded-md border bg-white px-3 py-2 text-sm" value={filter} onChange={(event) => onFilterChange(event.target.value)}>
-          <option value="ALL">สถานะ: ทั้งหมด</option>
-          {Object.entries(payoutStatuses).map(([value, status]) => <option key={value} value={value}>{status.label}</option>)}
-        </select>
+        <Select items={statusOptions} value={filter} onValueChange={(next) => {
+          if (next !== null) onFilterChange(next);
+        }}>
+          <SelectTrigger aria-label="สถานะคำขอ" className="h-9 min-w-40 rounded-lg border-input bg-background text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger={false}>
+            <SelectGroup>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
       {history.length ? (

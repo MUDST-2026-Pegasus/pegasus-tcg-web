@@ -63,7 +63,7 @@ function detail(overrides: Partial<SellerOrderDetails> = {}, costTotal = 980): S
     summary: {
       order: order(overrides),
       orderNumber: "PGS-20261013-000009",
-      buyer: { id: 5, username: "nattapong_p", displayName: "Nattapong" },
+      buyer: { id: 5, username: "nattapong_p", displayName: "Nattapong", avatarUrl: null },
       paidAt: "2026-10-13T03:00:00Z",
       shipBy: "2026-10-15T03:00:00Z",
       shippingAddressSnapshot: null,

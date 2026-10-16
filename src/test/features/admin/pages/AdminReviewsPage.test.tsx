@@ -29,6 +29,7 @@ const mockReviews: AdminReview[] = [
     visible: true,
     createdAt: "2026-10-15T10:00:00Z",
     reviewerUsername: "buyer01",
+    reviewerAvatarUrl: null,
   },
   {
     id: 12,
@@ -40,6 +41,7 @@ const mockReviews: AdminReview[] = [
     visible: false,
     createdAt: "2026-10-14T10:00:00Z",
     reviewerUsername: "buyer02",
+    reviewerAvatarUrl: null,
   },
 ];
 

@@ -14,6 +14,8 @@ export type AdminReview = {
   visible: boolean;
   createdAt: string;
   reviewerUsername: string;
+  /** presigned GET อายุสั้น ห้ามเก็บ — `null` = ผู้รีวิวไม่มีรูปโปรไฟล์ */
+  reviewerAvatarUrl: string | null;
 };
 
 /** `PUT /admin/reviews/{id}/visibility` คืนรีวิวหลังเปลี่ยน */

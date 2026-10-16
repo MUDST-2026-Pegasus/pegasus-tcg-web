@@ -73,7 +73,17 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
     seller: {
       username: 'cardseller',
       displayName: 'Card Kingdom',
-      avatarUrl: null,
+      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+      verified: true,
+      ratingAvg: 5.0,
+      ratingCount: 1,
+      salesCount: 10,
+    },
+    delivery: {
+      fastestEstDaysMin: 1,
+      fastestEstDaysMax: 2,
+      freeShipping: false,
+      optionCount: 1,
     },
   };
 
@@ -185,7 +195,8 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
     cy.contains('Market listings').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Card Kingdom').should('be.visible');
-    cy.contains('฿15,000').should('be.visible');
+    cy.contains('15,000').should('be.visible');
+    cy.get('[data-slot="avatar"]').should('be.visible');
 
     // 2. Visit Listing Detail page
     cy.visit('/listings/101');

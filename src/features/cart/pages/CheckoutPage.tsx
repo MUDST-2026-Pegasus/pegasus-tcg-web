@@ -50,12 +50,16 @@ export function CheckoutPage() {
     }
     return [];
   }, [cart, targetItemIds, targetProductId, targetListingId]);
+  const hasPriceChanges = checkoutItems.some((item) => item.priceChanged);
+  const hasUnavailableItems = checkoutItems.some((item) => !item.purchasable);
+  const cartNeedsReview = hasPriceChanges || hasUnavailableItems;
   const cartItemIds = checkoutItems.map((item) => item.id);
   const quotes = useShippingQuotes(cartItemIds, {
     userId: user?.id,
     cartId: cart?.id,
     items: checkoutItems,
-    enabled: isAuthenticated && !isAuthLoading && checkoutItems.length > 0,
+    enabled: isAuthenticated && !isAuthLoading && !isCartLoading && !isCartFetching
+      && !cartError && !cartNeedsReview && checkoutItems.length > 0,
   });
 
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -100,7 +104,27 @@ export function CheckoutPage() {
     sum + (quote?.itemsSubtotal ?? items.reduce((total, item) => total + (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity, 0)), 0);
   const itemCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
   const canPurchase = shippingReady && !!activeAddress && !isAddressLoading && !addressError && !cartError
-    && !isCartFetching && !isSubmitting && isAuthenticated;
+    && !isCartFetching && !isSubmitting && isAuthenticated && !cartNeedsReview;
+  const quotePriceChanged = quotes.error instanceof ApiError
+    && (quotes.error.code === "CART_PRICE_CHANGED" || quotes.error.code === "PRICE_CHANGED");
+
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated && !isCartLoading && !isCartFetching
+      && !cartError && (cartNeedsReview || quotePriceChanged)
+      && !hasRedirected.current && !completed.current) {
+      hasRedirected.current = true;
+      if (quotePriceChanged) void queryClient.invalidateQueries({ queryKey: cartKeys.all });
+      toast.add({
+        title: hasPriceChanges || quotePriceChanged ? "ราคาสินค้ามีการเปลี่ยนแปลง" : "สินค้าบางรายการไม่พร้อมจำหน่าย",
+        description: hasPriceChanges || quotePriceChanged
+          ? "กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ"
+          : "กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ",
+        type: "warning",
+      });
+      navigate("/cart", { replace: true });
+    }
+  }, [isAuthLoading, isAuthenticated, isCartLoading, isCartFetching, cartError,
+    cartNeedsReview, hasPriceChanges, quotePriceChanged, queryClient, navigate]);
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -158,7 +182,8 @@ export function CheckoutPage() {
           toast.add({ title: "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง", description: "ที่อยู่เดิมไม่พร้อมใช้งาน", type: "warning" });
         } else if (error.code === "PRICE_CHANGED" || error.code === "CART_PRICE_CHANGED") {
           void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-          toast.add({ title: "ราคาสินค้ามีการเปลี่ยนแปลง", description: "กรุณาตรวจสอบราคาในตะกร้าอีกครั้ง", type: "warning" });
+          hasRedirected.current = true;
+          toast.add({ title: "ราคาสินค้ามีการเปลี่ยนแปลง", description: "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง", type: "warning" });
           navigate("/cart");
         } else {
           toast.add({ title: error.code === "INSUFFICIENT_STOCK" ? "สินค้าไม่เพียงพอ" : "สั่งซื้อไม่สำเร็จ", description: error.message, type: "error" });
@@ -180,6 +205,7 @@ export function CheckoutPage() {
     );
   }
   if (!isAuthenticated) return null;
+  if (cartNeedsReview || quotePriceChanged) return null;
   if (cartError) {
     return <div className="checkout-page"><div role="alert" className="checkout-container checkout-alert checkout-alert-error">โหลดตะกร้าไม่สำเร็จ<Button variant="outline" onClick={() => void queryClient.invalidateQueries({ queryKey: cartKeys.all })}>ลองอีกครั้ง</Button></div></div>;
   }

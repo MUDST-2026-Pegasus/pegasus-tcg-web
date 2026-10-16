@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
 import { AboutPage } from "@/features/about/pages/AboutPage";
@@ -9,6 +10,7 @@ import { PrivacyPolicyPage } from "@/features/legal/pages/PrivacyPolicyPage";
 describe("Legal and About Pages", () => {
   beforeEach(() => {
     window.scrollTo = vi.fn();
+    Element.prototype.scrollIntoView = vi.fn();
   });
 
   describe("TermsOfServicePage", () => {
@@ -38,6 +40,25 @@ describe("Legal and About Pages", () => {
         screen.getByRole("heading", { level: 2, name: /Shipping and Returns/i })
       ).toBeInTheDocument();
     });
+
+    it("updates active section highlight when clicking a sidebar item", async () => {
+      render(
+        <MemoryRouter>
+          <TermsOfServicePage />
+        </MemoryRouter>
+      );
+
+      const introButton = screen.getByRole("button", { name: /01.*Introduction/i });
+      const accountsButton = screen.getByRole("button", { name: /02.*Accounts and Registration/i });
+
+      expect(introButton).toHaveAttribute("data-active", "true");
+      expect(accountsButton).toHaveAttribute("data-active", "false");
+
+      await userEvent.click(accountsButton);
+
+      expect(introButton).toHaveAttribute("data-active", "false");
+      expect(accountsButton).toHaveAttribute("data-active", "true");
+    });
   });
 
   describe("PrivacyPolicyPage", () => {
@@ -59,6 +80,25 @@ describe("Legal and About Pages", () => {
       ).toBeInTheDocument();
       expect(screen.getByText(/Process and fulfill orders/i)).toBeInTheDocument();
       expect(screen.getByText(/Prevent fraud and protect system security/i)).toBeInTheDocument();
+    });
+
+    it("updates active section highlight when clicking a sidebar item", async () => {
+      render(
+        <MemoryRouter>
+          <PrivacyPolicyPage />
+        </MemoryRouter>
+      );
+
+      const infoButton = screen.getByRole("button", { name: /01.*Information We Collect/i });
+      const usageButton = screen.getByRole("button", { name: /02.*How We Use Your Information/i });
+
+      expect(infoButton).toHaveAttribute("data-active", "true");
+      expect(usageButton).toHaveAttribute("data-active", "false");
+
+      await userEvent.click(usageButton);
+
+      expect(infoButton).toHaveAttribute("data-active", "false");
+      expect(usageButton).toHaveAttribute("data-active", "true");
     });
   });
 

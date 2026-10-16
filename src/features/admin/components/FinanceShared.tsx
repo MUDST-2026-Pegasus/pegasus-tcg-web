@@ -165,6 +165,7 @@ export function PartyAvatar({ party, className }: { party: FinanceParty; classNa
     <SellerAvatar
       initials={initialsOf(party.username)}
       accent={accentFor(party.id)}
+      src={party.avatarUrl}
       className={className}
     />
   );

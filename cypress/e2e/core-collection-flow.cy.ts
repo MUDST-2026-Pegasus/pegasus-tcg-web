@@ -163,4 +163,65 @@ describe('Core Collection Management Flow', () => {
     cy.contains('Dark Magician').should('not.exist');
     cy.contains('1 cards in your collection.').should('be.visible');
   });
+
+  it('renders public user collection showcase at /users/:username', () => {
+    cy.intercept('GET', '**/api/v1/users/collector_pro/collection*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [{ ...initialCollection.items[0], quantity: 1 }],
+          page: 0,
+          size: 20,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      },
+    }).as('getPublicCollection');
+
+    cy.intercept('GET', '**/api/v1/u/collector_pro/reviews*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          summary: { ratingAvg: 5, ratingCount: 0 },
+          reviews: [],
+        },
+      },
+    }).as('getPublicSellerReviews');
+
+    cy.visit('/users/collector_pro');
+
+    cy.wait('@getPublicCollection');
+    cy.contains('@collector_pro').should('be.visible');
+    cy.contains('1 cards').should('be.visible');
+    cy.contains('Collection highlights').should('be.visible');
+    cy.contains('Blue-Eyes White Dragon').should('be.visible');
+  });
+
+  it('renders collector profile showcase at /collectors/:username', () => {
+    cy.intercept('GET', '**/api/v1/users/collector_pro/collection*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          items: [{ ...initialCollection.items[0], quantity: 1 }],
+          page: 0,
+          size: 100,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      },
+    }).as('getCollectorCollection');
+
+    cy.visit('/collectors/collector_pro');
+
+    cy.wait('@getCollectorCollection');
+    cy.contains('@collector_pro').should('be.visible');
+    cy.contains('1 card').should('be.visible');
+    cy.contains('Collection highlights').should('be.visible');
+    cy.contains('Blue-Eyes White Dragon').should('be.visible');
+  });
 });
+
+

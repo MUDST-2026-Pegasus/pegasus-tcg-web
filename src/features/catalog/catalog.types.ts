@@ -85,6 +85,17 @@ export type ProductDetailDto = {
   images: CatalogImageDto[];
 };
 
+/** `GET /catalog/products/{idOrSlug}/market` */
+export type ProductMarketDto = {
+  catalogVariantId: number;
+  condition: CardCondition;
+  medianPrice: number | null;
+  statDate: string;
+  change30dPercent: number | null;
+  lastSold: { price: number; soldAt: string } | null;
+  lowSample: boolean;
+};
+
 export type CatalogCardEffectDto = {
   effectType: "ABILITY" | "ATTACK" | "RULE";
   name: string;
@@ -139,6 +150,16 @@ export type PublicListingDto = {
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
+    verified: boolean;
+    ratingAvg: number | null;
+    ratingCount: number;
+    salesCount: number;
+  };
+  delivery: {
+    fastestEstDaysMin: number | null;
+    fastestEstDaysMax: number | null;
+    freeShipping: boolean;
+    optionCount: number;
   };
 };
 

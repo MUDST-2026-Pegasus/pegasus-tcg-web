@@ -26,8 +26,8 @@ const get = vi.mocked(api.get);
 const post = vi.mocked(api.post);
 const put = vi.mocked(api.put);
 
-const buyer = { id: 7, username: "somchai.k", displayName: "Somchai" };
-const seller = { id: 3, username: "kandypop", displayName: "kandypop Cards" };
+const buyer = { id: 7, username: "somchai.k", displayName: "Somchai", avatarUrl: null };
+const seller = { id: 3, username: "kandypop", displayName: "kandypop Cards", avatarUrl: null };
 
 const payment: PaymentReview = {
   id: 20481,

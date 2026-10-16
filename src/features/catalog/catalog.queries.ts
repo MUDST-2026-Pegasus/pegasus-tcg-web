@@ -16,6 +16,7 @@ export const catalogKeys = {
   products: (query: ProductQuery) =>
     [...catalogKeys.all, "products", query] as const,
   product: (idOrSlug: string) => [...catalogKeys.all, "product", idOrSlug] as const,
+  market: (productId: number) => [...catalogKeys.all, "product", productId, "market"] as const,
   listings: (productId: number) => [...catalogKeys.all, "product", productId, "listings"] as const,
   listing: (id: number) => [...catalogKeys.all, "listing", id] as const,
   collectors: (productId: number, page: number) =>
@@ -76,6 +77,14 @@ export function useProductListings(productId: number) {
   return useQuery({
     queryKey: catalogKeys.listings(productId),
     queryFn: ({ signal }) => catalogApi.getProductListings(productId, signal),
+  });
+}
+
+export function useProductMarket(productId: number) {
+  return useQuery({
+    queryKey: catalogKeys.market(productId),
+    queryFn: ({ signal }) => catalogApi.getProductMarket(productId, signal),
+    retry: false,
   });
 }
 

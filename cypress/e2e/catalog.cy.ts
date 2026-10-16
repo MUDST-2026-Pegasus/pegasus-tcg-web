@@ -28,15 +28,42 @@ describe('Catalog UI', () => {
       },
     }).as('getCart');
 
-    // Mock games list
+    // Mock games, categories, and card-sets
     cy.intercept('GET', '**/api/v1/games*', {
       statusCode: 200,
       body: {
         success: true,
         message: 'OK',
-        data: [],
+        data: [
+          { id: 1, code: 'POKEMON', name: 'Pokémon', active: true },
+          { id: 2, code: 'ONE_PIECE', name: 'One Piece Card Game', active: true },
+        ],
       },
     }).as('getGames');
+
+    cy.intercept('GET', '**/api/v1/categories*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        message: 'OK',
+        data: [
+          { id: 1, code: 'SINGLE_CARD', name: 'Single Cards', active: true },
+          { id: 2, code: 'SEALED', name: 'Sealed Products', active: true },
+        ],
+      },
+    }).as('getCategories');
+
+    cy.intercept('GET', '**/api/v1/card-sets*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        message: 'OK',
+        data: [
+          { id: 10, gameId: 1, code: 'SV8A', name: 'Terastal Fest ex', active: true },
+          { id: 20, gameId: 2, code: 'OP09', name: 'Emperors in the New World', active: true },
+        ],
+      },
+    }).as('getCardSets');
 
     const productsResponse = {
       statusCode: 200,
@@ -71,7 +98,6 @@ describe('Catalog UI', () => {
 
     // Mock catalog products API request
     cy.intercept('GET', '**/api/v1/catalog/products*', productsResponse).as('getCatalogProducts');
-    cy.intercept('GET', '**/api/v1/products*', productsResponse).as('getProducts');
 
     // Mock product detail
     cy.intercept('GET', '**/api/v1/catalog/products/blue-eyes-white-dragon*', {
@@ -160,4 +186,17 @@ describe('Catalog UI', () => {
     cy.url().should('match', /\/products?\//);
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
+
+  it('loads Pokémon and One Piece category shortcut routes (/pokemon and /one-piece)', () => {
+    cy.visit('/pokemon');
+    cy.wait('@getGames');
+    cy.wait('@getCatalogProducts');
+    cy.contains('Blue-Eyes White Dragon').should('be.visible');
+
+    cy.visit('/one-piece');
+    cy.wait('@getGames');
+    cy.wait('@getCatalogProducts');
+    cy.contains('Legend of Blue Eyes White Dragon').should('be.visible');
+  });
 });
+

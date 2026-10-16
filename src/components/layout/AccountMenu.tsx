@@ -27,7 +27,7 @@ export function AccountMenu() {
 
   const handleLogout = async () => {
     await logout.mutateAsync();
-    navigate("/", { replace: true });
+    navigate("/login", { replace: true });
     toast.add({ type: "success", title: "ออกจากระบบเรียบร้อยแล้ว" });
   };
 

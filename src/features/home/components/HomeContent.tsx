@@ -344,7 +344,7 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
         <div id="browse-by-game-title">
           <SectionHeader title="Shop by Game" actionHref="/search" />
         </div>
-        <div className="mt-[18px] flex gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-1 mt-[14px] -mb-1 flex gap-4 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
             <Link
               key={game.id}

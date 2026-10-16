@@ -30,6 +30,7 @@ function review(overrides: Partial<AdminReview>): AdminReview {
     visible: true,
     createdAt: "2026-10-13T03:00:00Z",
     reviewerUsername: "pim.collects",
+    reviewerAvatarUrl: null,
     ...overrides,
   };
 }
