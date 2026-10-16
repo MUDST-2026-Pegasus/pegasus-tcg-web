@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useParams } from "react-router-dom";
 
 import { cartApi } from "@/features/cart/cart.api";
 import { CartPage } from "@/features/cart/pages/CartPage";
@@ -38,6 +38,7 @@ const cart: CartResponse = {
       productName: "Pikachu ex",
       variantLabel: "English / Holo",
       sellerName: "Seller Store",
+      sellerUsername: "seller_store",
       imageUrl: null,
       productId: 1,
     },
@@ -75,6 +76,41 @@ describe("CartPage item details", () => {
       </QueryClientProvider>,
     );
   }
+
+  it("opens the clicked seller's profile when shops have the same display name", async () => {
+    const user = userEvent.setup();
+    getCart.mockResolvedValue({ ...cart, items: [
+      { ...cart.items[0], sellerUsername: "shop_one" },
+      { ...cart.items[0], id: 11, listingId: 56, sellerProfileId: 6, sellerUsername: "shop_two" },
+    ] });
+    function SellerProfile() {
+      const { username } = useParams();
+      return <h1>Store profile: {username}</h1>;
+    }
+    render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter initialEntries={["/cart"]}>
+          <Routes>
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/u/:username" element={<SellerProfile />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    const sellers = await screen.findAllByRole("link", { name: "Seller Store" });
+    expect(sellers[0]).toHaveAttribute("href", "/u/shop_one");
+    expect(sellers[1]).toHaveAttribute("href", "/u/shop_two");
+    await user.click(sellers[1]);
+    expect(await screen.findByRole("heading", { name: "Store profile: shop_two" })).toBeInTheDocument();
+  });
+
+  it("shows the seller name without a broken link when username is missing", async () => {
+    getCart.mockResolvedValue({ ...cart, items: [{ ...cart.items[0], sellerUsername: null }] });
+    renderCart();
+    expect(await screen.findByText("Seller Store")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Seller Store" })).not.toBeInTheDocument();
+  });
 
   it.each([80, 120])("requires explicit acceptance of a changed price (%s) before checkout", async (price) => {
     const user = userEvent.setup();

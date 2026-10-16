@@ -17,6 +17,7 @@ export interface CartItemResponse {
   productName: string | null;
   variantLabel: string | null;
   sellerName: string | null;
+  sellerUsername?: string | null;
   imageUrl: string | null;
   productId: number | null;
 }
