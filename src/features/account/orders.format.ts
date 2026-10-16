@@ -8,7 +8,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   PREPARING: "Processing",
   PROCESSING: "Processing",
   SHIPPED: "Shipped",
-  DELIVERED: "Completed",
+  DELIVERED: "Delivered",
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
   CANCELED: "Cancelled",
@@ -35,7 +35,8 @@ export function snakeCaseToTitleCase(str: string): string {
  * - PAID -> "Paid"
  * - PREPARING / PROCESSING -> "Processing"
  * - SHIPPED -> "Shipped"
- * - DELIVERED / COMPLETED -> "Completed"
+ * - DELIVERED -> "Delivered"
+ * - COMPLETED -> "Completed"
  * - CANCELLED -> "Cancelled"
  * - Fallback: converts SNAKE_CASE to Title Case (e.g. RETURN_REQUESTED -> Return Requested)
  */
