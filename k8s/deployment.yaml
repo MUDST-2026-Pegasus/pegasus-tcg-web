@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pegasus-frontend-deployment
+  labels:
+    app: pegasus-frontend
+    app.kubernetes.io/name: pegasus-tcg-web
+    app.kubernetes.io/instance: pegasus-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: pegasus-tcg
+    tier: frontend
+spec:
+  # จำนวน Pod ที่ต้องการรัน
+  replicas: 3
+
+  # จำนวน Revision เก่าที่เก็บไว้สำหรับ Rollback
+  revisionHistoryLimit: 5
+
+  # กลยุทธ์การอัปเดตแบบ RollingUpdate เพื่อ Zero-Downtime Deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # เพิ่ม Pod ใหม่ได้สูงสุด 1 Pod ขณะ rollout
+      maxUnavailable: 0  # ต้องไม่มี Pod ที่ไม่พร้อมใช้งานระหว่าง deploy
+
+  selector:
+    matchLabels:
+      app: pegasus-frontend
+
+  template:
+    metadata:
+      labels:
+        app: pegasus-frontend
+        app.kubernetes.io/name: pegasus-tcg-web
+        app.kubernetes.io/instance: pegasus-frontend
+        app.kubernetes.io/component: frontend
+        app.kubernetes.io/part-of: pegasus-tcg
+        tier: frontend
+    spec:
+      # Security: ป้องกันการ mount token ของ ServiceAccount โดยไม่จำเป็น
+      automountServiceAccountToken: false
+
+      # Pod Security: บังคับใช้ Seccomp Profile มาตรฐาน
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+
+      # High Availability: กระจาย Pods ไปยังโหนดต่างกัน (Pod Anti-Affinity)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: pegasus-frontend
+                topologyKey: kubernetes.io/hostname
+
+      # Graceful Shutdown: ให้เวลา Connection Drain ก่อนปิด Pod
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: pegasus-tcg-web
+          image: pegasus-tcg-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+
+          # Container Security: จำกัดสิทธิ์ระดับ Container ป้องกัน Privilege Escalation
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+                - CHOWN
+                - SETGID
+                - SETUID
+
+          # Resource Model: Requests & Limits
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          # Health Checks: Probes
+          # livenessProbe: ตรวจสอบความพร้อม หากล้มเหลว Kubelet จะ restart container
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          # readinessProbe: ตรวจสอบว่าพร้อมรับ traffic จาก Service หรือยัง
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+          # Graceful Shutdown Hook: หน่วงเวลาเพื่อให้ Service ถอด IP ออกจาก Endpoints ก่อน Container ปิด
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+
+          # Mount Nginx configuration ที่มี reverse proxy /api ไปยัง backend
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+
+      # กำหนด Volume จาก ConfigMap
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: pegasus-frontend-nginx
