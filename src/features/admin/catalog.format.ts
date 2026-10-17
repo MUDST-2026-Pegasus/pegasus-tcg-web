@@ -163,6 +163,9 @@ export function catalogErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "PRODUCT_NOT_FOUND")) {
     return "ไม่พบสินค้านี้ในแคตตาล็อก";
   }
+  if (hasErrorCode(error, "PRODUCT_IN_USE")) {
+    return "สินค้านี้มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันอ้างถึงอยู่ ลบไม่ได้ — ปิดใช้งานแทน";
+  }
   if (hasErrorCode(error, "VARIANT_NOT_FOUND")) {
     return "ไม่พบ variant นี้แล้ว ลองโหลดสินค้าใหม่";
   }

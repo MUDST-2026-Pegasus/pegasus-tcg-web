@@ -53,9 +53,14 @@ export function PaymentQrCard({ amount, orderNumber, account }: PaymentQrCardPro
   const refSvg = useRef<SVGSVGElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const isDemo = account.promptPayId?.replace(/[-\s]/g, "") === "0000000000";
   let payload: string | undefined;
   try {
-    if (account.promptPayId) payload = buildPromptPayPayload(account.promptPayId, amount);
+    if (isDemo) {
+      payload = `PEGASUS DEMO | ${orderNumber || "checkout"} | THB ${amount.toFixed(2)} | NOT FOR PAYMENT`;
+    } else if (account.promptPayId) {
+      payload = buildPromptPayPayload(account.promptPayId, amount);
+    }
   } catch {
     // Invalid merchant configuration must never produce a misleading payment QR.
   }
@@ -86,7 +91,7 @@ export function PaymentQrCard({ amount, orderNumber, account }: PaymentQrCardPro
   return (
     <div className="flex flex-col items-center">
       {payload ? <>
-        <p className="text-xs text-muted-foreground font-medium mb-3 text-center">Scan with any banking app</p>
+        <p className="text-xs text-muted-foreground font-medium mb-3 text-center">{isDemo ? "QR ตัวอย่าง · ใช้ชำระเงินจริงไม่ได้" : "Scan with any banking app"}</p>
         <div className="w-full max-w-[240px] bg-[#F8FAFC] border border-slate-100/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs">
           <QRCodeSVG
             ref={refSvg}
@@ -99,17 +104,17 @@ export function PaymentQrCard({ amount, orderNumber, account }: PaymentQrCardPro
             imageSettings={{ src: "/site-icon.jpg", width: 32, height: 32, excavate: true }}
             className="w-40 h-40 md:w-44 md:h-44"
             role="img"
-            aria-label="PromptPay QR Code"
+            aria-label={isDemo ? "Demo QR Code" : "PromptPay QR Code"}
           />
-          <span className="text-[11px] font-bold tracking-wider text-slate-800 mt-3 uppercase">PAY VIA QR SCAN</span>
-          <span className="text-[10px] text-muted-foreground mt-0.5">Scan to Pay | {amountText}</span>
+          <span className="text-[11px] font-bold tracking-wider text-slate-800 mt-3 uppercase">{isDemo ? "DEMO QR" : "PAY VIA QR SCAN"}</span>
+          <span className="text-[10px] text-muted-foreground mt-0.5">{isDemo ? "ยอดตัวอย่าง" : "Scan to Pay"} | {amountText}</span>
         </div>
       </> : <p className="text-sm text-muted-foreground text-center">กรุณาโอนเงินผ่านบัญชีธนาคารด้านล่าง</p>}
       <div className="mt-4 text-center space-y-0.5">
         <p className="font-semibold text-sm text-foreground">{account.accountName}</p>
         {account.bankName && <p className="text-xs text-muted-foreground">{account.bankName}{account.accountNumber ? ` · ${account.accountNumber}` : ""}</p>}
         {!account.bankName && account.accountNumber && <p className="text-xs text-muted-foreground">{account.accountNumber}</p>}
-        {payload && <p className="text-xs text-muted-foreground">PromptPay ID {account.promptPayId}</p>}
+        {payload && !isDemo && <p className="text-xs text-muted-foreground">PromptPay ID {account.promptPayId}</p>}
       </div>
       {payload && <Button type="button" variant="outline" size="sm" disabled={saving} onClick={handleSaveQr}
         className="mt-4 rounded-full px-5 py-2 text-xs font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 shadow-2xs">

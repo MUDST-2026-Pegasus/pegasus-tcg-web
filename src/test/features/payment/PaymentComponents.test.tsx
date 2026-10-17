@@ -43,6 +43,15 @@ describe("Payment Components", () => {
       expect(screen.getByRole("button", { name: /Save QR/i })).toBeInTheDocument();
     });
 
+    it("shows the seeded demo account with a centered logo and explicit demo label", () => {
+      renderWithProviders(<PaymentQrCard amount={1110} orderNumber="ORD-DEMO" account={{ promptPayId: "0000000000" }} />);
+      const qr = screen.getByRole("img", { name: "Demo QR Code" });
+      expect(qr.querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
+      expect(screen.getByText("QR ตัวอย่าง · ใช้ชำระเงินจริงไม่ได้")).toBeInTheDocument();
+      expect(screen.getByText("ยอดตัวอย่าง | ฿1,110.00")).toBeInTheDocument();
+      expect(screen.queryByText("Scan with any banking app")).not.toBeInTheDocument();
+    });
+
     it("changes QR modules when the amount changes", () => {
       const { rerender } = renderWithProviders(<PaymentQrCard amount={150} account={{ promptPayId: "0812345678" }} />);
       const before = screen.getByRole("img", { name: "PromptPay QR Code" }).innerHTML;
