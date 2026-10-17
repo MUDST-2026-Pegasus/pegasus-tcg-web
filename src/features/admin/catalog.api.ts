@@ -22,8 +22,9 @@ import type {
  * แคตตาล็อกกลางของแพลตฟอร์ม — `AdminCatalogProductController.java` กับ
  * `AdminCatalogTaxonomyController.java` ทุก endpoint ใต้ `/admin` บังคับ role ADMIN
  *
- * backend ไม่มีการลบสินค้าหรือ variant (ประกาศขาย คำสั่งซื้อ คอลเลกชันชี้อยู่) —
- * เลิกขายแล้วให้ปิด `active` แทน รูปเป็นข้อยกเว้นเดียวที่ลบได้
+ * ลบสินค้าได้เฉพาะตัวที่ยังไม่มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันชี้อยู่
+ * (ไม่งั้นได้ `PRODUCT_IN_USE` — เลิกขายแล้วให้ปิด `active` แทน)
+ * variant ลบทีละตัวไม่ได้ ส่วนรูปลบได้เสมอ
  *
  * ไฟล์นี้ไม่มี React — component เรียกผ่าน hook ใน `catalog.queries.ts`
  */
@@ -81,6 +82,14 @@ export function updateProduct(
     `/admin/catalog/products/${productId}`,
     payload,
   );
+}
+
+/**
+ * ลบทั้งสินค้า พร้อม variant รูป และ Abilities & Attacks — กู้คืนไม่ได้
+ * มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันชี้อยู่ได้ `PRODUCT_IN_USE`
+ */
+export function deleteProduct(productId: number): Promise<void> {
+  return api.delete<void>(`/admin/catalog/products/${productId}`);
 }
 
 // ---------- variant ----------
