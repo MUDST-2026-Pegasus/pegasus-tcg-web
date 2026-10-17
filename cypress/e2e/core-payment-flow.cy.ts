@@ -136,7 +136,11 @@ describe('Core Payment & Checkout Flow', () => {
     cy.contains('ORD-101').should('be.visible');
 
     // Asserts QR Code & PromptPay merchant details
-    cy.get('svg#checkout-qr-svg').should('be.visible');
+    cy.get('svg[role="img"][aria-label="PromptPay QR Code"]')
+      .should('be.visible')
+      .find('image')
+      .should('have.attr', 'href', '/site-icon.jpg');
+    cy.contains('Scan to Pay | ฿1,050.00').should('be.visible');
     cy.contains('Pegasus TCG Co., Ltd.').should('be.visible');
     cy.contains('PromptPay ID 081-999-8888').should('be.visible');
 

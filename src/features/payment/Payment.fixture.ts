@@ -1,8 +1,4 @@
 export const PAYMENT_PAGE_FIXTURE = {
-  qrCode: {
-    amountText: "$129.99 USD",
-    timeRemaining: "14:59",
-  },
   orderSummary: {
     item: {
       name: "Charizard VMAX #020",
@@ -15,10 +11,6 @@ export const PAYMENT_PAGE_FIXTURE = {
     total: "THB 13,200",
   },
 } satisfies {
-  qrCode: {
-    amountText: string;
-    timeRemaining: string;
-  };
   orderSummary: {
     item: {
       name: string;

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash2 } from "lucide-react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -65,6 +66,8 @@ type CatalogProductFormProps = {
   defaultGameId: number;
   onCreated?: (product: CatalogProduct) => void;
   onCancel: () => void;
+  /** มีเฉพาะตอนแก้ไข — เปิด dialog ยืนยันลบสินค้า */
+  onDelete?: () => void;
 };
 
 /**
@@ -81,6 +84,7 @@ export function CatalogProductForm({
   defaultGameId,
   onCreated,
   onCancel,
+  onDelete,
 }: CatalogProductFormProps) {
   const isEdit = product !== undefined;
   const createProduct = useCreateProduct();
@@ -538,6 +542,17 @@ export function CatalogProductForm({
       </div>
 
       <div className="flex items-center justify-end gap-2 border-t border-border px-6 py-4">
+        {onDelete ? (
+          <Button
+            type="button"
+            variant="ghost"
+            className="mr-auto text-destructive"
+            onClick={onDelete}
+          >
+            <Trash2 data-icon="inline-start" />
+            ลบสินค้า
+          </Button>
+        ) : null}
         <Button type="button" variant="outline" onClick={onCancel}>
           {isEdit ? "ปิด" : "ยกเลิก"}
         </Button>

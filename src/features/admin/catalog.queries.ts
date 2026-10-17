@@ -206,6 +206,22 @@ export function useUpdateProduct() {
   });
 }
 
+/**
+ * ไม่ลบก้อน detail ออกจาก cache ตรงนี้ — หน้าต่างยังโชว์มันระหว่างเลื่อนปิด
+ * ถ้าลบตอนนั้น query จะดึงใหม่แล้วได้ 404 ขึ้นมาแทนก่อนหน้าต่างปิดพ้น
+ */
+export function useDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => catalogApi.deleteProduct(productId),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: adminCatalogKeys.products() }),
+        queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
+      ]),
+  });
+}
+
 /** `variantId: null` = เพิ่มใหม่ — body หน้าตาเดียวกันทั้ง POST และ PUT */
 export function useSaveVariant(productId: number) {
   const invalidate = useInvalidateProduct();

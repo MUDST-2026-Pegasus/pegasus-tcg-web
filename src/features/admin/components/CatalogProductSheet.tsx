@@ -10,10 +10,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/toast";
 
 import type { ProductTab, ProductTarget } from "../catalog.filters";
 import { productTitle } from "../catalog.format";
-import { useAdminProduct } from "../catalog.queries";
+import { useAdminProduct, useDeleteProduct } from "../catalog.queries";
 import type { CatalogProduct, Game } from "../catalog.types";
 
 import { CatalogCardEffectEditor } from "./CatalogCardEffectEditor";
@@ -21,6 +22,7 @@ import { CatalogImageManager } from "./CatalogImageManager";
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
 import { CatalogVariantList } from "./CatalogVariantList";
+import { DeleteProductDialog } from "./DeleteProductDialog";
 
 type CatalogProductSheetProps = {
   /** `null` = ปิด */
@@ -109,6 +111,18 @@ function EditProductPanel({
   onClose: () => void;
 }) {
   const detail = useAdminProduct(productId);
+  const deleteProduct = useDeleteProduct();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  const handleDelete = () => {
+    deleteProduct.mutate(productId, {
+      onSuccess: () => {
+        toast.add({ type: "success", title: "ลบสินค้าแล้ว" });
+        setConfirmingDelete(false);
+        onClose();
+      },
+    });
+  };
 
   return (
     <QueryBoundary
@@ -162,6 +176,18 @@ function EditProductPanel({
                   product={product}
                   defaultGameId={product.gameId}
                   onCancel={onClose}
+                  onDelete={() => {
+                    deleteProduct.reset();
+                    setConfirmingDelete(true);
+                  }}
+                />
+                <DeleteProductDialog
+                  open={confirmingDelete}
+                  onOpenChange={setConfirmingDelete}
+                  product={product}
+                  isPending={deleteProduct.isPending}
+                  error={deleteProduct.error}
+                  onConfirm={handleDelete}
                 />
               </TabsContent>
 

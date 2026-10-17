@@ -53,9 +53,20 @@ describe("PaymentPage", () => {
     expect(screen.getByRole("heading", { name: "Secure Checkout" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Order Summary" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Submit payment for verification/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Save QR/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Save QR/i })).not.toBeInTheDocument();
     await waitFor(() => expect(financeApi.createPayment).toHaveBeenCalledWith(42, expect.any(String)));
     expect(ordersApi.payOrder).not.toHaveBeenCalled();
+  });
+
+  it("uses payment amount rather than order total for the QR", async () => {
+    const promptPay = { ...payment, amount: 1450, transferAccountJson: JSON.stringify({ promptPayId: "0812345678" }) };
+    vi.mocked(financeApi.createPayment).mockResolvedValue(promptPay);
+    vi.mocked(financeApi.getPayment).mockResolvedValue(promptPay);
+    vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "ORD-42", grandTotal: 9999 } as never);
+    renderPaymentPage();
+    expect(await screen.findByText("Scan to Pay | ฿1,450.00")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
+    expect(screen.queryByText(/129.99 USD/)).not.toBeInTheDocument();
   });
 
   it("renders order items from real order details", async () => {
