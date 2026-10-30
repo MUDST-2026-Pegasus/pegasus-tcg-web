@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
@@ -34,6 +35,7 @@ import {
   toCardSetPayload,
   type CardSetFormValues,
 } from "../taxonomy.schema";
+import { LogoUploadField } from "./LogoUploadField";
 
 type CardSetFormDialogProps = {
   open: boolean;
@@ -88,13 +90,22 @@ function CardSetForm({
 
   const {
     register,
+    control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CardSetFormValues>({
     resolver: zodResolver(cardSetSchema),
     defaultValues: toCardSetForm(cardSet),
   });
+
+  const upload = useFileUpload({
+    purpose: "CATALOG_IMAGE",
+    onChange: (keys) =>
+      setValue("logoUrl", keys[0] ?? "", { shouldDirty: true }),
+  });
+  const logoUrl = useWatch({ control, name: "logoUrl" });
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -189,40 +200,42 @@ function CardSetForm({
           <FieldError errors={[errors.nameLocal]} />
         </Field>
 
-        <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
-          <Field data-invalid={Boolean(errors.totalCards) || undefined}>
-            <FieldLabel htmlFor="setTotal">จำนวนการ์ดในชุด</FieldLabel>
-            <Input
-              id="setTotal"
-              inputMode="numeric"
-              placeholder="เช่น 100"
-              aria-invalid={Boolean(errors.totalCards)}
-              {...register("totalCards")}
-            />
-            <FieldError errors={[errors.totalCards]} />
-          </Field>
+        <Field
+          data-invalid={Boolean(errors.totalCards) || undefined}
+          className="sm:max-w-[160px]"
+        >
+          <FieldLabel htmlFor="setTotal">จำนวนการ์ดในชุด</FieldLabel>
+          <Input
+            id="setTotal"
+            inputMode="numeric"
+            placeholder="เช่น 100"
+            aria-invalid={Boolean(errors.totalCards)}
+            {...register("totalCards")}
+          />
+          <FieldError errors={[errors.totalCards]} />
+        </Field>
 
-          <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-            <FieldLabel htmlFor="setLogo">โลโก้ (URL)</FieldLabel>
-            <Input
-              id="setLogo"
-              type="url"
-              maxLength={500}
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.logoUrl)}
-              {...register("logoUrl")}
-            />
-            <FieldError errors={[errors.logoUrl]} />
-          </Field>
-        </div>
+        <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
+          <FieldLabel htmlFor="setLogo">โลโก้</FieldLabel>
+          <LogoUploadField
+            upload={upload}
+            id="setLogo"
+            value={logoUrl}
+            saved={cardSet}
+            onRemove={() => setValue("logoUrl", "", { shouldDirty: true })}
+          />
+          <FieldError errors={[errors.logoUrl]} />
+        </Field>
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
           ยกเลิก
         </DialogClose>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Spinner data-icon="inline-start" />}
+        <Button type="submit" disabled={isSubmitting || upload.isUploading}>
+          {(isSubmitting || upload.isUploading) && (
+            <Spinner data-icon="inline-start" />
+          )}
           {cardSet ? "บันทึก" : "เพิ่มชุดการ์ด"}
         </Button>
       </DialogFooter>
