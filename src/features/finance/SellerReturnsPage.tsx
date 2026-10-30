@@ -1,69 +1,59 @@
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { RotateCcw, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-import { afterSalesApi } from "./after-sales.api";
-import { formatBaht, mapReturnErrorMessage } from "./after-sales.format";
-import {
-  calculateTabCounts,
-  categorizeReturns,
-  sortReturns,
-  type TabCategory,
-} from "./after-sales.helpers";
-import type { ReturnEvidenceLink, SellerReturnRequest } from "./after-sales.types";
+import type { ReturnEvidenceLink } from "./after-sales.types";
 import { EvidenceWarningWidget } from "./seller-returns/components/EvidenceWarningWidget";
 import { PendingFundsWidget } from "./seller-returns/components/PendingFundsWidget";
 import { ReturnRequestCard } from "./seller-returns/components/ReturnRequestCard";
 import { ReturnStepsWidget } from "./seller-returns/components/ReturnStepsWidget";
-import { DEFAULT_RETURN_DRAFT, getRefundAmount, type ReturnDraft } from "./seller-returns/return-draft";
 import { ApproveReturnModal } from "./seller-returns/modals/ApproveReturnModal";
 import { ConfirmReceiptModal } from "./seller-returns/modals/ConfirmReceiptModal";
 import { EvidencePreviewModal } from "./seller-returns/modals/EvidencePreviewModal";
 import { RejectReturnModal } from "./seller-returns/modals/RejectReturnModal";
 import { ReturnPolicyModal } from "./seller-returns/modals/ReturnPolicyModal";
+import { getRefundAmount } from "./seller-returns/return-draft";
+import { useReturnActions } from "./seller-returns/useReturnActions";
+import { useSellerReturns, type ReturnSortOrder } from "./seller-returns/useSellerReturns";
 
 /**
  * Main Seller Returns Page Component
  */
 export function SellerReturnsPage() {
-  const cache = useQueryClient();
-
-  // Queries
   const {
-    data: allReturns = [],
     isLoading,
     isError,
     refetch,
-  } = useQuery({
-    queryKey: ["finance", "seller-returns"],
-    queryFn: () => afterSalesApi.sellerReturns(),
-  });
+    tabCounts,
+    activeTab,
+    selectTab,
+    sortOrder,
+    setSortOrder,
+    currentTabReturns,
+    effectiveExpandedId,
+    toggleExpanded,
+    currentStep,
+    pendingFundsSummary,
+  } = useSellerReturns();
 
-  // Client-side categorization & tab counts
-  const categorized = useMemo(() => categorizeReturns(allReturns), [allReturns]);
-  const tabCounts = useMemo(() => calculateTabCounts(allReturns), [allReturns]);
+  const {
+    busyId,
+    getDraft,
+    updateDraft,
+    approveModalItem,
+    setApproveModalItem,
+    rejectModalItem,
+    setRejectModalItem,
+    receiveModalItem,
+    setReceiveModalItem,
+    handleApproveConfirm,
+    handleRejectConfirm,
+    handleReceiveConfirm,
+  } = useReturnActions();
 
-  // States
-  const [activeTab, setActiveTab] = useState<TabCategory>("action_required");
-  const [sortOrder, setSortOrder] = useState<"longest_first" | "newest_first">("longest_first");
-  const [explicitExpandedId, setExplicitExpandedId] = useState<number | null | undefined>(undefined);
-
-  // Form states per card
-  const [drafts, setDrafts] = useState<Record<number, Partial<ReturnDraft>>>({});
-  const [busyId, setBusyId] = useState<number | null>(null);
-  const getDraft = (id: number): ReturnDraft => ({ ...DEFAULT_RETURN_DRAFT, ...drafts[id] });
-  const updateDraft = (id: number, patch: Partial<ReturnDraft>) =>
-    setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
-
-  // Modal states
-  const [approveModalItem, setApproveModalItem] = useState<SellerReturnRequest | null>(null);
-  const [rejectModalItem, setRejectModalItem] = useState<SellerReturnRequest | null>(null);
-  const [receiveModalItem, setReceiveModalItem] = useState<SellerReturnRequest | null>(null);
   const [policyModalOpen, setPolicyModalOpen] = useState(false);
 
   // Evidence preview modal
@@ -71,158 +61,6 @@ export function SellerReturnsPage() {
     link: ReturnEvidenceLink | null;
     list: ReturnEvidenceLink[];
   }>({ link: null, list: [] });
-
-  // Sorted list for current active tab
-  const currentTabReturns = useMemo(() => {
-    return sortReturns(categorized[activeTab], sortOrder);
-  }, [categorized, activeTab, sortOrder]);
-
-  // Derived effective expanded ID (auto-expands first item in action_required tab unless user toggles)
-  const effectiveExpandedId = useMemo(() => {
-    if (explicitExpandedId !== undefined) {
-      return explicitExpandedId;
-    }
-    if (activeTab === "action_required" && currentTabReturns.length > 0) {
-      return currentTabReturns[0].id;
-    }
-    return null;
-  }, [explicitExpandedId, activeTab, currentTabReturns]);
-
-  // Determine currently active return for the 5-step widget
-  const activeExpandedReturn = useMemo(() => {
-    if (effectiveExpandedId) {
-      const found = allReturns.find((r) => r.id === effectiveExpandedId);
-      if (found) return found;
-    }
-    return currentTabReturns[0] ?? allReturns[0] ?? null;
-  }, [effectiveExpandedId, allReturns, currentTabReturns]);
-
-  // Calculate dynamic active step (1 to 5)
-  const currentStep = useMemo(() => {
-    if (!activeExpandedReturn) return 2;
-    switch (activeExpandedReturn.status) {
-      case "REQUESTED":
-        return 2;
-      case "AWAITING_RETURN_SHIPMENT":
-        return 3;
-      case "IN_TRANSIT":
-        return 4;
-      case "APPROVED":
-      case "RECEIVED":
-        return 5;
-      case "REFUNDED":
-      case "CLOSED":
-        return 6; // all completed
-      case "REJECTED":
-        return 2;
-      default:
-        return 2;
-    }
-  }, [activeExpandedReturn]);
-
-  // Pending Escrow total and sub-order count
-  const pendingFundsSummary = useMemo(() => {
-    const pendingStatuses = ["REQUESTED", "AWAITING_RETURN_SHIPMENT", "IN_TRANSIT", "APPROVED", "RECEIVED"];
-    const pendingList = allReturns.filter((r) => pendingStatuses.includes(r.status));
-    const total = pendingList.reduce((sum, r) => sum + (Number(r.sellerOrderGrandTotal) || 0), 0);
-    return {
-      count: pendingList.length,
-      total,
-    };
-  }, [allReturns]);
-
-  // Actions
-  const handleApproveConfirm = async () => {
-    if (!approveModalItem) return;
-    const id = approveModalItem.id;
-    const draft = getDraft(id);
-    const resolution = draft.resolution;
-    const amount = getRefundAmount(approveModalItem, draft);
-    const requireShipBack = draft.shipBack;
-
-    setBusyId(id);
-    try {
-      await afterSalesApi.approveReturn(id, resolution, amount, requireShipBack);
-      await Promise.all([
-        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
-      ]);
-      toast.add({
-        type: "success",
-        title: "อนุมัติคำขอคืนเงินเรียบร้อยแล้ว",
-        description: `คำขอ RT-${id} จำนวนเงิน ${formatBaht(amount)}`,
-      });
-      setApproveModalItem(null);
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: "ดำเนินการไม่สำเร็จ",
-        description: mapReturnErrorMessage(error),
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleRejectConfirm = async () => {
-    if (!rejectModalItem) return;
-    const id = rejectModalItem.id;
-
-    setBusyId(id);
-    try {
-      await afterSalesApi.rejectReturn(id);
-      await Promise.all([
-        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
-      ]);
-      toast.add({
-        type: "success",
-        title: "ปฏิเสธคำขอคืนสินค้าแล้ว",
-        description: `คำขอ RT-${id} ถูกปฏิเสธ ระบบจะโอนเงิน Escrow ตามกำหนดเดิม`,
-      });
-      setRejectModalItem(null);
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: "ดำเนินการไม่สำเร็จ",
-        description: mapReturnErrorMessage(error),
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleReceiveConfirm = async () => {
-    if (!receiveModalItem) return;
-    const id = receiveModalItem.id;
-    const restock = getDraft(id).restock;
-
-    setBusyId(id);
-    try {
-      await afterSalesApi.receiveReturn(id, restock);
-      await Promise.all([
-        cache.invalidateQueries({ queryKey: ["finance", "seller-returns"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "todos"] }),
-        cache.invalidateQueries({ queryKey: ["seller", "dashboard"] }),
-      ]);
-      toast.add({
-        type: "success",
-        title: "ยืนยันรับสินค้าคืนสำเร็จ",
-        description: `ระบบปล่อยเงินคืนให้ผู้ซื้อ และ${restock ? "นำการ์ดกลับเข้าสต็อกเรียบร้อยแล้ว" : "ไม่นำกลับเข้าสต็อก"}`,
-      });
-      setReceiveModalItem(null);
-    } catch (error) {
-      toast.add({
-        type: "error",
-        title: "ดำเนินการไม่สำเร็จ",
-        description: mapReturnErrorMessage(error),
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
 
   return (
     <div>
@@ -252,10 +90,7 @@ export function SellerReturnsPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                setActiveTab("action_required");
-                setExplicitExpandedId(undefined);
-              }}
+              onClick={() => selectTab("action_required")}
               className={cn(
                 "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "action_required"
@@ -267,10 +102,7 @@ export function SellerReturnsPage() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setActiveTab("awaiting_shipment");
-                setExplicitExpandedId(undefined);
-              }}
+              onClick={() => selectTab("awaiting_shipment")}
               className={cn(
                 "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "awaiting_shipment"
@@ -282,10 +114,7 @@ export function SellerReturnsPage() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setActiveTab("awaiting_refund");
-                setExplicitExpandedId(undefined);
-              }}
+              onClick={() => selectTab("awaiting_refund")}
               className={cn(
                 "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "awaiting_refund"
@@ -297,10 +126,7 @@ export function SellerReturnsPage() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setActiveTab("completed");
-                setExplicitExpandedId(undefined);
-              }}
+              onClick={() => selectTab("completed")}
               className={cn(
                 "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
                 activeTab === "completed"
@@ -317,7 +143,7 @@ export function SellerReturnsPage() {
               aria-label="เรียงลำดับคำขอคืนสินค้า"
               size="sm"
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as "longest_first" | "newest_first")}
+              onChange={(e) => setSortOrder(e.target.value as ReturnSortOrder)}
               className="rounded-lg border-input bg-background text-xs font-medium text-foreground"
             >
               <option value="longest_first">เรียง: รอนานสุดก่อน</option>
@@ -380,7 +206,7 @@ export function SellerReturnsPage() {
                       item={item}
                       isExpanded={isExpanded}
                       isHighlighted={isHighlighted}
-                      onToggle={() => setExplicitExpandedId(isExpanded ? null : item.id)}
+                      onToggle={() => toggleExpanded(item.id)}
                       draft={getDraft(item.id)}
                       isBusy={busyId === item.id}
                       onDraftChange={(patch) => updateDraft(item.id, patch)}
