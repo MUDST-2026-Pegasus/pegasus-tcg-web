@@ -1,6 +1,11 @@
 import { buildUrl } from "./config";
 import type { ApiEnvelope } from "./types";
 
+/**
+ * Session state stays beside the HTTP client because it attaches bearer tokens
+ * and refreshes on 401; putting it in features/auth would create an import cycle.
+ */
+
 const STORAGE_KEY = "pegasus.auth.session";
 const EXPIRY_SKEW_MS = 30_000;
 
@@ -8,6 +13,7 @@ export type SessionTokens = { accessToken: string; expiresIn: number };
 type StoredSession = { accessToken: string; accessExpiresAt: number };
 
 let cached: StoredSession | null = null;
+let sessionVersion = 0;
 let bootstrapDone = false;
 let bootstrapInFlight: Promise<void> | null = null;
 let refreshInFlight: Promise<string | null> | null = null;
@@ -15,68 +21,95 @@ const listeners = new Set<() => void>();
 
 // A previous release stored both tokens here. Removing that key is a one-time migration.
 if (typeof window !== "undefined") {
-  try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* Storage may be disabled. */ }
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage may be disabled; access tokens are never written there.
+  }
 }
 
-function notify(): void { for (const listener of listeners) listener(); }
+function notify(): void {
+  for (const listener of listeners) listener();
+}
+
 export function subscribeSession(listener: () => void): () => void {
   listeners.add(listener);
-  return () => { listeners.delete(listener); };
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 const channel = typeof window !== "undefined" && typeof BroadcastChannel !== "undefined"
-  ? new BroadcastChannel("pegasus-auth") : null;
+  ? new BroadcastChannel("pegasus-auth")
+  : null;
 if (channel) {
-  channel.onmessage = (event: MessageEvent<"login" | "logout" | "refreshed">) => {
+  channel.onmessage = (event: MessageEvent<"login" | "logout">) => {
     if (event.data === "logout") {
       cached = null;
+      sessionVersion++;
       notify();
-    } else if (event.data === "login" || event.data === "refreshed") {
+    } else if (event.data === "login") {
       // The other tab cannot share its access token; obtain our own from the cookie.
-      void refreshAccessToken(false);
+      void refreshAccessToken();
     }
   };
 }
 
-export function getSession(): StoredSession | null { return cached; }
-export function saveSession(tokens: SessionTokens, event: "login" | "refreshed" | null = "login"): void {
+export function getSession(): StoredSession | null {
+  return cached;
+}
+
+export function saveSession(tokens: SessionTokens, announce = true): void {
   cached = { accessToken: tokens.accessToken, accessExpiresAt: Date.now() + tokens.expiresIn * 1000 };
+  sessionVersion++;
   bootstrapDone = true;
   notify();
-  if (event) channel?.postMessage(event);
+  if (announce) channel?.postMessage("login");
 }
+
 export function clearSession(announce = true): void {
   cached = null;
+  sessionVersion++;
   bootstrapDone = true;
   notify();
   if (announce) channel?.postMessage("logout");
 }
-export function getAccessToken(): string | null { return cached?.accessToken ?? null; }
+
+export function getAccessToken(): string | null {
+  return cached?.accessToken ?? null;
+}
+
 export function isAccessTokenExpired(): boolean {
   return cached !== null && cached.accessExpiresAt - EXPIRY_SKEW_MS <= Date.now();
 }
-export function isSessionBootstrapping(): boolean { return !bootstrapDone; }
+export function isSessionBootstrapping(): boolean {
+  return !bootstrapDone;
+}
+
 export function bootstrapSession(): Promise<void> {
   if (bootstrapDone) return Promise.resolve();
-  bootstrapInFlight ??= refreshAccessToken(false).then(() => {
+  bootstrapInFlight ??= refreshAccessToken().then(() => {
     bootstrapDone = true;
     notify();
   });
   return bootstrapInFlight;
 }
 
-/** One request per tab and one cookie rotation at a time across tabs. */
-export function refreshAccessToken(announce = true): Promise<string | null> {
+/** Single-flight in this tab and one cookie rotation at a time across tabs. */
+export function refreshAccessToken(): Promise<string | null> {
   refreshInFlight ??= (async () => {
     if (typeof navigator !== "undefined" && navigator.locks?.request) {
-      return navigator.locks.request("pegasus-auth-refresh", () => runRefresh(announce));
+      return navigator.locks.request("pegasus-auth-refresh", runRefresh);
     }
-    return runRefresh(announce);
-  })().finally(() => { refreshInFlight = null; });
+    return runRefresh();
+  })().finally(() => {
+    refreshInFlight = null;
+  });
   return refreshInFlight;
 }
 
-async function runRefresh(announce: boolean): Promise<string | null> {
+async function runRefresh(): Promise<string | null> {
+  const startedVersion = sessionVersion;
   let response: Response;
   try {
     response = await fetch(buildUrl("/auth/refresh"), {
@@ -89,8 +122,9 @@ async function runRefresh(announce: boolean): Promise<string | null> {
     // Keep the current access token when the network is temporarily unavailable.
     return null;
   }
+  if (startedVersion !== sessionVersion) return getAccessToken();
   if (!response.ok) {
-    clearSession(false);
+    if (response.status === 401) clearSession(false);
     return null;
   }
   try {
@@ -99,7 +133,7 @@ async function runRefresh(announce: boolean): Promise<string | null> {
       clearSession(false);
       return null;
     }
-    saveSession(body.data.tokens, announce ? "refreshed" : null);
+    saveSession(body.data.tokens, false);
     return body.data.tokens.accessToken;
   } catch {
     clearSession(false);

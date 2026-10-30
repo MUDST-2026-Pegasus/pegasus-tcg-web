@@ -2,6 +2,7 @@ import { ApiError } from "./errors";
 import { buildUrl, type QueryParams } from "./config";
 import {
   getAccessToken,
+  bootstrapSession,
   isAccessTokenExpired,
   refreshAccessToken,
 } from "./session";
@@ -34,8 +35,9 @@ type RequestInput = RequestOptions & {
 async function request<T>(path: string, input: RequestInput): Promise<T> {
   const { method, body, query, headers, signal, auth = true, credentials } = input;
 
-  if (auth && isAccessTokenExpired()) {
-    await refreshAccessToken();
+  if (auth) {
+    await bootstrapSession();
+    if (isAccessTokenExpired()) await refreshAccessToken();
   }
 
   const send = () =>

@@ -3,6 +3,17 @@
 // Flow: สมัครสมาชิก → Login → ค้นหาการ์ด → เพิ่มลงตะกร้า → เลือกที่อยู่ → สั่งซื้อ
 
 describe("E2E Flow 1: Buyer Complete Journey", () => {
+  const visitAuthenticated = (path: string) => {
+    cy.intercept("POST", "**/api/v1/auth/refresh", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } },
+      },
+    });
+    cy.visit(path);
+  };
+
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
@@ -285,9 +296,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("addToCart");
 
-    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
-
-    cy.visit("/products/pikachu-ex-025-187");
+    visitAuthenticated("/products/pikachu-ex-025-187");
 
     cy.wait("@getProductDetail");
     cy.wait("@getListings");
@@ -345,9 +354,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getCart");
 
-    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
-
-    cy.visit("/cart");
+    visitAuthenticated("/cart");
 
     // Check cart items
     cy.contains(/Shopping Cart/i).should("be.visible");
@@ -500,9 +507,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getOrder");
 
-    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
-
-    cy.visit("/checkout?items=101");
+    visitAuthenticated("/checkout?items=101");
 
     cy.wait("@getCartCheckout");
     cy.wait("@getAddresses");

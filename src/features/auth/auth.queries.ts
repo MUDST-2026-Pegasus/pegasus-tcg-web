@@ -10,7 +10,7 @@ import {
   saveSession,
   subscribeSession,
 } from "@/lib/api";
-import { bootstrapSession, isSessionBootstrapping } from "@/lib/api/session";
+import { isSessionBootstrapping } from "@/lib/api/session";
 import { cartApi } from "@/features/cart/cart.api";
 import { toast } from "@/components/ui/toast";
 
@@ -78,7 +78,6 @@ export type AuthState = {
 
 export function useAuth(): AuthState {
   const bootstrapping = useSyncExternalStore(subscribeSession, isSessionBootstrapping, () => true);
-  useEffect(() => { void bootstrapSession(); }, []);
   const hasSession = useHasSession();
   const { data: user, isPending } = useCurrentUser();
 
