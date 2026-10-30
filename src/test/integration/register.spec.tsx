@@ -31,7 +31,7 @@ describe("Register Flow Integration", () => {
         success: true,
         data: {
           user: { id: "2", username: "new_player", email: "new@pegasus.com", roles: ["CUSTOMER"] },
-          tokens: { accessToken: "valid-token", refreshToken: "refresh", expiresIn: 3600 }
+          tokens: { accessToken: "valid-token", expiresIn: 3600 }
         }
       })
     } as unknown as Response);

@@ -36,18 +36,8 @@ describe('Core Seller Application Flow', () => {
   };
 
   const visitAuthenticated = (url: string, isSeller = false) => {
-    cy.visit(url, {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          'pegasus.auth.session',
-          JSON.stringify({
-            accessToken: isSeller ? 'seller-token' : 'buyer-token',
-            refreshToken: 'refresh-token',
-            accessExpiresAt: Date.now() + 3600000,
-          }),
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: isSeller ? 'seller-token' : 'buyer-token', expiresIn: 3600 } } } });
+    cy.visit(url);
   };
 
   beforeEach(() => {

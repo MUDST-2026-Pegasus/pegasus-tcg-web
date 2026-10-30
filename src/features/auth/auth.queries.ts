@@ -10,6 +10,7 @@ import {
   saveSession,
   subscribeSession,
 } from "@/lib/api";
+import { bootstrapSession, isSessionBootstrapping } from "@/lib/api/session";
 import { cartApi } from "@/features/cart/cart.api";
 import { toast } from "@/components/ui/toast";
 
@@ -26,7 +27,7 @@ import type {
 } from "./auth.types";
 
 /**
- * token อยู่ใน localStorage ผ่าน `@/lib/api` ส่วนข้อมูลผู้ใช้อยู่ใน cache
+ * access token อยู่ใน memory ผ่าน `@/lib/api` ส่วนข้อมูลผู้ใช้อยู่ใน cache
  * ใต้คีย์ `authKeys.me()` — component ใช้ `useAuth()` อย่างเดียวก็พอ
  */
 
@@ -76,6 +77,8 @@ export type AuthState = {
 };
 
 export function useAuth(): AuthState {
+  const bootstrapping = useSyncExternalStore(subscribeSession, isSessionBootstrapping, () => true);
+  useEffect(() => { void bootstrapSession(); }, []);
   const hasSession = useHasSession();
   const { data: user, isPending } = useCurrentUser();
 
@@ -84,7 +87,7 @@ export function useAuth(): AuthState {
   return {
     user: user ?? null,
     isAuthenticated: user !== undefined,
-    isLoading: hasSession && isPending,
+    isLoading: bootstrapping || (hasSession && isPending),
     roles,
     hasRole: (...wanted: RoleCode[]) => wanted.some((role) => roles.includes(role)),
   };
@@ -154,19 +157,16 @@ export function useChangePassword() {
 export function useLogout() {
   return useMutation({
     mutationFn: async () => {
-      const refreshToken = getSession()?.refreshToken;
-      if (refreshToken) {
-        await authApi.logout(refreshToken).catch(() => undefined);
-      }
+      await authApi.logout().catch(() => undefined);
     },
-    onSettled: clearSession,
+    onSettled: () => clearSession(),
   });
 }
 
 export function useLogoutAll() {
   return useMutation({
     mutationFn: authApi.logoutAll,
-    onSettled: clearSession,
+    onSettled: () => clearSession(),
   });
 }
 

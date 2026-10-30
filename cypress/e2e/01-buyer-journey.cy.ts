@@ -31,7 +31,6 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
         data: {
           tokens: {
             accessToken: "mock-buyer-access-token",
-            refreshToken: "mock-buyer-refresh-token",
             expiresIn: 3600,
           },
           user: {
@@ -74,7 +73,6 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
         data: {
           tokens: {
             accessToken: "mock-buyer-access-token",
-            refreshToken: "mock-buyer-refresh-token",
             expiresIn: 3600,
           },
           user: {
@@ -287,18 +285,9 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("addToCart");
 
-    cy.visit("/products/pikachu-ex-025-187", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-buyer-access-token",
-            refreshToken: "mock-buyer-refresh-token",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
+
+    cy.visit("/products/pikachu-ex-025-187");
 
     cy.wait("@getProductDetail");
     cy.wait("@getListings");
@@ -356,18 +345,9 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getCart");
 
-    cy.visit("/cart", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-buyer-access-token",
-            refreshToken: "mock-buyer-refresh-token",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
+
+    cy.visit("/cart");
 
     // Check cart items
     cy.contains(/Shopping Cart/i).should("be.visible");
@@ -520,18 +500,9 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getOrder");
 
-    cy.visit("/checkout?items=101", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-buyer-access-token",
-            refreshToken: "mock-buyer-refresh-token",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-buyer-access-token", expiresIn: 3600 } } } });
+
+    cy.visit("/checkout?items=101");
 
     cy.wait("@getCartCheckout");
     cy.wait("@getAddresses");

@@ -80,18 +80,8 @@ describe('Core Admin Portal Flow', () => {
   };
 
   const visitWithRole = (url: string, user: typeof mockAdminUser | typeof mockBuyerUser) => {
-    cy.visit(url, {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          'pegasus.auth.session',
-          JSON.stringify({
-            accessToken: `${user.roles[0].toLowerCase()}-token`,
-            refreshToken: 'refresh-token',
-            accessExpiresAt: Date.now() + 3600000,
-          }),
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: `${user.roles[0].toLowerCase()}-token`, expiresIn: 3600 } } } });
+    cy.visit(url);
   };
 
   beforeEach(() => {
