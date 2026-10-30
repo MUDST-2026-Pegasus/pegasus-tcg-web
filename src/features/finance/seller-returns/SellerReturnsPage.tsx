@@ -5,19 +5,19 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 
-import type { ReturnEvidenceLink } from "./after-sales.types";
-import { EvidenceWarningWidget } from "./seller-returns/components/EvidenceWarningWidget";
-import { PendingFundsWidget } from "./seller-returns/components/PendingFundsWidget";
-import { ReturnRequestCard } from "./seller-returns/components/ReturnRequestCard";
-import { ReturnStepsWidget } from "./seller-returns/components/ReturnStepsWidget";
-import { ApproveReturnModal } from "./seller-returns/modals/ApproveReturnModal";
-import { ConfirmReceiptModal } from "./seller-returns/modals/ConfirmReceiptModal";
-import { EvidencePreviewModal } from "./seller-returns/modals/EvidencePreviewModal";
-import { RejectReturnModal } from "./seller-returns/modals/RejectReturnModal";
-import { ReturnPolicyModal } from "./seller-returns/modals/ReturnPolicyModal";
-import { getRefundAmount } from "./seller-returns/return-draft";
-import { useReturnActions } from "./seller-returns/useReturnActions";
-import { useSellerReturns, type ReturnSortOrder } from "./seller-returns/useSellerReturns";
+import type { ReturnEvidenceLink } from "../after-sales.types";
+import { EvidenceWarningWidget } from "./components/EvidenceWarningWidget";
+import { PendingFundsWidget } from "./components/PendingFundsWidget";
+import { ReturnRequestCard } from "./components/ReturnRequestCard";
+import { ReturnStepsWidget } from "./components/ReturnStepsWidget";
+import { ApproveReturnModal } from "./modals/ApproveReturnModal";
+import { ConfirmReceiptModal } from "./modals/ConfirmReceiptModal";
+import { EvidencePreviewModal } from "./modals/EvidencePreviewModal";
+import { RejectReturnModal } from "./modals/RejectReturnModal";
+import { ReturnPolicyModal } from "./modals/ReturnPolicyModal";
+import { getRefundAmount } from "./return-draft";
+import { useReturnActions } from "./useReturnActions";
+import { useSellerReturns, type ReturnSortOrder } from "./useSellerReturns";
 
 /**
  * Main Seller Returns Page Component
