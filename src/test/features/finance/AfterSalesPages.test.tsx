@@ -52,11 +52,35 @@ describe("after sales screens", () => {
     await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalledWith(41, expect.objectContaining({ reasonCode: "DAMAGED" })));
   });
 
+  it("does not offer a new return while the buyer's returns can't be loaded", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockRejectedValue(new Error("down"));
+    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
+      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    expect(screen.queryByRole("button", { name: "ขอคืนสินค้า" })).toBeNull();
+    expect(await screen.findByText("โหลดคำขอคืนสินค้าไม่สำเร็จ")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "ขอคืนสินค้า" })).toBeNull();
+  });
+
+  it("keeps the return form open when the request fails", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
+    vi.mocked(afterSalesApi.requestReturn).mockRejectedValue(new Error("boom"));
+    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
+      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    fireEvent.click(await screen.findByRole("button", { name: "ขอคืนสินค้า" }));
+    fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
+    fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
+    await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalled());
+    expect(await screen.findByRole("button", { name: "ส่งคำขอคืนสินค้า" })).toBeEnabled();
+    expect((screen.getByRole("spinbutton") as HTMLInputElement).value).toBe("1");
+  });
+
   it("shows buyer return statuses and reasons as readable labels", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{ id: 7, sellerOrderId: 41,
       status: "AWAITING_RETURN_SHIPMENT", reasonCode: "DAMAGED", evidenceKeys: [] }] as never);
     render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />, { wrapper });
-    expect(await screen.findByText("คำขอคืน #7 · รอผู้ซื้อส่งสินค้าคืน · สินค้าเสียหาย")).toBeTruthy();
+    expect(await screen.findByText("คำขอคืน #7 · สินค้าเสียหาย")).toBeTruthy();
+    // status shows once, in the badge
+    expect(screen.getAllByText("รอผู้ซื้อส่งสินค้าคืน")).toHaveLength(1);
   });
 
   it("approves a return from the seller queue with the custom modal", async () => {

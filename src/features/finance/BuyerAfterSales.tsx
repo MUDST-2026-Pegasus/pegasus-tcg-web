@@ -1,6 +1,6 @@
 import { useState, useId } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { RotateCcw, UploadCloud, X, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { RotateCcw, UploadCloud, X, AlertCircle, Clock, CheckCircle2, ImageOff } from "lucide-react";
 import { TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,8 @@ function getReturnStatusBadge(status: string) {
       return { variant: "secondary" as const, className: "bg-blue-100 text-blue-800 border-transparent" };
     case "IN_TRANSIT":
       return { variant: "secondary" as const, className: "bg-purple-100 text-purple-800 border-transparent" };
-    case "RETURNED":
     case "APPROVED":
+    case "RECEIVED":
     case "REFUNDED":
       return { variant: "secondary" as const, className: "bg-emerald-100 text-emerald-800 border-transparent" };
     case "REJECTED":
@@ -39,21 +39,17 @@ function getReturnStatusBadge(status: string) {
   }
 }
 
-export function BuyerAfterSales({
-  order,
-  defaultOpen = false,
-}: {
-  order: SellerOrderDetails;
-  defaultOpen?: boolean;
-}) {
+export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const cache = useQueryClient();
   const fileInputId = useId();
+  const reasonId = useId();
+  const descriptionId = useId();
   const returns = useQuery({
     queryKey: ["finance", "buyer-returns", order.id],
     queryFn: () => afterSalesApi.buyerReturns(order.id),
   });
   const evidence = useFileUpload({ purpose: "RETURN_EVIDENCE", multiple: true, maxFiles: 10 });
-  const [isReturnFormOpen, setIsReturnFormOpen] = useState(defaultOpen);
+  const [isReturnFormOpen, setIsReturnFormOpen] = useState(false);
   const [reason, setReason] = useState(reasons[0]);
   const [description, setDescription] = useState("");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -66,6 +62,8 @@ export function BuyerAfterSales({
     Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
 
   const hasReturns = (returns.data?.length ?? 0) > 0;
+  // Only offer a new return once the list has loaded and is empty, so a failed load can't lead to a duplicate request
+  const canStartReturn = canReturn && returns.isSuccess && !hasReturns;
   const isCompleted = order.status === "COMPLETED";
 
   // Hide the entire section if no after-sales actions or reviews are applicable
@@ -79,12 +77,14 @@ export function BuyerAfterSales({
       await action();
       await cache.invalidateQueries({ queryKey: ["finance", "buyer-returns", order.id] });
       toast.add({ type: "success", title: success });
+      return true;
     } catch (error) {
       toast.add({
         type: "error",
         title: "ดำเนินการไม่สำเร็จ",
         description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
       });
+      return false;
     } finally {
       setBusy(false);
     }
@@ -95,7 +95,7 @@ export function BuyerAfterSales({
       .map((item) => ({ orderItemId: item.id, quantity: quantities[item.id] ?? 0 }))
       .filter((item) => item.quantity > 0);
     if (!items.length) return;
-    await act(
+    const ok = await act(
       () =>
         afterSalesApi.requestReturn(order.id, {
           reasonCode: reason,
@@ -105,7 +105,8 @@ export function BuyerAfterSales({
         }),
       "ส่งคำขอคืนสินค้าแล้ว"
     );
-    setIsReturnFormOpen(false);
+    // Keep the form (and what the buyer typed) open when the request fails
+    if (ok) setIsReturnFormOpen(false);
   }
 
   const selectedItemCount = Object.values(quantities).reduce((sum, q) => sum + (q > 0 ? q : 0), 0);
@@ -117,7 +118,7 @@ export function BuyerAfterSales({
         <h4 className="font-semibold text-sm text-foreground">
           {isCompleted ? "รีวิวร้านค้าและบริการหลังการขาย" : "บริการหลังการขาย"}
         </h4>
-        {canReturn && order.autoCompleteAt && !hasReturns && (
+        {canStartReturn && order.autoCompleteAt && (
           <span className="text-[11px] text-muted-foreground flex items-center gap-1">
             <Clock className="size-3 text-muted-foreground/80" />
             ขอคืนสินค้าได้ถึง {formatOrderDateTime(order.autoCompleteAt)}
@@ -157,7 +158,7 @@ export function BuyerAfterSales({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-0.5">
                 <p className="font-semibold text-sm text-foreground">
-                  คำขอคืน #{item.id} · {returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}
+                  คำขอคืน #{item.id} · {returnReasonLabel(item.reasonCode)}
                 </p>
               </div>
               <Badge variant={badgeConfig.variant} className={cn("text-xs font-medium", badgeConfig.className)}>
@@ -202,7 +203,7 @@ export function BuyerAfterSales({
       })}
 
       {/* Return Request Action or Form */}
-      {canReturn && !hasReturns && (
+      {canStartReturn && (
         <>
           {!isReturnFormOpen ? (
             <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 sm:p-4 transition-all">
@@ -255,7 +256,7 @@ export function BuyerAfterSales({
 
               {/* Reason */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor={reasonId} className="text-xs font-semibold text-foreground">
                   สาเหตุการคืนสินค้า <span className="text-destructive">*</span>
                 </label>
                 <Select
@@ -264,6 +265,7 @@ export function BuyerAfterSales({
                   onValueChange={(value) => setReason(value ?? reasons[0])}
                 >
                   <SelectTrigger
+                    id={reasonId}
                     aria-label="สาเหตุคืนสินค้า"
                     className="w-full rounded-lg border-border bg-background text-xs"
                   >
@@ -283,10 +285,11 @@ export function BuyerAfterSales({
 
               {/* Description */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label htmlFor={descriptionId} className="text-xs font-semibold text-foreground">
                   รายละเอียดเพิ่มเติม (ไม่บังคับ)
                 </label>
                 <Textarea
+                  id={descriptionId}
                   aria-label="รายละเอียดการคืน"
                   placeholder="ระบุอาการ ตำหนิ หรือปัญหาที่พบเพื่อช่วยให้ร้านค้าตรวจสอบได้รวดเร็วยิ่งขึ้น..."
                   value={description}
@@ -298,9 +301,9 @@ export function BuyerAfterSales({
               {/* Items Quantity Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground">
+                  <p className="text-xs font-semibold text-foreground">
                     เลือกรายการและระบุจำนวนที่ต้องการคืน <span className="text-destructive">*</span>
-                  </label>
+                  </p>
                   <span className="text-[11px] text-muted-foreground">
                     เลือกแล้ว {selectedItemCount} ชิ้น
                   </span>
@@ -328,13 +331,13 @@ export function BuyerAfterSales({
                                 className="w-full h-full object-contain"
                               />
                             ) : (
-                              <span className="text-[9px] text-muted-foreground">Art</span>
+                              <ImageOff className="size-4 text-muted-foreground" aria-hidden="true" />
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-foreground truncate">{item.productName}</p>
                             <p className="text-[11px] text-muted-foreground">
-                              {[item.variantLabel, item.condition].filter(Boolean).join(" • ")} · มีทั้งหมด {item.quantity} ชิ้น
+                              {[item.variantLabel, item.condition, `มีทั้งหมด ${item.quantity} ชิ้น`].filter(Boolean).join(" · ")}
                             </p>
                           </div>
                         </div>
@@ -407,7 +410,7 @@ export function BuyerAfterSales({
                     <UploadCloud className="size-5 text-muted-foreground" />
                     <span className="text-xs font-medium text-foreground">คลิกเพื่อเลือกไฟล์รูปภาพ</span>
                     <span className="text-[11px] text-muted-foreground">
-                      รองรับ JPG, PNG, WebP สูงสุด 10 รูป
+                      รองรับ JPG, PNG, WebP ไฟล์ละไม่เกิน 10MB สูงสุด 10 รูป
                     </span>
                     <input
                       id={fileInputId}
@@ -444,7 +447,7 @@ export function BuyerAfterSales({
                           <CheckCircle2 className="size-3 text-emerald-600" />
                         )}
                         {item.status === "error" && (
-                          <span className="text-destructive font-semibold">!</span>
+                          <span className="text-destructive font-medium">{item.error}</span>
                         )}
                         <button
                           type="button"
