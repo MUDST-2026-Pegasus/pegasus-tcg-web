@@ -348,7 +348,7 @@ const { user, isAuthenticated, isLoading, hasRole } = useAuth();
 if (hasRole("SELLER")) { ... }
 ```
 
-- token เก็บใน localStorage และต่ออายุเองอัตโนมัติ — **ไม่ต้องแตะ token เอง**
+- access token เก็บใน memory และต่ออายุเองผ่าน refresh cookie แบบ HttpOnly — **ไม่ต้องแตะ token เอง**
 - ข้อมูลผู้ใช้อยู่ใน cache ของ TanStack Query อ่านผ่าน `useAuth()` เท่านั้น
 - แท็บอื่น login/logout แท็บนี้เห็นตามทันที
 

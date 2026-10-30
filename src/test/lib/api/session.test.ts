@@ -1,170 +1,94 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
-  getSession,
-  saveSession,
-  clearSession,
-  subscribeSession,
-  getAccessToken,
-  getRefreshToken,
-  isAccessTokenExpired,
-  refreshAccessToken,
+  getSession, saveSession, clearSession, getAccessToken,
+  isAccessTokenExpired, refreshAccessToken,
 } from "@/lib/api/session";
 
-// Mock the localStorage
-const mockLocalStorage = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value.toString();
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
-  };
-})();
-
-Object.defineProperty(window, "localStorage", {
-  value: mockLocalStorage,
-});
-
-vi.mock("@/lib/api/config", () => ({
-  buildUrl: vi.fn((path) => `http://mock${path}`),
-}));
-
-globalThis.fetch = vi.fn();
+vi.mock("@/lib/api/config", () => ({ buildUrl: (path: string) => `http://mock${path}` }));
 
 describe("api session", () => {
   beforeEach(() => {
-    mockLocalStorage.clear();
-    clearSession();
-    vi.clearAllMocks();
-  });
-
-  afterEach(() => {
+    clearSession(false);
     vi.restoreAllMocks();
   });
 
-  it("should save and get session", () => {
-    const tokens = {
-      accessToken: "access-token-123",
-      refreshToken: "refresh-token-456",
-      expiresIn: 3600,
-    };
-
-    saveSession(tokens);
-
-    const session = getSession();
-    expect(session).toBeDefined();
-    expect(session?.accessToken).toBe("access-token-123");
-    expect(session?.refreshToken).toBe("refresh-token-456");
-    expect(session?.accessExpiresAt).toBeGreaterThan(Date.now());
-    
-    expect(getAccessToken()).toBe("access-token-123");
-    expect(getRefreshToken()).toBe("refresh-token-456");
-  });
-
-  it("should clear session", () => {
-    const tokens = {
-      accessToken: "access-token-123",
-      refreshToken: "refresh-token-456",
-      expiresIn: 3600,
-    };
-
-    saveSession(tokens);
-    clearSession();
-
+  it("keeps only the access token in memory", () => {
+    saveSession({ accessToken: "access", expiresIn: 3600 });
+    expect(getAccessToken()).toBe("access");
+    expect(getSession()).toEqual({ accessToken: "access", accessExpiresAt: expect.any(Number) });
+    expect(window.localStorage.getItem("pegasus.auth.session")).toBeNull();
+    clearSession(false);
     expect(getSession()).toBeNull();
-    expect(getAccessToken()).toBeNull();
-    expect(getRefreshToken()).toBeNull();
   });
 
-  it("should check if access token is expired", () => {
-    vi.spyOn(Date, "now").mockReturnValue(10000000);
-
-    saveSession({
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-      expiresIn: 10, // expires at 10010000
-    });
-
-    expect(isAccessTokenExpired()).toBe(true); // because 10s is less than 30s skew
-    
-    saveSession({
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-      expiresIn: 100, // expires at 10100000
-    });
-
-    expect(isAccessTokenExpired()).toBe(false); 
+  it("recognizes an access token near expiry", () => {
+    saveSession({ accessToken: "access", expiresIn: 10 });
+    expect(isAccessTokenExpired()).toBe(true);
+    saveSession({ accessToken: "access", expiresIn: 100 });
+    expect(isAccessTokenExpired()).toBe(false);
   });
 
-  it("should subscribe to session changes", () => {
-    const listener = vi.fn();
-    const unsubscribe = subscribeSession(listener);
-
-    saveSession({
-      accessToken: "token1",
-      refreshToken: "token2",
-      expiresIn: 3600,
-    });
-
-    expect(listener).toHaveBeenCalledTimes(1);
-
-    clearSession();
-    expect(listener).toHaveBeenCalledTimes(2);
-
-    unsubscribe();
-    clearSession();
-    expect(listener).toHaveBeenCalledTimes(2); // no more calls
-  });
-
-  it("should refresh access token", async () => {
-    saveSession({
-      accessToken: "old-access",
-      refreshToken: "valid-refresh",
-      expiresIn: -10, // expired
-    });
-
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
+  it("refreshes with a cookie and no token in the body", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      json: async () => ({
-        success: true,
-        data: {
-          tokens: {
-            accessToken: "new-access",
-            refreshToken: "new-refresh",
-            expiresIn: 3600,
-          },
-        },
-      }),
-    } as unknown as Response);
-
-    const token = await refreshAccessToken();
-    
-    expect(token).toBe("new-access");
-    expect(globalThis.fetch).toHaveBeenCalledWith("http://mock/auth/refresh", expect.any(Object));
-    expect(getAccessToken()).toBe("new-access");
-    expect(getRefreshToken()).toBe("new-refresh");
+      json: async () => ({ success: true, data: { tokens: { accessToken: "new", expiresIn: 900 } } }),
+    } as Response);
+    expect(await refreshAccessToken()).toBe("new");
+    expect(fetch).toHaveBeenCalledWith("http://mock/auth/refresh", expect.objectContaining({
+      credentials: "include", body: "{}", method: "POST",
+    }));
+    expect(getAccessToken()).toBe("new");
   });
 
-  it("should clear session on refresh fail", async () => {
-    saveSession({
-      accessToken: "old-access",
-      refreshToken: "invalid-refresh",
-      expiresIn: -10,
-    });
-
-    vi.mocked(globalThis.fetch).mockResolvedValueOnce({
-      ok: false,
-    } as unknown as Response);
-
-    const token = await refreshAccessToken();
-    
-    expect(token).toBeNull();
+  it("clears memory when refresh is rejected", async () => {
+    saveSession({ accessToken: "old", expiresIn: -1 });
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: false, status: 401 } as Response);
+    expect(await refreshAccessToken()).toBeNull();
     expect(getSession()).toBeNull();
+  });
+
+  it("keeps the current session when refresh gets a temporary server error", async () => {
+    saveSession({ accessToken: "old", expiresIn: -1 });
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: false, status: 503 } as Response);
+    expect(await refreshAccessToken()).toBeNull();
+    expect(getAccessToken()).toBe("old");
+  });
+
+  it("does not let a late refresh overwrite a newer login", async () => {
+    let finish!: (response: Response) => void;
+    vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise<Response>((resolve) => {
+      finish = resolve;
+    }));
+    const pending = refreshAccessToken();
+    saveSession({ accessToken: "new-login", expiresIn: 900 });
+    finish({
+      ok: true,
+      json: async () => ({ success: true, data: { tokens: { accessToken: "stale", expiresIn: 900 } } }),
+    } as Response);
+    await pending;
+    expect(getAccessToken()).toBe("new-login");
+  });
+
+  it("refreshes another tab on login but ignores ordinary refresh broadcasts", async () => {
+    const channels: Array<{ onmessage: ((event: MessageEvent) => void) | null }> = [];
+    class FakeChannel {
+      onmessage: ((event: MessageEvent) => void) | null = null;
+      constructor() { channels.push(this); }
+      postMessage() { /* No other tab in this test. */ }
+    }
+    vi.stubGlobal("BroadcastChannel", FakeChannel);
+    vi.resetModules();
+    const otherTab = await import("@/lib/api/session");
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, data: { tokens: { accessToken: "new", expiresIn: 900 } } }),
+    } as Response);
+
+    channels[0].onmessage?.({ data: "refreshed" } as MessageEvent);
+    expect(fetch).not.toHaveBeenCalled();
+    channels[0].onmessage?.({ data: "login" } as MessageEvent);
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(otherTab.getAccessToken()).toBe("new"));
+    vi.unstubAllGlobals();
   });
 });

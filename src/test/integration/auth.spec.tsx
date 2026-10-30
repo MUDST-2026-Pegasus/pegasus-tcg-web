@@ -31,7 +31,7 @@ describe("Auth Flow Integration", () => {
         success: true,
         data: {
           user: { id: "1", email: "test@pegasus.com", roles: ["CUSTOMER"] },
-          tokens: { accessToken: "valid-token", refreshToken: "refresh", expiresIn: 3600 }
+          tokens: { accessToken: "valid-token", expiresIn: 3600 }
         }
       })
     } as unknown as Response);

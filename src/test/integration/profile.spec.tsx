@@ -6,17 +6,20 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EditProfileDialog } from "@/features/account/components/EditProfileDialog";
 import { createTestQueryClient } from "../utils";
 import type { RoleCode } from "@/features/auth/auth.types";
+import { clearSession, saveSession } from "@/lib/api/session";
 
 describe("Profile Integration", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
+    saveSession({ accessToken: "test-access", expiresIn: 3600 });
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    clearSession(false);
   });
 
   it("updates profile information and closes dialog on success", async () => {

@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils";
 
 import type { Game } from "../catalog.types";
-import { displayableUrl, gameInitials } from "../taxonomy.format";
+import { gameInitials } from "../taxonomy.format";
 
 type GameAvatarProps = {
-  game: Pick<Game, "name" | "code" | "logoUrl">;
+  game: Pick<Game, "name" | "code" | "logoImageUrl">;
   /** `sm` ในรายการเกม (28px), `lg` ในการ์ดข้อมูลเกม (56px) */
   size: "sm" | "lg";
   highlighted?: boolean;
 };
 
-/** โลโก้เกมถ้าเป็น URL ที่เปิดได้ ไม่งั้นเป็นตัวย่อชื่อเกมบนพื้นสี */
+/** โลโก้เกมถ้ามี ไม่งั้นเป็นตัวย่อชื่อเกมบนพื้นสี */
 export function GameAvatar({ game, size, highlighted }: GameAvatarProps) {
-  const logo = displayableUrl(game.logoUrl);
+  const logo = game.logoImageUrl;
   const initials = gameInitials(game);
 
   return (

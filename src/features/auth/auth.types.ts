@@ -30,8 +30,6 @@ export type AuthTokens = {
   accessToken: string;
   tokenType: string;
   expiresIn: number;
-  /** ใช้ได้ครั้งเดียว พอ refresh แล้วได้ตัวใหม่มาแทน ต้องเก็บตัวใหม่เสมอ */
-  refreshToken: string;
   refreshExpiresIn: number;
 };
 

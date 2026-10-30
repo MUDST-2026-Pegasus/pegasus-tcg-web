@@ -93,7 +93,7 @@ describe('RegisterForm', () => {
 
   it('calls register mutation with valid data and navigates on success', async () => {
     mockMutateAsync.mockResolvedValueOnce({
-      tokens: { accessToken: '123', refreshToken: '456' },
+      tokens: { accessToken: '123', expiresIn: 900 },
       user: { id: '1', username: 'testuser', email: 'test@example.com' }
     });
 

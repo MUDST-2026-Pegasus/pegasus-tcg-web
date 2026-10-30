@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
 import type { CardSet, Game } from "../catalog.types";
-import { displayableUrl, formatReleaseDate } from "../taxonomy.format";
+import { formatReleaseDate } from "../taxonomy.format";
 
 import { CARD_EMPTY_CLASS, HEAD_CLASS, HEAD_ROW_CLASS } from "./taxonomy.styles";
 
@@ -121,7 +121,7 @@ export function CardSetTable({
 
           <TableBody className="[&_tr]:border-[#eef1f2]">
             {visible.map((cardSet) => {
-              const logo = displayableUrl(cardSet.logoUrl);
+              const logo = cardSet.logoImageUrl;
               const released = formatReleaseDate(cardSet.releaseDate);
 
               return (

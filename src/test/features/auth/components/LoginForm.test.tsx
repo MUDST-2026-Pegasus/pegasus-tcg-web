@@ -76,7 +76,7 @@ describe('LoginForm', () => {
 
   it('calls login mutation with valid data and navigates on success', async () => {
     mockMutateAsync.mockResolvedValueOnce({
-      tokens: { accessToken: '123', refreshToken: '456' },
+      tokens: { accessToken: '123', expiresIn: 900 },
       user: { id: '1', email: 'test@example.com', name: 'Test' }
     });
 

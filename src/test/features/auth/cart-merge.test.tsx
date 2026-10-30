@@ -23,7 +23,7 @@ describe("guest cart merge on login", () => {
   }
 
   const session = {
-    tokens: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+    tokens: { accessToken: "access", expiresIn: 3600 },
     user: { id: 1, username: "buyer", email: "buyer@example.com", roles: ["BUYER"] },
   };
 

@@ -6,7 +6,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       /**
-       * Injects session tokens into localStorage to simulate an authenticated user.
+       * Mocks the cookie refresh bootstrap for an authenticated user.
        */
       loginAs(role: "BUYER" | "SELLER" | "ADMIN", overrides?: Record<string, unknown>): Chainable<void>;
 
@@ -29,16 +29,10 @@ Cypress.Commands.add("loginAs", (role = "BUYER", overrides = {}) => {
     ...overrides,
   };
 
-  cy.window().then((win) => {
-    win.localStorage.setItem(
-      "pegasus.auth.session",
-      JSON.stringify({
-        accessToken: token,
-        refreshToken: `refresh-${token}`,
-        accessExpiresAt: Date.now() + 3600000,
-      })
-    );
-  });
+  cy.intercept("POST", "**/api/v1/auth/refresh", {
+    statusCode: 200,
+    body: { success: true, data: { tokens: { accessToken: token, expiresIn: 3600 } } },
+  }).as("refreshRequest");
 
   cy.intercept("GET", "**/api/v1/auth/me", {
     statusCode: 200,

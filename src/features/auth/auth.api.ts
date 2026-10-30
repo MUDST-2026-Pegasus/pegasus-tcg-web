@@ -14,7 +14,7 @@ import type {
 /** component ไม่ควรเรียกไฟล์นี้ตรง ๆ ให้ผ่าน hook ใน `auth.queries.ts` */
 
 /** endpoint สาธารณะ ไม่ต้องแนบ Authorization และ token เก่าอาจหมดอายุอยู่ */
-const PUBLIC = { auth: false } as const;
+const PUBLIC = { auth: false, credentials: "include" } as const;
 
 export function register(payload: RegisterPayload): Promise<AuthSession> {
   return api.post<AuthSession>("/auth/register", payload, PUBLIC);
@@ -24,12 +24,12 @@ export function login(payload: LoginPayload): Promise<AuthSession> {
   return api.post<AuthSession>("/auth/login", payload, PUBLIC);
 }
 
-export function logout(refreshToken: string): Promise<void> {
-  return api.post<void>("/auth/logout", { refreshToken }, PUBLIC);
+export function logout(): Promise<void> {
+  return api.post<void>("/auth/logout", {}, PUBLIC);
 }
 
 export function logoutAll(): Promise<void> {
-  return api.post<void>("/auth/logout-all");
+  return api.post<void>("/auth/logout-all", {}, { credentials: "include" });
 }
 
 export function getCurrentUser(): Promise<AuthUser> {
@@ -50,5 +50,5 @@ export function resetPassword(payload: ResetPasswordPayload): Promise<void> {
 export function changePassword(
   payload: ChangePasswordPayload,
 ): Promise<AuthSession> {
-  return api.post<AuthSession>("/auth/password/change", payload);
+  return api.post<AuthSession>("/auth/password/change", payload, { credentials: "include" });
 }

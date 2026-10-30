@@ -20,6 +20,7 @@ export type GamePayload = {
   nameLocal: string | null;
   /** `null` = ให้ backend สร้างจากชื่อ */
   slug: string | null;
+  /** object key จาก `useFileUpload({ purpose: "CATALOG_IMAGE" })` หรือค่าเดิม (URL ที่วางไว้/key) */
   logoUrl: string | null;
   displayOrder: number;
   active: boolean;
@@ -47,6 +48,7 @@ export type CardSetPayload = {
   /** `yyyy-MM-dd` — ใส่วันในอนาคตได้ (ลงแคตตาล็อกก่อนวางขาย) */
   releaseDate: string | null;
   totalCards: number | null;
+  /** object key จาก `useFileUpload({ purpose: "CATALOG_IMAGE" })` หรือค่าเดิม (URL ที่วางไว้/key) */
   logoUrl: string | null;
 };
 

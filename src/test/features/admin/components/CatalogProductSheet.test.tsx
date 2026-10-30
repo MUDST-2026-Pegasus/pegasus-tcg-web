@@ -24,6 +24,7 @@ const pokemon: Game = {
   nameLocal: null,
   slug: "pokemon",
   logoUrl: null,
+  logoImageUrl: null,
   displayOrder: 1,
   active: true,
   createdBy: 1,

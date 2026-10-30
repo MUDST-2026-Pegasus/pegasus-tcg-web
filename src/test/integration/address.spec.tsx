@@ -5,17 +5,20 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { AddressFormDialog } from "@/features/account/components/AddressFormDialog";
 import { createTestQueryClient } from "../utils";
+import { clearSession, saveSession } from "@/lib/api/session";
 
 describe("Address Book Integration", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
     queryClient = createTestQueryClient();
+    saveSession({ accessToken: "test-access", expiresIn: 3600 });
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    clearSession(false);
   });
 
   it("adds a new address and closes dialog on success", async () => {

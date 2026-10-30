@@ -24,6 +24,7 @@ const mockGames: Game[] = [
     nameLocal: "โปเกมอน",
     slug: "pokemon",
     logoUrl: null,
+    logoImageUrl: null,
     displayOrder: 1,
     active: true,
     createdBy: 1,
@@ -55,6 +56,7 @@ const mockCardSets: CardSet[] = [
     releaseDate: "2026-10-01",
     totalCards: 187,
     logoUrl: null,
+    logoImageUrl: null,
   },
 ];
 
