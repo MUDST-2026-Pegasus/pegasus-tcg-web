@@ -2,13 +2,13 @@ import { useState } from "react";
 import { RotateCcw, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 
 import type { ReturnEvidenceLink } from "../after-sales.types";
 import { EvidenceWarningWidget } from "./components/EvidenceWarningWidget";
 import { PendingFundsWidget } from "./components/PendingFundsWidget";
 import { ReturnRequestCard } from "./components/ReturnRequestCard";
+import { ReturnSortSelect } from "./components/ReturnSortSelect";
 import { ReturnStepsWidget } from "./components/ReturnStepsWidget";
 import { ApproveReturnModal } from "./modals/ApproveReturnModal";
 import { ConfirmReceiptModal } from "./modals/ConfirmReceiptModal";
@@ -17,7 +17,7 @@ import { RejectReturnModal } from "./modals/RejectReturnModal";
 import { ReturnPolicyModal } from "./modals/ReturnPolicyModal";
 import { getRefundAmount } from "./return-draft";
 import { useReturnActions } from "./useReturnActions";
-import { useSellerReturns, type ReturnSortOrder } from "./useSellerReturns";
+import { useSellerReturns } from "./useSellerReturns";
 
 /**
  * Main Seller Returns Page Component
@@ -139,16 +139,7 @@ export function SellerReturnsPage() {
           </div>
 
           <div className="self-end sm:self-auto">
-            <NativeSelect
-              aria-label="เรียงลำดับคำขอคืนสินค้า"
-              size="sm"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as ReturnSortOrder)}
-              className="rounded-lg border-input bg-background text-xs font-medium text-foreground"
-            >
-              <option value="longest_first">เรียง: รอนานสุดก่อน</option>
-              <option value="newest_first">เรียง: ใหม่สุดก่อน</option>
-            </NativeSelect>
+            <ReturnSortSelect value={sortOrder} onChange={setSortOrder} />
           </div>
         </div>
 
