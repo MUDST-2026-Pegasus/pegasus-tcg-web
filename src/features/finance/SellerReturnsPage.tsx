@@ -1,22 +1,14 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, RotateCcw, XCircle } from "lucide-react";
+import { RotateCcw, XCircle } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { NativeSelect } from "@/components/ui/native-select";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 import { afterSalesApi } from "./after-sales.api";
-import {
-  formatAgo,
-  formatBaht,
-  formatBahtShort,
-  mapReturnErrorMessage,
-  sellerReturnStatusConfig,
-} from "./after-sales.format";
+import { formatBaht, mapReturnErrorMessage } from "./after-sales.format";
 import {
   calculateTabCounts,
   categorizeReturns,
@@ -26,10 +18,7 @@ import {
 import type { ReturnEvidenceLink, SellerReturnRequest } from "./after-sales.types";
 import { EvidenceWarningWidget } from "./seller-returns/components/EvidenceWarningWidget";
 import { PendingFundsWidget } from "./seller-returns/components/PendingFundsWidget";
-import { ReturnDecisionBox } from "./seller-returns/components/ReturnDecisionBox";
-import { ReturnInTransitBox } from "./seller-returns/components/ReturnInTransitBox";
-import { ReturnRequestSummary } from "./seller-returns/components/ReturnRequestSummary";
-import { ReturnStatusCallout } from "./seller-returns/components/ReturnStatusCallout";
+import { ReturnRequestCard } from "./seller-returns/components/ReturnRequestCard";
 import { ReturnStepsWidget } from "./seller-returns/components/ReturnStepsWidget";
 import { DEFAULT_RETURN_DRAFT, getRefundAmount, type ReturnDraft } from "./seller-returns/return-draft";
 import { ApproveReturnModal } from "./seller-returns/modals/ApproveReturnModal";
@@ -384,126 +373,22 @@ export function SellerReturnsPage() {
                   const isExpanded = effectiveExpandedId === item.id;
                   const isActionRequiredTab = activeTab === "action_required";
                   const isHighlighted = isActionRequiredTab && (index === 0 || isExpanded);
-                  const statusConf = sellerReturnStatusConfig(item.status);
-
-                  // Card form states
-                  const draft = getDraft(item.id);
-                  const isBusy = busyId === item.id;
 
                   return (
-                    <Card
+                    <ReturnRequestCard
                       key={item.id}
-                      className={cn(
-                        "gap-0 overflow-hidden rounded-xl border py-0 ring-0 transition-all duration-200",
-                        isHighlighted && isExpanded
-                          ? "border-amber-500/70 shadow-none inset-ring-1 inset-ring-amber-500/30"
-                          : "border-border shadow-none"
-                      )}
-                    >
-                      {/* Accordion Card Header */}
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        aria-expanded={isExpanded}
-                        onClick={() => setExplicitExpandedId(isExpanded ? null : item.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setExplicitExpandedId(isExpanded ? null : item.id);
-                          }
-                        }}
-                        className="flex cursor-pointer items-center justify-between p-4 sm:p-5 transition-colors hover:bg-muted/40 select-none"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm sm:text-base text-foreground tracking-tight">
-                              RT-{item.id}
-                            </span>
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                "text-[11px] font-medium leading-none",
-                                statusConf.className
-                              )}
-                            >
-                              {statusConf.label}
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            <span>{item.sellerOrderNumber}</span>
-                            <span className="mx-1.5">·</span>
-                            <span className="text-foreground font-medium">
-                              {item.buyer?.username ?? "buyer"}
-                            </span>
-                            <span className="mx-1.5">·</span>
-                            <span>
-                              {item.status === "IN_TRANSIT"
-                                ? `อนุมัติเมื่อ ${formatAgo(item.reviewedAt ?? item.requestedAt)}`
-                                : `เปิดคำขอเมื่อ ${formatAgo(item.requestedAt)}`}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3.5">
-                          <div className="text-right">
-                            <div className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                              {formatBahtShort(item.sellerOrderGrandTotal)}
-                            </div>
-                            <div className="text-[11px] text-muted-foreground">
-                              {item.refundAmount && item.resolution === "PARTIAL_REFUND"
-                                ? `คืนบางส่วน ${formatBahtShort(item.refundAmount)}`
-                                : "ยอดออเดอร์ย่อย"}
-                            </div>
-                          </div>
-                          <div className="text-muted-foreground hover:text-foreground transition-colors">
-                            {isExpanded ? (
-                              <ChevronUp className="size-5" />
-                            ) : (
-                              <ChevronDown className="size-5" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Accordion Card Body */}
-                      {isExpanded && (
-                        <CardContent className="border-t border-border p-4 sm:p-5 pt-4 space-y-5">
-                          {/* Case 1: REQUESTED (Decision Box) */}
-                          {item.status === "REQUESTED" && (
-                            <>
-                              <ReturnRequestSummary
-                                item={item}
-                                onEvidenceClick={(link, list) => setEvidencePreview({ link, list })}
-                              />
-                              <ReturnDecisionBox
-                                item={item}
-                                draft={draft}
-                                isBusy={isBusy}
-                                onDraftChange={(patch) => updateDraft(item.id, patch)}
-                                onApprove={() => setApproveModalItem(item)}
-                                onReject={() => setRejectModalItem(item)}
-                              />
-                            </>
-                          )}
-
-                          {/* Case 2: IN_TRANSIT */}
-                          {item.status === "IN_TRANSIT" && (
-                            <ReturnInTransitBox
-                              item={item}
-                              restock={draft.restock}
-                              isBusy={isBusy}
-                              onRestockChange={(restock) => updateDraft(item.id, { restock })}
-                              onReceive={() => setReceiveModalItem(item)}
-                            />
-                          )}
-
-                          {/* Case 3: Other Statuses (Informative Status Callout) */}
-                          {item.status !== "REQUESTED" && item.status !== "IN_TRANSIT" && (
-                            <ReturnStatusCallout item={item} />
-                          )}
-                        </CardContent>
-                      )}
-                    </Card>
+                      item={item}
+                      isExpanded={isExpanded}
+                      isHighlighted={isHighlighted}
+                      onToggle={() => setExplicitExpandedId(isExpanded ? null : item.id)}
+                      draft={getDraft(item.id)}
+                      isBusy={busyId === item.id}
+                      onDraftChange={(patch) => updateDraft(item.id, patch)}
+                      onApprove={() => setApproveModalItem(item)}
+                      onReject={() => setRejectModalItem(item)}
+                      onReceive={() => setReceiveModalItem(item)}
+                      onEvidenceClick={(link, list) => setEvidencePreview({ link, list })}
+                    />
                   );
                 })
               )}
