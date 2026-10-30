@@ -64,14 +64,6 @@ export function gameInitials(game: Pick<Game, "name" | "code">): string {
   return initials.slice(0, 3).toUpperCase();
 }
 
-/**
- * `logoUrl` ของ endpoint admin เป็นค่าดิบ — อาจเป็น URL ที่วางไว้ หรือ object key ที่ยังไม่เซ็น
- * เปิดเป็นรูปได้เฉพาะแบบแรก แบบหลังใช้ตัวย่อแทน
- */
-export function displayableUrl(value: string | null): string | null {
-  return value && /^https?:\/\//i.test(value) ? value : null;
-}
-
 const RELEASE_DATE = new Intl.DateTimeFormat("th-TH", {
   day: "numeric",
   month: "short",
