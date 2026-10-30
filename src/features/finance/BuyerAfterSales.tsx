@@ -66,6 +66,8 @@ export function BuyerAfterSales({
     Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
 
   const hasReturns = (returns.data?.length ?? 0) > 0;
+  // Only offer a new return once the list has loaded and is empty, so a failed load can't lead to a duplicate request
+  const canStartReturn = canReturn && returns.isSuccess && !hasReturns;
   const isCompleted = order.status === "COMPLETED";
 
   // Hide the entire section if no after-sales actions or reviews are applicable
@@ -79,12 +81,14 @@ export function BuyerAfterSales({
       await action();
       await cache.invalidateQueries({ queryKey: ["finance", "buyer-returns", order.id] });
       toast.add({ type: "success", title: success });
+      return true;
     } catch (error) {
       toast.add({
         type: "error",
         title: "ดำเนินการไม่สำเร็จ",
         description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
       });
+      return false;
     } finally {
       setBusy(false);
     }
@@ -95,7 +99,7 @@ export function BuyerAfterSales({
       .map((item) => ({ orderItemId: item.id, quantity: quantities[item.id] ?? 0 }))
       .filter((item) => item.quantity > 0);
     if (!items.length) return;
-    await act(
+    const ok = await act(
       () =>
         afterSalesApi.requestReturn(order.id, {
           reasonCode: reason,
@@ -105,7 +109,8 @@ export function BuyerAfterSales({
         }),
       "ส่งคำขอคืนสินค้าแล้ว"
     );
-    setIsReturnFormOpen(false);
+    // Keep the form (and what the buyer typed) open when the request fails
+    if (ok) setIsReturnFormOpen(false);
   }
 
   const selectedItemCount = Object.values(quantities).reduce((sum, q) => sum + (q > 0 ? q : 0), 0);
@@ -117,7 +122,7 @@ export function BuyerAfterSales({
         <h4 className="font-semibold text-sm text-foreground">
           {isCompleted ? "รีวิวร้านค้าและบริการหลังการขาย" : "บริการหลังการขาย"}
         </h4>
-        {canReturn && order.autoCompleteAt && !hasReturns && (
+        {canStartReturn && order.autoCompleteAt && (
           <span className="text-[11px] text-muted-foreground flex items-center gap-1">
             <Clock className="size-3 text-muted-foreground/80" />
             ขอคืนสินค้าได้ถึง {formatOrderDateTime(order.autoCompleteAt)}
@@ -202,7 +207,7 @@ export function BuyerAfterSales({
       })}
 
       {/* Return Request Action or Form */}
-      {canReturn && !hasReturns && (
+      {canStartReturn && (
         <>
           {!isReturnFormOpen ? (
             <div className="rounded-xl border border-border/70 bg-muted/30 p-3.5 sm:p-4 transition-all">
