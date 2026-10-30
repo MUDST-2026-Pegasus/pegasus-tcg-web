@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  AlertTriangle,
-  Check,
   ChevronDown,
   ChevronUp,
   Copy,
@@ -42,7 +40,10 @@ import {
   type TabCategory,
 } from "./after-sales.helpers";
 import type { ReturnEvidenceLink, SellerReturnRequest } from "./after-sales.types";
+import { EvidenceWarningWidget } from "./seller-returns/components/EvidenceWarningWidget";
+import { PendingFundsWidget } from "./seller-returns/components/PendingFundsWidget";
 import { ReturnEvidenceGrid } from "./seller-returns/components/ReturnEvidenceGrid";
+import { ReturnStepsWidget } from "./seller-returns/components/ReturnStepsWidget";
 import { ApproveReturnModal } from "./seller-returns/modals/ApproveReturnModal";
 import { ConfirmReceiptModal } from "./seller-returns/modals/ConfirmReceiptModal";
 import { EvidencePreviewModal } from "./seller-returns/modals/EvidencePreviewModal";
@@ -962,189 +963,9 @@ export function SellerReturnsPage() {
 
             {/* Right Column: Widgets */}
             <div className="lg:col-span-4 space-y-4">
-              {/* Widget 1: Steps to Return (ขั้นตอนการคืนสินค้า) */}
-              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
-                <CardContent className="p-5 space-y-4">
-                  <h3 className="font-bold text-sm text-foreground">
-                    ขั้นตอนการคืนสินค้า
-                  </h3>
-
-                  <div className="space-y-4">
-                    {/* Step 1 */}
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                        <Check className="size-3 stroke-[3]" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-semibold text-foreground">
-                          1. ผู้ซื้อเปิดคำขอพร้อมหลักฐาน
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Step 2 */}
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                          currentStep === 2
-                            ? "border-2 border-primary text-primary bg-primary/10"
-                            : currentStep > 2
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-border text-muted-foreground bg-muted/50"
-                        )}
-                      >
-                        {currentStep > 2 ? <Check className="size-3 stroke-[3]" /> : "2"}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div
-                          className={cn(
-                            "text-xs font-semibold",
-                            currentStep === 2 ? "text-primary font-bold" : "text-foreground"
-                          )}
-                        >
-                          คุณอนุมัติหรือปฏิเสธ
-                        </div>
-                        <div className="text-[11px] text-muted-foreground leading-tight">
-                          ไม่มีกำหนดเวลา แต่มีผลถูกหักเงินจนกว่าจะตัดสิน
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Step 3 */}
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                          currentStep === 3
-                            ? "border-2 border-primary text-primary bg-primary/10"
-                            : currentStep > 3
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-border text-muted-foreground bg-muted/50"
-                        )}
-                      >
-                        {currentStep > 3 ? <Check className="size-3 stroke-[3]" /> : "3"}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div
-                          className={cn(
-                            "text-xs font-semibold",
-                            currentStep === 3 ? "text-primary font-bold" : "text-foreground"
-                          )}
-                        >
-                          ผู้ซื้อส่งของคืน
-                        </div>
-                        <div className="text-[11px] text-muted-foreground leading-tight">
-                          เฉพาะเมื่อคุณให้ส่งคืน
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Step 4 */}
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                          currentStep === 4
-                            ? "border-2 border-primary text-primary bg-primary/10"
-                            : currentStep > 4
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-border text-muted-foreground bg-muted/50"
-                        )}
-                      >
-                        {currentStep > 4 ? <Check className="size-3 stroke-[3]" /> : "4"}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div
-                          className={cn(
-                            "text-xs font-semibold",
-                            currentStep === 4 ? "text-primary font-bold" : "text-foreground"
-                          )}
-                        >
-                          คุณยืนยันได้รับของ
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Step 5 */}
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={cn(
-                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
-                          currentStep === 5
-                            ? "border-2 border-primary text-primary bg-primary/10"
-                            : currentStep > 5
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-border text-muted-foreground bg-muted/50"
-                        )}
-                      >
-                        {currentStep > 5 ? <Check className="size-3 stroke-[3]" /> : "5"}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div
-                          className={cn(
-                            "text-xs font-semibold",
-                            currentStep === 5 ? "text-primary font-bold" : "text-foreground"
-                          )}
-                        >
-                          ระบบคืนเงินให้ผู้ซื้อ
-                        </div>
-                        <div className="text-[11px] text-muted-foreground leading-tight">
-                          ถ้าผู้ซื้อโอนเงินมา แอดมินจะโอนคืนให้
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Widget 2: Pending Funds Summary (เงินที่รอผลคำขอคืน) */}
-              <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
-                <CardContent className="p-5 space-y-3.5">
-                  <div className="flex items-baseline justify-between">
-                    <div>
-                      <h3 className="font-bold text-sm text-foreground">
-                        เงินที่รอผลคำขอคืน
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {pendingFundsSummary.count} ออเดอร์ย่อย
-                      </p>
-                    </div>
-                    <div className="text-xl font-bold text-amber-600 dark:text-amber-400 tracking-tight">
-                      {formatBahtShort(pendingFundsSummary.total)}
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border pt-3 space-y-2 text-xs">
-                    <div className="text-[11px] font-semibold text-muted-foreground">
-                      ผลต่อเงินของคุณเมื่อจบเรื่อง
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">คืนเต็มจำนวน</span>
-                      <span className="font-medium text-destructive">ไม่ได้รับเงินออเดอร์นี้</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">คืนบางส่วน</span>
-                      <span className="font-medium text-amber-600 dark:text-amber-400">ได้ส่วนที่เหลือ หลังหักค่าคอม</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">ปฏิเสธ</span>
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400">ได้เต็มจำนวนตามกำหนดเดิม</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Widget 3: Warning Box (ตรวจหลักฐานก่อนปฏิเสธ) */}
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-200">
-                  <AlertTriangle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                  <span>ตรวจหลักฐานก่อนปฏิเสธ</span>
-                </div>
-                <p className="text-[11px] text-amber-800/90 dark:text-amber-300 leading-relaxed">
-                  กดปฏิเสธแล้วแก้ไขไม่ได้ และผู้ซื้อจะเปิดคำขอของออเดอร์นี้ซ้ำไม่ได้อีก
-                </p>
-              </div>
+              <ReturnStepsWidget currentStep={currentStep} />
+              <PendingFundsWidget pendingFundsSummary={pendingFundsSummary} />
+              <EvidenceWarningWidget />
             </div>
           </div>
         )}
