@@ -165,18 +165,8 @@ describe('Core Admin Management Flow', () => {
   };
 
   const visitAuthenticated = (url: string) => {
-    cy.visit(url, {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          'pegasus.auth.session',
-          JSON.stringify({
-            accessToken: 'mock-admin-token',
-            refreshToken: 'mock-refresh-token',
-            accessExpiresAt: Date.now() + 3600000,
-          }),
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: 'mock-admin-token', expiresIn: 3600 } } } });
+    cy.visit(url);
   };
 
   beforeEach(() => {
@@ -198,7 +188,6 @@ describe('Core Admin Management Flow', () => {
         data: {
           tokens: {
             accessToken: 'mock-refreshed-token',
-            refreshToken: 'mock-refreshed-refresh-token',
             expiresIn: 3600,
           },
         },

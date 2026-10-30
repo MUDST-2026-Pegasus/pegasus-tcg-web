@@ -52,7 +52,6 @@ describe('Account & Profile Flow', () => {
         data: {
           tokens: {
             accessToken: 'mock-access',
-            refreshToken: 'mock-refresh',
             expiresIn: 3600,
           },
         },
@@ -95,15 +94,8 @@ describe('Account & Profile Flow', () => {
   });
 
   const visitProfile = () => {
-    cy.visit('/account/profile', {
-      onBeforeLoad(win) {
-        win.localStorage.setItem('pegasus.auth.session', JSON.stringify({
-          accessToken: 'mock-access',
-          refreshToken: 'mock-refresh',
-          accessExpiresAt: Date.now() + 3600000
-        }));
-      }
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: 'mock-access', expiresIn: 3600 } } } });
+    cy.visit('/account/profile');
   };
 
   it('allows user to view and open edit profile dialog', () => {

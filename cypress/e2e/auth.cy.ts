@@ -11,6 +11,20 @@ describe('Authentication Flow', () => {
     cy.get('button[type="submit"]').contains(/log in/i).should('exist');
   });
 
+  it('removes the old localStorage token on startup', () => {
+    cy.intercept('POST', '**/auth/refresh', { statusCode: 401, body: { success: false } });
+    cy.visit('/login', {
+      onBeforeLoad(win) {
+        win.localStorage.setItem('pegasus.auth.session', JSON.stringify({
+          accessToken: 'old-access', refreshToken: 'old-refresh', accessExpiresAt: Date.now() + 3600000,
+        }));
+      },
+    });
+    cy.window().then((win) => {
+      expect(win.localStorage.getItem('pegasus.auth.session')).to.equal(null);
+    });
+  });
+
   it('shows validation errors when submitting an empty form', () => {
     cy.visit('/login');
     cy.get('button[type="submit"]').click();
@@ -33,7 +47,7 @@ describe('Authentication Flow', () => {
       body: {
         success: true,
         data: {
-          tokens: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
+          tokens: { accessToken: 'mock-access', expiresIn: 900 },
           user: { id: '1', email: 'test@example.com', roles: ['BUYER'] }
         }
       }
@@ -66,7 +80,7 @@ describe('Authentication Flow', () => {
       body: {
         success: true,
         data: {
-          tokens: { accessToken: 'mock-access', refreshToken: 'mock-refresh' },
+          tokens: { accessToken: 'mock-access', expiresIn: 900 },
           user: { id: '2', email: 'newuser@example.com', roles: ['BUYER'] }
         }
       }
