@@ -78,7 +78,9 @@ describe("after sales screens", () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{ id: 7, sellerOrderId: 41,
       status: "AWAITING_RETURN_SHIPMENT", reasonCode: "DAMAGED", evidenceKeys: [] }] as never);
     render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />, { wrapper });
-    expect(await screen.findByText("คำขอคืน #7 · รอผู้ซื้อส่งสินค้าคืน · สินค้าเสียหาย")).toBeTruthy();
+    expect(await screen.findByText("คำขอคืน #7 · สินค้าเสียหาย")).toBeTruthy();
+    // status shows once, in the badge
+    expect(screen.getAllByText("รอผู้ซื้อส่งสินค้าคืน")).toHaveLength(1);
   });
 
   it("approves a return from the seller queue with the custom modal", async () => {
