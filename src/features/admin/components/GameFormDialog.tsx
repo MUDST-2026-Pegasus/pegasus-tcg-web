@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
@@ -36,6 +37,7 @@ import {
   toGamePayload,
   type GameFormValues,
 } from "../taxonomy.schema";
+import { LogoUploadField } from "./LogoUploadField";
 
 type GameFormDialogProps = {
   open: boolean;
@@ -96,11 +98,19 @@ function GameForm({
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<GameFormValues>({
     resolver: zodResolver(gameSchema),
     defaultValues: toGameForm(game),
   });
+
+  const upload = useFileUpload({
+    purpose: "CATALOG_IMAGE",
+    onChange: (keys) =>
+      setValue("logoUrl", keys[0] ?? "", { shouldDirty: true }),
+  });
+  const logoUrl = useWatch({ control, name: "logoUrl" });
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -197,32 +207,32 @@ function GameForm({
           </Field>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
-          <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-            <FieldLabel htmlFor="gameLogo">โลโก้ (URL)</FieldLabel>
-            <Input
-              id="gameLogo"
-              type="url"
-              maxLength={500}
-              placeholder="https://…"
-              aria-invalid={Boolean(errors.logoUrl)}
-              {...register("logoUrl")}
-            />
-            <FieldError errors={[errors.logoUrl]} />
-          </Field>
+        <Field
+          data-invalid={Boolean(errors.displayOrder) || undefined}
+          className="sm:max-w-[160px]"
+        >
+          <FieldLabel htmlFor="gameOrder">ลำดับการแสดง</FieldLabel>
+          <Input
+            id="gameOrder"
+            inputMode="numeric"
+            placeholder="0"
+            aria-invalid={Boolean(errors.displayOrder)}
+            {...register("displayOrder")}
+          />
+          <FieldError errors={[errors.displayOrder]} />
+        </Field>
 
-          <Field data-invalid={Boolean(errors.displayOrder) || undefined}>
-            <FieldLabel htmlFor="gameOrder">ลำดับการแสดง</FieldLabel>
-            <Input
-              id="gameOrder"
-              inputMode="numeric"
-              placeholder="0"
-              aria-invalid={Boolean(errors.displayOrder)}
-              {...register("displayOrder")}
-            />
-            <FieldError errors={[errors.displayOrder]} />
-          </Field>
-        </div>
+        <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
+          <FieldLabel htmlFor="gameLogo">โลโก้</FieldLabel>
+          <LogoUploadField
+            upload={upload}
+            id="gameLogo"
+            value={logoUrl}
+            saved={game}
+            onRemove={() => setValue("logoUrl", "", { shouldDirty: true })}
+          />
+          <FieldError errors={[errors.logoUrl]} />
+        </Field>
 
         <Field orientation="horizontal">
           <Controller
@@ -250,8 +260,10 @@ function GameForm({
         <DialogClose render={<Button type="button" variant="outline" />}>
           ยกเลิก
         </DialogClose>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Spinner data-icon="inline-start" />}
+        <Button type="submit" disabled={isSubmitting || upload.isUploading}>
+          {(isSubmitting || upload.isUploading) && (
+            <Spinner data-icon="inline-start" />
+          )}
           {game ? "บันทึก" : "เพิ่มเกม"}
         </Button>
       </DialogFooter>
