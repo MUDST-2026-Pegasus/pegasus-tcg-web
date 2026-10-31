@@ -93,6 +93,8 @@ describe("admin promotions actions", () => {
     await waitFor(() => expect(adminPromotionApi.list).toHaveBeenCalledWith(expect.objectContaining({ owner: "PLATFORM", status: "ACTIVE", q: "welcome", page: 2 })));
     await waitFor(() => expect(adminPromotionApi.redemptions).toHaveBeenCalledWith(1, 1));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(await screen.findByText("ส่วนลดที่ Pegasus ออก")).toBeInTheDocument();
+    expect(screen.getByText("ยอดขายจากโค้ดนี้")).toBeInTheDocument();
   });
 
   it("loads every page of home candidates and saves their order", async () => {
