@@ -42,8 +42,10 @@ describe("admin promotions actions", () => {
   it("requires the exact code before deleting", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
-    await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
-    await user.click(screen.getByRole("button", { name: "ลบ" }));
+    const trigger = await screen.findByLabelText("จัดการ PEGASUS10");
+    await user.click(trigger);
+    await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "true"));
+    await user.click(await screen.findByRole("menuitem", { name: "ลบ" }));
     const confirm = screen.getByRole("button", { name: "ลบโค้ด" });
     expect(confirm).toBeDisabled();
     await user.type(screen.getByPlaceholderText("PEGASUS10"), "PEGASUS10");
@@ -56,7 +58,7 @@ describe("admin promotions actions", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
-    await user.click(screen.getByRole("button", { name: "ลบ" }));
+    await user.click(await screen.findByRole("menuitem", { name: "ลบ" }));
     await user.type(screen.getByPlaceholderText("PEGASUS10"), "PEGASUS10");
     await user.click(screen.getByRole("button", { name: "ลบโค้ด" }));
     await user.click(await screen.findByRole("button", { name: "หยุดชั่วคราว" }));
@@ -69,7 +71,7 @@ describe("admin promotions actions", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
-    await user.click(screen.getByRole("button", { name: "ลบ" }));
+    await user.click(await screen.findByRole("menuitem", { name: "ลบ" }));
     await user.type(screen.getByPlaceholderText("PEGASUS10"), "PEGASUS10");
     await user.click(screen.getByRole("button", { name: "ลบโค้ด" }));
     await user.click(await screen.findByRole("button", { name: "สิ้นสุดวันนี้" }));
@@ -82,7 +84,7 @@ describe("admin promotions actions", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
-    await user.click(screen.getByRole("button", { name: "ลบ" }));
+    await user.click(await screen.findByRole("menuitem", { name: "ลบ" }));
     await user.type(screen.getByPlaceholderText("PEGASUS10"), "PEGASUS10");
     await user.click(screen.getByRole("button", { name: "ลบโค้ด" }));
     expect(await screen.findByRole("button", { name: "สิ้นสุดวันนี้" })).toBeDisabled();
@@ -97,14 +99,26 @@ describe("admin promotions actions", () => {
     expect(screen.getByText("ยอดขายจากโค้ดนี้")).toBeInTheDocument();
   });
 
+  it("filters by owner and navigates with numbered page buttons", async () => {
+    vi.mocked(adminPromotionApi.list).mockImplementation(async ({ page: index }) => page([code], index, 2));
+    const user = userEvent.setup();
+    renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
+    await user.click(await screen.findByRole("button", { name: "Pegasus" }));
+    await waitFor(() => expect(adminPromotionApi.list).toHaveBeenCalledWith(expect.objectContaining({ owner: "PLATFORM", page: 0, size: 8 })));
+    await user.click(screen.getByRole("button", { name: "หน้า 2" }));
+    await waitFor(() => expect(adminPromotionApi.list).toHaveBeenCalledWith(expect.objectContaining({ owner: "PLATFORM", page: 1, size: 8 })));
+    expect(screen.getByRole("button", { name: "หน้า 2" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("loads every page of home candidates and saves their order", async () => {
     const second = { ...code, id: 2, code: "WELCOME20", featuredOnHome: false };
     vi.mocked(adminPromotionApi.list).mockImplementation(async ({ owner, page: index }) => owner === "PLATFORM" ? page(index === 0 ? [code] : [second], index, 2) : page([code]));
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByRole("button", { name: /จัดลำดับหน้าแรก/ }));
-    await user.click(await screen.findByRole("checkbox", { name: "WELCOME20" }));
-    await user.click(screen.getByRole("button", { name: "บันทึก" }));
+    await user.click(await screen.findByRole("button", { name: /เพิ่มโค้ด Pegasus/ }));
+    await user.click(screen.getByRole("button", { name: /WELCOME20/ }));
+    await user.click(screen.getByRole("button", { name: "บันทึกลำดับ" }));
     await waitFor(() => expect(adminPromotionApi.homeOrder).toHaveBeenCalledWith([1, 2]));
   });
 
@@ -115,9 +129,9 @@ describe("admin promotions actions", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
+    await user.click(await screen.findByRole("menuitem", { name: "หยุดชั่วคราว" }));
     await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
-    await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
-    await waitFor(() => expect(screen.getByRole("button", { name: "หยุดชั่วคราว 1" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("tab", { name: /หยุดชั่วคราว/ })).toHaveTextContent("1"));
     expect(screen.getAllByText("หยุดชั่วคราว").length).toBeGreaterThan(0);
   });
 
@@ -126,12 +140,12 @@ describe("admin promotions actions", () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
-    await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
+    await user.click(await screen.findByRole("menuitem", { name: "หยุดชั่วคราว" }));
     const confirm = screen.getByRole("button", { name: "หยุดชั่วคราว" });
     expect(confirm).toBeDisabled();
-    await user.selectOptions(screen.getByLabelText("เหตุผล *"), "ส่วนลดสูงผิดปกติ");
-    await user.type(screen.getByLabelText("รายละเอียดที่แจ้งร้าน *"), "ตรวจพบราคาผิด");
+    await user.selectOptions(screen.getByLabelText("เหตุผล *"), "ส่วนลดสูงผิดปกติ / สงสัยปั่นยอด");
+    await user.type(screen.getByLabelText("รายละเอียดถึงร้าน"), "ตรวจพบราคาผิด");
     await user.click(confirm);
-    await waitFor(() => expect(adminPromotionApi.pause).toHaveBeenCalledWith(1, "ส่วนลดสูงผิดปกติ: ตรวจพบราคาผิด", true));
+    await waitFor(() => expect(adminPromotionApi.pause).toHaveBeenCalledWith(1, "ส่วนลดสูงผิดปกติ / สงสัยปั่นยอด: ตรวจพบราคาผิด", true));
   });
 });
