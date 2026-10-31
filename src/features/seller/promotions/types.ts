@@ -1,0 +1,7 @@
+import type { PageResponse } from "@/lib/api";
+export type Status = "ACTIVE" | "SCHEDULED" | "PAUSED" | "EXPIRED" | "USED_UP";
+export interface SellerPromotion { id: number; code: string; name: string; description: string | null; discountType: "PERCENT" | "FIXED"; discountValue: number; maxDiscount: number | null; minSpend: number; visibility: "PUBLIC" | "PRIVATE"; newBuyerOnly: boolean; usageLimitTotal: number | null; usageLimitPerUser: number; usedCount: number; claimable: boolean; claimLimit: number | null; claimedCount: number; discountTotal: number; startsAt: string; endsAt: string; status: Status; pausedAt: string | null; pausedBy: "SELLER" | "ADMIN" | null; pauseReason: string | null; createdAt: string }
+export type SellerPromotionInput = Pick<SellerPromotion, "code" | "name" | "description" | "discountType" | "discountValue" | "maxDiscount" | "minSpend" | "visibility" | "newBuyerOnly" | "usageLimitTotal" | "usageLimitPerUser" | "claimable" | "claimLimit" | "startsAt" | "endsAt"> & { featuredOnHome: boolean };
+export interface SellerPromotionPage { page: PageResponse<SellerPromotion>; statusCounts: Record<Status, number> }
+export interface Summary { activeCodes: number; redemptions30d: number; shopDiscount30d: number; salesWithCodes30d: number }
+export interface Redemption { id: number; sellerOrderNumber: string | null; buyerDisplayName: string; amount: number; status: string; createdAt: string }
