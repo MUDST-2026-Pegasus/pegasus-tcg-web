@@ -44,6 +44,9 @@ const OrderHistoryPage = lazyPage(() => import("@/features/account/pages/OrderHi
 const AddressBookPage = lazyPage(() => import("@/features/account/pages/AddressBookPage").then((m) => m.AddressBookPage), <AccountPageSkeleton label="กำลังโหลดที่อยู่" />);
 const MyCollectionPage = lazyPage(() => import("@/features/collection/pages/MyCollectionPage").then((m) => m.MyCollectionPage), <CatalogPageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 const SellerApplicationPage = lazyPage(() => import("@/features/seller/application/SellerApplicationPage").then((m) => m.SellerApplicationPage), <FormPageSkeleton />);
+const AuctionListPage = lazyPage(() => import("@/features/auction/pages/AuctionListPage").then((m) => m.AuctionListPage), <CatalogPageSkeleton label="กำลังโหลดประมูล" />);
+const AuctionDetailPage = lazyPage(() => import("@/features/auction/pages/AuctionDetailPage").then((m) => m.AuctionDetailPage), <DetailPageSkeleton label="กำลังโหลดประมูล" />);
+const MyAuctionsPage = lazyPage(() => import("@/features/auction/pages/MyAuctionsPage").then((m) => m.MyAuctionsPage), <AccountPageSkeleton label="กำลังโหลดการประมูลของฉัน" />);
 const NotFoundPage = lazyPage(() => import("@/features/not-found/pages/NotFoundPage").then((m) => m.NotFoundPage), <ArticlePageSkeleton />);
 
 
@@ -61,6 +64,9 @@ export const publicRoutes: RouteObject = {
     { path: "pokemon", element: <ProductListPage key="pokemon" gameCode="POKEMON" title="Pokémon" /> },
     { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
     { path: "search", element: <SearchResultsPage /> },
+    // ระบบประมูล [TCG-627] — guest ดูได้ บิดต้องล็อกอิน (เช็กตอนกดบิด)
+    { path: "auctions", element: <AuctionListPage /> },
+    { path: "auctions/:auctionId", element: <AuctionDetailPage /> },
 
     { path: "store/:storeId", element: <StoreRedirect /> },
     { path: "u/:username", element: <PublicSellerPage /> },
@@ -82,6 +88,7 @@ export const publicRoutes: RouteObject = {
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },
         { path: "account/collection", element: <MyCollectionPage /> },
+        { path: "account/auctions", element: <MyAuctionsPage /> },
         // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
         { path: "become-a-seller", element: <SellerApplicationPage /> },
       ],
