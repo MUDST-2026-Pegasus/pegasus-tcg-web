@@ -11,6 +11,7 @@ import { financeApi } from "@/features/finance/finance.api";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { Review } from "@/features/finance/after-sales.types";
 import type { OrderDetails } from "@/features/account/orders.types";
+import { toast } from "@/components/ui/toast";
 
 const mockOrders: OrderDetails[] = [
   {
@@ -141,6 +142,17 @@ describe("OrderHistoryPage", () => {
     // Unpaid order and a paid one the seller has not shipped yet
     expect(screen.getByText("Awaiting Payment")).toBeInTheDocument();
     expect(screen.getByText("Preparing")).toBeInTheDocument();
+  });
+
+  it("notifies the buyer when a pending order times out and its code is released", async () => {
+    const notify = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+    const view = renderWithProviders(<OrderHistoryPage />);
+    const expired = { ...mockOrders[0], status: "CANCELLED", promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 50, status: "RELEASED" }], sellerOrders: [{ ...mockOrders[0].sellerOrders[0], status: "CANCELLED", cancelReason: "Cancelled automatically: payment was not received in time" }] };
+    vi.mocked(orderQueries.useBuyerOrders).mockReturnValue({ data: [expired, mockOrders[1]], isLoading: false, error: null, refetch: vi.fn() } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    view.rerender(<OrderHistoryPage />);
+    await waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({
+      title: "คำสั่งซื้อ ORD-101 หมดเวลาชำระ", description: "คืนสิทธิ์โค้ดแล้ว", type: "warning",
+    })));
   });
 
   it("opens the linked order details and closes without reopening the query link", async () => {

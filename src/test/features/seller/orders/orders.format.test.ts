@@ -330,6 +330,22 @@ describe("payment, timeline and profit", () => {
     expect(profitSummary(detail({ status: "CANCELLED" }))).toBeNull();
   });
 
+  it("shows buyer payment, each subsidy owner, and the seller payout from the order API", () => {
+    const summary = profitSummary(detail({
+      itemsSubtotal: 1000, shippingFee: 50, sellerDiscount: 100, platformDiscount: 80,
+      platformSubsidy: 80, commissionBase: 900, grandTotal: 870,
+      commissionAmount: 49.06, sellerNetAmount: 900.94,
+    }));
+    expect(summary?.rows).toEqual(expect.arrayContaining([
+      { id: "seller-promo", label: "− โค้ดร้าน (ร้านออก)", value: "฿100" },
+      { id: "platform-promo", label: "− โค้ด Pegasus (Pegasus ออก)", value: "฿80" },
+      { id: "buyer-paid", label: "ลูกค้าจ่าย", value: "฿870" },
+      { id: "subsidy", label: "+ Pegasus จ่ายแทน", value: "฿80" },
+      { id: "seller-net", label: "ร้านได้รับ", value: "฿900.94" },
+    ]));
+    expect(summary?.rows.some((row) => row.id === "sales")).toBe(false);
+  });
+
   it("words the month from the dashboard numbers", () => {
     expect(monthlySummary({ revenue: 26000, cost: 16420, commission: 1242.5, net: 8337.5 })).toMatchObject({
       rows: [

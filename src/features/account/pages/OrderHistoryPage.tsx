@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
@@ -86,7 +86,7 @@ export function OrderHistoryPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
+  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders(0, 50, true);
   const refunds = useBuyerRefunds();
 
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
@@ -114,6 +114,20 @@ export function OrderHistoryPage() {
     }
     return [];
   }, [ordersData]);
+  const previousStatuses = useRef<Map<number, string> | null>(null);
+  useEffect(() => {
+    if (!ordersData) return;
+    for (const order of orders) {
+      if (previousStatuses.current?.get(order.id) !== "PENDING_PAYMENT" || order.status !== "CANCELLED") continue;
+      const timedOut = order.sellerOrders.some((seller) => seller.cancelReason?.includes("Cancelled automatically: payment was not received in time"));
+      if (timedOut) toast.add({
+        title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
+        description: order.promotions?.length ? "คืนสิทธิ์โค้ดแล้ว" : "คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+        type: "warning",
+      });
+    }
+    previousStatuses.current = new Map(orders.map((order) => [order.id, order.status]));
+  }, [orders, ordersData]);
 
   const handleOpenCancelModal = (order: OrderDetails) => {
     setSelectedOrderToCancel(order);
@@ -781,7 +795,13 @@ function OrderDetailsModal({
                   {formatPrice(order.shippingTotal)}
                 </span>
               </div>
-              {order.discountTotal > 0 && (
+              {(order.sellerDiscountTotal || 0) > 0 && (
+                <div className="flex justify-between text-emerald-700"><span>ส่วนลดร้าน · {order.promotions?.filter((p) => p.ownerType === "SELLER").map((p) => p.code).join(", ")}</span><span>−{formatPrice(order.sellerDiscountTotal || 0)}</span></div>
+              )}
+              {(order.platformDiscountTotal || 0) > 0 && (
+                <div className="flex justify-between text-blue-700"><span>ส่วนลด Pegasus · {order.promotions?.find((p) => p.ownerType === "PLATFORM")?.code}</span><span>−{formatPrice(order.platformDiscountTotal || 0)}</span></div>
+              )}
+              {order.discountTotal > 0 && order.sellerDiscountTotal == null && order.platformDiscountTotal == null && (
                 <div className="flex justify-between text-emerald-600">
                   <span>Discount</span>
                   <span>-{formatPrice(order.discountTotal)}</span>

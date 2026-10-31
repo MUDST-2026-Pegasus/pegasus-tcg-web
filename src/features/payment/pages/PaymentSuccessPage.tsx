@@ -82,6 +82,8 @@ export function PaymentSuccessPage() {
                 <div className="payment-success-row"><dt>Date</dt><dd>{paymentSuccessDate(order.data?.paidAt)}</dd></div>
                 <div className="payment-success-row"><dt>Payment Method</dt><dd>{paymentMethodName(payment.data?.method)}</dd></div>
                 <div className="payment-success-row"><dt>Items</dt><dd>{items.length ? itemDescription : "—"}</dd></div>
+                {(order.data?.sellerDiscountTotal || 0) > 0 && <div className="payment-success-row"><dt>ส่วนลดร้าน · {order.data?.promotions?.filter((p) => p.ownerType === "SELLER").map((p) => p.code).join(", ")}</dt><dd>−฿{order.data?.sellerDiscountTotal?.toLocaleString("th-TH")}</dd></div>}
+                {(order.data?.platformDiscountTotal || 0) > 0 && <div className="payment-success-row"><dt>ส่วนลด Pegasus · {order.data?.promotions?.find((p) => p.ownerType === "PLATFORM")?.code}</dt><dd>−฿{order.data?.platformDiscountTotal?.toLocaleString("th-TH")}</dd></div>}
                 <div className="payment-success-row payment-success-total"><dt>Total Amount</dt><dd>{amountText}</dd></div>
               </dl>
             </section>

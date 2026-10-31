@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
@@ -24,6 +25,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [tracking, setTracking] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState(false);
+  const [confirmReturn, setConfirmReturn] = useState(false);
   const canReturn = ["SHIPPED", "DELIVERED"].includes(order.status) && !!order.autoCompleteAt
     && Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
 
@@ -54,8 +56,9 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       {(order.items ?? []).map((item) => <label key={item.id} className="flex items-center gap-2">{item.productName} (สูงสุด {item.quantity})<Input className="max-w-24" type="number" min="0" max={item.quantity} value={quantities[item.id] ?? 0} onChange={(e) => setQuantities((old) => ({ ...old, [item.id]: Math.min(item.quantity, Math.max(0, Number(e.target.value))) }))} /></label>)}
       <label>หลักฐานประกอบ (ไม่บังคับ)<Input type="file" multiple accept={evidence.accept} onChange={(e) => { if (e.target.files?.length) evidence.addFiles(e.target.files); }} /></label>
       {evidence.items.map((item) => <p key={item.id}>{item.file.name}: {item.status === "error" ? item.error : item.status === "done" ? "อัปโหลดแล้ว" : "กำลังอัปโหลด"}</p>)}
-      <Button disabled={busy || evidence.isUploading || !Object.values(quantities).some((value) => value > 0)} onClick={() => void createReturn()}>ส่งคำขอคืนสินค้า</Button>
+      <Button disabled={busy || evidence.isUploading || !Object.values(quantities).some((value) => value > 0)} onClick={() => setConfirmReturn(true)}>ส่งคำขอคืนสินค้า</Button>
     </div>}
+    <Dialog open={confirmReturn} onOpenChange={setConfirmReturn}><DialogContent><DialogHeader><DialogTitle>ยืนยันคำขอคืนสินค้า</DialogTitle></DialogHeader><div className="grid gap-2 text-sm">{order.items.filter((item) => (quantities[item.id] || 0) > 0).map((item) => <div key={item.id} className="rounded-lg border p-3"><strong>{item.productName} × {quantities[item.id]}</strong>{(item.discountAllocated || 0) > 0 && <div className="mt-1 text-xs text-muted-foreground"><p>ราคาสินค้า {item.unitPrice.toLocaleString("th-TH", { style: "currency", currency: "THB" })}</p><p>ส่วนลดร้านที่ปัน −{(item.sellerDiscountAllocated || 0).toLocaleString("th-TH", { style: "currency", currency: "THB" })}</p><p>ส่วนลด Pegasus ที่ปัน −{(item.platformDiscountAllocated || 0).toLocaleString("th-TH", { style: "currency", currency: "THB" })}</p><p className="font-semibold text-foreground">ยอดคืนโดยประมาณต่อใบ {item.refundEstimatePerUnit?.toLocaleString("th-TH", { style: "currency", currency: "THB" })}</p></div>}</div>)}</div><DialogFooter><Button variant="outline" onClick={() => setConfirmReturn(false)}>กลับไปแก้ไข</Button><Button disabled={busy} onClick={() => { setConfirmReturn(false); void createReturn(); }}>ยืนยัน</Button></DialogFooter></DialogContent></Dialog>
     <BuyerOrderReview orderId={order.id} status={order.status}/>
   </section>;
 }

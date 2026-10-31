@@ -178,6 +178,11 @@ export type SellerOrderDetail = {
   shipments: OrderShipment[];
   statusHistory: OrderStatusChange[];
   sellerName: string | null;
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: Array<{ code: string; ownerType: "PLATFORM" | "SELLER"; amount: number }>;
 };
 
 /** `payment.method` */

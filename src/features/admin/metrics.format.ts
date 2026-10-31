@@ -101,7 +101,7 @@ export type StatCardModel = {
 
 /** การ์ดสถิติ 4 ใบเรียงตามดีไซน์ */
 export function statCards(overview: AdminOverview): StatCardModel[] {
-  const { gmv, newSellers, activeListings, commission } = overview.stats;
+  const { gmv, newSellers, activeListings, commission, promotionCost } = overview.stats;
   return [
     {
       id: "gmv",
@@ -142,6 +142,15 @@ export function statCards(overview: AdminOverview): StatCardModel[] {
       bars: sparkBars(commission.sparkline),
       accent: "green",
     },
+    ...(promotionCost ? [{
+      id: "promotion-cost",
+      label: "ต้นทุนโปรโมชั่น Pegasus",
+      value: formatBaht(promotionCost.value),
+      delta: formatDelta(promotionCost.value, promotionCost.previous),
+      footnote: "PROMO_SUBSIDY ที่ปล่อยเงินให้ร้านแล้ว",
+      bars: sparkBars(promotionCost.sparkline),
+      accent: "primary" as const,
+    }] : []),
   ];
 }
 

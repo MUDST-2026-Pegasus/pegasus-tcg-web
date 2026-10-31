@@ -12,7 +12,13 @@ export interface OrderItemDetails {
   imageKey: string | null;
   imageUrl?: string | null;
   unitIds: number[];
+  discountAllocated?: number;
+  sellerDiscountAllocated?: number;
+  platformDiscountAllocated?: number;
+  refundEstimatePerUnit?: number;
 }
+
+export interface AppliedPromotion { code: string; ownerType: "PLATFORM" | "SELLER"; sellerProfileId: number | null; amount: number; status: string }
 
 export interface ShipmentDetails {
   id: number;
@@ -59,6 +65,12 @@ export interface SellerOrderDetails {
   items: OrderItemDetails[];
   shipments: ShipmentDetails[];
   statusHistory: OrderStatusHistory[];
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface OrderDetails {
@@ -83,6 +95,10 @@ export interface OrderDetails {
   paymentUnderReview?: boolean;
   /** Last moment a paid order can be cancelled; null before payment. */
   cancellableUntil?: string | null;
+  sellerDiscountTotal?: number;
+  platformDiscountTotal?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface PageResponse<T> {

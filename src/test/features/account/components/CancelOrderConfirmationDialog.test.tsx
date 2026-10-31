@@ -27,6 +27,15 @@ const mockOrder: OrderDetails = {
 };
 
 describe("CancelOrderConfirmationDialog", () => {
+  it("explains when an unpaid order restores its code", () => {
+    renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, promotionsRestoredOnCancel: true, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "RESERVED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
+    expect(screen.getByText(/โค้ดจะกลับเข้าโค้ดของฉัน/)).toBeInTheDocument();
+  });
+
+  it("explains that a paid order does not restore its code", () => {
+    renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, status: "PAID", promotionsRestoredOnCancel: false, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "CONSUMED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
+    expect(screen.getByText(/โค้ดจะไม่ได้คืนสิทธิ์/)).toBeInTheDocument();
+  });
   it("renders correctly when open with title, description, and action buttons", () => {
     renderWithProviders(
       <CancelOrderConfirmationDialog

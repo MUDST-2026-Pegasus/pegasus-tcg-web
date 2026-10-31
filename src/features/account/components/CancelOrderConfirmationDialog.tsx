@@ -50,6 +50,10 @@ export function CancelOrderConfirmationDialog({
               {order ? ` (Order #${order.orderNumber})` : ""}
             </DialogDescription>
           </div>
+          {order && (order.promotions?.length || 0) > 0 && <div className={`rounded-lg border p-3 text-xs ${order.promotionsRestoredOnCancel ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>
+            <p>ยอดที่จ่าย {order.grandTotal.toLocaleString("th-TH", { style: "currency", currency: "THB" })} · โค้ดที่ใช้ {order.promotions?.map((promotion) => promotion.code).join(", ")}</p>
+            <p className="mt-1 font-semibold">{order.promotionsRestoredOnCancel ? "โค้ดจะกลับเข้าโค้ดของฉัน" : "เงินคืนตามยอดที่ชำระจริง · โค้ดจะไม่ได้คืนสิทธิ์"}</p>
+          </div>}
         </div>
 
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-gray-100 bg-neutral-50 px-6 py-4">

@@ -130,6 +130,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
 
           <div className="flex shrink-0 flex-col items-end gap-[3px]">
             <span className="text-base font-bold text-zinc-950">{formatBaht(order.grandTotal)}</span>
+            {(order.sellerDiscount || order.platformDiscount) ? <span title="ออเดอร์นี้ใช้โค้ดส่วนลด" className="text-xs text-teal-700">🎟 โค้ดส่วนลด</span> : null}
             <span className={cn("text-[10px]", PAYMENT_TEXT[payment])}>
               {PAYMENT_STATE_LABEL[payment]}
             </span>

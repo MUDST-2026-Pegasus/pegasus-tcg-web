@@ -423,8 +423,18 @@ export function profitSummary(detail: SellerOrderDetail): ProfitSummary | null {
   }
   return {
     rows: [
-      { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
+      ...(!order.sellerDiscount && !order.platformDiscount ? [{ id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) }] : []),
+      ...(order.sellerDiscount || order.platformDiscount ? [
+        { id: "items", label: "ยอดสินค้า", value: formatBaht(order.itemsSubtotal) },
+        { id: "shipping", label: "ค่าส่ง", value: formatBaht(order.shippingFee) },
+        ...(order.sellerDiscount ? [{ id: "seller-promo", label: "− โค้ดร้าน (ร้านออก)", value: formatBaht(order.sellerDiscount) }] : []),
+        ...(order.platformDiscount ? [{ id: "platform-promo", label: "− โค้ด Pegasus (Pegasus ออก)", value: formatBaht(order.platformDiscount) }] : []),
+        { id: "buyer-paid", label: "ลูกค้าจ่าย", value: formatBaht(order.grandTotal) },
+        ...(order.platformSubsidy ? [{ id: "subsidy", label: "+ Pegasus จ่ายแทน", value: formatBaht(order.platformSubsidy) }] : []),
+        { id: "commission-base", label: "ฐานคอมมิชชั่น", value: formatBaht(order.commissionBase ?? order.itemsSubtotal) },
+      ] : []),
       { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
+      ...(order.sellerDiscount || order.platformDiscount ? [{ id: "seller-net", label: "ร้านได้รับ", value: formatBaht(order.sellerNetAmount) }] : []),
       { id: "cost", label: "− ต้นทุนสินค้า", value: formatBaht(roundMoney(detail.costTotal)) },
     ],
     net: formatBaht(roundMoney(order.sellerNetAmount - detail.costTotal)),

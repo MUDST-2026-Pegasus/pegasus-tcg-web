@@ -120,13 +120,17 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
         <Section title="ยอดเงิน">
           <Row label="ค่าสินค้า">{formatBaht(order.itemsSubtotal)}</Row>
           <Row label="ค่าส่ง">{formatBaht(order.shippingFee)}</Row>
+          {(order.sellerDiscount || 0) > 0 && <Row label={`โค้ดร้าน · ${order.promotions?.find((p) => p.ownerType === "SELLER")?.code || ""}`}>− {formatBaht(order.sellerDiscount || 0)}</Row>}
+          {(order.platformDiscount || 0) > 0 && <Row label={`โค้ด Pegasus · ${order.promotions?.find((p) => p.ownerType === "PLATFORM")?.code || ""}`}>− {formatBaht(order.platformDiscount || 0)}</Row>}
           {order.discountAmount > 0 ? (
             <Row label="ส่วนลด">− {formatBaht(order.discountAmount)}</Row>
           ) : null}
           <Row label="ยอดรวม" strong>
             {formatBaht(order.grandTotal)}
           </Row>
+          {(order.sellerDiscount || order.platformDiscount) && <Row label="Pegasus จ่ายแทน">+ {formatBaht(order.platformSubsidy || 0)}</Row>}
           <Separator />
+          {(order.sellerDiscount || order.platformDiscount) && <Row label="ฐานคอมมิชชั่น">{formatBaht(order.commissionBase ?? order.itemsSubtotal)}</Row>}
           <Row label="ค่าคอมมิชชั่น">− {formatBaht(order.commissionAmount)}</Row>
           <Row label="ผู้ขายได้รับ" strong>
             {formatBaht(order.sellerNetAmount)}

@@ -23,6 +23,10 @@ export type OrderItem = {
   /** presigned GET อายุสั้น — ห้ามเก็บไว้ใช้ทีหลัง */
   imageUrl: string | null;
   unitIds: number[];
+  discountAllocated?: number;
+  sellerDiscountAllocated?: number;
+  platformDiscountAllocated?: number;
+  refundEstimatePerUnit?: number;
 };
 
 export type Shipment = {
@@ -78,6 +82,12 @@ export type SellerOrderDetails = {
   /** เก่าสุดก่อน */
   statusHistory: StatusHistoryEntry[];
   sellerName: string | null;
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: Array<{ code: string; ownerType: "PLATFORM" | "SELLER"; amount: number }>;
+  promotionsRestoredOnCancel?: boolean;
 };
 
 export type OrderBuyer = {
