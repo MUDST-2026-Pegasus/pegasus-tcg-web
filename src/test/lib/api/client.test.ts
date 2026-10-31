@@ -5,6 +5,7 @@ import * as session from "@/lib/api/session";
 import * as cartSession from "@/lib/api/cart-session";
 
 vi.mock("@/lib/api/session", () => ({
+  bootstrapSession: vi.fn(),
   getAccessToken: vi.fn(),
   isAccessTokenExpired: vi.fn(),
   refreshAccessToken: vi.fn(),
@@ -27,6 +28,7 @@ describe("api client", () => {
     mockFetch = vi.fn();
     globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    vi.mocked(session.bootstrapSession).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -53,6 +55,23 @@ describe("api client", () => {
       headers: { Accept: "application/json" },
     }));
     expect(result).toEqual({ user: "john" });
+  });
+
+  it("waits for session bootstrap before an authenticated request", async () => {
+    let completeBootstrap!: () => void;
+    vi.mocked(session.bootstrapSession).mockReturnValue(new Promise<void>((resolve) => {
+      completeBootstrap = resolve;
+    }));
+    vi.mocked(session.getAccessToken).mockReturnValue("restored-token");
+    mockFetch.mockResolvedValueOnce(createResponse(true, 200, { success: true, data: "ok" }));
+
+    const result = api.get("/cart");
+    expect(mockFetch).not.toHaveBeenCalled();
+    completeBootstrap();
+    await result;
+    expect(mockFetch).toHaveBeenCalledWith("http://mock/cart", expect.objectContaining({
+      headers: expect.objectContaining({ Authorization: "Bearer restored-token" }),
+    }));
   });
 
   it("should add Authorization header if auth is true and token exists", async () => {

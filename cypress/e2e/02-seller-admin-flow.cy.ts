@@ -46,18 +46,9 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("getVerificationsEmpty");
 
-    cy.visit("/become-a-seller", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-candidate-token",
-            refreshToken: "mock-candidate-refresh",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-candidate-token", expiresIn: 3600 } } } });
+
+    cy.visit("/become-a-seller");
 
     cy.wait("@getVerificationsEmpty");
     cy.contains(/สมัครเป็นผู้ขาย/i).should("be.visible");
@@ -124,18 +115,9 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("submitVerification");
 
-    cy.visit("/become-a-seller", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-candidate-token",
-            refreshToken: "mock-candidate-refresh",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-candidate-token", expiresIn: 3600 } } } });
+
+    cy.visit("/become-a-seller");
 
     cy.wait("@getVerificationsEmpty");
 
@@ -205,18 +187,9 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("getVerificationsSubmitted");
 
-    cy.visit("/become-a-seller", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-candidate-token",
-            refreshToken: "mock-candidate-refresh",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-candidate-token", expiresIn: 3600 } } } });
+
+    cy.visit("/become-a-seller");
 
     cy.wait("@getVerificationsSubmitted");
     cy.contains(/ส่งคำขอเรียบร้อยแล้ว|ข้อมูลที่ส่งไป|คำขอ/i).should("be.visible");
@@ -289,18 +262,9 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       }
     }).as("getQueue");
 
-    cy.visit("/admin/sellers", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-admin-token",
-            refreshToken: "mock-admin-refresh",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-admin-token", expiresIn: 3600 } } } });
+
+    cy.visit("/admin/sellers");
 
     cy.wait("@getQueue");
     cy.contains(/อนุมัติผู้ขาย/i).should("be.visible");
@@ -406,18 +370,9 @@ describe("E2E Flow 2: Seller KYC & Admin Approval Flow", () => {
       },
     }).as("approveVerification");
 
-    cy.visit("/admin/sellers", {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          "pegasus.auth.session",
-          JSON.stringify({
-            accessToken: "mock-admin-token",
-            refreshToken: "mock-admin-refresh",
-            accessExpiresAt: Date.now() + 3600000,
-          })
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: "mock-admin-token", expiresIn: 3600 } } } });
+
+    cy.visit("/admin/sellers");
 
     cy.wait("@getQueue");
     cy.contains(/Somchai Rakdee/i).should("be.visible").click();

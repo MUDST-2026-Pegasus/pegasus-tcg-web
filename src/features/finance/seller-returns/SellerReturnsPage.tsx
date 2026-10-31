@@ -1,0 +1,267 @@
+import { useState } from "react";
+import { RotateCcw, XCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+import type { ReturnEvidenceLink } from "../after-sales.types";
+import { EvidenceWarningWidget } from "./components/EvidenceWarningWidget";
+import { PendingFundsWidget } from "./components/PendingFundsWidget";
+import { ReturnRequestCard } from "./components/ReturnRequestCard";
+import { ReturnSortSelect } from "./components/ReturnSortSelect";
+import { ReturnStepsWidget } from "./components/ReturnStepsWidget";
+import { ApproveReturnModal } from "./modals/ApproveReturnModal";
+import { ConfirmReceiptModal } from "./modals/ConfirmReceiptModal";
+import { EvidencePreviewModal } from "./modals/EvidencePreviewModal";
+import { RejectReturnModal } from "./modals/RejectReturnModal";
+import { ReturnPolicyModal } from "./modals/ReturnPolicyModal";
+import { getRefundAmount } from "./return-draft";
+import { useReturnActions } from "./useReturnActions";
+import { useSellerReturns } from "./useSellerReturns";
+
+/**
+ * Main Seller Returns Page Component
+ */
+export function SellerReturnsPage() {
+  const {
+    isLoading,
+    isError,
+    refetch,
+    tabCounts,
+    activeTab,
+    selectTab,
+    sortOrder,
+    setSortOrder,
+    currentTabReturns,
+    effectiveExpandedId,
+    toggleExpanded,
+    currentStep,
+    pendingFundsSummary,
+  } = useSellerReturns();
+
+  const {
+    busyId,
+    getDraft,
+    updateDraft,
+    approveModalItem,
+    setApproveModalItem,
+    rejectModalItem,
+    setRejectModalItem,
+    receiveModalItem,
+    setReceiveModalItem,
+    handleApproveConfirm,
+    handleRejectConfirm,
+    handleReceiveConfirm,
+  } = useReturnActions();
+
+  const [policyModalOpen, setPolicyModalOpen] = useState(false);
+
+  // Evidence preview modal
+  const [evidencePreview, setEvidencePreview] = useState<{
+    link: ReturnEvidenceLink | null;
+    list: ReturnEvidenceLink[];
+  }>({ link: null, list: [] });
+
+  return (
+    <div>
+      <div className="flex flex-col gap-6">
+        {/* Page Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-zinc-950">
+              คำขอคืนสินค้า
+            </h1>
+            <p className="text-xs text-gray-500">
+              {tabCounts.action_required} คำขอรอคุณดำเนินการ · เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกพักไว้จนกว่าจะจบเรื่อง
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPolicyModalOpen(true)}
+            className="self-start sm:self-auto rounded-lg bg-background text-xs font-medium"
+          >
+            นโยบายการคืนสินค้า
+          </Button>
+        </div>
+
+        {/* Pill Tabs & Sorting */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => selectTab("action_required")}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "action_required"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              ต้องดำเนินการ ({tabCounts.action_required})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectTab("awaiting_shipment")}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "awaiting_shipment"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              รอผู้ซื้อส่งคืน ({tabCounts.awaiting_shipment})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectTab("awaiting_refund")}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "awaiting_refund"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              รอคืนเงิน ({tabCounts.awaiting_refund})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectTab("completed")}
+              className={cn(
+                "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
+                activeTab === "completed"
+                  ? "bg-zinc-950 font-medium text-white"
+                  : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              เสร็จสิ้น ({tabCounts.completed})
+            </button>
+          </div>
+
+          <div className="self-end sm:self-auto">
+            <ReturnSortSelect value={sortOrder} onChange={setSortOrder} />
+          </div>
+        </div>
+
+        {/* Loading and Error states */}
+        {isLoading && (
+          <div className="space-y-4 py-8">
+            <div className="h-32 w-full animate-pulse rounded-xl bg-card border border-border" />
+            <div className="h-24 w-full animate-pulse rounded-xl bg-card border border-border" />
+          </div>
+        )}
+
+        {isError && (
+          <div
+            role="alert"
+            className="flex flex-col items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center"
+          >
+            <XCircle className="size-8 text-destructive mb-2" />
+            <p className="text-sm font-semibold text-destructive">โหลดคำขอคืนสินค้าไม่สำเร็จ</p>
+            <p className="text-xs text-muted-foreground mt-1">กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void refetch()}
+              className="mt-4 border-destructive/30 text-destructive hover:bg-destructive/10"
+            >
+              ลองอีกครั้ง
+            </Button>
+          </div>
+        )}
+
+        {/* Main Content Layout: Left (List) & Right (Widgets) */}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Return Request Cards */}
+            <div className="lg:col-span-8 space-y-4">
+              {currentTabReturns.length === 0 ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <RotateCcw className="size-6" />
+                  </div>
+                  <h3 className="mt-3 text-sm font-semibold text-foreground">ไม่มีคำขอในหมวดนี้</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    เมื่อมีคำขอคืนสินค้าในสถานะนี้ รายการจะปรากฏที่นี่โดยอัตโนมัติ
+                  </p>
+                </div>
+              ) : (
+                currentTabReturns.map((item, index) => {
+                  const isExpanded = effectiveExpandedId === item.id;
+                  const isActionRequiredTab = activeTab === "action_required";
+                  const isHighlighted = isActionRequiredTab && (index === 0 || isExpanded);
+
+                  return (
+                    <ReturnRequestCard
+                      key={item.id}
+                      item={item}
+                      isExpanded={isExpanded}
+                      isHighlighted={isHighlighted}
+                      onToggle={() => toggleExpanded(item.id)}
+                      draft={getDraft(item.id)}
+                      isBusy={busyId === item.id}
+                      onDraftChange={(patch) => updateDraft(item.id, patch)}
+                      onApprove={() => setApproveModalItem(item)}
+                      onReject={() => setRejectModalItem(item)}
+                      onReceive={() => setReceiveModalItem(item)}
+                      onEvidenceClick={(link, list) => setEvidencePreview({ link, list })}
+                    />
+                  );
+                })
+              )}
+            </div>
+
+            {/* Right Column: Widgets */}
+            <div className="lg:col-span-4 space-y-4">
+              <ReturnStepsWidget currentStep={currentStep} />
+              <PendingFundsWidget pendingFundsSummary={pendingFundsSummary} />
+              <EvidenceWarningWidget />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Confirmation & Preview Modals */}
+      <ApproveReturnModal
+        open={!!approveModalItem}
+        onOpenChange={(open) => !open && setApproveModalItem(null)}
+        item={approveModalItem}
+        amount={approveModalItem ? getRefundAmount(approveModalItem, getDraft(approveModalItem.id)) : 0}
+        resolution={approveModalItem ? getDraft(approveModalItem.id).resolution : "FULL_REFUND"}
+        requireShipBack={approveModalItem ? getDraft(approveModalItem.id).shipBack : true}
+        onConfirm={handleApproveConfirm}
+        loading={busyId !== null}
+      />
+
+      <RejectReturnModal
+        open={!!rejectModalItem}
+        onOpenChange={(open) => !open && setRejectModalItem(null)}
+        item={rejectModalItem}
+        onConfirm={handleRejectConfirm}
+        loading={busyId !== null}
+      />
+
+      <ConfirmReceiptModal
+        open={!!receiveModalItem}
+        onOpenChange={(open) => !open && setReceiveModalItem(null)}
+        item={receiveModalItem}
+        restock={receiveModalItem ? getDraft(receiveModalItem.id).restock : true}
+        onConfirm={handleReceiveConfirm}
+        loading={busyId !== null}
+      />
+
+      <EvidencePreviewModal
+        open={!!evidencePreview.link}
+        onOpenChange={(open) => !open && setEvidencePreview({ link: null, list: [] })}
+        activeLink={evidencePreview.link}
+        allLinks={evidencePreview.list}
+        onSelectLink={(link) => setEvidencePreview((prev) => ({ ...prev, link }))}
+      />
+
+      <ReturnPolicyModal
+        open={policyModalOpen}
+        onOpenChange={setPolicyModalOpen}
+      />
+    </div>
+  );
+}

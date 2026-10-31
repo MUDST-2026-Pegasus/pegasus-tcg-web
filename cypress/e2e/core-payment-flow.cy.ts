@@ -58,18 +58,8 @@ describe('Core Payment & Checkout Flow', () => {
   };
 
   const visitAuthenticated = (url: string) => {
-    cy.visit(url, {
-      onBeforeLoad(win) {
-        win.localStorage.setItem(
-          'pegasus.auth.session',
-          JSON.stringify({
-            accessToken: 'mock-access',
-            refreshToken: 'mock-refresh',
-            accessExpiresAt: Date.now() + 3600000,
-          }),
-        );
-      },
-    });
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 200, body: { success: true, data: { tokens: { accessToken: 'mock-access', expiresIn: 3600 } } } });
+    cy.visit(url);
   };
 
   beforeEach(() => {

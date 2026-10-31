@@ -2,6 +2,7 @@ import { ApiError } from "./errors";
 import { buildUrl, type QueryParams } from "./config";
 import {
   getAccessToken,
+  bootstrapSession,
   isAccessTokenExpired,
   refreshAccessToken,
 } from "./session";
@@ -23,6 +24,7 @@ export type RequestOptions = {
   headers?: Record<string, string>;
   signal?: AbortSignal;
   auth?: boolean;
+  credentials?: RequestCredentials;
 };
 
 type RequestInput = RequestOptions & {
@@ -31,10 +33,11 @@ type RequestInput = RequestOptions & {
 };
 
 async function request<T>(path: string, input: RequestInput): Promise<T> {
-  const { method, body, query, headers, signal, auth = true } = input;
+  const { method, body, query, headers, signal, auth = true, credentials } = input;
 
-  if (auth && isAccessTokenExpired()) {
-    await refreshAccessToken();
+  if (auth) {
+    await bootstrapSession();
+    if (isAccessTokenExpired()) await refreshAccessToken();
   }
 
   const send = () =>
@@ -44,6 +47,7 @@ async function request<T>(path: string, input: RequestInput): Promise<T> {
       headers,
       signal,
       auth,
+      credentials,
     });
 
   let response = await send();
@@ -73,6 +77,7 @@ async function fetchJson(
     headers?: Record<string, string>;
     signal?: AbortSignal;
     auth: boolean;
+    credentials?: RequestCredentials;
   },
 ): Promise<RawResponse> {
   const headers: Record<string, string> = {
@@ -104,6 +109,7 @@ async function fetchJson(
       headers,
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       signal: init.signal,
+      credentials: init.credentials,
     });
   } catch (cause) {
     if (cause instanceof DOMException && cause.name === "AbortError") {

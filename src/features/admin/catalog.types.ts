@@ -42,10 +42,7 @@ export type CardEdition =
 /** `model/AttributeDataType.java` — บอกว่าฟอร์มต้องวาดช่องแบบไหน */
 export type AttributeDataType = "STRING" | "NUMBER" | "BOOLEAN" | "ENUM" | "DATE";
 
-/**
- * `Game` — `GET /admin/games` ได้ทั้งเกมที่ปิดไปแล้ว เรียงตาม `displayOrder`
- * `logoUrl` ของ endpoint admin เป็นค่าดิบ (URL ที่วางไว้หรือ object key) ยังไม่ได้เซ็น
- */
+/** `AdminGameResponse` — `GET /admin/games` ได้ทั้งเกมที่ปิดไปแล้ว เรียงตาม `displayOrder` */
 export type Game = {
   id: number;
   /** รหัสถาวร เช่น POKEMON — เป็นส่วนหน้าของ SKU ที่ backend สร้างให้ */
@@ -53,7 +50,10 @@ export type Game = {
   name: string;
   nameLocal: string | null;
   slug: string;
+  /** ค่าดิบที่เก็บไว้ (URL ที่วางไว้ หรือ object key ที่อัปโหลด) — ส่งกลับตอน PUT */
   logoUrl: string | null;
+  /** URL ที่เปิดเป็นรูปได้ของ `logoUrl` (backend เซ็นให้แล้ว) — `null` เมื่อไม่มีโลโก้ */
+  logoImageUrl: string | null;
   displayOrder: number;
   active: boolean;
   createdBy: number | null;
@@ -78,7 +78,7 @@ export type GameAttribute = {
   displayOrder: number;
 };
 
-/** `CardSet` — `GET /card-sets?gameId=` ใหม่สุดก่อน */
+/** `CardSetResponse` — `GET /card-sets?gameId=` ใหม่สุดก่อน */
 export type CardSet = {
   id: number;
   gameId: number;
@@ -88,7 +88,10 @@ export type CardSet = {
   /** `yyyy-MM-dd` */
   releaseDate: string | null;
   totalCards: number | null;
+  /** ค่าดิบที่เก็บไว้ (URL ที่วางไว้ หรือ object key ที่อัปโหลด) — ส่งกลับตอน PUT */
   logoUrl: string | null;
+  /** URL ที่เปิดเป็นรูปได้ของ `logoUrl` — `null` เมื่อไม่มีโลโก้ */
+  logoImageUrl: string | null;
 };
 
 /** `CatalogCategory` — `GET /admin/categories?gameId=` ได้หมวดข้ามเกม (`gameId: null`) มาด้วย */

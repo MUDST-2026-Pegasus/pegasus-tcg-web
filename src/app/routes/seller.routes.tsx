@@ -20,7 +20,7 @@ const SellerOrdersPage = lazyPage(() => import("@/features/seller/orders/SellerO
 const SellerOrderDetailPage = lazyPage(() => import("@/features/seller/orders/SellerOrderDetailPage").then((m) => m.SellerOrderDetailPage), <OrderDetailSkeleton />);
 const SellerPayoutPage = lazyPage(() => import("@/features/seller/payout/SellerPayoutPage").then((m) => m.SellerPayoutPage), pageSkeleton);
 const SellerVerificationPage = lazyPage(() => import("@/features/seller/payout/SellerVerificationPage").then((m) => m.SellerVerificationPage), formSkeleton);
-const SellerReturnsPage = lazyPage(() => import("@/features/finance/SellerReturnsPage").then((m) => m.SellerReturnsPage), pageSkeleton);
+const SellerReturnsPage = lazyPage(() => import("@/features/finance/seller-returns/SellerReturnsPage").then((m) => m.SellerReturnsPage), pageSkeleton);
 const SellerReviewsPage = lazyPage(() => import("@/features/finance/SellerReviewsPage").then((m) => m.SellerReviewsPage), pageSkeleton);
 const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
 
