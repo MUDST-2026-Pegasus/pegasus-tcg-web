@@ -108,7 +108,12 @@ describe("SellerDashboardPage", () => {
     expect(screen.getByText(/Nattapong/i)).toBeInTheDocument();
 
     // Low stock
-    expect(screen.getByText("Charizard ex — Box A")).toBeInTheDocument();
+    expect(screen.getByText("Charizard ex")).toBeInTheDocument();
+    expect(screen.getByText("Box A · NM")).toBeInTheDocument();
+    expect(screen.getByText("เหลือ 1 ชิ้น")).toBeInTheDocument();
+    expect(screen.getByText("2 รายการ")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Charizard ex.*เหลือ 1 ชิ้น/ })).toHaveAttribute("href", "/seller/products/7/restock");
+    expect(screen.getByText("ไปหน้าจัดการสินค้า").closest("a")).toHaveAttribute("href", "/seller/products?status=ACTIVE&sort=stock_asc");
     expect(screen.getByText("Pikachu VMAX")).toBeInTheDocument();
   });
 

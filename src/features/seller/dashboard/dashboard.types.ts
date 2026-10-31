@@ -85,18 +85,19 @@ export type StockSeverity = "critical" | "warning";
 export type LowStockItem = {
   listingId: number;
   name: string;
+  metaLabel: string | null;
   remainingLabel: string;
-  /** สัดส่วนที่เหลือ 0-100 ใช้วาดความยาวแถบ */
-  percent: number;
   severity: StockSeverity;
 };
 
 export type LowStock = {
   title: string;
+  subtitle: string;
   /** จำนวนสินค้าใกล้หมดทั้งหมด อาจมากกว่าจำนวนใน items ที่ตัดมาแสดง */
   count: number;
   items: LowStockItem[];
   actionLabel: string;
+  actionTo: string;
   emptyLabel: string;
 };
 

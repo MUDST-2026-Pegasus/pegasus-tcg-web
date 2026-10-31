@@ -245,25 +245,23 @@ export function recentOrders(dashboard: SellerDashboard): RecentOrders {
   };
 }
 
-/** แถบยาวตามสัดส่วนที่เหลือ แต่ไม่สั้นจนมองไม่เห็น — เหลือใบเดียวคือวิกฤต */
 export function lowStock(dashboard: SellerDashboard): LowStock {
   const { listings } = dashboard;
   return {
     title: "สต็อกใกล้หมด",
+    subtitle: `ประกาศที่เหลือไม่เกิน ${count.format(listings.lowStockThreshold)} ชิ้น · น้อยสุดก่อน`,
     count: listings.lowStockCount,
     items: listings.lowStock.map((listing) => ({
       listingId: listing.listingId,
-      name: listing.lotLabel
-        ? `${listing.productName} — ${listing.lotLabel}`
-        : listing.productName,
-      remainingLabel: `เหลือ ${count.format(listing.quantityAvailable)}`,
-      percent:
-        listing.quantityTotal > 0
-          ? Math.max(8, Math.round((listing.quantityAvailable / listing.quantityTotal) * 100))
-          : 8,
+      name: listing.productName,
+      metaLabel: listing.lotLabel ? `${listing.lotLabel} · ${listing.conditionCode}` : null,
+      remainingLabel: `เหลือ ${count.format(listing.quantityAvailable)} ชิ้น`,
       severity: listing.quantityAvailable <= 1 ? "critical" : "warning",
     })),
-    actionLabel: "ไปหน้าจัดการสินค้า",
+    actionLabel: listings.lowStockCount > listings.lowStock.length
+      ? `ดูทั้งหมด ${count.format(listings.lowStockCount)} รายการ`
+      : "ไปหน้าจัดการสินค้า",
+    actionTo: "/seller/products?status=ACTIVE&sort=stock_asc",
     emptyLabel: "สต็อกยังพอทุกรายการ",
   };
 }
