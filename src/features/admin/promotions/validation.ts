@@ -9,6 +9,11 @@ export function getAdminPromotionErrors(form: AdminPromotionInput, existing?: Pa
   if (!result.success) for (const issue of result.error.issues) errors[String(issue.path[0])] = issue.message;
   if (form.usageLimitTotal != null && form.usageLimitTotal < (existing?.usedCount || 1)) errors.usageLimitTotal = "สิทธิ์รวมต้องไม่ต่ำกว่าจำนวนที่ใช้แล้ว";
   if (form.claimable && form.claimLimit != null && form.claimLimit < (existing?.claimedCount || 1)) errors.claimLimit = "จำนวนแจกต้องไม่ต่ำกว่าจำนวนที่เก็บแล้ว";
+  if (form.scopeType !== "ALL" && form.scopeIds.length === 0) errors.scopeIds = "กรุณาเลือกเกมหรือหมวดหมู่อย่างน้อยหนึ่งรายการ";
+  if (form.scopeType === "ALL" && form.scopeIds.length > 0) errors.scopeIds = "ทุกเกมไม่ต้องเลือกรายการเฉพาะ";
+  if (form.usageLimitTotal != null && form.usageLimitTotal < 1) errors.usageLimitTotal = "จำนวนสิทธิ์ต้องอย่างน้อย 1";
+  if (form.claimLimit != null && form.claimLimit < 1) errors.claimLimit = "จำนวนที่แจกต้องอย่างน้อย 1";
+  if (form.featuredOnHome && (!form.claimable || form.visibility !== "PUBLIC")) errors.featuredOnHome = "แสดงหน้าแรกได้เฉพาะโค้ดสาธารณะที่กดเก็บได้";
   if (form.claimRequired && !form.claimable) errors.claimRequired = "ต้องเปิดให้กดเก็บก่อน";
   if ((existing?.usedCount || 0) > 0) {
     if (existing?.endsAt && Date.parse(form.endsAt) < Date.parse(existing.endsAt)) errors.endsAt = "หลังมีการใช้โค้ดแล้ว ลดวันสิ้นสุดไม่ได้";

@@ -1,0 +1,13 @@
+.promotion-admin [data-slot="button"] {
+  border-radius: 8px;
+}
+
+.promotion-admin [data-slot="input"] {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+}
+
+.promotion-admin [data-slot="input"]:disabled {
+  background: var(--muted);
+}
