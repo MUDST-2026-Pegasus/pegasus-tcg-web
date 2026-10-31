@@ -19,17 +19,22 @@ export function CodePickerDialog({ open, onOpenChange, owner, sellerName, promot
 }) {
   const [typed, setTyped] = useState("");
   const relevant = promotions.filter((promotion) => owner === "PLATFORM" ? promotion.ownerType === "PLATFORM" : promotion.sellerProfileId === owner);
+  const groups = [
+    { title: "เก็บไว้ใช้ได้", items: relevant.filter((promotion) => promotion.source === "CLAIMED" && promotion.applicable) },
+    { title: "เก็บไว้แต่ยังใช้ไม่ได้", items: relevant.filter((promotion) => promotion.source === "CLAIMED" && !promotion.applicable) },
+    { title: "ยังไม่ได้เก็บ", items: relevant.filter((promotion) => promotion.source === "CLAIMABLE") },
+    { title: "โค้ดทั่วไป", items: relevant.filter((promotion) => promotion.source === "PUBLIC") },
+  ];
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] gap-4 overflow-y-auto rounded-2xl p-6">
       <DialogHeader><DialogTitle>เลือกโค้ดส่วนลด{owner === "PLATFORM" ? " Pegasus" : `ร้าน ${sellerName || ""}`}</DialogTitle></DialogHeader>
-      {(["CLAIMED", "CLAIMABLE", "PUBLIC"] as const).map((source) => {
-        const group = relevant.filter((promotion) => promotion.source === source);
-        if (!group.length) return null;
-        return <section key={source} className="grid gap-2">
-          <h3 className="text-sm font-semibold">{{ CLAIMED: "เก็บไว้แล้ว", CLAIMABLE: "ยังไม่ได้เก็บ", PUBLIC: "โค้ดทั่วไป" }[source]}</h3>
-          {group.map((promotion) => <div key={promotion.id} className="grid gap-1">
+      {groups.map((group) => {
+        if (!group.items.length) return null;
+        return <section key={group.title} className="grid gap-2">
+          <h3 className="text-sm font-semibold">{group.title}</h3>
+          {group.items.map((promotion) => <div key={promotion.id} className="grid gap-1">
             <CouponTicket promotion={promotion} selected={selectedCode === promotion.code} onSelect={() => { onSelect(promotion.code); onOpenChange(false); }} />
-            {source === "CLAIMABLE" && onClaim && <Button size="sm" variant="outline" disabled={promotion.remainingClaims === 0} onClick={() => onClaim(promotion)}>เก็บโค้ด</Button>}
+            {promotion.source === "CLAIMABLE" && onClaim && <Button size="sm" variant="outline" disabled={promotion.remainingClaims === 0} onClick={() => onClaim(promotion)}>{promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}</Button>}
           </div>)}
         </section>;
       })}

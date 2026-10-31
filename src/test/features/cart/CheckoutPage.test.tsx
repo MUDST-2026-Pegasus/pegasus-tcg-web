@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/errors";
 import type { CartResponse } from "@/features/cart/cart.types";
 import type { Address } from "@/features/account/address.types";
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
+import { PROMOTION_SELECTION_KEY } from "@/features/cart/promotions.types";
 
 const mockNavigate = vi.fn();
 
@@ -145,6 +146,7 @@ async function ready() { await waitFor(() => expect(purchase()).toBeEnabled()); 
 describe("CheckoutPage", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    sessionStorage.removeItem(PROMOTION_SELECTION_KEY);
     mockNavigate.mockReset();
     vi.spyOn(toast, "add").mockImplementation(vi.fn());
     vi.spyOn(authQueries, "useAuth").mockReturnValue({
@@ -175,6 +177,47 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("Pikachu Illustrator")).toBeInTheDocument();
     expect(screen.queryByText("Charizard Base Set")).not.toBeInTheDocument();
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+  });
+
+  it("keeps cart promotion codes and submits the total returned by preview", async () => {
+    sessionStorage.setItem(PROMOTION_SELECTION_KEY, JSON.stringify({ platformCode: "PEGASUS10", sellerCodes: { 1: "STORE50" } }));
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 50, platformDiscount: 29, grandTotal: 261 }],
+      itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 50, platformDiscountTotal: 29, grandTotal: 261,
+      shippingEstimated: false, bestPick: null,
+      codes: [{ code: request.platformCode || "", ownerType: "PLATFORM", sellerProfileId: null, sellerName: null, status: "APPLIED", discount: 29, shortfall: null, pendingShipping: false }],
+    }));
+    const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿261");
+    await userEvent.setup().click(purchase());
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
+    expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({
+      platformCode: "PEGASUS10", sellerCodes: { 1: "STORE50" }, expectedGrandTotal: 261,
+    }));
+  });
+
+  it("asks for confirmation when the promotion total changes before ordering", async () => {
+    let changed = false;
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async () => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: changed ? 40 : 0, grandTotal: changed ? 300 : 340 }],
+      itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 0,
+      platformDiscountTotal: changed ? 40 : 0, grandTotal: changed ? 300 : 340,
+      shippingEstimated: false, codes: [], bestPick: null,
+    }));
+    const submit = vi.spyOn(checkoutApi, "checkout")
+      .mockImplementationOnce(async () => { changed = true; throw new ApiError({ status: 409, code: "PROMO_CHANGED", message: "total changed", details: { grandTotal: 300, code: "PEGASUS10" } }); })
+      .mockResolvedValue(orderResponse);
+    renderCheckout("/checkout?items=42");
+    await ready();
+    await userEvent.setup().click(purchase());
+    expect(await screen.findByRole("dialog", { name: "ยอดชำระเปลี่ยนไป" })).toBeInTheDocument();
+    expect(screen.getByText(/ยอดเดิม: ฿340/)).toBeInTheDocument();
+    expect(await screen.findByText(/ยอดใหม่: ฿300/)).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "สั่งซื้อด้วยยอดใหม่" }));
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
+    expect(submit.mock.calls[1][0].expectedGrandTotal).toBe(300);
   });
 
   it("shows every item grouped by seller, physical quantity, and free shipping", async () => {
