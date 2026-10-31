@@ -20,8 +20,8 @@ const AdminRefundsPage = lazyPage(() => import("@/features/admin/pages/AdminRefu
 const AdminPayoutsPage = lazyPage(() => import("@/features/admin/pages/AdminPayoutsPage").then((m) => m.AdminPayoutsPage), pageSkeleton);
 const AdminReviewsPage = lazyPage(() => import("@/features/admin/pages/AdminReviewsPage").then((m) => m.AdminReviewsPage), pageSkeleton);
 const AdminActivityLogPage = lazyPage(() => import("@/features/admin/pages/AdminActivityLogPage").then((m) => m.AdminActivityLogPage), pageSkeleton);
-const AdminPromotionsPage = lazyPage(() => import("@/features/admin/promotions/PromotionsPage").then((m) => m.AdminPromotionsPage), pageSkeleton);
-const AdminPromotionFormPage = lazyPage(() => import("@/features/admin/promotions/PromotionFormPage").then((m) => m.AdminPromotionFormPage), pageSkeleton);
+const AdminPromotionsPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionsPage").then((m) => m.AdminPromotionsPage), pageSkeleton);
+const AdminPromotionFormPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionFormPage").then((m) => m.AdminPromotionFormPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ดูแลระบบ — ใช้ DashboardLayout (Sidebar + topbar + Footer)
