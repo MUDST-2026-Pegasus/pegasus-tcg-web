@@ -22,6 +22,9 @@ const SellerPayoutPage = lazyPage(() => import("@/features/seller/payout/SellerP
 const SellerVerificationPage = lazyPage(() => import("@/features/seller/payout/SellerVerificationPage").then((m) => m.SellerVerificationPage), formSkeleton);
 const SellerReturnsPage = lazyPage(() => import("@/features/finance/seller-returns/SellerReturnsPage").then((m) => m.SellerReturnsPage), pageSkeleton);
 const SellerReviewsPage = lazyPage(() => import("@/features/finance/SellerReviewsPage").then((m) => m.SellerReviewsPage), pageSkeleton);
+const SellerAuctionsPage = lazyPage(() => import("@/features/auction/pages/SellerAuctionsPage").then((m) => m.SellerAuctionsPage), pageSkeleton);
+const SellerAuctionCreatePage = lazyPage(() => import("@/features/auction/pages/SellerAuctionCreatePage").then((m) => m.SellerAuctionCreatePage), formSkeleton);
+const SellerAuctionDetailPage = lazyPage(() => import("@/features/auction/pages/SellerAuctionDetailPage").then((m) => m.SellerAuctionDetailPage), pageSkeleton);
 const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
 
 /**
@@ -53,6 +56,9 @@ export const sellerRoutes: RouteObject = {
     { path: "verification", element: <SellerVerificationPage /> },
     { path: "returns", element: <SellerReturnsPage /> },
     { path: "reviews", element: <SellerReviewsPage /> },
+    { path: "auctions", element: <SellerAuctionsPage /> },
+    { path: "auctions/new", element: <SellerAuctionCreatePage /> },
+    { path: "auctions/:auctionId", element: <SellerAuctionDetailPage /> },
     { path: "logout", element: <SellerLogoutPage /> },
   ],
 };
