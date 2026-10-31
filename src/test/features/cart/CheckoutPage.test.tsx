@@ -158,6 +158,14 @@ describe("CheckoutPage", () => {
     } as unknown as ReturnType<typeof addressQueries.useAddresses>);
     vi.spyOn(checkoutApi, "getShippingQuotes").mockImplementation(async (ids) =>
       [quoteA, quoteB].filter(q => ids.includes(q.sellerProfileId === 1 ? 42 : 45)));
+    vi.spyOn(checkoutApi, "getPromotions").mockResolvedValue([]);
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => {
+      const sellers = [
+        ...(request.cartItemIds.includes(42) ? [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: request.shippingOptionBySeller?.[1] === 12 ? 65 : 40, sellerDiscount: 0, platformDiscount: 0, grandTotal: request.shippingOptionBySeller?.[1] === 12 ? 365 : 340 }] : []),
+        ...(request.cartItemIds.includes(45) ? [{ sellerProfileId: 2, sellerName: "Store B", itemsSubtotal: 500, shippingFee: 0, sellerDiscount: 0, platformDiscount: 0, grandTotal: 500 }] : []),
+      ];
+      return { sellers, itemsSubtotal: sellers.reduce((sum, seller) => sum + seller.itemsSubtotal, 0), shippingTotal: sellers.reduce((sum, seller) => sum + seller.shippingFee, 0), sellerDiscountTotal: 0, platformDiscountTotal: 0, grandTotal: sellers.reduce((sum, seller) => sum + seller.grandTotal, 0), shippingEstimated: false, codes: [], bestPick: null };
+    });
   });
 
   it("quotes only selected cart items and uses the API fee instead of a flat 50", async () => {
@@ -286,7 +294,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
     await user.click(purchase());
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
-    expect(submit.mock.calls[0][0]).toEqual({ cartItemIds: [42], shippingAddressId: 1, shippingOptionBySeller: { 1: 12 } });
+    expect(submit.mock.calls[0][0]).toEqual({ cartItemIds: [42], shippingAddressId: 1, shippingOptionBySeller: { 1: 12 }, platformCode: null, sellerCodes: {}, expectedGrandTotal: 365 });
     expect(submit.mock.calls[0][1]).toMatch(/^[0-9a-f-]{36}$/i);
     expect(mockNavigate).toHaveBeenCalledWith("/payment?orderId=1001", { state: { orderId: 1001, order: orderResponse } });
   });
@@ -444,7 +452,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340"));
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
     expect(quoteSpy).toHaveBeenCalledTimes(3);

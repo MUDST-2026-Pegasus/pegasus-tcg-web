@@ -5,6 +5,7 @@ import { ShippingOptionPicker } from "./ShippingOptionPicker";
 import type { CartItemResponse } from "../cart.types";
 import type { ShippingQuote, ShippingQuoteOption } from "../checkout.types";
 import { checkoutMoney } from "../checkout.format";
+import { TicketPercent } from "lucide-react";
 
 interface Props {
   sellerId: number | null;
@@ -16,9 +17,13 @@ interface Props {
   failed: boolean;
   disabled: boolean;
   onSelect: (optionId: number) => void;
+  promotionCode?: string | null;
+  promotionDiscount?: number;
+  promotionCount?: number;
+  onOpenPromotions?: () => void;
 }
 
-export function CheckoutSellerCard({ sellerId, sellerName, items, quote, selected, loading, failed, disabled, onSelect }: Props) {
+export function CheckoutSellerCard({ sellerId, sellerName, items, quote, selected, loading, failed, disabled, onSelect, promotionCode, promotionDiscount = 0, promotionCount = 0, onOpenPromotions }: Props) {
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = quote?.itemsSubtotal ?? items.reduce((sum, item) => sum + (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity, 0);
   return (
@@ -43,9 +48,14 @@ export function CheckoutSellerCard({ sellerId, sellerName, items, quote, selecte
       <Separator className="checkout-divider" />
       <ShippingOptionPicker sellerName={sellerName} itemCount={quote?.itemCount ?? count}
         quote={quote} selected={selected} loading={loading} failed={failed} disabled={disabled} onSelect={onSelect} />
+      {onOpenPromotions && <div className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs ${promotionCode ? "border-teal-200 bg-teal-50 text-teal-800" : "border-slate-200"}`}>
+        <span className="flex min-w-0 items-center gap-2"><TicketPercent className="size-4 shrink-0" /><span className="truncate">{promotionCode ? `โค้ดร้าน · ${promotionCode}` : `โค้ดร้าน ${promotionCount ? `· มี ${promotionCount} โค้ดที่ใช้ได้` : ""}`}</span></span>
+        {promotionCode && <strong className="shrink-0">− {checkoutMoney(promotionDiscount)}</strong>}
+        <button type="button" className="shrink-0 text-primary hover:underline" onClick={onOpenPromotions}>{promotionCode ? "เปลี่ยน" : "เลือกหรือกรอกโค้ด"}</button>
+      </div>}
       <div className="flex items-center justify-between gap-3 pt-1">
         <span className="text-xs text-muted-foreground">รวมร้านนี้ ({count} ใบ)</span>
-        <span className="text-sm font-semibold">{!loading && !failed && selected && sellerId != null ? checkoutMoney(subtotal + selected.fee) : "—"}</span>
+        <span className="text-sm font-semibold">{!loading && !failed && selected && sellerId != null ? checkoutMoney(subtotal + selected.fee - promotionDiscount) : "—"}</span>
       </div>
     </Card>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,10 @@ import { checkoutApi } from "../checkout.api";
 import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
 import { checkoutMoney } from "../checkout.format";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
+import { CodePickerDialog } from "../components/CodePickerDialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { readPromotionSelection, savePromotionSelection, type PromotionSelection } from "../promotions.types";
 import type { CartItemResponse } from "../cart.types";
 import "./checkout.css";
 
@@ -79,6 +83,13 @@ export function CheckoutPage() {
   }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingNotice, setShippingNotice] = useState<string | null>(null);
+  const [promotionSelection, setPromotionSelection] = useState<PromotionSelection>(readPromotionSelection);
+  const [debouncedSelection, setDebouncedSelection] = useState(promotionSelection);
+  const [promotionPicker, setPromotionPicker] = useState<"PLATFORM" | number | null>(null);
+  const [typedPlatformCode, setTypedPlatformCode] = useState("");
+  const [promotionError, setPromotionError] = useState<string | null>(null);
+  const [promotionChanged, setPromotionChanged] = useState<{ previous: number; next: number; code?: string } | null>(null);
+  useEffect(() => { savePromotionSelection(promotionSelection); const timer = window.setTimeout(() => setDebouncedSelection(promotionSelection), 180); return () => window.clearTimeout(timer); }, [promotionSelection]);
   const activeAddress = addresses.find((address) => address.id === selectedAddressId)
     ?? addresses.find((address) => address.defaultShipping) ?? addresses[0] ?? null;
   const sellerGroups = useMemo(() => {
@@ -100,10 +111,44 @@ export function CheckoutPage() {
   const shippingReady = !quotes.isPending && !quotes.isFetching && !quotes.isPlaceholderData && !quotes.isError
     && sellerGroups.length > 0 && selectedOptions.every(Boolean);
   const shippingFee = selectedOptions.reduce((sum, option) => sum + (option?.fee ?? 0), 0);
+  const shippingOptionBySeller: Record<number, number> = {};
+  sellerGroups.forEach(({ sellerId }, index) => {
+    if (sellerId != null && selectedOptions[index]) shippingOptionBySeller[sellerId] = selectedOptions[index].id;
+  });
+  const promotionList = useQuery({
+    queryKey: ["checkout-promotions", cartItemIds],
+    queryFn: () => checkoutApi.getPromotions(cartItemIds),
+    enabled: checkoutItems.length > 0 && !cartNeedsReview,
+  });
+  const promoPreview = useQuery({
+    queryKey: ["checkout-promo-preview", cartItemIds, shippingOptionBySeller, debouncedSelection],
+    queryFn: ({ signal }) => checkoutApi.previewPromotions({ cartItemIds, shippingOptionBySeller, ...debouncedSelection }, signal),
+    enabled: shippingReady && debouncedSelection === promotionSelection,
+    retry: false,
+  });
+  const preview = promoPreview.data;
+  const previewReady = !!preview && !promoPreview.isFetching && !promoPreview.isError && debouncedSelection === promotionSelection;
+  const appliedPlatformCode = preview?.codes.find((code) => code.ownerType === "PLATFORM" && code.status === "APPLIED")?.code;
+  const sellerDiscounts = new Map(preview?.sellers.map((seller) => [seller.sellerProfileId, seller.sellerDiscount]));
+  const setCode = (owner: "PLATFORM" | number, code: string | null) => {
+    setPromotionError(null);
+    setPromotionSelection((previous) => owner === "PLATFORM"
+      ? { ...previous, platformCode: code }
+      : { ...previous, sellerCodes: { ...previous.sellerCodes, [owner]: code || "" } });
+  };
+  useEffect(() => {
+    if (!preview || !previewReady) return;
+    const invalid = preview.codes.find((code) => code.status !== "APPLIED" && !code.pendingShipping);
+    if (!invalid) return;
+    setPromotionError(`${invalid.code}: ${invalid.status}${invalid.shortfall ? ` · ซื้อเพิ่มอีก ${checkoutMoney(invalid.shortfall)}` : ""}`);
+    setPromotionSelection((previous) => invalid.ownerType === "PLATFORM"
+      ? { ...previous, platformCode: null }
+      : { ...previous, sellerCodes: Object.fromEntries(Object.entries(previous.sellerCodes).filter(([id]) => Number(id) !== invalid.sellerProfileId)) });
+  }, [preview, previewReady]);
   const subtotal = sellerGroups.reduce((sum, { items, quote }) =>
     sum + (quote?.itemsSubtotal ?? items.reduce((total, item) => total + (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity, 0)), 0);
   const itemCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
-  const canPurchase = shippingReady && !!activeAddress && !isAddressLoading && !addressError && !cartError
+  const canPurchase = shippingReady && previewReady && !!activeAddress && !isAddressLoading && !addressError && !cartError
     && !isCartFetching && !isSubmitting && isAuthenticated && !cartNeedsReview;
   const quotePriceChanged = quotes.error instanceof ApiError
     && (quotes.error.code === "CART_PRICE_CHANGED" || quotes.error.code === "PRICE_CHANGED");
@@ -145,11 +190,7 @@ export function CheckoutPage() {
     if (!canPurchase || submitting.current) return;
     submitting.current = true;
     setIsSubmitting(true);
-    const shippingOptionBySeller: Record<number, number> = {};
-    sellerGroups.forEach(({ sellerId }, index) => {
-      if (sellerId != null && selectedOptions[index]) shippingOptionBySeller[sellerId] = selectedOptions[index].id;
-    });
-    const payload = { cartItemIds, shippingAddressId: activeAddress.id, shippingOptionBySeller };
+    const payload = { cartItemIds, shippingAddressId: activeAddress.id, shippingOptionBySeller, ...promotionSelection, expectedGrandTotal: preview!.grandTotal };
     const signature = JSON.stringify(payload);
     // Preserve the key after uncertain network failures so retrying cannot place a duplicate order.
     if (attempt.current?.signature !== signature) attempt.current = { signature, key: crypto.randomUUID() };
@@ -175,6 +216,9 @@ export function CheckoutPage() {
             return next;
           });
           await quotes.refetch();
+        } else if (error.code === "PROMO_CHANGED") {
+          setPromotionChanged({ previous: payload.expectedGrandTotal, next: Number(error.details.grandTotal) || payload.expectedGrandTotal, code: typeof error.details.code === "string" ? error.details.code : undefined });
+          await promoPreview.refetch();
         } else if (error.code === "SHIPPING_ADDRESS_REQUIRED" || error.code === "ADDRESS_NOT_FOUND") {
           setSelectedAddressId(null);
           await queryClient.invalidateQueries({ queryKey: addressKeys.all });
@@ -243,6 +287,10 @@ export function CheckoutPage() {
               failed={quotes.isError}
               disabled={isSubmitting}
               onSelect={(id) => { if (sellerId != null) setShippingChoices((previous) => ({ ...previous, [sellerId]: id })); }}
+              promotionCode={sellerId == null ? null : promotionSelection.sellerCodes[sellerId]}
+              promotionDiscount={sellerId == null ? 0 : sellerDiscounts.get(sellerId) || 0}
+              promotionCount={promotionList.data?.filter((promotion) => promotion.sellerProfileId === sellerId && promotion.applicable).length || 0}
+              onOpenPromotions={sellerId == null ? undefined : () => setPromotionPicker(sellerId)}
             />)}
           </div>
           <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
@@ -265,6 +313,12 @@ export function CheckoutPage() {
               </div>
             </Card>
             <Card className="checkout-panel">
+              <div className="flex items-center justify-between gap-2"><h2 className="text-[13px] font-semibold">โค้ดส่วนลด Pegasus</h2><button type="button" className="checkout-link text-xs" onClick={() => setPromotionPicker("PLATFORM")}>ดูทั้งหมด ({promotionList.data?.filter((promotion) => promotion.ownerType === "PLATFORM").length || 0})</button></div>
+              {promotionSelection.platformCode && <div className="flex items-center justify-between rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs text-blue-800"><strong>{promotionSelection.platformCode}</strong><span>− {checkoutMoney(preview?.platformDiscountTotal || 0)}</span><button type="button" aria-label="นำโค้ด Pegasus ออก" onClick={() => setCode("PLATFORM", null)}>✕</button></div>}
+              <form className="flex gap-2" onSubmit={(event) => { event.preventDefault(); if (typedPlatformCode.trim()) { setCode("PLATFORM", typedPlatformCode.trim().toUpperCase()); setTypedPlatformCode(""); } }}><Input aria-label="กรอกโค้ด Pegasus" value={typedPlatformCode} maxLength={20} onChange={(event) => setTypedPlatformCode(event.target.value)} placeholder="กรอกโค้ดอื่น" /><Button type="submit" variant="secondary">ใช้โค้ด</Button></form>
+              {promotionError && <p role="alert" className="text-xs text-destructive">{promotionError}</p>}
+            </Card>
+            <Card className="checkout-panel">
               <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
               <div className="flex items-center justify-between gap-3 text-[13px]">
                 <span className="text-muted-foreground">ยอดสินค้า ({itemCount} ใบ)</span><span>{checkoutMoney(subtotal)}</span>
@@ -281,10 +335,13 @@ export function CheckoutPage() {
                   </div>;
                 })}
               </div>
+              {!!preview?.sellerDiscountTotal && <div className="flex justify-between text-[13px] text-teal-700"><span>ส่วนลดร้าน</span><span>− {checkoutMoney(preview.sellerDiscountTotal)}</span></div>}
+              {!!preview?.platformDiscountTotal && <div className="flex justify-between text-[13px] text-blue-700"><span>ส่วนลด Pegasus{appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}</span><span>− {checkoutMoney(preview.platformDiscountTotal)}</span></div>}
               <Separator className="checkout-divider" />
               <div className="flex items-center justify-between gap-3 text-lg" aria-live="polite">
-                <span>ยอดรวม</span><strong data-testid="checkout-grand-total">{shippingReady ? checkoutMoney(subtotal + shippingFee) : "—"}</strong>
+                <span>ยอดรวม</span><strong data-testid="checkout-grand-total">{previewReady ? checkoutMoney(preview.grandTotal) : "—"}</strong>
               </div>
+              {!!preview && preview.sellerDiscountTotal + preview.platformDiscountTotal > 0 && <p className="text-right text-xs font-semibold text-teal-700">ประหยัดไป {checkoutMoney(preview.sellerDiscountTotal + preview.platformDiscountTotal)}</p>}
               <Button className="checkout-primary h-11 w-full rounded-full text-sm font-semibold" disabled={!canPurchase} onClick={() => void handlePurchase()}>
                 {isSubmitting && <Loader2 className="size-4 animate-spin" />}
                 {isSubmitting ? "กำลังสร้างคำสั่งซื้อ..." : "สั่งซื้อและไปชำระเงิน"}
@@ -301,6 +358,8 @@ export function CheckoutPage() {
           open={addressPickerOpen}
           onOpenChange={setAddressPickerOpen}
         />
+        <CodePickerDialog open={promotionPicker !== null} onOpenChange={(open) => { if (!open) setPromotionPicker(null); }} owner={promotionPicker ?? "PLATFORM"} sellerName={sellerGroups.find((group) => group.sellerId === promotionPicker)?.quote?.sellerName} promotions={promotionList.data || []} selectedCode={promotionPicker === "PLATFORM" ? promotionSelection.platformCode : promotionPicker == null ? null : promotionSelection.sellerCodes[promotionPicker]} onSelect={(code) => { if (promotionPicker !== null) setCode(promotionPicker, code); }} onTryCode={(code) => { if (promotionPicker !== null) { setCode(promotionPicker, code); setPromotionPicker(null); } }} error={promotionError} />
+        <Dialog open={promotionChanged !== null} onOpenChange={(open) => { if (!open) setPromotionChanged(null); }}><DialogContent><DialogHeader><DialogTitle>ยอดชำระเปลี่ยนไป</DialogTitle><DialogDescription>โค้ดหรือยอดส่วนลดเปลี่ยนระหว่างสั่งซื้อ กรุณาตรวจสอบยอดใหม่ก่อนยืนยัน</DialogDescription></DialogHeader><div className="grid gap-2 text-sm"><p>ยอดเดิม: {checkoutMoney(promotionChanged?.previous ?? 0)}</p>{promotionChanged?.code && <p className="text-amber-700">โค้ดที่เปลี่ยน: {promotionChanged.code}</p>}<p>ยอดใหม่: {promoPreview.isFetching ? "กำลังคำนวณ..." : checkoutMoney(preview?.grandTotal ?? promotionChanged?.next ?? 0)}</p>{promotionError && <p className="text-amber-700">{promotionError}</p>}</div><DialogFooter><Button variant="outline" onClick={() => { setPromotionChanged(null); setPromotionPicker("PLATFORM"); }}>เลือกโค้ดอื่น</Button><Button disabled={!previewReady} onClick={() => { setPromotionChanged(null); void handlePurchase(); }}>สั่งซื้อด้วยยอดใหม่</Button></DialogFooter></DialogContent></Dialog>
       </div>
     </div>
   );
