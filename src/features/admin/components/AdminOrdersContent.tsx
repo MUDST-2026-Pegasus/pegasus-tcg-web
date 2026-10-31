@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 
 import { Clock } from "lucide-react";
 
@@ -11,6 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { orderAlertNotice } from "../orders.format";
+import { getAdminOrders } from "../orders.api";
 import { useOrderBoard } from "../orders.queries";
 import type { AdminOrderSummary, OrderBoardColumn } from "../orders.types";
 import { OrderBoardSkeleton } from "./OrderBoardSkeleton";
@@ -26,6 +29,13 @@ export function AdminOrdersContent() {
   const board = useOrderBoard();
   const [listColumn, setListColumn] = useState<OrderBoardColumn | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [params] = useSearchParams();
+  const searchedOrder = params.get("q")?.trim() || "";
+  const orderMatches = useQuery({
+    queryKey: ["admin-orders", "promotion-order", searchedOrder],
+    queryFn: () => getAdminOrders({ statuses: [], q: searchedOrder, sort: "NEWEST", page: 0, size: 20 }),
+    enabled: searchedOrder.length > 0,
+  });
 
   const disputes = board.data?.columns.find((column) => column.key === "DISPUTED");
 
@@ -65,6 +75,13 @@ export function AdminOrdersContent() {
           </Button>
         </div>
       </div>
+
+      {searchedOrder && <div className="rounded-xl border bg-card p-4 text-sm">
+        <h2 className="font-semibold">คำสั่งซื้อ {searchedOrder}</h2>
+        {orderMatches.isPending && <p className="mt-2 text-muted-foreground">กำลังค้นหาคำสั่งซื้อ...</p>}
+        {orderMatches.isError && <p role="alert" className="mt-2 text-destructive">ค้นหาคำสั่งซื้อไม่สำเร็จ <button onClick={() => void orderMatches.refetch()}>ลองอีกครั้ง</button></p>}
+        {orderMatches.data && <div className="mt-2 grid gap-2">{orderMatches.data.items.filter((item) => item.orderNumber === searchedOrder).map((item) => <button key={item.sellerOrderId} type="button" className="rounded-lg border p-3 text-left hover:bg-muted" onClick={() => setSelectedId(item.sellerOrderId)}>{item.sellerOrderNumber} · {item.seller.displayName} · {item.status}</button>)}{!orderMatches.data.items.some((item) => item.orderNumber === searchedOrder) && <p className="text-muted-foreground">ไม่พบคำสั่งซื้อหมายเลขนี้</p>}</div>}
+      </div>}
 
       <QueryBoundary
         query={board}

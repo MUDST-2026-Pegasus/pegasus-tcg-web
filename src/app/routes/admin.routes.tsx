@@ -23,6 +23,8 @@ const AdminAuctionsPage = lazyPage(() => import("@/features/auction/pages/AdminA
 const AdminAuctionDetailPage = lazyPage(() => import("@/features/auction/pages/AdminAuctionDetailPage").then((m) => m.AdminAuctionDetailPage), pageSkeleton);
 const AdminBannedBiddersPage = lazyPage(() => import("@/features/auction/pages/AdminBannedBiddersPage").then((m) => m.AdminBannedBiddersPage), pageSkeleton);
 const AdminActivityLogPage = lazyPage(() => import("@/features/admin/pages/AdminActivityLogPage").then((m) => m.AdminActivityLogPage), pageSkeleton);
+const AdminPromotionsPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionsPage").then((m) => m.AdminPromotionsPage), pageSkeleton);
+const AdminPromotionFormPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionFormPage").then((m) => m.AdminPromotionFormPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ดูแลระบบ — ใช้ DashboardLayout (Sidebar + topbar + Footer)
@@ -49,6 +51,9 @@ export const adminRoutes: RouteObject = {
     { path: "auctions/banned-bidders", element: <AdminBannedBiddersPage /> },
     { path: "auctions/:auctionId", element: <AdminAuctionDetailPage /> },
     { path: "commission", element: <AdminCommissionPage /> },
+    { path: "promotions", element: <AdminPromotionsPage /> },
+    { path: "promotions/new", element: <AdminPromotionFormPage /> },
+    { path: "promotions/:id/edit", element: <AdminPromotionFormPage /> },
     { path: "payments", element: <AdminPaymentsPage /> },
     { path: "refunds", element: <AdminRefundsPage /> },
     { path: "payouts", element: <AdminPayoutsPage /> },

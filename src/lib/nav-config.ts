@@ -1,4 +1,5 @@
 import {
+  TicketPercent,
   ArrowUpRight,
   BadgeCheck,
   Clock2,
@@ -71,6 +72,7 @@ export const adminNav: NavGroup[] = [
       { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
       { label: "การประมูล", to: "/admin/auctions", icon: Gavel },
       { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
+      { label: "โปรโมชั่น & โค้ดส่วนลด", to: "/admin/promotions", icon: TicketPercent },
       { label: "จัดการรีวิว", to: "/admin/reviews", icon: Star },
     ],
   },
