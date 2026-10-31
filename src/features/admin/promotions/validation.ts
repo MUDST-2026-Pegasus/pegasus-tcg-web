@@ -14,6 +14,7 @@ export function getAdminPromotionErrors(form: AdminPromotionInput, existing?: Pa
   if (form.usageLimitTotal != null && form.usageLimitTotal < 1) errors.usageLimitTotal = "จำนวนสิทธิ์ต้องอย่างน้อย 1";
   if (form.claimLimit != null && form.claimLimit < 1) errors.claimLimit = "จำนวนที่แจกต้องอย่างน้อย 1";
   if (form.featuredOnHome && (!form.claimable || form.visibility !== "PUBLIC")) errors.featuredOnHome = "แสดงหน้าแรกได้เฉพาะโค้ดสาธารณะที่กดเก็บได้";
+  if (form.featuredOnHome && form.homeSort != null && (!Number.isInteger(form.homeSort) || form.homeSort < 0 || form.homeSort > 7)) errors.homeSort = "ลำดับบนหน้าแรกต้องอยู่ระหว่าง 0–7";
   if (form.claimRequired && !form.claimable) errors.claimRequired = "ต้องเปิดให้กดเก็บก่อน";
   if ((existing?.usedCount || 0) > 0) {
     if (existing?.endsAt && Date.parse(form.endsAt) < Date.parse(existing.endsAt)) errors.endsAt = "หลังมีการใช้โค้ดแล้ว ลดวันสิ้นสุดไม่ได้";

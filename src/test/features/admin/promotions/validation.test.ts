@@ -7,11 +7,16 @@ const valid: AdminPromotionInput = {
   discountValue: 10, maxDiscount: 200, minSpend: 500, scopeType: "ALL", scopeIds: [],
   visibility: "PUBLIC", newBuyerOnly: false, usageLimitTotal: 100, usageLimitPerUser: 1,
   startsAt: new Date(Date.now() + 86_400_000).toISOString(), endsAt: new Date(Date.now() + 30 * 86_400_000).toISOString(),
-  claimable: true, claimRequired: false, claimLimit: 100, featuredOnHome: true,
+  claimable: true, claimRequired: false, claimLimit: 100, featuredOnHome: true, homeSort: null,
 };
 
 describe("admin promotion validation", () => {
   it("accepts a valid code", () => expect(getAdminPromotionErrors(valid)).toEqual({}));
+
+  it("accepts only positions in the eight-code home strip", () => {
+    expect(getAdminPromotionErrors({ ...valid, homeSort: 7 })).toEqual({});
+    expect(getAdminPromotionErrors({ ...valid, homeSort: 8 }).homeSort).toBeTruthy();
+  });
 
   it("rejects a percentage above 90 and an end before the start", () => {
     const errors = getAdminPromotionErrors({ ...valid, discountValue: 91, endsAt: new Date(Date.now() - 86_400_000).toISOString() });

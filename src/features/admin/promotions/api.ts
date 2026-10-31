@@ -10,7 +10,7 @@ export const adminPromotionApi = {
   create: (input: AdminPromotionInput) => api.post<AdminPromotion>(root, input),
   update: (id: number, input: AdminPromotionInput) => api.put<AdminPromotion>(`${root}/${id}`, input),
   remove: (id: number) => api.delete<void>(`${root}/${id}`),
-  pause: (id: number, reason?: string) => api.post<AdminPromotion>(`${root}/${id}/pause`, { reason, notifySeller: true }),
+  pause: (id: number, reason?: string, notifySeller = true) => api.post<AdminPromotion>(`${root}/${id}/pause`, { reason, notifySeller }),
   resume: (id: number) => api.post<AdminPromotion>(`${root}/${id}/resume`, { notifySeller: true }),
   homeOrder: (promotionIds: number[]) => api.put<AdminPromotion[]>(`${root}/home-order`, { promotionIds }),
   redemptions: (id: number, page: number) => api.get<PageResponse<Redemption>>(`${root}/${id}/redemptions`, { query: { page, size: 20 } }),

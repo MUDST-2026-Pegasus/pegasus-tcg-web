@@ -61,7 +61,7 @@ describe("admin promotions actions", () => {
     await user.click(screen.getByRole("button", { name: "ลบโค้ด" }));
     await user.click(await screen.findByRole("button", { name: "หยุดชั่วคราว" }));
     await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
-    await waitFor(() => expect(adminPromotionApi.pause).toHaveBeenCalledWith(1, ""));
+    await waitFor(() => expect(adminPromotionApi.pause).toHaveBeenCalledWith(1, "", true));
   });
 
   it("can end an unused but already claimed code today after delete is rejected", async () => {
@@ -104,5 +104,32 @@ describe("admin promotions actions", () => {
     await user.click(await screen.findByRole("checkbox", { name: "WELCOME20" }));
     await user.click(screen.getByRole("button", { name: "บันทึก" }));
     await waitFor(() => expect(adminPromotionApi.homeOrder).toHaveBeenCalledWith([1, 2]));
+  });
+
+  it("refreshes the status row and tab count after pausing a code", async () => {
+    let current = code;
+    vi.mocked(adminPromotionApi.list).mockImplementation(async () => ({ page: { items: [current], page: 0, size: 20, totalItems: 1, totalPages: 1 }, statusCounts: { ACTIVE: current.status === "ACTIVE" ? 1 : 0, SCHEDULED: 0, PAUSED: current.status === "PAUSED" ? 1 : 0, EXPIRED: 0, USED_UP: 0 } }));
+    vi.mocked(adminPromotionApi.pause).mockImplementation(async () => { current = { ...current, status: "PAUSED" }; return current; });
+    const user = userEvent.setup();
+    renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
+    await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
+    await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
+    await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "หยุดชั่วคราว 1" })).toBeInTheDocument());
+    expect(screen.getAllByText("หยุดชั่วคราว").length).toBeGreaterThan(0);
+  });
+
+  it("requires a category and explanation before pausing a seller code", async () => {
+    vi.mocked(adminPromotionApi.list).mockImplementation(async () => page([{ ...code, ownerType: "SELLER" }]));
+    const user = userEvent.setup();
+    renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
+    await user.click(await screen.findByLabelText("จัดการ PEGASUS10"));
+    await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
+    const confirm = screen.getByRole("button", { name: "หยุดชั่วคราว" });
+    expect(confirm).toBeDisabled();
+    await user.selectOptions(screen.getByLabelText("เหตุผล *"), "ส่วนลดสูงผิดปกติ");
+    await user.type(screen.getByLabelText("รายละเอียดที่แจ้งร้าน *"), "ตรวจพบราคาผิด");
+    await user.click(confirm);
+    await waitFor(() => expect(adminPromotionApi.pause).toHaveBeenCalledWith(1, "ส่วนลดสูงผิดปกติ: ตรวจพบราคาผิด", true));
   });
 });
