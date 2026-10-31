@@ -43,6 +43,7 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
             <SheetDescription className="text-xs">
               {discountLabel(data)}
               {cap !== "—" ? ` ${cap}` : ""} · {minSpendLabel(data.minSpend)} · {formatPeriod(data.startsAt, data.endsAt)}
+              {data.createdBy ? ` · สร้างโดย ${maskBuyer(data.createdBy)}` : ""}
             </SheetDescription>
           ) : null}
         </SheetHeader>
@@ -54,9 +55,12 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
               value={`${data.usedCount.toLocaleString("th-TH")} / ${limitLabel(data.usageLimitTotal)}`}
               caption={data.claimable ? `เก็บแล้ว ${data.claimedCount.toLocaleString("th-TH")} / ${limitLabel(data.claimLimit)}` : undefined}
             />
-            {/* backend ยังไม่ส่งยอดส่วนลด/ยอดขายรายโค้ด — แสดงขีดไว้ก่อน */}
-            <Metric label={data.ownerType === "PLATFORM" ? "ส่วนลดที่ Pegasus ออก" : "ส่วนลดที่ร้านออก"} value="—" />
-            <Metric label="ยอดขายจากโค้ดนี้" value="—" />
+            <Metric
+              label={data.ownerType === "PLATFORM" ? "ส่วนลดที่ Pegasus ออก" : "ส่วนลดที่ร้านออก"}
+              value={formatBaht(data.discountTotal)}
+              caption={data.reservedOrders ? `รอชำระอีก ${data.reservedOrders.toLocaleString("th-TH")} ออเดอร์` : undefined}
+            />
+            <Metric label="ยอดขายจากโค้ดนี้" value={formatBaht(data.salesTotal)} />
           </div>
         ) : null}
 

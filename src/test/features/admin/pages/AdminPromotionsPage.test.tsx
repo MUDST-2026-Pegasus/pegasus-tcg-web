@@ -17,6 +17,7 @@ vi.mock("@/features/admin/promotions.api", () => ({
   resumePromotion: vi.fn(),
   setHomeOrder: vi.fn(),
   getRedemptions: vi.fn(),
+  endPromotion: vi.fn(),
   getAllPlatformPromotions: vi.fn(),
   getPromotionCategories: vi.fn(),
 }));
@@ -53,6 +54,11 @@ const code: AdminPromotion = {
   pauseReason: null,
   createdAt: "2026-10-01T00:00:00Z",
   updatedAt: "2026-10-01T00:00:00Z",
+  createdBy: null,
+  pausedBy: null,
+  discountTotal: 0,
+  salesTotal: 0,
+  reservedOrders: 0,
 };
 
 const shopCode: AdminPromotion = {
@@ -95,8 +101,11 @@ describe("AdminPromotionsPage", () => {
       redemptions30d: 0,
       redemptionsChangePercent: 18,
       claims30d: 0,
-      platformDiscountCost30d: 0,
-      salesWithCodes30d: 0,
+      platformDiscountCost30d: 310,
+      salesWithCodes30d: 4600,
+      gmv30d: 10000,
+      paidOrders30d: 50,
+      ordersWithCodes30d: 23,
     });
     vi.mocked(promotionsApi.getAllPlatformPromotions).mockResolvedValue([code]);
     vi.mocked(promotionsApi.getPromotionCategories).mockResolvedValue([]);
@@ -105,6 +114,7 @@ describe("AdminPromotionsPage", () => {
     vi.mocked(promotionsApi.pausePromotion).mockResolvedValue({ ...code, status: "PAUSED" });
     vi.mocked(promotionsApi.setHomeOrder).mockResolvedValue([]);
     vi.mocked(promotionsApi.updatePromotion).mockResolvedValue({ ...code, status: "EXPIRED" });
+    vi.mocked(promotionsApi.endPromotion).mockResolvedValue({ ...code, status: "EXPIRED" });
     vi.mocked(promotionsApi.getRedemptions).mockResolvedValue({ items: [], page: 0, size: 20, totalItems: 0, totalPages: 1 });
   });
 
@@ -117,6 +127,8 @@ describe("AdminPromotionsPage", () => {
     expect(within(row).getByLabelText("แสดงบนหน้าแรก")).toBeInTheDocument();
     expect(screen.getByText("shady_cards · ล้างสต็อก")).toBeInTheDocument();
     expect(screen.getByText("+18% จากเดือนก่อน")).toBeInTheDocument();
+    expect(screen.getByText("3.1% ของ GMV")).toBeInTheDocument();
+    expect(screen.getByText("46% ของออเดอร์ทั้งหมด")).toBeInTheDocument();
   });
 
   it("requires the exact code before deleting an untouched code", async () => {
@@ -136,16 +148,25 @@ describe("AdminPromotionsPage", () => {
     expect(await screen.findByText("ลบโค้ดนี้ไม่ได้")).toBeInTheDocument();
     expect(promotionsApi.deletePromotion).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "สิ้นสุดวันนี้" }));
-    await waitFor(() =>
-      expect(promotionsApi.updatePromotion).toHaveBeenCalledWith(1, expect.objectContaining({ featuredOnHome: false, homeSort: null })),
-    );
+    await waitFor(() => expect(promotionsApi.endPromotion).toHaveBeenCalledWith(1));
   });
 
-  it("offers only pausing for a used code, since its end date cannot move earlier", async () => {
-    vi.mocked(promotionsApi.getPromotions).mockResolvedValue(page([{ ...code, usedCount: 4, featuredOnHome: false }]));
+  it("ends a used code today through the end action", async () => {
+    vi.mocked(promotionsApi.getPromotions).mockResolvedValue(page([{ ...code, usedCount: 4 }]));
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     const user = await openMenuItem("PEGASUS10", "ลบ");
-    expect(await screen.findByText(/สิ้นสุดก่อนวันที่ตั้งไว้ไม่ได้/)).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "สิ้นสุดวันนี้" }));
+    await waitFor(() => expect(promotionsApi.endPromotion).toHaveBeenCalledWith(1));
+    expect(promotionsApi.updatePromotion).not.toHaveBeenCalled();
+  });
+
+  it("only offers pausing for a code that has not started", async () => {
+    vi.mocked(promotionsApi.getPromotions).mockResolvedValue(
+      page([{ ...code, usedCount: 4, featuredOnHome: false, startsAt: "2099-01-01T00:00:00Z", endsAt: "2099-02-01T00:00:00Z" }]),
+    );
+    renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
+    const user = await openMenuItem("PEGASUS10", "ลบ");
+    expect(await screen.findByText(/ยังไม่ถึงวันเริ่ม/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "สิ้นสุดวันนี้" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
     await user.click(await screen.findByRole("button", { name: "หยุดโค้ด" }));
@@ -164,9 +185,11 @@ describe("AdminPromotionsPage", () => {
   });
 
   it("takes a paused Pegasus code off the home page when asked", async () => {
+    vi.mocked(promotionsApi.getPromotions).mockResolvedValue(page([{ ...code, reservedOrders: 3 }]));
     vi.mocked(promotionsApi.getAllPlatformPromotions).mockResolvedValue([code, { ...code, id: 2, code: "FREESHIP", homeSort: 1 }]);
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     const user = await openMenuItem("PEGASUS10", "หยุดชั่วคราว");
+    expect(screen.getByText("3 รายการ")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "ซ่อนจากหน้าแรกระหว่างหยุด" })).toBeChecked();
     await user.click(screen.getByRole("button", { name: "หยุดโค้ด" }));
     await waitFor(() => expect(promotionsApi.setHomeOrder).toHaveBeenCalledWith([2]));
@@ -174,6 +197,12 @@ describe("AdminPromotionsPage", () => {
 
   it("restores filters, page and the redemption sheet from the URL", async () => {
     vi.mocked(promotionsApi.getPromotions).mockImplementation(async ({ page: index }) => page([code], index, 3));
+    vi.mocked(promotionsApi.getPromotion).mockResolvedValue({
+      ...code,
+      discountTotal: 27940,
+      salesTotal: 214300,
+      createdBy: { id: 1, username: "kant", displayName: "Kant Somsak", avatarUrl: null },
+    });
     vi.mocked(promotionsApi.getRedemptions).mockResolvedValue({
       items: [
         {
@@ -198,6 +227,9 @@ describe("AdminPromotionsPage", () => {
       expect(promotionsApi.getPromotions).toHaveBeenCalledWith({ owner: "PLATFORM", status: "ACTIVE", q: "PEGA", page: 1, size: 8 }),
     );
     expect(await screen.findByText("ธนภัทร ส.")).toBeInTheDocument();
+    expect(screen.getByText("฿27,940")).toBeInTheDocument();
+    expect(screen.getByText("฿214,300")).toBeInTheDocument();
+    expect(screen.getByText(/สร้างโดย Kant S\./)).toBeInTheDocument();
     expect(screen.getByText("ใช้แล้ว")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "PG-20261029-0412" })).toHaveAttribute(
       "href",
@@ -244,5 +276,25 @@ describe("AdminPromotionsPage", () => {
     await user.click(screen.getByRole("button", { name: "เลื่อน FREESHIP ขึ้น" }));
     await user.click(screen.getByRole("button", { name: "บันทึกลำดับ" }));
     await waitFor(() => expect(promotionsApi.setHomeOrder).toHaveBeenCalledWith([2, 1]));
+  });
+
+  it("says who paused a code before resuming it", async () => {
+    vi.mocked(promotionsApi.getPromotions).mockResolvedValue(
+      page([
+        {
+          ...code,
+          status: "PAUSED",
+          pausedAt: "2026-10-28T07:20:00Z",
+          pauseReason: "ส่วนลดสูงผิดปกติ",
+          pausedBy: { id: 1, username: "kant", displayName: "Kant Somsak", avatarUrl: null },
+        },
+      ]),
+    );
+    vi.mocked(promotionsApi.resumePromotion).mockResolvedValue(code);
+    renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
+    const user = await openMenuItem("PEGASUS10", "เปิดใช้อีกครั้ง");
+    expect(screen.getByText(/หยุดโดย Kant S\. เมื่อ/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "เปิดใช้โค้ด" }));
+    await waitFor(() => expect(promotionsApi.resumePromotion).toHaveBeenCalledWith(1, false));
   });
 });

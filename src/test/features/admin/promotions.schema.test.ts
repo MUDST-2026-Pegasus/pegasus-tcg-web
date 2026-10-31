@@ -46,6 +46,11 @@ const existing: AdminPromotion = {
   pauseReason: null,
   createdAt: valid.startsAt,
   updatedAt: valid.startsAt,
+  createdBy: null,
+  pausedBy: null,
+  discountTotal: 0,
+  salesTotal: 0,
+  reservedOrders: 0,
 };
 
 describe("promotion form schema", () => {

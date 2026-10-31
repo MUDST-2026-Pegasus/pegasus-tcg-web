@@ -8,13 +8,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
 
-import { SELLER_PAUSE_REASONS, formatPromoDate, formatPromoDateTime, limitLabel, promotionErrorMessage } from "../promotions.format";
-import { toPromotionInput } from "../promotions.schema";
+import {
+  SELLER_PAUSE_REASONS,
+  formatPromoDate,
+  formatPromoDateTime,
+  limitLabel,
+  maskBuyer,
+  promotionErrorMessage,
+} from "../promotions.format";
 import {
   useDeletePromotion,
+  useEndPromotion,
   usePausePromotion,
   useResumePromotion,
-  useSavePromotion,
   useSetHomeOrder,
 } from "../promotions.queries";
 import type { AdminPromotion } from "../promotions.types";
@@ -121,8 +127,8 @@ function PausePlatformDialog({
           <strong>{promotion.claimedCount.toLocaleString("th-TH")} คน</strong>
         </p>
         <p>
-          <span>ใช้โค้ดแล้ว</span>
-          <strong>{promotion.usedCount.toLocaleString("th-TH")} ครั้ง</strong>
+          <span>ออเดอร์รอชำระที่ใช้โค้ดนี้</span>
+          <strong>{promotion.reservedOrders.toLocaleString("th-TH")} รายการ</strong>
         </p>
       </div>
       <p className="promotion-action-note">
@@ -240,7 +246,11 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
       tone="success"
       icon={<CirclePlay />}
       title={`เปิดใช้ ${promotion.code} อีกครั้ง?`}
-      description={promotion.pausedAt ? `หยุดเมื่อ ${formatPromoDateTime(promotion.pausedAt)}` : undefined}
+      description={
+        promotion.pausedAt
+          ? `หยุด${promotion.pausedBy ? `โดย ${maskBuyer(promotion.pausedBy)} ` : ""}เมื่อ ${formatPromoDateTime(promotion.pausedAt)}`
+          : undefined
+      }
       footerNote={isSeller ? "บันทึกใน Activity Log" : undefined}
       actions={
         <>
@@ -347,25 +357,19 @@ function DeleteBlockedDialog({
   onClose: () => void;
   onPause: () => void;
 }) {
-  const save = useSavePromotion();
-  // backend ไม่ให้ร่นวันสิ้นสุดหลังมีออเดอร์ใช้โค้ด และโค้ดที่ยังไม่เริ่มสิ้นสุดก่อนวันเริ่มไม่ได้
-  const canEndToday = promotion.usedCount === 0 && Date.parse(promotion.startsAt) < now;
+  const end = useEndPromotion();
+  // โค้ดที่ยังไม่เริ่มไม่มีอะไรให้สิ้นสุด — ลบไม่ได้ก็หยุดไว้แทน
+  const canEndToday = Date.parse(promotion.startsAt) < now;
 
   const endToday = () =>
-    save.mutate(
-      {
-        id: promotion.id,
-        input: { ...toPromotionInput(promotion), endsAt: new Date().toISOString(), featuredOnHome: false, homeSort: null },
+    end.mutate(promotion.id, {
+      onSuccess: () => {
+        toast.add({ title: `สิ้นสุดโค้ด ${promotion.code} วันนี้แล้ว`, type: "success" });
+        onClose();
       },
-      {
-        onSuccess: () => {
-          toast.add({ title: `สิ้นสุดโค้ด ${promotion.code} วันนี้แล้ว`, type: "success" });
-          onClose();
-        },
-        onError: (error) =>
-          toast.add({ title: "สิ้นสุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
-      },
-    );
+      onError: (error) =>
+        toast.add({ title: "สิ้นสุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
+    });
 
   return (
     <PromotionDialog
@@ -377,15 +381,15 @@ function DeleteBlockedDialog({
       description={`${promotion.code} ถูกเก็บ ${promotion.claimedCount.toLocaleString("th-TH")} ครั้ง และใช้ในคำสั่งซื้อ ${promotion.usedCount.toLocaleString("th-TH")} รายการ ต้องเก็บไว้เพื่อให้ใบเสร็จและบัญชีย้อนหลังถูกต้อง`}
       actions={
         <>
-          <Button variant="outline" disabled={save.isPending} onClick={onClose}>
+          <Button variant="outline" disabled={end.isPending} onClick={onClose}>
             ปิด
           </Button>
           {canEndToday ? (
-            <Button variant="outline" disabled={save.isPending} onClick={endToday}>
+            <Button variant="outline" disabled={end.isPending} onClick={endToday}>
               สิ้นสุดวันนี้
             </Button>
           ) : null}
-          <Button disabled={save.isPending} onClick={onPause}>
+          <Button disabled={end.isPending} onClick={onPause}>
             หยุดชั่วคราว
           </Button>
         </>
@@ -394,9 +398,7 @@ function DeleteBlockedDialog({
       <p className="promotion-info-box">
         {canEndToday
           ? "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) หรือ ตั้งวันสิ้นสุดเป็นวันนี้ (โค้ดหมดอายุตามปกติ)"
-          : promotion.usedCount > 0
-            ? "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) — โค้ดที่มีออเดอร์ใช้แล้วสิ้นสุดก่อนวันที่ตั้งไว้ไม่ได้"
-            : "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) — โค้ดยังไม่ถึงวันเริ่ม จึงสิ้นสุดวันนี้ไม่ได้"}
+          : "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) — โค้ดยังไม่ถึงวันเริ่ม จึงสิ้นสุดวันนี้ไม่ได้"}
       </p>
     </PromotionDialog>
   );

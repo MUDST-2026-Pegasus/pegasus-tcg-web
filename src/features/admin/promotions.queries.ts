@@ -101,6 +101,11 @@ export function useResumePromotion() {
   });
 }
 
+export function useEndPromotion() {
+  const invalidate = useInvalidatePromotions();
+  return useMutation({ mutationFn: (id: number) => promotionsApi.endPromotion(id), onSuccess: invalidate });
+}
+
 export function useSetHomeOrder() {
   const invalidate = useInvalidatePromotions();
   return useMutation({

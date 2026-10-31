@@ -9,7 +9,14 @@ import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
-import { PROMOTION_PAGE_SIZE, STATUS_TABS, currentHomeIds, formatBaht, type ScopeNames } from "../promotions.format";
+import {
+  PROMOTION_PAGE_SIZE,
+  STATUS_TABS,
+  type ScopeNames,
+  currentHomeIds,
+  formatBaht,
+  percentOf,
+} from "../promotions.format";
 import {
   usePlatformPromotions,
   usePromotionCategories,
@@ -108,6 +115,8 @@ export function AdminPromotionsContent() {
   const firstPage = Math.max(0, Math.min(page - 1, totalPages - 3));
   const pageNumbers = Array.from({ length: Math.min(3, totalPages) }, (_, index) => firstPage + index);
   const change = summary.data?.redemptionsChangePercent;
+  const costShare = summary.data ? percentOf(summary.data.platformDiscountCost30d, summary.data.gmv30d) : null;
+  const orderShare = summary.data ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d) : null;
 
   return (
     <main className="promotion-admin promotion-list-page grid gap-6">
@@ -143,12 +152,12 @@ export function AdminPromotionsContent() {
         <KpiCard
           label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          caption={`เก็บโค้ด ${(summary.data?.claims30d ?? 0).toLocaleString("th-TH")} ครั้งใน 30 วัน`}
+          caption={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
         />
         <KpiCard
           label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          caption="30 วันล่าสุด"
+          caption={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
         />
       </div>
 

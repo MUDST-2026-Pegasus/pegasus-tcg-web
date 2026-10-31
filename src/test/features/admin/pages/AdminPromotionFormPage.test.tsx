@@ -20,6 +20,7 @@ vi.mock("@/features/admin/promotions.api", () => ({
   resumePromotion: vi.fn(),
   setHomeOrder: vi.fn(),
   getRedemptions: vi.fn(),
+  endPromotion: vi.fn(),
   getAllPlatformPromotions: vi.fn(),
   getPromotionCategories: vi.fn(),
 }));
@@ -56,6 +57,11 @@ const used: AdminPromotion = {
   pauseReason: null,
   createdAt: "2026-10-01T00:00:00Z",
   updatedAt: "2026-10-01T00:00:00Z",
+  createdBy: null,
+  pausedBy: null,
+  discountTotal: 0,
+  salesTotal: 0,
+  reservedOrders: 0,
 };
 
 function renderAt(path: string, extra: RouteObject[] = [{ path: "/admin/promotions", element: <div>รายการโค้ด</div> }]) {
@@ -207,6 +213,9 @@ describe("AdminPromotionFormPage — creating", () => {
       claims30d: 0,
       platformDiscountCost30d: 0,
       salesWithCodes30d: 0,
+      gmv30d: 0,
+      paidOrders30d: 0,
+      ordersWithCodes30d: 0,
     });
     vi.mocked(promotionsApi.getPromotionCategories).mockResolvedValue([]);
     vi.mocked(promotionsApi.createPromotion).mockImplementation(async (input) => {

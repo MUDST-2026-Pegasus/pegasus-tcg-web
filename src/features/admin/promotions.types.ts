@@ -55,6 +55,16 @@ export type AdminPromotion = {
   pauseReason: string | null;
   createdAt: string;
   updatedAt: string;
+  /** ผู้สร้างโค้ด — `null` สำหรับโค้ดที่ seed ไว้ */
+  createdBy: PromotionParty | null;
+  /** ผู้หยุดโค้ด ระหว่างที่หยุดอยู่ */
+  pausedBy: PromotionParty | null;
+  /** ส่วนลดที่โค้ดนี้หักจากออเดอร์ที่ชำระแล้ว */
+  discountTotal: number;
+  /** ยอดรวมของออเดอร์ที่ชำระแล้วที่ใช้โค้ดนี้ */
+  salesTotal: number;
+  /** ออเดอร์ที่ถือโค้ดไว้ระหว่างรอชำระ */
+  reservedOrders: number;
 };
 
 export type AdminPromotionInput = Pick<
@@ -103,6 +113,11 @@ export type AdminPromotionSummary = {
   claims30d: number;
   platformDiscountCost30d: number;
   salesWithCodes30d: number;
+  /** ยอดรวมทุกออเดอร์ที่ชำระใน 30 วัน — ฐานของ "% ของ GMV" */
+  gmv30d: number;
+  paidOrders30d: number;
+  /** ในจำนวนนั้น ออเดอร์ที่ใช้โค้ด — ฐานของ "% ของออเดอร์ทั้งหมด" */
+  ordersWithCodes30d: number;
 };
 
 export type PromotionRedemption = {

@@ -50,6 +50,14 @@ export function pausePromotion(id: number, reason: string | null, notifySeller: 
   return api.post<AdminPromotion>(`${ROOT}/${id}/pause`, { reason, notifySeller });
 }
 
+/**
+ * สิ้นสุดโค้ด Pegasus ทันที ใช้ได้แม้มีออเดอร์ใช้แล้ว (PUT ร่นวันสิ้นสุดไม่ได้) และเอาออกจากหน้าแรก
+ * โค้ดที่ยังไม่เริ่มได้ `PROMO_INVALID`
+ */
+export function endPromotion(id: number) {
+  return api.post<AdminPromotion>(`${ROOT}/${id}/end`);
+}
+
 export function resumePromotion(id: number, notifySeller: boolean) {
   return api.post<AdminPromotion>(`${ROOT}/${id}/resume`, { notifySeller });
 }

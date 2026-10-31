@@ -257,6 +257,12 @@ export function maskBuyer(buyer: PromotionParty): string {
     .join(" ");
 }
 
+/** "3.1%" — ทศนิยมหนึ่งตำแหน่ง ตัวหารเป็นศูนย์ได้ `null` */
+export function percentOf(part: number, whole: number): string | null {
+  if (!whole) return null;
+  return `${((100 * part) / whole).toLocaleString("th-TH", { maximumFractionDigits: 1 })}%`;
+}
+
 /** ข้อความ error ของหน้านี้ — แปลจาก `ApiError.code` (ภายหลังย้ายไป Tolgee ได้) */
 export function promotionErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "PROMO_CODE_TAKEN")) return "โค้ดนี้มีอยู่แล้ว (PROMO_CODE_TAKEN) — ลองเพิ่มตัวเลขต่อท้าย";
