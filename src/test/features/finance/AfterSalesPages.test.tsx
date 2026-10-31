@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
-import { SellerReturnsPage } from "@/features/finance/SellerReturnsPage";
+import { SellerReturnsPage } from "@/features/finance/seller-returns/SellerReturnsPage";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
