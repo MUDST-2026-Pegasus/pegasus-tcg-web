@@ -22,8 +22,10 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 import { RadioGroup } from "@/components/ui/radio-group";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
+import { PROMOTION_DANGER_BUTTON, PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
 import { HOME_STRIP_MAX, type ScopeNames, promotionErrorMessage } from "../promotions.format";
 import {
   usePlatformPromotions,
@@ -41,7 +43,13 @@ import {
 import type { AdminPromotion, AdminPromotionInput } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
 import { PromotionFormAside } from "./PromotionFormAside";
-import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "./PromotionFormControls";
+import {
+  ChoiceCard,
+  FormField,
+  LockedSuffix,
+  NumberInput,
+  ToggleRow,
+} from "./PromotionFormControls";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
@@ -242,7 +250,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
   const usedLimitFloor = Math.max(existing?.usedCount ?? 0, existing?.usageLimitTotal ?? 0);
 
   return (
-    <main className="mx-auto grid w-full max-w-[960px] gap-6">
+    <main className={cn("mx-auto grid w-full max-w-[960px] gap-6", PROMOTION_PAGE_CONTROLS)}>
       <div className="grid gap-4">
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
@@ -257,16 +265,16 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
         </Breadcrumb>
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">
-              {existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}
-            </h1>
-            <p className="text-xs text-muted-foreground">Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
+            <h1 className="text-2xl font-black">{existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}</h1>
+            <p className="text-sm text-muted-foreground">Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/admin/promotions")}>
+            <Button variant="outline" size="sm" className="px-2.5" onClick={() => navigate("/admin/promotions")}>
               ยกเลิก
             </Button>
-            <Button onClick={requestSave}>{existing ? "บันทึก" : "บันทึกและเปิดใช้"}</Button>
+            <Button size="sm" className="px-2.5" onClick={requestSave}>
+              {existing ? "บันทึก" : "บันทึกและเปิดใช้"}
+            </Button>
           </div>
         </header>
       </div>
@@ -293,7 +301,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid min-w-0 gap-4">
           <Section title="1. ข้อมูลโค้ด">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 field="code"
                 htmlFor="promotion-code"
@@ -312,13 +320,19 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                     autoComplete="off"
                     disabled={locked("code")}
                     placeholder="PEGASUS10"
+                    className="font-semibold tracking-[0.04em] placeholder:font-normal placeholder:tracking-normal"
                     onChange={(event) => change("code", event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
                   />
                   {locked("code") ? (
                     <LockedSuffix locked />
                   ) : (
                     <InputGroupAddon align="inline-end">
-                      <InputGroupButton size="xs" variant="secondary" onClick={() => change("code", randomCode())}>
+                      <InputGroupButton
+                        size="xs"
+                        variant="secondary"
+                        className="h-auto rounded-[4px]! bg-[#eef1f2] px-2 py-0.5 text-xs text-[#414755]"
+                        onClick={() => change("code", randomCode())}
+                      >
                         สุ่มโค้ด
                       </InputGroupButton>
                     </InputGroupAddon>
@@ -349,7 +363,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 aria-label="การมองเห็น"
                 value={form.visibility}
                 onValueChange={(value) => change("visibility", value as AdminPromotionInput["visibility"])}
-                className="grid gap-2.5 sm:grid-cols-2"
+                className="grid gap-4 sm:grid-cols-2"
               >
                 <ChoiceCard
                   value="PUBLIC"
@@ -388,13 +402,13 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               data-field="discountType"
               value={form.discountType}
               onValueChange={(value) => change("discountType", value as AdminPromotionInput["discountType"])}
-              className="grid gap-2.5 sm:grid-cols-3"
+              className="grid gap-4 sm:grid-cols-3"
             >
               <ChoiceCard value="PERCENT" title="เปอร์เซ็นต์" hint="ลด x% ของยอดสินค้า" disabled={locked("discountType")} />
               <ChoiceCard value="FIXED" title="จำนวนเงิน" hint="ลดเป็นบาท" disabled={locked("discountType")} />
               <ChoiceCard value="FREE_SHIPPING" title="ส่งฟรี" hint="ลดค่าส่งทุกร้าน" disabled={locked("discountType")} />
             </RadioGroup>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {form.discountType !== "FREE_SHIPPING" ? (
                 <FormField
                   field="discountValue"
@@ -444,7 +458,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           </Section>
 
           <Section title="3. เงื่อนไข" description="ยอดขั้นต่ำคิดจากสินค้าที่เข้าเงื่อนไขหลังหักโค้ดร้าน ไม่รวมค่าส่ง">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField field="minSpend" htmlFor="promotion-minSpend" label="ยอดสั่งซื้อขั้นต่ำ" error={errors.minSpend}>
                 <NumberInput
                   id="promotion-minSpend"
@@ -463,7 +477,8 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                       key={value}
                       type="button"
                       size="xs"
-                      variant={form.scopeType === value ? "secondary" : "outline"}
+                      variant="outline"
+                      className="h-auto rounded-full! px-2.5 py-[5px] text-[#414755] aria-pressed:border-primary aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                       aria-pressed={form.scopeType === value}
                       disabled={locked("scopeType")}
                       onClick={() => change("scopeType", value)}
@@ -525,7 +540,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           </Section>
 
           <Section title="4. ระยะเวลาและจำนวนสิทธิ์">
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField field="startsAt" htmlFor="promotion-startsAt" label="เริ่มใช้ได้" required error={errors.startsAt}>
                 <InputGroup data-disabled={locked("startsAt") || undefined}>
                   <InputGroupInput
@@ -562,7 +577,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 field="usageLimitTotal"
                 htmlFor="promotion-usageLimitTotal"
@@ -630,7 +645,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               />
               {errors.featuredOnHome ? <FieldError className="text-[11px]">{errors.featuredOnHome}</FieldError> : null}
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 field="claimLimit"
                 htmlFor="promotion-claimLimit"
@@ -707,7 +722,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             <Button variant="outline" onClick={() => blocker.reset?.()}>
               อยู่ต่อ
             </Button>
-            <Button variant="destructive" onClick={() => blocker.proceed?.()}>
+            <Button className={PROMOTION_DANGER_BUTTON} onClick={() => blocker.proceed?.()}>
               ออกโดยไม่บันทึก
             </Button>
           </>
@@ -730,15 +745,15 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <Card className="gap-4 shadow-none">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
+    <Card className="gap-4 rounded-[12px] border border-border p-5 shadow-none ring-0">
+      <CardHeader className="gap-0.5 px-0">
+        <CardTitle className="flex items-center gap-2 text-[15px] font-semibold">
           {title}
           {badge}
         </CardTitle>
-        {description ? <CardDescription className="text-[11px]">{description}</CardDescription> : null}
+        {description ? <CardDescription className="text-xs">{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent className="grid gap-4">{children}</CardContent>
+      <CardContent className="grid gap-4 px-0">{children}</CardContent>
     </Card>
   );
 }
