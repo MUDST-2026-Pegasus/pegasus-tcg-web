@@ -648,12 +648,6 @@ export function ReorderPreviewModal({
                                       <span>
                                         สภาพกล่อง: {item.originalCondition || "Factory Sealed (New)"}
                                       </span>
-                                      <button
-                                        type="button"
-                                        className="text-[#006699] font-medium hover:underline flex items-center gap-1 cursor-pointer"
-                                      >
-                                        Find from other sellers (หาร้านอื่น) →
-                                      </button>
                                     </div>
                                   </div>
                                 );
@@ -719,12 +713,6 @@ export function ReorderPreviewModal({
                                       <span className="text-[11px] font-bold text-slate-500 tracking-wider uppercase">
                                         SELECT CONDITION FROM {sellerOrder.sellerName.toUpperCase()}
                                       </span>
-                                      <button
-                                        type="button"
-                                        className="text-xs text-[#006699] font-medium hover:underline cursor-pointer"
-                                      >
-                                        Condition Guide (คู่มือสภาพการ์ด)
-                                      </button>
                                     </div>
 
                                     <div className="grid grid-cols-5 gap-2">
