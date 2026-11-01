@@ -1,14 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { renderWithProviders } from "@/test/utils";
 import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
 import * as orderQueries from "@/features/account/orders.queries";
+import { cartApi } from "@/features/cart/cart.api";
+import { toast } from "@/components/ui/toast";
+import { ApiError } from "@/lib/api/errors";
+import type { CartResponse } from "@/features/cart/cart.types";
 import type {
   OrderDetails,
   ReorderPreviewResponse,
 } from "@/features/account/orders.types";
+
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 const mockOrder: OrderDetails = {
   id: 67,
@@ -136,6 +149,18 @@ const mockPreviewData: ReorderPreviewResponse = {
 describe("ReorderPreviewModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNavigate.mockReset();
+    vi.spyOn(toast, "add").mockImplementation(vi.fn());
+    vi.spyOn(cartApi, "addBatchItems").mockResolvedValue({
+      id: 1,
+      userId: 1,
+      sessionKey: null,
+      currency: "THB",
+      items: [],
+      totalQuantity: 1,
+      itemsSubtotal: 9500,
+      expiresAt: null,
+    } as CartResponse);
   });
 
   it("renders modal header, seller info, blue alert banner, and order item from API query", () => {
@@ -278,13 +303,116 @@ describe("ReorderPreviewModal", () => {
     const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
     await user.click(ctaBtn);
 
-    expect(onConfirmReorder).toHaveBeenCalledWith([
-      {
-        listingId: 1001,
-        quantity: 2,
-      },
-    ]);
-    expect(onClose).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onConfirmReorder).toHaveBeenCalledWith([
+        {
+          listingId: 1001,
+          quantity: 2,
+        },
+      ]);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("submits batch add to cart and navigates to /cart with reorderListingIds on success", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const addBatchSpy = vi.spyOn(cartApi, "addBatchItems").mockResolvedValue({
+      id: 1,
+      userId: 1,
+      sessionKey: null,
+      currency: "THB",
+      items: [],
+      totalQuantity: 1,
+      itemsSubtotal: 9500,
+      expiresAt: null,
+    });
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={onClose}
+        orderId={67}
+      />
+    );
+
+    const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
+    await user.click(ctaBtn);
+
+    await waitFor(() => {
+      expect(addBatchSpy).toHaveBeenCalledWith([
+        {
+          listingId: 1001,
+          quantity: 1,
+        },
+      ]);
+      expect(onClose).toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith("/cart", {
+        state: { reorderListingIds: [1001] },
+      });
+      expect(toast.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "success",
+          title: "เพิ่มสินค้าเข้าตะกร้าแล้ว",
+        })
+      );
+    });
+  });
+
+  it("handles 409 conflict error without closing modal and displays specific card name", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const conflictError = new ApiError({
+      status: 409,
+      code: "LISTING_NOT_PURCHASABLE",
+      message: "Listing 1001 is not available for purchase",
+      details: { listingId: 1001 },
+    });
+    vi.spyOn(cartApi, "addBatchItems").mockRejectedValue(conflictError);
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={onClose}
+        orderId={67}
+      />
+    );
+
+    const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
+    await user.click(ctaBtn);
+
+    await waitFor(() => {
+      const alert = screen.getByRole("alert");
+      expect(alert).toBeInTheDocument();
+      expect(within(alert).getByText(/Bio-Broly \(SR\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/สินค้าหมดสต็อกหรือไม่พร้อมจำหน่าย กรุณาเลือกสภาพการ์ดอื่น/)
+      ).toBeInTheDocument();
+      expect(toast.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "สินค้าบางรายการไม่สามารถสั่งซื้อได้",
+        })
+      );
+    });
+
+    // Modal should NOT be closed
+    expect(onClose).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it("renders vacation mode warning banner and disables CTA button when seller is on vacation", () => {
@@ -293,6 +421,7 @@ describe("ReorderPreviewModal", () => {
       sellerOrders: [
         {
           ...mockPreviewData.sellerOrders[0],
+          sellerAvailable: false,
           vacationMode: true,
         },
       ],

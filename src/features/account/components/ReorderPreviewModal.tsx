@@ -1,4 +1,5 @@
 import { useState, useId, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   AlertTriangle,
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { ApiError } from "@/lib/api/errors";
+import { useBatchAddToCart } from "@/features/cart/cart.queries";
 import { useReorderPreview } from "../orders.queries";
 import type {
   OrderDetails,
@@ -154,6 +157,8 @@ export function ReorderPreviewModal({
   onConfirmReorder,
 }: ReorderPreviewModalProps) {
   const titleId = useId();
+  const navigate = useNavigate();
+  const batchMutation = useBatchAddToCart();
   const isModalOpen = Boolean(isOpen ?? open ?? false);
   const activeOrderId = orderId ?? order?.id ?? null;
 
@@ -188,17 +193,24 @@ export function ReorderPreviewModal({
   const [userSelections, setUserSelections] = useState<
     Record<number, { listingId: number | null; quantity: number }>
   >({});
+  const [conflictError, setConflictError] = useState<{
+    listingId?: number;
+    cardName?: string;
+    message: string;
+  } | null>(null);
 
   // Reset user modifications when activeOrderId changes
   const [prevOrderId, setPrevOrderId] = useState(activeOrderId);
   if (activeOrderId !== prevOrderId) {
     setPrevOrderId(activeOrderId);
     setUserSelections({});
+    setConflictError(null);
   }
 
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   const handleSelectListing = (item: ReorderPreviewItem, listing: ReorderListingInfo) => {
+    setConflictError(null);
     setUserSelections((prev) => {
       const current = prev[item.originalOrderItemId] ?? getDefaultSelection(item);
       const maxStock = listing.quantityAvailable;
@@ -218,6 +230,7 @@ export function ReorderPreviewModal({
     delta: number,
     maxStock: number
   ) => {
+    setConflictError(null);
     setUserSelections((prev) => {
       const current = prev[item.originalOrderItemId] ?? getDefaultSelection(item);
       const nextQty = Math.max(1, Math.min(maxStock, current.quantity + delta));
@@ -276,7 +289,7 @@ export function ReorderPreviewModal({
 
   const hasVacationSeller = sellerOrders.some((so) => so.vacationMode);
   const isCtaDisabled =
-    hasVacationSeller || purchasableItems.length === 0 || isLoading || isError;
+    hasVacationSeller || purchasableItems.length === 0 || isLoading || isError || batchMutation.isPending;
 
   const handleConfirm = () => {
     if (isCtaDisabled) return;
@@ -284,15 +297,84 @@ export function ReorderPreviewModal({
       listingId,
       quantity,
     }));
-    if (onConfirmReorder) {
-      onConfirmReorder(payload);
+
+    if (payload.length === 0) {
+      toast.add({
+        title: "ไม่พบสินค้าที่เลือก",
+        description: "กรุณาเลือกสินค้าอย่างน้อย 1 รายการก่อนสั่งซื้อ",
+        type: "error",
+      });
+      return;
     }
-    toast.add({
-      title: "เพิ่มสินค้าเข้าตะกร้าแล้ว",
-      description: "ระบบได้นำสินค้าพร้อมส่งเข้าตะกร้าของคุณเรียบร้อยแล้ว",
-      type: "success",
+
+    if (payload.length > 50) {
+      toast.add({
+        title: "จำนวนสินค้าเกินกำหนด",
+        description: "สามารถสั่งซื้อได้สูงสุด 50 รายการต่อครั้ง",
+        type: "error",
+      });
+      return;
+    }
+
+    batchMutation.mutate(payload, {
+      onSuccess: () => {
+        onConfirmReorder?.(payload);
+        toast.add({
+          title: "เพิ่มสินค้าเข้าตะกร้าแล้ว",
+          description: "ระบบได้นำสินค้าพร้อมส่งเข้าตะกร้าของคุณเรียบร้อยแล้ว",
+          type: "success",
+        });
+        handleClose();
+        const reorderListingIds = payload.map((i) => i.listingId);
+        navigate("/cart", { state: { reorderListingIds } });
+      },
+      onError: (err) => {
+        let problematicListingId: number | undefined;
+
+        if (err instanceof ApiError) {
+          if (typeof err.details?.listingId === "number") {
+            problematicListingId = err.details.listingId;
+          } else if (typeof err.details?.listingId === "string") {
+            problematicListingId = parseInt(err.details.listingId, 10);
+          }
+        } else if (typeof (err as unknown as { response?: { data?: { data?: { details?: { listingId?: number } } } } })?.response?.data?.data?.details?.listingId === "number") {
+          problematicListingId = (err as unknown as { response: { data: { data: { details: { listingId: number } } } } }).response.data.data.details.listingId;
+        }
+
+        let problematicCardName: string | undefined;
+        if (problematicListingId !== undefined) {
+          const matchedItem = allItems.find((item) => {
+            const listings = [
+              item.currentListing,
+              ...(item.alternativeConditions ?? []),
+            ].filter((l): l is ReorderListingInfo => Boolean(l));
+            return listings.some((l) => l.listingId === problematicListingId);
+          });
+          problematicCardName = matchedItem?.productName || undefined;
+        }
+
+        let errorMessage = "ไม่สามารถเพิ่มสินค้าเข้าตะกร้าได้ กรุณาลองใหม่อีกครั้ง";
+        if (problematicCardName) {
+          errorMessage = `การ์ด "${problematicCardName}" สินค้าหมดสต็อกหรือไม่พร้อมจำหน่าย กรุณาเลือกสภาพการ์ดอื่น`;
+        } else if (problematicListingId) {
+          errorMessage = `รายการ #${problematicListingId} สินค้าหมดสต็อกหรือไม่พร้อมจำหน่าย กรุณาเลือกสภาพการ์ดอื่น`;
+        } else if (err instanceof ApiError && err.message) {
+          errorMessage = err.message;
+        }
+
+        setConflictError({
+          listingId: problematicListingId,
+          cardName: problematicCardName,
+          message: errorMessage,
+        });
+
+        toast.add({
+          title: "สินค้าบางรายการไม่สามารถสั่งซื้อได้",
+          description: errorMessage,
+          type: "error",
+        });
+      },
     });
-    handleClose();
   };
 
   const sellerName = sellerOrders[0]?.sellerName || "Card Kingdom TH";
@@ -367,6 +449,34 @@ export function ReorderPreviewModal({
             </div>
           ) : (
             <>
+              {/* Conflict Error Banner */}
+              {conflictError && (
+                <div
+                  role="alert"
+                  className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 text-rose-900"
+                >
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="size-5 text-rose-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold">
+                        สินค้าบางรายการไม่สามารถสั่งซื้อได้
+                      </p>
+                      <p className="text-xs sm:text-sm mt-0.5 leading-relaxed">
+                        {conflictError.message}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setConflictError(null)}
+                    className="text-rose-600 hover:text-rose-800 p-1 cursor-pointer"
+                    aria-label="Close error notice"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              )}
+
               {/* Notice Banner */}
               {hasVacationSeller ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 sm:p-4 flex items-start gap-3 text-amber-800">
@@ -602,13 +712,18 @@ export function ReorderPreviewModal({
                                   >
                                     {cond}
                                   </span>
-                                  <span className="text-xs font-semibold text-slate-900 mt-0.5">
+                                  <span
+                                    className={cn(
+                                      "text-[11px] font-semibold mt-0.5",
+                                      isSelected ? "text-[#006699]" : "text-slate-600"
+                                    )}
+                                  >
                                     {formatPrice(listing.price)}
                                   </span>
                                   <span
                                     className={cn(
                                       "text-[10px] font-medium mt-0.5",
-                                      isSelected ? "text-[#006699]" : "text-slate-500"
+                                      isSelected ? "text-[#006699]/80" : "text-slate-400"
                                     )}
                                   >
                                     {listing.quantityAvailable} left
@@ -619,11 +734,11 @@ export function ReorderPreviewModal({
                           </div>
                         </div>
 
-                        {/* Quantity & Subtotal Row */}
+                        {/* Stepper & Line Subtotal */}
                         {activeListing && (
-                          <div className="border-t border-slate-100 pt-3 flex items-center justify-between flex-wrap gap-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-slate-600">Quantity:</span>
+                          <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-slate-500 font-medium">Quantity:</span>
                               <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
                                 <button
                                   type="button"
@@ -698,8 +813,17 @@ export function ReorderPreviewModal({
             onClick={handleConfirm}
             className="bg-[#006699] hover:bg-[#005580] text-white px-6 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
           >
-            <span>สั่งสินค้านี้อีกครั้ง</span>
-            <ArrowRight className="size-4" />
+            {batchMutation.isPending ? (
+              <>
+                <RotateCw className="size-4 animate-spin" />
+                <span>กำลังเพิ่มสินค้า...</span>
+              </>
+            ) : (
+              <>
+                <span>สั่งสินค้านี้อีกครั้ง</span>
+                <ArrowRight className="size-4" />
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
