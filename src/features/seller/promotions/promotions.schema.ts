@@ -27,7 +27,7 @@ export function schemaForSellerPromotion(existing?: Partial<SellerPromotion>) {
     if (form.discountType === "PERCENT" && (form.discountValue < 1 || form.discountValue > 90)) {
       issue("discountValue", "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90");
     }
-    if (form.discountType === "FIXED" && form.discountValue > form.minSpend) {
+    if (form.discountType === "FIXED" && form.minSpend > 0 && form.discountValue > form.minSpend) {
       issue("discountValue", `ส่วนลดต้องไม่เกินยอดขั้นต่ำ ${money(form.minSpend)}`);
     }
     if (!Number.isInteger(form.usageLimitPerUser) || form.usageLimitPerUser < 1) {

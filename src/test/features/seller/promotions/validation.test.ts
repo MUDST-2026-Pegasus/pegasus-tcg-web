@@ -16,6 +16,10 @@ describe("seller promotion validation", () => {
     expect(getSellerPromotionErrors({ ...valid, discountValue: 600 }).discountValue).toBeTruthy();
   });
 
+  it("accepts any fixed discount when there is no minimum spend", () => {
+    expect(getSellerPromotionErrors({ ...valid, minSpend: 0, discountValue: 50 })).toEqual({});
+  });
+
   it("requires the end to follow the start", () => {
     expect(getSellerPromotionErrors({ ...valid, endsAt: new Date(Date.now() - 86_400_000).toISOString() }).endsAt).toBeTruthy();
   });

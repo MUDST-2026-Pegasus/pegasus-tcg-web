@@ -24,10 +24,10 @@ export function SellerPromotionCard({
       <CouponTicket promotion={code} />
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5 pt-3 text-xs text-foreground/80">
         <PromotionStatusPill status={code.status} />
-        <Button variant="link" size="sm" onClick={onRedemptions}>
+        <Button variant="link" size="sm" className="h-auto px-1 text-xs font-normal text-foreground/80"
+          title="ดูการใช้โค้ด" onClick={onRedemptions}>
           ใช้แล้ว {code.usedCount} / {limitLabel(code.usageLimitTotal)}
         </Button>
-        {code.claimable && <span>เก็บแล้ว {code.claimedCount} / {limitLabel(code.claimLimit)}</span>}
         <span>ส่วนลดรวม {money(code.discountTotal)}</span>
         <div className="ml-auto flex flex-wrap gap-1 max-sm:ml-0 max-sm:w-full">
           {staffPaused ? (
@@ -58,8 +58,9 @@ export function SellerPromotionCard({
         </div>
       </div>
       {staffPaused && (
-        <div className="mt-3 rounded-lg bg-orange-50 p-2.5 text-xs text-amber-700">
-          ทีมงานหยุดโค้ดนี้: {code.pauseReason || "โปรดติดต่อทีมงาน"}
+        <div className="mt-3 rounded-lg bg-orange-50 px-3 py-2.5 text-xs text-amber-700">
+          ทีมงานหยุดโค้ดนี้: {code.pauseReason || "ไม่ได้ระบุเหตุผล"} กรุณาติดต่อ support@pegasus.gg
+          ก่อนเปิดใช้อีกครั้ง
         </div>
       )}
     </Card>

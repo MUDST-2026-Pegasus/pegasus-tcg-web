@@ -28,7 +28,8 @@ export function useSellerRedemptions(id: number | null, page: number) {
     queryKey: sellerPromotionKeys.redemptions(id ?? 0, page),
     queryFn: () => sellerPromotionApi.redemptions(id!, page),
     enabled: id != null,
-    placeholderData: keepPreviousData,
+    // เปลี่ยนหน้าแล้วตารางไม่กระพริบ แต่ถ้าเปิดโค้ดอื่นต้องไม่เห็นแถวของโค้ดก่อนหน้า
+    placeholderData: (previous, previousQuery) => (previousQuery?.queryKey[2] === id ? previous : undefined),
   });
 }
 
@@ -36,7 +37,8 @@ function usePromotionMutation<TVariables>(mutationFn: (value: TVariables) => Pro
   const client = useQueryClient();
   return useMutation({
     mutationFn,
-    onSuccess: () => client.invalidateQueries({ queryKey: sellerPromotionKeys.all }),
+    // รวมตอน error ด้วย: 409 (`PROMO_PAUSED`, `PROMO_IN_USE`) แปลว่าสถานะบน server เปลี่ยนไปแล้ว
+    onSettled: () => client.invalidateQueries({ queryKey: sellerPromotionKeys.all }),
   });
 }
 

@@ -115,8 +115,8 @@ describe("SellerPromotionsPage", () => {
     renderWithProviders(<SellerPromotionsPage />, { route: "/seller/promotions" });
     await screen.findByText("SHOP100");
     await user.click(screen.getByRole("button", { name: "หยุดชั่วคราว" }));
-    expect(screen.getByText("ออเดอร์รอชำระ")).toBeInTheDocument();
-    expect(screen.getByText("2 ออเดอร์")).toBeInTheDocument();
+    expect(screen.getByText("ออเดอร์รอชำระที่ใช้โค้ดนี้")).toBeInTheDocument();
+    expect(screen.getByText("2 รายการ")).toBeInTheDocument();
   });
 
   it("shows staff support when resume returns PROMO_PAUSED", async () => {
@@ -145,6 +145,29 @@ describe("SellerPromotionsPage", () => {
     await user.click(screen.getByRole("button", { name: "ใช้แล้ว 4 / 50" }));
     expect(await screen.findByRole("link", { name: "SO-42" })).toHaveAttribute("href", "/seller/orders/42");
     expect(screen.getAllByText("ใช้แล้ว").length).toBeGreaterThan(0);
+    expect(screen.getByText("S***i")).toBeInTheDocument();
+  });
+
+  it("forgets a PROMO_PAUSED answer when another action opens", async () => {
+    const user = userEvent.setup();
+    vi.mocked(sellerPromotionApi.list).mockResolvedValue({
+      page: { items: [
+        { ...code, status: "PAUSED", pausedBy: "SELLER" },
+        { ...code, id: 8, code: "FRESH10", usedCount: 0, claimedCount: 0 },
+      ], page: 0, size: 20, totalItems: 2, totalPages: 1 },
+      statusCounts: { ACTIVE: 1, SCHEDULED: 0, PAUSED: 1, EXPIRED: 0, USED_UP: 0 },
+    });
+    vi.mocked(sellerPromotionApi.resume).mockRejectedValue(new ApiError({
+      status: 409, code: "PROMO_PAUSED", message: "Staff paused code",
+    }));
+    renderWithProviders(<SellerPromotionsPage />, { route: "/seller/promotions" });
+    await screen.findByText("FRESH10");
+    await user.click(screen.getByRole("button", { name: "เปิดใช้อีกครั้ง" }));
+    await user.click(screen.getByRole("button", { name: "เปิดใช้โค้ด" }));
+    await user.click(await screen.findByRole("button", { name: "ปิด" }));
+    await user.click(screen.getByRole("button", { name: "ลบ" }));
+    expect(await screen.findByText("ลบโค้ด FRESH10?")).toBeInTheDocument();
+    expect(screen.queryByText(/ทีมงานหยุดโค้ด/)).not.toBeInTheDocument();
   });
 
   it("submits form choices to the seller API", async () => {
@@ -155,9 +178,9 @@ describe("SellerPromotionsPage", () => {
     await user.click(screen.getByRole("button", { name: "สร้างโค้ดร้าน" }));
     await user.type(screen.getByRole("textbox", { name: /รหัสโค้ด/ }), "newcode10");
     await user.type(screen.getByRole("textbox", { name: /ชื่อที่ลูกค้าเห็น/ }), "สำหรับลูกค้า");
-    await user.click(screen.getByRole("radio", { name: "ลดเป็น %" }));
-    await user.clear(screen.getByRole("spinbutton", { name: /ลด \*/ }));
-    await user.type(screen.getByRole("spinbutton", { name: /ลด \*/ }), "50");
+    await user.click(screen.getByRole("button", { name: "ลดเป็น %" }));
+    await user.clear(screen.getByRole("spinbutton", { name: "ลด" }));
+    await user.type(screen.getByRole("spinbutton", { name: "ลด" }), "50");
     await user.click(screen.getByRole("button", { name: /^สร้างโค้ด$/ }));
     expect(sellerPromotionApi.create).toHaveBeenCalledWith(expect.objectContaining({ code: "NEWCODE10", name: "สำหรับลูกค้า", discountType: "PERCENT", claimable: true, visibility: "PUBLIC" }));
   });
