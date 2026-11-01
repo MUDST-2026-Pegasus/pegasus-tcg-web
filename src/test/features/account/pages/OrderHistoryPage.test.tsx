@@ -346,4 +346,161 @@ describe("OrderHistoryPage", () => {
       expect(screen.queryByText("Order #ORD-101")).not.toBeInTheDocument();
     });
   });
+
+  it("renders status filter tabs with dynamic counts and filters orders by selected status tab", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Verify all 7 filter tabs are rendered
+    const allTab = screen.getByRole("tab", { name: /ทั้งหมด/i });
+    const pendingTab = screen.getByRole("tab", { name: /รอชำระเงิน/i });
+    const preparingTab = screen.getByRole("tab", { name: /กำลังเตรียมพัสดุ/i });
+    const inTransitTab = screen.getByRole("tab", { name: /กำลังจัดส่ง/i });
+    const completedTab = screen.getByRole("tab", { name: /สำเร็จแล้ว/i });
+    const returnRefundTab = screen.getByRole("tab", { name: /ขอคืนเงิน\/คืนสินค้า/i });
+    const cancelledTab = screen.getByRole("tab", { name: /ยกเลิกแล้ว/i });
+
+    expect(allTab).toBeInTheDocument();
+    expect(pendingTab).toBeInTheDocument();
+    expect(preparingTab).toBeInTheDocument();
+    expect(inTransitTab).toBeInTheDocument();
+    expect(completedTab).toBeInTheDocument();
+    expect(returnRefundTab).toBeInTheDocument();
+    expect(cancelledTab).toBeInTheDocument();
+
+    // Both orders visible initially
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+
+    // Filter to Pending (ORD-101 is pending payment)
+    await user.click(pendingTab);
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
+
+    // Filter to Preparing (ORD-102 is paid/preparing)
+    await user.click(preparingTab);
+    expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+
+    // Filter to Cancelled (0 orders)
+    await user.click(cancelledTab);
+    expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
+    expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
+    expect(screen.getByText("No orders found")).toBeInTheDocument();
+
+    // Click "View all orders" button in empty state
+    await user.click(screen.getByRole("button", { name: /view all orders/i }));
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+  });
+
+  it("preserves scroll position when opening and closing OrderDetailsModal", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    Object.defineProperty(window, "scrollY", { value: 750, writable: true, configurable: true });
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    const viewDetailsButtons = screen.getAllByRole("button", { name: /view details/i });
+    await userEvent.click(viewDetailsButtons[0]);
+
+    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+
+    const closeBtn = screen.getByRole("button", { name: /close/i });
+    await userEvent.click(closeBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("heading", { name: /order details/i })).not.toBeInTheDocument();
+    });
+
+    expect(scrollToSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ top: 750, behavior: "instant" })
+    );
+  });
+
+  it("renders Reorder button ONLY on completed orders and directly opens ReorderPreviewModal", async () => {
+    const user = userEvent.setup();
+    const completedOrder: OrderDetails = {
+      ...mockOrders[0],
+      id: 106,
+      orderNumber: "ORD-106",
+      status: "COMPLETED",
+      sellerOrders: [
+        {
+          ...mockOrders[0].sellerOrders[0],
+          id: 206,
+          salesOrderId: 106,
+          status: "COMPLETED",
+          items: [
+            {
+              ...mockOrders[0].sellerOrders[0].items[0],
+              productName: "Mega Evolution Booster Box",
+            },
+          ],
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [mockOrders[0], completedOrder],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Reorder button should exist only for completed order
+    const reorderButtons = screen.getAllByRole("button", { name: /^reorder$/i });
+    expect(reorderButtons).toHaveLength(1);
+
+    // Clicking Reorder directly opens ReorderPreviewModal without opening OrderDetailsModal
+    await user.click(reorderButtons[0]);
+    expect(
+      screen.getByRole("heading", { name: /reorder items \(สั่งซื้อสินค้าอีกครั้ง\)/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/#ord-106/i)).toBeInTheDocument();
+  });
+
+  it("renders Reorder button inside OrderDetailsModal for completed order and opens preview", async () => {
+    const user = userEvent.setup();
+    const completedOrder: OrderDetails = {
+      ...mockOrders[0],
+      id: 107,
+      orderNumber: "ORD-107",
+      status: "COMPLETED",
+      sellerOrders: [
+        {
+          ...mockOrders[0].sellerOrders[0],
+          id: 207,
+          salesOrderId: 107,
+          status: "COMPLETED",
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [completedOrder],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Open View Details
+    await user.click(screen.getByRole("button", { name: /view details/i }));
+    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+
+    // Reorder button should exist inside the details modal (card is inert while modal is open)
+    const reorderInModal = screen.getByRole("button", { name: /^reorder$/i });
+    expect(reorderInModal).toBeInTheDocument();
+
+    // Click Reorder inside the modal
+    await user.click(reorderInModal);
+
+    // ReorderPreviewModal should open
+    expect(
+      screen.getByRole("heading", { name: /reorder items \(สั่งซื้อสินค้าอีกครั้ง\)/i })
+    ).toBeInTheDocument();
+  });
 });

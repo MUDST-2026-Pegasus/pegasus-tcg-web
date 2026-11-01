@@ -161,4 +161,40 @@ describe("CartPage item details", () => {
     expect(screen.getByRole("button", { name: "Proceed to Checkout" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "ยอมรับราคาใหม่" })).toBeEnabled();
   });
+
+  it("auto-selects ONLY reordered items when arriving with reorderListingIds in navigation state", async () => {
+    const twoItemsCart: CartResponse = {
+      ...cart,
+      items: [
+        { ...cart.items[0], id: 10, listingId: 55, productName: "Pikachu ex", unitPriceAtAdd: 100, currentPrice: 100 },
+        { ...cart.items[0], id: 11, listingId: 56, productName: "Charizard ex", unitPriceAtAdd: 200, currentPrice: 200 },
+      ],
+    };
+    getCart.mockResolvedValue(twoItemsCart);
+
+    render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter initialEntries={[{ pathname: "/cart", state: { reorderListingIds: [56] } }]}>
+          <Routes>
+            <Route path="/cart" element={<CartPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await screen.findByRole("heading", { name: "Pikachu ex" });
+
+    // Pikachu (id 10, listingId 55) should NOT be checked
+    const pikachuCheckbox = screen.getByRole("checkbox", { name: "เลือก Pikachu ex" });
+    expect(pikachuCheckbox).not.toBeChecked();
+
+    // Charizard (id 11, listingId 56) SHOULD be checked
+    const charizardCheckbox = screen.getByRole("checkbox", { name: "เลือก Charizard ex" });
+    expect(charizardCheckbox).toBeChecked();
+
+    // Order summary reflects ONLY Charizard (200 + 50 shipping = 250)
+    expect(screen.getByText("Subtotal (1 items)")).toBeInTheDocument();
+    expect(screen.getAllByText("฿200").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("฿250")).toBeInTheDocument();
+  });
 });
