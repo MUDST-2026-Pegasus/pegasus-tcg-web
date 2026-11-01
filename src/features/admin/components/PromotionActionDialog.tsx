@@ -25,11 +25,12 @@ import {
 } from "../promotions.queries";
 import type { AdminPromotion } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
+import { PROMOTION_DANGER_BUTTON } from "../promotions.styles";
 import { CheckRow } from "./PromotionFormControls";
 
-const SUMMARY_BOX = "grid gap-1 rounded-lg bg-muted px-3.5 py-2.5 text-xs";
+const SUMMARY_BOX = "grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-xs";
 const SUMMARY_ROW = "flex justify-between gap-3 text-muted-foreground [&>strong]:font-semibold [&>strong]:text-foreground";
-const INFO_BOX = "rounded-lg bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]";
+const INFO_BOX = "rounded-md bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]";
 
 export type PromotionActionKind = "pause" | "resume" | "delete" | "blocked";
 export type PromotionActionState = { kind: PromotionActionKind; promotion: AdminPromotion };
@@ -118,7 +119,7 @@ function PausePlatformDialog({
           <Button variant="outline" disabled={pending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button variant="destructive" disabled={pending} onClick={() => void submit()}>
+          <Button className={PROMOTION_DANGER_BUTTON} disabled={pending} onClick={() => void submit()}>
             หยุดโค้ด
           </Button>
         </>
@@ -187,7 +188,7 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button variant="destructive" disabled={!valid || pause.isPending} onClick={submit}>
+          <Button className={PROMOTION_DANGER_BUTTON} disabled={!valid || pause.isPending} onClick={submit}>
             หยุดโค้ดร้าน
           </Button>
         </>
@@ -271,7 +272,7 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
         </>
       }
     >
-      <div className="grid gap-1 rounded-lg bg-muted px-3.5 py-2.5 text-[11px] text-muted-foreground [&>strong]:text-xs [&>strong]:font-medium [&>strong]:text-foreground">
+      <div className="grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-[11px] text-muted-foreground [&>strong]:text-xs [&>strong]:font-medium [&>strong]:text-foreground">
         <span>เหตุผลที่หยุด</span>
         <strong>{promotion.pauseReason || "ไม่ได้ระบุเหตุผล"}</strong>
       </div>
@@ -336,7 +337,7 @@ function DeleteDialog({
           <Button variant="outline" disabled={remove.isPending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button variant="destructive" disabled={!confirmed || remove.isPending} onClick={submit}>
+          <Button className={PROMOTION_DANGER_BUTTON} disabled={!confirmed || remove.isPending} onClick={submit}>
             ลบโค้ด
           </Button>
         </>

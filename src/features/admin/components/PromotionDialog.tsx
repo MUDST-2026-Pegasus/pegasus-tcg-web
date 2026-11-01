@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
+import { PROMOTION_DIALOG_CONTROLS } from "../promotions.styles";
+
 export type PromotionDialogTone = "info" | "success" | "warning" | "danger" | "teal";
 
 const TONE_STYLE: Record<PromotionDialogTone, string> = {
@@ -53,7 +55,8 @@ export function PromotionDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
         className={cn(
-          "max-h-[calc(100svh-2rem)] gap-0 overflow-hidden rounded-xl p-0 sm:max-w-[420px] flex flex-col",
+          "max-h-[calc(100svh-2rem)] gap-0 overflow-hidden rounded-[12px] p-0 sm:max-w-[420px] flex flex-col",
+          PROMOTION_DIALOG_CONTROLS,
           className,
         )}
       >

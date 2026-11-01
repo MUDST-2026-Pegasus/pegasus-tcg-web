@@ -19,14 +19,14 @@ export function PromotionFormAside({ form }: { form: AdminPromotionInput }) {
 
   return (
     <aside className="grid min-w-0 gap-4 lg:sticky lg:top-4">
-      <Card className="gap-2.5 p-5 shadow-none">
-        <h2 className="text-xs font-semibold">ผู้ซื้อจะเห็นแบบนี้</h2>
+      <Card className="gap-3 rounded-[12px] border border-border p-5 shadow-none ring-0">
+        <h2 className="text-[13px] font-semibold">ผู้ซื้อจะเห็นแบบนี้</h2>
         <ClaimTicketPreview promotion={form} />
       </Card>
       {/* การ์ดคำนวณใน Figma เป็นพื้นกลับสีจากธีม */}
-      <Card className="gap-0 bg-foreground p-5 text-background shadow-none ring-0">
-        <h2 className="text-xs font-semibold">ตัวอย่างการคำนวณ (ตะกร้า {formatBaht(sample.subtotal)})</h2>
-        <dl className="mt-4 grid gap-1.5 border-b border-background/20 pb-3.5 text-[11px] [&>div]:flex [&>div]:justify-between [&>div]:gap-3 [&_dt]:opacity-70 [&_dd]:font-medium">
+      <Card className="gap-0 rounded-[12px] bg-foreground p-5 text-background shadow-none ring-0">
+        <h2 className="text-[13px] font-semibold">ตัวอย่างการคำนวณ (ตะกร้า {formatBaht(sample.subtotal)})</h2>
+        <dl className="mt-2.5 grid gap-2.5 border-b border-background/20 pb-2.5 text-xs [&>div]:flex [&>div]:justify-between [&>div]:gap-3 [&_dt]:opacity-70 [&_dd]:font-medium">
           <div>
             <dt>ยอดสินค้า</dt>
             <dd>{formatBaht(sample.subtotal)}</dd>
@@ -44,20 +44,20 @@ export function PromotionFormAside({ form }: { form: AdminPromotionInput }) {
             <dd>{formatBaht(sample.sellerReceives)}</dd>
           </div>
         </dl>
-        <p className="mt-3.5 flex items-end justify-between gap-3 text-[11px]">
+        <p className="mt-2.5 flex items-center justify-between gap-3 text-[13px] font-semibold">
           <span>Pegasus ออกส่วนลด</span>
-          <strong className="text-2xl leading-6">{formatBaht(sample.discount)}</strong>
+          <strong className="text-[22px] leading-7 font-black">{formatBaht(sample.discount)}</strong>
         </p>
       </Card>
-      <Card className="gap-2.5 p-5 shadow-none">
-        <h2 className="text-xs font-semibold">งบสูงสุดของแคมเปญ</h2>
-        <strong className="text-2xl font-bold">{budgetLabel(form)}</strong>
-        <p className="text-[11px] text-muted-foreground">{budgetFormula(form, true)} — ใช้ประเมินต้นทุนก่อนเปิดใช้</p>
+      <Card className="gap-2 rounded-[12px] border border-border p-5 shadow-none ring-0">
+        <h2 className="text-[13px] font-semibold">งบสูงสุดของแคมเปญ</h2>
+        <strong className="text-[22px] leading-7 font-black">{budgetLabel(form)}</strong>
+        <p className="text-xs text-muted-foreground">{budgetFormula(form, true)} — ใช้ประเมินต้นทุนก่อนเปิดใช้</p>
       </Card>
-      <Alert className="border-[#fde4bd] bg-[#fff1db] text-[#a7610b]">
+      <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] p-4 text-[#a7610b]">
         <TriangleAlert />
-        <AlertTitle className="text-xs">หลังมีคนใช้โค้ดแล้ว</AlertTitle>
-        <AlertDescription className="text-[11px] text-[#a7610b]">
+        <AlertTitle className="text-[13px] font-semibold">หลังมีคนใช้โค้ดแล้ว</AlertTitle>
+        <AlertDescription className="text-xs text-[#a7610b]">
           แก้ได้เฉพาะชื่อแคมเปญ, ยืดวันสิ้นสุด, เพิ่มจำนวนสิทธิ์ และหยุดชั่วคราว — ประเภท/มูลค่า/เงื่อนไขล็อก
           เพื่อให้ทุกออเดอร์คิดส่วนลดแบบเดียวกัน
         </AlertDescription>

@@ -21,12 +21,12 @@ export function ChoiceCard({
   disabled?: boolean;
 }) {
   return (
-    <FieldLabel className="rounded-lg">
-      <Field orientation="horizontal" data-disabled={disabled || undefined} className="p-3!">
+    <FieldLabel className="has-[>[data-slot=field]]:rounded-md has-data-checked:border-primary has-data-checked:bg-[#f0f7fc]">
+      <Field orientation="horizontal" data-disabled={disabled || undefined} className="gap-2.5 p-3!">
         <RadioGroupItem value={value} disabled={disabled} aria-label={title} />
-        <FieldContent>
-          <FieldTitle className="text-xs">{title}</FieldTitle>
-          <FieldDescription className="text-[11px]">{hint}</FieldDescription>
+        <FieldContent className="gap-0.5">
+          <FieldTitle className="text-[13px] font-semibold">{title}</FieldTitle>
+          <FieldDescription className="text-xs">{hint}</FieldDescription>
         </FieldContent>
       </Field>
     </FieldLabel>
@@ -53,13 +53,13 @@ export function ToggleRow({
     <Field
       orientation="horizontal"
       data-disabled={disabled || undefined}
-      className="justify-between rounded-lg bg-muted px-3 py-2.5"
+      className="justify-between gap-3 rounded-md bg-[#fafbfb] p-3"
     >
-      <FieldContent>
-        <FieldLabel htmlFor={id} className="text-xs font-semibold">
+      <FieldContent className="gap-0.5">
+        <FieldLabel htmlFor={id} className="text-[13px] font-semibold">
           {title}
         </FieldLabel>
-        <FieldDescription className="text-[11px]">{hint}</FieldDescription>
+        <FieldDescription className="text-xs">{hint}</FieldDescription>
       </FieldContent>
       <Switch id={id} size="sm" checked={checked} disabled={disabled} onCheckedChange={onChange} />
     </Field>
@@ -84,8 +84,8 @@ export function CheckRow({
     <Field
       orientation="horizontal"
       className={cn(
-        "rounded-lg px-3 py-2",
-        tone === "danger" ? "bg-destructive/10 text-destructive" : "bg-muted",
+        "gap-2.5 rounded-md",
+        tone === "danger" ? "bg-[#fdecec] px-3 py-2.5 text-[#dc2626]" : "px-0",
       )}
     >
       <Checkbox id={id} checked={checked} onCheckedChange={(value) => onChange(value === true)} />
@@ -121,13 +121,13 @@ export function FormField({
 }) {
   return (
     <Field data-field={field} data-invalid={error ? true : undefined} className={cn("scroll-mt-24 gap-1.5", className)}>
-      <FieldLabel htmlFor={htmlFor} className="text-xs">
+      <FieldLabel htmlFor={htmlFor} className="gap-1 text-[13px]">
         {label}
         {required ? <span className="text-destructive">*</span> : null}
       </FieldLabel>
       {children}
-      {hint ? <FieldDescription className="text-[11px]">{hint}</FieldDescription> : null}
-      {error ? <FieldError className="text-[11px]">{error}</FieldError> : null}
+      {hint ? <FieldDescription className="text-xs">{hint}</FieldDescription> : null}
+      {error ? <FieldError className="text-xs">{error}</FieldError> : null}
     </Field>
   );
 }

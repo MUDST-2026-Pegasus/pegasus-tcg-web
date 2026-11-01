@@ -68,7 +68,7 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
         </>
       }
     >
-      <div className="grid gap-2 rounded-lg bg-muted px-3.5 py-3 text-xs [&>p]:flex [&>p]:items-start [&>p]:justify-between [&>p]:gap-3 [&>p]:text-muted-foreground [&>p>strong]:text-right [&>p>strong]:font-semibold [&>p>strong]:text-foreground">
+      <div className="grid gap-2 rounded-md bg-muted px-3.5 py-3 text-xs [&>p]:flex [&>p]:items-start [&>p]:justify-between [&>p]:gap-3 [&>p]:text-muted-foreground [&>p>strong]:text-right [&>p>strong]:font-semibold [&>p>strong]:text-foreground">
         <p>
           <span>ส่วนลด</span>
           <strong>
@@ -144,9 +144,9 @@ function EditDialog({
       }
     >
       {changed.length === 0 ? (
-        <p className="rounded-lg bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]">ยังไม่มีข้อมูลที่เปลี่ยนแปลง</p>
+        <p className="rounded-md bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]">ยังไม่มีข้อมูลที่เปลี่ยนแปลง</p>
       ) : (
-        <dl className="grid max-h-56 divide-y overflow-y-auto rounded-lg border text-xs">
+        <dl className="grid max-h-56 divide-y overflow-y-auto rounded-md border text-xs">
           {changed.map((key) => (
             <div key={key} className="flex items-center justify-between gap-3 px-3.5 py-2">
               <dt className="text-muted-foreground">{FIELD_LABEL[key]}</dt>
@@ -160,7 +160,7 @@ function EditDialog({
         </dl>
       )}
       {changed.length > 0 && oldBudget !== newBudget ? (
-        <p className="flex justify-between rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground [&>strong]:text-[#b45309]">
+        <p className="flex justify-between rounded-md bg-muted px-3.5 py-2.5 text-xs text-muted-foreground [&>strong]:text-[#b45309]">
           <span>งบสูงสุดใหม่</span>
           <strong>{budgetLabel(input)}</strong>
         </p>

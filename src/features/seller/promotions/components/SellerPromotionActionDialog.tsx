@@ -4,6 +4,7 @@ import { AlertTriangle, CirclePause, CirclePlay, ShieldAlert, Trash2 } from "luc
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
+import { PROMOTION_DANGER_BUTTON } from "@/features/admin/promotions.styles";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
 import { useDeleteSellerPromotion, usePauseSellerPromotion, useResumeSellerPromotion } from "../promotions.queries";
@@ -12,8 +13,6 @@ import type { SellerPromotion } from "../promotions.types";
 import type { PromotionAction } from "./SellerPromotionCard";
 
 const SUPPORT_EMAIL = "support@pegasus.gg";
-const DANGER_BUTTON = "bg-destructive text-white hover:bg-destructive/90";
-
 /**
  * Modal ของการกระทำบนการ์ดโค้ด (Figma PRM-M2): หยุดชั่วคราว, เปิดใช้อีกครั้ง, ลบ, ลบไม่ได้ (`PROMO_IN_USE`)
  * และทีมงานหยุดโค้ด — `key` ตาม action ให้ state ของ error รอบก่อนไม่ค้างมาถึงโค้ดถัดไป
@@ -115,7 +114,7 @@ function ActionDialog({
       <Button variant="outline" onClick={onClose}>
         ยกเลิก
       </Button>
-      <Button disabled={busy} className={danger ? DANGER_BUTTON : undefined} onClick={() => void perform()}>
+      <Button disabled={busy} className={danger ? PROMOTION_DANGER_BUTTON : undefined} onClick={() => void perform()}>
         {label}
       </Button>
     </>

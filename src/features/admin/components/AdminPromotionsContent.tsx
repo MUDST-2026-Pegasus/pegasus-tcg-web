@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowUpDown, Info, Plus, Search, TicketPercent } from "lucide-react";
+import { Info, Plus, Search, TicketPercent } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
 import {
@@ -26,12 +26,12 @@ import {
   usePromotionSummary,
   usePromotions,
 } from "../promotions.queries";
+import { PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
 import type { AdminPromotion, PromotionOwnerType, PromotionStatus } from "../promotions.types";
 import { PromotionActionDialog, type PromotionActionState } from "./PromotionActionDialog";
 import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
-import { StatCard } from "./StatCard";
 
 const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> = [
   { value: null, label: "ทุกเจ้าของ" },
@@ -122,112 +122,98 @@ export function AdminPromotionsContent() {
   const orderShare = summary.data ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d) : null;
 
   return (
-    <main className="grid w-full min-w-0 gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+    <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="grid gap-1">
           <h1 className="text-2xl font-black">โปรโมชั่น &amp; โค้ดส่วนลด</h1>
           <p className="text-sm text-muted-foreground">สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" disabled={!platform.data} onClick={() => setHomeOpen(true)}>
-            <ArrowUpDown />
+          <Button variant="outline" size="sm" className="px-2.5" disabled={!platform.data} onClick={() => setHomeOpen(true)}>
             จัดลำดับหน้าแรก
           </Button>
-          <Button render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+          <Button size="sm" className="px-2.5" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
             <Plus />
             สร้างโค้ด Pegasus
           </Button>
         </div>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          id="active"
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
           label="โค้ดที่ใช้งานอยู่"
           value={((summary.data?.activePlatformCodes ?? 0) + (summary.data?.activeSellerCodes ?? 0)).toLocaleString("th-TH")}
-          delta={null}
-          footnote={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
-          bars={null}
-          accent="primary"
+          note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
         />
-        <StatCard
-          id="redemptions"
+        <KpiCard
           label="ใช้โค้ด (30 วัน)"
           value={(summary.data?.redemptions30d ?? 0).toLocaleString("th-TH")}
-          delta={
-            change == null
-              ? null
-              : { label: `${change > 0 ? "+" : ""}${change}%`, trend: change > 0 ? "up" : change < 0 ? "down" : "flat" }
-          }
-          footnote={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : "เทียบกับเดือนก่อน"}
-          bars={null}
-          accent="primary"
+          note={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`}
+          tone={change == null || change === 0 ? undefined : change > 0 ? "up" : "down"}
         />
-        <StatCard
-          id="cost"
+        <KpiCard
           label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          delta={null}
-          footnote={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
-          bars={null}
-          accent="primary"
+          note={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
         />
-        <StatCard
-          id="sales"
+        <KpiCard
           label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          delta={null}
-          footnote={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
-          bars={null}
-          accent="primary"
+          note={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
         />
       </div>
 
-      <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+      <Card className="gap-0 overflow-hidden rounded-[12px] border border-border p-0 shadow-none ring-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
-            <TabsList aria-label="กรองตามสถานะ" className="max-w-full overflow-x-auto">
+            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
               {STATUS_TABS.map((tab) => {
                 const count =
                   tab.value == null
                     ? Object.values(counts ?? {}).reduce((sum, value) => sum + value, 0)
                     : (counts?.[tab.value] ?? 0);
                 return (
-                  <TabsTrigger key={tab.label} value={tab.value ?? "ALL"} className="text-xs">
+                  <TabsTrigger
+                    key={tab.label}
+                    value={tab.value ?? "ALL"}
+                    className="h-auto gap-1.5 rounded-sm border-0! px-2.5 py-1.5 text-[13px] text-muted-foreground data-active:font-semibold data-active:shadow-xs"
+                  >
                     {tab.label}
-                    <span className="text-muted-foreground">{count}</span>
+                    <span className="text-[11px] font-semibold text-[#9aa5ad]">{count}</span>
                   </TabsTrigger>
                 );
               })}
             </TabsList>
           </Tabs>
           <div className="flex flex-wrap items-center gap-3">
-            <ButtonGroup aria-label="เจ้าของโค้ด">
+            <div role="group" aria-label="เจ้าของโค้ด" className="flex overflow-hidden rounded-sm border">
               {OWNER_FILTERS.map((filter) => (
                 <Button
                   key={filter.label}
                   size="sm"
-                  variant={owner === filter.value ? "secondary" : "outline"}
+                  variant="ghost"
+                  className="rounded-none! px-3 text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                   aria-pressed={owner === filter.value}
                   onClick={() => updateParams({ owner: filter.value })}
                 >
                   {filter.label}
                 </Button>
               ))}
-            </ButtonGroup>
+            </div>
             <form
               role="search"
-              className="w-44"
+              className="w-[220px] max-w-full"
               onSubmit={(event) => {
                 event.preventDefault();
                 updateParams({ q: search.trim() || null });
               }}
             >
-              <InputGroup className="h-8">
+              <InputGroup className="h-[34px] text-[13px]">
                 <InputGroupAddon>
                   <Search aria-hidden />
                 </InputGroupAddon>
                 <InputGroupInput
+                  className="text-[13px] md:text-[13px]"
                   aria-label="ค้นหาโค้ด"
                   placeholder="ค้นหาโค้ด / แคมเปญ / ร้าน"
                   value={search}
@@ -268,7 +254,7 @@ export function AdminPromotionsContent() {
           <PromotionTable promotions={rows} scopeNames={scopeNames} now={now} onAction={onRowAction} />
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
             แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
             {totalItems} โค้ด
@@ -276,6 +262,7 @@ export function AdminPromotionsContent() {
           <nav aria-label="หน้ารายการโปรโมชั่น" className="flex items-center gap-2">
             <Button
               size="icon-sm"
+              className="size-7 text-[13px] text-[#414755]"
               variant="outline"
               aria-label="หน้าก่อนหน้า"
               disabled={page === 0}
@@ -287,6 +274,7 @@ export function AdminPromotionsContent() {
               <Button
                 key={number}
                 size="icon-sm"
+                className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
                 variant={number === page ? "default" : "outline"}
                 aria-current={number === page ? "page" : undefined}
                 aria-label={`หน้า ${number + 1}`}
@@ -297,6 +285,7 @@ export function AdminPromotionsContent() {
             ))}
             <Button
               size="icon-sm"
+              className="size-7 text-[13px] text-[#414755]"
               variant="outline"
               aria-label="หน้าถัดไป"
               disabled={page + 1 >= totalPages}
@@ -308,9 +297,9 @@ export function AdminPromotionsContent() {
         </div>
       </Card>
 
-      <Alert className="border-[#fde4bd] bg-[#fff1db] text-[#956019]">
+      <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] px-4 py-3.5 text-[#956019]">
         <Info />
-        <AlertDescription className="text-xs text-[#956019]">
+        <AlertDescription className="text-[13px] text-[#956019]">
           โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล
           (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
         </AlertDescription>
@@ -325,5 +314,24 @@ export function AdminPromotionsContent() {
         onClose={() => updateParams({ promo: null, redemptionPage: null }, false)}
       />
     </main>
+  );
+}
+
+/** การ์ดตัวเลขบนหัวหน้า (Figma PRM-A1 KPIs) — ป้ายเทา ตัวเลขหนา และบรรทัดเล็กใต้ตัวเลข */
+function KpiCard({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "up" | "down" }) {
+  return (
+    <Card className="min-w-0 gap-1.5 rounded-[12px] border border-border px-5 py-4 shadow-none ring-0">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-2xl leading-tight font-black">{value}</p>
+      <p
+        className={cn(
+          "text-xs text-muted-foreground",
+          tone === "up" && "text-[#007a4a]",
+          tone === "down" && "text-destructive",
+        )}
+      >
+        {note}
+      </p>
+    </Card>
   );
 }
