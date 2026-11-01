@@ -374,9 +374,9 @@ export function OrderHistoryPage() {
       )}
 
       {/* Reorder Preview Modal */}
-      {reorderOrderId !== null && (
+      {Boolean(reorderOrderId) && (
         <ReorderPreviewModal
-          isOpen={reorderOrderId !== null}
+          isOpen={Boolean(reorderOrderId)}
           onClose={() => setReorderOrderId(null)}
           orderId={reorderOrderId}
           order={orders.find((o) => o.id === reorderOrderId) ?? null}

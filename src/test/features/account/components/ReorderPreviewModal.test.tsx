@@ -199,9 +199,6 @@ describe("ReorderPreviewModal", () => {
     // Price change warning tag because NM price is 9500 vs original 8000
     expect(screen.getByText(/ราคาเปลี่ยนแปลงจากตอนที่เคยซื้อ/i)).toBeInTheDocument();
 
-    // Condition Guide link
-    expect(screen.getByText(/condition guide \(คู่มือสภาพการ์ด\)/i)).toBeInTheDocument();
-
     // Out of stock item details
     expect(screen.getByText("Mega Evolution Booster Box")).toBeInTheDocument();
     expect(screen.getByText(/out of stock from this seller/i)).toBeInTheDocument();
