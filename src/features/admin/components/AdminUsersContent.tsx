@@ -1,23 +1,11 @@
 import { useState } from "react";
 
-import { Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
-import { EmptyState, QueryBoundary } from "@/components/common";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
 import {
   Tooltip,
   TooltipContent,
@@ -26,15 +14,13 @@ import {
 import { useAuth } from "@/features/auth/auth.queries";
 
 import { formatCount } from "../catalog.format";
-import { ROLE_LABEL, USER_STATUS_LABEL, userErrorMessage } from "../users.format";
-import {
-  useAdminUsers,
-  useChangeRole,
-  useUpdateUserStatus,
-  useUserCounts,
-} from "../users.queries";
+import { useAdminUsers, useUserCounts } from "../users.queries";
 import type { AdminUser, RoleCode, UserStatus } from "../users.types";
-import { type UserAction, UsersTable } from "./UsersTable";
+import { AddAdminDialog } from "./AddAdminDialog";
+import { UserDetailSheet } from "./UserDetailSheet";
+import { UserRolesDialog } from "./UserRolesDialog";
+import { type UserStatusAction, UserStatusDialog } from "./UserStatusDialog";
+import { UsersTable, UsersTableSkeleton } from "./UsersTable";
 import { type UserFilters, UsersToolbar } from "./UsersToolbar";
 
 const PAGE_SIZE = 20;
@@ -55,68 +41,27 @@ function readFilters(params: URLSearchParams): UserFilters & { page: number } {
   };
 }
 
-type ActionCopy = {
-  title: string;
-  description: string;
-  confirm: string;
-  destructive: boolean;
-};
-
-function actionCopy(user: AdminUser, action: UserAction): ActionCopy {
-  const name = `@${user.username}`;
-  switch (action) {
-    case "suspend":
-      return {
-        title: `ระงับบัญชี ${name}?`,
-        description:
-          "ผู้ใช้จะถูกออกจากระบบทุกอุปกรณ์ภายในไม่กี่นาที และเข้าสู่ระบบไม่ได้จนกว่าจะเปิดใช้งานอีกครั้ง",
-        confirm: "ระงับบัญชี",
-        destructive: true,
-      };
-    case "deactivate":
-      return {
-        title: `ปิดบัญชี ${name}?`,
-        description:
-          "ผู้ใช้จะถูกออกจากระบบและเข้าใช้ไม่ได้อีก ใช้กับบัญชีที่ขอปิดหรือไม่ใช้งานแล้ว เปิดกลับได้ภายหลัง",
-        confirm: "ปิดบัญชี",
-        destructive: true,
-      };
-    case "restore":
-      return {
-        title: `เปิดใช้งาน ${name} อีกครั้ง?`,
-        description: "ผู้ใช้จะเข้าสู่ระบบและใช้งานได้ตามปกติ",
-        confirm: "เปิดใช้งาน",
-        destructive: false,
-      };
-    case "grant-admin":
-      return {
-        title: `ตั้ง ${name} เป็นผู้ดูแล?`,
-        description:
-          "จะเข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป",
-        confirm: "ตั้งเป็นผู้ดูแล",
-        destructive: false,
-      };
-    case "revoke-admin":
-      return {
-        title: `ถอนสิทธิ์ผู้ดูแลของ ${name}?`,
-        description: "จะเข้าหลังบ้านไม่ได้อีก มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป",
-        confirm: "ถอนสิทธิ์",
-        destructive: true,
-      };
-  }
+/** `?user={id}` — มีแค่ id ใน URL ไม่มี PII */
+function readUserId(params: URLSearchParams): number | null {
+  const id = Number(params.get("user"));
+  return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-const NEXT_STATUS: Partial<Record<UserAction, UserStatus>> = {
-  suspend: "SUSPENDED",
-  deactivate: "DEACTIVATED",
-  restore: "ACTIVE",
-};
+type OpenDialog =
+  | { kind: "status"; user: AdminUser; action: UserStatusAction }
+  | { kind: "roles"; user: AdminUser }
+  | { kind: "add-admin" };
 
-/** จัดการผู้ใช้ — ค้นหา กรอง ระงับ และให้/ถอนสิทธิ์ผู้ดูแล ผ่าน `/admin/users` */
+/**
+ * จัดการผู้ใช้ — ค้นหา กรอง ดูรายละเอียด เปลี่ยนสถานะ และจัดการบทบาท
+ * ผ่าน `/admin/users` + `/users/{id}/roles`
+ */
 export function AdminUsersContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, ...filters } = readFilters(searchParams);
+  const detailUserId = readUserId(searchParams);
   const { user: me } = useAuth();
+  const currentUserId = me?.id ?? null;
 
   const users = useAdminUsers({
     q: filters.q,
@@ -126,12 +71,9 @@ export function AdminUsersContent() {
     size: PAGE_SIZE,
   });
   const counts = useUserCounts();
-  const updateStatus = useUpdateUserStatus();
-  const changeRole = useChangeRole();
-  const [pending, setPending] = useState<{ user: AdminUser; action: UserAction } | null>(
-    null,
-  );
-  const isSaving = updateStatus.isPending || changeRole.isPending;
+  const [dialog, setDialog] = useState<OpenDialog | null>(null);
+  // แถวที่คลิก — Sidebar ใช้แสดงไปก่อนระหว่างรอ GET /admin/users/{id}
+  const [preview, setPreview] = useState<AdminUser | undefined>(undefined);
 
   function writeParams(changes: Partial<UserFilters> & { page?: number }) {
     setSearchParams(
@@ -150,33 +92,23 @@ export function AdminUsersContent() {
     );
   }
 
-  function confirm() {
-    if (!pending) return;
-    const { user, action } = pending;
-    const done = {
-      onSuccess: () => {
-        setPending(null);
-        toast.add({ type: "success", title: successTitle(user, action) });
+  function openDetail(user: AdminUser | null) {
+    setPreview(user ?? undefined);
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (user) {
+          next.set("user", String(user.id));
+        } else {
+          next.delete("user");
+        }
+        return next;
       },
-      onError: (error: unknown) =>
-        toast.add({
-          type: "error",
-          title: "ทำรายการไม่สำเร็จ",
-          description: userErrorMessage(error, "ลองใหม่อีกครั้ง"),
-        }),
-    };
-    const status = NEXT_STATUS[action];
-    if (status) {
-      updateStatus.mutate({ userId: user.id, status }, done);
-    } else {
-      changeRole.mutate(
-        { userId: user.id, role: "ADMIN", grant: action === "grant-admin" },
-        done,
-      );
-    }
+      { replace: true },
+    );
   }
 
-  const copy = pending ? actionCopy(pending.user, pending.action) : null;
+  const clearFilters = () => writeParams({ q: "", role: null, status: null });
   const filtered = Boolean(filters.q || filters.role || filters.status);
 
   return (
@@ -194,38 +126,33 @@ export function AdminUsersContent() {
           </p>
         </div>
 
-        {/* backend ยังไม่มี endpoint ส่งออก ปิดไว้พร้อมบอกเหตุผล
-            ส่วนการเพิ่มผู้ดูแลย้ายไปอยู่ที่เมนู ⋯ ของแต่ละแถว */}
-        <Tooltip>
-          <TooltipTrigger render={<span className="inline-flex" />}>
-            <Button variant="outline" className="rounded-md px-2.5" disabled>
-              ส่งออก CSV
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          {/* backend ยังไม่มี endpoint ส่งออก ปิดไว้พร้อมบอกเหตุผล */}
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button variant="outline" className="rounded-md px-2.5" disabled>
+                ส่งออก CSV
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
+          </Tooltip>
+          <Button className="rounded-md px-2.5" onClick={() => setDialog({ kind: "add-admin" })}>
+            <Plus data-icon="inline-start" />
+            เพิ่มผู้ดูแล
+          </Button>
+        </div>
       </div>
 
       {/* การ์ดเดียวครอบทั้งแถบเครื่องมือ ตาราง และเลขหน้า ตามดีไซน์ */}
       <Card className="gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-none ring-0">
-        <UsersToolbar
-          filters={filters}
-          onChange={writeParams}
-          onClear={() => writeParams({ q: "", role: null, status: null })}
-        />
+        <UsersToolbar filters={filters} onChange={writeParams} onClear={clearFilters} />
         <QueryBoundary
           query={users}
           loading={<UsersTableSkeleton />}
           errorTitle="โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
+          errorMessage="เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ข้อมูลที่ค้นไว้ยังอยู่ใน URL"
           isEmpty={(result) => result.items.length === 0}
-          empty={
-            <div className="border-t border-[#eef1f2] py-6">
-              <EmptyState
-                icon={Users}
-                title={filtered ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้"}
-              />
-            </div>
-          }
+          empty={<UsersEmpty filtered={filtered} onClear={clearFilters} />}
         >
           {(result) => (
             <UsersTable
@@ -234,63 +161,69 @@ export function AdminUsersContent() {
               size={result.size}
               totalItems={result.totalItems}
               totalPages={result.totalPages}
-              currentUserId={me?.id ?? null}
+              currentUserId={currentUserId}
               disabled={users.isPlaceholderData}
               onPageChange={(next) => writeParams({ page: next })}
-              onAction={(user, action) => setPending({ user, action })}
+              onAction={(user, action) => {
+                if (action === "view") openDetail(user);
+                else if (action === "roles") setDialog({ kind: "roles", user });
+                else setDialog({ kind: "status", user, action });
+              }}
             />
           )}
         </QueryBoundary>
       </Card>
 
-      <AlertDialog
-        open={pending !== null}
-        onOpenChange={(open) => {
-          if (!open && !isSaving) setPending(null);
-        }}
-      >
-        <AlertDialogContent>
-          {copy ? (
-            <>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{copy.title}</AlertDialogTitle>
-                <AlertDialogDescription>{copy.description}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isSaving}>ยกเลิก</AlertDialogCancel>
-                <Button
-                  variant={copy.destructive ? "destructive" : "default"}
-                  onClick={confirm}
-                  disabled={isSaving}
-                >
-                  {isSaving && <Spinner data-icon="inline-start" />}
-                  {copy.confirm}
-                </Button>
-              </AlertDialogFooter>
-            </>
-          ) : null}
-        </AlertDialogContent>
-      </AlertDialog>
+      <UserDetailSheet
+        userId={detailUserId}
+        preview={preview}
+        currentUserId={currentUserId}
+        onClose={() => openDetail(null)}
+        onStatusAction={(user, action) => setDialog({ kind: "status", user, action })}
+        onManageRoles={(user) => setDialog({ kind: "roles", user })}
+      />
+
+      {dialog?.kind === "status" ? (
+        <UserStatusDialog
+          key={`${dialog.action}-${dialog.user.id}`}
+          user={dialog.user}
+          action={dialog.action}
+          onClose={() => setDialog(null)}
+        />
+      ) : dialog?.kind === "roles" ? (
+        <UserRolesDialog
+          key={dialog.user.id}
+          user={dialog.user}
+          currentUserId={currentUserId}
+          onClose={() => setDialog(null)}
+        />
+      ) : dialog?.kind === "add-admin" ? (
+        <AddAdminDialog onClose={() => setDialog(null)} />
+      ) : null}
     </div>
   );
 }
 
-function successTitle(user: AdminUser, action: UserAction): string {
-  const status = NEXT_STATUS[action];
-  if (status) {
-    return `@${user.username} ${USER_STATUS_LABEL[status]}แล้ว`;
-  }
-  return action === "grant-admin"
-    ? `ตั้ง @${user.username} เป็น${ROLE_LABEL.ADMIN}แล้ว`
-    : `ถอนสิทธิ์${ROLE_LABEL.ADMIN}ของ @${user.username} แล้ว`;
-}
-
-function UsersTableSkeleton() {
+/** กรองแล้วไม่พบ → มีปุ่มล้าง · ยังไม่มีผู้ใช้เลย → ไม่มีปุ่ม */
+function UsersEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
   return (
-    <div aria-busy="true" className="flex flex-col gap-2 border-t border-[#eef1f2] px-5 py-4">
-      {Array.from({ length: 8 }, (_, index) => (
-        <Skeleton key={index} className="h-10 rounded-md" />
-      ))}
+    <div className="flex flex-col items-center gap-2 border-t border-[#eef1f2] px-5 py-11 text-center">
+      <div className="grid size-11 place-items-center rounded-full bg-[#eef1f2]">
+        <Users aria-hidden="true" className="size-5 text-muted-foreground" />
+      </div>
+      <p className="text-[13px] font-semibold text-foreground">
+        {filtered ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้"}
+      </p>
+      <p className="text-[11px] text-muted-foreground">
+        {filtered
+          ? "ลองลดตัวกรอง หรือค้นด้วยอีเมล / username แทน"
+          : "บัญชีจะขึ้นที่นี่เมื่อมีคนสมัครสมาชิก"}
+      </p>
+      {filtered ? (
+        <Button variant="outline" size="sm" className="rounded-md" onClick={onClear}>
+          ล้างตัวกรองทั้งหมด
+        </Button>
+      ) : null}
     </div>
   );
 }
