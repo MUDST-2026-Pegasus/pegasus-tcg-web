@@ -105,8 +105,7 @@ export function OrderHistoryPage() {
   const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<OrderDetails | null>(null);
   const [activeFilter, setActiveFilter] = useState<OrderFilterTab>("ALL");
-  const [selectedOrderForReorder, setSelectedOrderForReorder] =
-    useState<OrderDetails | null>(null);
+  const [reorderOrderId, setReorderOrderId] = useState<number | null>(null);
   const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
 
   const sidebarUser = toSidebarUser(user);
@@ -311,7 +310,7 @@ export function OrderHistoryPage() {
                 key={order.id}
                 order={order}
                 onViewDetails={() => setSelectedOrderForDetails(order)}
-                onReorder={() => setSelectedOrderForReorder(order)}
+                onReorder={() => setReorderOrderId(order.id)}
                 onPayNow={() => navigate(`/payment?orderId=${order.id}`)}
                 onCancelOrder={() => handleOpenCancelModal(order)}
                 onConfirmReceived={() => setConfirmTarget(order)}
@@ -350,7 +349,7 @@ export function OrderHistoryPage() {
             }, { replace: true });
           }}
           onReorder={(order) => {
-            setSelectedOrderForReorder(order);
+            setReorderOrderId(order.id);
           }}
           onConfirmReceived={() => setConfirmTarget(detailOrder)}
           isConfirming={confirmingOrderId === detailOrder.id}
@@ -358,15 +357,14 @@ export function OrderHistoryPage() {
       )}
 
       {/* Reorder Preview Modal */}
-      <ReorderPreviewModal
-        open={!!selectedOrderForReorder}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedOrderForReorder(null);
-          }
-        }}
-        order={selectedOrderForReorder}
-      />
+      {reorderOrderId !== null && (
+        <ReorderPreviewModal
+          isOpen={reorderOrderId !== null}
+          onClose={() => setReorderOrderId(null)}
+          orderId={reorderOrderId}
+          order={orders.find((o) => o.id === reorderOrderId) ?? null}
+        />
+      )}
 
       <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
         <AlertDialogContent>

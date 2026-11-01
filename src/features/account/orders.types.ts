@@ -96,3 +96,39 @@ export interface PageResponse<T> {
   first?: boolean;
   last?: boolean;
 }
+
+export interface ReorderListingInfo {
+  listingId: number;
+  condition: string; // "NM" | "LP" | "MP" | "HP" | "DMG" | "SEALED"
+  price: number;
+  priceChanged?: boolean;
+  quantityAvailable: number;
+  isAvailable?: boolean;
+}
+
+export interface ReorderPreviewItem {
+  originalOrderItemId: number;
+  catalogVariantId: number;
+  productName: string;
+  variantLabel: string;
+  originalCondition: string;
+  originalPrice: number;
+  originalQuantity: number;
+  imageUrl: string | null;
+  currentListing: ReorderListingInfo | null;
+  alternativeConditions: ReorderListingInfo[];
+  status: "AVAILABLE" | "AVAILABLE_PRICE_CHANGED" | "ALTERNATIVE_AVAILABLE" | "OUT_OF_STOCK";
+}
+
+export interface ReorderSellerOrder {
+  sellerProfileId: number;
+  sellerName: string;
+  sellerAvailable: boolean;
+  vacationMode: boolean;
+  items: ReorderPreviewItem[];
+}
+
+export interface ReorderPreviewResponse {
+  orderId: number;
+  sellerOrders: ReorderSellerOrder[];
+}

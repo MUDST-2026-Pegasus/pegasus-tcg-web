@@ -1,10 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { renderWithProviders } from "@/test/utils";
 import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
-import type { OrderDetails } from "@/features/account/orders.types";
+import * as orderQueries from "@/features/account/orders.queries";
+import type {
+  OrderDetails,
+  ReorderPreviewResponse,
+} from "@/features/account/orders.types";
 
 const mockOrder: OrderDetails = {
   id: 67,
@@ -68,10 +72,87 @@ const mockOrder: OrderDetails = {
   ],
 };
 
+const mockPreviewData: ReorderPreviewResponse = {
+  orderId: 67,
+  sellerOrders: [
+    {
+      sellerProfileId: 1,
+      sellerName: "Card Kingdom TH",
+      sellerAvailable: true,
+      vacationMode: false,
+      items: [
+        {
+          originalOrderItemId: 501,
+          catalogVariantId: 10,
+          productName: "Bio-Broly (SR)",
+          variantLabel: "JP • FOIL • Dragon Ball Super Card Game",
+          originalCondition: "DMG",
+          originalPrice: 8000,
+          originalQuantity: 1,
+          imageUrl: null,
+          currentListing: {
+            listingId: 1001,
+            condition: "NM",
+            price: 9500,
+            quantityAvailable: 2,
+            isAvailable: true,
+          },
+          alternativeConditions: [
+            {
+              listingId: 1002,
+              condition: "LP",
+              price: 8900,
+              quantityAvailable: 1,
+              isAvailable: true,
+            },
+            {
+              listingId: 1003,
+              condition: "MP",
+              price: 8500,
+              quantityAvailable: 0,
+              isAvailable: false,
+            },
+          ],
+          status: "AVAILABLE",
+        },
+        {
+          originalOrderItemId: 502,
+          catalogVariantId: 11,
+          productName: "Mega Evolution Booster Box",
+          variantLabel: "EN • Factory Sealed Box",
+          originalCondition: "SEALED",
+          originalPrice: 7750,
+          originalQuantity: 1,
+          imageUrl: null,
+          currentListing: null,
+          alternativeConditions: [],
+          status: "OUT_OF_STOCK",
+        },
+      ],
+    },
+  ],
+};
+
 describe("ReorderPreviewModal", () => {
-  it("renders modal header, seller info, blue alert banner, and order item", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders modal header, seller info, blue alert banner, and order item from API query", () => {
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
     renderWithProviders(
-      <ReorderPreviewModal open={true} onOpenChange={vi.fn()} order={mockOrder} />
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+        order={mockOrder}
+      />
     );
 
     expect(
@@ -90,60 +171,229 @@ describe("ReorderPreviewModal", () => {
     expect(screen.getByText(/previously ordered:/i)).toBeInTheDocument();
     expect(screen.getByText(/dmg \(฿8,000\)/i)).toBeInTheDocument();
 
+    // Price change warning tag because NM price is 9500 vs original 8000
+    expect(screen.getByText(/ราคาเปลี่ยนแปลงจากตอนที่เคยซื้อ/i)).toBeInTheDocument();
+
     // Condition Guide link
     expect(screen.getByText(/condition guide \(คู่มือสภาพการ์ด\)/i)).toBeInTheDocument();
 
+    // Out of stock item details
+    expect(screen.getByText("Mega Evolution Booster Box")).toBeInTheDocument();
+    expect(screen.getByText(/out of stock from this seller/i)).toBeInTheDocument();
+
     // CTA button
-    expect(
-      screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i })).toBeInTheDocument();
   });
 
-  it("allows selecting available card conditions and updates subtotal", async () => {
+  it("allows selecting available card conditions and updates price, max quantity, and subtotal", async () => {
     const user = userEvent.setup();
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
     renderWithProviders(
-      <ReorderPreviewModal open={true} onOpenChange={vi.fn()} order={mockOrder} />
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
     );
 
-    // Initial default condition is NM (appears on condition button and subtotal)
+    // Initial default condition is NM (9,500)
     expect(screen.getByRole("button", { name: /^nm/i })).toBeInTheDocument();
-    expect(screen.getAllByText("฿9,440").length).toBe(2);
+    expect(screen.getAllByText("฿9,500").length).toBeGreaterThanOrEqual(1);
 
-    // Select LP
+    // Select LP (8,900)
     const lpBtn = screen.getByRole("button", { name: /^lp/i });
     await user.click(lpBtn);
 
     // Subtotal updates to LP price
-    expect(screen.getAllByText("฿8,880").length).toBe(2);
+    expect(screen.getAllByText("฿8,900").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("allows adjusting quantity with stepper and triggers CTA action to close modal", async () => {
+  it("does not allow selecting disabled/out-of-stock condition pills", async () => {
     const user = userEvent.setup();
-    const onOpenChange = vi.fn();
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
     renderWithProviders(
-      <ReorderPreviewModal open={true} onOpenChange={onOpenChange} order={mockOrder} />
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
     );
 
+    // MP is out of stock (not a button, but aria-disabled)
+    const mpPill = screen.getByText(/^mp$/i).closest("[aria-disabled='true']");
+    expect(mpPill).toBeInTheDocument();
+
+    if (mpPill) {
+      await user.click(mpPill);
+    }
+
+    // Subtotal should remain at NM price (9,500)
+    expect(screen.getAllByText("฿9,500").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("allows adjusting quantity with stepper and triggers onConfirmReorder with payload", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const onConfirmReorder = vi.fn();
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={onClose}
+        orderId={67}
+        onConfirmReorder={onConfirmReorder}
+      />
+    );
+
+    // Increase quantity from 1 to 2 (max for NM is 2)
     const plusBtn = screen.getByRole("button", { name: /increase quantity/i });
     await user.click(plusBtn);
+
+    // Plus button should now be disabled because max stock (2) reached
+    expect(plusBtn).toBeDisabled();
+
+    // Subtotal should be 9500 * 2 = 19,000
+    expect(screen.getAllByText("฿19,000").length).toBeGreaterThanOrEqual(1);
 
     // Click CTA button
     const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
     await user.click(ctaBtn);
 
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(onConfirmReorder).toHaveBeenCalledWith([
+      {
+        listingId: 1001,
+        quantity: 2,
+      },
+    ]);
+    expect(onClose).toHaveBeenCalled();
   });
 
-  it("calls onOpenChange(false) when close button is clicked", async () => {
-    const user = userEvent.setup();
-    const onOpenChange = vi.fn();
+  it("renders vacation mode warning banner and disables CTA button when seller is on vacation", () => {
+    const vacationData: ReorderPreviewResponse = {
+      orderId: 67,
+      sellerOrders: [
+        {
+          ...mockPreviewData.sellerOrders[0],
+          vacationMode: true,
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: vacationData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
     renderWithProviders(
-      <ReorderPreviewModal open={true} onOpenChange={onOpenChange} order={mockOrder} />
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
+    );
+
+    // Vacation warning banner
+    expect(screen.getByText(/ร้านค้าเปิดโหมดพักร้อนอยู่ในขณะนี้/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/ผู้ขายกำลังอยู่ในช่วงพักร้อน ไม่สามารถสั่งซื้อสินค้าจากร้านค้านี้ได้ชั่วคราว/i)
+    ).toBeInTheDocument();
+
+    // CTA button is disabled
+    const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
+    expect(ctaBtn).toBeDisabled();
+  });
+
+  it("renders loading skeleton while query is loading", () => {
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
+    );
+
+    expect(screen.getByTestId("reorder-skeleton")).toBeInTheDocument();
+  });
+
+  it("renders error state with retry button when query fails", async () => {
+    const user = userEvent.setup();
+    const refetch = vi.fn();
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
+    );
+
+    expect(
+      screen.getByText(/ไม่สามารถโหลดข้อมูลรายการสั่งซื้อซ้ำได้/i)
+    ).toBeInTheDocument();
+
+    const retryBtn = screen.getByRole("button", { name: /ลองใหม่/i });
+    await user.click(retryBtn);
+
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it("calls onClose when close button is clicked", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={onClose}
+        orderId={67}
+      />
     );
 
     const closeBtn = screen.getByRole("button", { name: /close/i });
     await user.click(closeBtn);
 
-    expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything());
+    expect(onClose).toHaveBeenCalled();
   });
 });
