@@ -47,7 +47,7 @@ export function ReviewSellerCard({
         </div>
       </div>
 
-      <Separator className="bg-[#eef1f2]" />
+      <Separator className="bg-muted" />
 
       <div className="flex items-center gap-3">
         <p className="text-[36px] leading-none font-bold text-foreground">
@@ -68,7 +68,7 @@ export function ReviewSellerCard({
           return (
             <div key={star} className="flex items-center gap-2">
               <dt className="w-6 shrink-0 text-[11px] font-medium text-muted-foreground">{star} ★</dt>
-              <dd className="h-1.5 flex-1 overflow-hidden rounded-[3px] bg-[#f2f5f6]">
+              <dd className="h-1.5 flex-1 overflow-hidden rounded-[3px] bg-secondary">
                 <span
                   className="block h-full rounded-[3px] bg-[#f59e0a]"
                   style={{ width: `${percent}%` }}

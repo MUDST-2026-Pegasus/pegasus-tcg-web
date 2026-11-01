@@ -35,26 +35,26 @@ export function CommissionCategoryList({
   onManage,
 }: CommissionCategoryListProps & EditableProps) {
   return (
-    <Card className="gap-0 rounded-xl border border-[#e3e7e8] p-0 shadow-none ring-0">
+    <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-4 px-5 pt-[18px] pb-3.5">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-[15px] font-semibold text-[#090b0c]">{title}</p>
-          <p className="text-xs text-[#67787c]">{description}</p>
+          <p className="text-[15px] font-semibold text-foreground">{title}</p>
+          <p className="text-xs text-muted-foreground">{description}</p>
         </div>
         <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
           {addLabel}
         </Button>
       </div>
 
-      <ul className="border-t border-[#eef1f2]">
+      <ul className="border-t border-muted">
         {items.length === 0 && <li className="px-5 py-6 text-sm text-muted-foreground">ยังไม่มีเกมหรือหมวดหมู่ให้ตั้งค่า</li>}
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-b border-[#eef1f2] px-5 py-3.5 last:border-b-0"
+            className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-b border-muted px-5 py-3.5 last:border-b-0"
           >
             <div className="flex min-w-[160px] flex-1 basis-[200px] flex-col gap-[3px]">
-              <span className="truncate text-[13px] font-medium text-[#090b0c]">
+              <span className="truncate text-[13px] font-medium text-foreground">
                 {item.name}
               </span>
               <span className="truncate text-[11px] text-[#9aa5ad]">
@@ -79,8 +79,8 @@ export function CommissionCategoryList({
               className={cn(
                 "flex w-[110px] shrink-0 items-baseline gap-1 rounded-lg border px-3 py-[7px]",
                 item.useCustom
-                  ? "border-[#e3e7e8] bg-white focus-within:border-primary"
-                  : "border-[#eef1f2] bg-[#fafbfb]",
+                  ? "border-border bg-card focus-within:border-primary"
+                  : "border-muted bg-[#fafbfb]",
               )}
             >
               <input
@@ -92,7 +92,7 @@ export function CommissionCategoryList({
                 onChange={(event) => onRateChange?.(item.id, event.target.value)}
                 disabled={!item.useCustom || !onRateChange}
                 aria-label={`อัตราค่าคอมของ ${item.name}`}
-                className="w-full min-w-0 border-none bg-transparent text-sm font-semibold text-[#090b0c] outline-none disabled:text-[#9aa5ad] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="w-full min-w-0 border-none bg-transparent text-sm font-semibold text-foreground outline-none disabled:text-[#9aa5ad] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
               <span className="text-[11px] text-[#9aa5ad]">%</span>
             </div>
@@ -101,7 +101,7 @@ export function CommissionCategoryList({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="shrink-0 rounded-md text-[#9aa5ad] hover:text-[#090b0c]"
+                className="shrink-0 rounded-md text-[#9aa5ad] hover:text-foreground"
                 onClick={() => onEdit(item.id)}
                 aria-label={`แก้ไขกฎของ ${item.name} แบบละเอียด`}
                 title="ตั้งค่าแบบละเอียด"
@@ -117,7 +117,7 @@ export function CommissionCategoryList({
         <button
           type="button"
           onClick={onManage}
-          className="flex items-center justify-between border-t border-[#eef1f2] px-5 py-3 text-left text-xs font-medium text-[#414755] hover:bg-[#fafbfb]"
+          className="flex items-center justify-between border-t border-muted px-5 py-3 text-left text-xs font-medium text-[#414755] hover:bg-[#fafbfb]"
         >
           {manageLabel}
           <ChevronRight className="size-4 text-[#9aa5ad]" />

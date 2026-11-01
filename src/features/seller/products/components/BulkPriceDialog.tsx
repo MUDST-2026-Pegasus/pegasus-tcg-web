@@ -67,7 +67,7 @@ export function BulkPriceDialog({
       <DialogContent className="rounded-2xl sm:max-w-[420px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <DialogTitle className="text-base font-bold text-zinc-950">
+            <DialogTitle className="text-base font-bold text-foreground">
               แก้ไขราคาพร้อมกัน
             </DialogTitle>
             <DialogDescription className="text-xs text-gray-500">
@@ -106,7 +106,7 @@ export function BulkPriceDialog({
           {valid && example ? (
             <p className="rounded-lg bg-neutral-50 px-3 py-2 text-xs text-gray-600">
               ตัวอย่าง: {example.card.productName} {formatBaht(example.price)} →{" "}
-              <span className="font-semibold text-zinc-950">
+              <span className="font-semibold text-foreground">
                 {formatBaht(adjustPrice(example.price, percent))}
               </span>
             </p>

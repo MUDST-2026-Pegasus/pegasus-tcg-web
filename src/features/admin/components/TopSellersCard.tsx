@@ -41,7 +41,7 @@ export function TopSellersCard({
                       "flex size-5 items-center justify-center rounded-md text-[11px] font-bold",
                       isTop
                         ? "bg-[#e8f1fc] text-primary"
-                        : "bg-[#eef1f2] text-muted-foreground",
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     {index + 1}
@@ -56,7 +56,7 @@ export function TopSellersCard({
               </div>
 
               <div
-                className="h-1.5 w-full overflow-hidden rounded-full bg-[#eef1f2]"
+                className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
                 role="presentation"
               >
                 <div

@@ -9,7 +9,7 @@ type MonthlySummaryCardProps = MonthlySummary;
 export function MonthlySummaryCard({ title, rows, netLabel, netValue }: MonthlySummaryCardProps) {
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-xs font-semibold text-zinc-950">{title}</p>
+      <p className="text-xs font-semibold text-foreground">{title}</p>
 
       {rows.map((row) => (
         <div key={row.id} className="flex items-center justify-between gap-2">
@@ -17,7 +17,7 @@ export function MonthlySummaryCard({ title, rows, netLabel, netValue }: MonthlyS
           <p
             className={cn(
               "text-xs font-medium",
-              row.tone === "muted" ? "text-gray-500" : "text-zinc-950",
+              row.tone === "muted" ? "text-gray-500" : "text-foreground",
             )}
           >
             {row.value}
@@ -25,10 +25,10 @@ export function MonthlySummaryCard({ title, rows, netLabel, netValue }: MonthlyS
         </div>
       ))}
 
-      <Separator className="bg-gray-100" />
+      <Separator className="bg-secondary" />
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-zinc-950">{netLabel}</p>
+        <p className="text-xs font-semibold text-foreground">{netLabel}</p>
         <p className="text-lg font-bold text-[#12805c]">{netValue}</p>
       </div>
     </Card>

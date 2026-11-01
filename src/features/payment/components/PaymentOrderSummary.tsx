@@ -12,8 +12,8 @@ function ProductThumbnail({
 
   if (!imageUrl || hasError) {
     return (
-      <div className="w-full h-full bg-slate-50 border border-slate-100/80 rounded flex flex-col items-center justify-center p-1 text-center">
-        <div className="w-7 h-9 border border-slate-200 rounded bg-white shadow-2xs flex items-center justify-center">
+      <div className="w-full h-full bg-slate-50 border border-muted/80 rounded flex flex-col items-center justify-center p-1 text-center">
+        <div className="w-7 h-9 border border-slate-200 rounded bg-card shadow-2xs flex items-center justify-center">
           <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">
             TCG
           </span>
@@ -86,13 +86,13 @@ export function PaymentOrderSummary({
     : PAYMENT_PAGE_FIXTURE.orderSummary.total;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+    <div className="bg-card rounded-2xl border border-muted shadow-sm p-6 space-y-4">
       {/* Title */}
       <h2 className="text-xl font-bold text-slate-900 tracking-tight">
         Order Summary
       </h2>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-secondary" />
 
       {/* Items List */}
       <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
@@ -103,7 +103,7 @@ export function PaymentOrderSummary({
 
           return (
             <div key={item.id ?? index} className="flex gap-4 items-start">
-              <div className="w-16 h-20 rounded-lg bg-[#F8FAFC] border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center p-1">
+              <div className="w-16 h-20 rounded-lg bg-[#F8FAFC] border border-muted overflow-hidden shrink-0 flex items-center justify-center p-1">
                 <ProductThumbnail
                   imageUrl={item.imageUrl}
                   productName={item.productName}
@@ -133,7 +133,7 @@ export function PaymentOrderSummary({
         })}
       </div>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-secondary" />
 
       {/* Price Breakdown */}
       <div className="space-y-3 text-sm">
@@ -151,7 +151,7 @@ export function PaymentOrderSummary({
         </div>
       </div>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-secondary" />
 
       {/* Total Row */}
       <div className="flex justify-between items-center pt-1">

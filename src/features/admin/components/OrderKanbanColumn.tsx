@@ -44,7 +44,7 @@ export function OrderKanbanColumn({
       </div>
 
       {column.items.length === 0 ? (
-        <p className="rounded-[10px] border border-dashed border-[#e3e7e8] px-3 py-6 text-center text-[11px] text-muted-foreground">
+        <p className="rounded-[10px] border border-dashed border-border px-3 py-6 text-center text-[11px] text-muted-foreground">
           ยังไม่มีคำสั่งซื้อในสถานะนี้
         </p>
       ) : (
@@ -65,7 +65,7 @@ export function OrderKanbanColumn({
         <Button
           variant="outline"
           onClick={() => onShowMore(column)}
-          className="h-[31px] rounded-[10px] border-dashed border-[#e3e7e8] bg-transparent text-[11px] font-medium text-muted-foreground shadow-none hover:bg-[#fafbfb]"
+          className="h-[31px] rounded-[10px] border-dashed border-border bg-transparent text-[11px] font-medium text-muted-foreground shadow-none hover:bg-[#fafbfb]"
         >
           ดูเพิ่มเติม
         </Button>

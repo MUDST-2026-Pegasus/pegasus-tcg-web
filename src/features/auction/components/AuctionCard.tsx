@@ -23,7 +23,7 @@ export function AuctionCard({ auction, serverTime, className }: AuctionCardProps
     <Link
       to={`/auctions/${auction.id}`}
       className={cn(
-        "flex w-full flex-col gap-2.5 rounded-2xl border border-border bg-white p-3 transition-colors hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+        "flex w-full flex-col gap-2.5 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         className,
       )}
     >

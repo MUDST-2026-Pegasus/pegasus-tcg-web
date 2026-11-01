@@ -71,10 +71,10 @@ export function OrderDetailsModal({
       <DialogContent
         showCloseButton={false}
         finalFocus={false}
-        className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-white shadow-xl"
+        className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-card shadow-xl"
       >
         {/* Sticky Header with Title, Formatted Status Badge, and Sticky "✕" Close Button */}
-        <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-white px-6 py-4 shrink-0">
+        <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-card px-6 py-4 shrink-0">
           <DialogHeader className="gap-0.5">
             <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
               Order Details
@@ -148,7 +148,7 @@ export function OrderDetailsModal({
                 <div className="flex flex-col gap-3">
                   {(so.items ?? []).map((item) => (
                     <div key={item.id} className="flex items-center gap-3">
-                      <div className="size-14 rounded border bg-[#f4f4f5] overflow-hidden shrink-0 flex items-center justify-center p-1">
+                      <div className="size-14 rounded border bg-secondary overflow-hidden shrink-0 flex items-center justify-center p-1">
                         {item.imageUrl ? (
                           <img
                             src={item.imageUrl}

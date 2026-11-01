@@ -112,7 +112,7 @@ export function OrderRefunds({ salesOrderId }: { salesOrderId: number }) {
                 <p className="text-xs text-muted-foreground">เลขอ้างอิงการโอน: {refund.transferReference}</p>
               )}
             </div>
-            <Badge variant="outline" className="shrink-0 bg-white">{refundStatusLabel(refund.status)}</Badge>
+            <Badge variant="outline" className="shrink-0 bg-card">{refundStatusLabel(refund.status)}</Badge>
           </div>
           {refund.method === "BANK_TRANSFER" && refund.status === "APPROVED" && <RefundDestination refund={refund} />}
           <RefundDetails refund={refund} />

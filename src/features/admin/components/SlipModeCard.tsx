@@ -51,7 +51,7 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-foreground">โหมดตรวจสอบสลิปชำระเงิน</p>
-            <Badge className="h-5 rounded-[5px] bg-[#eef1f2] px-2 text-[10px] font-medium text-muted-foreground">
+            <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
               {SLIP_AUTO_APPROVE_KEY} = {autoApprove.isPending ? "…" : String(enabled)}
             </Badge>
           </div>
@@ -69,7 +69,7 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
       <div
         role="radiogroup"
         aria-label="โหมดตรวจสอบสลิป"
-        className="flex shrink-0 gap-1 self-start rounded-[10px] bg-[#f2f5f6] p-1 md:self-auto"
+        className="flex shrink-0 gap-1 self-start rounded-[10px] bg-secondary p-1 md:self-auto"
       >
         {options.map((option) => {
           const selected = option.value === enabled;
@@ -85,7 +85,7 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
               className={cn(
                 "flex items-center gap-2 rounded-lg py-2 pr-3.5 pl-3 text-[13px] transition-colors disabled:cursor-not-allowed",
                 selected
-                  ? "bg-white font-semibold text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
+                  ? "bg-card font-semibold text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
                   : "font-medium text-muted-foreground hover:text-foreground",
               )}
             >

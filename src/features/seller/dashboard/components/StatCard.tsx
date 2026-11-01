@@ -43,7 +43,7 @@ export function StatCard({ id, accent, label, value, footnote }: StatCardData) {
         <p className="text-xs font-medium text-gray-500">{label}</p>
       </div>
 
-      <p className="text-xl font-bold text-zinc-950">{value}</p>
+      <p className="text-xl font-bold text-foreground">{value}</p>
       <p className="text-xs text-gray-400">{footnote}</p>
     </Card>
   );

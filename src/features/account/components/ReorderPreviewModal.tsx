@@ -416,10 +416,10 @@ export function ReorderPreviewModal({
     <Dialog open={isModalOpen} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[90vh] sm:max-w-3xl flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-white shadow-2xl ring-0"
+        className="max-h-[90vh] sm:max-w-3xl flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-card shadow-2xl ring-0"
       >
         {/* Header */}
-        <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-white px-6 py-4 shrink-0">
+        <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-card px-6 py-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-full bg-sky-50 text-[#006699] flex items-center justify-center shrink-0">
               <RotateCw className="size-5" />
@@ -438,7 +438,7 @@ export function ReorderPreviewModal({
           <button
             type="button"
             onClick={handleClose}
-            className="size-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer transition-colors"
+            className="size-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-secondary hover:text-slate-700 cursor-pointer transition-colors"
             aria-label="Close"
           >
             <X className="size-4" />
@@ -453,9 +453,9 @@ export function ReorderPreviewModal({
               aria-label="Loading reorder preview"
               className="flex flex-col gap-4 animate-pulse"
             >
-              <div className="h-14 bg-slate-100 rounded-xl" />
-              <div className="h-44 bg-slate-100 rounded-2xl" />
-              <div className="h-32 bg-slate-100 rounded-2xl" />
+              <div className="h-14 bg-secondary rounded-xl" />
+              <div className="h-44 bg-secondary rounded-2xl" />
+              <div className="h-32 bg-secondary rounded-2xl" />
             </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center gap-3">
@@ -567,7 +567,7 @@ export function ReorderPreviewModal({
                         {/* Items Under This Seller */}
                         <div className="flex flex-col gap-4">
                           {sellerItems.length === 0 ? (
-                            <div className="border border-slate-200 rounded-xl p-4 text-center text-xs text-slate-400 bg-white">
+                            <div className="border border-slate-200 rounded-xl p-4 text-center text-xs text-slate-400 bg-card">
                               ไม่มีรายการสินค้าจากร้านค้านี้
                             </div>
                           ) : (
@@ -604,7 +604,7 @@ export function ReorderPreviewModal({
                                 return (
                                   <div
                                     key={item.originalOrderItemId}
-                                    className="border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 bg-white opacity-80"
+                                    className="border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 bg-card opacity-80"
                                   >
                                     <div className="flex items-start justify-between gap-3">
                                       <div className="flex items-start gap-3">
@@ -644,7 +644,7 @@ export function ReorderPreviewModal({
                                       </span>
                                     </div>
 
-                                    <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs text-slate-500">
+                                    <div className="border-t border-muted pt-2.5 flex items-center justify-between text-xs text-slate-500">
                                       <span>
                                         สภาพกล่อง: {item.originalCondition || "Factory Sealed (New)"}
                                       </span>
@@ -662,7 +662,7 @@ export function ReorderPreviewModal({
                                 <div
                                   key={item.originalOrderItemId}
                                   className={cn(
-                                    "border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 bg-white transition-opacity",
+                                    "border border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 bg-card transition-opacity",
                                     isVacation && "opacity-75"
                                   )}
                                 >
@@ -690,7 +690,7 @@ export function ReorderPreviewModal({
                                         {item.variantLabel}
                                       </p>
                                       <div className="mt-2 flex flex-wrap items-center gap-2">
-                                        <span className="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1.5">
+                                        <span className="bg-secondary text-slate-600 text-xs px-2.5 py-1 rounded-full font-medium inline-flex items-center gap-1.5">
                                           <Clock className="size-3 text-slate-400" />
                                           <span>Previously ordered: </span>
                                           <span className="font-semibold text-slate-800">
@@ -737,7 +737,7 @@ export function ReorderPreviewModal({
                                               type="button"
                                               disabled={true}
                                               aria-disabled="true"
-                                              className="border border-slate-200 bg-slate-100 rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center opacity-60 cursor-not-allowed select-none"
+                                              className="border border-slate-200 bg-secondary rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center opacity-60 cursor-not-allowed select-none"
                                             >
                                               <span className="text-xs font-bold text-slate-400">
                                                 {cond}
@@ -757,7 +757,7 @@ export function ReorderPreviewModal({
                                             <div
                                               key={cond}
                                               aria-disabled="true"
-                                              className="border border-slate-200 bg-slate-100 rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center opacity-60 cursor-not-allowed select-none"
+                                              className="border border-slate-200 bg-secondary rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center opacity-60 cursor-not-allowed select-none"
                                             >
                                               <span className="text-xs font-bold text-slate-400">
                                                 {cond}
@@ -781,7 +781,7 @@ export function ReorderPreviewModal({
                                               handleSelectListing(item, listing, isVacation)
                                             }
                                             className={cn(
-                                              "relative rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all cursor-pointer bg-white",
+                                              "relative rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center transition-all cursor-pointer bg-card",
                                               isSelected
                                                 ? "border-2 border-[#006699] ring-2 ring-[#006699]/20 shadow-sm"
                                                 : "border border-slate-200 hover:border-slate-300"
@@ -823,7 +823,7 @@ export function ReorderPreviewModal({
                                   </div>
 
                                   {/* Stepper & Line Subtotal */}
-                                  <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+                                  <div className="border-t border-muted pt-3 flex items-center justify-between">
                                     <div
                                       className={cn(
                                         "flex items-center gap-3 transition-opacity",
@@ -831,7 +831,7 @@ export function ReorderPreviewModal({
                                       )}
                                     >
                                       <span className="text-xs text-slate-500 font-medium">Quantity:</span>
-                                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
+                                      <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-card">
                                         <button
                                           type="button"
                                           aria-label="Decrease quantity"
@@ -845,7 +845,7 @@ export function ReorderPreviewModal({
                                               isVacation
                                             )
                                           }
-                                          className="size-7 flex items-center justify-center text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                          className="size-7 flex items-center justify-center text-slate-600 hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                                         >
                                           <Minus className="size-3" />
                                         </button>
@@ -869,7 +869,7 @@ export function ReorderPreviewModal({
                                               isVacation
                                             )
                                           }
-                                          className="size-7 flex items-center justify-center text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                          className="size-7 flex items-center justify-center text-slate-600 hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                                         >
                                           <Plus className="size-3" />
                                         </button>
@@ -909,7 +909,7 @@ export function ReorderPreviewModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 z-20 flex items-center justify-between border-t bg-white px-6 py-4 shrink-0">
+        <div className="sticky bottom-0 z-20 flex items-center justify-between border-t bg-card px-6 py-4 shrink-0">
           <div className="flex flex-col">
             <span className="text-xs text-slate-500">
               Total ({purchasableItems.length} {purchasableItems.length === 1 ? "item" : "items"}):

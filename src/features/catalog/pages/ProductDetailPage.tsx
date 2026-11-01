@@ -314,7 +314,7 @@ function ProductDetailContent({
   }
 
   return (
-    <div className="flex-1 bg-[#F4F4F5] font-sans text-foreground">
+    <div className="flex-1 bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-8 sm:px-6 lg:py-10">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-primary">Home</Link>
@@ -331,12 +331,12 @@ function ProductDetailContent({
               {gallery.map((image, index) => (
                 <button key={image.id} type="button" onClick={() => setSelectedImageId(image.id)}
                   aria-label={`ดูรูปสินค้าที่ ${index + 1}`} aria-pressed={currentImage?.id === image.id}
-                  className={`flex aspect-[3/4] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-white p-1.5 transition sm:w-full ${currentImage?.id === image.id ? "border-primary shadow-sm" : "border-transparent hover:border-primary/40"}`}>
+                  className={`flex aspect-[3/4] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-card p-1.5 transition sm:w-full ${currentImage?.id === image.id ? "border-primary shadow-sm" : "border-transparent hover:border-primary/40"}`}>
                   <ProductImage key={image.url} src={image.url} alt={image.altText ?? product.name} className="h-full w-full object-contain" />
                 </button>
               ))}
             </div>}
-            <div className="order-1 flex min-h-[500px] flex-col items-center justify-center gap-4 rounded-2xl border bg-white p-8 shadow-sm sm:order-2 lg:min-h-[620px]">
+            <div className="order-1 flex min-h-[500px] flex-col items-center justify-center gap-4 rounded-2xl border bg-card p-8 shadow-sm sm:order-2 lg:min-h-[620px]">
               {currentImage ? (
                 <ProductImage key={currentImage.url} src={currentImage.url} alt={currentImage.altText ?? product.name}
                   className="max-h-[560px] w-full object-contain drop-shadow-[0_18px_24px_rgba(24,24,27,0.22)]" />
@@ -357,7 +357,7 @@ function ProductDetailContent({
               <p className="mt-2 min-h-6 text-muted-foreground">{[product.nameLocal, product.cardNumber].filter(Boolean).join(" · ") || "—"}</p>
             </div>
 
-            <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none">
+            <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div><p className="text-sm font-medium text-muted-foreground">Market price</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
@@ -379,7 +379,7 @@ function ProductDetailContent({
                 value={selectedVariant || ALL_VARIANTS}
                 onValueChange={(value) => changeVariant(!value || value === ALL_VARIANTS ? "" : value)}
               >
-                <SelectTrigger aria-label="Select variant" className="h-12 w-full rounded-xl border-border bg-white px-4">
+                <SelectTrigger aria-label="Select variant" className="h-12 w-full rounded-xl border-border bg-card px-4">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -405,7 +405,7 @@ function ProductDetailContent({
                     <button key={condition} type="button" disabled={!enabled}
                       aria-pressed={effectiveCondition === condition}
                       onClick={() => changeCondition(condition)}
-                      className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-white p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
+                      className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-card p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
                       <span className="text-sm font-bold">{condition}</span>
                       <span className="text-xs text-muted-foreground">{CONDITION_LABELS[condition]}</span>
                       <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(offer.price, offer.currency) : "—"}</span>
@@ -422,7 +422,7 @@ function ProductDetailContent({
                 <p className="text-sm font-semibold">Quantity</p>
                 <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? `${availableForSelectedListing} available from ${purchasableListing?.seller.displayName || purchasableListing?.seller.username}` : "Out of stock"}</p>
               </div>
-              <div className="flex items-center rounded-lg border bg-white">
+              <div className="flex items-center rounded-lg border bg-card">
                 <Button type="button" variant="ghost" size="icon" aria-label="ลดจำนวนสินค้า" disabled={!purchasableListing || selectedQuantity <= 1 || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.max(1, selectedQuantity - 1) })}>
                   <Minus className="size-4" />
                 </Button>
@@ -442,7 +442,7 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
               </Button>
             </div>
-            <div className="grid grid-cols-3 divide-x rounded-2xl border bg-white px-2 py-4 text-center">
+            <div className="grid grid-cols-3 divide-x rounded-2xl border bg-card px-2 py-4 text-center">
               <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Tracked shipping</p></div>
               <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Buyer protection</p></div>
               <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Verified sellers</p></div>
@@ -450,7 +450,7 @@ function ProductDetailContent({
           </div>
         </section>
 
-        <section className="min-w-0 rounded-2xl border bg-white p-5 shadow-sm sm:p-7">
+        <section className="min-w-0 rounded-2xl border bg-card p-5 shadow-sm sm:p-7">
           <div className="mb-6">
             <div><p className="text-sm font-semibold text-primary">{listingsReady ? `${availableQuantity} available` : "— available"}</p><h2 className="mt-1 text-2xl font-bold">Market listings</h2></div>
           </div>
@@ -482,7 +482,7 @@ function ProductDetailContent({
           )}
         </section>
 
-        <section className="min-w-0 rounded-2xl border bg-white p-6 shadow-none">
+        <section className="min-w-0 rounded-2xl border bg-card p-6 shadow-none">
           <div className="mb-3">
             <h2 className="text-lg font-semibold leading-6">Collectors with this {product.productType === "SINGLE_CARD" ? "card" : "product"}</h2>
             <p className="text-xs leading-4 text-muted-foreground">People who have made this {product.productType === "SINGLE_CARD" ? "card" : "product"} public · {collectorsQuery.data?.totalItems ?? "—"} collectors</p>
@@ -528,13 +528,13 @@ function ProductDetailContent({
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none"><CardContent className="p-6 sm:p-7">
+          <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
             <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />Card attributes</h2>
             <dl className="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">{attributeRows.map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-semibold">{value}</dd></div>)}</dl>
             {product.description && <p className="mt-5 whitespace-pre-wrap border-t pt-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>}
           </CardContent></Card>
           {product.productType === "SINGLE_CARD" && (
-            <Card className="gap-0 rounded-2xl border bg-white p-0 shadow-none"><CardContent className="p-6 sm:p-7">
+            <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
               <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />Abilities &amp; Attacks</h2>
               {effectsQuery.isPending ? (
                 <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>

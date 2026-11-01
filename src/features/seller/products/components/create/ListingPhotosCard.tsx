@@ -75,7 +75,7 @@ export function ListingPhotosCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">รูปการ์ดจริง</h2>
+        <h2 className="text-base font-semibold text-foreground">รูปการ์ดจริง</h2>
         <p className="text-xs text-gray-500">
           ถ่ายใบที่จะส่งจริง หน้า-หลัง และมุมที่มีตำหนิ · รูปแรกเป็นรูปหลักบนหน้าประกาศ ·
           สูงสุด {MAX_LISTING_PHOTOS} รูป

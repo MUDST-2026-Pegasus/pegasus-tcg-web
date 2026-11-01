@@ -126,7 +126,7 @@ export function PricingCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">ราคาและจำนวน</h2>
+        <h2 className="text-base font-semibold text-foreground">ราคาและจำนวน</h2>
         <p className="text-xs text-gray-500">
           {mode === "create"
             ? "ต้นทุนใช้คำนวณกำไรในรายงานของคุณ ผู้ซื้อไม่เห็นข้อมูลนี้"
@@ -153,7 +153,7 @@ export function PricingCard({
                     "w-full cursor-pointer items-start gap-2.5 rounded-[10px] p-3.5 ring-inset",
                     isSelected
                       ? "bg-emerald-50 ring-2 ring-teal-600"
-                      : "bg-white ring-1 ring-zinc-200 hover:bg-gray-50",
+                      : "bg-card ring-1 ring-border hover:bg-gray-50",
                   )}
                 >
                   <RadioGroupItem
@@ -161,7 +161,7 @@ export function PricingCard({
                     className="border-input bg-background data-checked:border-primary"
                   />
                   <span className="flex flex-1 flex-col gap-[3px]">
-                    <span className="text-xs font-semibold text-zinc-950">
+                    <span className="text-xs font-semibold text-foreground">
                       {option.title}
                     </span>
                     <span className="text-[10px] leading-4 font-normal text-gray-500">
@@ -257,7 +257,7 @@ export function PricingCard({
         <AutoPricingFields form={form} ids={ids} market={market} />
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-y-3 rounded-[10px] border border-gray-100 bg-neutral-50 p-4">
+      <div className="flex flex-wrap items-center gap-y-3 rounded-[10px] border border-muted bg-neutral-50 p-4">
         <SummaryItem label="ราคาขาย" value={formatBaht(price ?? 0)} strong />
         <SummaryItem
           label={`− ค่าคอมมิชชั่น ~${ESTIMATED_COMMISSION_PERCENT}%`}
@@ -278,7 +278,7 @@ export function PricingCard({
           <p
             className={cn(
               "text-lg font-bold",
-              totalNet < 0 ? "text-red-600" : "text-emerald-700",
+              totalNet < 0 ? "text-destructive" : "text-emerald-700",
             )}
           >
             {formatSignedBaht(totalNet)}
@@ -381,7 +381,7 @@ function AutoPricingFields({
       <div className="flex gap-2.5">
         <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-teal-600" />
         <div className="flex flex-col gap-1.5 text-xs leading-5 text-gray-700">
-          <p className="font-semibold text-zinc-950">ราคาอัตโนมัติทำงานอย่างไร</p>
+          <p className="font-semibold text-foreground">ราคาอัตโนมัติทำงานอย่างไร</p>
           <ul className="flex list-disc flex-col gap-0.5 pl-4">
             <li>
               ทุกคืนตี 3 ระบบหาค่ากลางราคาของประกาศที่เปิดขายอยู่ของการ์ดพิมพ์นี้ในสภาพเดียวกัน
@@ -483,11 +483,11 @@ function SummaryItem({
           tone
             ? cn(
                 "text-lg font-bold",
-                tone === "negative" ? "text-red-600" : "text-emerald-700",
+                tone === "negative" ? "text-destructive" : "text-emerald-700",
               )
             : cn(
                 "text-base font-semibold",
-                strong ? "text-zinc-950" : "text-gray-500",
+                strong ? "text-foreground" : "text-gray-500",
               ),
         )}
       >
@@ -562,7 +562,7 @@ function MarketComparison({
       <div
         aria-hidden="true"
         style={{ "--price-position": `${pricePosition}%` } as React.CSSProperties}
-        className="flex h-7 items-center overflow-hidden rounded-lg bg-gray-100"
+        className="flex h-7 items-center overflow-hidden rounded-lg bg-secondary"
       >
         <div className="h-7 w-(--price-position) rounded-lg bg-emerald-50" />
         {price !== null ? (

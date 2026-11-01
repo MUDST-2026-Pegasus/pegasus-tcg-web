@@ -21,7 +21,7 @@ export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
     try { const saved = await mutation.mutateAsync(data); form.reset({ handlingDays: saved.handlingDays, vacationMode: saved.vacationMode, autoAcceptOrders: saved.autoAcceptOrders }); toast.add({ type: 'success', title: 'บันทึกการตั้งค่าแล้ว' }); }
     catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') }); }
   });
-  const row = 'flex items-center justify-between gap-4 rounded-[9px] border border-[#eef1f2] bg-[#fafbfb] px-[14px] py-3';
+  const row = 'flex items-center justify-between gap-4 rounded-[9px] border border-muted bg-[#fafbfb] px-[14px] py-3';
   return <ShopCard title="การทำงานของร้าน" subtitle="กำหนดการเปิด-ปิดร้านและระยะเวลาจัดส่ง"><form className="space-y-4" onSubmit={save}>
     <div className={row}><div><label htmlFor="vacation" className="text-xs font-medium">ปิดร้านชั่วคราว</label><p className="mt-1 text-[11px] text-muted-foreground">ซ่อนสินค้าทั้งร้านและปิดการสั่งซื้อ · คำสั่งซื้อที่ชำระเงินแล้วยังต้องจัดส่งตามปกติ</p></div><Switch id="vacation" checked={values.vacationMode} disabled={mutation.isPending} onCheckedChange={(checked) => checked ? setConfirm(true) : form.setValue('vacationMode', false, { shouldDirty: true })}/></div>
     <div className={row}><label htmlFor="handling" className="text-xs font-medium">เวลาเตรียมของ (วันทำการ)</label><Input id="handling" className="w-20" type="number" min={0} max={30} disabled={mutation.isPending} {...form.register('handlingDays', { valueAsNumber: true })}/></div>

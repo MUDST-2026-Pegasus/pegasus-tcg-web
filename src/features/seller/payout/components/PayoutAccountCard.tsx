@@ -12,16 +12,16 @@ export function PayoutAccountCard({ account, missingAccount }: Props) {
   const badge = account ? "ยืนยันแล้ว" : missingAccount ? "ยังไม่มี" : "ตรวจสอบไม่ได้";
 
   return (
-    <Card className="gap-4 rounded-xl border bg-white p-5">
+    <Card className="gap-4 rounded-xl border bg-card p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">บัญชีรับเงิน</h2>
-        <span className={`rounded-full px-2 py-1 text-xs ${account ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+        <span className={`rounded-full px-2 py-1 text-xs ${account ? "bg-emerald-100 text-emerald-700" : "bg-secondary text-slate-600"}`}>
           {badge}
         </span>
       </div>
 
       {account ? (
-        <div className="space-y-3 rounded-lg border bg-white p-4 text-sm">
+        <div className="space-y-3 rounded-lg border bg-card p-4 text-sm">
           <div className="flex gap-3">
             <CreditCard className="size-5 shrink-0 text-teal-700" />
             <div>
@@ -49,7 +49,7 @@ export function PayoutAccountCard({ account, missingAccount }: Props) {
       <p className="text-xs text-muted-foreground">
         เงินจะโอนเข้าบัญชีนี้เท่านั้น หากต้องการใช้บัญชีใหม่ กรุณาส่งเอกสารยืนยันอีกครั้ง
       </p>
-      <button type="button" disabled title="ยังไม่เปิดให้ใช้งาน" className="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
+      <button type="button" disabled title="ยังไม่เปิดให้ใช้งาน" className="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-secondary px-3 py-2 text-xs font-medium text-slate-400">
         {missingAccount ? "ยืนยันตัวตนและบัญชีธนาคาร" : "ส่งยืนยันบัญชีใหม่"}
       </button>
     </Card>

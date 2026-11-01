@@ -74,7 +74,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">
+        <h2 className="text-base font-semibold text-foreground">
           เลือกการ์ดจากแคตตาล็อก
         </h2>
         <p className="text-xs text-gray-500">
@@ -131,7 +131,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
         <ul
           aria-busy={search.isPlaceholderData || undefined}
           className={cn(
-            "flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-100",
+            "flex flex-col divide-y divide-muted rounded-lg border border-muted",
             search.isPlaceholderData && "opacity-60",
           )}
         >
@@ -152,9 +152,9 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
       )}
 
       <div className="flex items-center gap-3 text-[11px] text-gray-400">
-        <span className="h-px flex-1 bg-gray-100" />
+        <span className="h-px flex-1 bg-secondary" />
         หรือ
-        <span className="h-px flex-1 bg-gray-100" />
+        <span className="h-px flex-1 bg-secondary" />
       </div>
 
       <CodeLookup onSelect={onSelect} />
@@ -201,7 +201,7 @@ function SearchResultRow({
         onClick={onToggle}
         className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-gray-50"
       >
-        <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100">
+        <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-secondary">
           {item.primaryImageUrl ? (
             <img
               src={item.primaryImageUrl}
@@ -213,7 +213,7 @@ function SearchResultRow({
           )}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-sm font-medium text-zinc-950">
+          <span className="truncate text-sm font-medium text-foreground">
             {item.name}
           </span>
           <span className="truncate text-[11px] text-gray-500">
@@ -364,7 +364,7 @@ function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5">
           <div className="flex min-w-0 flex-col">
-            <p className="text-sm font-medium text-zinc-950">
+            <p className="text-sm font-medium text-foreground">
               {lookup.data.productName}
             </p>
             <p className="text-[11px] text-gray-600">

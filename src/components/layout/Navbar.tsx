@@ -19,13 +19,13 @@ export function Navbar() {
   const cartQuantity = cart?.totalQuantity ?? 0;
 
   return (
-    <header className="sticky top-0 z-40 h-20 border-b border-border bg-white px-4 py-3.5 backdrop-blur-[6px] lg:px-10">
+    <header className="sticky top-0 z-40 h-20 border-b border-border bg-card px-4 py-3.5 backdrop-blur-[6px] lg:px-10">
       {/* คอลัมน์ซ้าย-ขวากว้างเท่ากัน เมนูจึงอยู่กึ่งกลางหน้าเสมอ แม้โลโก้กับกลุ่มไอคอนกว้างไม่เท่ากัน */}
       <div className="mx-auto grid h-full max-w-[1280px] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr] lg:gap-10">
         <Link
           to="/"
           aria-label="Pegasus TCG — กลับหน้าแรก"
-          className="flex h-full min-w-0 cursor-pointer items-center justify-self-start text-xl sm:text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
+          className="flex h-full min-w-0 cursor-pointer items-center justify-self-start text-xl sm:text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-primary"
         >
           pegasus
         </Link>
@@ -43,7 +43,7 @@ export function Navbar() {
                   <span
                     className={cn(
                       "text-sm font-bold uppercase leading-none tracking-wide",
-                      isActive ? "text-sky-700" : "text-zinc-700",
+                      isActive ? "text-primary" : "text-zinc-700",
                     )}
                   >
                     {label}
@@ -51,7 +51,7 @@ export function Navbar() {
                   <span
                     className={cn(
                       "absolute bottom-0 left-0 h-[2px] w-full rounded-full",
-                      isActive ? "bg-sky-700" : "bg-transparent",
+                      isActive ? "bg-primary" : "bg-transparent",
                     )}
                   />
                 </>
@@ -67,10 +67,10 @@ export function Navbar() {
             aria-label="Switch language"
             className="flex h-full w-20 items-center justify-between"
           >
-            <span className="leading-none text-xs font-bold text-sky-700">
+            <span className="leading-none text-xs font-bold text-primary">
               TH
             </span>
-            <span className="relative flex h-5 w-10 items-center rounded-xl bg-sky-700">
+            <span className="relative flex h-5 w-10 items-center rounded-xl bg-primary">
               <span className="absolute left-[2px] size-4 rounded-full bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.18)]" />
             </span>
             <span className="leading-none text-xs font-semibold text-gray-500">
@@ -83,7 +83,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             aria-label="Search"
-            className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
+            className="flex cursor-pointer items-center justify-center text-primary hover:text-primary"
             nativeButton={false}
             render={<Link to="/search" />}
           >
@@ -93,7 +93,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             aria-label={cart ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น` : "ตะกร้าสินค้า"}
-            className="relative flex cursor-pointer items-center justify-center overflow-visible text-sky-700 hover:text-sky-700"
+            className="relative flex cursor-pointer items-center justify-center overflow-visible text-primary hover:text-primary"
             nativeButton={false}
             render={<Link to="/cart" />}
           >
@@ -101,7 +101,7 @@ export function Navbar() {
             {cartQuantity > 0 && (
               <Badge
                 aria-hidden="true"
-                className="absolute -right-1.5 -top-1.5 h-5 min-w-5 rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white"
+                className="absolute -right-1.5 -top-1.5 h-5 min-w-5 rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-white"
               >
                 {cartQuantity > 99 ? "99+" : cartQuantity}
               </Badge>

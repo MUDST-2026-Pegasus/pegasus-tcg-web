@@ -28,7 +28,7 @@ export function SellerApprovalStats({
     <div
       role="tablist"
       aria-label="กรองคำขอตามสถานะ"
-      className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-[#eef1f2] xl:grid-cols-4"
+      className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-muted xl:grid-cols-4"
     >
       {VERIFICATION_STATUSES.map((status, index) => {
         const meta = VERIFICATION_STATUS_META[status];

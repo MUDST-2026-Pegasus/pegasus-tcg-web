@@ -168,7 +168,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-zinc-950">{order.sellerOrderNumber}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{order.sellerOrderNumber}</h1>
             <Badge
               className={cn(
                 "h-5 rounded-full px-2 text-xs",

@@ -92,7 +92,7 @@ export function PaymentQrCard({ amount, orderNumber, account }: PaymentQrCardPro
     <div className="flex flex-col items-center">
       {payload ? <>
         <p className="text-xs text-muted-foreground font-medium mb-3 text-center">{isDemo ? "QR ตัวอย่าง · ใช้ชำระเงินจริงไม่ได้" : "Scan with any banking app"}</p>
-        <div className="w-full max-w-[240px] bg-[#F8FAFC] border border-slate-100/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs">
+        <div className="w-full max-w-[240px] bg-[#F8FAFC] border border-muted/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs">
           <QRCodeSVG
             ref={refSvg}
             value={payload}

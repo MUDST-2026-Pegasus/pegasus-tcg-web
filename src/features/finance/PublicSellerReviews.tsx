@@ -9,7 +9,7 @@ import { ReviewStars } from './ReviewStars';
 export function PublicSellerReviews({ username }: { username: string }) {
   const reviews = useQuery({ queryKey: ['finance', 'public-reviews', username], queryFn: () => afterSalesApi.publicReviews(username), enabled: !!username, retry: false });
   const notSeller = reviews.isError && hasErrorCode(reviews.error, 'SELLER_NOT_FOUND');
-  return <section className="space-y-4 rounded-xl border bg-white p-6">
+  return <section className="space-y-4 rounded-xl border bg-card p-6">
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-xl font-semibold">รีวิวร้านค้า</h2><p className="mt-1 text-xs text-muted-foreground">ผู้ซื้อให้คะแนนได้หลังคำสั่งซื้อเสร็จสมบูรณ์</p></div><Button nativeButton={false} variant="outline" size="sm" render={<Link to="/account/orders" role="link"/>}>รีวิวจากคำสั่งซื้อของฉัน</Button></div>
     {reviews.isPending && <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว"><ListRowsSkeleton rows={3} /></div>}
     {reviews.isError && !notSeller && <p role="alert">{getErrorMessage(reviews.error, 'โหลดรีวิวไม่สำเร็จ')} <Button variant="outline" size="sm" onClick={() => void reviews.refetch()}>ลองอีกครั้ง</Button></p>}

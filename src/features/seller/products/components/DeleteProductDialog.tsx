@@ -48,14 +48,14 @@ export function DeleteProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="gap-0 overflow-hidden rounded-2xl bg-white p-0 shadow-[0px_12px_32px_0px_rgba(0,0,0,0.18)] ring-0 sm:max-w-[460px]"
+        className="gap-0 overflow-hidden rounded-2xl bg-card p-0 shadow-[0px_12px_32px_0px_rgba(0,0,0,0.18)] ring-0 sm:max-w-[460px]"
       >
         <div className="flex flex-col gap-3 px-6 pt-6 pb-4">
           <div className="flex size-11 items-center justify-center rounded-xl bg-rose-100">
-            <Trash2 aria-hidden="true" className="size-5 text-red-600" />
+            <Trash2 aria-hidden="true" className="size-5 text-destructive" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <DialogTitle className="text-base leading-normal font-bold text-zinc-950">
+            <DialogTitle className="text-base leading-normal font-bold text-foreground">
               ลบสินค้านี้ออกจากร้าน?
             </DialogTitle>
             <DialogDescription className="text-xs leading-4 text-gray-500">
@@ -66,10 +66,10 @@ export function DeleteProductDialog({
 
         <div className="flex flex-col gap-3.5 px-6 pb-5">
           {listing ? (
-            <div className="flex items-center gap-3 rounded-[10px] border border-gray-100 bg-neutral-50 p-3.5">
+            <div className="flex items-center gap-3 rounded-[10px] border border-muted bg-neutral-50 p-3.5">
               <ListingThumb listing={listing} />
               <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                <p className="text-xs font-medium text-zinc-950">
+                <p className="text-xs font-medium text-foreground">
                   {listing.card.productName}
                 </p>
                 <p className="truncate text-[10px] text-gray-400">
@@ -95,7 +95,7 @@ export function DeleteProductDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-gray-100 bg-neutral-50 px-6 py-4">
+        <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-neutral-50 px-6 py-4">
           {onUnpublish ? (
             <Button
               variant="outline"

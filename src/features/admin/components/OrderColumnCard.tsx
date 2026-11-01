@@ -34,7 +34,7 @@ export function OrderColumnCard({
     <button
       type="button"
       onClick={() => onSelect(order)}
-      className="flex w-full flex-col gap-3 rounded-[10px] border border-[#eef1f2] bg-background p-3 text-left shadow-none transition-colors hover:border-[#d5dbdd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="flex w-full flex-col gap-3 rounded-[10px] border border-muted bg-background p-3 text-left shadow-none transition-colors hover:border-[#d5dbdd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="truncate font-medium text-foreground">
