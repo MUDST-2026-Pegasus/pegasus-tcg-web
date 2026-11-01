@@ -107,7 +107,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={detailPath}
-                className="relative z-10 rounded-sm text-sm font-semibold text-zinc-950 outline-none hover:text-teal-600 hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
+                className="relative z-10 rounded-sm text-sm font-semibold text-foreground outline-none hover:text-teal-600 hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
               >
                 {order.sellerOrderNumber}
               </Link>
@@ -129,7 +129,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
           </div>
 
           <div className="flex shrink-0 flex-col items-end gap-[3px]">
-            <span className="text-base font-bold text-zinc-950">{formatBaht(order.grandTotal)}</span>
+            <span className="text-base font-bold text-foreground">{formatBaht(order.grandTotal)}</span>
             <span className={cn("text-[10px]", PAYMENT_TEXT[payment])}>
               {PAYMENT_STATE_LABEL[payment]}
             </span>
@@ -151,12 +151,12 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
           className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0"
         >
           <div className="flex flex-col gap-3.5 px-5 pb-4">
-            <Separator className="bg-gray-100" />
+            <Separator className="bg-secondary" />
 
             <ul className="flex flex-col gap-2.5">
               {order.items.map((item) => (
                 <li key={item.id} className="flex items-center gap-3">
-                  <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100">
+                  <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-secondary">
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt="" className="size-full object-cover" />
                     ) : (
@@ -164,7 +164,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                     )}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <p className="truncate text-xs font-medium text-zinc-950">{item.productName}</p>
+                    <p className="truncate text-xs font-medium text-foreground">{item.productName}</p>
                     <p className="text-[10px] text-gray-400">
                       {[itemMeta(item), `×${item.quantity}`].filter(Boolean).join(" ")}
                     </p>
@@ -175,10 +175,10 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                 </li>
               ))}
               <li className="flex items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-gray-100">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <ShoppingBag aria-hidden="true" className="size-4 text-slate-500" />
                 </div>
-                <p className="flex-1 text-xs font-medium text-zinc-950">ค่าจัดส่ง</p>
+                <p className="flex-1 text-xs font-medium text-foreground">ค่าจัดส่ง</p>
                 <p className="shrink-0 text-xs font-medium text-gray-700">
                   {order.shippingFee > 0 ? formatBaht(order.shippingFee) : "ส่งฟรี"}
                 </p>

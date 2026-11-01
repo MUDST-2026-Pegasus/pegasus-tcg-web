@@ -39,7 +39,7 @@ export const STATUS_STYLE: Record<PromotionStatus, string> = {
   ACTIVE: "bg-[#e7f6ee] text-[#007a4a]",
   SCHEDULED: "bg-[#e8f1fc] text-[#0058bc]",
   PAUSED: "bg-[#fdf0dd] text-[#b45309]",
-  EXPIRED: "bg-[#eef1f2] text-muted-foreground",
+  EXPIRED: "bg-muted text-muted-foreground",
   USED_UP: "bg-[#fde8e8] text-[#b42318]",
 };
 
@@ -52,7 +52,7 @@ export const REDEMPTION_STATUS_LABEL: Record<RedemptionStatus, string> = {
 export const REDEMPTION_STATUS_STYLE: Record<RedemptionStatus, string> = {
   CONSUMED: "bg-[#e7f6ee] text-[#007a4a]",
   RESERVED: "bg-[#e8f1fc] text-[#0058bc]",
-  RELEASED: "bg-[#eef1f2] text-muted-foreground",
+  RELEASED: "bg-muted text-muted-foreground",
 };
 
 /** เหตุผลให้เลือกตอนหยุดโค้ดร้าน (Figma PRM-M1) — ส่งไปพร้อมรายละเอียดเป็นข้อความเดียว */

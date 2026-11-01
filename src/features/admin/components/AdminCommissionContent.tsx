@@ -26,7 +26,7 @@ export function AdminCommissionContent({ data }: AdminCommissionContentProps) {
           <Button variant="outline" className="rounded-md px-2.5">
             {data.actions.historyLabel}
           </Button>
-          <Button className="rounded-md bg-[#090b0c] px-2.5 text-white hover:bg-[#090b0c]/90">
+          <Button className="rounded-md bg-foreground px-2.5 text-background hover:bg-foreground/90">
             {data.actions.saveLabel}
           </Button>
         </div>

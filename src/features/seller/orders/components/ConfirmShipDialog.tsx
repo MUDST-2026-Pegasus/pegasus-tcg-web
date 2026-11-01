@@ -48,11 +48,11 @@ export function ConfirmShipDialog({
         <dl className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
           <div className="flex items-center justify-between gap-3">
             <dt className="text-gray-500">บริษัทขนส่ง</dt>
-            <dd className="font-medium text-zinc-950">{carrierName}</dd>
+            <dd className="font-medium text-foreground">{carrierName}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
             <dt className="text-gray-500">เลขพัสดุ</dt>
-            <dd className="font-medium break-all text-zinc-950">{trackingNumber}</dd>
+            <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
           </div>
         </dl>
 

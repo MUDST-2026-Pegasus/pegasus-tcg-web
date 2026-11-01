@@ -92,12 +92,12 @@ export function AdminPaymentReviewContent() {
   const counts = summary.data;
   const badgesFor = (payment: PaymentReview): FinanceBadge[] => {
     const badges: FinanceBadge[] = [
-      { label: payment.orderNumber, className: "bg-[#eef1f2] text-muted-foreground" },
+      { label: payment.orderNumber, className: "bg-muted text-muted-foreground" },
     ];
     if (payment.splits.length > 1) {
       badges.push({
         label: `${payment.splits.length} ร้านค้า`,
-        className: "bg-[#eef1f2] text-muted-foreground",
+        className: "bg-muted text-muted-foreground",
       });
     }
     if (payment.id === selected?.id) {

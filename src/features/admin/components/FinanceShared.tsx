@@ -71,7 +71,7 @@ export function FinanceStatStrip({
   isError?: boolean;
 }) {
   return (
-    <div className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-[#eef1f2] xl:grid-cols-4">
+    <div className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-muted xl:grid-cols-4">
       {stats.map((stat) => (
         <div key={stat.label} className="flex flex-col gap-1.5 bg-background px-5 py-4">
           <div className="flex items-center gap-[7px]">
@@ -136,7 +136,7 @@ export function FinanceTabs<T extends string>({
               className={cn(
                 "rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-[#eef1f2] text-foreground"
+                  ? "bg-muted text-foreground"
                   : "text-foreground hover:bg-[#f6f8f9]",
               )}
             >

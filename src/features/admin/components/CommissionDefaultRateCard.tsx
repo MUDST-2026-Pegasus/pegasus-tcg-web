@@ -24,14 +24,14 @@ export function CommissionDefaultRateCard({
   const percent = Math.min(100, (parseFloat(value) / max) * 100);
 
   return (
-    <Card className="gap-[18px] rounded-xl border border-[#e3e7e8] p-5 shadow-none ring-0">
+    <Card className="gap-[18px] rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <p className="text-[15px] font-semibold text-[#090b0c]">{title}</p>
-        <p className="text-xs text-[#67787c]">{description}</p>
+        <p className="text-[15px] font-semibold text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex w-[105px] items-baseline gap-1 rounded-[10px] border border-[#e3e7e8] bg-[#fafbfb] px-[18px] py-3.5">
+        <div className="flex w-[105px] items-baseline gap-1 rounded-[10px] border border-border bg-[#fafbfb] px-[18px] py-3.5">
           {onChange ? <input aria-label="อัตราค่าคอมมิชชั่น (%)" type="number" min="0" max="100" step="0.001"
             value={value} onChange={(event) => onChange(event.target.value)}
             className="w-[50px] shrink-0 appearance-none bg-transparent text-[30px] leading-none font-bold tracking-[-0.8px] text-foreground outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
@@ -42,7 +42,7 @@ export function CommissionDefaultRateCard({
         <div className="flex flex-1 flex-col gap-[7px]">
           <div
             style={{ "--percent": `${percent}%` } as React.CSSProperties}
-            className="relative h-[5px] w-full rounded-full bg-[#eef1f2]"
+            className="relative h-[5px] w-full rounded-full bg-muted"
           >
             <div
               className="h-full rounded-full bg-[#0058bc]"
@@ -52,7 +52,7 @@ export function CommissionDefaultRateCard({
 
           <div className="flex items-center justify-between text-[10px] text-[#9aa5ad]">
             <span>{minLabel}</span>
-            <span className="text-[#67787c]">{recommendedLabel}</span>
+            <span className="text-muted-foreground">{recommendedLabel}</span>
             <span>{maxLabel}</span>
           </div>
         </div>

@@ -122,7 +122,7 @@ export function CardSchemaTable({
             </TableRow>
           </TableHeader>
 
-          <TableBody className="[&_tr]:border-[#eef1f2]">
+          <TableBody className="[&_tr]:border-muted">
             {attributes.map((attribute, index) => {
               const busy = isBusy(attribute.id);
 

@@ -52,7 +52,7 @@ export function PayoutHistory({ payouts, filter, onFilterChange, onSelect }: Pro
       {history.length ? (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[740px] text-left text-sm">
-            <thead className="bg-[#f0f3f3] text-xs text-muted-foreground">
+            <thead className="bg-muted text-xs text-muted-foreground">
               <tr>
                 <th className="px-5 py-3">วันที่ขอ</th>
                 <th>เลขที่</th>

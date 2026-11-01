@@ -27,7 +27,7 @@ const ICON_BG: Record<TodoAccent, string> = {
   red: "bg-[#fbe9e8]",
   amber: "bg-[#fdf0dd]",
   primary: "bg-[#e8f1fc]",
-  gray: "bg-[#eef1f2]",
+  gray: "bg-muted",
 };
 
 const ICON_COLOR: Record<TodoAccent, string> = {
@@ -51,7 +51,7 @@ function TodoRow({ item }: { item: TodoItem }) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-        <p className="text-xs font-medium text-zinc-950">{item.title}</p>
+        <p className="text-xs font-medium text-foreground">{item.title}</p>
         <p className="text-xs text-gray-500">{item.description}</p>
       </div>
 
@@ -63,7 +63,7 @@ function TodoRow({ item }: { item: TodoItem }) {
   const rowClass = "flex items-center gap-3 px-4 py-3";
 
   return (
-    <li className="border-t border-gray-100 first:border-t-0">
+    <li className="border-t border-muted first:border-t-0">
       {item.to ? (
         <Link
           to={item.to}
@@ -86,7 +86,7 @@ export function TodoCard({ title, description, count, items, emptyLabel }: TodoL
     <Card className="w-full gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-none ring-0 lg:w-96">
       <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-3">
         <div className="flex flex-col gap-0.5">
-          <p className="text-base font-semibold text-zinc-950">{title}</p>
+          <p className="text-base font-semibold text-foreground">{title}</p>
           <p className="text-xs text-gray-500">{description}</p>
         </div>
         {count > 0 ? (
@@ -97,7 +97,7 @@ export function TodoCard({ title, description, count, items, emptyLabel }: TodoL
       </div>
 
       {items.length === 0 ? (
-        <p className="border-t border-gray-100 px-4 py-6 text-center text-xs text-gray-500">
+        <p className="border-t border-muted px-4 py-6 text-center text-xs text-gray-500">
           {emptyLabel}
         </p>
       ) : (

@@ -25,7 +25,7 @@ export function ReadinessCard({ items }: ReadinessCardProps) {
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-zinc-950">พร้อมลงขายหรือยัง</p>
+        <p className="text-xs font-semibold text-foreground">พร้อมลงขายหรือยัง</p>
         <Badge
           className={cn(
             "h-5 rounded-full px-2 text-xs",

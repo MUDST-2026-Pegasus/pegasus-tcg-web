@@ -261,7 +261,7 @@ export function ProductsContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-zinc-950">จัดการสินค้า</h1>
+          <h1 className="text-2xl font-bold text-foreground">จัดการสินค้า</h1>
           <p className="text-xs text-gray-500">
             {counts.isPending
               ? "กำลังนับประกาศ…"

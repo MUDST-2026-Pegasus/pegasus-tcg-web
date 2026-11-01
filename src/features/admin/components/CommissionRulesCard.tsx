@@ -9,8 +9,8 @@ type CommissionRulesCardProps = AdminCommissionData["rules"];
  */
 export function CommissionRulesCard({ title, items }: CommissionRulesCardProps) {
   return (
-    <Card className="gap-3.5 rounded-xl border border-[#e3e7e8] p-5 shadow-none ring-0">
-      <p className="text-[13px] font-semibold text-[#090b0c]">{title}</p>
+    <Card className="gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
+      <p className="text-[13px] font-semibold text-foreground">{title}</p>
       <ul className="flex flex-col gap-3.5">
         {items.map((rule) => (
           <li key={rule.id} className="flex items-center gap-2.5">

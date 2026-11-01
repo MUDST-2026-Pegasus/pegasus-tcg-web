@@ -139,8 +139,8 @@ export function AdminCommissionPage() {
   const ready = rules.isSuccess && setting.isSuccess && games.isSuccess && categories.isSuccess;
   return <div className="space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex flex-col gap-1"><h1 className="text-[26px] font-bold tracking-[-0.5px] text-[#090b0c]">ค่าคอมมิชชั่น</h1>
-        <p className="text-[13px] text-[#67787c]">กำหนดอัตราค่าธรรมเนียมที่แพลตฟอร์มเก็บจากผู้ขายในแต่ละหมวดหมู่</p></div>
+      <div className="flex flex-col gap-1"><h1 className="text-[26px] font-bold tracking-[-0.5px] text-foreground">ค่าคอมมิชชั่น</h1>
+        <p className="text-[13px] text-muted-foreground">กำหนดอัตราค่าธรรมเนียมที่แพลตฟอร์มเก็บจากผู้ขายในแต่ละหมวดหมู่</p></div>
       <div className="flex gap-2"><Button variant="outline" className="rounded-md px-2.5" disabled title="ระบบยังไม่มี API ประวัติการแก้ไขค่าคอมมิชชั่น">ดูประวัติการแก้ไข</Button>
         <Button className="rounded-md px-2.5" disabled={busy || !hasChanges} onClick={() => void saveSettings()}>บันทึกการตั้งค่า</Button></div>
     </div>

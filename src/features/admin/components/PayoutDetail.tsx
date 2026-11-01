@@ -75,7 +75,7 @@ export function PayoutDetail({ payout, onMoved }: PayoutDetailProps) {
         <PayoutTimeline payout={payout} />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
-          <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-[#f2f5f6] p-4">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-secondary p-4">
             <span className="text-[11px] text-[#9aa5ad]">ยอดที่ต้องโอนให้ผู้ขาย</span>
             <span className="text-[26px] leading-tight font-bold text-foreground">{formatBaht(payout.amount)}</span>
             <AmountRow label="ยอด available ใน wallet" value={formatBaht(payout.wallet.available)} />
@@ -199,13 +199,13 @@ function PayoutTimeline({ payout }: { payout: AdminPayout }) {
                     done && "bg-[#e3f4ec] text-[#12805c]",
                     current && !failed && "bg-[#0058bc] text-white",
                     failed && "bg-[#fbe9e8] text-[#d0342c]",
-                    !done && !current && "bg-[#eef1f2] text-[#9aa5ad]",
+                    !done && !current && "bg-muted text-[#9aa5ad]",
                   )}
                 >
                   {done ? <Check className="size-3" /> : failed ? <XCircle className="size-3" /> : index + 1}
                 </span>
                 {index < STEPS.length - 1 && (
-                  <span className={cn("h-0.5 flex-1", index < reached ? "bg-[#12805c]" : "bg-[#e3e7e8]")} />
+                  <span className={cn("h-0.5 flex-1", index < reached ? "bg-[#12805c]" : "bg-border")} />
                 )}
               </div>
               <span

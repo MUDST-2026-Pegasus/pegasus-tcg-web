@@ -11,7 +11,7 @@ type OrderTimelineCardProps = {
 export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-base font-semibold text-zinc-950">{title}</p>
+      <p className="text-base font-semibold text-foreground">{title}</p>
 
       <ol className="flex flex-col">
         {entries.map((entry, index) => {
@@ -23,11 +23,11 @@ export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
                 <span
                   className={cn(
                     "size-2.5 rounded-full border-2",
-                    entry.done ? "border-teal-600 bg-teal-600" : "border-zinc-200 bg-white",
+                    entry.done ? "border-teal-600 bg-teal-600" : "border-border bg-card",
                   )}
                 />
                 {isLast ? null : (
-                  <span className={cn("h-7 w-0.5", entry.done ? "bg-zinc-200" : "bg-gray-100")} />
+                  <span className={cn("h-7 w-0.5", entry.done ? "bg-border" : "bg-secondary")} />
                 )}
               </div>
 
@@ -35,7 +35,7 @@ export function OrderTimelineCard({ title, entries }: OrderTimelineCardProps) {
                 <p
                   className={cn(
                     "text-xs",
-                    entry.done ? "font-medium text-zinc-950" : "font-normal text-gray-400",
+                    entry.done ? "font-medium text-foreground" : "font-normal text-gray-400",
                   )}
                 >
                   {entry.label}

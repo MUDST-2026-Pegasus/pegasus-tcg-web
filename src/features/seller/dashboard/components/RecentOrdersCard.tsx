@@ -21,7 +21,7 @@ export function RecentOrdersCard({
   return (
     <Card className="w-full flex-1 gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-5 pt-4 pb-3.5">
-        <p className="text-base font-semibold text-zinc-950">{title}</p>
+        <p className="text-base font-semibold text-foreground">{title}</p>
         <Button
           variant="ghost"
           size="sm"
@@ -34,24 +34,24 @@ export function RecentOrdersCard({
       </div>
 
       {items.length === 0 ? (
-        <p className="border-t border-gray-100 px-5 py-8 text-center text-xs text-gray-500">
+        <p className="border-t border-muted px-5 py-8 text-center text-xs text-gray-500">
           {emptyLabel}
         </p>
       ) : (
         <ul className="flex flex-col">
           {items.map((order) => (
-            <li key={order.id} className="border-t border-gray-100 first:border-t-0">
+            <li key={order.id} className="border-t border-muted first:border-t-0">
               <Link
                 to={`/seller/orders/${order.id}`}
                 className="flex items-center gap-3.5 px-5 py-3 outline-none hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:ring-3 focus-visible:ring-ring/30"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-gray-100">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <ImageIcon aria-hidden="true" className="size-3.5 text-gray-400" />
                 </div>
 
                 {/* เลขออเดอร์ยาว (PGS-YYYYMMDD-NNNNNN-S…) ต้องตัดได้ ไม่งั้นทับราคา */}
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-                  <p className="truncate text-xs font-semibold text-zinc-950" title={order.number}>
+                  <p className="truncate text-xs font-semibold text-foreground" title={order.number}>
                     {order.number}
                   </p>
                   <p className="truncate text-xs text-gray-400">
@@ -59,7 +59,7 @@ export function RecentOrdersCard({
                   </p>
                 </div>
 
-                <p className="shrink-0 text-xs font-semibold text-zinc-950">
+                <p className="shrink-0 text-xs font-semibold text-foreground">
                   {order.price}
                 </p>
 

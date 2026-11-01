@@ -25,10 +25,10 @@ export function GameAvatar({ game, size, highlighted }: GameAvatarProps) {
           : "size-14 rounded-[10px] text-lg",
         size === "sm" && initials.length > 2 && "text-[8px]",
         logo
-          ? "bg-white ring-1 ring-border"
+          ? "bg-card ring-1 ring-border"
           : highlighted
             ? "bg-primary text-primary-foreground"
-            : "bg-[#f1f3f4] text-[#414755]",
+            : "bg-muted text-[#414755]",
       )}
     >
       {logo ? (

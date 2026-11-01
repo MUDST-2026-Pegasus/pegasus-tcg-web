@@ -71,9 +71,9 @@ export function ShippingInfoCard({
 
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-base font-semibold text-zinc-950">ข้อมูลการจัดส่ง</p>
+      <p className="text-base font-semibold text-foreground">ข้อมูลการจัดส่ง</p>
 
-      <div className="flex flex-col gap-2 rounded-[10px] border border-gray-100 bg-neutral-50 p-4">
+      <div className="flex flex-col gap-2 rounded-[10px] border border-muted bg-neutral-50 p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <UserIcon aria-hidden="true" className="size-4 text-slate-500" />

@@ -330,7 +330,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                       <InputGroupButton
                         size="xs"
                         variant="secondary"
-                        className="h-auto rounded-[4px]! bg-[#eef1f2] px-2 py-0.5 text-xs text-[#414755]"
+                        className="h-auto rounded-[4px]! bg-muted px-2 py-0.5 text-xs text-[#414755]"
                         onClick={() => change("code", randomCode())}
                       >
                         สุ่มโค้ด

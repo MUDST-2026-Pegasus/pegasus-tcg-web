@@ -31,8 +31,8 @@ const STATUS_BADGE: Record<ListingStatus, string> = {
   ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
   SOLD_OUT: "bg-[#fbe9e8] text-[#d0342c]",
   PAUSED: "bg-[#fdf0dd] text-[#b45309]",
-  DRAFT: "bg-[#eef1f2] text-[#6b7280]",
-  DELISTED: "bg-zinc-100 text-zinc-500",
+  DRAFT: "bg-muted text-[#6b7280]",
+  DELISTED: "bg-secondary text-zinc-500",
   BLOCKED: "bg-rose-100 text-rose-700",
 };
 

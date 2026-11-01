@@ -39,7 +39,7 @@ export function LogoUploadField({
         <img
           src={saved?.logoImageUrl ?? undefined}
           alt=""
-          className="size-14 rounded-md bg-white object-contain"
+          className="size-14 rounded-md bg-card object-contain"
         />
         <p className="flex-1 text-xs text-muted-foreground">โลโก้ปัจจุบัน</p>
         <Button

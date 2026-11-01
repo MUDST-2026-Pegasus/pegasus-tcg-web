@@ -30,7 +30,7 @@ export function PayoutRequestDialog({ open, onOpenChange, amount, onAmountChange
 
         <div className="min-w-0 space-y-2">
           <label htmlFor="payout-amount" className="text-sm font-medium">จำนวนเงินที่ต้องการถอน</label>
-          <div className="flex min-w-0 items-center rounded-lg border-2 border-teal-600 bg-white px-4 focus-within:ring-2 focus-within:ring-teal-100">
+          <div className="flex min-w-0 items-center rounded-lg border-2 border-teal-600 bg-card px-4 focus-within:ring-2 focus-within:ring-teal-100">
             <span className="text-2xl font-semibold text-muted-foreground">฿</span>
             <input
               id="payout-amount"
@@ -48,11 +48,11 @@ export function PayoutRequestDialog({ open, onOpenChange, amount, onAmountChange
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">ทศนิยมไม่เกิน 2 ตำแหน่ง</p>
-          {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
+          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
           {conflict && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{conflict}</p>}
         </div>
 
-        <div className="flex min-w-0 items-center gap-3 rounded-lg bg-[#f0f3f3] p-3">
+        <div className="flex min-w-0 items-center gap-3 rounded-lg bg-muted p-3">
           <CreditCard className="size-5 text-teal-700" />
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">โอนเข้า</p>

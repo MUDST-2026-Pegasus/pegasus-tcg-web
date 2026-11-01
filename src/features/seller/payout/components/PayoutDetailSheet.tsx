@@ -57,7 +57,7 @@ export function PayoutDetailSheet({ payout, onClose, onRetry, canRetry }: Props)
                 return (
                   <li key={step.label} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <span className={`flex size-5 shrink-0 items-center justify-center rounded-full ${step.done ? failed ? "bg-red-600 text-white" : "bg-teal-600 text-white" : "border border-slate-300 text-slate-400"}`}>
+                      <span className={`flex size-5 shrink-0 items-center justify-center rounded-full ${step.done ? failed ? "bg-destructive text-white" : "bg-teal-600 text-white" : "border border-slate-300 text-slate-400"}`}>
                         {step.done && (failed ? <X className="size-3" /> : <Check className="size-3" />)}
                       </span>
                       {index < timeline.length - 1 && <span className={`min-h-9 w-0.5 ${step.done ? "bg-teal-600" : "bg-slate-200"}`} />}

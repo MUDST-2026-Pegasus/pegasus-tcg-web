@@ -39,7 +39,7 @@ export function AccountMenu() {
             variant="ghost"
             size="icon"
             aria-label="Account"
-            className="flex cursor-pointer items-center justify-center text-sky-700 hover:text-sky-700"
+            className="flex cursor-pointer items-center justify-center text-primary hover:text-primary"
           />
         }
       >

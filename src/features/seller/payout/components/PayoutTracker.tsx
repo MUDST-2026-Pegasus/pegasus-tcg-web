@@ -10,7 +10,7 @@ export function PayoutTracker({ payouts, onSelect }: { payouts: Payout[]; onSele
   const total = payouts.reduce((sum, payout) => sum + Number(payout.amount), 0);
 
   return (
-    <Card className="gap-0 rounded-xl border bg-white py-0">
+    <Card className="gap-0 rounded-xl border bg-card py-0">
       <div className="border-b px-5 py-4">
         <h2 className="font-semibold">คำขอที่ยังไม่โอน</h2>
         <p className="text-xs text-muted-foreground">ยอดรวม {money(total)} ถูกกันไว้ ยังไม่ถูกตัดจากกระเป๋า</p>
@@ -32,7 +32,7 @@ export function PayoutTracker({ payouts, onSelect }: { payouts: Payout[]; onSele
                 {labels.map((label, index) => (
                   <div key={label} className="relative">
                     {index < 3 && <span className={`absolute left-[calc(50%+8px)] right-[calc(-50%+8px)] top-[5px] h-px ${index < step - 1 ? "bg-teal-600" : "bg-slate-200"}`} />}
-                    <div className={`relative z-10 mx-auto mb-1 flex size-3 items-center justify-center rounded-full ${index < step - 1 ? "bg-teal-600" : index === step - 1 ? "border-2 border-teal-600 bg-white" : "border border-slate-200 bg-slate-100"}`}>
+                    <div className={`relative z-10 mx-auto mb-1 flex size-3 items-center justify-center rounded-full ${index < step - 1 ? "bg-teal-600" : index === step - 1 ? "border-2 border-teal-600 bg-card" : "border border-slate-200 bg-secondary"}`}>
                       {index === step - 1 && <span className="size-1 rounded-full bg-teal-600" />}
                     </div>
                     <span className={index < step ? "font-medium text-teal-700" : "text-muted-foreground"}>{label}</span>

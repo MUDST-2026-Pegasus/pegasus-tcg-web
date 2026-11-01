@@ -81,7 +81,7 @@ export function PaymentSteps({
       {/* Step 1: Scan & Pay */}
       <div className="flex gap-3.5">
         <div className="flex flex-col items-center">
-          <div className="w-6 h-6 rounded-full bg-sky-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
+          <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold shrink-0">
             1
           </div>
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
@@ -100,7 +100,7 @@ export function PaymentSteps({
           <div
             className={`w-6 h-6 rounded-full border text-xs font-semibold flex items-center justify-center shrink-0 ${
               hasUploadedSlip
-                ? "bg-sky-700 border-sky-700 text-white"
+                ? "bg-primary border-primary text-white"
                 : "border-slate-300 text-muted-foreground"
             }`}
           >
@@ -146,13 +146,13 @@ export function PaymentSteps({
                 disabled
                   ? "border-slate-200 bg-slate-50/80 cursor-not-allowed opacity-60"
                   : isDragOver
-                  ? "border-sky-700 bg-sky-50/50 cursor-pointer"
-                  : "border-slate-200 bg-white hover:bg-slate-50/60 cursor-pointer"
+                  ? "border-primary bg-sky-50/50 cursor-pointer"
+                  : "border-slate-200 bg-card hover:bg-slate-50/60 cursor-pointer"
               }`}
             >
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                  disabled ? "bg-slate-100 text-slate-400" : "bg-sky-50 text-sky-700"
+                  disabled ? "bg-secondary text-slate-400" : "bg-sky-50 text-primary"
                 }`}
               >
                 <CloudUpload className="size-5" />
@@ -163,7 +163,7 @@ export function PaymentSteps({
                     <span className="text-slate-500 font-medium">Payment submitted</span>
                   ) : (
                     <>
-                      <span className="text-sky-700 font-semibold hover:underline">
+                      <span className="text-primary font-semibold hover:underline">
                         Click to upload
                       </span>{" "}
                       <span className="text-slate-500 font-normal">or drag &amp; drop</span>
@@ -177,16 +177,16 @@ export function PaymentSteps({
             </div>
           ) : (
             /* Selected / Uploaded File Display */
-            <div className="mt-2.5 rounded-xl border border-slate-200 bg-white p-3 flex items-center justify-between gap-3 shadow-2xs">
+            <div className="mt-2.5 rounded-xl border border-slate-200 bg-card p-3 flex items-center justify-between gap-3 shadow-2xs">
               <div className="flex items-center gap-3 min-w-0">
                 {uploadedItem.previewUrl ? (
                   <img
                     src={uploadedItem.previewUrl}
                     alt="Slip preview"
-                    className="w-10 h-10 rounded-lg object-cover border border-slate-100 shrink-0"
+                    className="w-10 h-10 rounded-lg object-cover border border-muted shrink-0"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-slate-500">
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-slate-500">
                     <FileText className="size-5" />
                   </div>
                 )}
@@ -199,7 +199,7 @@ export function PaymentSteps({
                       {(uploadedItem.file.size / 1024 / 1024).toFixed(2)} MB
                     </span>
                     {uploadedItem.status === "uploading" && (
-                      <span className="text-[11px] text-sky-700 flex items-center gap-1 font-medium">
+                      <span className="text-[11px] text-primary flex items-center gap-1 font-medium">
                         <Loader2 className="size-3 animate-spin" /> Uploading...
                       </span>
                     )}
@@ -263,7 +263,7 @@ export function PaymentSteps({
           <div
             className={`w-6 h-6 rounded-full border text-xs font-semibold flex items-center justify-center shrink-0 ${
               referenceCode.trim()
-                ? "bg-sky-700 border-sky-700 text-white"
+                ? "bg-primary border-primary text-white"
                 : "border-slate-300 text-muted-foreground"
             }`}
           >
@@ -282,7 +282,7 @@ export function PaymentSteps({
             value={referenceCode}
             disabled={disabled}
             onChange={(e) => onReferenceCodeChange(e.target.value)}
-            className="mt-2 text-sm rounded-lg border-slate-200 bg-white placeholder:text-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="mt-2 text-sm rounded-lg border-slate-200 bg-card placeholder:text-slate-400 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
       </div>

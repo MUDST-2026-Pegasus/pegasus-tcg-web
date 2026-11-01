@@ -110,7 +110,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
         <div className="space-y-2">
           <label htmlFor="shop-link" className="text-xs">ลิงก์หน้าร้าน</label>
           <div className="flex flex-wrap gap-2">
-            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-[#f4f6f7] px-3"><Input id="shop-link" readOnly value={url} className="min-w-0 border-0 bg-transparent px-0 text-xs shadow-none"/><Lock className="size-3 shrink-0 text-muted-foreground"/></div>
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-secondary px-3"><Input id="shop-link" readOnly value={url} className="min-w-0 border-0 bg-transparent px-0 text-xs shadow-none"/><Lock className="size-3 shrink-0 text-muted-foreground"/></div>
             <Button type="button" variant="outline" size="sm" onClick={async () => { try { await navigator.clipboard.writeText(url); toast.add({ type: 'success', title: 'คัดลอกลิงก์แล้ว' }); } catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'คัดลอกไม่สำเร็จ') }); } }}>คัดลอกลิงก์</Button>
           </div>
           <p className="text-[10px] text-muted-foreground">แก้ไขไม่ได้ เพราะผูกกับ username ของบัญชี</p>
@@ -120,7 +120,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
     </ShopCard>
     <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
       <p className="mb-4 flex items-center gap-2 text-xs text-muted-foreground"><Eye className="size-4"/>ตัวอย่างหน้าร้านที่ผู้ซื้อเห็น</p>
-      <div className="overflow-hidden rounded-xl border bg-white"><div className="h-[76px] bg-teal-600"/>
+      <div className="overflow-hidden rounded-xl border bg-card"><div className="h-[76px] bg-teal-600"/>
         <div className="space-y-3 px-[18px] pb-[18px]">
           <ShopAvatar name={name} url={avatar} small/>
           <h3 className="flex items-center gap-2 break-all text-base font-bold">{name}{verified && <BadgeCheck className="size-4 shrink-0 text-teal-600"/>}</h3>

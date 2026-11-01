@@ -9,7 +9,7 @@ export type CountdownTone = "normal" | "urgent" | "warning";
 
 /** สีตาม Figma Components › AUC / Countdown */
 const TONE: Record<CountdownTone, string> = {
-  normal: "bg-slate-100 text-foreground",
+  normal: "bg-secondary text-foreground",
   urgent: "bg-red-50 text-red-700",
   warning: "bg-amber-100 text-amber-800",
 };

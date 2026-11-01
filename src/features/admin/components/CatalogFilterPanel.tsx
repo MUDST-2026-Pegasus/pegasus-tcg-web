@@ -67,7 +67,7 @@ export function CatalogFilterPanel({
                     "flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-[9px] text-left transition-colors",
                     isActive
                       ? "bg-[#e8f1fc]"
-                      : "hover:bg-[#eef1f2] focus-visible:bg-[#eef1f2]",
+                      : "hover:bg-muted focus-visible:bg-muted",
                   )}
                 >
                   <span className="flex min-w-0 items-center gap-2">

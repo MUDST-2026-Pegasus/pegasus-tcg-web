@@ -41,7 +41,7 @@ export function MarketListingsPage() {
   if (productQuery.isError) {
     const notFound = productQuery.error instanceof ApiError && productQuery.error.status === 404;
     return (
-      <div role="alert" className="bg-[#f4f4f5] px-5 py-12 text-center">
+      <div role="alert" className="bg-secondary px-5 py-12 text-center">
         <h1 className="text-xl font-bold">{notFound ? "ไม่พบสินค้านี้" : "โหลดสินค้าไม่สำเร็จ"}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{notFound ? "กรุณาตรวจสอบลิงก์สินค้า" : "กรุณาลองใหม่อีกครั้ง"}</p>
         {notFound ? <Link className="mt-4 inline-block text-primary underline" to="/products">กลับหน้าสินค้า</Link> : <Button className="mt-4" onClick={() => void productQuery.refetch()}>ลองใหม่</Button>}
@@ -55,11 +55,11 @@ export function MarketListingsPage() {
 /** วางตรงกับ MarketListingsContent — breadcrumb, หัวข้อ, การ์ดสรุปสินค้า, รายการประกาศขาย */
 function MarketListingsSkeleton() {
   return (
-    <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า" className="min-h-full bg-[#f4f4f5]">
+    <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า" className="min-h-full bg-secondary">
       <div className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
         <Skeleton className="h-3.5 w-56 rounded-md" />
         <Skeleton className="h-9 w-64 rounded-lg" />
-        <div className="flex items-center gap-[18px] rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:p-[22px]">
+        <div className="flex items-center gap-[18px] rounded-2xl border border-border bg-card p-4 sm:p-[22px]">
           <Skeleton className="h-[140px] w-[130px] shrink-0 rounded-[10px]" />
           <div className="flex flex-1 flex-col gap-3">
             <Skeleton className="h-5 w-40 rounded-full" />
@@ -67,9 +67,9 @@ function MarketListingsSkeleton() {
             <Skeleton className="h-3.5 w-28 rounded-md" />
           </div>
         </div>
-        <div className="rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:p-[22px]">
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-[22px]">
           <Skeleton className="mb-3 h-7 w-48 rounded-md" />
-          <ListRowsSkeleton rows={6} className="divide-[#e3e7e8]" />
+          <ListRowsSkeleton rows={6} className="divide-border" />
         </div>
       </div>
     </div>
@@ -109,7 +109,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   }
 
   return (
-    <div className="min-h-full bg-[#f4f4f5] font-sans text-foreground">
+    <div className="min-h-full bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-primary">Home</Link>
@@ -121,9 +121,9 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
 
         <h1 className="text-[30px] font-bold leading-9 tracking-tight">Market listings</h1>
 
-        <section aria-label="Product summary" className="flex flex-col gap-5 rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
+        <section aria-label="Product summary" className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
           <div className="flex min-w-0 flex-col items-start gap-[18px] sm:flex-row sm:items-center">
-            <div className="flex h-[140px] w-[130px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#f3f4f5]">
+            <div className="flex h-[140px] w-[130px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-secondary">
               {imageUrl ? <img src={imageUrl} alt={image?.altText || product.name} className="h-full w-full object-contain" /> : <span className="px-3 text-center text-xs text-muted-foreground">ยังไม่มีรูปสินค้า</span>}
             </div>
             <div className="min-w-0 space-y-2">
@@ -143,15 +143,15 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
           </div>
         </section>
 
-        <section aria-labelledby="listing-heading" className="rounded-2xl border border-[#e3e7e8] bg-white p-4 sm:p-[22px]">
+        <section aria-labelledby="listing-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-[22px]">
           <div className="mb-2">
             <p className="text-xs font-semibold text-primary">{listingsQuery.isSuccess ? `${listings.length} available` : "— available"}</p>
             <h2 id="listing-heading" className="text-[22px] font-bold leading-7">Market listings</h2>
           </div>
-          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={6} className="divide-[#e3e7e8]" /></div> : listingsQuery.isError ? (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={6} className="divide-border" /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-10 text-center text-sm"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
           ) : listings.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีประกาศขายสินค้านี้</p> : (
-            <div className="divide-y divide-[#e3e7e8]">
+            <div className="divide-y divide-border">
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />

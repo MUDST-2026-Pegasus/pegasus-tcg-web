@@ -14,7 +14,7 @@ import {
 /** หน้าย่อยของสินค้า (เติมสต็อก / แก้ไข) เปิดด้วยรหัสสินค้าที่ไม่มีอยู่ */
 export function ProductNotFound() {
   return (
-    <Empty className="rounded-xl border border-border bg-white">
+    <Empty className="rounded-xl border border-border bg-card">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <SearchXIcon />
