@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { AdminUser, RoleCode, UserStatus } from "./users.types";
@@ -49,6 +49,21 @@ export function formatThaiDate(value: string): string {
   return `${format(date, "d MMM", { locale: th })} ${date.getFullYear() + 543}`;
 }
 
+/** "0812345678" → "081-234-5678" · รูปแบบอื่นคืนตามเดิม · ไม่มี → "—" */
+export function formatPhone(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 9) {
+    return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
+  }
+  return value;
+}
+
 export function formatLastLogin(value: string | null): string {
   return value ? formatThaiDate(value) : "ยังไม่เคยเข้าใช้";
 }
@@ -86,12 +101,17 @@ export function pageNumbers(page: number, totalPages: number): (number | null)[]
   return result;
 }
 
+/** 404 ของ `GET /admin/users/{id}` — ลิงก์เก่าหรือบัญชีถูกลบไปแล้ว */
+export function isUserNotFound(error: unknown): boolean {
+  return hasErrorCode(error, "USER_NOT_FOUND") || (isApiError(error) && error.status === 404);
+}
+
 export function userErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ACCESS_DENIED")) {
     return "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้";
   }
   if (hasErrorCode(error, "USER_NOT_FOUND")) {
-    return "ไม่พบบัญชีนี้แล้ว";
+    return "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ";
   }
   return getErrorMessage(error, fallback);
 }
