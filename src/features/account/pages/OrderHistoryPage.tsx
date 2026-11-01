@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
@@ -6,13 +6,11 @@ import {
   CircleCheck,
   Clock,
   Download,
-  Loader2,
   Package,
   RotateCcw,
   RotateCw,
   Truck,
   TriangleAlert,
-  X,
 } from "lucide-react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -20,6 +18,7 @@ import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
 import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
+import { OrderDetailsModal } from "@/features/account/components/OrderDetailsModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,13 +30,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
   AlertDialog,
   AlertDialogCancel,
   AlertDialogContent,
@@ -46,23 +38,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
-import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
-import { afterSalesApi } from "@/features/finance/after-sales.api";
 import { reviewKeys } from "@/features/finance/reviews.queries";
+import { afterSalesApi } from "@/features/finance/after-sales.api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
 import {
   canBuyerCancel,
-  confirmableSellerOrders,
   firstTracking,
   formatOrderDateTime,
   nextAutoCompleteAt,
@@ -70,8 +59,6 @@ import {
 } from "../order-stage";
 
 import {
-  formatOrderStatus,
-  getOrderStatusBadge,
   toSidebarUser,
 } from "../account.format";
 import {
@@ -79,6 +66,8 @@ import {
   matchesOrderFilter,
   type OrderFilterTab,
 } from "../order-filter";
+
+export { OrderDetailsModal };
 
 export function OrderHistoryPage() {
   const navigate = useNavigate();
@@ -96,6 +85,7 @@ export function OrderHistoryPage() {
   const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
   const refunds = useBuyerRefunds();
 
+  const scrollPosRef = useRef(0);
   const [selectedOrderForDetails, setSelectedOrderForDetails] =
     useState<OrderDetails | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -128,19 +118,25 @@ export function OrderHistoryPage() {
     const counts: Record<OrderFilterTab, number> = {
       ALL: orders.length,
       PENDING: 0,
+      PREPARING: 0,
       IN_TRANSIT: 0,
       COMPLETED: 0,
+      RETURN_REFUND: 0,
       CANCELLED: 0,
     };
     for (const order of orders) {
       const { stage } = orderStage(order);
       if (stage === "AWAITING_PAYMENT" || stage === "PAYMENT_REVIEW") {
         counts.PENDING++;
-      } else if (stage === "IN_TRANSIT" || stage === "PREPARING") {
+      } else if (stage === "PREPARING") {
+        counts.PREPARING++;
+      } else if (stage === "IN_TRANSIT") {
         counts.IN_TRANSIT++;
       } else if (stage === "COMPLETED") {
         counts.COMPLETED++;
-      } else if (stage === "CANCELLED" || stage === "REFUNDED" || stage === "RETURN_IN_PROGRESS") {
+      } else if (stage === "RETURN_IN_PROGRESS" || stage === "REFUNDED") {
+        counts.RETURN_REFUND++;
+      } else if (stage === "CANCELLED") {
         counts.CANCELLED++;
       }
     }
@@ -155,6 +151,33 @@ export function OrderHistoryPage() {
   const handleOpenCancelModal = (order: OrderDetails) => {
     setSelectedOrderToCancel(order);
     setIsCancelModalOpen(true);
+  };
+
+  const handleOpenDetails = (order: OrderDetails) => {
+    scrollPosRef.current =
+      window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    setSelectedOrderForDetails(order);
+  };
+
+  const handleCloseDetails = () => {
+    const savedY = scrollPosRef.current;
+    setSelectedOrderForDetails(null);
+    if (searchParams.has("orderId")) {
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.delete("orderId");
+          return next;
+        },
+        { replace: true, preventScrollReset: true },
+      );
+    }
+    const restoreScroll = () => {
+      window.scrollTo({ top: savedY, behavior: "instant" });
+    };
+    requestAnimationFrame(restoreScroll);
+    setTimeout(restoreScroll, 0);
+    setTimeout(restoreScroll, 50);
   };
 
   const handleConfirmCancelOrder = async () => {
@@ -228,11 +251,11 @@ export function OrderHistoryPage() {
           <div
             role="tablist"
             aria-label="Order status filter"
-            className="flex flex-wrap items-center gap-2 sm:gap-2.5"
+            className="flex flex-wrap items-center gap-2 pb-1"
           >
             {ORDER_FILTER_TABS.map((tab) => {
               const isActive = activeFilter === tab.key;
-              const count = tabCounts[tab.key];
+              const count = tabCounts[tab.key] ?? 0;
               return (
                 <button
                   key={tab.key}
@@ -241,7 +264,7 @@ export function OrderHistoryPage() {
                   aria-selected={isActive}
                   onClick={() => setActiveFilter(tab.key)}
                   className={cn(
-                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer select-none",
+                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer select-none shrink-0 whitespace-nowrap",
                     isActive
                       ? "bg-[#006699] text-white shadow-sm font-semibold"
                       : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
@@ -309,7 +332,7 @@ export function OrderHistoryPage() {
               <OrderCardItem
                 key={order.id}
                 order={order}
-                onViewDetails={() => setSelectedOrderForDetails(order)}
+                onViewDetails={() => handleOpenDetails(order)}
                 onReorder={() => setReorderOrderId(order.id)}
                 onPayNow={() => navigate(`/payment?orderId=${order.id}`)}
                 onCancelOrder={() => handleOpenCancelModal(order)}
@@ -341,13 +364,7 @@ export function OrderHistoryPage() {
         <OrderDetailsModal
           order={detailOrder}
           open={!!detailOrder}
-          onClose={() => {
-            setSelectedOrderForDetails(null);
-            setSearchParams((current) => {
-              current.delete("orderId");
-              return current;
-            }, { replace: true });
-          }}
+          onClose={handleCloseDetails}
           onReorder={(order) => {
             setReorderOrderId(order.id);
           }}
@@ -377,6 +394,7 @@ export function OrderHistoryPage() {
           <AlertDialogFooter className="border-t pt-4">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
+              type="button"
               onClick={() => {
                 const target = confirmTarget;
                 setConfirmTarget(null);
@@ -515,6 +533,7 @@ function OrderCardItem({
 
           {otherItems.length > 0 && (
             <button
+              type="button"
               onClick={() => setExpanded(!expanded)}
               className="mt-2 flex items-center gap-1 text-sm text-primary font-medium hover:underline cursor-pointer"
             >
@@ -576,12 +595,13 @@ function OrderCardItem({
       <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
           {stage === "COMPLETED" && (
-            <Button variant="link" size="sm" className="px-0">
+            <Button type="button" variant="link" size="sm" className="px-0">
               Download Invoice <Download data-icon="inline-end" />
             </Button>
           )}
           {canCancel && (
             <Button
+              type="button"
               variant="destructive"
               size="xs"
               onClick={onCancelOrder}
@@ -593,11 +613,12 @@ function OrderCardItem({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
+          <Button type="button" variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
             View Details
           </Button>
           {stage === "COMPLETED" && (
             <Button
+              type="button"
               size="sm"
               onClick={onReorder}
               className="bg-[#006699] hover:bg-[#005580] text-white px-4 py-2 rounded-full font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
@@ -607,17 +628,17 @@ function OrderCardItem({
             </Button>
           )}
           {stage === "AWAITING_PAYMENT" && (
-            <Button size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
+            <Button type="button" size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
               Pay Now
             </Button>
           )}
           {stage === "IN_TRANSIT" && (
-            <Button size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
+            <Button type="button" size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
               {isConfirming ? "Confirming..." : "Confirm Received"}
             </Button>
           )}
           {canReview && (
-            <Button size="sm" onClick={onViewDetails} className="rounded-full">
+            <Button type="button" size="sm" onClick={onViewDetails} className="rounded-full">
               Write a Review
             </Button>
           )}
@@ -706,240 +727,4 @@ function StageHint({
         </p>
       );
   }
-}
-
-function OrderDetailsModal({
-  order,
-  open,
-  onClose,
-  onReorder,
-  onConfirmReceived,
-  isConfirming = false,
-}: {
-  order: OrderDetails;
-  open: boolean;
-  onClose: () => void;
-  onReorder?: (order: OrderDetails) => void;
-  onConfirmReceived?: () => void;
-  isConfirming?: boolean;
-}) {
-  const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
-
-  // Parse address snapshot if JSON
-  let addressText = "Standard Shipping Address";
-  if (order.shippingAddressSnapshot) {
-    try {
-      const snap = JSON.parse(order.shippingAddressSnapshot);
-      addressText = [
-        snap.recipientName && `${snap.recipientName} (${snap.phone || ""})`,
-        snap.line1,
-        snap.subdistrict,
-        snap.district,
-        snap.province,
-        snap.postalCode,
-      ]
-        .filter(Boolean)
-        .join(", ");
-    } catch {
-      addressText = order.shippingAddressSnapshot;
-    }
-  }
-
-  const sellerOrders = order.sellerOrders ?? [];
-  const canConfirmReceived = confirmableSellerOrders(order).length > 0;
-  const { stage, label: stageLabel, badgeClassName } = orderStage(order);
-
-  return (
-    <>
-      <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-        <DialogContent
-          showCloseButton={false}
-          className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-white shadow-xl"
-        >
-          {/* Sticky Header with Title, Formatted Status Badge, and Sticky "✕" Close Button */}
-          <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-white px-6 py-4 shrink-0">
-            <DialogHeader className="gap-0.5">
-              <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
-                Order Details
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                Order #{order.orderNumber}
-              </p>
-            </DialogHeader>
-
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="secondary"
-                className={cn("text-sm font-semibold shrink-0", badgeClassName)}
-              >
-                {stageLabel}
-              </Badge>
-              <DialogClose
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
-                    aria-label="Close"
-                  />
-                }
-              >
-                <X className="size-4" />
-              </DialogClose>
-            </div>
-          </div>
-
-          {/* Scrollable Modal Content */}
-          <div className="overflow-y-auto px-6 py-5 flex flex-col gap-6 flex-1">
-            {/* Shipping Address */}
-            <div className="bg-muted/40 p-4 rounded-xl border text-sm">
-              <p className="font-semibold text-foreground mb-1">Shipping Destination</p>
-              <p className="text-muted-foreground leading-relaxed">{addressText}</p>
-            </div>
-
-            {/* Sub-Orders by Seller */}
-            <div className="flex flex-col gap-6">
-              <h3 className="font-bold text-base text-foreground">Items by Seller</h3>
-              {sellerOrders.map((so) => (
-                <div key={so.id} className="border rounded-xl p-4 flex flex-col gap-3">
-                  <div className="flex justify-between items-center text-sm border-b pb-2">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-foreground">
-                        Seller: {so.sellerName || "Pegasus Seller"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Order #{so.sellerOrderNumber}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <Badge
-                        variant={getOrderStatusBadge(so.status).variant}
-                        className={cn("text-xs font-medium", getOrderStatusBadge(so.status).className)}
-                      >
-                        Package Status: {formatOrderStatus(so.status)}
-                      </Badge>
-                      {so.autoCompleteAt && ["SHIPPED", "DELIVERED"].includes(so.status) && (
-                        <p className="mt-1 text-[11px] text-muted-foreground">
-                          Auto-confirms {formatOrderDateTime(so.autoCompleteAt)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Items */}
-                  <div className="flex flex-col gap-3">
-                    {(so.items ?? []).map((item) => (
-                      <div key={item.id} className="flex items-center gap-3">
-                        <div className="size-14 rounded border bg-[#f4f4f5] overflow-hidden shrink-0 flex items-center justify-center p-1">
-                          {item.imageUrl ? (
-                            <img
-                              src={item.imageUrl}
-                              alt={item.productName}
-                              className="w-full h-full object-contain"
-                            />
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground">Art</span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {item.productName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {[item.variantLabel, item.condition]
-                              .filter(Boolean)
-                              .join(" • ")}{" "}
-                            • Qty: {item.quantity}
-                          </p>
-                        </div>
-                        <div className="text-sm font-bold text-foreground">
-                          {formatPrice(item.lineTotal)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {so.cancelReason && (
-                    <p className="text-xs text-muted-foreground">Cancel reason: {so.cancelReason}</p>
-                  )}
-
-                  {/* Shipments info if any */}
-                  {so.shipments && so.shipments.length > 0 && (
-                    <div className="bg-muted/50 p-2.5 rounded-lg text-xs flex flex-col gap-1 mt-1">
-                      {so.shipments.map((ship) => (
-                        <div key={ship.id} className="flex justify-between">
-                          <span className="font-medium text-foreground">
-                            Carrier: {ship.carrierName || ship.carrierCode}
-                          </span>
-                          <span className="text-muted-foreground">
-                            Tracking: {ship.trackingNumber || "Pending"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <BuyerAfterSales order={so} />
-                </div>
-              ))}
-            </div>
-
-            <Separator />
-
-            {/* Pricing Summary */}
-            <div className="flex flex-col gap-2 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <span>Items Subtotal</span>
-                <span className="font-medium text-foreground">
-                  {formatPrice(order.itemsSubtotal)}
-                </span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Shipping Total</span>
-                <span className="font-medium text-foreground">
-                  {formatPrice(order.shippingTotal)}
-                </span>
-              </div>
-              {order.discountTotal > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Discount</span>
-                  <span>-{formatPrice(order.discountTotal)}</span>
-                </div>
-              )}
-              <Separator className="my-1" />
-              <div className="flex justify-between text-base font-bold text-foreground">
-                <span>Grand Total</span>
-                <span className="text-lg text-primary">
-                  {formatPrice(order.grandTotal)}
-                </span>
-              </div>
-            </div>
-
-            {stage === "COMPLETED" && (
-              <div className="flex justify-end pt-3 border-t">
-                <Button
-                  type="button"
-                  onClick={() => onReorder?.(order)}
-                  className="bg-[#006699] hover:bg-[#005580] text-white rounded-full px-4 py-2 font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
-                >
-                  <RotateCw className="size-3.5" />
-                  Reorder
-                </Button>
-              </div>
-            )}
-
-            {canConfirmReceived && (
-              <div className="flex justify-end pt-2 border-t">
-                <Button onClick={onConfirmReceived} disabled={isConfirming}>
-                  {isConfirming ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
-                  {isConfirming ? "Confirming..." : "Confirm receipt"}
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-    </>
-  );
 }

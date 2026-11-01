@@ -51,12 +51,12 @@ export function orderStage(order: OrderDetails): OrderStageInfo {
     if (order.status === "PENDING_PAYMENT") {
       return order.paymentUnderReview ? "PAYMENT_REVIEW" : "AWAITING_PAYMENT";
     }
-    if (order.status === "CANCELLED") return "CANCELLED";
+    if (order.status === "CANCELLED" || order.status === "CANCELED") return "CANCELLED";
     if (order.status === "REFUNDED") return "REFUNDED";
-    if (has(children, RETURNING)) return "RETURN_IN_PROGRESS";
-    if (has(children, IN_TRANSIT)) return "IN_TRANSIT";
-    if (has(children, PREPARING)) return "PREPARING";
-    if (order.status === "COMPLETED" || order.status === "PARTIALLY_COMPLETED" || has(children, ["COMPLETED"])) {
+    if (order.status === "RETURN_REQUESTED" || order.status === "RETURNED" || has(children, RETURNING)) return "RETURN_IN_PROGRESS";
+    if (order.status === "SHIPPED" || has(children, IN_TRANSIT)) return "IN_TRANSIT";
+    if (order.status === "PREPARING" || order.status === "PROCESSING" || has(children, PREPARING)) return "PREPARING";
+    if (order.status === "COMPLETED" || order.status === "DELIVERED" || order.status === "PARTIALLY_COMPLETED" || has(children, ["COMPLETED"])) {
       return "COMPLETED";
     }
     if (has(children, ["REFUNDED"])) return "REFUNDED";

@@ -351,27 +351,36 @@ describe("OrderHistoryPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<OrderHistoryPage />);
 
-    // Verify all 5 filter tabs are rendered
-    const allTab = screen.getByRole("tab", { name: /ทั้งหมด \(All\)/i });
-    const pendingTab = screen.getByRole("tab", { name: /รอชำระเงิน \(Pending\)/i });
-    const inTransitTab = screen.getByRole("tab", { name: /กำลังจัดส่ง \(In Transit\)/i });
-    const completedTab = screen.getByRole("tab", { name: /สำเร็จแล้ว \(Completed\)/i });
-    const cancelledTab = screen.getByRole("tab", { name: /ยกเลิกแล้ว \(Cancelled\)/i });
+    // Verify all 7 filter tabs are rendered
+    const allTab = screen.getByRole("tab", { name: /ทั้งหมด/i });
+    const pendingTab = screen.getByRole("tab", { name: /รอชำระเงิน/i });
+    const preparingTab = screen.getByRole("tab", { name: /กำลังเตรียมพัสดุ/i });
+    const inTransitTab = screen.getByRole("tab", { name: /กำลังจัดส่ง/i });
+    const completedTab = screen.getByRole("tab", { name: /สำเร็จแล้ว/i });
+    const returnRefundTab = screen.getByRole("tab", { name: /ขอคืนเงิน\/คืนสินค้า/i });
+    const cancelledTab = screen.getByRole("tab", { name: /ยกเลิกแล้ว/i });
 
     expect(allTab).toBeInTheDocument();
     expect(pendingTab).toBeInTheDocument();
+    expect(preparingTab).toBeInTheDocument();
     expect(inTransitTab).toBeInTheDocument();
     expect(completedTab).toBeInTheDocument();
+    expect(returnRefundTab).toBeInTheDocument();
     expect(cancelledTab).toBeInTheDocument();
 
     // Both orders visible initially
     expect(screen.getByText("ORD-101")).toBeInTheDocument();
     expect(screen.getByText("ORD-102")).toBeInTheDocument();
 
-    // Filter to Pending
+    // Filter to Pending (ORD-101 is pending payment)
     await user.click(pendingTab);
     expect(screen.getByText("ORD-101")).toBeInTheDocument();
     expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
+
+    // Filter to Preparing (ORD-102 is paid/preparing)
+    await user.click(preparingTab);
+    expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
 
     // Filter to Cancelled (0 orders)
     await user.click(cancelledTab);
@@ -383,6 +392,29 @@ describe("OrderHistoryPage", () => {
     await user.click(screen.getByRole("button", { name: /view all orders/i }));
     expect(screen.getByText("ORD-101")).toBeInTheDocument();
     expect(screen.getByText("ORD-102")).toBeInTheDocument();
+  });
+
+  it("preserves scroll position when opening and closing OrderDetailsModal", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    Object.defineProperty(window, "scrollY", { value: 750, writable: true, configurable: true });
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    const viewDetailsButtons = screen.getAllByRole("button", { name: /view details/i });
+    await userEvent.click(viewDetailsButtons[0]);
+
+    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+
+    const closeBtn = screen.getByRole("button", { name: /close/i });
+    await userEvent.click(closeBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("heading", { name: /order details/i })).not.toBeInTheDocument();
+    });
+
+    expect(scrollToSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ top: 750, behavior: "instant" })
+    );
   });
 
   it("renders Reorder button ONLY on completed orders and directly opens ReorderPreviewModal", async () => {

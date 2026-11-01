@@ -54,20 +54,24 @@ function createMockOrder(status: string, sellerStatus?: string, paymentUnderRevi
 }
 
 describe("order-filter", () => {
-  it("provides exactly the 5 specified tabs in order", () => {
-    expect(ORDER_FILTER_TABS).toHaveLength(5);
+  it("provides exactly the 7 specified tabs in order", () => {
+    expect(ORDER_FILTER_TABS).toHaveLength(7);
     expect(ORDER_FILTER_TABS.map((t) => t.key)).toEqual([
       "ALL",
       "PENDING",
+      "PREPARING",
       "IN_TRANSIT",
       "COMPLETED",
+      "RETURN_REFUND",
       "CANCELLED",
     ]);
     expect(ORDER_FILTER_TABS.map((t) => t.label)).toEqual([
       "ทั้งหมด (All)",
-      "รอชำระเงิน (Pending)",
-      "กำลังจัดส่ง (In Transit)",
-      "สำเร็จแล้ว (Completed)",
+      "รอชำระเงิน (Pending / To Pay)",
+      "กำลังเตรียมพัสดุ (Preparing / Prepared)",
+      "กำลังจัดส่ง (In Transit / Shipped)",
+      "สำเร็จแล้ว (Completed / Delivered)",
+      "ขอคืนเงิน/คืนสินค้า (Return Requested / Refunded)",
       "ยกเลิกแล้ว (Cancelled)",
     ]);
   });
@@ -87,13 +91,22 @@ describe("order-filter", () => {
     expect(matchesOrderFilter(completed, "PENDING")).toBe(false);
   });
 
-  it("correctly filters IN_TRANSIT and PREPARING orders", () => {
-    const shipped = createMockOrder("PAID", "SHIPPED");
+  it("correctly separates PREPARING orders from IN_TRANSIT", () => {
     const preparing = createMockOrder("PAID", "PREPARING");
+    const shipped = createMockOrder("PAID", "SHIPPED");
+
+    expect(matchesOrderFilter(preparing, "PREPARING")).toBe(true);
+    expect(matchesOrderFilter(preparing, "IN_TRANSIT")).toBe(false);
+
+    expect(matchesOrderFilter(shipped, "PREPARING")).toBe(false);
+    expect(matchesOrderFilter(shipped, "IN_TRANSIT")).toBe(true);
+  });
+
+  it("correctly filters IN_TRANSIT orders", () => {
+    const shipped = createMockOrder("PAID", "SHIPPED");
     const pending = createMockOrder("PENDING_PAYMENT");
 
     expect(matchesOrderFilter(shipped, "IN_TRANSIT")).toBe(true);
-    expect(matchesOrderFilter(preparing, "IN_TRANSIT")).toBe(true);
     expect(matchesOrderFilter(pending, "IN_TRANSIT")).toBe(false);
   });
 
@@ -105,15 +118,18 @@ describe("order-filter", () => {
     expect(matchesOrderFilter(pending, "COMPLETED")).toBe(false);
   });
 
-  it("correctly filters CANCELLED orders including refunds and returns", () => {
-    const cancelled = createMockOrder("CANCELLED");
-    const refunded = createMockOrder("REFUNDED");
+  it("correctly separates RETURN_REFUND from CANCELLED", () => {
     const returning = createMockOrder("PAID", "RETURN_REQUESTED");
-    const completed = createMockOrder("COMPLETED");
+    const refunded = createMockOrder("REFUNDED");
+    const cancelled = createMockOrder("CANCELLED");
+
+    expect(matchesOrderFilter(returning, "RETURN_REFUND")).toBe(true);
+    expect(matchesOrderFilter(returning, "CANCELLED")).toBe(false);
+
+    expect(matchesOrderFilter(refunded, "RETURN_REFUND")).toBe(true);
+    expect(matchesOrderFilter(refunded, "CANCELLED")).toBe(false);
 
     expect(matchesOrderFilter(cancelled, "CANCELLED")).toBe(true);
-    expect(matchesOrderFilter(refunded, "CANCELLED")).toBe(true);
-    expect(matchesOrderFilter(returning, "CANCELLED")).toBe(true);
-    expect(matchesOrderFilter(completed, "CANCELLED")).toBe(false);
+    expect(matchesOrderFilter(cancelled, "RETURN_REFUND")).toBe(false);
   });
 });
