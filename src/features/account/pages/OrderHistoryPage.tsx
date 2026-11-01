@@ -9,6 +9,7 @@ import {
   Loader2,
   Package,
   RotateCcw,
+  RotateCw,
   Truck,
   TriangleAlert,
   X,
@@ -18,6 +19,7 @@ import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
+import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +74,11 @@ import {
   getOrderStatusBadge,
   toSidebarUser,
 } from "../account.format";
+import {
+  ORDER_FILTER_TABS,
+  matchesOrderFilter,
+  type OrderFilterTab,
+} from "../order-filter";
 
 export function OrderHistoryPage() {
   const navigate = useNavigate();
@@ -97,6 +104,9 @@ export function OrderHistoryPage() {
   const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const [confirmingOrderId, setConfirmingOrderId] = useState<number | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<OrderDetails | null>(null);
+  const [activeFilter, setActiveFilter] = useState<OrderFilterTab>("ALL");
+  const [selectedOrderForReorder, setSelectedOrderForReorder] =
+    useState<OrderDetails | null>(null);
   const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
 
   const sidebarUser = toSidebarUser(user);
@@ -114,6 +124,34 @@ export function OrderHistoryPage() {
     }
     return [];
   }, [ordersData]);
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<OrderFilterTab, number> = {
+      ALL: orders.length,
+      PENDING: 0,
+      IN_TRANSIT: 0,
+      COMPLETED: 0,
+      CANCELLED: 0,
+    };
+    for (const order of orders) {
+      const { stage } = orderStage(order);
+      if (stage === "AWAITING_PAYMENT" || stage === "PAYMENT_REVIEW") {
+        counts.PENDING++;
+      } else if (stage === "IN_TRANSIT" || stage === "PREPARING") {
+        counts.IN_TRANSIT++;
+      } else if (stage === "COMPLETED") {
+        counts.COMPLETED++;
+      } else if (stage === "CANCELLED" || stage === "REFUNDED" || stage === "RETURN_IN_PROGRESS") {
+        counts.CANCELLED++;
+      }
+    }
+    return counts;
+  }, [orders]);
+
+  const filteredOrders = useMemo(() => {
+    if (activeFilter === "ALL") return orders;
+    return orders.filter((order) => matchesOrderFilter(order, activeFilter));
+  }, [orders, activeFilter]);
 
   const handleOpenCancelModal = (order: OrderDetails) => {
     setSelectedOrderToCancel(order);
@@ -187,6 +225,45 @@ export function OrderHistoryPage() {
             </p>
           </div>
 
+          {/* Status Filter Tab Bar */}
+          <div
+            role="tablist"
+            aria-label="Order status filter"
+            className="flex flex-wrap items-center gap-2 sm:gap-2.5"
+          >
+            {ORDER_FILTER_TABS.map((tab) => {
+              const isActive = activeFilter === tab.key;
+              const count = tabCounts[tab.key];
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  type="button"
+                  aria-selected={isActive}
+                  onClick={() => setActiveFilter(tab.key)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors cursor-pointer select-none",
+                    isActive
+                      ? "bg-[#006699] text-white shadow-sm font-semibold"
+                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={cn(
+                      "min-w-5 rounded-full px-2 py-0.5 text-xs font-semibold text-center leading-none",
+                      isActive
+                        ? "bg-[#004e75] text-white"
+                        : "bg-slate-100 text-slate-600"
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {isLoading ? (
             <div role="status" aria-busy="true" aria-label="Loading orders">
               <ProductRowsSkeleton />
@@ -213,12 +290,28 @@ export function OrderHistoryPage() {
               </div>
               <Button onClick={() => navigate("/products")}>Start Shopping</Button>
             </div>
+          ) : filteredOrders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border gap-3 text-center p-6">
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-foreground">No orders found</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  There are no orders matching the selected status.
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setActiveFilter("ALL")}>
+                View all orders
+              </Button>
+            </div>
           ) : (
-            orders.map((order) => (
+            filteredOrders.map((order) => (
               <OrderCardItem
                 key={order.id}
                 order={order}
                 onViewDetails={() => setSelectedOrderForDetails(order)}
+                onReorder={() => setSelectedOrderForReorder(order)}
                 onPayNow={() => navigate(`/payment?orderId=${order.id}`)}
                 onCancelOrder={() => handleOpenCancelModal(order)}
                 onConfirmReceived={() => setConfirmTarget(order)}
@@ -256,10 +349,24 @@ export function OrderHistoryPage() {
               return current;
             }, { replace: true });
           }}
+          onReorder={(order) => {
+            setSelectedOrderForReorder(order);
+          }}
           onConfirmReceived={() => setConfirmTarget(detailOrder)}
           isConfirming={confirmingOrderId === detailOrder.id}
         />
       )}
+
+      {/* Reorder Preview Modal */}
+      <ReorderPreviewModal
+        open={!!selectedOrderForReorder}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedOrderForReorder(null);
+          }
+        }}
+        order={selectedOrderForReorder}
+      />
 
       <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
         <AlertDialogContent>
@@ -290,6 +397,7 @@ export function OrderHistoryPage() {
 function OrderCardItem({
   order,
   onViewDetails,
+  onReorder,
   onPayNow,
   onCancelOrder,
   onConfirmReceived,
@@ -298,6 +406,7 @@ function OrderCardItem({
 }: {
   order: OrderDetails;
   onViewDetails: () => void;
+  onReorder: () => void;
   onPayNow: () => void;
   onCancelOrder: () => void;
   onConfirmReceived: () => void;
@@ -486,21 +595,31 @@ function OrderCardItem({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" onClick={onViewDetails}>
+          <Button variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
             View Details
           </Button>
+          {stage === "COMPLETED" && (
+            <Button
+              size="sm"
+              onClick={onReorder}
+              className="bg-[#006699] hover:bg-[#005580] text-white px-4 py-2 rounded-full font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <RotateCw className="size-3.5" />
+              Reorder
+            </Button>
+          )}
           {stage === "AWAITING_PAYMENT" && (
-            <Button size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white">
+            <Button size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
               Pay Now
             </Button>
           )}
           {stage === "IN_TRANSIT" && (
-            <Button size="sm" onClick={onConfirmReceived} disabled={isConfirming}>
+            <Button size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
               {isConfirming ? "Confirming..." : "Confirm Received"}
             </Button>
           )}
           {canReview && (
-            <Button size="sm" onClick={onViewDetails}>
+            <Button size="sm" onClick={onViewDetails} className="rounded-full">
               Write a Review
             </Button>
           )}
@@ -595,12 +714,14 @@ function OrderDetailsModal({
   order,
   open,
   onClose,
+  onReorder,
   onConfirmReceived,
   isConfirming = false,
 }: {
   order: OrderDetails;
   open: boolean;
   onClose: () => void;
+  onReorder?: (order: OrderDetails) => void;
   onConfirmReceived?: () => void;
   isConfirming?: boolean;
 }) {
@@ -628,7 +749,7 @@ function OrderDetailsModal({
 
   const sellerOrders = order.sellerOrders ?? [];
   const canConfirmReceived = confirmableSellerOrders(order).length > 0;
-  const { label: stageLabel, badgeClassName } = orderStage(order);
+  const { stage, label: stageLabel, badgeClassName } = orderStage(order);
 
   return (
     <>
@@ -795,6 +916,19 @@ function OrderDetailsModal({
                 </span>
               </div>
             </div>
+
+            {stage === "COMPLETED" && (
+              <div className="flex justify-end pt-3 border-t">
+                <Button
+                  type="button"
+                  onClick={() => onReorder?.(order)}
+                  className="bg-[#006699] hover:bg-[#005580] text-white rounded-full px-4 py-2 font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <RotateCw className="size-3.5" />
+                  Reorder
+                </Button>
+              </div>
+            )}
 
             {canConfirmReceived && (
               <div className="flex justify-end pt-2 border-t">
