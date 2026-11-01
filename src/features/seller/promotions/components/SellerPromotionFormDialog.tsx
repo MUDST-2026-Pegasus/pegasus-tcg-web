@@ -1,19 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch, type Control, type FieldErrors } from "react-hook-form";
-import { LogOut, Pencil } from "lucide-react";
+import { Lock, LogOut, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "@/components/ui/toast";
-import {
-  FormField,
-  LockedSuffix,
-  NumberInput,
-  ToggleRow,
-} from "@/features/admin/components/PromotionFormControls";
+import { FormField, ToggleRow } from "@/features/admin/components/PromotionFormControls";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
@@ -342,6 +337,38 @@ function Row({ children }: { children: ReactNode }) {
   return <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">{children}</div>;
 }
 
+/**
+ * ช่องกรอกแบบ Figma PRM-S2 / M2: กรอบ 8px ขาวเส้นเทา ตัวอักษร 13px · ช่องที่ล็อกเป็นพื้นเทา ตัวหนังสือจาง และมีแม่กุญแจ
+ * ขอบแดงตอน error มาจาก `aria-invalid` ของ `InputGroup` เอง
+ */
+function FieldBox({
+  prefix,
+  suffix,
+  locked,
+  ...input
+}: ComponentProps<typeof InputGroupInput> & { prefix?: string; suffix?: string; locked?: boolean }) {
+  return (
+    <InputGroup className="h-9 rounded-lg border-border bg-card has-[input:disabled]:bg-muted">
+      {prefix ? (
+        <InputGroupAddon>
+          <InputGroupText className="text-[13px] text-muted-foreground/70">{prefix}</InputGroupText>
+        </InputGroupAddon>
+      ) : null}
+      <InputGroupInput
+        {...input}
+        disabled={locked || input.disabled}
+        className="px-3 text-[13px] md:text-[13px] disabled:text-muted-foreground/70 disabled:opacity-100"
+      />
+      {suffix || locked ? (
+        <InputGroupAddon align="inline-end" className="gap-1.5">
+          {suffix ? <InputGroupText className="text-[13px] text-muted-foreground/70">{suffix}</InputGroupText> : null}
+          {locked ? <Lock aria-label="ล็อก" className="size-3.5 text-muted-foreground/70" /> : null}
+        </InputGroupAddon>
+      ) : null}
+    </InputGroup>
+  );
+}
+
 function TextField({
   control,
   errors,
@@ -357,16 +384,14 @@ function TextField({
         control={control}
         name={name}
         render={({ field }) => (
-          <InputGroup>
-            <InputGroupInput
-              ref={field.ref}
-              aria-label={label}
-              aria-invalid={!!errors[name] || undefined}
-              value={field.value ?? ""}
-              onBlur={field.onBlur}
-              onChange={(event) => field.onChange(upper ? event.target.value.toUpperCase() : event.target.value)}
-            />
-          </InputGroup>
+          <FieldBox
+            ref={field.ref}
+            aria-label={label}
+            aria-invalid={!!errors[name] || undefined}
+            value={field.value ?? ""}
+            onBlur={field.onBlur}
+            onChange={(event) => field.onChange(upper ? event.target.value.toUpperCase() : event.target.value)}
+          />
         )}
       />
     </FormField>
@@ -376,10 +401,7 @@ function TextField({
 function LockedText({ label, value }: { label: string; value: string }) {
   return (
     <FormField field={label} label={label}>
-      <InputGroup data-disabled>
-        <InputGroupInput aria-label={label} value={value} disabled readOnly />
-        <LockedSuffix locked />
-      </InputGroup>
+      <FieldBox aria-label={label} value={value} readOnly locked />
     </FormField>
   );
 }
@@ -400,15 +422,20 @@ function NumberField({
         control={control}
         name={name}
         render={({ field }) => (
-          <NumberInput
+          <FieldBox
+            ref={field.ref}
             id={`seller-promotion-${name}`}
-            label={label}
-            value={field.value}
-            onChange={field.onChange}
+            aria-label={label}
+            aria-invalid={!!errors[name] || undefined}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            value={field.value ?? ""}
+            onBlur={field.onBlur}
+            onChange={(event) => field.onChange(event.target.value === "" ? null : Number(event.target.value))}
             prefix={unit === "฿" ? unit : undefined}
             suffix={unit === "฿" ? undefined : unit}
             locked={locked}
-            invalid={!!errors[name]}
           />
         )}
       />
@@ -430,20 +457,18 @@ function DateField({
         control={control}
         name={name}
         render={({ field }) => (
-          <InputGroup>
-            <InputGroupInput
-              ref={field.ref}
-              aria-label={label}
-              aria-invalid={!!errors[name] || undefined}
-              type="datetime-local"
-              min={min}
-              value={toLocal(field.value)}
-              onBlur={field.onBlur}
-              onChange={(event) =>
-                field.onChange(event.target.value ? new Date(event.target.value).toISOString() : "")
-              }
-            />
-          </InputGroup>
+          <FieldBox
+            ref={field.ref}
+            aria-label={label}
+            aria-invalid={!!errors[name] || undefined}
+            type="datetime-local"
+            min={min}
+            value={toLocal(field.value)}
+            onBlur={field.onBlur}
+            onChange={(event) =>
+              field.onChange(event.target.value ? new Date(event.target.value).toISOString() : "")
+            }
+          />
         )}
       />
     </FormField>
@@ -474,7 +499,6 @@ function Segmented<K extends "discountType" | "visibility">({
         render={({ field }) => (
           <ToggleGroup
             aria-label={label}
-            variant="outline"
             spacing={0}
             disabled={disabled}
             value={[field.value as string]}
@@ -484,13 +508,13 @@ function Segmented<K extends "discountType" | "visibility">({
               field.onChange(value);
               onPick?.(value);
             }}
-            className="grid w-full grid-cols-2"
+            className="grid w-full grid-cols-2 overflow-hidden rounded-lg border border-border bg-card"
           >
             {options.map(([value, text]) => (
               <ToggleGroupItem
                 key={value as string}
                 value={value as string}
-                className="w-full text-xs aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90"
+                className="h-8.5 w-full rounded-none! text-[13px] font-medium aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90"
               >
                 {text}
               </ToggleGroupItem>
