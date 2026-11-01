@@ -248,7 +248,12 @@ export function sampleCalculation(input: DiscountFields) {
 }
 
 /** "ธนภัทร ส." — ชื่อแรกเต็ม ที่เหลือเหลือตัวแรก ไม่มีชื่อแสดงใช้ username */
-export function maskBuyer(buyer: PromotionParty): string {
+export function maskBuyer(buyer: PromotionParty | string): string {
+  if (typeof buyer === "string") {
+    const parts = buyer.trim().split(/\s+/);
+    if (parts.length > 1) return `${parts[0]} ${parts.slice(1).map((part) => `${part[0]}.`).join(" ")}`;
+    return buyer.length > 2 ? `${buyer[0]}***${buyer.at(-1)}` : `${buyer[0] ?? ""}*`;
+  }
   const name = buyer.displayName?.trim();
   if (!name) return buyer.username;
   return name
