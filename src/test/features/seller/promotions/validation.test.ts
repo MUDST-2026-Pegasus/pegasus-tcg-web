@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getSellerPromotionErrors } from "@/features/seller/promotions/validation";
-import type { SellerPromotionInput } from "@/features/seller/promotions/types";
+import { getSellerPromotionErrors } from "@/features/seller/promotions/promotions.schema";
+import type { SellerPromotionInput } from "@/features/seller/promotions/promotions.types";
 
 const valid: SellerPromotionInput = {
   code: "SHOPTEST", name: "ทดสอบ", description: "", discountType: "FIXED",
   discountValue: 100, maxDiscount: null, minSpend: 500, visibility: "PUBLIC",
   newBuyerOnly: false, usageLimitTotal: 20, usageLimitPerUser: 1,
-  claimable: true, claimLimit: 30, featuredOnHome: false,
+  claimable: true, claimLimit: 30,
   startsAt: new Date(Date.now() + 86_400_000).toISOString(), endsAt: new Date(Date.now() + 30 * 86_400_000).toISOString(),
 };
 

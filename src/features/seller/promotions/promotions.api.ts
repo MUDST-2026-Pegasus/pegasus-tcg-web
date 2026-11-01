@@ -1,8 +1,8 @@
 import { api, type PageResponse } from "@/lib/api";
-import type { SellerPromotion, SellerPromotionInput, SellerPromotionPage, Summary, Redemption, Status } from "./types";
+import type { SellerPromotion, SellerPromotionInput, SellerPromotionPage, Summary, Redemption, PromotionStatus } from "./promotions.types";
 const root = "/sellers/me/promotions";
 export const sellerPromotionApi = {
-  list: (status?: Status, page = 0) => api.get<SellerPromotionPage>(root, { query: { status, page, size: 20 } }),
+  list: (status?: PromotionStatus, page = 0) => api.get<SellerPromotionPage>(root, { query: { status, page, size: 20 } }),
   summary: () => api.get<Summary>(`${root}/summary`),
   create: (input: SellerPromotionInput) => api.post<SellerPromotion>(root, input),
   update: (id: number, input: SellerPromotionInput) => api.put<SellerPromotion>(`${root}/${id}`, input),

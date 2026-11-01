@@ -1,5 +1,4 @@
-import notch from "@/assets/promotions/notch.svg";
-import scallop from "@/assets/promotions/scallop.svg";
+import { PromotionTicketFrame } from "@/features/promotions/PromotionTicketFrame";
 
 import { formatBaht, formatPromoDate } from "../promotions.format";
 import type { AdminPromotionInput } from "../promotions.types";
@@ -21,13 +20,12 @@ export function ClaimTicketPreview({ promotion }: { promotion: AdminPromotionInp
       : "";
 
   return (
-    <div className="relative flex h-[92px] w-full overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border">
-      <div className="flex w-[88px] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-[#00398a] via-[#0058bc] to-[#1a8fe0] px-1 text-center text-white">
+    <PromotionTicketFrame variant="platform" scallopOffsets={SCALLOP_OFFSETS}
+      stub={<>
         {promotion.discountType === "FREE_SHIPPING" ? null : <span className="text-[10px] opacity-80">ลด</span>}
         <strong className="text-[22px] leading-7 font-black">{value}</strong>
         <span className="text-[9px] font-semibold tracking-widest opacity-80">PEGASUS</span>
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 border-l border-dashed border-border px-3 py-2">
+      </>} body={<>
         <div className="flex items-center justify-between gap-1">
           <strong className="truncate text-sm tracking-wide">{promotion.code || "PEGASUS10"}</strong>
           <span aria-hidden className="size-[18px] shrink-0 rounded-full border border-muted-foreground/60" />
@@ -40,18 +38,6 @@ export function ClaimTicketPreview({ promotion }: { promotion: AdminPromotionInp
           ใช้ได้ถึง {endsAt} ·{" "}
           {promotion.claimLimit == null ? "เก็บได้ไม่จำกัด" : `เหลือ ${promotion.claimLimit} สิทธิ์`}
         </span>
-      </div>
-      <img src={notch} alt="" className="pointer-events-none absolute -top-[9px] left-[79px] size-[18px]" />
-      <img src={notch} alt="" className="pointer-events-none absolute -bottom-[9px] left-[79px] size-[18px]" />
-      {SCALLOP_OFFSETS.map((offset) => (
-        <img
-          key={offset}
-          src={scallop}
-          alt=""
-          className="pointer-events-none absolute -left-1 size-2"
-          style={{ top: `calc(50% + ${offset}px)` }}
-        />
-      ))}
-    </div>
+      </>} />
   );
 }
