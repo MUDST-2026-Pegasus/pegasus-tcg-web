@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, GripVertical, Plus, X } from "lucide-r
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 import {
   HOME_STRIP_MAX,
@@ -78,7 +79,7 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
       icon={<ArrowUpDown />}
       title="จัดลำดับโค้ดบนหน้าแรก"
       description={`แสดงสูงสุด ${HOME_STRIP_MAX} ใบ เรียงจากซ้ายไปขวา · ลากหรือกดลูกศรเพื่อเปลี่ยนลำดับ`}
-      className="max-w-[460px]"
+      className="sm:max-w-[460px]"
       actions={
         <>
           <Button variant="outline" disabled={save.isPending} onClick={onClose}>
@@ -90,7 +91,7 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
         </>
       }
     >
-      <ol className="promotion-order-list" aria-label="ลำดับโค้ดบนหน้าแรก">
+      <ol className="grid max-h-72 gap-2 overflow-y-auto" aria-label="ลำดับโค้ดบนหน้าแรก">
         {selected.map((promotion, index) => {
           const status = homeStatus(promotion);
           return (
@@ -101,21 +102,21 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
               onDragEnd={() => setDragId(null)}
               onDragOver={(event) => event.preventDefault()}
               onDrop={() => dragId != null && move(ids.indexOf(dragId), index)}
-              className="promotion-order-row"
+              className="flex min-h-13 min-w-0 cursor-grab items-center gap-2 rounded-lg border bg-card px-2.5 py-2 data-dragging:border-primary data-dragging:bg-primary/5"
               data-dragging={dragId === promotion.id || undefined}
             >
-              <GripVertical aria-hidden className="promotion-order-grip" />
-              <span className="promotion-order-number">{index + 1}</span>
-              <span aria-hidden className="promotion-order-stripe" />
-              <div className="promotion-order-copy">
-                <strong>{promotion.code}</strong>
-                <small>
+              <GripVertical aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+              <span className="w-3.5 shrink-0 text-center text-xs text-muted-foreground">{index + 1}</span>
+              <span aria-hidden className="h-7 w-1.5 shrink-0 rounded-sm bg-gradient-to-b from-[#00398a] to-[#1a8fe0]" />
+              <div className="grid min-w-0 flex-1 gap-0.5">
+                <strong className="truncate text-xs">{promotion.code}</strong>
+                <small className="truncate text-[10px] text-muted-foreground">
                   {discountLabel(promotion)}
                   {discountCapLabel(promotion) !== "—" ? ` ${discountCapLabel(promotion)}` : ""} · {promotion.name}
                 </small>
               </div>
-              <span className={`promotion-order-status ${status.className}`}>{status.label}</span>
-              <div className="promotion-order-actions">
+              <span className={cn("shrink-0 text-[11px] max-sm:hidden", status.className)}>{status.label}</span>
+              <div className="flex shrink-0 items-center text-muted-foreground">
                 <Button
                   type="button"
                   variant="ghost"
@@ -151,31 +152,37 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
         })}
       </ol>
       {ids.length < HOME_STRIP_MAX ? (
-        <Button type="button" variant="outline" className="promotion-order-add" onClick={() => setAdding((show) => !show)}>
+        <Button type="button" variant="outline" className="w-full border-dashed text-primary" onClick={() => setAdding((show) => !show)}>
           <Plus />
           {adding ? "ซ่อนรายการโค้ด" : `เพิ่มโค้ด Pegasus (${ids.length} / ${HOME_STRIP_MAX})`}
         </Button>
       ) : null}
       {adding && ids.length < HOME_STRIP_MAX ? (
-        <div className="promotion-order-available" aria-label="โค้ด Pegasus ที่เพิ่มได้">
+        <div className="grid max-h-40 gap-1 overflow-y-auto rounded-lg border bg-muted p-1.5" aria-label="โค้ด Pegasus ที่เพิ่มได้">
           {available.length === 0 ? (
             <p className="text-xs text-muted-foreground">ไม่มีโค้ดอื่นที่เพิ่มได้</p>
           ) : (
             available.map((promotion) => (
-              <button type="button" key={promotion.id} onClick={() => setIds((current) => [...current, promotion.id])}>
-                <Plus aria-hidden />
-                <span>
-                  <strong>{promotion.code}</strong>
-                  <small>
+              <Button
+                type="button"
+                variant="ghost"
+                key={promotion.id}
+                className="h-auto justify-start gap-2 px-2 py-1.5 text-left"
+                onClick={() => setIds((current) => [...current, promotion.id])}
+              >
+                <Plus aria-hidden className="text-primary" />
+                <span className="grid min-w-0 gap-0.5">
+                  <strong className="text-xs">{promotion.code}</strong>
+                  <small className="truncate text-[10px] font-normal text-muted-foreground">
                     {discountLabel(promotion)} · {promotion.name}
                   </small>
                 </span>
-              </button>
+              </Button>
             ))
           )}
         </div>
       ) : null}
-      <p className="promotion-order-hint">
+      <p className="text-[10px] leading-4 text-muted-foreground">
         แสดงเฉพาะโค้ดที่ “ให้กดเก็บได้” + สาธารณะ · โค้ดที่หมดอายุ/หยุด/สิทธิ์เต็ม หายจากหน้าแรกเอง ·
         โค้ดที่ตั้งเวลาไว้ขึ้นเมื่อถึงวันเริ่ม
       </p>

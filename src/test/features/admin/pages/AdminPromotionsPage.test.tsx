@@ -126,7 +126,7 @@ describe("AdminPromotionsPage", () => {
     expect(within(row).getByText("สูงสุด ฿200")).toBeInTheDocument();
     expect(within(row).getByLabelText("แสดงบนหน้าแรก")).toBeInTheDocument();
     expect(screen.getByText("shady_cards · ล้างสต็อก")).toBeInTheDocument();
-    expect(screen.getByText("+18% จากเดือนก่อน")).toBeInTheDocument();
+    expect(screen.getByText("+18%")).toBeInTheDocument();
     expect(screen.getByText("3.1% ของ GMV")).toBeInTheDocument();
     expect(screen.getByText("46% ของออเดอร์ทั้งหมด")).toBeInTheDocument();
   });

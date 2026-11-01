@@ -25,6 +25,11 @@ import {
 } from "../promotions.queries";
 import type { AdminPromotion } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
+import { CheckRow } from "./PromotionFormControls";
+
+const SUMMARY_BOX = "grid gap-1 rounded-lg bg-muted px-3.5 py-2.5 text-xs";
+const SUMMARY_ROW = "flex justify-between gap-3 text-muted-foreground [&>strong]:font-semibold [&>strong]:text-foreground";
+const INFO_BOX = "rounded-lg bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]";
 
 export type PromotionActionKind = "pause" | "resume" | "delete" | "blocked";
 export type PromotionActionState = { kind: PromotionActionKind; promotion: AdminPromotion };
@@ -74,8 +79,6 @@ export function PromotionActionDialog({ action, homeIds, now, onChange }: Promot
   }
 }
 
-const dangerButton = "promotion-danger-button";
-
 function PausePlatformDialog({
   promotion,
   homeIds,
@@ -115,30 +118,32 @@ function PausePlatformDialog({
           <Button variant="outline" disabled={pending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button className={dangerButton} disabled={pending} onClick={() => void submit()}>
+          <Button variant="destructive" disabled={pending} onClick={() => void submit()}>
             หยุดโค้ด
           </Button>
         </>
       }
     >
-      <div className="promotion-summary-box">
-        <p>
+      <div className={SUMMARY_BOX}>
+        <p className={SUMMARY_ROW}>
           <span>ผู้ที่เก็บไว้</span>
           <strong>{promotion.claimedCount.toLocaleString("th-TH")} คน</strong>
         </p>
-        <p>
+        <p className={SUMMARY_ROW}>
           <span>ออเดอร์รอชำระที่ใช้โค้ดนี้</span>
           <strong>{promotion.reservedOrders.toLocaleString("th-TH")} รายการ</strong>
         </p>
       </div>
-      <p className="promotion-action-note">
+      <p className="text-[11px] leading-4 text-muted-foreground">
         ผู้ที่เก็บไว้ยังเห็นโค้ดในกระเป๋าพร้อมป้าย “หยุดชั่วคราว” · ออเดอร์รอชำระยังได้ส่วนลดเดิมจนหมดเวลาชำระ
       </p>
       {onHome ? (
-        <label className="promotion-check-row">
-          <input type="checkbox" checked={hideFromHome} onChange={(event) => setHideFromHome(event.target.checked)} />
-          <span>ซ่อนจากหน้าแรกระหว่างหยุด</span>
-        </label>
+        <CheckRow
+          id="promotion-hide-from-home"
+          label="ซ่อนจากหน้าแรกระหว่างหยุด"
+          checked={hideFromHome}
+          onChange={setHideFromHome}
+        />
       ) : null}
     </PromotionDialog>
   );
@@ -182,7 +187,7 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button className={dangerButton} disabled={!valid || pause.isPending} onClick={submit}>
+          <Button variant="destructive" disabled={!valid || pause.isPending} onClick={submit}>
             หยุดโค้ดร้าน
           </Button>
         </>
@@ -209,10 +214,13 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
           onChange={(event) => setDetail(event.target.value)}
         />
       </label>
-      <label className="promotion-check-row promotion-check-row-danger">
-        <input type="checkbox" checked={notifySeller} onChange={(event) => setNotifySeller(event.target.checked)} />
-        <span>แจ้งร้านทางอีเมลและแจ้งเตือนในแอป</span>
-      </label>
+      <CheckRow
+        id="promotion-notify-paused"
+        label="แจ้งร้านทางอีเมลและแจ้งเตือนในแอป"
+        checked={notifySeller}
+        onChange={setNotifySeller}
+        tone="danger"
+      />
     </PromotionDialog>
   );
 }
@@ -263,25 +271,27 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
         </>
       }
     >
-      <div className="promotion-reason-box">
+      <div className="grid gap-1 rounded-lg bg-muted px-3.5 py-2.5 text-[11px] text-muted-foreground [&>strong]:text-xs [&>strong]:font-medium [&>strong]:text-foreground">
         <span>เหตุผลที่หยุด</span>
         <strong>{promotion.pauseReason || "ไม่ได้ระบุเหตุผล"}</strong>
       </div>
-      <div className="promotion-summary-box">
-        <p>
+      <div className={SUMMARY_BOX}>
+        <p className={SUMMARY_ROW}>
           <span>สิทธิ์คงเหลือ</span>
           <strong>{remaining}</strong>
         </p>
-        <p>
+        <p className={SUMMARY_ROW}>
           <span>หมดอายุ</span>
           <strong>{formatPromoDate(promotion.endsAt)}</strong>
         </p>
       </div>
       {isSeller ? (
-        <label className="promotion-check-row">
-          <input type="checkbox" checked={notifySeller} onChange={(event) => setNotifySeller(event.target.checked)} />
-          <span>แจ้งร้านว่าเปิดใช้แล้ว</span>
-        </label>
+        <CheckRow
+          id="promotion-notify-resumed"
+          label="แจ้งร้านว่าเปิดใช้แล้ว"
+          checked={notifySeller}
+          onChange={setNotifySeller}
+        />
       ) : null}
     </PromotionDialog>
   );
@@ -326,7 +336,7 @@ function DeleteDialog({
           <Button variant="outline" disabled={remove.isPending} onClick={onClose}>
             ยกเลิก
           </Button>
-          <Button className={dangerButton} disabled={!confirmed || remove.isPending} onClick={submit}>
+          <Button variant="destructive" disabled={!confirmed || remove.isPending} onClick={submit}>
             ลบโค้ด
           </Button>
         </>
@@ -395,7 +405,7 @@ function DeleteBlockedDialog({
         </>
       }
     >
-      <p className="promotion-info-box">
+      <p className={INFO_BOX}>
         {canEndToday
           ? "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) หรือ ตั้งวันสิ้นสุดเป็นวันนี้ (โค้ดหมดอายุตามปกติ)"
           : "ทางเลือก: หยุดชั่วคราว (เปิดคืนได้) — โค้ดยังไม่ถึงวันเริ่ม จึงสิ้นสุดวันนี้ไม่ได้"}
