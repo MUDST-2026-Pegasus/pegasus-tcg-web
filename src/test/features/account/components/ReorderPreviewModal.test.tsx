@@ -445,7 +445,7 @@ describe("ReorderPreviewModal", () => {
     // Vacation warning banner
     expect(screen.getByText(/ร้านค้าเปิดโหมดพักร้อนอยู่ในขณะนี้/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/ผู้ขายกำลังอยู่ในช่วงพักร้อน ไม่สามารถสั่งซื้อสินค้าจากร้านค้านี้ได้ชั่วคราว/i)
+      screen.getByText(/ร้านค้า Card Kingdom TH เปิดโหมดพักร้อนอยู่ในขณะนี้ ไม่สามารถสั่งซื้อสินค้าจากร้านค้านี้ได้ชั่วคราว/i)
     ).toBeInTheDocument();
 
     // CTA button is disabled
@@ -524,5 +524,204 @@ describe("ReorderPreviewModal", () => {
     await user.click(closeBtn);
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("supports multi-seller grouping: isolates vacation banner to the vacation seller and allows ordering from the active seller", async () => {
+    const user = userEvent.setup();
+    const addBatchSpy = vi.spyOn(cartApi, "addBatchItems").mockResolvedValue({
+      id: 1,
+      userId: 1,
+      sessionKey: null,
+      currency: "THB",
+      items: [],
+      totalQuantity: 1,
+      itemsSubtotal: 9500,
+      expiresAt: null,
+    });
+
+    const multiSellerData: ReorderPreviewResponse = {
+      orderId: 67,
+      sellerOrders: [
+        {
+          sellerProfileId: 1,
+          sellerName: "Card Kingdom TH",
+          sellerAvailable: true,
+          vacationMode: false,
+          items: [mockPreviewData.sellerOrders[0].items[0]], // Bio-Broly (available NM 9500)
+        },
+        {
+          sellerProfileId: 2,
+          sellerName: "Kanto Cards",
+          sellerAvailable: false,
+          vacationMode: true,
+          items: [
+            {
+              originalOrderItemId: 503,
+              catalogVariantId: 20,
+              productName: "Charizard VMAX",
+              variantLabel: "JP • FOIL",
+              originalCondition: "NM",
+              originalPrice: 5000,
+              originalQuantity: 1,
+              imageUrl: null,
+              currentListing: {
+                listingId: 2001,
+                condition: "NM",
+                price: 5200,
+                quantityAvailable: 1,
+                isAvailable: true,
+              },
+              alternativeConditions: [],
+              status: "AVAILABLE",
+            },
+          ],
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: multiSellerData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
+    );
+
+    // Modal Header subtitle is order-level without leaking single seller
+    expect(screen.getByText(/Select available card conditions •/i)).toBeInTheDocument();
+
+    // Seller 1: Card Kingdom TH section exists and has no vacation banner
+    const cardKingdomSection = screen.getByRole("region", { name: /seller card kingdom th/i });
+    expect(cardKingdomSection).toBeInTheDocument();
+    expect(within(cardKingdomSection).queryByText(/เปิดโหมดพักร้อน/i)).not.toBeInTheDocument();
+    expect(within(cardKingdomSection).getByText("Bio-Broly (SR)")).toBeInTheDocument();
+
+    // Seller 2: Kanto Cards section exists and has its own vacation banner
+    const kantoSection = screen.getByRole("region", { name: /seller kanto cards/i });
+    expect(kantoSection).toBeInTheDocument();
+    expect(
+      within(kantoSection).getByText(/ร้านค้า Kanto Cards เปิดโหมดพักร้อนอยู่ในขณะนี้ ไม่สามารถสั่งซื้อสินค้าจากร้านค้านี้ได้ชั่วคราว/i)
+    ).toBeInTheDocument();
+    expect(within(kantoSection).getByText("Charizard VMAX")).toBeInTheDocument();
+
+    // Kanto Cards condition buttons are disabled
+    const kantoCardPill = within(kantoSection).getByText(/^nm$/i).closest("button");
+    expect(kantoCardPill).toBeDisabled();
+
+    // Aggregated Footer total should ONLY count the active seller's item (1 item: 9,500 THB)
+    expect(screen.getByText("Total (1 item):")).toBeInTheDocument();
+    expect(screen.getAllByText("฿9,500").length).toBeGreaterThanOrEqual(1);
+
+    // CTA button is enabled because Card Kingdom TH has a purchasable item
+    const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
+    expect(ctaBtn).not.toBeDisabled();
+
+    // Clicking CTA submits ONLY the active seller's item
+    await user.click(ctaBtn);
+
+    await waitFor(() => {
+      expect(addBatchSpy).toHaveBeenCalledWith([
+        {
+          listingId: 1001,
+          quantity: 1,
+        },
+      ]);
+    });
+  });
+
+  it("toggles condition selection: deselecting an item excludes it from totals and batch payload", async () => {
+    const user = userEvent.setup();
+    const addBatchSpy = vi.spyOn(cartApi, "addBatchItems").mockResolvedValue({
+      id: 1,
+      userId: 1,
+      sessionKey: null,
+      currency: "THB",
+      items: [],
+      totalQuantity: 1,
+      itemsSubtotal: 9500,
+      expiresAt: null,
+    });
+
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: mockPreviewData,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(
+      <ReorderPreviewModal
+        isOpen={true}
+        onClose={vi.fn()}
+        orderId={67}
+      />
+    );
+
+    const ctaBtn = screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i });
+
+    // Initial state: NM is selected for Bio-Broly
+    const nmBtn = screen.getByRole("button", { name: /^nm/i });
+    expect(nmBtn).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Total (1 item):")).toBeInTheDocument();
+    expect(ctaBtn).not.toBeDisabled();
+
+    // 1. Click active NM pill to DESELECT
+    await user.click(nmBtn);
+
+    // NM pill should no longer be pressed
+    expect(nmBtn).toHaveAttribute("aria-pressed", "false");
+
+    // Subtotal should show ฿0 (ไม่ได้เลือก)
+    expect(screen.getByText(/ไม่ได้เลือก/i)).toBeInTheDocument();
+
+    // Total should update to 0 items and ฿0
+    expect(screen.getByText("Total (0 items):")).toBeInTheDocument();
+    expect(screen.getAllByText("฿0").length).toBeGreaterThanOrEqual(1);
+
+    // CTA button should now be disabled
+    expect(ctaBtn).toBeDisabled();
+
+    // 2. Click NM pill again to RE-SELECT
+    await user.click(nmBtn);
+
+    expect(nmBtn).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Total (1 item):")).toBeInTheDocument();
+    expect(ctaBtn).not.toBeDisabled();
+
+    // 3. Switch condition to LP (8,900 THB)
+    const lpBtn = screen.getByRole("button", { name: /^lp/i });
+    await user.click(lpBtn);
+
+    expect(lpBtn).toHaveAttribute("aria-pressed", "true");
+    expect(nmBtn).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getAllByText("฿8,900").length).toBeGreaterThanOrEqual(1);
+
+    // 4. Click LP pill to DESELECT
+    await user.click(lpBtn);
+
+    expect(lpBtn).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByText("Total (0 items):")).toBeInTheDocument();
+    expect(ctaBtn).toBeDisabled();
+
+    // 5. Select LP again and submit
+    await user.click(lpBtn);
+    expect(ctaBtn).not.toBeDisabled();
+    await user.click(ctaBtn);
+
+    await waitFor(() => {
+      expect(addBatchSpy).toHaveBeenCalledWith([
+        {
+          listingId: 1002,
+          quantity: 1,
+        },
+      ]);
+    });
   });
 });
