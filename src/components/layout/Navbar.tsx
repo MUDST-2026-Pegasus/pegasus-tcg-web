@@ -19,18 +19,18 @@ export function Navbar() {
   const cartQuantity = cart?.totalQuantity ?? 0;
 
   return (
-    <header className="sticky top-0 z-40 h-20 border-b border-border bg-white px-10 py-3.5 backdrop-blur-[6px]">
+    <header className="sticky top-0 z-40 h-20 border-b border-border bg-white px-4 py-3.5 backdrop-blur-[6px] lg:px-10">
       {/* คอลัมน์ซ้าย-ขวากว้างเท่ากัน เมนูจึงอยู่กึ่งกลางหน้าเสมอ แม้โลโก้กับกลุ่มไอคอนกว้างไม่เท่ากัน */}
-      <div className="mx-auto grid h-full max-w-[1280px] grid-cols-[1fr_auto_1fr] items-center gap-10">
+      <div className="mx-auto grid h-full max-w-[1280px] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 lg:grid-cols-[1fr_auto_1fr] lg:gap-10">
         <Link
           to="/"
           aria-label="Pegasus TCG — กลับหน้าแรก"
-          className="flex h-full cursor-pointer items-center justify-self-start text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
+          className="flex h-full min-w-0 cursor-pointer items-center justify-self-start text-xl sm:text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-sky-700"
         >
           pegasus
         </Link>
 
-        <nav className="flex h-full items-center justify-center gap-8">
+        <nav className="hidden h-full items-center justify-center gap-8 lg:flex">
           {NAV_LINKS.map(({ label, to }) => (
             <NavLink
               key={to}
@@ -60,7 +60,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex h-full items-center gap-5 justify-self-end">
+        <div className="flex h-full items-center gap-1 justify-self-end sm:gap-3 lg:gap-5">
           {/* Language switch — ปิดไว้ก่อนจนกว่าจะมีระบบ i18n จริง [TCG-467]
           <button
             type="button"

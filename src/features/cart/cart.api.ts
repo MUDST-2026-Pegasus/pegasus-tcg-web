@@ -15,6 +15,9 @@ export const cartApi = {
   addItem: (data: AddCartItemRequest) =>
     api.post<CartItemResponse>("/cart/items", data),
 
+  addBatchItems: (items: Array<{ listingId: number; quantity: number }>) =>
+    api.post<CartResponse>("/cart/items/batch", items),
+
   updateQuantity: (itemId: number, data: UpdateCartItemRequest) =>
     api.patch<CartItemResponse>(`/cart/items/${itemId}`, data),
 
