@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowUpDown, Info, Plus, Search, TicketPercent } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
-import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
 import {
@@ -28,7 +31,7 @@ import { PromotionActionDialog, type PromotionActionState } from "./PromotionAct
 import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
-import "./promotions.css";
+import { StatCard } from "./StatCard";
 
 const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> = [
   { value: null, label: "ทุกเจ้าของ" },
@@ -119,7 +122,7 @@ export function AdminPromotionsContent() {
   const orderShare = summary.data ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d) : null;
 
   return (
-    <main className="promotion-admin promotion-list-page grid gap-6">
+    <main className="grid w-full min-w-0 gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-black">โปรโมชั่น &amp; โค้ดส่วนลด</h1>
@@ -138,82 +141,99 @@ export function AdminPromotionsContent() {
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
+        <StatCard
+          id="active"
           label="โค้ดที่ใช้งานอยู่"
           value={((summary.data?.activePlatformCodes ?? 0) + (summary.data?.activeSellerCodes ?? 0)).toLocaleString("th-TH")}
-          caption={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
+          delta={null}
+          footnote={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
+          bars={null}
+          accent="primary"
         />
-        <KpiCard
+        <StatCard
+          id="redemptions"
           label="ใช้โค้ด (30 วัน)"
           value={(summary.data?.redemptions30d ?? 0).toLocaleString("th-TH")}
-          caption={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`}
-          captionClassName={change == null ? undefined : change >= 0 ? "text-[#007a4a]" : "text-destructive"}
+          delta={
+            change == null
+              ? null
+              : { label: `${change > 0 ? "+" : ""}${change}%`, trend: change > 0 ? "up" : change < 0 ? "down" : "flat" }
+          }
+          footnote={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : "เทียบกับเดือนก่อน"}
+          bars={null}
+          accent="primary"
         />
-        <KpiCard
+        <StatCard
+          id="cost"
           label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          caption={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
+          delta={null}
+          footnote={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
+          bars={null}
+          accent="primary"
         />
-        <KpiCard
+        <StatCard
+          id="sales"
           label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          caption={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
+          delta={null}
+          footnote={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
+          bars={null}
+          accent="primary"
         />
       </div>
 
       <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none">
-        <div className="promotion-list-toolbar border-b">
-          <div className="promotion-status-tabs" role="tablist" aria-label="กรองตามสถานะ">
-            {STATUS_TABS.map((tab) => {
-              const selected = status === tab.value;
-              const count =
-                tab.value == null
-                  ? Object.values(counts ?? {}).reduce((sum, value) => sum + value, 0)
-                  : (counts?.[tab.value] ?? 0);
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => updateParams({ status: tab.value })}
-                  className={cn("promotion-status-tab", selected && "is-selected")}
-                >
-                  <span>{tab.label}</span>
-                  <span className="promotion-tab-count">{count}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="promotion-list-controls">
-            <div className="promotion-owner-tabs" role="group" aria-label="เจ้าของโค้ด">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
+          <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
+            <TabsList aria-label="กรองตามสถานะ" className="max-w-full overflow-x-auto">
+              {STATUS_TABS.map((tab) => {
+                const count =
+                  tab.value == null
+                    ? Object.values(counts ?? {}).reduce((sum, value) => sum + value, 0)
+                    : (counts?.[tab.value] ?? 0);
+                return (
+                  <TabsTrigger key={tab.label} value={tab.value ?? "ALL"} className="text-xs">
+                    {tab.label}
+                    <span className="text-muted-foreground">{count}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+          <div className="flex flex-wrap items-center gap-3">
+            <ButtonGroup aria-label="เจ้าของโค้ด">
               {OWNER_FILTERS.map((filter) => (
-                <button
+                <Button
                   key={filter.label}
-                  type="button"
+                  size="sm"
+                  variant={owner === filter.value ? "secondary" : "outline"}
                   aria-pressed={owner === filter.value}
                   onClick={() => updateParams({ owner: filter.value })}
-                  className={cn(owner === filter.value && "is-selected")}
                 >
                   {filter.label}
-                </button>
+                </Button>
               ))}
-            </div>
+            </ButtonGroup>
             <form
-              className="promotion-search"
               role="search"
+              className="w-44"
               onSubmit={(event) => {
                 event.preventDefault();
                 updateParams({ q: search.trim() || null });
               }}
             >
-              <Search aria-hidden />
-              <Input
-                aria-label="ค้นหาโค้ด"
-                placeholder="ค้นหาโค้ด / แคมเปญ / ร้าน"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
+              <InputGroup className="h-8">
+                <InputGroupAddon>
+                  <Search aria-hidden />
+                </InputGroupAddon>
+                <InputGroupInput
+                  aria-label="ค้นหาโค้ด"
+                  placeholder="ค้นหาโค้ด / แคมเปญ / ร้าน"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </InputGroup>
             </form>
           </div>
         </div>
@@ -228,31 +248,32 @@ export function AdminPromotionsContent() {
           </p>
         ) : null}
         {list.data && rows.length === 0 ? (
-          <div className="m-5 grid justify-items-center gap-2 rounded-xl border border-dashed p-10 text-center">
-            <TicketPercent className="size-8 text-muted-foreground" aria-hidden />
-            <strong className="text-sm">ยังไม่มีโค้ดในแท็บนี้</strong>
-            <p className="text-xs text-muted-foreground">สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ</p>
-            <Button size="sm" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
-              <Plus />
-              สร้างโค้ด Pegasus
-            </Button>
-          </div>
+          <Empty className="m-5 border border-dashed">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <TicketPercent />
+              </EmptyMedia>
+              <EmptyTitle>ยังไม่มีโค้ดในแท็บนี้</EmptyTitle>
+              <EmptyDescription>สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button size="sm" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+                <Plus />
+                สร้างโค้ด Pegasus
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : null}
         {rows.length > 0 ? (
-          <PromotionTable
-            promotions={rows}
-            scopeNames={scopeNames}
-            now={now}
-            onAction={onRowAction}
-          />
+          <PromotionTable promotions={rows} scopeNames={scopeNames} now={now} onAction={onRowAction} />
         ) : null}
 
-        <div className="promotion-pagination border-t">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-xs text-muted-foreground">
           <span>
             แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
             {totalItems} โค้ด
           </span>
-          <nav aria-label="หน้ารายการโปรโมชั่น" className="promotion-page-buttons">
+          <nav aria-label="หน้ารายการโปรโมชั่น" className="flex items-center gap-2">
             <Button
               size="icon-sm"
               variant="outline"
@@ -287,13 +308,13 @@ export function AdminPromotionsContent() {
         </div>
       </Card>
 
-      <p className="promotion-admin-note">
-        <Info aria-hidden />
-        <span>
+      <Alert className="border-[#fde4bd] bg-[#fff1db] text-[#956019]">
+        <Info />
+        <AlertDescription className="text-xs text-[#956019]">
           โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล
           (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
-        </span>
-      </p>
+        </AlertDescription>
+      </Alert>
 
       <PromotionActionDialog action={action} homeIds={homeIds} now={now} onChange={setAction} />
       <PromotionHomeOrderDialog open={homeOpen} onOpenChange={setHomeOpen} promotions={platform.data ?? []} />
@@ -304,25 +325,5 @@ export function AdminPromotionsContent() {
         onClose={() => updateParams({ promo: null, redemptionPage: null }, false)}
       />
     </main>
-  );
-}
-
-function KpiCard({
-  label,
-  value,
-  caption,
-  captionClassName,
-}: {
-  label: string;
-  value: string;
-  caption: string;
-  captionClassName?: string;
-}) {
-  return (
-    <Card className="gap-1 rounded-xl p-5 shadow-none">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <strong className="text-2xl">{value}</strong>
-      <span className={cn("text-xs text-muted-foreground", captionClassName)}>{caption}</span>
-    </Card>
   );
 }

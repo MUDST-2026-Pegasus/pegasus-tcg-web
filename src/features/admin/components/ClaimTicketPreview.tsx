@@ -21,7 +21,7 @@ export function ClaimTicketPreview({ promotion }: { promotion: AdminPromotionInp
       : "";
 
   return (
-    <div className="promotion-ticket relative flex h-[92px] w-full overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border">
+    <div className="relative flex h-[92px] w-full overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border">
       <div className="flex w-[88px] shrink-0 flex-col items-center justify-center bg-gradient-to-br from-[#00398a] via-[#0058bc] to-[#1a8fe0] px-1 text-center text-white">
         {promotion.discountType === "FREE_SHIPPING" ? null : <span className="text-[10px] opacity-80">ลด</span>}
         <strong className="text-[22px] leading-7 font-black">{value}</strong>

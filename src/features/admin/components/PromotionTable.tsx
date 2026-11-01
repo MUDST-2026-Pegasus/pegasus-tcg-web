@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { House, MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,38 +39,49 @@ type PromotionTableProps = {
   onAction: (action: PromotionRowAction, promotion: AdminPromotion) => void;
 };
 
-const HEADERS = ["โค้ด / แคมเปญ", "ส่วนลด", "เงื่อนไข", "ใช้ไปแล้ว", "ระยะเวลา", "สถานะ"];
+const HEADERS: Array<{ label: string; width: string }> = [
+  { label: "โค้ด / แคมเปญ", width: "w-[22%]" },
+  { label: "ส่วนลด", width: "w-[15%]" },
+  { label: "เงื่อนไข", width: "w-[16%]" },
+  { label: "ใช้ไปแล้ว", width: "w-[15%]" },
+  { label: "ระยะเวลา", width: "w-[18%]" },
+  { label: "สถานะ", width: "w-[14%]" },
+];
 
-/** ตาราง Figma PRM-A1 — คอลัมน์เมนูติดขวาเสมอ จอแคบเลื่อนตารางแล้วยังกดเมนูได้ */
+const HEAD_CLASS = "h-10 px-3 text-xs font-medium text-muted-foreground";
+const CELL_CLASS = "px-3 py-2.5 align-middle text-[13px] whitespace-normal";
+const SUB_CLASS = "block truncate text-xs text-muted-foreground";
+/** คอลัมน์เมนูติดขวา จอแคบเลื่อนตารางแล้วยังกดเมนูได้ */
+const MENU_CLASS = "sticky right-0 w-[52px] bg-card px-2 text-right";
+
+/** ตาราง Figma PRM-A1 — 900px พอดีการ์ดที่จอ 1280 แคบกว่านั้นเลื่อนตาราง */
 export function PromotionTable({ promotions, scopeNames, now, onAction }: PromotionTableProps) {
   return (
-    <div className="promotion-table-scroll">
-      <table className="promotion-table">
-        <thead>
-          <tr>
-            {HEADERS.map((head) => (
-              <th key={head} scope="col">
-                {head}
-              </th>
-            ))}
-            <th scope="col">
-              <span className="sr-only">จัดการ</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {promotions.map((promotion) => (
-            <PromotionRow
-              key={promotion.id}
-              promotion={promotion}
-              scopeNames={scopeNames}
-              now={now}
-              onAction={onAction}
-            />
+    <Table className="min-w-[900px] table-fixed">
+      <TableHeader>
+        <TableRow className="bg-muted hover:bg-muted">
+          {HEADERS.map((head) => (
+            <TableHead key={head.label} className={cn(HEAD_CLASS, head.width)}>
+              {head.label}
+            </TableHead>
           ))}
-        </tbody>
-      </table>
-    </div>
+          <TableHead className={cn(HEAD_CLASS, MENU_CLASS, "bg-muted")}>
+            <span className="sr-only">จัดการ</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {promotions.map((promotion) => (
+          <PromotionRow
+            key={promotion.id}
+            promotion={promotion}
+            scopeNames={scopeNames}
+            now={now}
+            onAction={onAction}
+          />
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -88,8 +101,8 @@ function PromotionRow({
   const full = isUsageFull(promotion);
 
   return (
-    <tr>
-      <td>
+    <TableRow className="h-[60px]">
+      <TableCell className={CELL_CLASS}>
         <div className="flex min-w-0 items-center gap-2">
           <strong className="truncate text-sm tracking-wide">{promotion.code}</strong>
           <PromotionOwnerTag owner={promotion.ownerType} />
@@ -97,54 +110,56 @@ function PromotionRow({
             <House className="size-3.5 shrink-0 text-primary" aria-label="แสดงบนหน้าแรก" />
           ) : null}
         </div>
-        <span className="promotion-cell-sub" title={promotionSubtitle(promotion)}>
+        <span className={SUB_CLASS} title={promotionSubtitle(promotion)}>
           {promotionSubtitle(promotion)}
         </span>
-      </td>
-      <td>
-        <span className="text-sm font-semibold">{discountLabel(promotion)}</span>
-        <span className="promotion-cell-sub">{discountCapLabel(promotion)}</span>
-      </td>
-      <td>
-        <span>{minSpendLabel(promotion.minSpend)}</span>
-        <span className="promotion-cell-sub">{conditionDetail(promotion, scopeNames)}</span>
-      </td>
-      <td>
-        <span>
+      </TableCell>
+      <TableCell className={CELL_CLASS}>
+        <span className="block text-sm font-semibold">{discountLabel(promotion)}</span>
+        <span className={SUB_CLASS}>{discountCapLabel(promotion)}</span>
+      </TableCell>
+      <TableCell className={CELL_CLASS}>
+        <span className="block">{minSpendLabel(promotion.minSpend)}</span>
+        <span className={SUB_CLASS}>{conditionDetail(promotion, scopeNames)}</span>
+      </TableCell>
+      <TableCell className={CELL_CLASS}>
+        <span className="block">
           {promotion.usedCount.toLocaleString("th-TH")} / {limitLabel(promotion.usageLimitTotal)}
         </span>
-        <span className="promotion-usage-bar" aria-hidden>
-          <span
-            className={cn(full ? "bg-destructive" : "bg-primary")}
-            style={{ width: `${promotion.usageLimitTotal ? usagePercent(promotion) : 0}%` }}
-          />
-        </span>
+        <Progress
+          aria-hidden
+          value={promotion.usageLimitTotal ? usagePercent(promotion) : 0}
+          className={cn(
+            "my-1 w-24 max-w-full gap-0 [&_[data-slot=progress-track]]:h-1.5",
+            full && "[&_[data-slot=progress-indicator]]:bg-destructive",
+          )}
+        />
         {promotion.claimable ? (
-          <span className="promotion-cell-sub">
+          <span className={SUB_CLASS}>
             เก็บแล้ว {promotion.claimedCount.toLocaleString("th-TH")} / {limitLabel(promotion.claimLimit)}
           </span>
         ) : null}
-      </td>
-      <td>
+      </TableCell>
+      <TableCell className={CELL_CLASS}>
         <span
           className="block truncate"
           title={`${formatPromoDate(promotion.startsAt)} – ${formatPromoDate(promotion.endsAt)}`}
         >
           {formatPeriod(promotion.startsAt, promotion.endsAt)}
         </span>
-        <span className="promotion-cell-sub">{periodHint(promotion, now)}</span>
-      </td>
-      <td>
+        <span className={SUB_CLASS}>{periodHint(promotion, now)}</span>
+      </TableCell>
+      <TableCell className={CELL_CLASS}>
         <PromotionStatusPill status={promotion.status} />
-      </td>
-      <td className="promotion-menu-cell">
+      </TableCell>
+      <TableCell className={cn(CELL_CLASS, MENU_CLASS)}>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${promotion.code}`} />}
           >
             <MoreVertical className="size-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={4} className="promotion-row-menu w-40 min-w-40">
+          <DropdownMenuContent align="end" sideOffset={4} className="w-40 min-w-40">
             {isPlatform ? (
               <DropdownMenuItem render={<Link to={`/admin/promotions/${promotion.id}/edit`} />}>แก้ไข</DropdownMenuItem>
             ) : null}
@@ -163,7 +178,7 @@ function PromotionRow({
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

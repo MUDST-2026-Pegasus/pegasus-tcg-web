@@ -1,11 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
-import { Lock, LogOut } from "lucide-react";
+import { Info, Lock, LogOut } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
@@ -28,9 +41,8 @@ import {
 import type { AdminPromotion, AdminPromotionInput } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
 import { PromotionFormAside } from "./PromotionFormAside";
-import { ChoiceCard, FormField, InputSuffix, NumberInput, ToggleRow } from "./PromotionFormControls";
+import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "./PromotionFormControls";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
-import "./promotions.css";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminPromotionInput> = [
@@ -230,42 +242,58 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
   const usedLimitFloor = Math.max(existing?.usedCount ?? 0, existing?.usageLimitTotal ?? 0);
 
   return (
-    <main className="promotion-admin promotion-form-page">
-      <nav aria-label="breadcrumb" className="promotion-breadcrumb">
-        <Link to="/admin/promotions">โปรโมชั่น &amp; โค้ดส่วนลด</Link>
-        <span aria-hidden>/</span>
-        <span>{existing ? `แก้ไข ${existing.code}` : "สร้างโค้ด Pegasus"}</span>
-      </nav>
-      <header className="promotion-form-header">
-        <div>
-          <h1>{existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}</h1>
-          <p>Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
-        </div>
-        <div className="promotion-header-actions">
-          <Button variant="outline" onClick={() => navigate("/admin/promotions")}>
-            ยกเลิก
-          </Button>
-          <Button onClick={requestSave}>{existing ? "บันทึก" : "บันทึกและเปิดใช้"}</Button>
-        </div>
-      </header>
+    <main className="mx-auto grid w-full max-w-[960px] gap-6">
+      <div className="grid gap-4">
+        <Breadcrumb>
+          <BreadcrumbList className="text-xs">
+            <BreadcrumbItem>
+              <BreadcrumbLink render={<Link to="/admin/promotions" />}>โปรโมชั่น &amp; โค้ดส่วนลด</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{existing ? `แก้ไข ${existing.code}` : "สร้างโค้ด Pegasus"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight">
+              {existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}
+            </h1>
+            <p className="text-xs text-muted-foreground">Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/promotions")}>
+              ยกเลิก
+            </Button>
+            <Button onClick={requestSave}>{existing ? "บันทึก" : "บันทึกและเปิดใช้"}</Button>
+          </div>
+        </header>
+      </div>
 
-      {locks.used ? (
-        <p className="promotion-edit-notice">
-          โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString("th-TH")} ครั้ง — ฟิลด์ที่มี{" "}
-          <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
-        </p>
-      ) : locks.claimed ? (
-        <p className="promotion-edit-notice">
-          มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString("th-TH")} คน — “ต้องเก็บก่อนใช้”
-          ล็อก และจำนวนที่แจกเพิ่มได้อย่างเดียว
-        </p>
+      {locks.used || locks.claimed ? (
+        <Alert className="border-[#cfe0f7] bg-[#e8f1fc] text-[#0058bc]">
+          <Info />
+          <AlertDescription className="text-xs text-[#0058bc]">
+            {locks.used ? (
+              <>
+                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString("th-TH")} ครั้ง — ฟิลด์ที่มี{" "}
+                <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
+              </>
+            ) : (
+              <>
+                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString("th-TH")} คน — “ต้องเก็บก่อนใช้” ล็อก
+                และจำนวนที่แจกเพิ่มได้อย่างเดียว
+              </>
+            )}
+          </AlertDescription>
+        </Alert>
       ) : null}
 
-      <div className="promotion-form-grid">
-        <div className="promotion-form-sections">
-          <Card className="promotion-section">
-            <h2>1. ข้อมูลโค้ด</h2>
-            <div className="promotion-two-cols">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid min-w-0 gap-4">
+          <Section title="1. ข้อมูลโค้ด">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FormField
                 field="code"
                 htmlFor="promotion-code"
@@ -274,8 +302,8 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 hint="A–Z และ 0–9 ยาว 4–20 ตัว · ระบบเก็บเป็นตัวพิมพ์ใหญ่ และห้ามซ้ำกับโค้ดร้าน"
                 error={errors.code}
               >
-                <div className="promotion-code-input">
-                  <Input
+                <InputGroup data-disabled={locked("code") || undefined}>
+                  <InputGroupInput
                     id="promotion-code"
                     aria-label="รหัสโค้ด"
                     aria-invalid={!!errors.code || undefined}
@@ -287,13 +315,15 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                     onChange={(event) => change("code", event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
                   />
                   {locked("code") ? (
-                    <InputSuffix locked />
+                    <LockedSuffix locked />
                   ) : (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => change("code", randomCode())}>
-                      สุ่มโค้ด
-                    </Button>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton size="xs" variant="secondary" onClick={() => change("code", randomCode())}>
+                        สุ่มโค้ด
+                      </InputGroupButton>
+                    </InputGroupAddon>
                   )}
-                </div>
+                </InputGroup>
               </FormField>
               <FormField
                 field="name"
@@ -319,68 +349,52 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 aria-label="การมองเห็น"
                 value={form.visibility}
                 onValueChange={(value) => change("visibility", value as AdminPromotionInput["visibility"])}
-                className="promotion-choice-grid promotion-choice-grid-two"
+                className="grid gap-2.5 sm:grid-cols-2"
               >
                 <ChoiceCard
                   value="PUBLIC"
                   title="สาธารณะ"
                   hint="แสดงในตัวเลือกโค้ดตอนชำระเงิน"
-                  selected={form.visibility === "PUBLIC"}
                   disabled={locked("visibility")}
                 />
                 <ChoiceCard
                   value="PRIVATE"
                   title="ส่วนตัว"
                   hint="ผู้ซื้อต้องพิมพ์โค้ดเอง (แจกผ่านโซเชียล)"
-                  selected={form.visibility === "PRIVATE"}
                   disabled={locked("visibility")}
                 />
               </RadioGroup>
             </FormField>
-            <details className="promotion-extra" data-field="description" open={!!form.description || undefined}>
-              <summary>คำอธิบายเพิ่มเติม (ไม่บังคับ)</summary>
+            <details
+              className="scroll-mt-24 text-xs text-muted-foreground"
+              data-field="description"
+              open={!!form.description || undefined}
+            >
+              <summary className="cursor-pointer">คำอธิบายเพิ่มเติม (ไม่บังคับ)</summary>
               <Input
                 aria-label="คำอธิบาย"
+                className="mt-2"
                 value={form.description ?? ""}
                 maxLength={500}
                 placeholder="คำอธิบายภายในแคมเปญ"
                 onChange={(event) => change("description", event.target.value)}
               />
             </details>
-          </Card>
+          </Section>
 
-          <Card className="promotion-section">
-            <h2>2. ประเภทส่วนลด</h2>
+          <Section title="2. ประเภทส่วนลด">
             <RadioGroup
               aria-label="ประเภทส่วนลด"
               data-field="discountType"
               value={form.discountType}
               onValueChange={(value) => change("discountType", value as AdminPromotionInput["discountType"])}
-              className="promotion-choice-grid promotion-choice-grid-three"
+              className="grid gap-2.5 sm:grid-cols-3"
             >
-              <ChoiceCard
-                value="PERCENT"
-                title="เปอร์เซ็นต์"
-                hint="ลด x% ของยอดสินค้า"
-                selected={form.discountType === "PERCENT"}
-                disabled={locked("discountType")}
-              />
-              <ChoiceCard
-                value="FIXED"
-                title="จำนวนเงิน"
-                hint="ลดเป็นบาท"
-                selected={form.discountType === "FIXED"}
-                disabled={locked("discountType")}
-              />
-              <ChoiceCard
-                value="FREE_SHIPPING"
-                title="ส่งฟรี"
-                hint="ลดค่าส่งทุกร้าน"
-                selected={form.discountType === "FREE_SHIPPING"}
-                disabled={locked("discountType")}
-              />
+              <ChoiceCard value="PERCENT" title="เปอร์เซ็นต์" hint="ลด x% ของยอดสินค้า" disabled={locked("discountType")} />
+              <ChoiceCard value="FIXED" title="จำนวนเงิน" hint="ลดเป็นบาท" disabled={locked("discountType")} />
+              <ChoiceCard value="FREE_SHIPPING" title="ส่งฟรี" hint="ลดค่าส่งทุกร้าน" disabled={locked("discountType")} />
             </RadioGroup>
-            <div className="promotion-two-cols">
+            <div className="grid gap-3 sm:grid-cols-2">
               {form.discountType !== "FREE_SHIPPING" ? (
                 <FormField
                   field="discountValue"
@@ -427,12 +441,10 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 </FormField>
               ) : null}
             </div>
-          </Card>
+          </Section>
 
-          <Card className="promotion-section">
-            <h2>3. เงื่อนไข</h2>
-            <p className="promotion-section-hint">ยอดขั้นต่ำคิดจากสินค้าที่เข้าเงื่อนไขหลังหักโค้ดร้าน ไม่รวมค่าส่ง</p>
-            <div className="promotion-two-cols">
+          <Section title="3. เงื่อนไข" description="ยอดขั้นต่ำคิดจากสินค้าที่เข้าเงื่อนไขหลังหักโค้ดร้าน ไม่รวมค่าส่ง">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FormField field="minSpend" htmlFor="promotion-minSpend" label="ยอดสั่งซื้อขั้นต่ำ" error={errors.minSpend}>
                 <NumberInput
                   id="promotion-minSpend"
@@ -445,51 +457,62 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
               <FormField field="scopeType" label="ใช้กับสินค้า">
-                <div className="promotion-scope-options" role="group" aria-label="ใช้กับสินค้า">
+                <div className="flex flex-wrap gap-1.5" role="group" aria-label="ใช้กับสินค้า">
                   {(["ALL", "GAME", "CATEGORY"] as const).map((value) => (
-                    <button
+                    <Button
                       key={value}
                       type="button"
+                      size="xs"
+                      variant={form.scopeType === value ? "secondary" : "outline"}
                       aria-pressed={form.scopeType === value}
                       disabled={locked("scopeType")}
                       onClick={() => change("scopeType", value)}
                     >
                       {value === "ALL" ? "ทุกเกม" : value === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่"}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </FormField>
             </div>
             {form.scopeType !== "ALL" ? (
-              <fieldset className="promotion-scope-list" data-field="scopeIds" disabled={locked("scopeIds")}>
-                <legend>{form.scopeType === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่"} (เลือกได้หลายรายการ)</legend>
-                {scopeOptions.data?.map((item) => (
-                  <label key={item.id}>
-                    <input
-                      type="checkbox"
-                      checked={form.scopeIds.includes(item.id)}
-                      onChange={(event) =>
-                        change(
-                          "scopeIds",
-                          event.target.checked
-                            ? [...form.scopeIds, item.id]
-                            : form.scopeIds.filter((scopeId) => scopeId !== item.id),
-                        )
-                      }
-                    />
-                    {item.name}
-                  </label>
-                ))}
-                {scopeOptions.isPending ? <span>กำลังโหลดรายการ...</span> : null}
-                {scopeOptions.isError ? <span role="alert">โหลดรายการไม่สำเร็จ</span> : null}
-                {errors.scopeIds ? (
-                  <span role="alert" className="promotion-field-error">
-                    {errors.scopeIds}
-                  </span>
+              <FieldSet
+                data-field="scopeIds"
+                disabled={locked("scopeIds")}
+                className="max-h-48 scroll-mt-24 gap-2 overflow-y-auto rounded-lg border p-3"
+              >
+                <FieldLegend variant="label" className="mb-1 text-xs text-muted-foreground">
+                  {form.scopeType === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่"} (เลือกได้หลายรายการ)
+                </FieldLegend>
+                {scopeOptions.data?.map((item) => {
+                  const id = `promotion-scope-${item.id}`;
+                  return (
+                    <Field key={item.id} orientation="horizontal" className="gap-2">
+                      <Checkbox
+                        id={id}
+                        checked={form.scopeIds.includes(item.id)}
+                        onCheckedChange={(checked) =>
+                          change(
+                            "scopeIds",
+                            checked === true
+                              ? [...form.scopeIds, item.id]
+                              : form.scopeIds.filter((scopeId) => scopeId !== item.id),
+                          )
+                        }
+                      />
+                      <FieldLabel htmlFor={id} className="text-xs font-normal">
+                        {item.name}
+                      </FieldLabel>
+                    </Field>
+                  );
+                })}
+                {scopeOptions.isPending ? <span className="text-xs text-muted-foreground">กำลังโหลดรายการ...</span> : null}
+                {scopeOptions.isError ? (
+                  <FieldError className="text-[11px]">โหลดรายการไม่สำเร็จ</FieldError>
                 ) : null}
-              </fieldset>
+                {errors.scopeIds ? <FieldError className="text-[11px]">{errors.scopeIds}</FieldError> : null}
+              </FieldSet>
             ) : null}
-            <div data-field="newBuyerOnly">
+            <div data-field="newBuyerOnly" className="scroll-mt-24">
               <ToggleRow
                 id="promotion-new-buyer"
                 title="เฉพาะผู้ซื้อใหม่"
@@ -499,14 +522,13 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 onChange={(checked) => change("newBuyerOnly", checked)}
               />
             </div>
-          </Card>
+          </Section>
 
-          <Card className="promotion-section">
-            <h2>4. ระยะเวลาและจำนวนสิทธิ์</h2>
-            <div className="promotion-two-cols">
+          <Section title="4. ระยะเวลาและจำนวนสิทธิ์">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FormField field="startsAt" htmlFor="promotion-startsAt" label="เริ่มใช้ได้" required error={errors.startsAt}>
-                <div className="promotion-input-wrap">
-                  <Input
+                <InputGroup data-disabled={locked("startsAt") || undefined}>
+                  <InputGroupInput
                     id="promotion-startsAt"
                     aria-label="เริ่มใช้ได้"
                     type="datetime-local"
@@ -516,8 +538,8 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                       change("startsAt", event.target.value ? new Date(event.target.value).toISOString() : "")
                     }
                   />
-                  {locked("startsAt") ? <InputSuffix locked /> : null}
-                </div>
+                  <LockedSuffix locked={locked("startsAt")} />
+                </InputGroup>
               </FormField>
               <FormField
                 field="endsAt"
@@ -530,6 +552,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 <Input
                   id="promotion-endsAt"
                   aria-label="สิ้นสุด"
+                  aria-invalid={!!errors.endsAt || undefined}
                   type="datetime-local"
                   value={toLocalInput(form.endsAt)}
                   min={locks.used && existing ? toLocalInput(existing.endsAt) : undefined}
@@ -539,7 +562,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
             </div>
-            <div className="promotion-two-cols">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FormField
                 field="usageLimitTotal"
                 htmlFor="promotion-usageLimitTotal"
@@ -580,13 +603,13 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
             </div>
-          </Card>
+          </Section>
 
-          <Card className="promotion-section">
-            <h2>
-              5. การแจกโค้ด (กดเก็บ) <span className="promotion-new-badge">ใหม่</span>
-            </h2>
-            <div data-field="claimable">
+          <Section
+            title="5. การแจกโค้ด (กดเก็บ)"
+            badge={<Badge className="h-4 rounded bg-[#e8f1fc] px-1.5 text-[9px] text-[#0058bc]">ใหม่</Badge>}
+          >
+            <div data-field="claimable" className="scroll-mt-24">
               <ToggleRow
                 id="promotion-claimable"
                 title="ให้ผู้ซื้อกดเก็บได้"
@@ -596,7 +619,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 onChange={(checked) => change("claimable", checked)}
               />
             </div>
-            <div data-field="featuredOnHome" className="grid gap-1.5">
+            <div data-field="featuredOnHome" className="grid scroll-mt-24 gap-1.5">
               <ToggleRow
                 id="promotion-featured"
                 title="แสดงบนหน้าแรก"
@@ -605,13 +628,9 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 disabled={!form.claimable || form.visibility !== "PUBLIC"}
                 onChange={(checked) => change("featuredOnHome", checked)}
               />
-              {errors.featuredOnHome ? (
-                <span role="alert" className="promotion-field-error">
-                  {errors.featuredOnHome}
-                </span>
-              ) : null}
+              {errors.featuredOnHome ? <FieldError className="text-[11px]">{errors.featuredOnHome}</FieldError> : null}
             </div>
-            <div className="promotion-two-cols">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FormField
                 field="claimLimit"
                 htmlFor="promotion-claimLimit"
@@ -651,7 +670,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
             </div>
-            <div data-field="claimRequired" className="grid gap-1.5">
+            <div data-field="claimRequired" className="grid scroll-mt-24 gap-1.5">
               <ToggleRow
                 id="promotion-claim-required"
                 title="ต้องเก็บก่อนใช้"
@@ -660,13 +679,9 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 disabled={locked("claimRequired") || !form.claimable}
                 onChange={(checked) => change("claimRequired", checked)}
               />
-              {errors.claimRequired ? (
-                <span role="alert" className="promotion-field-error">
-                  {errors.claimRequired}
-                </span>
-              ) : null}
+              {errors.claimRequired ? <FieldError className="text-[11px]">{errors.claimRequired}</FieldError> : null}
             </div>
-          </Card>
+          </Section>
         </div>
         <PromotionFormAside form={payload} />
       </div>
@@ -692,12 +707,38 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             <Button variant="outline" onClick={() => blocker.reset?.()}>
               อยู่ต่อ
             </Button>
-            <Button className="promotion-danger-button" onClick={() => blocker.proceed?.()}>
+            <Button variant="destructive" onClick={() => blocker.proceed?.()}>
               ออกโดยไม่บันทึก
             </Button>
           </>
         }
       />
     </main>
+  );
+}
+
+/** การ์ดหนึ่งหมวดของฟอร์ม (Figma PRM-A2 การ์ด 1–5) */
+function Section({
+  title,
+  description,
+  badge,
+  children,
+}: {
+  title: string;
+  description?: string;
+  badge?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="gap-4 shadow-none">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-1.5 text-sm font-bold">
+          {title}
+          {badge}
+        </CardTitle>
+        {description ? <CardDescription className="text-[11px]">{description}</CardDescription> : null}
+      </CardHeader>
+      <CardContent className="grid gap-4">{children}</CardContent>
+    </Card>
   );
 }

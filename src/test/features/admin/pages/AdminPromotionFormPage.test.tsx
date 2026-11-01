@@ -115,7 +115,7 @@ describe("AdminPromotionFormPage — editing", () => {
     await user.clear(limit);
     await user.type(limit, "800");
     await user.click(screen.getByRole("button", { name: "บันทึก" }));
-    const dialog = await screen.findByRole("dialog", { name: "บันทึกการเปลี่ยนแปลง?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "บันทึกการเปลี่ยนแปลง?" });
     expect(within(dialog).getByText("จำนวนสิทธิ์ใช้")).toBeInTheDocument();
     expect(within(dialog).getByText("800")).toBeInTheDocument();
     expect(within(dialog).getByText("฿160,000")).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("AdminPromotionFormPage — editing", () => {
     await user.type(limit, "100");
     await user.click(screen.getByRole("button", { name: "บันทึก" }));
     expect(await screen.findByText("หลังมีการใช้โค้ดแล้ว เพิ่มจำนวนสิทธิ์ได้อย่างเดียว")).toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 });
 
@@ -229,7 +229,7 @@ describe("AdminPromotionFormPage — creating", () => {
     expect(screen.getByRole("switch", { name: "แสดงบนหน้าแรก" })).toBeChecked();
     expect(await screen.findByDisplayValue("2")).toBe(screen.getByRole("spinbutton", { name: "ลำดับบนหน้าแรก" }));
     await user.click(screen.getByRole("button", { name: "บันทึกและเปิดใช้" }));
-    const dialog = await screen.findByRole("dialog", { name: "เปิดใช้โค้ด PEGASUS20?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "เปิดใช้โค้ด PEGASUS20?" });
     expect(within(dialog).getByText("งบสูงสุด (500 × ฿200)")).toBeInTheDocument();
     expect(within(dialog).getByText("800 ใบ · หน้าแรก ลำดับ 2")).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "เปิดใช้โค้ด" }));

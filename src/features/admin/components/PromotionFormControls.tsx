@@ -1,36 +1,39 @@
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from "@/components/ui/field";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
-/** การ์ดตัวเลือกแบบ radio (การมองเห็น / ประเภทส่วนลด) */
+/** การ์ดตัวเลือกแบบ radio (การมองเห็น / ประเภทส่วนลด) — แบบ choice card ของ `Field` */
 export function ChoiceCard({
   value,
   title,
   hint,
-  selected,
   disabled,
 }: {
   value: string;
   title: string;
   hint: string;
-  selected: boolean;
   disabled?: boolean;
 }) {
   return (
-    <label className={cn("promotion-choice", selected && "is-selected", disabled && "is-disabled")}>
-      <RadioGroupItem value={value} disabled={disabled} aria-label={title} />
-      <span>
-        <strong>{title}</strong>
-        <small>{hint}</small>
-      </span>
-    </label>
+    <FieldLabel className="rounded-lg">
+      <Field orientation="horizontal" data-disabled={disabled || undefined} className="p-3!">
+        <RadioGroupItem value={value} disabled={disabled} aria-label={title} />
+        <FieldContent>
+          <FieldTitle className="text-xs">{title}</FieldTitle>
+          <FieldDescription className="text-[11px]">{hint}</FieldDescription>
+        </FieldContent>
+      </Field>
+    </FieldLabel>
   );
 }
 
+/** แถวเปิด/ปิดพร้อมคำอธิบาย */
 export function ToggleRow({
   id,
   title,
@@ -47,13 +50,49 @@ export function ToggleRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <div className={cn("promotion-toggle-row", disabled && "is-disabled")}>
-      <div>
-        <label htmlFor={id}>{title}</label>
-        <p>{hint}</p>
-      </div>
+    <Field
+      orientation="horizontal"
+      data-disabled={disabled || undefined}
+      className="justify-between rounded-lg bg-muted px-3 py-2.5"
+    >
+      <FieldContent>
+        <FieldLabel htmlFor={id} className="text-xs font-semibold">
+          {title}
+        </FieldLabel>
+        <FieldDescription className="text-[11px]">{hint}</FieldDescription>
+      </FieldContent>
       <Switch id={id} size="sm" checked={checked} disabled={disabled} onCheckedChange={onChange} />
-    </div>
+    </Field>
+  );
+}
+
+/** checkbox พร้อม label ในกรอบเทา — `tone="danger"` ใช้กับการแจ้งร้านตอนหยุดโค้ดร้าน */
+export function CheckRow({
+  id,
+  label,
+  checked,
+  onChange,
+  tone = "muted",
+}: {
+  id: string;
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  tone?: "muted" | "danger";
+}) {
+  return (
+    <Field
+      orientation="horizontal"
+      className={cn(
+        "rounded-lg px-3 py-2",
+        tone === "danger" ? "bg-destructive/10 text-destructive" : "bg-muted",
+      )}
+    >
+      <Checkbox id={id} checked={checked} onCheckedChange={(value) => onChange(value === true)} />
+      <FieldLabel htmlFor={id} className="text-xs font-normal">
+        {label}
+      </FieldLabel>
+    </Field>
   );
 }
 
@@ -69,6 +108,7 @@ export function FormField({
   hint,
   error,
   children,
+  className,
 }: {
   field: string;
   htmlFor?: string;
@@ -77,28 +117,18 @@ export function FormField({
   hint?: string;
   error?: string;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="promotion-field" data-field={field}>
-      {htmlFor ? (
-        <label htmlFor={htmlFor}>
-          {label}
-          {required ? <em> *</em> : null}
-        </label>
-      ) : (
-        <span className="promotion-field-label">
-          {label}
-          {required ? <em> *</em> : null}
-        </span>
-      )}
+    <Field data-field={field} data-invalid={error ? true : undefined} className={cn("scroll-mt-24 gap-1.5", className)}>
+      <FieldLabel htmlFor={htmlFor} className="text-xs">
+        {label}
+        {required ? <span className="text-destructive">*</span> : null}
+      </FieldLabel>
       {children}
-      {hint ? <p className="promotion-field-hint">{hint}</p> : null}
-      {error ? (
-        <span role="alert" className="promotion-field-error">
-          {error}
-        </span>
-      ) : null}
-    </div>
+      {hint ? <FieldDescription className="text-[11px]">{hint}</FieldDescription> : null}
+      {error ? <FieldError className="text-[11px]">{error}</FieldError> : null}
+    </Field>
   );
 }
 
@@ -129,9 +159,13 @@ export function NumberInput({
   invalid?: boolean;
 }) {
   return (
-    <div className={cn("promotion-input-wrap", prefix && "has-prefix")}>
-      {prefix ? <span className="promotion-input-affix">{prefix}</span> : null}
-      <Input
+    <InputGroup data-disabled={disabled || locked || undefined}>
+      {prefix ? (
+        <InputGroupAddon>
+          <InputGroupText>{prefix}</InputGroupText>
+        </InputGroupAddon>
+      ) : null}
+      <InputGroupInput
         id={id}
         aria-label={label}
         aria-invalid={invalid || undefined}
@@ -143,17 +177,18 @@ export function NumberInput({
         disabled={disabled || locked}
         onChange={(event) => onChange(event.target.value === "" ? null : Number(event.target.value))}
       />
-      <InputSuffix suffix={suffix} locked={locked} />
-    </div>
+      <LockedSuffix suffix={suffix} locked={locked} />
+    </InputGroup>
   );
 }
 
-export function InputSuffix({ suffix, locked }: { suffix?: string; locked?: boolean }) {
+/** ท้ายช่อง: หน่วย และแม่กุญแจเมื่อแก้ไม่ได้ */
+export function LockedSuffix({ suffix, locked }: { suffix?: string; locked?: boolean }) {
   if (!suffix && !locked) return null;
   return (
-    <span className="promotion-input-affix promotion-input-suffix">
-      {suffix}
-      {locked ? <Lock className="size-3.5" aria-label="ล็อก" /> : null}
-    </span>
+    <InputGroupAddon align="inline-end">
+      {suffix ? <InputGroupText>{suffix}</InputGroupText> : null}
+      {locked ? <Lock aria-label="ล็อก" /> : null}
+    </InputGroupAddon>
   );
 }

@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 export type PromotionDialogTone = "info" | "success" | "warning" | "danger";
@@ -9,7 +17,7 @@ const TONE_STYLE: Record<PromotionDialogTone, string> = {
   info: "bg-[#e8f1fc] text-[#0058bc]",
   success: "bg-[#e7f6ee] text-[#007a4a]",
   warning: "bg-[#fdf0dd] text-[#b45309]",
-  danger: "bg-[#fde8e8] text-[#b42318]",
+  danger: "bg-destructive/10 text-destructive",
 };
 
 type PromotionDialogProps = {
@@ -27,8 +35,8 @@ type PromotionDialogProps = {
 };
 
 /**
- * เปลือกเดียวของบอร์ด "Modals & Dialogs — Admin" (Figma PRM-M1):
- * ไอคอนในกรอบสี หัวข้อ คำอธิบาย เนื้อหา แล้ว footer เทาปุ่มชิดขวา
+ * เปลือกเดียวของบอร์ด "Modals & Dialogs — Admin" (Figma PRM-M1) บน `AlertDialog`
+ * แบบเดียวกับ `ConfirmDeleteDialog`: ไอคอนในกรอบสี หัวข้อ คำอธิบาย เนื้อหา แล้วปุ่มชิดขวา
  */
 export function PromotionDialog({
   open,
@@ -43,25 +51,21 @@ export function PromotionDialog({
   className,
 }: PromotionDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className={cn("promotion-dialog max-w-[420px] gap-0 overflow-hidden p-0", className)}>
-        <div className="grid gap-3 p-6 pb-5">
-          <span aria-hidden className={cn("promotion-modal-icon", TONE_STYLE[tone])}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className={cn("gap-4 sm:max-w-[420px]", className)}>
+        <AlertDialogHeader>
+          <AlertDialogMedia className={cn("size-10 rounded-xl *:[svg:not([class*='size-'])]:size-5", TONE_STYLE[tone])}>
             {icon}
-          </span>
-          <DialogHeader className="gap-1">
-            <DialogTitle className="text-lg leading-6 font-bold">{title}</DialogTitle>
-            {description ? (
-              <DialogDescription className="text-xs leading-[17px] text-muted-foreground">{description}</DialogDescription>
-            ) : null}
-          </DialogHeader>
-          {children}
-        </div>
-        <DialogFooter className="promotion-dialog-footer">
-          {footerNote ? <span className="promotion-footer-note">{footerNote}</span> : null}
+          </AlertDialogMedia>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          {description ? <AlertDialogDescription className="text-xs">{description}</AlertDialogDescription> : null}
+        </AlertDialogHeader>
+        {children}
+        <AlertDialogFooter className="items-center">
+          {footerNote ? <span className="mr-auto text-[11px] text-muted-foreground">{footerNote}</span> : null}
           {actions}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

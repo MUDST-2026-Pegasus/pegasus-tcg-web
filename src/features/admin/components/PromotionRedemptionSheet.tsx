@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import {
@@ -78,35 +79,35 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
             <p className="py-6 text-sm text-muted-foreground">ยังไม่มีการใช้โค้ด</p>
           ) : null}
           {redemptions.data && redemptions.data.items.length > 0 ? (
-            <table className="promotion-redemption-table">
-              <thead>
-                <tr>
-                  <th scope="col">คำสั่งซื้อ</th>
-                  <th scope="col">ผู้ซื้อ</th>
-                  <th scope="col">ส่วนลด</th>
-                  <th scope="col">สถานะ</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table className="text-xs">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="h-9 px-0 text-muted-foreground">คำสั่งซื้อ</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">ผู้ซื้อ</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">ส่วนลด</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">สถานะ</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {redemptions.data.items.map((entry) => (
-                  <tr key={entry.id}>
-                    <td>
+                  <TableRow key={entry.id}>
+                    <TableCell className="px-0">
                       <Link
                         className="text-primary underline-offset-2 hover:underline"
                         to={`/admin/orders?q=${encodeURIComponent(entry.orderNumber)}`}
                       >
                         {entry.orderNumber}
                       </Link>
-                    </td>
-                    <td>{maskBuyer(entry.buyer)}</td>
-                    <td>{formatBaht(entry.amount)}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{maskBuyer(entry.buyer)}</TableCell>
+                    <TableCell>{formatBaht(entry.amount)}</TableCell>
+                    <TableCell>
                       <RedemptionStatusPill status={entry.status} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           ) : null}
           {totalPages > 1 ? (
             <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">

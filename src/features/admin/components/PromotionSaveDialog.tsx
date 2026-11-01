@@ -68,7 +68,7 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
         </>
       }
     >
-      <div className="promotion-confirm-summary">
+      <div className="grid gap-2 rounded-lg bg-muted px-3.5 py-3 text-xs [&>p]:flex [&>p]:items-start [&>p]:justify-between [&>p]:gap-3 [&>p]:text-muted-foreground [&>p>strong]:text-right [&>p>strong]:font-semibold [&>p>strong]:text-foreground">
         <p>
           <span>ส่วนลด</span>
           <strong>
@@ -100,7 +100,7 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
           <span>การแจก</span>
           <strong>{distribution}</strong>
         </p>
-        <p className="promotion-confirm-budget">
+        <p className="items-center! border-t pt-2.5 [&>strong]:text-lg [&>strong]:font-extrabold">
           <span>งบสูงสุด ({budgetFormula(input)})</span>
           <strong>{budgetLabel(input)}</strong>
         </p>
@@ -144,23 +144,23 @@ function EditDialog({
       }
     >
       {changed.length === 0 ? (
-        <p className="promotion-info-box">ยังไม่มีข้อมูลที่เปลี่ยนแปลง</p>
+        <p className="rounded-lg bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]">ยังไม่มีข้อมูลที่เปลี่ยนแปลง</p>
       ) : (
-        <dl className="promotion-diff">
+        <dl className="grid max-h-56 divide-y overflow-y-auto rounded-lg border text-xs">
           {changed.map((key) => (
-            <div key={key}>
-              <dt>{FIELD_LABEL[key]}</dt>
-              <dd>
-                <span className="promotion-diff-old">{formatFieldValue(key, before, scopeNames)}</span>
+            <div key={key} className="flex items-center justify-between gap-3 px-3.5 py-2">
+              <dt className="text-muted-foreground">{FIELD_LABEL[key]}</dt>
+              <dd className="flex min-w-0 items-center gap-1.5 text-right">
+                <span className="text-muted-foreground">{formatFieldValue(key, before, scopeNames)}</span>
                 <ArrowRight aria-label="เป็น" className="size-3.5 shrink-0 text-muted-foreground" />
-                <strong>{formatFieldValue(key, input, scopeNames)}</strong>
+                <strong className="font-semibold text-primary">{formatFieldValue(key, input, scopeNames)}</strong>
               </dd>
             </div>
           ))}
         </dl>
       )}
       {changed.length > 0 && oldBudget !== newBudget ? (
-        <p className="promotion-diff-budget">
+        <p className="flex justify-between rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground [&>strong]:text-[#b45309]">
           <span>งบสูงสุดใหม่</span>
           <strong>{budgetLabel(input)}</strong>
         </p>
