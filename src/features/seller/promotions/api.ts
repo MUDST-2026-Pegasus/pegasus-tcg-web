@@ -9,5 +9,5 @@ export const sellerPromotionApi = {
   pause: (id: number) => api.post<SellerPromotion>(`${root}/${id}/pause`, {}),
   resume: (id: number) => api.post<SellerPromotion>(`${root}/${id}/resume`, {}),
   remove: (id: number) => api.delete<void>(`${root}/${id}`),
-  redemptions: (id: number) => api.get<PageResponse<Redemption>>(`${root}/${id}/redemptions`),
+  redemptions: (id: number, page = 0) => api.get<PageResponse<Redemption>>(`${root}/${id}/redemptions`, { query: { page, size: 20 } }),
 };

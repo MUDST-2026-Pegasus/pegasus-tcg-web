@@ -9,6 +9,9 @@ export function getSellerPromotionErrors(form: SellerPromotionInput, existing?: 
   if (!result.success) result.error.issues.forEach((issue) => { issues[String(issue.path[0])] = issue.message; });
   if (form.discountType === "PERCENT" && (form.discountValue < 1 || form.discountValue > 90)) issues.discountValue = "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90";
   if (form.discountType === "FIXED" && form.discountValue > form.minSpend) issues.discountValue = "ส่วนลดต้องไม่เกินยอดขั้นต่ำ";
+  if (!Number.isInteger(form.usageLimitPerUser) || form.usageLimitPerUser < 1) issues.usageLimitPerUser = "สิทธิ์ต่อคนต้องเป็นจำนวนเต็มอย่างน้อย 1";
+  if (form.usageLimitTotal != null && (!Number.isInteger(form.usageLimitTotal) || form.usageLimitTotal < 1)) issues.usageLimitTotal = "จำนวนสิทธิ์ต้องเป็นจำนวนเต็มอย่างน้อย 1";
+  if (form.claimLimit != null && (!Number.isInteger(form.claimLimit) || form.claimLimit < 1)) issues.claimLimit = "จำนวนที่แจกต้องเป็นจำนวนเต็มอย่างน้อย 1";
   if (new Date(form.endsAt) <= new Date(form.startsAt)) issues.endsAt = "วันสิ้นสุดต้องหลังวันเริ่ม";
   if (form.usageLimitTotal != null && form.usageLimitTotal < (existing?.usedCount || 1)) issues.usageLimitTotal = "สิทธิ์รวมต้องไม่ต่ำกว่าจำนวนที่ใช้แล้ว";
   if (form.claimLimit != null && form.claimLimit < (existing?.claimedCount || 1)) issues.claimLimit = "จำนวนแจกต้องไม่ต่ำกว่าจำนวนที่เก็บแล้ว";
