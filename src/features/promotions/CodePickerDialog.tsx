@@ -17,7 +17,6 @@ import {
 import { CouponTicket } from "./CouponTicket";
 import {
   formatPromotionUnavailableReason,
-  formatPromotionValue,
   normalizePromotionCode,
 } from "@/features/cart/checkout.format";
 import type { AvailablePromotion, PromotionUiError } from "@/features/cart/promotions.types";
@@ -115,8 +114,6 @@ export function CodePickerDialog({
       items: relevant.filter((promotion) => promotion.source === "PUBLIC"),
     },
   ];
-
-  const draftPromotion = relevant.find((p) => p.code === draftCode);
 
   const handleTrySubmit = async () => {
     const normalized = normalizePromotionCode(typed);
@@ -266,47 +263,24 @@ export function CodePickerDialog({
           )}
         </div>
 
-        {/* Footer with discount summary and action buttons */}
-        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t bg-card px-6 py-3">
-          <div className="min-w-0 flex-1 text-xs">
-            {draftPromotion ? (
-              <p className="truncate">
-                <span className="text-muted-foreground">เลือก: </span>
-                <strong className="font-semibold text-foreground">
-                  {draftPromotion.code}
-                </strong>
-                <span
-                  className={`ml-1 font-medium ${
-                    draftPromotion.ownerType === "PLATFORM"
-                      ? "text-primary"
-                      : "text-teal-700"
-                  }`}
-                >
-                  ({formatPromotionValue(draftPromotion)})
-                </span>
-              </p>
-            ) : (
-              <span className="text-muted-foreground">ยังไม่ได้เลือกโค้ด</span>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleClear}
-            >
-              ไม่ใช้โค้ด
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              disabled={!draftCode}
-              onClick={handleConfirm}
-            >
-              ใช้โค้ดนี้
-            </Button>
-          </div>
+        {/* Footer actions match the shared Figma picker for platform and seller codes. */}
+        <div className="sticky bottom-0 flex items-center justify-end gap-2 border-t bg-card px-6 py-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClear}
+          >
+            ไม่ใช้โค้ด
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            disabled={!draftCode}
+            onClick={handleConfirm}
+          >
+            ใช้โค้ดนี้
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
