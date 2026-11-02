@@ -46,7 +46,7 @@ export function WalletTicket({ code, tab, onOpenTerms }: WalletTicketProps) {
       scallopOffsets={[-29, -11, 7, 25]}
       onClick={onOpenTerms}
       className={cn(onOpenTerms && "cursor-pointer", muted && "bg-muted/30")}
-      stubClassName={muted ? "!bg-none bg-gradient-to-br from-zinc-500 to-zinc-300" : undefined}
+      stubClassName={muted ? "from-zinc-500 via-zinc-400 to-zinc-300" : undefined}
       stub={
         <>
           {code.discountType !== "FREE_SHIPPING" && <span className="text-[10px] text-white/80">ลด</span>}

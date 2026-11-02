@@ -230,7 +230,12 @@ export function CartPage() {
 
   const codeRow = (owner: PromotionOwnerKey, label: string) => {
     const notice = promotions.notices[String(owner)];
-    if (notice) return <DroppedCodeNotice message={notice} />;
+    const row = codeControl(owner, label);
+    // C2-E sits where the code was; the row stays under it so another code can be picked.
+    return notice ? <div className="grid gap-2"><DroppedCodeNotice message={notice} />{row}</div> : row;
+  };
+
+  const codeControl = (owner: PromotionOwnerKey, label: string) => {
     const applied = promotions.appliedCode(owner);
     if (applied) {
       return (

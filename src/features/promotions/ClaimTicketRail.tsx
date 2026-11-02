@@ -1,4 +1,5 @@
 import { ClaimTicket } from "./ClaimTicket";
+import { claimTicketState, type ClaimTicketState } from "./claim.format";
 import type { ClaimableCode, ClaimSource } from "./claim.types";
 import { useClaimFlow } from "./useClaimFlow";
 
@@ -9,13 +10,15 @@ export interface ClaimTicketRailProps {
   ownerView?: boolean;
 }
 
+const ORDER: Record<ClaimTicketState, number> = { claimable: 0, claimed: 1, soldOut: 2 };
+
 /**
  * Tickets 292 px wide — four fill the 1216 px row on the home page, more
- * scroll sideways. Collected ones go last so the next claimable is in view.
+ * scroll sideways. Claimable first, then collected, sold out last (H1).
  */
 export function ClaimTicketRail({ codes, source, ownerView = false }: ClaimTicketRailProps) {
   const { claim, claimingId, openTerms, dialogs } = useClaimFlow(source, { ownerView });
-  const ordered = [...codes].sort((a, b) => Number(a.claimed) - Number(b.claimed));
+  const ordered = [...codes].sort((a, b) => ORDER[claimTicketState(a)] - ORDER[claimTicketState(b)]);
 
   return (
     <>

@@ -73,7 +73,7 @@ export function ClaimTicket({
         soldOut && "bg-muted/30",
         className,
       )}
-      stubClassName={soldOut ? "!bg-none bg-gradient-to-br from-zinc-500 to-zinc-300" : undefined}
+      stubClassName={soldOut ? "from-zinc-500 via-zinc-400 to-zinc-300" : undefined}
       stub={
         <>
           <small className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/80">

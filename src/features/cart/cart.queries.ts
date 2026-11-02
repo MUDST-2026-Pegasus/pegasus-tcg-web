@@ -42,6 +42,8 @@ export function useCheckoutPromotionList(cartItemIds: number[], context: {
     queryKey: ["checkout-promotions", context.userId, context.cartId, cartItemIds, context.itemsKey ?? null],
     queryFn: () => checkoutApi.getPromotions(cartItemIds),
     enabled: context.enabled,
+    // The cart re-asks on every tick; keep the last list so badges and "collected" don't blink.
+    placeholderData: context.itemsKey === undefined ? undefined : keepPreviousData,
   });
 }
 
