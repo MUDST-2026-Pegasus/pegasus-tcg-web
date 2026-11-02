@@ -15,6 +15,10 @@ vi.mock("@/components/layout/Navbar", () => ({
   Navbar: () => <nav data-testid="navbar" />,
 }));
 
+vi.mock("@/features/promotions/PendingClaimRunner", () => ({
+  PendingClaimRunner: () => null,
+}));
+
 vi.mock("@/components/layout/Footer", () => ({
   Footer: () => <footer data-testid="footer" />,
 }));

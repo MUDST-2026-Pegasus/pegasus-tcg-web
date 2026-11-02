@@ -42,6 +42,7 @@ const PaymentSuccessPage = lazyPage(() => import("@/features/payment/pages/Payme
 const ProfilePage = lazyPage(() => import("@/features/account/pages/ProfilePage").then((m) => m.ProfilePage), <AccountPageSkeleton label="กำลังโหลดโปรไฟล์" />);
 const OrderHistoryPage = lazyPage(() => import("@/features/account/pages/OrderHistoryPage").then((m) => m.OrderHistoryPage), <AccountPageSkeleton label="กำลังโหลดคำสั่งซื้อ" />);
 const AddressBookPage = lazyPage(() => import("@/features/account/pages/AddressBookPage").then((m) => m.AddressBookPage), <AccountPageSkeleton label="กำลังโหลดที่อยู่" />);
+const MyCouponsPage = lazyPage(() => import("@/features/account/pages/MyCouponsPage").then((m) => m.MyCouponsPage), <AccountPageSkeleton label="กำลังโหลดโค้ดของฉัน" />);
 const MyCollectionPage = lazyPage(() => import("@/features/collection/pages/MyCollectionPage").then((m) => m.MyCollectionPage), <CatalogPageSkeleton label="กำลังโหลดคอลเลกชัน" />);
 const SellerApplicationPage = lazyPage(() => import("@/features/seller/application/SellerApplicationPage").then((m) => m.SellerApplicationPage), <FormPageSkeleton />);
 const AuctionListPage = lazyPage(() => import("@/features/auction/pages/AuctionListPage").then((m) => m.AuctionListPage), <CatalogPageSkeleton label="กำลังโหลดประมูล" />);
@@ -87,6 +88,7 @@ export const publicRoutes: RouteObject = {
         { path: "account/profile", element: <ProfilePage /> },
         { path: "account/orders", element: <OrderHistoryPage /> },
         { path: "account/addresses", element: <AddressBookPage /> },
+        { path: "account/coupons", element: <MyCouponsPage /> },
         { path: "account/collection", element: <MyCollectionPage /> },
         { path: "account/auctions", element: <MyAuctionsPage /> },
         // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร

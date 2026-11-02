@@ -55,6 +55,37 @@ describe('Core Shopping Cart Flow', () => {
     expiresAt: null,
   };
 
+  /** Totals for the ticked items with no codes, like the BE when nothing is collected. */
+  function stubPromotions(getCart: () => typeof initialCartData) {
+    cy.intercept('GET', '**/api/v1/checkout/promotions*', {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    });
+    cy.intercept('POST', '**/api/v1/checkout/promo-preview', (req) => {
+      const ids: number[] = req.body.cartItemIds;
+      const subtotal = getCart().items
+        .filter((item) => ids.includes(item.id))
+        .reduce((sum, item) => sum + item.currentPrice * item.quantity, 0);
+      req.reply({
+        statusCode: 200,
+        body: {
+          success: true,
+          data: {
+            sellers: [],
+            itemsSubtotal: subtotal,
+            shippingTotal: null,
+            sellerDiscountTotal: 0,
+            platformDiscountTotal: 0,
+            grandTotal: subtotal,
+            shippingEstimated: true,
+            codes: [],
+            bestPick: req.body.autoPick ? { platformCode: null, sellerCodes: {} } : null,
+          },
+        },
+      });
+    });
+  }
+
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
@@ -73,7 +104,7 @@ describe('Core Shopping Cart Flow', () => {
     }).as('getMe');
   });
 
-  it('renders cart items with correct subtotal, shipping, and total calculations', () => {
+  it('renders cart items per shop with the subtotal and total before shipping', () => {
     cy.intercept('GET', '**/api/v1/cart*', {
       statusCode: 200,
       body: {
@@ -81,12 +112,13 @@ describe('Core Shopping Cart Flow', () => {
         data: initialCartData,
       },
     }).as('getCart');
+    stubPromotions(() => initialCartData);
 
     cy.visit('/cart');
     cy.wait('@getCart');
 
     // Verify page title
-    cy.contains('h1', 'Shopping Cart').should('be.visible');
+    cy.contains('h1', 'ตะกร้าสินค้า').should('be.visible');
 
     // Verify items
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
@@ -94,14 +126,13 @@ describe('Core Shopping Cart Flow', () => {
     cy.contains('Dark Magician').should('be.visible');
     cy.contains('Yugi Card Shop').should('be.visible');
 
-    // Verify summary: 1300 subtotal, 100 shipping, 1400 total
-    cy.contains('Subtotal (2 items)').should('be.visible');
-    cy.contains('฿1,300').should('be.visible');
-    cy.contains('฿100').should('be.visible');
-    cy.contains('฿1,400').should('be.visible');
+    // Verify summary: 2 + 1 cards for 1300; shipping is worked out at checkout
+    cy.contains('ยอดสินค้า (3 ใบ)').should('be.visible');
+    cy.contains('คิดในหน้าถัดไป').should('be.visible');
+    cy.get('[aria-label="ยอดรวม"]').should('contain.text', '฿1,300');
 
     // Checkout button should be enabled
-    cy.contains('button', 'Proceed to Checkout').should('not.be.disabled');
+    cy.contains('button', 'ไปชำระเงิน (3)').should('not.be.disabled');
   });
 
   it('toggles item selection and updates order summary calculations', () => {
@@ -112,23 +143,24 @@ describe('Core Shopping Cart Flow', () => {
         data: initialCartData,
       },
     }).as('getCart');
+    stubPromotions(() => initialCartData);
 
     cy.visit('/cart');
     cy.wait('@getCart');
 
-    // Click "Select All" to deselect all items
-    cy.get('label[for="select-all"]').click();
+    // Click "เลือกทั้งหมด" to deselect all items
+    cy.contains('label', 'เลือกทั้งหมด').click();
 
-    // Summary should show 0 subtotal and checkout button should be disabled
-    cy.contains('Subtotal (0 items)').should('be.visible');
-    cy.contains('button', 'Proceed to Checkout').should('be.disabled');
+    // Summary should show 0 cards and checkout button should be disabled
+    cy.contains('ยอดสินค้า (0 ใบ)').should('be.visible');
+    cy.contains('button', 'ไปชำระเงิน (0)').should('be.disabled');
 
-    // Click "Select All" again to re-select all items
-    cy.get('label[for="select-all"]').click();
+    // Click "เลือกทั้งหมด" again to re-select all items
+    cy.contains('label', 'เลือกทั้งหมด').click();
 
-    // Summary should restore to 2 items
-    cy.contains('Subtotal (2 items)').should('be.visible');
-    cy.contains('button', 'Proceed to Checkout').should('not.be.disabled');
+    // Summary should restore to 3 cards
+    cy.contains('ยอดสินค้า (3 ใบ)').should('be.visible');
+    cy.contains('button', 'ไปชำระเงิน (3)').should('not.be.disabled');
   });
 
   it('removes an item from cart and dynamically updates the cart', () => {
@@ -158,6 +190,7 @@ describe('Core Shopping Cart Flow', () => {
         },
       });
     }).as('removeDarkMagician');
+    stubPromotions(() => currentCart);
 
     cy.visit('/cart');
     cy.wait('@getCartDynamic');
@@ -165,7 +198,7 @@ describe('Core Shopping Cart Flow', () => {
     cy.contains('Dark Magician').should('be.visible');
 
     // Click remove on the second item (Dark Magician)
-    cy.get('button').contains('Remove').last().click();
+    cy.get('button[aria-label="ลบ Dark Magician"]').click();
 
     cy.wait('@removeDarkMagician');
     cy.wait('@getCartDynamic');
@@ -173,6 +206,7 @@ describe('Core Shopping Cart Flow', () => {
     // Dark Magician should no longer be in the cart
     cy.contains('Dark Magician').should('not.exist');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
-    cy.contains('Subtotal (1 items)').should('be.visible');
+    cy.contains('ยอดสินค้า (2 ใบ)').should('be.visible');
+    cy.get('[aria-label="ยอดรวม"]').should('contain.text', '฿1,000');
   });
 });

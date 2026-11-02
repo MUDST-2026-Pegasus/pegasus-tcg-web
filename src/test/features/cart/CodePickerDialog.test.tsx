@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@/test/utils";
 import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
@@ -126,7 +126,7 @@ describe("CodePickerDialog", () => {
     expect(screen.getByText(/โค้ดทั่วไป/)).toBeInTheDocument();
   });
 
-  it("explains that an uncollected code must be collected before selection", async () => {
+  it("shows an uncollected code as a claim ticket that cannot be selected", async () => {
     const user = userEvent.setup();
     const onClaim = vi.fn();
     const claimable: AvailablePromotion = {
@@ -149,16 +149,27 @@ describe("CodePickerDialog", () => {
       />,
     );
 
-    const ticket = screen.getByRole("radio", { name: /NEEDCLAIM/ });
-    expect(ticket).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByText("เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้")).toBeInTheDocument();
-
-    const tooltipTrigger = document.querySelector('span[aria-label^="NEEDCLAIM:"]')!;
-    await user.hover(tooltipTrigger);
-    await waitFor(() => expect(tooltipTrigger).toHaveAttribute("data-popup-open"));
-
-    await user.click(screen.getByRole("button", { name: "เก็บแล้วใช้เลย" }));
+    expect(screen.queryByRole("radio", { name: /NEEDCLAIM/ })).not.toBeInTheDocument();
+    expect(screen.getByText("เหลือ 5 สิทธิ์")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "เก็บโค้ด NEEDCLAIM" }));
     expect(onClaim).toHaveBeenCalledWith(claimable);
+  });
+
+  it("disables collecting a code that has run out", () => {
+    render(
+      <CodePickerDialog
+        open
+        onOpenChange={vi.fn()}
+        owner="PLATFORM"
+        promotions={[{ ...platformPromo, id: 7, code: "GONE", source: "CLAIMABLE", remainingClaims: 0 }]}
+        onSelect={vi.fn()}
+        onTryCode={vi.fn()}
+        onClaim={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "หมดแล้ว" })).toBeDisabled();
+    expect(screen.getByText("ถูกเก็บครบแล้ว")).toBeInTheDocument();
   });
 
   it("selects a code via draft selection + confirm, and normalizes typed codes", async () => {
@@ -303,7 +314,7 @@ describe("CodePickerDialog", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "เก็บแล้วใช้เลย" }));
+    await user.click(screen.getByRole("button", { name: "เก็บโค้ด CLAIMME" }));
     expect(onClaim).toHaveBeenCalledWith(claimable);
   });
 });
