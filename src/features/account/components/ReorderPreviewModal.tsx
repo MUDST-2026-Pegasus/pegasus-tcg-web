@@ -754,8 +754,10 @@ export function ReorderPreviewModal({
 
                                         if (!isAvailable || !listing) {
                                           return (
-                                            <div
+                                            <button
                                               key={cond}
+                                              type="button"
+                                              disabled
                                               aria-disabled="true"
                                               className="border border-slate-200 bg-secondary rounded-xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-center opacity-60 cursor-not-allowed select-none"
                                             >
@@ -768,7 +770,7 @@ export function ReorderPreviewModal({
                                               <span className="text-[10px] text-slate-400 mt-0.5">
                                                 {cond === "DMG" ? "Out of stock" : "หมด"}
                                               </span>
-                                            </div>
+                                            </button>
                                           );
                                         }
 

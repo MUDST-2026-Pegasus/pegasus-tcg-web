@@ -163,6 +163,64 @@ describe("ReorderPreviewModal", () => {
     } as CartResponse);
   });
 
+  it("pre-selects the original condition when it is in stock", () => {
+    const preview: ReorderPreviewResponse = {
+      ...mockPreviewData,
+      sellerOrders: [{
+        ...mockPreviewData.sellerOrders[0],
+        items: [{
+          ...mockPreviewData.sellerOrders[0].items[0],
+          currentListing: { listingId: 1001, condition: "DMG", price: 8000, quantityAvailable: 2, isAvailable: true },
+          alternativeConditions: [],
+        }],
+      }],
+    };
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: preview,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(<ReorderPreviewModal isOpen orderId={67} />);
+
+    expect(screen.getByRole("button", { name: /^dmg/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i })).toBeEnabled();
+  });
+
+  it("disables the sold-out original condition and lets the buyer choose another", async () => {
+    const user = userEvent.setup();
+    const preview: ReorderPreviewResponse = {
+      ...mockPreviewData,
+      sellerOrders: [{
+        ...mockPreviewData.sellerOrders[0],
+        items: [{
+          ...mockPreviewData.sellerOrders[0].items[0],
+          currentListing: { listingId: 1001, condition: "DMG", price: 8000, quantityAvailable: 0, isAvailable: false },
+          alternativeConditions: [
+            { listingId: 1002, condition: "NM", price: 9500, quantityAvailable: 2, isAvailable: true },
+            { listingId: 1003, condition: "LP", price: 8900, quantityAvailable: 1, isAvailable: true },
+          ],
+        }],
+      }],
+    };
+    const addBatch = vi.spyOn(cartApi, "addBatchItems");
+    vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
+      data: preview,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderPreview>);
+
+    renderWithProviders(<ReorderPreviewModal isOpen orderId={67} />);
+
+    expect(screen.getByRole("button", { name: /^dmg/i })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: /^lp/i }));
+    expect(screen.getByRole("button", { name: /^lp/i })).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByRole("button", { name: /สั่งสินค้านี้อีกครั้ง/i }));
+    await waitFor(() => expect(addBatch).toHaveBeenCalledWith([{ listingId: 1003, quantity: 1 }]));
+  });
+
   it("renders modal header, seller info, blue alert banner, and order item from API query", () => {
     vi.spyOn(orderQueries, "useReorderPreview").mockReturnValue({
       data: mockPreviewData,
