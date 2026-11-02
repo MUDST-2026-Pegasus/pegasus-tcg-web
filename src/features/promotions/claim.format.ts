@@ -10,7 +10,6 @@ export function claimTicketState(promotion: Pick<ClaimableCode, "claimed" | "rem
   return promotion.remainingClaims === 0 ? "soldOut" : "claimable";
 }
 
-
 const dateTime = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
   day: "numeric",
   month: "short",
@@ -19,21 +18,9 @@ const dateTime = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
   minute: "2-digit",
 });
 
-const shortDate = new Intl.DateTimeFormat("th-TH", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
 export function formatTermsDateTime(value: string): string {
   const date = new Date(value);
   return Number.isFinite(date.getTime()) ? dateTime.format(date) : "—";
-}
-
-/** "30 พ.ย. 2569" in the wallet, matching W1. */
-export function formatWalletDate(value: string): string {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? shortDate.format(date) : "—";
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -112,4 +99,24 @@ export async function copyPromotionCode(code: string) {
   } catch {
     toast.add({ type: "error", title: "คัดลอกไม่สำเร็จ" });
   }
+}
+
+/** "ลด 10% สูงสุด ฿200 · ขั้นต่ำ ฿500 · เฉพาะ CardVault BKK" — W1's second line. */
+export function walletRuleSummary(code: {
+  ownerType: "PLATFORM" | "SELLER";
+  shop: { name: string } | null;
+  discountType: "PERCENT" | "FIXED" | "FREE_SHIPPING";
+  discountValue: number;
+  maxDiscount: number | null;
+  minSpend: number;
+}): string {
+  const parts: string[] = [];
+  if (code.discountType === "PERCENT") {
+    parts.push(`ลด ${code.discountValue}%${code.maxDiscount ? ` สูงสุด ${checkoutMoney(code.maxDiscount)}` : ""}`);
+  } else if (code.discountType === "FREE_SHIPPING") {
+    parts.push(code.maxDiscount ? `ส่งฟรีสูงสุด ${checkoutMoney(code.maxDiscount)}/ร้าน` : "ส่งฟรี");
+  }
+  parts.push(code.minSpend > 0 ? `ขั้นต่ำ ${checkoutMoney(code.minSpend)}` : "ไม่มีขั้นต่ำ");
+  if (code.ownerType === "SELLER" && code.shop) parts.push(`เฉพาะ ${code.shop.name}`);
+  return parts.join(" · ");
 }
