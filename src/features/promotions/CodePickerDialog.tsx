@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Ticket, TicketPercent } from "lucide-react";
+import { Ticket, TicketPercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,7 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { PromotionCodeForm } from "./PromotionCodeForm";
+import { RadioGroup } from "@/components/ui/radio-group";
 import {
   Tooltip,
   TooltipContent,
@@ -18,8 +19,8 @@ import {
   formatPromotionUnavailableReason,
   formatPromotionValue,
   normalizePromotionCode,
-} from "../checkout.format";
-import type { AvailablePromotion, PromotionUiError } from "../promotions.types";
+} from "@/features/cart/checkout.format";
+import type { AvailablePromotion, PromotionUiError } from "@/features/cart/promotions.types";
 
 export interface CodePickerDialogProps {
   open: boolean;
@@ -117,8 +118,7 @@ export function CodePickerDialog({
 
   const draftPromotion = relevant.find((p) => p.code === draftCode);
 
-  const handleTrySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTrySubmit = async () => {
     const normalized = normalizePromotionCode(typed);
     if (!normalized || loading || submitting) return;
     setSubmitting(true);
@@ -151,47 +151,16 @@ export function CodePickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-[var(--radius-card)] p-0">
+      <DialogContent className="flex max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-xl p-0">
         <DialogHeader className="p-6 pb-3">
           <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
         </DialogHeader>
 
         {/* Input box at top as specified by Figma B2/C2 */}
         <div className="border-b px-6 pb-4">
-          <form onSubmit={handleTrySubmit} className="flex flex-col gap-1.5">
-            <label htmlFor="promo-code-input" className="text-xs font-medium text-foreground">
-              กรอกโค้ดอื่น
-            </label>
-            <div className="flex gap-2">
-              <Input
-                id="promo-code-input"
-                value={typed}
-                onChange={(e) => setTyped(e.target.value)}
-                maxLength={20}
-                placeholder="กรอกโค้ดส่วนลด"
-                className="h-10 rounded-sm border-border bg-white px-3 py-[9px] text-[13px] leading-5 uppercase placeholder:text-promotion-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20"
-                disabled={loading || submitting}
-                aria-invalid={!!resolvedError}
-                aria-describedby={resolvedError ? "promo-code-error" : undefined}
-              />
-              <Button
-                type="submit"
-                disabled={!typed.trim() || loading || submitting}
-                className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-muted-foreground disabled:opacity-100"
-              >
-                {loading || submitting ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  "ใช้โค้ด"
-                )}
-              </Button>
-            </div>
-            {resolvedError && (
-              <p id="promo-code-error" role="alert" className="text-xs text-destructive">
-                {resolvedError}
-              </p>
-            )}
-          </form>
+          <PromotionCodeForm id="promo-code-input" label="กรอกโค้ดอื่น"
+            value={typed} onChange={setTyped} onSubmit={() => handleTrySubmit()}
+            error={resolvedError} loading={loading || submitting} />
         </div>
 
         {/* Scrollable list */}
@@ -214,6 +183,7 @@ export function CodePickerDialog({
             </div>
           )}
 
+          <RadioGroup value={draftCode ?? ""} onValueChange={(value) => setDraftCode(String(value))} className="gap-4">
           {groups.map((group) => {
             if (!group.items.length) return null;
             return (
@@ -274,6 +244,7 @@ export function CodePickerDialog({
               </section>
             );
           })}
+          </RadioGroup>
 
           {!relevant.length && (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 py-8 text-center">
@@ -307,8 +278,8 @@ export function CodePickerDialog({
                 <span
                   className={`ml-1 font-medium ${
                     draftPromotion.ownerType === "PLATFORM"
-                      ? "text-promotion-pegasus"
-                      : "text-promotion-shop"
+                      ? "text-primary"
+                      : "text-teal-700"
                   }`}
                 >
                   ({formatPromotionValue(draftPromotion)})

@@ -1,5 +1,7 @@
 import { ChevronRight, TicketPercent } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ShippingOptionPicker } from "./ShippingOptionPicker";
 import type { CartItemResponse } from "../cart.types";
@@ -46,7 +48,7 @@ export function CheckoutSellerCard({
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <Card className="checkout-seller gap-4 rounded-[var(--radius-card)] border border-border bg-card p-5 shadow-none ring-0" aria-label={`ร้าน ${sellerName}`}>
+    <Card className="checkout-seller gap-4 rounded-xl border border-border bg-card p-5 shadow-none ring-0" aria-label={`ร้าน ${sellerName}`}>
       <header className="flex items-center gap-2.5">
         <span aria-hidden="true" className="checkout-seller-avatar">
           {sellerName.trim().slice(0, 2).toUpperCase()}
@@ -96,57 +98,52 @@ export function CheckoutSellerCard({
       {onOpenPromotions && (
         <>
           {promotionCode ? (
-            <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-promotion-shop-selected-border bg-promotion-shop-selected px-3 py-2.5 text-xs">
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-teal-600/40 bg-teal-50 dark:bg-teal-950/30 px-3 py-2.5 text-xs">
               <div className="flex min-w-0 items-center gap-2">
-                <TicketPercent className="size-[18px] shrink-0 text-promotion-shop" />
+                <TicketPercent className="size-[18px] shrink-0 text-teal-700 dark:text-teal-400" />
                 <div className="min-w-0">
-                  <span className="block truncate font-semibold text-promotion-shop">
+                  <span className="block truncate font-semibold text-teal-700 dark:text-teal-400">
                     โค้ดร้าน · {promotionCode}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 {promotionDiscount > 0 && (
-                  <strong className="font-semibold text-promotion-shop">
+                  <strong className="font-semibold text-teal-700 dark:text-teal-400">
                     − {checkoutMoney(promotionDiscount)}
                   </strong>
                 )}
-                <button
+                <Button
                   type="button"
-                  className="text-primary hover:underline font-medium cursor-pointer"
+                  variant="link"
+                  className="h-auto p-0 text-xs"
                   onClick={onOpenPromotions}
                 >
                   เปลี่ยน
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <div
-              role="button"
-              tabIndex={0}
+            <Button
+              type="button"
+              variant="outline"
               onClick={onOpenPromotions}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onOpenPromotions?.();
-                }
-              }}
-              className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs transition-colors hover:border-promotion-shop"
+              className="h-auto w-full justify-between gap-2 rounded-lg px-3 py-2.5 text-xs font-normal hover:border-teal-700"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <TicketPercent className="size-[18px] shrink-0 text-promotion-shop" />
+                <TicketPercent className="size-[18px] shrink-0 text-teal-700 dark:text-teal-400" />
                 <span className="font-medium text-foreground">โค้ดร้าน</span>
                 {promotionCount > 0 && (
-                  <span className="rounded-full bg-promotion-shop/10 px-2 py-0.5 text-[11px] font-medium text-promotion-shop">
+                  <Badge variant="secondary" className="rounded-full bg-teal-700/10 text-[11px] text-teal-700 dark:text-teal-400">
                     มี {promotionCount} โค้ดที่ใช้ได้
-                  </span>
+                  </Badge>
                 )}
               </div>
               <div className="flex items-center gap-1 text-primary">
                 <span className="text-xs font-medium">เลือกหรือกรอกโค้ด</span>
                 <ChevronRight className="size-4" />
               </div>
-            </div>
+            </Button>
           )}
         </>
       )}

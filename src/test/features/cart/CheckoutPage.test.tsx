@@ -14,7 +14,7 @@ import { ApiError } from "@/lib/api/errors";
 import type { CartResponse } from "@/features/cart/cart.types";
 import type { Address } from "@/features/account/address.types";
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
-import { PROMOTION_SELECTION_KEY } from "@/features/cart/promotions.types";
+import { PROMOTION_SELECTION_KEY } from "@/features/cart/promotions.storage";
 
 const mockNavigate = vi.fn();
 
@@ -196,6 +196,7 @@ describe("CheckoutPage", () => {
     expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({
       platformCode: "PEGASUS10", sellerCodes: { 1: "STORE50" }, expectedGrandTotal: 261,
     }));
+    await waitFor(() => expect(sessionStorage.getItem(PROMOTION_SELECTION_KEY)).toBeNull());
   });
 
   it("asks for confirmation when the promotion total changes before ordering", async () => {
@@ -696,18 +697,18 @@ describe("CheckoutPage", () => {
 
     const summaryCard = screen.getByRole("heading", { name: "สรุปคำสั่งซื้อ" }).parentElement;
     expect(summaryCard).toHaveClass(
-      "rounded-[var(--radius-card)]",
+      "rounded-xl",
       "border",
       "border-border",
       "bg-card",
       "shadow-none",
     );
     const sellerDiscount = screen.getByText("ส่วนลดร้าน").parentElement;
-    expect(sellerDiscount?.children[0]).toHaveClass("text-promotion-label");
-    expect(sellerDiscount?.children[1]).toHaveClass("text-promotion-shop");
+    expect(sellerDiscount?.children[0]).toHaveClass("text-foreground/75");
+    expect(sellerDiscount?.children[1]).toHaveClass("text-teal-700");
     const platformDiscount = screen.getByText("ส่วนลด Pegasus · PEGASUS200").parentElement;
-    expect(platformDiscount?.children[0]).toHaveClass("text-promotion-label");
-    expect(platformDiscount?.children[1]).toHaveClass("text-promotion-pegasus");
+    expect(platformDiscount?.children[0]).toHaveClass("text-foreground/75");
+    expect(platformDiscount?.children[1]).toHaveClass("text-primary");
   });
 
   it("applies and removes platform code via user interaction", async () => {
@@ -746,6 +747,34 @@ describe("CheckoutPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
     });
+  });
+
+  it("recalculates a free-shipping promotion when delivery changes", async () => {
+    sessionStorage.setItem(PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "FREESHIP", sellerCodes: {} }));
+    const previewSpy = vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => {
+      const shippingFee = request.shippingOptionBySeller?.[1] === 12 ? 65 : 40;
+      return {
+        sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300,
+          shippingFee, sellerDiscount: 0, platformDiscount: shippingFee, grandTotal: 300 }],
+        itemsSubtotal: 300, shippingTotal: shippingFee, sellerDiscountTotal: 0,
+        platformDiscountTotal: shippingFee, grandTotal: 300, shippingEstimated: false,
+        codes: [{ code: "FREESHIP", ownerType: "PLATFORM", sellerProfileId: null,
+          sellerName: null, status: "APPLIED", discount: shippingFee,
+          shortfall: null, pendingShipping: false }],
+        bestPick: null,
+      };
+    });
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+
+    await userEvent.setup().click(screen.getByRole("radio", { name: /EMS Store A/ }));
+    await waitFor(() => expect(previewSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ shippingOptionBySeller: { 1: 12 } }), expect.anything(),
+    ));
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+    expect(screen.getAllByText("− ฿65")).toHaveLength(2);
   });
 
   it("displays Thai error with seller name when promo is for wrong seller", async () => {

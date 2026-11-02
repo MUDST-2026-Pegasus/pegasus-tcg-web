@@ -17,7 +17,7 @@ import { useCreateSellerPromotion, useUpdateSellerPromotion } from "../promotion
 import { discountLabel, money } from "../promotions.format";
 import { schemaForSellerPromotion } from "../promotions.schema";
 import type { SellerPromotion, SellerPromotionInput } from "../promotions.types";
-import { CouponTicket } from "./CouponTicket";
+import { CouponTicket } from "@/features/promotions/CouponTicket";
 
 type NumberKey = "discountValue" | "maxDiscount" | "minSpend" | "usageLimitTotal" | "usageLimitPerUser" | "claimLimit";
 

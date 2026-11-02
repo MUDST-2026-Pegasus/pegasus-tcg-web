@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@/test/utils";
-import { CodePickerDialog } from "@/features/cart/components/CodePickerDialog";
-import { CouponTicket } from "@/features/cart/components/CouponTicket";
+import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
+import { CouponTicket } from "@/features/promotions/CouponTicket";
 import type { AvailablePromotion } from "@/features/cart/promotions.types";
 
 const platformPromo: AvailablePromotion = {
@@ -62,12 +62,12 @@ describe("CouponTicket", () => {
     const { rerender } = render(
       <CouponTicket promotion={platformPromo} selected={false} onSelect={onSelect} />,
     );
-    const button = screen.getByRole("button", { name: /PEGASUS10/ });
-    expect(button).toHaveAttribute("aria-pressed", "false");
+    const button = screen.getByRole("radio", { name: /PEGASUS10/ });
+    expect(button.closest(".ring-border")).not.toHaveClass("border-primary");
     expect(button).not.toBeDisabled();
 
     rerender(<CouponTicket promotion={platformPromo} selected={true} onSelect={onSelect} />);
-    expect(screen.getByRole("button", { name: /PEGASUS10/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("radio", { name: /PEGASUS10/ }).closest(".ring-border")).toHaveClass("border-primary");
 
     rerender(
       <CouponTicket
@@ -80,7 +80,7 @@ describe("CouponTicket", () => {
         onSelect={onSelect}
       />,
     );
-    expect(screen.getByRole("button", { name: /PEGASUS10/ })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: /PEGASUS10/ })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText(/ซื้อเพิ่มอีก ฿150/)).toBeInTheDocument();
   });
 });
@@ -149,11 +149,11 @@ describe("CodePickerDialog", () => {
       />,
     );
 
-    const ticket = screen.getByRole("button", { name: /NEEDCLAIM/ });
-    expect(ticket).toBeDisabled();
+    const ticket = screen.getByRole("radio", { name: /NEEDCLAIM/ });
+    expect(ticket).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText("เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้")).toBeInTheDocument();
 
-    const tooltipTrigger = ticket.parentElement!;
+    const tooltipTrigger = document.querySelector('span[aria-label^="NEEDCLAIM:"]')!;
     await user.hover(tooltipTrigger);
     await waitFor(() => expect(tooltipTrigger).toHaveAttribute("data-popup-open"));
 
@@ -179,7 +179,7 @@ describe("CodePickerDialog", () => {
     );
 
     // Clicking the ticket updates draft selection (does NOT close immediately)
-    await user.click(screen.getByRole("button", { name: /PEGASUS10/ }));
+    await user.click(screen.getByRole("radio", { name: /PEGASUS10/ }));
     expect(onSelect).not.toHaveBeenCalled();
     expect(screen.getAllByText(/PEGASUS10/).length).toBeGreaterThanOrEqual(1);
 

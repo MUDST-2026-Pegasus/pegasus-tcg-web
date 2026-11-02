@@ -1,4 +1,5 @@
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -65,7 +66,7 @@ export function PromotionChangedDialog({
             </p>
           )}
           {sellerDiscountTotal > 0 && (
-            <p className="flex justify-between text-xs text-teal-700">
+            <p className="flex justify-between text-xs text-teal-700 dark:text-teal-400">
               <span>ส่วนลดร้านที่ยังใช้ได้</span>
               <span>− {checkoutMoney(sellerDiscountTotal)}</span>
             </p>
@@ -100,7 +101,7 @@ export function PromotionChangedDialog({
               onConfirmNewTotal();
             }}
           >
-            {loading && <Loader2 className="mr-1.5 size-4 animate-spin" />}
+            {loading && <Spinner className="mr-1.5" />}
             สั่งซื้อด้วยยอดใหม่
           </Button>
         </DialogFooter>

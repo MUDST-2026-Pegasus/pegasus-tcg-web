@@ -1,24 +1,26 @@
+import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { useAddresses, addressKeys } from "@/features/account/address.queries";
-import { formatAddressLines } from "@/features/account/address.format";
 import { useCart, useShippingQuotes, cartKeys } from "../cart.queries";
 import { checkoutApi } from "../checkout.api";
 import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
+import { CheckoutAddressSummary } from "../components/CheckoutAddressSummary";
 import { findPromotionOwnerForCode } from "../checkout.format";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
-import { CodePickerDialog } from "../components/CodePickerDialog";
+import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
 import { PromotionChangedDialog } from "../components/PromotionChangedDialog";
 import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPromotionCard";
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
+import { clearPromotionSelection } from "../promotions.storage";
 import type { CartItemResponse } from "../cart.types";
 import "./checkout.css";
 
@@ -202,6 +204,8 @@ export function CheckoutPage() {
     cartNeedsReview,
     shippingOptionBySeller,
     shippingReady,
+    userId: user?.id,
+    cartId: cart?.id,
   });
 
   const promotionStoreUsername =
@@ -344,6 +348,7 @@ export function CheckoutPage() {
     try {
       const response = await checkoutApi.checkout(payload, attempt.current.key);
       completed.current = true;
+      clearPromotionSelection();
       toast.add({
         title: "สร้างคำสั่งซื้อสำเร็จ",
         description: `คำสั่งซื้อ ${response.orderNumber}`,
@@ -600,54 +605,17 @@ export function CheckoutPage() {
           </div>
 
           <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
-            <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
-              <div className="flex items-center justify-between gap-3 text-[13px]">
-                <h2 className="font-semibold">ที่อยู่จัดส่ง</h2>
-                <button
-                  type="button"
-                  className="checkout-link font-medium"
-                  disabled={isSubmitting || !!addressError || isAddressLoading}
-                  onClick={() => setAddressPickerOpen(true)}
-                >
-                  {activeAddress ? "เปลี่ยน" : "เพิ่มที่อยู่"}
-                </button>
-              </div>
-              {isAddressLoading ? (
-                <div
-                  role="status"
-                  aria-label="กำลังโหลดที่อยู่จัดส่ง"
-                  className="grid gap-2"
-                >
-                  <div className="checkout-shipping-skeleton" />
-                  <div className="checkout-shipping-skeleton" />
-                </div>
-              ) : addressError ? (
-                <div role="alert" className="text-xs text-destructive">
-                  โหลดที่อยู่ไม่สำเร็จ{" "}
-                  <button
-                    type="button"
-                    className="checkout-link"
-                    onClick={() => void refetchAddresses()}
-                  >
-                    ลองอีกครั้ง
-                  </button>
-                </div>
-              ) : activeAddress ? (
-                <div className="text-xs leading-[18px] text-muted-foreground">
-                  <p className="font-medium text-foreground">
-                    {activeAddress.recipientName} · {activeAddress.phone}
-                  </p>
-                  <p>{formatAddressLines(activeAddress).join(" ")}</p>
-                </div>
-              ) : (
-                <p role="alert" className="text-xs text-destructive">
-                  เพิ่มที่อยู่จัดส่งเพื่อดำเนินการต่อ
-                </p>
-              )}
-            </Card>
+            <CheckoutAddressSummary
+              address={activeAddress}
+              loading={isAddressLoading}
+              error={!!addressError}
+              disabled={isSubmitting}
+              onChange={() => setAddressPickerOpen(true)}
+              onRetry={() => void refetchAddresses()}
+            />
 
-            <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
-              <div className="flex items-center justify-between gap-3 text-[13px]">
+            <Card className={`${CHECKOUT_CARD_CLASS} text-[13px]`}>
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="font-semibold">วิธีชำระเงิน</h2>
                 <span className="text-muted-foreground">โอนผ่าน PromptPay</span>
               </div>

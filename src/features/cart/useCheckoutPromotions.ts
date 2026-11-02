@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import type { CartItemResponse } from "./cart.types";
-import { checkoutApi } from "./checkout.api";
+import { useCheckoutPromotionList, useCheckoutPromotionPreview } from "./cart.queries";
 import { formatPromotionError, normalizePromotionCode } from "./checkout.format";
-import {
-  readPromotionSelection,
-  savePromotionSelection,
-  type PromotionSelection,
-} from "./promotions.types";
+import { readPromotionSelection, savePromotionSelection } from "./promotions.storage";
+import type { PromotionSelection } from "./promotions.types";
 
 interface CheckoutPromotionsOptions {
   checkoutItems: CartItemResponse[];
@@ -15,6 +11,8 @@ interface CheckoutPromotionsOptions {
   cartNeedsReview: boolean;
   shippingOptionBySeller: Record<number, number>;
   shippingReady: boolean;
+  userId?: number;
+  cartId?: number;
 }
 
 export function useCheckoutPromotions({
@@ -23,6 +21,8 @@ export function useCheckoutPromotions({
   cartNeedsReview,
   shippingOptionBySeller,
   shippingReady,
+  userId,
+  cartId,
 }: CheckoutPromotionsOptions) {
   const [promotionSelection, setPromotionSelection] = useState<PromotionSelection>(
     readPromotionSelection,
@@ -65,26 +65,13 @@ export function useCheckoutPromotions({
     return () => window.clearTimeout(timer);
   }, [promotionSelection]);
 
-  const promotionList = useQuery({
-    queryKey: ["checkout-promotions", cartItemIds],
-    queryFn: () => checkoutApi.getPromotions(cartItemIds),
-    enabled: checkoutItems.length > 0 && !cartNeedsReview,
+  const promotionList = useCheckoutPromotionList(cartItemIds, {
+    userId, cartId, enabled: checkoutItems.length > 0 && !cartNeedsReview,
   });
 
-  const promoPreview = useQuery({
-    queryKey: [
-      "checkout-promo-preview",
-      cartItemIds,
-      shippingOptionBySeller,
-      debouncedSelection,
-    ],
-    queryFn: ({ signal }) =>
-      checkoutApi.previewPromotions(
-        { cartItemIds, shippingOptionBySeller, ...debouncedSelection },
-        signal,
-      ),
-    enabled: shippingReady && debouncedSelection === promotionSelection,
-    retry: false,
+  const promoPreview = useCheckoutPromotionPreview({
+    cartItemIds, shippingOptionBySeller, selection: debouncedSelection,
+    userId, cartId, enabled: shippingReady && debouncedSelection === promotionSelection,
   });
 
   const preview = promoPreview.data;

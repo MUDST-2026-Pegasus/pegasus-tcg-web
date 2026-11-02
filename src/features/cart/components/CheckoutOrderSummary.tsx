@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -49,7 +50,7 @@ export function CheckoutOrderSummary({
   onReturnToCart,
 }: CheckoutOrderSummaryProps) {
   return (
-    <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
+    <Card className={CHECKOUT_CARD_CLASS}>
       <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
 
       <div className="flex items-center justify-between gap-3 text-[13px]">
@@ -113,8 +114,8 @@ export function CheckoutOrderSummary({
 
       {!!preview?.sellerDiscountTotal && preview.sellerDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
-          <span className="text-promotion-label">ส่วนลดร้าน</span>
-          <span className="font-medium text-promotion-shop">
+          <span className="text-foreground/75">ส่วนลดร้าน</span>
+          <span className="font-medium text-teal-700 dark:text-teal-400">
             − {checkoutMoney(preview.sellerDiscountTotal)}
           </span>
         </div>
@@ -128,11 +129,11 @@ export function CheckoutOrderSummary({
               const code = promotionSelection.sellerCodes[seller.sellerProfileId];
               return (
                 <div key={seller.sellerProfileId} className="flex justify-between">
-                  <span className="min-w-0 truncate text-promotion-muted">
+                  <span className="min-w-0 truncate text-muted-foreground">
                     {seller.sellerName}
                     {code ? ` (${code})` : ""}
                   </span>
-                  <span className="shrink-0 text-promotion-muted">
+                  <span className="shrink-0 text-muted-foreground">
                     − {checkoutMoney(seller.sellerDiscount)}
                   </span>
                 </div>
@@ -143,11 +144,11 @@ export function CheckoutOrderSummary({
 
       {!!preview?.platformDiscountTotal && preview.platformDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
-          <span className="text-promotion-label">
+          <span className="text-foreground/75">
             ส่วนลด Pegasus
             {appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}
           </span>
-          <span className="font-medium text-promotion-pegasus">
+          <span className="font-medium text-primary">
             − {checkoutMoney(preview.platformDiscountTotal)}
           </span>
         </div>
@@ -163,7 +164,7 @@ export function CheckoutOrderSummary({
       </div>
 
       {!!preview && preview.sellerDiscountTotal + preview.platformDiscountTotal > 0 && (
-        <p className="text-right text-xs font-semibold text-promotion-shop">
+        <p className="text-right text-xs font-semibold text-teal-700 dark:text-teal-400">
           ประหยัดไป{" "}
           {checkoutMoney(
             preview.sellerDiscountTotal + preview.platformDiscountTotal,
@@ -176,7 +177,7 @@ export function CheckoutOrderSummary({
         disabled={!canPurchase}
         onClick={onPurchase}
       >
-        {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+        {isSubmitting && <Spinner />}
         {isSubmitting ? "กำลังสร้างคำสั่งซื้อ..." : "สั่งซื้อและไปชำระเงิน"}
       </Button>
 

@@ -4,7 +4,6 @@ import scallop from "@/assets/promotions/scallop.svg";
 import { cn } from "@/lib/utils";
 
 export type PromotionTicketFrameProps = {
-  as?: "div" | "button";
   variant: "platform" | "shop";
   className?: string;
   stubClassName?: string;
@@ -13,15 +12,10 @@ export type PromotionTicketFrameProps = {
   body: ReactNode;
   scallopOffsets: number[];
   onClick?: () => void;
-  disabled?: boolean;
-  type?: "button" | "submit" | "reset";
-  "aria-pressed"?: boolean | "true" | "false" | "mixed";
-  tabIndex?: number;
 };
 
 /** Shared coupon outline, notch and scallops for platform and shop codes. */
 export function PromotionTicketFrame({
-  as = "div",
   variant,
   className,
   stubClassName,
@@ -30,37 +24,21 @@ export function PromotionTicketFrame({
   body,
   scallopOffsets,
   onClick,
-  disabled,
-  type,
-  "aria-pressed": ariaPressed,
-  tabIndex,
 }: PromotionTicketFrameProps) {
-  const Component = as;
-  const buttonProps =
-    Component === "button"
-      ? {
-          type: type ?? "button",
-          disabled,
-          "aria-pressed": ariaPressed,
-          tabIndex,
-        }
-      : { tabIndex };
-
   return (
-    <Component
+    <div
       onClick={onClick}
-      {...buttonProps}
       className={cn(
-        "relative flex h-[90px] w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-transparent bg-card text-left shadow-promotion-ticket ring-1 ring-promotion-ticket transition-colors",
+        "relative flex h-[92px] w-full min-w-0 overflow-hidden rounded-xl bg-card text-left shadow-sm ring-1 ring-border",
         className,
       )}
     >
       <div
         className={cn(
-          "flex w-[88px] shrink-0 flex-col items-center justify-center pl-2 pr-1 text-center text-white",
+          "flex w-[88px] shrink-0 flex-col items-center justify-center px-1 text-center text-white",
           variant === "shop"
-            ? "bg-gradient-to-br from-promotion-shop-start via-promotion-shop-mid to-promotion-shop-end"
-            : "bg-gradient-to-br from-promotion-platform-start via-promotion-platform-mid to-promotion-platform-end",
+            ? "bg-gradient-to-br from-teal-800 via-teal-600 to-teal-400"
+            : "bg-gradient-to-br from-blue-900 via-primary to-sky-500",
           stubClassName,
         )}
       >
@@ -68,7 +46,7 @@ export function PromotionTicketFrame({
       </div>
       <div
         className={cn(
-          "flex min-w-0 flex-1 flex-col justify-center gap-1 border-l border-dashed border-border py-3 pr-3 pl-3.5",
+          "flex min-w-0 flex-1 flex-col justify-center gap-1 border-l border-dashed border-border px-3 py-2",
           bodyClassName,
         )}
       >
@@ -85,6 +63,6 @@ export function PromotionTicketFrame({
           style={{ top: `calc(50% + ${offset}px)` }}
         />
       ))}
-    </Component>
+    </div>
   );
 }
