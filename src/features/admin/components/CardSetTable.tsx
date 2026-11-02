@@ -119,7 +119,7 @@ export function CardSetTable({
             </TableRow>
           </TableHeader>
 
-          <TableBody className="[&_tr]:border-[#eef1f2]">
+          <TableBody className="[&_tr]:border-muted">
             {visible.map((cardSet) => {
               const logo = cardSet.logoImageUrl;
               const released = formatReleaseDate(cardSet.releaseDate);
@@ -128,7 +128,7 @@ export function CardSetTable({
                 <TableRow key={cardSet.id} className="hover:bg-[#fafbfb]">
                   <TableCell className="py-2.5 pl-5">
                     <div className="flex items-center gap-2.5">
-                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[#f1f3f4] text-[#9aa5ad]">
+                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
                         {logo ? (
                           <img src={logo} alt="" className="size-full object-contain" />
                         ) : (

@@ -4,16 +4,16 @@ import { AUCTION_PILL_LABEL, type AuctionPillKind } from "../auction.format";
 
 /** สีของป้ายแต่ละแบบ ตาม Figma Components › AUC / Status Pill (พื้น / ตัวอักษร+จุด) */
 const PILL_TONE: Record<AuctionPillKind, string> = {
-  Live: "bg-sky-50 text-sky-700",
+  Live: "bg-sky-50 text-primary",
   EndingSoon: "bg-red-50 text-red-700",
   Leading: "bg-emerald-50 text-emerald-700",
   Outbid: "bg-amber-100 text-amber-800",
   Won: "bg-emerald-50 text-emerald-700",
   AwaitingPayment: "bg-amber-50 text-amber-800",
-  Lost: "bg-slate-100 text-muted-foreground",
-  Ended: "bg-slate-100 text-muted-foreground",
-  Unsold: "bg-slate-100 text-muted-foreground",
-  SecondChance: "bg-sky-50 text-sky-700",
+  Lost: "bg-secondary text-muted-foreground",
+  Ended: "bg-secondary text-muted-foreground",
+  Unsold: "bg-secondary text-muted-foreground",
+  SecondChance: "bg-sky-50 text-primary",
   Suspended: "bg-red-50 text-red-700",
   NeedsDecision: "bg-amber-50 text-amber-800",
 };

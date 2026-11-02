@@ -82,7 +82,7 @@ export function ReviewModerationCard({
           {review.comment}
         </p>
         {review.replyComment && !hidden && (
-          <div className="mt-1 flex flex-col gap-1 rounded-lg bg-[#f2f5f6] px-3 py-2.5">
+          <div className="mt-1 flex flex-col gap-1 rounded-lg bg-secondary px-3 py-2.5">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
               <MessageSquareReply aria-hidden="true" className="size-3" />
               ผู้ขายตอบกลับ

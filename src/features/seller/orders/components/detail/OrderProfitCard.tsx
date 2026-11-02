@@ -3,7 +3,7 @@ import type { ProfitSummary } from "../../orders.format";
 /** การ์ดพื้นดำสรุปกำไรของออเดอร์ — ยอดขายรวมค่าจัดส่งที่ผู้ซื้อจ่ายแล้ว */
 export function OrderProfitCard({ rows, net }: ProfitSummary) {
   return (
-    <div className="flex w-full flex-col gap-3.5 rounded-xl bg-zinc-950 p-5">
+    <div className="flex w-full flex-col gap-3.5 rounded-xl bg-foreground p-5">
       <p className="text-xs font-semibold text-white">กำไรจากออเดอร์นี้</p>
 
       {rows.map((row, index) => (

@@ -21,7 +21,7 @@ export function ReviewStars({
           aria-hidden="true"
           className={cn(
             starClassName,
-            value <= filled ? "fill-[#f59e0a] text-[#f59e0a]" : "fill-[#e3e7e8] text-[#e3e7e8]",
+            value <= filled ? "fill-[#f59e0a] text-[#f59e0a]" : "fill-border text-border",
           )}
         />
       ))}

@@ -81,7 +81,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
               <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-[11px] font-medium text-[#b45309]">
                 รอตรวจสอบ
               </Badge>
-              <Badge className="h-5 rounded-[5px] bg-[#eef1f2] px-2 text-[10px] font-medium text-muted-foreground">
+              <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
                 {payment.status}
               </Badge>
             </div>
@@ -92,7 +92,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
           </div>
         </div>
 
-        <Separator className="w-60! bg-[#eef1f2]" />
+        <Separator className="w-60! bg-muted" />
 
         <div className="flex flex-col gap-5 md:flex-row md:items-start">
           <SlipPreview url={payment.slipUrl} paymentId={payment.id} />
@@ -218,14 +218,14 @@ function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number
   const fileName = url ? fileNameOf(url) : null;
 
   return (
-    <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[10px] border border-border bg-white md:w-[250px]">
+    <div className="flex w-full shrink-0 flex-col overflow-hidden rounded-[10px] border border-border bg-card md:w-[250px]">
       <a
         href={url ?? undefined}
         target="_blank"
         rel="noreferrer"
         aria-label="เปิดสลิปขนาดเต็ม"
         className={cn(
-          "flex h-[330px] flex-col items-center justify-center gap-2 bg-[#f2f5f6]",
+          "flex h-[330px] flex-col items-center justify-center gap-2 bg-secondary",
           url === null && "pointer-events-none",
         )}
       >

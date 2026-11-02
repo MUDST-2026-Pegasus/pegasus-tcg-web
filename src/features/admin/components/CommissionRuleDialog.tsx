@@ -41,15 +41,15 @@ const STATUS_RANK: Record<RuleStatus, number> = { ACTIVE: 0, SCHEDULED: 1, EXPIR
 const STATUS_STYLE: Record<RuleStatus, string> = {
   ACTIVE: "bg-[#e6f4ea] text-[#1e7a3c]",
   SCHEDULED: "bg-[#e6f0fb] text-[#0058bc]",
-  EXPIRED: "bg-[#eef1f2] text-[#67787c]",
-  INACTIVE: "bg-[#eef1f2] text-[#9aa5ad]",
+  EXPIRED: "bg-muted text-muted-foreground",
+  INACTIVE: "bg-muted text-[#9aa5ad]",
 };
 
 const baht = (value: number) =>
   `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const dateTime = (iso: string) =>
   new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
-const FIELD = "h-9 rounded-md border-[#e3e7e8] bg-white";
+const FIELD = "h-9 rounded-md border-border bg-card";
 const DECIMAL = /^\d*\.?\d*$/;
 const SIGNED_INTEGER = /^-?\d*$/;
 
@@ -181,9 +181,9 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
     rules.filter((rule) => (value === "ALL" || rule.scope === value) && (showInactive || rule.active)).length;
 
   return <>
-    <div className="flex flex-col gap-1.5 border-b border-[#eef1f2] px-6 pt-6 pb-4 pr-14">
-      <DialogTitle className="text-lg font-bold text-[#090b0c]">กฎค่าคอมมิชชั่น</DialogTitle>
-      <DialogDescription className="text-xs text-[#67787c]">
+    <div className="flex flex-col gap-1.5 border-b border-muted px-6 pt-6 pb-4 pr-14">
+      <DialogTitle className="text-lg font-bold text-foreground">กฎค่าคอมมิชชั่น</DialogTitle>
+      <DialogDescription className="text-xs text-muted-foreground">
         ตอนคิดค่าธรรมเนียม ระบบเลือกกฎที่เจาะจงที่สุด: ผู้ขาย › หมวดหมู่ › เกม › ทั้งแพลตฟอร์ม
         ถ้าขอบเขตเท่ากัน ลำดับความสำคัญมากกว่าชนะ
       </DialogDescription>
@@ -194,7 +194,7 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
         {(["ALL", ...SCOPE_OPTIONS.map((option) => option.value)] as const).map((value) => (
           <button key={value} type="button" role="tab" aria-selected={scope === value} onClick={() => setScope(value)}
             className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              scope === value ? "border-[#090b0c] bg-[#090b0c] text-white" : "border-[#e3e7e8] text-[#414755] hover:bg-[#fafbfb]")}>
+              scope === value ? "border-foreground bg-foreground text-background" : "border-border text-[#414755] hover:bg-[#fafbfb]")}>
             {value === "ALL" ? "ทั้งหมด" : scopeLabel(value)} <span className="opacity-60">{count(value)}</span>
           </button>
         ))}
@@ -206,23 +206,23 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
       <Button size="sm" className="rounded-md px-2.5" onClick={onAdd}><Plus />เพิ่มกฎ</Button>
     </div>
 
-    <ul className="min-h-[200px] flex-1 overflow-y-auto border-t border-[#eef1f2]" aria-label="รายการกฎค่าคอมมิชชั่น">
-      {visible.length === 0 && <li className="px-6 py-10 text-center text-sm text-[#67787c]">
+    <ul className="min-h-[200px] flex-1 overflow-y-auto border-t border-muted" aria-label="รายการกฎค่าคอมมิชชั่น">
+      {visible.length === 0 && <li className="px-6 py-10 text-center text-sm text-muted-foreground">
         ยังไม่มีกฎในมุมมองนี้ — ระบบจะใช้อัตราเริ่มต้นทั้งแพลตฟอร์ม
       </li>}
       {visible.map((rule) => {
         const status = ruleStatus(rule, now);
         return (
-          <li key={rule.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#eef1f2] px-6 py-3.5 last:border-b-0">
+          <li key={rule.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-muted px-6 py-3.5 last:border-b-0">
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[13px] font-medium text-[#090b0c]">{targetName(rule)}</span>
-                <Badge variant="outline" className="h-[18px] rounded-md px-1.5 text-[10px] text-[#67787c]">{scopeLabel(rule.scope)}</Badge>
+                <span className="text-[13px] font-medium text-foreground">{targetName(rule)}</span>
+                <Badge variant="outline" className="h-[18px] rounded-md px-1.5 text-[10px] text-muted-foreground">{scopeLabel(rule.scope)}</Badge>
                 <Badge className={cn("h-[18px] rounded-md px-1.5 text-[10px]", STATUS_STYLE[status])}>{STATUS_LABEL[status]}</Badge>
                 <span className="text-[10px] text-[#9aa5ad]">#{rule.id}</span>
               </div>
               <p className="text-xs text-[#414755] tabular-nums">
-                <strong className="font-semibold text-[#090b0c]">{rule.ratePercent}%</strong>
+                <strong className="font-semibold text-foreground">{rule.ratePercent}%</strong>
                 {rule.fixedFee > 0 && <> + {baht(rule.fixedFee)}</>}
                 {rule.minFee != null && <> · ขั้นต่ำ {baht(rule.minFee)}</>}
                 {rule.maxFee != null && <> · ขั้นสูง {baht(rule.maxFee)}</>}
@@ -311,15 +311,15 @@ function RuleForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-col gap-1.5 border-b border-[#eef1f2] px-6 pt-5 pb-4 pr-14">
+      <div className="flex flex-col gap-1.5 border-b border-muted px-6 pt-5 pb-4 pr-14">
         <button type="button" onClick={onBack}
-          className="flex w-fit items-center gap-1 text-xs text-[#67787c] hover:text-[#090b0c]">
+          className="flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-3.5" />กฎทั้งหมด
         </button>
-        <DialogTitle className="text-lg font-bold text-[#090b0c]">
+        <DialogTitle className="text-lg font-bold text-foreground">
           {editing ? `แก้ไขกฎ #${editing.id}` : "เพิ่มกฎค่าคอมมิชชั่น"}
         </DialogTitle>
-        <DialogDescription className="text-xs text-[#67787c]">
+        <DialogDescription className="text-xs text-muted-foreground">
           {editing ? "การแก้ไขมีผลกับคำสั่งซื้อที่สร้างหลังบันทึก คำสั่งซื้อเดิมไม่เปลี่ยน"
             : "กำหนดอัตราแยกให้เกม หมวดหมู่ หรือผู้ขาย ระบบใช้อัตราเริ่มต้นกับส่วนที่ไม่มีกฎ"}
         </DialogDescription>
@@ -335,12 +335,12 @@ function RuleForm({
                   className={cn("rounded-lg border px-3 py-2 text-left text-[13px] font-medium transition-colors",
                     draft.scope === option.value
                       ? "border-primary bg-primary/5 text-primary ring-1 ring-primary"
-                      : "border-[#e3e7e8] text-[#414755] hover:bg-[#fafbfb]")}>
+                      : "border-border text-[#414755] hover:bg-[#fafbfb]")}>
                   {option.label}
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#67787c]">{scopeHint}</p>
+            <p className="text-[11px] text-muted-foreground">{scopeHint}</p>
 
             {draft.scope === "GAME" && <Field className="gap-1.5" data-invalid={!!errors.target}>
               <FieldLabel htmlFor={`${id}-game`} className="text-xs">เกม</FieldLabel>
@@ -434,7 +434,7 @@ function RuleForm({
           </div>}
         </div>
 
-        <aside className="flex h-fit flex-col gap-3 rounded-xl bg-[#090b0c] p-5 text-white md:sticky md:top-0">
+        <aside className="flex h-fit flex-col gap-3 rounded-xl bg-foreground p-5 text-background md:sticky md:top-0">
           <p className="text-[13px] font-semibold">ตัวอย่างการคำนวณ</p>
           <label className="flex items-center justify-between gap-3 text-xs text-[#9aa5ad]">
             ราคาขาย
@@ -459,7 +459,7 @@ function RuleForm({
         </aside>
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#eef1f2] px-6 py-4">
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-muted px-6 py-4">
         {editing && <div className="mr-auto">
           {confirmDelete
             ? <ConfirmBar busy={busy} message={`ลบกฎ #${editing.id} ถาวร? กู้คืนไม่ได้`}
@@ -489,7 +489,7 @@ function ConfirmBar({ message, busy, onCancel, onConfirm }: {
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return <fieldset className="flex flex-col gap-3">
-    <legend className="mb-3 text-[13px] font-semibold text-[#090b0c]">{title}</legend>
+    <legend className="mb-3 text-[13px] font-semibold text-foreground">{title}</legend>
     {children}
   </fieldset>;
 }

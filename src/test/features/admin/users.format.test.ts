@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatLastLogin,
+  formatPhone,
   formatThaiDate,
+  isUserNotFound,
   pageNumbers,
   pageSummary,
   sortedRoles,
@@ -24,6 +26,18 @@ describe("users.format", () => {
   it("writes dates with the Buddhist year", () => {
     expect(formatThaiDate("2026-01-12T10:00:00+07:00")).toBe("12 ม.ค. 2569");
     expect(formatLastLogin(null)).toBe("ยังไม่เคยเข้าใช้");
+  });
+
+  it("groups Thai phone numbers and shows a dash when missing", () => {
+    expect(formatPhone("0812345678")).toBe("081-234-5678");
+    expect(formatPhone("021234567")).toBe("02-123-4567");
+    expect(formatPhone("+66 81 234 5678")).toBe("+66 81 234 5678");
+    expect(formatPhone(null)).toBe("—");
+  });
+
+  it("recognises a missing account", () => {
+    expect(isUserNotFound(new ApiError({ status: 404, code: "USER_NOT_FOUND", message: "" }))).toBe(true);
+    expect(isUserNotFound(new ApiError({ status: 500, code: "HTTP_500", message: "" }))).toBe(false);
   });
 
   it("summarises the rows on the current page", () => {

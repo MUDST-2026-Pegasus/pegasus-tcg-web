@@ -13,8 +13,8 @@ export const HEAD_CLASS =
   "h-auto py-2 text-[11px] font-medium text-muted-foreground";
 
 export const HEAD_ROW_CLASS =
-  "border-y border-[#eef1f2] bg-[#fafbfb] hover:bg-[#fafbfb]";
+  "border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]";
 
 /** สถานะว่างที่วางต่อจากหัวการ์ด ไม่ใช่กล่องแยก */
 export const CARD_EMPTY_CLASS =
-  "min-h-0 rounded-none border-0 border-t border-[#eef1f2] py-10";
+  "min-h-0 rounded-none border-0 border-t border-muted py-10";

@@ -216,9 +216,9 @@ export function PaymentPage() {
         {/* Two-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Payment Card (lg:col-span-8) */}
-          <div className="lg:col-span-8 bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
+          <div className="lg:col-span-8 bg-card rounded-2xl border border-muted shadow-xs overflow-hidden">
             {/* Top Accent Stripe - Same color as Pegasus Logo (sky-700) */}
-            <div className="h-1 bg-sky-700 w-full" />
+            <div className="h-1 bg-primary w-full" />
 
             <div className="p-6 md:p-8">
               {/* Card Header: Amount Due and Expiration Badge */}
@@ -250,7 +250,7 @@ export function PaymentPage() {
               </div>
 
               {/* Full-width Divider Line below Header */}
-              <div className="border-t border-slate-100 -mx-6 md:-mx-8 my-6" />
+              <div className="border-t border-muted -mx-6 md:-mx-8 my-6" />
 
               {/* Card Body: QR Scan & 3 Steps in 2 Columns */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -276,14 +276,14 @@ export function PaymentPage() {
               </div>
 
               {/* Full-width Divider Line above Submit Button */}
-              <div className="border-t border-slate-100 -mx-6 md:-mx-8 mt-8 mb-6" />
+              <div className="border-t border-muted -mx-6 md:-mx-8 mt-8 mb-6" />
 
               {/* Full-width Action Section below the divider */}
               {isAwaitingVerification ? (
                 <div className="space-y-4">
                   {/* Status Announcement Card */}
                   <div className="rounded-xl border border-sky-100 bg-sky-50/70 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-sky-100 text-primary flex items-center justify-center shrink-0">
                       <Clock className="size-5 animate-pulse" />
                     </div>
                     <div className="flex-1 text-center sm:text-left space-y-1">
@@ -306,7 +306,7 @@ export function PaymentPage() {
                     <Button
                       type="button"
                       onClick={() => navigate("/account/orders")}
-                      className="w-full h-11 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                      className="w-full h-11 rounded-xl bg-primary hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <FileText className="size-4" />
                       <span>ดูประวัติคำสั่งซื้อ</span>
@@ -332,7 +332,7 @@ export function PaymentPage() {
                     className={`w-full h-12 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
                       isButtonDisabled
                         ? "bg-[#85b4d0] text-white hover:bg-[#85b4d0] cursor-not-allowed opacity-90 shadow-none"
-                        : "bg-sky-700 hover:bg-sky-800 text-white shadow-xs cursor-pointer"
+                        : "bg-primary hover:bg-sky-800 text-white shadow-xs cursor-pointer"
                     }`}
                   >
                     {isSubmitting ? (
