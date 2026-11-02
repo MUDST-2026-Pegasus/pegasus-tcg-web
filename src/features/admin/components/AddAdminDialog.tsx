@@ -161,7 +161,7 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
                 <label
                   key={user.id}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2.5 rounded-[10px] border border-[#eef1f2] px-3 py-2.5",
+                    "flex cursor-pointer items-center gap-2.5 rounded-[10px] border border-muted px-3 py-2.5",
                     checked && "border-[#0058bc] bg-[#f5f9fe]",
                     isAdmin && "cursor-not-allowed opacity-55",
                   )}

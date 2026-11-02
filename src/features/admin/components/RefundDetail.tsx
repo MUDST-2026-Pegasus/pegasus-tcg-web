@@ -95,10 +95,10 @@ export function RefundDetail({
           </div>
         </div>
 
-        <Separator className="w-60! bg-[#eef1f2]" />
+        <Separator className="w-60! bg-muted" />
 
         <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
-          <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-[#f2f5f6] p-4">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-secondary p-4">
             <span className="text-[11px] text-[#9aa5ad]">ยอดที่ต้องโอนคืน</span>
             <span className="text-[26px] leading-tight font-bold text-foreground">{formatBaht(refund.amount)}</span>
             <AmountRow label="ประเภท" value={typeLabel} />
@@ -171,7 +171,7 @@ function StepHead({
           "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
           state === "active" && "bg-[#0058bc] text-white",
           state === "done" && "bg-[#e3f4ec] text-[#12805c]",
-          state === "waiting" && "bg-[#eef1f2] text-[#9aa5ad]",
+          state === "waiting" && "bg-muted text-[#9aa5ad]",
         )}
       >
         {state === "done" ? <CheckCircle2 className="size-4" /> : number}
@@ -292,7 +292,7 @@ function RefundSteps({
         </div>
       </div>
 
-      <Separator className="bg-[#eef1f2]" />
+      <Separator className="bg-muted" />
 
       <div className="flex flex-col gap-3">
         <StepHead number={2} title="ยืนยันผลการโอน" transition="PROCESSING → PROCESSED" state={stepTwo} />

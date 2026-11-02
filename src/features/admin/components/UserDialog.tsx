@@ -89,7 +89,7 @@ export function UserDialog({
           </div>
           {children}
         </div>
-        <AlertDialogFooter className="shrink-0 items-center gap-2.5 border-t border-[#eef1f2] bg-[#fafbfb] px-6 py-4">
+        <AlertDialogFooter className="shrink-0 items-center gap-2.5 border-t border-muted bg-[#fafbfb] px-6 py-4">
           {footerNote ? (
             <span className="text-[10px] leading-[14px] text-[#9aa5ad] sm:mr-auto">
               {footerNote}

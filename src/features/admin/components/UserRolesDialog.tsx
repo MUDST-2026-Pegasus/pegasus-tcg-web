@@ -133,7 +133,7 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
             <li
               key={role}
               className={cn(
-                "flex items-center gap-3 rounded-[10px] border border-[#eef1f2] px-3.5 py-3",
+                "flex items-center gap-3 rounded-[10px] border border-muted px-3.5 py-3",
                 changed && "border-[#0058bc] bg-[#f5f9fe]",
               )}
             >

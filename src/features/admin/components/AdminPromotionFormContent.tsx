@@ -250,7 +250,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
   const usedLimitFloor = Math.max(existing?.usedCount ?? 0, existing?.usageLimitTotal ?? 0);
 
   return (
-    <main className={cn("mx-auto grid w-full max-w-[960px] gap-6", PROMOTION_PAGE_CONTROLS)}>
+    <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <div className="grid gap-4">
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
@@ -330,7 +330,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                       <InputGroupButton
                         size="xs"
                         variant="secondary"
-                        className="h-auto rounded-[4px]! bg-[#eef1f2] px-2 py-0.5 text-xs text-[#414755]"
+                        className="h-auto rounded-[4px]! bg-muted px-2 py-0.5 text-xs text-[#414755]"
                         onClick={() => change("code", randomCode())}
                       >
                         สุ่มโค้ด

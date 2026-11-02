@@ -13,7 +13,7 @@ import { SellerAvatar } from "./SellerAvatar";
 
 /** สีของ badge ตามบอร์ด "V2 · Admin / จัดการผู้ใช้" — ใช้ทั้งตาราง Sidebar และ dialog */
 const ROLE_BADGE: Record<RoleCode, string> = {
-  BUYER: "bg-[#eef1f2] text-muted-foreground",
+  BUYER: "bg-muted text-muted-foreground",
   SELLER: "bg-[#e6f4f2] text-[#0d9488]",
   ADMIN: "bg-[#e8f1fc] text-[#0058bc]",
   SUPPORT: "bg-[#ecebff] text-[#4f46e5]",
@@ -22,7 +22,7 @@ const ROLE_BADGE: Record<RoleCode, string> = {
 const STATUS_BADGE: Record<UserStatus, string> = {
   ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
   SUSPENDED: "bg-[#fbe9e8] text-[#d0342c]",
-  DEACTIVATED: "bg-[#eef1f2] text-muted-foreground",
+  DEACTIVATED: "bg-muted text-muted-foreground",
 };
 
 export function RoleBadge({ role }: { role: RoleCode }) {

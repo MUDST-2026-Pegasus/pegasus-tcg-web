@@ -75,7 +75,7 @@ export function GameListPanel({
                     "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] text-left transition-colors",
                     isActive
                       ? "bg-[#e8f1fc]"
-                      : "hover:bg-[#eef1f2] focus-visible:bg-[#eef1f2]",
+                      : "hover:bg-muted focus-visible:bg-muted",
                     !game.active && !isActive && "opacity-60",
                   )}
                 >

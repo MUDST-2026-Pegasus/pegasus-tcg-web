@@ -76,7 +76,7 @@ export function UsersTable({
     <>
       <Table className={cn(disabled && "opacity-60")}>
         <TableHeader>
-          <TableRow className="border-y border-[#eef1f2] bg-[#fafbfb] hover:bg-[#fafbfb]">
+          <TableRow className="border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]">
             <TableHead className={cn(HEAD_CLASS, "w-[320px] pl-5")}>ผู้ใช้</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-[200px]")}>บทบาท</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>สมัครเมื่อ</TableHead>
@@ -88,7 +88,7 @@ export function UsersTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="[&_tr]:border-[#eef1f2]">
+        <TableBody className="[&_tr]:border-muted">
           {users.map((user) => {
             const isSelf = user.id === currentUserId;
             return (
@@ -156,7 +156,7 @@ export function UsersTable({
         </TableBody>
       </Table>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#eef1f2] px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-muted px-5 py-3.5">
         <p className="text-xs text-muted-foreground">
           {pageSummary(page, size, totalItems)}
         </p>
@@ -243,7 +243,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
           <Shield />
           จัดการบทบาท…
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="my-1 bg-[#eef1f2]" />
+        <DropdownMenuSeparator className="my-1 bg-muted" />
         {user.status === "ACTIVE" ? (
           <DropdownMenuItem
             variant="destructive"
@@ -288,11 +288,11 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
 /** skeleton โหลดครั้งแรก — รูปทรงเดียวกับแถวจริง */
 export function UsersTableSkeleton() {
   return (
-    <div aria-busy="true" aria-label="กำลังโหลดรายชื่อผู้ใช้" className="border-t border-[#eef1f2]">
+    <div aria-busy="true" aria-label="กำลังโหลดรายชื่อผู้ใช้" className="border-t border-muted">
       {Array.from({ length: 8 }, (_, index) => (
         <div
           key={index}
-          className="flex items-center gap-6 border-b border-[#eef1f2] px-5 py-[13px] last:border-b-0"
+          className="flex items-center gap-6 border-b border-muted px-5 py-[13px] last:border-b-0"
         >
           <div className="flex w-[290px] items-center gap-2.5">
             <Skeleton className="size-7 rounded-full" />

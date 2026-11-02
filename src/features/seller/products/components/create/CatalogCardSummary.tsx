@@ -24,7 +24,7 @@ export function CatalogCardSummary({
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {onChange ? (
           <Button
             type="button"
@@ -39,7 +39,7 @@ export function CatalogCardSummary({
       </div>
 
       <div className="flex items-center gap-3.5 rounded-[10px] bg-emerald-50 p-3.5">
-        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white">
+        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-card">
           {card.imageUrl ? (
             <img
               src={card.imageUrl}
@@ -51,14 +51,14 @@ export function CatalogCardSummary({
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
-          <p className="text-sm font-semibold text-zinc-950">
+          <p className="text-sm font-semibold text-foreground">
             {card.productName}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
               <Badge
                 key={tag}
-                className="h-5 rounded-[5px] bg-white px-2 text-xs text-teal-600"
+                className="h-5 rounded-[5px] bg-card px-2 text-xs text-teal-600"
               >
                 {tag}
               </Badge>

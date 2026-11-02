@@ -70,14 +70,14 @@ export function CollectorProfilePage() {
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
 
   return (
-    <main className="min-h-[580px] bg-[#f1f3f3] px-5 py-8 font-sans sm:px-8 sm:py-12 lg:px-12">
+    <main className="min-h-[580px] bg-muted px-5 py-8 font-sans sm:px-8 sm:py-12 lg:px-12">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8">
         <div><Button variant="outline" render={<Link to={backHref} />}>{fromSlug ? "Back to card" : "Back to products"}</Button></div>
 
-        <section aria-label="Collector profile" className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-5 rounded-xl border border-[#e3e7e8] bg-white p-6 sm:flex sm:gap-6 sm:p-8">
+        <section aria-label="Collector profile" className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-5 rounded-xl border border-border bg-card p-6 sm:flex sm:gap-6 sm:p-8">
           <Avatar className="size-20 shrink-0">
             {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
-            <AvatarFallback className="bg-[#f1f3f3] text-sm text-muted-foreground">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
             <h1 className="break-all text-xl font-bold leading-7 sm:text-2xl sm:leading-8">{displayName}</h1>
@@ -92,7 +92,7 @@ export function CollectorProfilePage() {
             <p className="mt-2 text-sm text-muted-foreground">A selection of cards from {displayName}’s public collection.</p>
           </div>
           {items.length === 0 ? (
-            <p className="rounded-xl border bg-white p-8 text-center text-sm text-muted-foreground">ยังไม่มีรายการสะสมที่เปิดเป็นสาธารณะ</p>
+            <p className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">ยังไม่มีรายการสะสมที่เปิดเป็นสาธารณะ</p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 [&_a]:w-full">
               {items.slice(0, 6).map((item) => (

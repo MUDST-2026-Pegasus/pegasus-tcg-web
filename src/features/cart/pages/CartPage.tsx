@@ -252,7 +252,7 @@ export function CartPage() {
           {/* Left Column: Cart Items */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             {/* Select All */}
-            <Card className="rounded-xl border shadow-none bg-white p-0 !py-0 gap-0">
+            <Card className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0">
               <CardContent className="px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Checkbox
@@ -284,7 +284,7 @@ export function CartPage() {
                 <ProductRowsSkeleton />
               </div>
             ) : items.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground bg-white rounded-xl border flex flex-col items-center gap-4">
+              <div className="text-center py-16 text-muted-foreground bg-card rounded-xl border flex flex-col items-center gap-4">
                 <p className="text-lg">Your cart is empty.</p>
                 <Button variant="outline" onClick={() => navigate("/products")}>
                   Explore Products
@@ -298,7 +298,7 @@ export function CartPage() {
                 return (
                   <Card
                     key={item.id}
-                    className="rounded-xl border shadow-none bg-white p-0 !py-0 gap-0"
+                    className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0"
                   >
                     <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                       <div className="flex items-center gap-4 sm:gap-6 self-start sm:self-auto h-full mt-2 sm:mt-0">
@@ -416,7 +416,7 @@ export function CartPage() {
 
           {/* Right Column: Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="rounded-xl border shadow-none bg-white p-6 !py-6 flex flex-col gap-6">
+            <Card className="rounded-xl border shadow-none bg-card p-6 !py-6 flex flex-col gap-6">
               <h2 className="text-2xl font-bold text-foreground">Order Summary</h2>
 
               <div className="flex flex-col gap-4 text-base">

@@ -77,7 +77,7 @@ export function UserDetailSheet({
         showCloseButton={false}
         className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-[440px] **:data-[slot=button]:rounded-md"
       >
-        <header className="flex items-center border-b border-[#eef1f2] py-[18px] pr-4 pl-6">
+        <header className="flex items-center border-b border-muted py-[18px] pr-4 pl-6">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <SheetTitle className="text-[15px] font-bold text-foreground">รายละเอียดผู้ใช้</SheetTitle>
             <SheetDescription className={cn("text-[11px] text-[#9aa5ad]", !detail.data && "sr-only")}>
@@ -278,7 +278,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
         ) : null}
       </div>
 
-      <footer className="flex items-center gap-2.5 border-t border-[#eef1f2] bg-[#fafbfb] px-6 py-3.5">
+      <footer className="flex items-center gap-2.5 border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         {isSelf ? (
           <>
             <p className="text-[11px] text-[#9aa5ad]">ปุ่มจัดการถูกปิดสำหรับบัญชีตัวเอง</p>
@@ -345,7 +345,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function Divider() {
-  return <div aria-hidden="true" className="h-px shrink-0 bg-[#eef1f2]" />;
+  return <div aria-hidden="true" className="h-px shrink-0 bg-muted" />;
 }
 
 const BANNER_TONE = {
@@ -386,7 +386,7 @@ function UserNotFound({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 pt-5 pb-6 text-center">
-        <div className="grid size-11 place-items-center rounded-full bg-[#eef1f2]">
+        <div className="grid size-11 place-items-center rounded-full bg-muted">
           <UserRoundX aria-hidden="true" className="size-5 text-muted-foreground" />
         </div>
         <p className="text-[13px] font-semibold text-foreground">ไม่พบบัญชีนี้แล้ว</p>
@@ -395,7 +395,7 @@ function UserNotFound({ onClose }: { onClose: () => void }) {
           กลับไปที่รายการ
         </Button>
       </div>
-      <footer className="flex justify-end border-t border-[#eef1f2] bg-[#fafbfb] px-6 py-3.5">
+      <footer className="flex justify-end border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         <Button variant="outline" size="sm" onClick={onClose}>
           ปิด
         </Button>
@@ -436,7 +436,7 @@ function UserDetailSkeleton() {
         <SkeletonRows />
         <SkeletonRows />
       </div>
-      <footer className="flex items-center justify-between border-t border-[#eef1f2] bg-[#fafbfb] px-6 py-3.5">
+      <footer className="flex items-center justify-between border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         <Skeleton className="h-[30px] w-[70px] rounded-md" />
         <Skeleton className="h-[30px] w-24 rounded-md" />
       </footer>

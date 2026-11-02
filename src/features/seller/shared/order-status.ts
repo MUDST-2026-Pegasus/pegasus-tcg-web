@@ -39,7 +39,7 @@ export const ORDER_TONE_BADGE: Record<OrderTone, string> = {
   pending: "bg-[#fdf0dd] text-[#b45309]",
   shipping: "bg-[#ede9fe] text-[#6d28d9]",
   success: "bg-[#e3f4ec] text-[#12805c]",
-  muted: "bg-[#eef1f2] text-[#6b7280]",
+  muted: "bg-muted text-[#6b7280]",
 };
 
 /** ที่ร้านต้องแพ็คและส่ง — ส่งจาก PAID ได้เลยโดยไม่ต้องกดรับออเดอร์ก่อน */

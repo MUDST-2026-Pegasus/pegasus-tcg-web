@@ -13,7 +13,7 @@ export function CommissionCalcCard({
   totalValue,
 }: CommissionCalcCardProps) {
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-[#090b0c] px-5 py-5 text-white">
+    <section className="flex flex-col gap-4 rounded-xl bg-foreground px-5 py-5 text-background">
       <p className="text-[13px] font-semibold">{title}</p>
 
       <dl className="flex flex-col gap-[11px] text-xs">

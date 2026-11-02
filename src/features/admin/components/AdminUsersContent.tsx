@@ -207,8 +207,8 @@ export function AdminUsersContent() {
 /** กรองแล้วไม่พบ → มีปุ่มล้าง · ยังไม่มีผู้ใช้เลย → ไม่มีปุ่ม */
 function UsersEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-2 border-t border-[#eef1f2] px-5 py-11 text-center">
-      <div className="grid size-11 place-items-center rounded-full bg-[#eef1f2]">
+    <div className="flex flex-col items-center gap-2 border-t border-muted px-5 py-11 text-center">
+      <div className="grid size-11 place-items-center rounded-full bg-muted">
         <Users aria-hidden="true" className="size-5 text-muted-foreground" />
       </div>
       <p className="text-[13px] font-semibold text-foreground">
