@@ -97,7 +97,7 @@ export function CheckoutPlatformPromotionCard({
         />
         <Button
           type="submit"
-          className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-promotion-muted disabled:opacity-100"
+          className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-muted-foreground disabled:opacity-100"
           disabled={!typedCode.trim() || loading}
         >
           {loading && typedCode ? (

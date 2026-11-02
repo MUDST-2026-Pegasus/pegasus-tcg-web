@@ -177,7 +177,7 @@ export function CodePickerDialog({
               <Button
                 type="submit"
                 disabled={!typed.trim() || loading || submitting}
-                className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-promotion-muted disabled:opacity-100"
+                className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-muted-foreground disabled:opacity-100"
               >
                 {loading || submitting ? (
                   <Loader2 className="size-4 animate-spin" />
