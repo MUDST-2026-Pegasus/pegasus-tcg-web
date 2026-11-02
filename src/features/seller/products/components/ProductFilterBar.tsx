@@ -122,8 +122,8 @@ export function ProductFilterBar({
             className={cn(
               "cursor-pointer rounded-full px-3.5 py-2 text-xs transition-colors",
               isActive
-                ? "bg-zinc-950 font-medium text-white"
-                : "border border-zinc-200 bg-white font-normal text-gray-700 hover:bg-gray-50",
+                ? "bg-foreground font-medium text-background"
+                : "border border-border bg-card font-normal text-gray-700 hover:bg-gray-50",
             )}
           >
             {chip.label} {counts.isPending ? "…" : chip.count}

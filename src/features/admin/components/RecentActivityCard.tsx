@@ -57,7 +57,7 @@ export function RecentActivityCard() {
             {page.items.map((verification) => (
               <li
                 key={verification.id}
-                className="flex items-start gap-3 border-t border-[#eef1f2] px-[18px] py-3 first:border-t-0"
+                className="flex items-start gap-3 border-t border-muted px-[18px] py-3 first:border-t-0"
               >
                 <SellerAvatar
                   initials={initialsFor(verification)}

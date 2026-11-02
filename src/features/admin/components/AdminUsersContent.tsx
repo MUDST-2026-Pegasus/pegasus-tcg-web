@@ -219,7 +219,7 @@ export function AdminUsersContent() {
           errorTitle="โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
           isEmpty={(result) => result.items.length === 0}
           empty={
-            <div className="border-t border-[#eef1f2] py-6">
+            <div className="border-t border-muted py-6">
               <EmptyState
                 icon={Users}
                 title={filtered ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้"}
@@ -287,7 +287,7 @@ function successTitle(user: AdminUser, action: UserAction): string {
 
 function UsersTableSkeleton() {
   return (
-    <div aria-busy="true" className="flex flex-col gap-2 border-t border-[#eef1f2] px-5 py-4">
+    <div aria-busy="true" className="flex flex-col gap-2 border-t border-muted px-5 py-4">
       {Array.from({ length: 8 }, (_, index) => (
         <Skeleton key={index} className="h-10 rounded-md" />
       ))}

@@ -166,7 +166,7 @@ export function AdminPromotionsContent() {
       <Card className="gap-0 overflow-hidden rounded-[12px] border border-border p-0 shadow-none ring-0">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
-            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
+            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]">
               {STATUS_TABS.map((tab) => {
                 const count =
                   tab.value == null

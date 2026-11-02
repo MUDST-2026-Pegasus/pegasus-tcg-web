@@ -38,7 +38,7 @@ export function ProductPagination({
   const to = (page - 1) * pageSize + rowsOnPage;
 
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-gray-100 px-5 py-3.5">
+    <div className="flex items-center justify-between gap-4 border-t border-muted px-5 py-3.5">
       <p className="text-xs text-gray-500">
         แสดง {from}–{to} จาก {totalItems} รายการ
       </p>
@@ -66,7 +66,7 @@ export function ProductPagination({
                 "flex size-7 cursor-pointer items-center justify-center rounded-md text-xs font-medium disabled:cursor-default",
                 number === page
                   ? "bg-teal-600 text-white"
-                  : "border border-zinc-200 bg-white text-gray-700 hover:bg-gray-50",
+                  : "border border-border bg-card text-gray-700 hover:bg-gray-50",
               )}
             >
               {number}

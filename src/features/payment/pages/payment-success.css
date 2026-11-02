@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  background: #f2f2f7;
+  background: var(--muted);
   color: #1c1c1e;
 }
 .payment-success-card {
@@ -14,7 +14,7 @@
   overflow: hidden;
   border: 1px solid rgba(193, 198, 215, .3);
   border-radius: 12px;
-  background: white;
+  background: var(--card);
   padding: 32px;
   gap: 0;
   box-shadow: none;
@@ -25,7 +25,7 @@
 .payment-success-symbol { display: flex; width: 80px; height: 80px; align-items: center; justify-content: center; align-self: center; border-radius: 999px; background: #d8e2ff; margin-bottom: 24px; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .05)); }
 .payment-success-title { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -.64px; text-align: center; }
 .payment-success-order { margin-top: 8px; margin-bottom: 32px; font-size: 16px; line-height: 24px; color: #636366; text-align: center; overflow-wrap: anywhere; }
-.payment-success-summary { border: 1px solid rgba(193, 198, 215, .2); border-radius: 8px; background: #f4f3f8; padding: 16px; margin-bottom: 32px; }
+.payment-success-summary { border: 1px solid rgba(193, 198, 215, .2); border-radius: 8px; background: var(--secondary); padding: 16px; margin-bottom: 32px; }
 .payment-success-summary h2 { font-size: 18px; font-weight: 600; line-height: 24px; margin-bottom: 12px; }
 .payment-success-summary dl { display: grid; gap: 12px; }
 .payment-success-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 4px 0; border-bottom: 1px solid rgba(193, 198, 215, .1); font-size: 14px; line-height: 20px; }

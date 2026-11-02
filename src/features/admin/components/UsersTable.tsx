@@ -34,7 +34,7 @@ import type { AdminUser, RoleCode, UserStatus } from "../users.types";
 import { SellerAvatar } from "./SellerAvatar";
 
 const ROLE_BADGE: Record<RoleCode, string> = {
-  BUYER: "bg-[#eef1f2] text-muted-foreground",
+  BUYER: "bg-muted text-muted-foreground",
   SELLER: "bg-[#e6f4f2] text-[#0d9488]",
   ADMIN: "bg-[#e8f1fc] text-[#0058bc]",
   SUPPORT: "bg-[#ecebff] text-[#4f46e5]",
@@ -43,7 +43,7 @@ const ROLE_BADGE: Record<RoleCode, string> = {
 const STATUS_BADGE: Record<UserStatus, string> = {
   ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
   SUSPENDED: "bg-[#fbe9e8] text-[#d0342c]",
-  DEACTIVATED: "bg-[#eef1f2] text-muted-foreground",
+  DEACTIVATED: "bg-muted text-muted-foreground",
 };
 
 const HEAD_CLASS = "h-auto py-2.5 text-[11px] font-medium text-muted-foreground";
@@ -93,7 +93,7 @@ export function UsersTable({
     <>
       <Table className={cn(disabled && "opacity-60")}>
         <TableHeader>
-          <TableRow className="border-y border-[#eef1f2] bg-[#fafbfb] hover:bg-[#fafbfb]">
+          <TableRow className="border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]">
             <TableHead className={cn(HEAD_CLASS, "w-[320px] pl-5")}>ผู้ใช้</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-[200px]")}>บทบาท</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>สมัครเมื่อ</TableHead>
@@ -105,7 +105,7 @@ export function UsersTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="[&_tr]:border-[#eef1f2]">
+        <TableBody className="[&_tr]:border-muted">
           {users.map((user) => {
             const isSelf = user.id === currentUserId;
             const isAdmin = user.roles.includes("ADMIN");
@@ -217,7 +217,7 @@ export function UsersTable({
         </TableBody>
       </Table>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#eef1f2] px-5 py-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-muted px-5 py-3.5">
         <p className="text-xs text-muted-foreground">
           {pageSummary(page, size, totalItems)}
         </p>

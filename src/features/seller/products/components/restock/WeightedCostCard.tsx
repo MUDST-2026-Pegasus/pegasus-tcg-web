@@ -49,7 +49,7 @@ export function WeightedCostCard({
   const operators = ["+", "="];
 
   return (
-    <section className="flex w-full flex-col gap-4 rounded-xl bg-zinc-950 p-5">
+    <section className="flex w-full flex-col gap-4 rounded-xl bg-foreground p-5">
       <div className="flex items-center gap-2">
         <TrendingUp aria-hidden="true" className="size-4 shrink-0 text-slate-50" />
         <h2 className="text-xs font-semibold text-white">{title}</h2>
