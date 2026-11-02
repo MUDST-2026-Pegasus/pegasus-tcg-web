@@ -1,41 +1,106 @@
-import notch from "@/assets/promotions/notch.svg";
-import scallop from "@/assets/promotions/scallop.svg";
 import radio from "@/assets/promotions/radio.svg";
 import check from "@/assets/promotions/check.svg";
-import { checkoutMoney } from "../checkout.format";
+import { PromotionTicketFrame } from "@/features/promotions/PromotionTicketFrame";
+import {
+  checkoutMoney,
+  formatPromotionDate,
+  formatPromotionError,
+  formatPromotionValue,
+} from "../checkout.format";
 import type { AvailablePromotion } from "../promotions.types";
+import { cn } from "@/lib/utils";
 
-function promotionValue(promotion: AvailablePromotion) {
-  if (promotion.discountType === "FREE_SHIPPING") return "ส่งฟรี";
-  return promotion.discountType === "PERCENT" ? `${promotion.discountValue}%` : checkoutMoney(promotion.discountValue);
-}
+const SCALLOP_OFFSETS = [-29, -11, 7, 25];
 
-export function CouponTicket({ promotion, selected = false, onSelect }: {
+export interface CouponTicketProps {
   promotion: AvailablePromotion;
   selected?: boolean;
   onSelect?: () => void;
-}) {
-  const disabled = !promotion.applicable;
+  className?: string;
+  disabled?: boolean;
+}
+
+export function CouponTicket({
+  promotion,
+  selected = false,
+  onSelect,
+  className,
+  disabled: propDisabled,
+}: CouponTicketProps) {
+  const disabled = propDisabled ?? !promotion.applicable;
   const platform = promotion.ownerType === "PLATFORM";
-  return <button type="button" disabled={disabled || !onSelect} onClick={onSelect}
-    className={`relative flex min-h-[90px] w-full overflow-hidden rounded-xl border text-left shadow-sm transition-colors ${selected ? "border-[#0069a8] bg-[#f0f7fc]" : "border-[#e3e7e8] bg-white"} ${disabled ? "opacity-65" : "hover:border-[#0069a8]"}`}
-    aria-pressed={selected}>
-    <span className={`relative flex w-[88px] shrink-0 flex-col items-center justify-center text-white ${disabled ? "bg-[#9ca8ad]" : platform ? "bg-gradient-to-br from-[#00398a] via-[#0058bc] to-[#1a8fe0]" : "bg-gradient-to-br from-[#065f58] via-[#0d9488] to-[#2bb5a3]"}`}>
-      <span className="text-[11px] text-white/80">ลด</span>
-      <strong className="text-[22px] font-black leading-none">{promotionValue(promotion)}</strong>
-      <small className="mt-1 text-[9px] uppercase tracking-wider">{platform ? "PEGASUS" : "SHOP"}</small>
-    </span>
-    <span className="flex min-w-0 flex-1 items-center gap-2 border-l border-dashed border-[#d3dce1] px-3 py-2">
-      <span className="min-w-0 flex-1"><strong className="block truncate text-[13px]">{promotion.code}</strong>
-        <span className="block truncate text-[11px] text-muted-foreground">{promotion.name}</span>
-        <span className="block text-[10px] text-muted-foreground">ขั้นต่ำ {checkoutMoney(promotion.minSpend)}{promotion.maxDiscount ? ` · สูงสุด ${checkoutMoney(promotion.maxDiscount)}` : ""}</span>
-        {!disabled && <span className="block truncate text-[10px] text-[#9aa5ad]">ใช้ได้ถึง {new Date(promotion.endsAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}{promotion.remainingClaims != null ? ` · เหลือ ${promotion.remainingClaims} สิทธิ์` : ""}</span>}
-        {disabled && <span className="block text-[10px] text-amber-700">{promotion.reason === "PROMO_MIN_SPEND_NOT_MET" && promotion.shortfall ? `ซื้อเพิ่มอีก ${checkoutMoney(promotion.shortfall)}` : promotion.reason || "ยังใช้ไม่ได้"}</span>}
-      </span>
-      <img alt="" src={selected ? check : radio} className="size-[18px] shrink-0" />
-    </span>
-    <img alt="" src={notch} className="pointer-events-none absolute left-[79px] -top-[9px] size-[18px]" />
-    <img alt="" src={notch} className="pointer-events-none absolute -bottom-[9px] left-[79px] size-[18px]" />
-    {[-29, -11, 7, 25].map((offset) => <img key={offset} alt="" src={scallop} className="pointer-events-none absolute -left-1 size-2" style={{ top: `calc(50% + ${offset}px)` }} />)}
-  </button>;
+  const value = formatPromotionValue(promotion);
+
+  const disabledReason =
+    promotion.reason === "PROMO_MIN_SPEND_NOT_MET" && promotion.shortfall
+      ? `ซื้อเพิ่มอีก ${checkoutMoney(promotion.shortfall)}`
+      : formatPromotionError(promotion.reason, {
+          sellerName: promotion.sellerName,
+          shortfall: promotion.shortfall,
+        });
+
+  return (
+    <PromotionTicketFrame
+      as="button"
+      type="button"
+      disabled={disabled || !onSelect}
+      onClick={onSelect}
+      aria-pressed={selected}
+      variant={platform ? "platform" : "shop"}
+      scallopOffsets={SCALLOP_OFFSETS}
+      className={cn(
+        "h-[92px] w-full text-left transition-colors",
+        selected
+          ? "ring-2 ring-primary border-primary bg-[#f0f7fc]"
+          : "ring-1 ring-border bg-white hover:border-primary/60",
+        disabled && "bg-muted/20 cursor-not-allowed hover:border-border",
+        !disabled && onSelect && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        className,
+      )}
+      stubClassName={disabled ? "!bg-none !bg-[#9ca8ad] text-white/90" : undefined}
+      stub={
+        <>
+          {promotion.discountType === "FREE_SHIPPING" ? null : (
+            <span className="text-[10px] text-white/80">ลด</span>
+          )}
+          <strong className="text-[22px] font-black leading-none">{value}</strong>
+          <small className="mt-1 text-[9px] font-bold uppercase tracking-wider text-white/80">
+            {platform ? "PEGASUS" : "SHOP"}
+          </small>
+        </>
+      }
+      body={
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <strong className="block truncate text-[13px] font-semibold text-[#090b0c]">
+              {promotion.code}
+            </strong>
+            <span className="block truncate text-[11px] text-[#67787c]">
+              {promotion.name}
+            </span>
+            <span className="block text-[10px] text-[#67787c]">
+              ขั้นต่ำ {checkoutMoney(promotion.minSpend)}
+              {promotion.maxDiscount ? ` · สูงสุด ${checkoutMoney(promotion.maxDiscount)}` : ""}
+            </span>
+            {!disabled && (
+              <span className="block truncate text-[10px] text-[#9aa5ad]">
+                ใช้ได้ถึง {formatPromotionDate(promotion.endsAt)}
+                {promotion.remainingClaims != null ? ` · เหลือ ${promotion.remainingClaims} สิทธิ์` : ""}
+              </span>
+            )}
+            {disabled && (
+              <span className="block truncate text-[10px] font-medium text-amber-700">
+                {disabledReason}
+              </span>
+            )}
+          </div>
+          <img
+            src={selected ? check : radio}
+            alt=""
+            className="size-[18px] shrink-0"
+          />
+        </div>
+      }
+    />
+  );
 }

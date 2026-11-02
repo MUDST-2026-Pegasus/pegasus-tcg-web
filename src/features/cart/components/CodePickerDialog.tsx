@@ -1,50 +1,299 @@
 import { useState } from "react";
+import { Loader2, Ticket, TicketPercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { CouponTicket } from "./CouponTicket";
-import type { AvailablePromotion } from "../promotions.types";
+import {
+  formatPromotionValue,
+  normalizePromotionCode,
+} from "../checkout.format";
+import type { AvailablePromotion, PromotionUiError } from "../promotions.types";
 
-export function CodePickerDialog({ open, onOpenChange, owner, sellerName, promotions, selectedCode, onSelect, onClaim, onTryCode, error }: {
+export interface CodePickerDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange(open: boolean): void;
   owner: "PLATFORM" | number;
-  sellerName?: string;
+  sellerName?: string | null;
   promotions: AvailablePromotion[];
   selectedCode?: string | null;
-  onSelect: (code: string | null) => void;
-  onClaim?: (promotion: AvailablePromotion) => void;
-  onTryCode: (code: string) => void;
-  error?: string | null;
-}) {
+  onSelect(code: string | null): void;
+  onTryCode(code: string): void | Promise<void>;
+  onClaim?: (promotion: AvailablePromotion) => void | Promise<void>;
+  error?: PromotionUiError | string | null;
+  loading?: boolean;
+  isGuest?: boolean;
+  onLogin?: () => void;
+  onRegister?: () => void;
+  onNavigateHome?: () => void;
+}
+
+export function CodePickerDialog({
+  open,
+  onOpenChange,
+  owner,
+  sellerName,
+  promotions,
+  selectedCode,
+  onSelect,
+  onTryCode,
+  onClaim,
+  error,
+  loading = false,
+  isGuest = false,
+  onLogin,
+  onRegister,
+  onNavigateHome,
+}: CodePickerDialogProps) {
+  const [draftCode, setDraftCode] = useState<string | null>(selectedCode ?? null);
   const [typed, setTyped] = useState("");
-  const relevant = promotions.filter((promotion) => owner === "PLATFORM" ? promotion.ownerType === "PLATFORM" : promotion.sellerProfileId === owner);
+  const [submitting, setSubmitting] = useState(false);
+  const [previousContext, setPreviousContext] = useState({
+    open,
+    owner,
+    selectedCode,
+  });
+
+  if (
+    previousContext.open !== open ||
+    previousContext.owner !== owner ||
+    previousContext.selectedCode !== selectedCode
+  ) {
+    const openedOrChangedOwner =
+      open && (!previousContext.open || previousContext.owner !== owner);
+    setPreviousContext({ open, owner, selectedCode });
+    setDraftCode(selectedCode ?? null);
+    if (openedOrChangedOwner) setTyped("");
+  }
+
+  const resolvedError = (() => {
+    if (!error) return null;
+    if (typeof error === "string") return error;
+    if (error.owner === owner) return error.message;
+    return null;
+  })();
+
+  const relevant = promotions.filter((promotion) =>
+    owner === "PLATFORM"
+      ? promotion.ownerType === "PLATFORM"
+      : promotion.sellerProfileId === owner,
+  );
+
   const groups = [
-    { title: "เก็บไว้ใช้ได้", items: relevant.filter((promotion) => promotion.source === "CLAIMED" && promotion.applicable) },
-    { title: "เก็บไว้แต่ยังใช้ไม่ได้", items: relevant.filter((promotion) => promotion.source === "CLAIMED" && !promotion.applicable) },
-    { title: "ยังไม่ได้เก็บ", items: relevant.filter((promotion) => promotion.source === "CLAIMABLE") },
-    { title: "โค้ดทั่วไป", items: relevant.filter((promotion) => promotion.source === "PUBLIC") },
+    {
+      title: "เก็บไว้ใช้ได้",
+      items: relevant.filter(
+        (promotion) => promotion.source === "CLAIMED" && promotion.applicable,
+      ),
+    },
+    {
+      title: "เก็บไว้แต่ยังใช้ไม่ได้",
+      items: relevant.filter(
+        (promotion) => promotion.source === "CLAIMED" && !promotion.applicable,
+      ),
+    },
+    {
+      title: "ยังไม่ได้เก็บ",
+      items: relevant.filter((promotion) => promotion.source === "CLAIMABLE"),
+    },
+    {
+      title: "โค้ดทั่วไป",
+      items: relevant.filter((promotion) => promotion.source === "PUBLIC"),
+    },
   ];
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] gap-4 overflow-y-auto rounded-2xl p-6">
-      <DialogHeader><DialogTitle>เลือกโค้ดส่วนลด{owner === "PLATFORM" ? " Pegasus" : `ร้าน ${sellerName || ""}`}</DialogTitle></DialogHeader>
-      {groups.map((group) => {
-        if (!group.items.length) return null;
-        return <section key={group.title} className="grid gap-2">
-          <h3 className="text-sm font-semibold">{group.title}</h3>
-          {group.items.map((promotion) => <div key={promotion.id} className="grid gap-1">
-            <CouponTicket promotion={promotion} selected={selectedCode === promotion.code} onSelect={() => { onSelect(promotion.code); onOpenChange(false); }} />
-            {promotion.source === "CLAIMABLE" && onClaim && <Button size="sm" variant="outline" disabled={promotion.remainingClaims === 0} onClick={() => onClaim(promotion)}>{promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}</Button>}
-          </div>)}
-        </section>;
-      })}
-      {!relevant.length && <p className="rounded-lg bg-muted p-5 text-center text-sm text-muted-foreground">ยังไม่มีโค้ดสำหรับรายการนี้</p>}
-      {selectedCode && <Button variant="outline" onClick={() => { onSelect(null); onOpenChange(false); }}>ไม่ใช้โค้ด</Button>}
-      <form onSubmit={(event) => { event.preventDefault(); if (typed.trim()) onTryCode(typed.trim().toUpperCase()); }} className="grid gap-2 border-t pt-4">
-        <label htmlFor="promo-code-input" className="text-sm font-medium">กรอกโค้ดอื่น</label>
-        <div className="flex gap-2"><Input id="promo-code-input" value={typed} onChange={(event) => setTyped(event.target.value)} maxLength={20} placeholder="กรอกโค้ดส่วนลด" /><Button type="submit">ใช้โค้ด</Button></div>
-        {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
-      </form>
-    </DialogContent>
-  </Dialog>;
+
+  const draftPromotion = relevant.find((p) => p.code === draftCode);
+
+  const handleTrySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const normalized = normalizePromotionCode(typed);
+    if (!normalized || loading || submitting) return;
+    setSubmitting(true);
+    try {
+      await onTryCode(normalized);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirm = () => {
+    onSelect(draftCode);
+    onOpenChange(false);
+  };
+
+  const handleClear = () => {
+    setDraftCode(null);
+    onSelect(null);
+    onOpenChange(false);
+  };
+
+  const title =
+    owner === "PLATFORM"
+      ? "เลือกโค้ดส่วนลด Pegasus"
+      : `โค้ดร้าน ${sellerName || ""}`;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0">
+        <DialogHeader className="p-6 pb-3">
+          <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
+        </DialogHeader>
+
+        {/* Input box at top as specified by Figma B2/C2 */}
+        <div className="border-b px-6 pb-4">
+          <form onSubmit={handleTrySubmit} className="flex flex-col gap-1.5">
+            <label htmlFor="promo-code-input" className="text-xs font-medium text-foreground">
+              กรอกโค้ดอื่น
+            </label>
+            <div className="flex gap-2">
+              <Input
+                id="promo-code-input"
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                maxLength={20}
+                placeholder="กรอกโค้ดส่วนลด"
+                className="h-10 text-sm uppercase"
+                disabled={loading || submitting}
+                aria-invalid={!!resolvedError}
+                aria-describedby={resolvedError ? "promo-code-error" : undefined}
+              />
+              <Button
+                type="submit"
+                disabled={!typed.trim() || loading || submitting}
+                className="h-10 shrink-0 px-4"
+              >
+                {loading || submitting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  "ใช้โค้ด"
+                )}
+              </Button>
+            </div>
+            {resolvedError && (
+              <p id="promo-code-error" role="alert" className="text-xs text-destructive">
+                {resolvedError}
+              </p>
+            )}
+          </form>
+        </div>
+
+        {/* Scrollable list */}
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+          {isGuest && (
+            <div className="rounded-xl border border-dashed border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
+              <p>เข้าสู่ระบบเพื่อดูโค้ดส่วนลดที่คุณเก็บไว้</p>
+              <div className="mt-2 flex justify-center gap-2">
+                {onLogin && (
+                  <Button size="sm" variant="outline" onClick={onLogin}>
+                    เข้าสู่ระบบ
+                  </Button>
+                )}
+                {onRegister && (
+                  <Button size="sm" variant="ghost" onClick={onRegister}>
+                    สมัครสมาชิก
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {groups.map((group) => {
+            if (!group.items.length) return null;
+            return (
+              <section key={group.title} className="grid gap-2">
+                <h3 className="text-xs font-semibold text-muted-foreground">
+                  {group.title} ({group.items.length})
+                </h3>
+                {group.items.map((promotion) => (
+                  <div key={promotion.id} className="grid gap-1">
+                    <CouponTicket
+                      promotion={promotion}
+                      selected={draftCode === promotion.code}
+                      onSelect={
+                        promotion.source !== "CLAIMABLE" && promotion.applicable
+                          ? () => setDraftCode(promotion.code)
+                          : undefined
+                      }
+                    />
+                    {promotion.source === "CLAIMABLE" && onClaim && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={promotion.remainingClaims === 0}
+                        onClick={() => void onClaim(promotion)}
+                        className="justify-self-end text-xs"
+                      >
+                        {promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </section>
+            );
+          })}
+
+          {!relevant.length && (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 py-8 text-center">
+              <TicketPercent className="size-8 text-muted-foreground/60" />
+              <p className="text-sm font-medium text-foreground">ยังไม่มีโค้ดที่เก็บไว้</p>
+              <p className="text-xs text-muted-foreground">ยังไม่มีโค้ดสำหรับรายการนี้</p>
+              {onNavigateHome && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onNavigateHome}
+                  className="mt-2 text-xs"
+                >
+                  <Ticket className="mr-1.5 size-3.5" />
+                  ไปหน้าแรกเพื่อเก็บโค้ด
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer with discount summary and action buttons */}
+        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t bg-card px-6 py-3">
+          <div className="min-w-0 flex-1 text-xs">
+            {draftPromotion ? (
+              <p className="truncate">
+                <span className="text-muted-foreground">เลือก: </span>
+                <strong className="font-semibold text-foreground">
+                  {draftPromotion.code}
+                </strong>
+                <span className="ml-1 text-teal-700 font-medium">
+                  ({formatPromotionValue(draftPromotion)})
+                </span>
+              </p>
+            ) : (
+              <span className="text-muted-foreground">ยังไม่ได้เลือกโค้ด</span>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleClear}
+            >
+              ไม่ใช้โค้ด
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={!draftCode}
+              onClick={handleConfirm}
+            >
+              ใช้โค้ดนี้
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
