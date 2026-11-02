@@ -269,6 +269,7 @@ export function CodePickerDialog({
             type="button"
             variant="outline"
             size="sm"
+            className="rounded-lg bg-background"
             onClick={handleClear}
           >
             ไม่ใช้โค้ด
@@ -276,6 +277,7 @@ export function CodePickerDialog({
           <Button
             type="button"
             size="sm"
+            className="rounded-lg"
             disabled={!draftCode}
             onClick={handleConfirm}
           >
