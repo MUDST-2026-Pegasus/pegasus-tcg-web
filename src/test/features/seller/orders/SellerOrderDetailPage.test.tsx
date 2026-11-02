@@ -110,7 +110,46 @@ describe("SellerOrderDetailPage", () => {
     expect(screen.getAllByText("Buyer User").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Please pack carefully/)).toBeInTheDocument();
     expect(screen.getByText("กำไรจากออเดอร์นี้")).toBeInTheDocument();
+    expect(screen.getByText("ยอดขาย (รวมค่าส่ง)")).toBeInTheDocument();
+    expect(screen.queryByText(/โค้ดร้าน/)).not.toBeInTheDocument();
     expect(screen.getByText(/1,422.50/)).toBeInTheDocument();
+  });
+
+  it("renders the O1 discount owners and seller payout from the order API", async () => {
+    vi.mocked(ordersApi.getSellerOrder).mockResolvedValue({
+      ...mockOrderDetail,
+      summary: {
+        ...mockOrderDetail.summary,
+        order: {
+          ...mockOrderDetail.summary.order,
+          itemsSubtotal: 830,
+          shippingFee: 45,
+          discountAmount: 99.06,
+          sellerDiscount: 50,
+          platformDiscount: 49.06,
+          platformSubsidy: 49.06,
+          commissionBase: 780,
+          grandTotal: 775.94,
+          commissionAmount: 39,
+          sellerNetAmount: 786,
+          promotions: [
+            { code: "MINMIN50", ownerType: "SELLER", amount: 50 },
+            { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
+          ],
+        },
+      },
+    });
+
+    renderWithRoute("/seller/orders/501");
+
+    expect(await screen.findByText("โค้ดร้าน MINMIN50 · ร้านออก")).toBeInTheDocument();
+    expect(screen.getByText("โค้ด Pegasus PEGASUS10 · Pegasus ออก")).toBeInTheDocument();
+    expect(screen.getByText("ลูกค้าจ่าย")).toBeInTheDocument();
+    expect(screen.getByText("ฐานคอมมิชชั่น")).toBeInTheDocument();
+    expect(screen.getByText("+ Pegasus จ่ายแทน")).toBeInTheDocument();
+    expect(screen.getByText("ร้านได้รับ")).toBeInTheDocument();
+    expect(screen.getByText("฿786")).toBeInTheDocument();
+    expect(screen.getByText(/โค้ด Pegasus ไม่ลดรายได้ร้าน/)).toBeInTheDocument();
   });
 
   it("renders not found state when order ID is not numeric or not found", async () => {

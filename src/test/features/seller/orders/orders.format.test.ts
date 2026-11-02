@@ -330,18 +330,32 @@ describe("payment, timeline and profit", () => {
     expect(profitSummary(detail({ status: "CANCELLED" }))).toBeNull();
   });
 
-  it("shows buyer payment, each subsidy owner, and the seller payout from the order API", () => {
+  it("uses the API's O1 promotion allocations for the seller money summary", () => {
     const summary = profitSummary(detail({
-      itemsSubtotal: 1000, shippingFee: 50, sellerDiscount: 100, platformDiscount: 80,
-      platformSubsidy: 80, commissionBase: 900, grandTotal: 870,
-      commissionAmount: 49.06, sellerNetAmount: 900.94,
+      itemsSubtotal: 830, shippingFee: 45, sellerDiscount: 50, platformDiscount: 49.06,
+      platformSubsidy: 49.06, commissionBase: 780, grandTotal: 775.94,
+      commissionAmount: 39, sellerNetAmount: 786,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER", amount: 50 },
+        { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
+      ],
     }));
+    expect(summary?.promotionBreakdown).toEqual({
+      sellerDiscount: 50,
+      platformDiscount: 49.06,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER", amount: 50 },
+        { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
+      ],
+    });
     expect(summary?.rows).toEqual(expect.arrayContaining([
-      { id: "seller-promo", label: "− โค้ดร้าน (ร้านออก)", value: "฿100" },
-      { id: "platform-promo", label: "− โค้ด Pegasus (Pegasus ออก)", value: "฿80" },
-      { id: "buyer-paid", label: "ลูกค้าจ่าย", value: "฿870" },
-      { id: "subsidy", label: "+ Pegasus จ่ายแทน", value: "฿80" },
-      { id: "seller-net", label: "ร้านได้รับ", value: "฿900.94" },
+      { id: "items", label: "ยอดสินค้า", value: "฿830" },
+      { id: "shipping", label: "ค่าส่ง", value: "฿45" },
+      { id: "buyer-paid", label: "ลูกค้าจ่าย", value: "฿775.94" },
+      { id: "subsidy", label: "+ Pegasus จ่ายแทน", value: "฿49.06" },
+      { id: "commission-base", label: "ฐานคอมมิชชั่น", value: "฿780" },
+      { id: "commission", label: "− ค่าคอมมิชชั่น", value: "฿39" },
+      { id: "seller-net", label: "ร้านได้รับ", value: "฿786" },
     ]));
     expect(summary?.rows.some((row) => row.id === "sales")).toBe(false);
   });

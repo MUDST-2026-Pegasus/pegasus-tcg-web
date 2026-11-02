@@ -11,6 +11,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PromotionOrderTable } from "@/features/promotions/components/PromotionOrderTable";
 
 import { formatBaht } from "../catalog.format";
 import {
@@ -63,6 +64,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
   const { summary, order, payment } = detail;
   const address = parseShippingAddress(detail.shippingAddressSnapshot);
   const shipment = order.shipments.at(-1);
+  const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
 
   return (
     <>
@@ -117,24 +119,33 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           </ul>
         </Section>
 
-        <Section title="ยอดเงิน">
-          <Row label="ค่าสินค้า">{formatBaht(order.itemsSubtotal)}</Row>
-          <Row label="ค่าส่ง">{formatBaht(order.shippingFee)}</Row>
-          {(order.sellerDiscount || 0) > 0 && <Row label={`โค้ดร้าน · ${order.promotions?.find((p) => p.ownerType === "SELLER")?.code || ""}`}>− {formatBaht(order.sellerDiscount || 0)}</Row>}
-          {(order.platformDiscount || 0) > 0 && <Row label={`โค้ด Pegasus · ${order.promotions?.find((p) => p.ownerType === "PLATFORM")?.code || ""}`}>− {formatBaht(order.platformDiscount || 0)}</Row>}
-          {order.discountAmount > 0 ? (
-            <Row label="ส่วนลด">− {formatBaht(order.discountAmount)}</Row>
-          ) : null}
-          <Row label="ยอดรวม" strong>
-            {formatBaht(order.grandTotal)}
-          </Row>
-          {(order.sellerDiscount || order.platformDiscount) && <Row label="Pegasus จ่ายแทน">+ {formatBaht(order.platformSubsidy || 0)}</Row>}
-          <Separator />
-          {(order.sellerDiscount || order.platformDiscount) && <Row label="ฐานคอมมิชชั่น">{formatBaht(order.commissionBase ?? order.itemsSubtotal)}</Row>}
-          <Row label="ค่าคอมมิชชั่น">− {formatBaht(order.commissionAmount)}</Row>
-          <Row label="ผู้ขายได้รับ" strong>
-            {formatBaht(order.sellerNetAmount)}
-          </Row>
+        <Section title={hasPromotionDiscount ? "ส่วนลดตามร้าน" : "ยอดเงิน"}>
+          {hasPromotionDiscount ? (
+            <PromotionOrderTable
+              rows={[{
+                id: order.id,
+                sellerName: order.sellerName || summary.seller.displayName,
+                itemsSubtotal: order.itemsSubtotal,
+                sellerDiscount: order.sellerDiscount ?? 0,
+                platformDiscount: order.platformDiscount ?? 0,
+                grandTotal: order.grandTotal,
+                commissionAmount: order.commissionAmount,
+                sellerNetAmount: order.sellerNetAmount,
+                promotions: order.promotions,
+              }]}
+              formatAmount={formatBaht}
+            />
+          ) : (
+            <>
+              <Row label="ค่าสินค้า">{formatBaht(order.itemsSubtotal)}</Row>
+              <Row label="ค่าส่ง">{formatBaht(order.shippingFee)}</Row>
+              {order.discountAmount > 0 ? <Row label="ส่วนลด">− {formatBaht(order.discountAmount)}</Row> : null}
+              <Row label="ยอดรวม" strong>{formatBaht(order.grandTotal)}</Row>
+              <Separator />
+              <Row label="ค่าคอมมิชชั่น">− {formatBaht(order.commissionAmount)}</Row>
+              <Row label="ผู้ขายได้รับ" strong>{formatBaht(order.sellerNetAmount)}</Row>
+            </>
+          )}
         </Section>
 
         <Section title="การชำระเงิน">

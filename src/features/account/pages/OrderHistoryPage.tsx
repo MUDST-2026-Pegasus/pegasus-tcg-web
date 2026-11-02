@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
@@ -114,6 +114,32 @@ export function OrderHistoryPage() {
     return [];
   }, [ordersData]);
 
+  const previousStatuses = useRef<Map<number, string>>(new Map());
+  const timeoutNotices = useRef(new Set<number>());
+  useEffect(() => {
+    if (!ordersData) return;
+    for (const order of orders) {
+      if (order.status !== "CANCELLED" || timeoutNotices.current.has(order.id)) continue;
+      const timedOut = order.sellerOrders.some((seller) => seller.cancelReason?.includes("Cancelled automatically: payment was not received in time"));
+      if (!timedOut) continue;
+      const previousStatus = previousStatuses.current.get(order.id);
+      const restoredPromoLoadedAfterExpiry = previousStatus === undefined
+        && order.promotionsRestoredOnCancel
+        && (order.promotions?.length ?? 0) > 0;
+      if (previousStatus !== "PENDING_PAYMENT" && !restoredPromoLoadedAfterExpiry) continue;
+      timeoutNotices.current.add(order.id);
+      const codeNames = order.promotions?.map((promotion) => promotion.code).filter(Boolean) ?? [];
+      toast.add({
+        title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
+        description: order.promotionsRestoredOnCancel && codeNames.length
+          ? `คืนสิทธิ์ ${codeNames.join(", ")} แล้ว`
+          : "คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+        type: "warning",
+      });
+    }
+    previousStatuses.current = new Map(orders.map((order) => [order.id, order.status]));
+  }, [orders, ordersData]);
+
   const tabCounts = useMemo(() => {
     const counts: Record<OrderFilterTab, number> = {
       ALL: orders.length,
@@ -180,12 +206,12 @@ export function OrderHistoryPage() {
     setTimeout(restoreScroll, 50);
   };
 
-  const handleConfirmCancelOrder = async () => {
+  const handleConfirmCancelOrder = async (reason?: string) => {
     if (!selectedOrderToCancel) return;
     const orderId = selectedOrderToCancel.id;
     setCancellingOrderId(orderId);
     try {
-      await ordersApi.cancelOrder(orderId, "Buyer requested cancellation");
+      await ordersApi.cancelOrder(orderId, reason ?? "Buyer requested cancellation");
       toast.add({
         title: "Order Cancelled",
         description: "Your order has been cancelled successfully.",

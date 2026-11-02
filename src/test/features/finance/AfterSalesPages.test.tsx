@@ -32,6 +32,7 @@ describe("after sales screens", () => {
       items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
     fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
+    fireEvent.click(await screen.findByRole("button", { name: "ยืนยัน" }));
     await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalledWith(41, {
       reasonCode: "NOT_AS_DESCRIBED", description: "", evidenceKeys: [], items: [{ orderItemId: 72, quantity: 1 }],
     }));
@@ -47,6 +48,7 @@ describe("after sales screens", () => {
     await user.click(screen.getByRole("combobox", { name: "สาเหตุคืนสินค้า" }));
     await user.click(await screen.findByRole("option", { name: "สินค้าเสียหาย" }));
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
+    fireEvent.click(await screen.findByRole("button", { name: "ยืนยัน" }));
     await waitFor(() => expect(afterSalesApi.requestReturn).toHaveBeenCalledWith(41, expect.objectContaining({ reasonCode: "DAMAGED" })));
   });
 

@@ -12,6 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
+import { PromotionDiscountLines } from "@/features/promotions/components/PromotionDiscountLines";
 import type { OrderDetails } from "../orders.types";
 import {
   confirmableSellerOrders,
@@ -197,6 +198,22 @@ export function OrderDetailsModal({
                   </div>
                 )}
 
+                {((so.sellerDiscount ?? 0) > 0 || (so.platformDiscount ?? 0) > 0) && (
+                  <div className="flex flex-col gap-2 border-t pt-3">
+                    <PromotionDiscountLines
+                      sellerDiscount={so.sellerDiscount}
+                      platformDiscount={so.platformDiscount}
+                      promotions={so.promotions}
+                      formatAmount={formatPrice}
+                      className="flex flex-col gap-2"
+                    />
+                    <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                      <span>ลูกค้าจ่ายร้านนี้</span>
+                      <span className="shrink-0 tabular-nums">{formatPrice(so.grandTotal)}</span>
+                    </div>
+                  </div>
+                )}
+
                 <BuyerAfterSales order={so} />
               </div>
             ))}
@@ -218,7 +235,14 @@ export function OrderDetailsModal({
                 {formatPrice(order.shippingTotal)}
               </span>
             </div>
-            {order.discountTotal > 0 && (
+            <PromotionDiscountLines
+              sellerDiscount={order.sellerDiscountTotal}
+              platformDiscount={order.platformDiscountTotal}
+              promotions={order.promotions}
+              formatAmount={formatPrice}
+              className="flex flex-col gap-2"
+            />
+            {order.discountTotal > 0 && order.sellerDiscountTotal == null && order.platformDiscountTotal == null && (
               <div className="flex justify-between text-emerald-600">
                 <span>Discount</span>
                 <span>-{formatPrice(order.discountTotal)}</span>

@@ -29,12 +29,40 @@ const mockOrder: OrderDetails = {
 describe("CancelOrderConfirmationDialog", () => {
   it("explains when an unpaid order restores its code", () => {
     renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, promotionsRestoredOnCancel: true, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "RESERVED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
-    expect(screen.getByText(/โค้ดจะกลับเข้าโค้ดของฉัน/)).toBeInTheDocument();
+    expect(screen.getByText(/PEGASUS10 จะกลับเข้า “โค้ดของฉัน”/)).toBeInTheDocument();
   });
 
   it("explains that a paid order does not restore its code", () => {
     renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, status: "PAID", promotionsRestoredOnCancel: false, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "CONSUMED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
-    expect(screen.getByText(/โค้ดจะไม่ได้คืนสิทธิ์/)).toBeInTheDocument();
+    expect(screen.getByText(/จะไม่ได้คืนสิทธิ์ เพราะชำระเงินแล้ว/)).toBeInTheDocument();
+  });
+
+  it("shows per-shop payment, applied codes, refund and required reason for a paid promotion order", async () => {
+    const onConfirm = vi.fn();
+    const order = {
+      ...mockOrder,
+      status: "PAID",
+      grandTotal: 775.94,
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 49.06,
+      promotionsRestoredOnCancel: false,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER" as const, sellerProfileId: 12, amount: 50, status: "CONSUMED" },
+        { code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 49.06, status: "CONSUMED" },
+      ],
+      sellerOrders: [{ id: 7, sellerOrderNumber: "SO-7", sellerName: "minmin_tcg", grandTotal: 775.94 }],
+    } as OrderDetails;
+    renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={order} onConfirm={onConfirm} isCancelling={false} />);
+
+    expect(screen.getByText("ยอดที่จ่ายให้ร้านนี้")).toBeInTheDocument();
+    expect(screen.getAllByText("฿775.94")).toHaveLength(2);
+    expect(screen.getByText(/MINMIN50/)).toBeInTheDocument();
+    expect(screen.getByText("PEGASUS10")).toBeInTheDocument();
+    expect(screen.getByText("เงินคืน")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "เหตุผลการยกเลิก" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
+    expect(onConfirm).toHaveBeenCalledWith("เปลี่ยนใจ / สั่งผิด");
   });
   it("renders correctly when open with title, description, and action buttons", () => {
     renderWithProviders(
@@ -54,6 +82,7 @@ describe("CancelOrderConfirmationDialog", () => {
     expect(screen.getByText(/ORD-2026-0042/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /keep order/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /confirm cancel/i })).toBeInTheDocument();
+    expect(screen.queryByText(/โค้ดที่ใช้กับคำสั่งซื้อนี้/)).not.toBeInTheDocument();
   });
 
   it("calls onOpenChange(false) when clicking Keep Order", async () => {
