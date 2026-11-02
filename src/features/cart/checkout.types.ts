@@ -45,6 +45,9 @@ export interface CheckoutRequest {
   shippingOptionBySeller?: Record<number, number> | null;
   buyerNote?: string | null;
   cartItemIds?: number[] | null;
+  platformCode?: string | null;
+  sellerCodes?: Record<number, string>;
+  expectedGrandTotal?: number;
 }
 
 export interface ShippingQuoteOption {

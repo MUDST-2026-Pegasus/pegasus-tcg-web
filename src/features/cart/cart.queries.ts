@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { cartApi } from "./cart.api";
 import { checkoutApi } from "./checkout.api";
 import type { AddCartItemRequest, CartItemResponse, UpdateCartItemRequest } from "./cart.types";
+import type { PromotionSelection } from "./promotions.types";
 
 export const cartKeys = {
   all: ["cart"] as const,
@@ -26,6 +27,39 @@ export function useShippingQuotes(cartItemIds: number[], context: {
     queryFn: () => checkoutApi.getShippingQuotes(cartItemIds),
     enabled: (context.enabled ?? true) && cartItemIds.length > 0,
     placeholderData: keepPreviousData,
+    retry: false,
+  });
+}
+
+export function useCheckoutPromotionList(cartItemIds: number[], context: {
+  userId?: number;
+  cartId?: number;
+  enabled: boolean;
+}) {
+  return useQuery({
+    queryKey: ["checkout-promotions", context.userId, context.cartId, cartItemIds],
+    queryFn: () => checkoutApi.getPromotions(cartItemIds),
+    enabled: context.enabled,
+  });
+}
+
+export function useCheckoutPromotionPreview(context: {
+  cartItemIds: number[];
+  shippingOptionBySeller: Record<number, number>;
+  selection: PromotionSelection;
+  userId?: number;
+  cartId?: number;
+  enabled: boolean;
+}) {
+  return useQuery({
+    queryKey: ["checkout-promo-preview", context.userId, context.cartId,
+      context.cartItemIds, context.shippingOptionBySeller, context.selection],
+    queryFn: ({ signal }) => checkoutApi.previewPromotions({
+      cartItemIds: context.cartItemIds,
+      shippingOptionBySeller: context.shippingOptionBySeller,
+      ...context.selection,
+    }, signal),
+    enabled: context.enabled,
     retry: false,
   });
 }
