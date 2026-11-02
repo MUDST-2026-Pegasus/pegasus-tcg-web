@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
 import { useRegister } from "@/features/auth/auth.queries";
+import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/claim-redirect";
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import {
   registerSchema,
@@ -26,6 +27,7 @@ import { applyApiErrors } from "@/lib/form";
 
 export function RegisterForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const registerAccount = useRegister();
 
   const form = useForm<RegisterFormValues>({
@@ -56,7 +58,8 @@ export function RegisterForm() {
         email: values.email,
         password: values.password,
       });
-      navigate("/", { replace: true });
+      rememberPendingClaim(location.search);
+      navigate(authRedirectTarget(location.search, location.state), { replace: true });
     } catch (error) {
       // 409 ไม่มี violations มาด้วย ต้องชี้เองว่า code ไหนลงช่องไหน
       applyApiErrors(error, setError, {
@@ -190,7 +193,7 @@ export function RegisterForm() {
       </FieldGroup>
       <p className="text-center text-sm text-muted-foreground ">
         Already have an account? &nbsp;
-        <Link to="/login" className="font-medium text-primary">
+        <Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">
           Log in
         </Link>
       </p>

@@ -10,12 +10,11 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useLogin } from "@/features/auth/auth.queries";
+import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/claim-redirect";
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { loginSchema, type LoginFormValues } from "@/features/auth/auth.schema";
 import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
-
-type LocationState = { from?: { pathname?: string } } | null;
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -37,8 +36,8 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     try {
       await login.mutateAsync(values);
-      const from = (location.state as LocationState)?.from?.pathname;
-      navigate(from ?? "/", { replace: true });
+      rememberPendingClaim(location.search);
+      navigate(authRedirectTarget(location.search, location.state), { replace: true });
     } catch (error) {
       // 401 ตั้งใจไม่ชี้ว่าช่องไหนผิด กันไม่ให้เดาว่าอีเมลนี้มีบัญชีจริงไหม
       applyApiErrors(error, setError);
@@ -98,7 +97,7 @@ export function LoginForm() {
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link to="/register" className="font-medium text-primary">
+          <Link to={{ pathname: "/register", search: location.search }} className="font-medium text-primary">
             Sign up
           </Link>
         </p>
