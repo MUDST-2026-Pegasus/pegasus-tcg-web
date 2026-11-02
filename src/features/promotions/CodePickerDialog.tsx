@@ -208,7 +208,7 @@ export function CodePickerDialog({
                   );
 
                   return (
-                    <div key={promotion.id} className="grid gap-2">
+                    <div key={promotion.id} className="grid gap-4">
                       {canSelect ? (
                         ticket
                       ) : (
