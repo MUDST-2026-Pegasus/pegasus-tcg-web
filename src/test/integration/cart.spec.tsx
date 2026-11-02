@@ -10,6 +10,14 @@ vi.mock("@/components/ui/toast", () => ({
   toast: { add: vi.fn() },
 }));
 
+// No promotions in this flow: the cart falls back to its own subtotal.
+vi.mock("@/features/cart/checkout.api", () => ({
+  checkoutApi: {
+    getPromotions: vi.fn().mockResolvedValue([]),
+    previewPromotions: vi.fn().mockRejectedValue(new Error("not under test")),
+  },
+}));
+
 vi.mock("@/features/cart/cart.api", () => ({
   cartApi: {
     getCart: vi.fn(),
@@ -97,7 +105,7 @@ describe("CartPage Integration Flow", () => {
     });
   });
 
-  it("renders cart items and displays correct subtotal and estimated shipping", async () => {
+  it("renders cart items per shop and the subtotal before shipping", async () => {
     renderWithProviders(<CartPage />);
 
     expect(await screen.findByText("Blue-Eyes White Dragon")).toBeInTheDocument();
@@ -105,10 +113,9 @@ describe("CartPage Integration Flow", () => {
     expect(screen.getByText("Kaiba Store")).toBeInTheDocument();
     expect(screen.getByText("Yugi Games")).toBeInTheDocument();
 
-    expect(screen.getByText("Subtotal (2 items)")).toBeInTheDocument();
-    expect(screen.getByText("฿1,300")).toBeInTheDocument();
-    expect(screen.getByText("฿100")).toBeInTheDocument();
-    expect(screen.getByText("฿1,400")).toBeInTheDocument();
+    expect(screen.getByText("ยอดสินค้า (3 ใบ)")).toBeInTheDocument();
+    expect(screen.getByText("ค่าจัดส่ง").nextSibling).toHaveTextContent("คิดในหน้าถัดไป");
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿1,300");
   });
 
   it("allows increasing and decreasing item quantity", async () => {
@@ -135,10 +142,7 @@ describe("CartPage Integration Flow", () => {
 
     expect(await screen.findByText("Blue-Eyes White Dragon")).toBeInTheDocument();
 
-    const removeButtons = screen.getAllByRole("button", { name: "Remove" });
-    expect(removeButtons).toHaveLength(2);
-
-    await user.click(removeButtons[0]);
+    await user.click(screen.getByRole("button", { name: "ลบ Blue-Eyes White Dragon" }));
 
     await waitFor(() => {
       expect(cartApi.removeItem).toHaveBeenCalledWith(1);
@@ -156,8 +160,8 @@ describe("CartPage Integration Flow", () => {
 
     renderWithProviders(<CartPage />);
 
-    expect(await screen.findByText("Your cart is empty.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Explore Products" })).toBeInTheDocument();
+    expect(await screen.findByText("ยังไม่มีสินค้าในตะกร้า")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "เลือกซื้อสินค้า" })).toBeInTheDocument();
   });
 
   it("renders error state when cart fetch fails", async () => {
@@ -165,7 +169,7 @@ describe("CartPage Integration Flow", () => {
 
     renderWithProviders(<CartPage />);
 
-    expect(await screen.findByText("Failed to load cart.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(await screen.findByText("โหลดตะกร้าไม่สำเร็จ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ลองใหม่" })).toBeInTheDocument();
   });
 });

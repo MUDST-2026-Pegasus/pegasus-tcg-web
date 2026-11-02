@@ -95,7 +95,7 @@ export function SellerQueueList({
                 </div>
 
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge className="h-5 rounded-[5px] bg-[#eef1f2] px-2 text-[10px] font-medium text-muted-foreground">
+                  <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
                     {verification.bankName}
                   </Badge>
                   {claimedBy !== null && (

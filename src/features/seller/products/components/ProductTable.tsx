@@ -46,12 +46,12 @@ export function ListingThumb({ listing }: { listing: SellerListingSummary }) {
         src={src}
         alt=""
         onError={() => setFailedSrc(src)}
-        className="size-10 shrink-0 rounded-md bg-gray-100 object-cover"
+        className="size-10 shrink-0 rounded-md bg-secondary object-cover"
       />
     );
   }
   return (
-    <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-gray-100">
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-secondary">
       <ImageIcon aria-hidden="true" className="size-4 text-gray-400" />
     </div>
   );
@@ -102,7 +102,7 @@ export function ProductTable({
         className={cn("transition-opacity", isFetching && "opacity-60")}
       >
         <TableHeader>
-          <TableRow className="border-y border-gray-100 bg-neutral-50 hover:bg-neutral-50">
+          <TableRow className="border-y border-muted bg-neutral-50 hover:bg-neutral-50">
             <TableHead className={cn(HEAD_CLASS, "w-8 pl-5")}>
               <Checkbox
                 checked={allSelected}
@@ -126,7 +126,7 @@ export function ProductTable({
           </TableRow>
         </TableHeader>
 
-        <TableBody className="[&_tr]:border-gray-100">
+        <TableBody className="[&_tr]:border-muted">
           {rows.map((row) => {
             const isSelected = selectedIds.includes(row.id);
             const name = row.card.productName;
@@ -151,7 +151,7 @@ export function ProductTable({
                   <div className="flex items-center gap-3">
                     <ListingThumb listing={row} />
                     <div className="flex min-w-0 flex-col gap-[3px]">
-                      <p className="truncate text-xs font-medium text-zinc-950">
+                      <p className="truncate text-xs font-medium text-foreground">
                         {name}
                       </p>
                       <p className="truncate text-[10px] text-gray-400">
@@ -176,7 +176,7 @@ export function ProductTable({
                           ? "text-[#d0342c]"
                           : lowStock
                             ? "text-[#b45309]"
-                            : "text-zinc-950",
+                            : "text-foreground",
                       )}
                     >
                       {row.quantityAvailable}

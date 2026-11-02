@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { EditProfileDialog } from "@/features/account/components/EditProfileDialog";
@@ -23,7 +22,6 @@ describe("Profile Integration", () => {
   });
 
   it("updates profile information and closes dialog on success", async () => {
-    const user = userEvent.setup();
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -67,15 +65,13 @@ describe("Profile Integration", () => {
 
     // Fill form
     const nameInput = screen.getByLabelText(/display name/i);
-    await user.clear(nameInput);
-    await user.type(nameInput, "New Master");
+    fireEvent.change(nameInput, { target: { value: "New Master" } });
     
     const phoneInput = screen.getByLabelText(/phone number/i);
-    await user.clear(phoneInput);
-    await user.type(phoneInput, "0891234567");
+    fireEvent.change(phoneInput, { target: { value: "0891234567" } });
 
     // Submit form
-    await user.click(screen.getByRole("button", { name: /save changes/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     // Verify API called
     await waitFor(() => {

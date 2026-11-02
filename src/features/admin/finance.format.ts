@@ -65,7 +65,7 @@ export type StatusMeta = {
   badgeClass: string;
 };
 
-export const NEUTRAL_BADGE = "bg-[#eef1f2] text-muted-foreground";
+export const NEUTRAL_BADGE = "bg-muted text-muted-foreground";
 
 const AMBER = "bg-[#fdf0dd] text-[#b45309]";
 const BLUE = "bg-[#e8f1fc] text-[#0058bc]";

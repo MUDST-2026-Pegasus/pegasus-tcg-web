@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import { EditProfileDialog } from '@/features/account/components/EditProfileDialog';
@@ -48,6 +48,7 @@ describe('EditProfileDialog', () => {
   });
 
   it('calls update mutation and closes dialog on success', async () => {
+    const user = userEvent.setup();
     mockMutateAsync.mockResolvedValueOnce({});
     
     renderWithProviders(
@@ -55,14 +56,13 @@ describe('EditProfileDialog', () => {
     );
 
     const nameInput = screen.getByLabelText(/display name/i);
-    await userEvent.clear(nameInput);
-    await userEvent.type(nameInput, 'Jane Doe');
+    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
 
     const phoneInput = screen.getByLabelText(/phone number/i);
-    await userEvent.type(phoneInput, '0812345678');
+    await user.type(phoneInput, '0812345678');
 
     const saveButton = screen.getByRole('button', { name: /save changes/i });
-    await userEvent.click(saveButton);
+    await user.click(saveButton);
 
     await waitFor(() => {
       expect(mockMutateAsync).toHaveBeenCalledWith({

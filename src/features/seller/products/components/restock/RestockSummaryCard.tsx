@@ -25,31 +25,31 @@ export function RestockSummaryCard({
       id: "stock",
       label: newStockLabel,
       value: `${result.newStock} ${product.unit}`,
-      className: "text-zinc-950",
+      className: "text-foreground",
     },
     {
       id: "average-cost",
       label: averageCostLabel,
       value: formatBaht(result.newAverageCost),
-      className: "text-zinc-950",
+      className: "text-foreground",
     },
     {
       id: "selling-price",
       label: sellingPriceLabel,
       value: formatBaht(product.sellingPrice),
-      className: "text-zinc-950",
+      className: "text-foreground",
     },
     {
       id: "profit",
       label: profitPerUnitLabel,
       value: formatSignedBaht(result.newProfit),
-      className: result.newProfit < 0 ? "text-red-600" : "text-emerald-700",
+      className: result.newProfit < 0 ? "text-destructive" : "text-emerald-700",
     },
   ];
 
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-xs font-semibold text-zinc-950">{title}</p>
+      <p className="text-xs font-semibold text-foreground">{title}</p>
 
       {rows.map((row) => (
         <div key={row.id} className="flex items-center justify-between gap-2">

@@ -89,7 +89,7 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
         onConfirm={confirmDelete}
       >
         {deleteTarget && (
-          <dl className="flex flex-col gap-2.5 rounded-lg border border-[#eef1f2] bg-[#fafbfb] px-4 py-3.5 text-xs">
+          <dl className="flex flex-col gap-2.5 rounded-lg border border-muted bg-[#fafbfb] px-4 py-3.5 text-xs">
             <SummaryRow
               label="การ์ดในแคตตาล็อกที่อยู่ในชุดนี้"
               value={
