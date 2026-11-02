@@ -39,7 +39,7 @@ export function DetailsCard({ form }: DetailsCardProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">
+        <h2 className="text-base font-semibold text-foreground">
           รายละเอียดเพิ่มเติม
         </h2>
         <p className="text-xs text-gray-500">ไม่บังคับ — ช่วยให้ผู้ซื้อตัดสินใจง่ายขึ้น</p>

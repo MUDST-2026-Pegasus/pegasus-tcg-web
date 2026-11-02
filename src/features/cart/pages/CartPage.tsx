@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, Lock, Minus, Plus } from "lucide-react";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
@@ -16,31 +16,44 @@ import {
 } from "../cart.queries";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import type { CardCondition } from "@/features/catalog/catalog.types";
+import type { CartItemResponse } from "../cart.types";
 
 export function CartPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const reorderListingIds = (location.state as { reorderListingIds?: number[] } | undefined)?.reorderListingIds;
+
   const { data: cart, isLoading, error, refetch } = useCart();
   const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
   const acceptPricesMutation = useAcceptCartPrices();
 
-  const [deselectedItemIds, setDeselectedItemIds] = useState<Set<number>>(new Set());
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
+  const [prevItems, setPrevItems] = useState<CartItemResponse[] | null>(null);
 
   const items = useMemo(() => cart?.items ?? [], [cart]);
 
-  // Derive selection during render: all cart items are selected by default unless explicitly deselected
-  const selectedItemIds = useMemo(() => {
-    const selected = new Set<number>();
-    for (const item of items) {
-      if (!deselectedItemIds.has(item.id)) {
-        selected.add(item.id);
-      }
+  if (cart && cart.items !== prevItems) {
+    setPrevItems(cart.items);
+    if (reorderListingIds && reorderListingIds.length > 0) {
+      const reorderedSet = new Set(reorderListingIds);
+      const matchingIds = cart.items
+        .filter((item) => reorderedSet.has(item.listingId))
+        .map((item) => item.id);
+      setSelectedItemIds(new Set(matchingIds));
+    } else {
+      setSelectedItemIds(new Set(cart.items.map((item) => item.id)));
     }
-    return selected;
-  }, [items, deselectedItemIds]);
+  }
+
+  useEffect(() => {
+    if (!isLoading && cart && reorderListingIds && reorderListingIds.length > 0) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [isLoading, cart, reorderListingIds, navigate, location.pathname]);
 
   const toggleCheck = (id: number) => {
-    setDeselectedItemIds((prev) => {
+    setSelectedItemIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -56,9 +69,9 @@ export function CartPage() {
 
   const toggleAll = () => {
     if (allChecked) {
-      setDeselectedItemIds(new Set(items.map((item) => item.id)));
+      setSelectedItemIds(new Set());
     } else {
-      setDeselectedItemIds(new Set());
+      setSelectedItemIds(new Set(items.map((item) => item.id)));
     }
   };
 
@@ -103,6 +116,11 @@ export function CartPage() {
   const handleRemoveItem = (itemId: number) => {
     removeItemMutation.mutate(itemId, {
       onSuccess: () => {
+        setSelectedItemIds((prev) => {
+          const next = new Set(prev);
+          next.delete(itemId);
+          return next;
+        });
         toast.add({
           title: "Item Removed",
           description: "Item has been removed from your cart.",
@@ -128,6 +146,13 @@ export function CartPage() {
         // continue with other items
       }
     }
+    setSelectedItemIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        next.delete(id);
+      }
+      return next;
+    });
     toast.add({
       title: "Selected Items Removed",
       description: "Selected items were removed from your cart.",
@@ -183,7 +208,7 @@ export function CartPage() {
     if (checkedItems.length === 0 || checkoutBlocked || isLoading || acceptPricesMutation.isPending) return;
     navigate("/checkout", {
       state: {
-        selectedCartItemIds: Array.from(selectedItemIds),
+        selectedCartItemIds: checkedItems.map((i) => i.id),
       },
     });
   };
@@ -227,7 +252,7 @@ export function CartPage() {
           {/* Left Column: Cart Items */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             {/* Select All */}
-            <Card className="rounded-xl border shadow-none bg-white p-0 !py-0 gap-0">
+            <Card className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0">
               <CardContent className="px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Checkbox
@@ -259,7 +284,7 @@ export function CartPage() {
                 <ProductRowsSkeleton />
               </div>
             ) : items.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground bg-white rounded-xl border flex flex-col items-center gap-4">
+              <div className="text-center py-16 text-muted-foreground bg-card rounded-xl border flex flex-col items-center gap-4">
                 <p className="text-lg">Your cart is empty.</p>
                 <Button variant="outline" onClick={() => navigate("/products")}>
                   Explore Products
@@ -273,7 +298,7 @@ export function CartPage() {
                 return (
                   <Card
                     key={item.id}
-                    className="rounded-xl border shadow-none bg-white p-0 !py-0 gap-0"
+                    className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0"
                   >
                     <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                       <div className="flex items-center gap-4 sm:gap-6 self-start sm:self-auto h-full mt-2 sm:mt-0">
@@ -391,7 +416,7 @@ export function CartPage() {
 
           {/* Right Column: Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="rounded-xl border shadow-none bg-white p-6 !py-6 flex flex-col gap-6">
+            <Card className="rounded-xl border shadow-none bg-card p-6 !py-6 flex flex-col gap-6">
               <h2 className="text-2xl font-bold text-foreground">Order Summary</h2>
 
               <div className="flex flex-col gap-4 text-base">

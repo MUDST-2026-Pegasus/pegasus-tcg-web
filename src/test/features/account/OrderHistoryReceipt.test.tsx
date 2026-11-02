@@ -9,7 +9,10 @@ import type { OrderDetails } from "@/features/account/orders.types";
 
 const useBuyerOrders = vi.fn();
 
-vi.mock("@/features/account/orders.queries", () => ({ useBuyerOrders: () => useBuyerOrders() }));
+vi.mock("@/features/account/orders.queries", () => ({
+  useBuyerOrders: () => useBuyerOrders(),
+  useReorderPreview: () => ({ data: undefined, isLoading: false, isError: false }),
+}));
 vi.mock("@/features/auth/auth.queries", () => ({ useAuth: () => ({ user: null }) }));
 vi.mock("@/features/account/orders.api", () => ({ ordersApi: { confirmReceived: vi.fn() } }));
 vi.mock("@/components/ui/toast", () => ({ toast: { add: vi.fn() } }));

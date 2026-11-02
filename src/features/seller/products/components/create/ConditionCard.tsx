@@ -24,7 +24,7 @@ export function ConditionCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">สภาพการ์ด</h2>
+        <h2 className="text-base font-semibold text-foreground">สภาพการ์ด</h2>
         <p className="text-xs text-gray-500">
           {disabled
             ? "สภาพเปลี่ยนไม่ได้หลังลงประกาศ ถ้าเลือกผิดให้ลงประกาศใหม่ แล้วปิดประกาศนี้"
@@ -52,7 +52,7 @@ export function ConditionCard({
                 disabled ? "cursor-default" : "cursor-pointer",
                 isSelected
                   ? "bg-emerald-50 ring-2 ring-teal-600"
-                  : "bg-white ring-1 ring-zinc-200",
+                  : "bg-card ring-1 ring-border",
                 !isSelected && !disabled && "hover:bg-gray-50",
                 !isSelected && disabled && "opacity-50",
               )}
@@ -62,7 +62,7 @@ export function ConditionCard({
                 className="border-input bg-background data-checked:border-primary"
               />
               <span className="flex flex-1 flex-col gap-[3px]">
-                <span className="text-xs font-semibold text-zinc-950">
+                <span className="text-xs font-semibold text-foreground">
                   {option.label}
                 </span>
                 <span className="text-[10px] leading-4 font-normal text-gray-500">

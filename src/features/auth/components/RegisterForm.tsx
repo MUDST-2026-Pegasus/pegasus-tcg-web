@@ -161,7 +161,7 @@ export function RegisterForm() {
                 onCheckedChange={(checked) => field.onChange(checked)}
                 onBlur={field.onBlur}
                 aria-invalid={Boolean(errors.acceptTerms)}
-                className="bg-white border-2 border-black-50 size-4.5"
+                className="bg-card border-2 border-black-50 size-4.5"
               />
             )}
           />

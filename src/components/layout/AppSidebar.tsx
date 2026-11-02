@@ -21,7 +21,7 @@ const DASHBOARD_BLUE_BG = "bg-[#0058bc]";
 
 const NAV_ACTIVE =
   "data-active:bg-[#e8f1fc] data-active:font-medium data-active:text-[#0058bc] data-active:hover:bg-[#e8f1fc] data-active:hover:text-[#0058bc]";
-const NAV_HOVER = "hover:bg-[#eef1f2] hover:text-foreground";
+const NAV_HOVER = "hover:bg-muted hover:text-foreground";
 
 type AppSidebarProps = {
   role: string;

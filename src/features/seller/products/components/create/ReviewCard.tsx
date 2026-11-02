@@ -34,14 +34,14 @@ export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">ตรวจสอบก่อนลงขาย</h2>
+        <h2 className="text-base font-semibold text-foreground">ตรวจสอบก่อนลงขาย</h2>
         <p className="text-xs text-gray-500">
           "ลงขายทันที" ผู้ซื้อเห็นประกาศเลย · "บันทึกฉบับร่าง" การ์ดเข้าคลังแล้วแต่ยังไม่เปิดขาย
           เปิดทีหลังได้จากหน้าจัดการสินค้า
         </p>
       </div>
 
-      <dl className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-100">
+      <dl className="flex flex-col divide-y divide-muted rounded-lg border border-muted">
         <Row label="การ์ด" step={0} onEditStep={onEditStep}>
           {card ? (
             <>
@@ -110,7 +110,7 @@ function Row({
   return (
     <div className="flex items-start gap-3 px-3.5 py-2.5">
       <dt className="w-20 shrink-0 text-xs text-gray-500">{label}</dt>
-      <dd className="min-w-0 flex-1 text-sm text-zinc-950">{children}</dd>
+      <dd className="min-w-0 flex-1 text-sm text-foreground">{children}</dd>
       <Button
         type="button"
         variant="ghost"

@@ -83,7 +83,7 @@ export function RestockFormCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
         <p className="text-xs text-gray-500">{description}</p>
       </div>
 
@@ -134,7 +134,7 @@ export function RestockFormCard({
               render={
                 <Button
                   variant="outline"
-                  className="h-8 w-full justify-start rounded-lg border-input bg-background px-2.5 text-sm font-normal text-zinc-950 hover:bg-background"
+                  className="h-8 w-full justify-start rounded-lg border-input bg-background px-2.5 text-sm font-normal text-foreground hover:bg-background"
                 />
               }
             >

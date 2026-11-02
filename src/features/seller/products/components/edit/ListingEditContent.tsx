@@ -175,7 +175,7 @@ export function ListingEditContent({
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-zinc-950">
+          <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-foreground">
             แก้ไขสินค้า
             <Badge variant="outline" className="rounded-full text-xs font-medium">
               {LISTING_STATUS_LABEL[listing.status]}

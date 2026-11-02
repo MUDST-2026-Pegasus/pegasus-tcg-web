@@ -48,7 +48,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
 
   const name = listing.card.productName;
   const price = (
-    <span className="text-xs font-semibold text-zinc-950">
+    <span className="text-xs font-semibold text-foreground">
       {formatBaht(listing.price)}
     </span>
   );
@@ -60,7 +60,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
           render={<span tabIndex={0} className="flex items-center gap-1.5" />}
         >
           {price}
-          <span className="rounded bg-sky-50 px-1 text-[10px] text-sky-700">
+          <span className="rounded bg-sky-50 px-1 text-[10px] text-primary">
             อัตโนมัติ
           </span>
         </TooltipTrigger>
@@ -121,7 +121,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
           <button
             type="button"
             aria-label={`แก้ราคา: ${name}`}
-            className="group -mx-1 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 hover:bg-gray-100"
+            className="group -mx-1 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 hover:bg-secondary"
           />
         }
       >

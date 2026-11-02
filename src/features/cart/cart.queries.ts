@@ -40,6 +40,17 @@ export function useAddCartItem() {
   });
 }
 
+export function useBatchAddToCart() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (items: Array<{ listingId: number; quantity: number }>) =>
+      cartApi.addBatchItems(items),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    },
+  });
+}
+
 export function useAcceptCartPrices() {
   const queryClient = useQueryClient();
   return useMutation({
