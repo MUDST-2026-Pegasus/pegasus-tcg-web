@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,21 +12,13 @@ import { formatAddressLines } from "@/features/account/address.format";
 import { useCart, useShippingQuotes, cartKeys } from "../cart.queries";
 import { checkoutApi } from "../checkout.api";
 import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
-import {
-  findPromotionOwnerForCode,
-  formatPromotionError,
-  normalizePromotionCode,
-} from "../checkout.format";
+import { findPromotionOwnerForCode } from "../checkout.format";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
 import { CodePickerDialog } from "../components/CodePickerDialog";
 import { PromotionChangedDialog } from "../components/PromotionChangedDialog";
 import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPromotionCard";
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
-import {
-  readPromotionSelection,
-  savePromotionSelection,
-  type PromotionSelection,
-} from "../promotions.types";
+import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import type { CartItemResponse } from "../cart.types";
 import "./checkout.css";
 
@@ -125,56 +117,12 @@ export function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingNotice, setShippingNotice] = useState<string | null>(null);
 
-  // Read initial selection from session storage with schema guard
-  const [promotionSelection, setPromotionSelection] = useState<PromotionSelection>(
-    readPromotionSelection,
-  );
-  const [debouncedSelection, setDebouncedSelection] = useState(promotionSelection);
-
-  // Sanitize seller codes to only sellers present in this checkout
-  useEffect(() => {
-    if (!checkoutItems.length) return;
-    const currentSellerIds = new Set(
-      checkoutItems
-        .map((item) => item.sellerProfileId)
-        .filter((id): id is number => id != null),
-    );
-    setPromotionSelection((prev) => {
-      const filteredSellerCodes: Record<number, string> = {};
-      let changed = false;
-      for (const [key, val] of Object.entries(prev.sellerCodes)) {
-        const numKey = Number(key);
-        if (currentSellerIds.has(numKey)) {
-          filteredSellerCodes[numKey] = val;
-        } else {
-          changed = true;
-        }
-      }
-      return changed ? { ...prev, sellerCodes: filteredSellerCodes } : prev;
-    });
-  }, [checkoutItems]);
-
-  const [promotionPicker, setPromotionPicker] = useState<"PLATFORM" | number | null>(null);
-  const [typedPlatformCode, setTypedPlatformCode] = useState("");
-  const [platformError, setPlatformError] = useState<string | null>(null);
-  const [sellerErrors, setSellerErrors] = useState<Record<number, string>>({});
-  const [pendingTypedCode, setPendingTypedCode] = useState<{
-    owner: "PLATFORM" | number;
-    code: string;
-  } | null>(null);
   const [promotionChanged, setPromotionChanged] = useState<{
     previous: number;
     next: number;
     code?: string;
     owner?: "PLATFORM" | number;
   } | null>(null);
-
-  // Save to session storage and debounce preview requests (180ms)
-  useEffect(() => {
-    savePromotionSelection(promotionSelection);
-    const timer = window.setTimeout(() => setDebouncedSelection(promotionSelection), 180);
-    return () => window.clearTimeout(timer);
-  }, [promotionSelection]);
 
   const activeAddress =
     addresses.find((address) => address.id === selectedAddressId) ??
@@ -195,13 +143,6 @@ export function CheckoutPage() {
       quote: quotes.data?.find((quote) => quote.sellerProfileId === sellerId),
     }));
   }, [checkoutItems, quotes.data]);
-
-  const promotionStoreUsername =
-    promotionPicker == null || promotionPicker === "PLATFORM"
-      ? undefined
-      : sellerGroups
-          .find((group) => group.sellerId === promotionPicker)
-          ?.items.find((item) => item.sellerUsername)?.sellerUsername ?? undefined;
 
   const selectedOptions = sellerGroups.map(
     ({ sellerId, quote }) =>
@@ -236,154 +177,39 @@ export function CheckoutPage() {
     return map;
   }, [sellerGroups, selectedOptions]);
 
-  const promotionList = useQuery({
-    queryKey: ["checkout-promotions", cartItemIds],
-    queryFn: () => checkoutApi.getPromotions(cartItemIds),
-    enabled: checkoutItems.length > 0 && !cartNeedsReview,
+  const {
+    promotionSelection,
+    promotionPicker,
+    setPromotionPicker,
+    typedPlatformCode,
+    setTypedPlatformCode,
+    platformError,
+    setPlatformError,
+    sellerErrors,
+    pendingTypedCode,
+    setPendingTypedCode,
+    promotionList,
+    promoPreview,
+    preview,
+    previewReady,
+    appliedPlatformCode,
+    appliedPlatformPromotion,
+    sellerDiscounts,
+    setCode,
+  } = useCheckoutPromotions({
+    checkoutItems,
+    cartItemIds,
+    cartNeedsReview,
+    shippingOptionBySeller,
+    shippingReady,
   });
 
-  const promoPreview = useQuery({
-    queryKey: [
-      "checkout-promo-preview",
-      cartItemIds,
-      shippingOptionBySeller,
-      debouncedSelection,
-    ],
-    queryFn: ({ signal }) =>
-      checkoutApi.previewPromotions(
-        { cartItemIds, shippingOptionBySeller, ...debouncedSelection },
-        signal,
-      ),
-    enabled: shippingReady && debouncedSelection === promotionSelection,
-    retry: false,
-  });
-
-  const preview = promoPreview.data;
-  const previewReady =
-    !!preview &&
-    !promoPreview.isFetching &&
-    !promoPreview.isError &&
-    debouncedSelection === promotionSelection;
-
-  const appliedPlatformCode = preview?.codes.find(
-    (code) => code.ownerType === "PLATFORM" && code.status === "APPLIED",
-  )?.code;
-
-  const appliedPlatformPromotion = useMemo(() => {
-    if (!promotionSelection.platformCode) return null;
-    return promotionList.data?.find(
-      (p) =>
-        p.code === promotionSelection.platformCode && p.ownerType === "PLATFORM",
-    );
-  }, [promotionSelection.platformCode, promotionList.data]);
-
-  const sellerDiscounts = new Map(
-    preview?.sellers.map((seller) => [
-      seller.sellerProfileId,
-      seller.sellerDiscount,
-    ]),
-  );
-
-  const clearOwnerError = (owner: "PLATFORM" | number) => {
-    if (owner === "PLATFORM") {
-      setPlatformError(null);
-    } else {
-      setSellerErrors((prev) => {
-        const next = { ...prev };
-        delete next[owner];
-        return next;
-      });
-    }
-  };
-
-  const setCode = (owner: "PLATFORM" | number, code: string | null) => {
-    clearOwnerError(owner);
-    const normalized = code ? normalizePromotionCode(code) : null;
-    setPromotionSelection((previous) => {
-      if (owner === "PLATFORM") {
-        return { ...previous, platformCode: normalized };
-      }
-      const nextSellerCodes = { ...previous.sellerCodes };
-      if (normalized) {
-        nextSellerCodes[owner] = normalized;
-      } else {
-        delete nextSellerCodes[owner];
-      }
-      return { ...previous, sellerCodes: nextSellerCodes };
-    });
-  };
-
-  // Reconcile the authoritative result. Invalid codes are removed individually;
-  // a typed code closes its picker only after the API confirms it was applied.
-  useEffect(() => {
-    if (!preview || !previewReady) return;
-    const invalidOutcomes = preview.codes.filter(
-      (code) => code.status !== "APPLIED" && !code.pendingShipping,
-    );
-
-    if (invalidOutcomes.length) {
-      let removePlatform = false;
-      const sellerIdsToRemove = new Set<number>();
-      const nextSellerErrors: Record<number, string> = {};
-
-      for (const invalid of invalidOutcomes) {
-        const message = formatPromotionError(invalid.status, {
-          sellerName: invalid.sellerName,
-          shortfall: invalid.shortfall,
-        });
-        if (
-          invalid.ownerType === "PLATFORM" &&
-          promotionSelection.platformCode === invalid.code
-        ) {
-          removePlatform = true;
-          setPlatformError(message);
-        } else if (
-          invalid.sellerProfileId != null &&
-          promotionSelection.sellerCodes[invalid.sellerProfileId] === invalid.code
-        ) {
-          sellerIdsToRemove.add(invalid.sellerProfileId);
-          nextSellerErrors[invalid.sellerProfileId] = message;
-        }
-      }
-
-      if (removePlatform || sellerIdsToRemove.size) {
-        setSellerErrors((previous) => ({ ...previous, ...nextSellerErrors }));
-        setPromotionSelection((previous) => {
-          const sellerCodes = { ...previous.sellerCodes };
-          for (const sellerId of sellerIdsToRemove) delete sellerCodes[sellerId];
-          return {
-            platformCode: removePlatform ? null : previous.platformCode,
-            sellerCodes,
-          };
-        });
-      }
-
-      if (
-        pendingTypedCode &&
-        invalidOutcomes.some(
-          (outcome) => outcome.code === pendingTypedCode.code,
-        )
-      ) {
-        setPendingTypedCode(null);
-      }
-      return;
-    }
-
-    if (pendingTypedCode) {
-      const applied = preview.codes.some((outcome) => {
-        if (outcome.code !== pendingTypedCode.code || outcome.status !== "APPLIED") {
-          return false;
-        }
-        return pendingTypedCode.owner === "PLATFORM"
-          ? outcome.ownerType === "PLATFORM"
-          : outcome.sellerProfileId === pendingTypedCode.owner;
-      });
-      if (applied) {
-        setPendingTypedCode(null);
-        setPromotionPicker(null);
-      }
-    }
-  }, [pendingTypedCode, preview, previewReady, promotionSelection]);
+  const promotionStoreUsername =
+    promotionPicker == null || promotionPicker === "PLATFORM"
+      ? undefined
+      : sellerGroups
+          .find((group) => group.sellerId === promotionPicker)
+          ?.items.find((item) => item.sellerUsername)?.sellerUsername ?? undefined;
 
   const subtotal = sellerGroups.reduce(
     (sum, { items, quote }) =>

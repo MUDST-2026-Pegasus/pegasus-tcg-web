@@ -53,6 +53,8 @@
     --color-promotion-control-disabled: var(--promotion-control-disabled);
     --color-promotion-selected: var(--promotion-selected);
     --color-promotion-selected-border: var(--promotion-selected-border);
+    --color-promotion-shop-selected: var(--promotion-shop-selected);
+    --color-promotion-shop-selected-border: var(--promotion-shop-selected-border);
     --color-promotion-platform-start: var(--promotion-platform-start);
     --color-promotion-platform-mid: var(--promotion-platform-mid);
     --color-promotion-platform-end: var(--promotion-platform-end);
@@ -103,6 +105,8 @@
     --promotion-control-disabled: #eef1f2;
     --promotion-selected: #f0f7fc;
     --promotion-selected-border: #0069a8;
+    --promotion-shop-selected: #effaf8;
+    --promotion-shop-selected-border: #99d5cf;
     --promotion-platform-start: #00398a;
     --promotion-platform-mid: #0058bc;
     --promotion-platform-end: #1a8fe0;

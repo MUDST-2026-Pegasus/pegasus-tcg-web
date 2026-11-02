@@ -96,7 +96,7 @@ export function CheckoutSellerCard({
       {onOpenPromotions && (
         <>
           {promotionCode ? (
-            <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-[#99d5cf] bg-[#effaf8] px-3 py-2.5 text-xs">
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-promotion-shop-selected-border bg-promotion-shop-selected px-3 py-2.5 text-xs">
               <div className="flex min-w-0 items-center gap-2">
                 <TicketPercent className="size-[18px] shrink-0 text-promotion-shop" />
                 <div className="min-w-0">

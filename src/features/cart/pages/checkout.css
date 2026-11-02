@@ -1,7 +1,5 @@
 .checkout-page {
-  --checkout-selected: #f0f7fc;
   --checkout-subtle: var(--muted);
-  --checkout-success: #007a4a;
   background: #f6f8f9;
   min-height: calc(100svh - 80px);
   padding: 40px 24px 64px;
