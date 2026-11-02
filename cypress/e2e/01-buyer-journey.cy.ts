@@ -463,6 +463,37 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       },
     }).as("getShippingQuotes");
 
+    cy.intercept("GET", "**/api/v1/checkout/promotions*", {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    }).as("getCheckoutPromotions");
+
+    cy.intercept("POST", "**/api/v1/checkout/promo-preview", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          sellers: [{
+            sellerProfileId: 10,
+            sellerName: "Somchai Cards Shop",
+            itemsSubtotal: 250,
+            shippingFee: 50,
+            sellerDiscount: 0,
+            platformDiscount: 0,
+            grandTotal: 300,
+          }],
+          itemsSubtotal: 250,
+          shippingTotal: 50,
+          sellerDiscountTotal: 0,
+          platformDiscountTotal: 0,
+          grandTotal: 300,
+          shippingEstimated: false,
+          codes: [],
+          bestPick: null,
+        },
+      },
+    }).as("getPromoPreview");
+
     cy.intercept("POST", "**/api/v1/checkout", {
       statusCode: 201,
       body: {
@@ -512,6 +543,13 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
     cy.wait("@getCartCheckout");
     cy.wait("@getAddresses");
     cy.wait("@getShippingQuotes");
+    cy.wait("@getCheckoutPromotions");
+    cy.wait("@getPromoPreview").its("request.body").should("deep.equal", {
+      cartItemIds: [101],
+      shippingOptionBySeller: { 10: 7 },
+      platformCode: null,
+      sellerCodes: {},
+    });
 
     cy.contains("h1", "ตรวจสอบและสั่งซื้อ").should("be.visible");
     cy.contains(/88\/1 ถนนพหลโยธิน/i).should("be.visible");
@@ -524,6 +562,9 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
       cartItemIds: [101],
       shippingAddressId: 1,
       shippingOptionBySeller: { 10: 7 },
+      platformCode: null,
+      sellerCodes: {},
+      expectedGrandTotal: 300,
     });
 
     // Navigates to payment page
