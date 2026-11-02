@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Ticket, TicketPercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ClaimTicket } from "./ClaimTicket";
 import { CouponTicket } from "./CouponTicket";
 import {
   formatPromotionUnavailableReason,
@@ -31,6 +32,10 @@ export interface CodePickerDialogProps {
   onSelect(code: string | null): void;
   onTryCode(code: string): void | Promise<void>;
   onClaim?: (promotion: AvailablePromotion) => void | Promise<void>;
+  /** The code being collected, for the spinner on its ticket. */
+  claimingId?: number | null;
+  /** Under the "กรอกโค้ดอื่น" field: C2-C "เก็บไว้ใช้ครั้งหน้า" or "เก็บแล้วใช้เลย". */
+  inputFooter?: ReactNode;
   error?: PromotionUiError | string | null;
   loading?: boolean;
   isGuest?: boolean;
@@ -50,6 +55,8 @@ export function CodePickerDialog({
   onSelect,
   onTryCode,
   onClaim,
+  claimingId = null,
+  inputFooter,
   error,
   loading = false,
   isGuest = false,
@@ -158,6 +165,7 @@ export function CodePickerDialog({
           <PromotionCodeForm id="promo-code-input" label="กรอกโค้ดอื่น"
             value={typed} onChange={setTyped} onSubmit={() => handleTrySubmit()}
             error={resolvedError} loading={loading || submitting} />
+          {inputFooter}
         </div>
 
         {/* Scrollable list */}
@@ -189,6 +197,23 @@ export function CodePickerDialog({
                   {group.title} ({group.items.length})
                 </h3>
                 {group.items.map((promotion) => {
+                  if (promotion.source === "CLAIMABLE" && onClaim) {
+                    // C2-A: a full-width claim ticket; collecting it also selects it.
+                    return (
+                      <ClaimTicket
+                        key={promotion.id}
+                        promotion={{
+                          ...promotion,
+                          claimed: false,
+                          shop: promotion.sellerName
+                            ? { sellerProfileId: promotion.sellerProfileId ?? 0, name: promotion.sellerName, username: "" }
+                            : null,
+                        }}
+                        claiming={claimingId === promotion.id}
+                        onClaim={() => void onClaim(promotion)}
+                      />
+                    );
+                  }
                   const canSelect =
                     promotion.source !== "CLAIMABLE" && promotion.applicable;
                   const unavailableReason =
@@ -224,17 +249,6 @@ export function CodePickerDialog({
                           <TooltipContent>{unavailableReason}</TooltipContent>
                         </Tooltip>
                       )}
-                      {promotion.source === "CLAIMABLE" && onClaim && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={promotion.remainingClaims === 0}
-                          onClick={() => void onClaim(promotion)}
-                          className="justify-self-end text-xs"
-                        >
-                          {promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}
-                        </Button>
-                      )}
                     </div>
                   );
                 })}
@@ -247,7 +261,7 @@ export function CodePickerDialog({
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 py-8 text-center">
               <TicketPercent className="size-8 text-muted-foreground/60" />
               <p className="text-sm font-medium text-foreground">ยังไม่มีโค้ดที่เก็บไว้</p>
-              <p className="text-xs text-muted-foreground">ยังไม่มีโค้ดสำหรับรายการนี้</p>
+              <p className="text-xs text-muted-foreground">เก็บโค้ดได้ที่หน้าแรกและหน้าร้าน</p>
               {onNavigateToPromotions && (
                 <Button
                   size="sm"
