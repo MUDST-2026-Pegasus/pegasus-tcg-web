@@ -46,7 +46,7 @@ export function CheckoutSellerCard({
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <Card className="checkout-panel checkout-seller" aria-label={`ร้าน ${sellerName}`}>
+    <Card className="checkout-seller gap-4 rounded-[var(--radius-card)] border border-border bg-card p-5 shadow-none ring-0" aria-label={`ร้าน ${sellerName}`}>
       <header className="flex items-center gap-2.5">
         <span aria-hidden="true" className="checkout-seller-avatar">
           {sellerName.trim().slice(0, 2).toUpperCase()}
@@ -98,16 +98,16 @@ export function CheckoutSellerCard({
           {promotionCode ? (
             <div className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-[#99d5cf] bg-[#effaf8] px-3 py-2.5 text-xs">
               <div className="flex min-w-0 items-center gap-2">
-                <TicketPercent className="size-[18px] shrink-0 text-teal-700" />
+                <TicketPercent className="size-[18px] shrink-0 text-promotion-shop" />
                 <div className="min-w-0">
-                  <span className="block truncate font-semibold text-teal-900">
+                  <span className="block truncate font-semibold text-promotion-shop">
                     โค้ดร้าน · {promotionCode}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 {promotionDiscount > 0 && (
-                  <strong className="text-teal-700 font-semibold">
+                  <strong className="font-semibold text-promotion-shop">
                     − {checkoutMoney(promotionDiscount)}
                   </strong>
                 )}
@@ -131,13 +131,13 @@ export function CheckoutSellerCard({
                   onOpenPromotions?.();
                 }
               }}
-              className="flex items-center justify-between gap-2 rounded-lg border border-[#e3e7e8] bg-white px-3 py-2.5 text-xs transition-colors hover:border-teal-500 cursor-pointer"
+              className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs transition-colors hover:border-promotion-shop"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <TicketPercent className="size-[18px] shrink-0 text-teal-600" />
+                <TicketPercent className="size-[18px] shrink-0 text-promotion-shop" />
                 <span className="font-medium text-foreground">โค้ดร้าน</span>
                 {promotionCount > 0 && (
-                  <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700">
+                  <span className="rounded-full bg-promotion-shop/10 px-2 py-0.5 text-[11px] font-medium text-promotion-shop">
                     มี {promotionCount} โค้ดที่ใช้ได้
                   </span>
                 )}

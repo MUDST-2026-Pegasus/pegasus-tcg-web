@@ -1,4 +1,5 @@
-import { Loader2, Ticket } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import appliedTicket from "@/assets/promotions/applied-ticket.svg";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,12 +34,12 @@ export function CheckoutPlatformPromotionCard({
   onOpenPicker,
 }: CheckoutPlatformPromotionCardProps) {
   return (
-    <Card className="checkout-panel gap-3">
+    <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-[13px] font-semibold">โค้ดส่วนลด Pegasus</h2>
+        <h2 className="text-sm font-semibold">โค้ดส่วนลด Pegasus</h2>
         <button
           type="button"
-          className="checkout-link text-xs font-medium"
+          className="text-[13px] font-medium text-promotion-pegasus"
           onClick={onOpenPicker}
         >
           ดูทั้งหมด ({availableCount})
@@ -46,11 +47,13 @@ export function CheckoutPlatformPromotionCard({
       </div>
 
       {selectedCode && (
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-primary/40 bg-[#f0f7fc] px-3 py-2 text-xs text-primary">
-          <div className="flex min-w-0 items-center gap-2">
-            <Ticket className="size-4 shrink-0 text-primary" />
+        <div className="flex items-center justify-between gap-2 rounded-md border border-dashed border-promotion-selected-border bg-promotion-selected px-3 py-2.5 text-promotion-pegasus">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <img src={appliedTicket} alt="" className="size-[18px] shrink-0" />
             <div className="min-w-0">
-              <strong className="block truncate font-semibold">{selectedCode}</strong>
+              <strong className="block truncate text-[13px] font-bold tracking-[0.03em]">
+                {selectedCode}
+              </strong>
               {selectedPromotion && (
                 <span className="block truncate text-[11px] text-muted-foreground">
                   {formatPromotionRuleSummary(selectedPromotion)}
@@ -60,7 +63,7 @@ export function CheckoutPlatformPromotionCard({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {discount > 0 && (
-              <span className="font-semibold">− {checkoutMoney(discount)}</span>
+              <span className="text-sm font-bold">− {checkoutMoney(discount)}</span>
             )}
             <button
               type="button"
@@ -87,16 +90,14 @@ export function CheckoutPlatformPromotionCard({
           maxLength={20}
           onChange={(event) => onTypedCodeChange(event.target.value)}
           placeholder="กรอกโค้ดอื่น"
-          className="h-9 uppercase text-xs"
+          className="h-10 rounded-sm border-border bg-white px-3 py-[9px] text-[13px] leading-5 uppercase placeholder:text-promotion-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20"
           disabled={loading}
           aria-invalid={!!error}
           aria-describedby={error ? "pegasus-code-error" : undefined}
         />
         <Button
           type="submit"
-          variant="secondary"
-          size="sm"
-          className="h-9 shrink-0 px-3"
+          className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-promotion-muted disabled:opacity-100"
           disabled={!typedCode.trim() || loading}
         >
           {loading && typedCode ? (

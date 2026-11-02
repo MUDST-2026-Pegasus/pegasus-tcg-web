@@ -638,7 +638,7 @@ describe("CheckoutPage", () => {
     expect(submit.mock.calls[1][0].shippingOptionBySeller).toEqual({ 1: 12, 2: 23 });
   });
 
-  it("renders Figma B1 totals (grand total ฿3,025 and saved ฿250) from authoritative preview", async () => {
+  it("renders Figma B1 totals, discount colors, and shared Card geometry", async () => {
     sessionStorage.setItem(
       PROMOTION_SELECTION_KEY,
       JSON.stringify({ platformCode: "PEGASUS200", sellerCodes: { 1: "STORE50" } }),
@@ -693,6 +693,21 @@ describe("CheckoutPage", () => {
     expect(screen.getByText(/ประหยัดไป ฿250/)).toBeInTheDocument();
     expect(screen.getAllByText("− ฿50").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("− ฿200").length).toBeGreaterThanOrEqual(1);
+
+    const summaryCard = screen.getByRole("heading", { name: "สรุปคำสั่งซื้อ" }).parentElement;
+    expect(summaryCard).toHaveClass(
+      "rounded-[var(--radius-card)]",
+      "border",
+      "border-border",
+      "bg-card",
+      "shadow-none",
+    );
+    const sellerDiscount = screen.getByText("ส่วนลดร้าน").parentElement;
+    expect(sellerDiscount?.children[0]).toHaveClass("text-promotion-label");
+    expect(sellerDiscount?.children[1]).toHaveClass("text-promotion-shop");
+    const platformDiscount = screen.getByText("ส่วนลด Pegasus · PEGASUS200").parentElement;
+    expect(platformDiscount?.children[0]).toHaveClass("text-promotion-label");
+    expect(platformDiscount?.children[1]).toHaveClass("text-promotion-pegasus");
   });
 
   it("applies and removes platform code via user interaction", async () => {

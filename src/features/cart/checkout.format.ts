@@ -1,3 +1,5 @@
+import type { AvailablePromotion } from "./promotions.types";
+
 export const checkoutMoney = (value: number) =>
   `฿${value.toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
 
@@ -121,4 +123,31 @@ export function formatPromotionError(
     default:
       return "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง";
   }
+}
+
+export function formatPromotionUnavailableReason(
+  promotion: Pick<
+    AvailablePromotion,
+    "source" | "remainingClaims" | "reason" | "shortfall" | "sellerName"
+  >,
+): string {
+  if (promotion.source === "CLAIMABLE") {
+    return promotion.remainingClaims === 0
+      ? "โค้ดนี้ถูกเก็บครบแล้ว"
+      : "เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้";
+  }
+  if (
+    promotion.reason === "PROMO_MIN_SPEND_NOT_MET" &&
+    promotion.shortfall != null &&
+    promotion.shortfall > 0
+  ) {
+    return `ซื้อเพิ่มอีก ${checkoutMoney(promotion.shortfall)}`;
+  }
+  if (!promotion.reason) return "โค้ดนี้ยังใช้ไม่ได้";
+  return (
+    formatPromotionError(promotion.reason, {
+      sellerName: promotion.sellerName,
+      shortfall: promotion.shortfall,
+    }) || "โค้ดนี้ยังใช้ไม่ได้"
+  );
 }

@@ -8,8 +8,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CouponTicket } from "./CouponTicket";
 import {
+  formatPromotionUnavailableReason,
   formatPromotionValue,
   normalizePromotionCode,
 } from "../checkout.format";
@@ -31,6 +37,7 @@ export interface CodePickerDialogProps {
   onLogin?: () => void;
   onRegister?: () => void;
   onNavigateHome?: () => void;
+  onNavigateToStore?: () => void;
 }
 
 export function CodePickerDialog({
@@ -49,6 +56,7 @@ export function CodePickerDialog({
   onLogin,
   onRegister,
   onNavigateHome,
+  onNavigateToStore,
 }: CodePickerDialogProps) {
   const [draftCode, setDraftCode] = useState<string | null>(selectedCode ?? null);
   const [typed, setTyped] = useState("");
@@ -136,10 +144,14 @@ export function CodePickerDialog({
     owner === "PLATFORM"
       ? "เลือกโค้ดส่วนลด Pegasus"
       : `โค้ดร้าน ${sellerName || ""}`;
+  const onNavigateToPromotions =
+    owner === "PLATFORM" ? onNavigateHome : onNavigateToStore;
+  const navigateLabel =
+    owner === "PLATFORM" ? "ไปหน้าแรกเพื่อเก็บโค้ด" : "ไปร้านค้าเพื่อเก็บโค้ด";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-2xl p-0">
+      <DialogContent className="flex max-h-[85svh] w-[520px] max-w-[calc(100%-2rem)] flex-col gap-0 overflow-hidden rounded-[var(--radius-card)] p-0">
         <DialogHeader className="p-6 pb-3">
           <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
         </DialogHeader>
@@ -157,7 +169,7 @@ export function CodePickerDialog({
                 onChange={(e) => setTyped(e.target.value)}
                 maxLength={20}
                 placeholder="กรอกโค้ดส่วนลด"
-                className="h-10 text-sm uppercase"
+                className="h-10 rounded-sm border-border bg-white px-3 py-[9px] text-[13px] leading-5 uppercase placeholder:text-promotion-muted focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20"
                 disabled={loading || submitting}
                 aria-invalid={!!resolvedError}
                 aria-describedby={resolvedError ? "promo-code-error" : undefined}
@@ -165,7 +177,7 @@ export function CodePickerDialog({
               <Button
                 type="submit"
                 disabled={!typed.trim() || loading || submitting}
-                className="h-10 shrink-0 px-4"
+                className="h-10 shrink-0 rounded-sm px-[14px] text-[13px] font-semibold disabled:bg-promotion-control-disabled disabled:text-promotion-muted disabled:opacity-100"
               >
                 {loading || submitting ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -209,30 +221,56 @@ export function CodePickerDialog({
                 <h3 className="text-xs font-semibold text-muted-foreground">
                   {group.title} ({group.items.length})
                 </h3>
-                {group.items.map((promotion) => (
-                  <div key={promotion.id} className="grid gap-1">
+                {group.items.map((promotion) => {
+                  const canSelect =
+                    promotion.source !== "CLAIMABLE" && promotion.applicable;
+                  const unavailableReason =
+                    formatPromotionUnavailableReason(promotion);
+                  const ticket = (
                     <CouponTicket
                       promotion={promotion}
                       selected={draftCode === promotion.code}
+                      disabled={!canSelect}
                       onSelect={
-                        promotion.source !== "CLAIMABLE" && promotion.applicable
-                          ? () => setDraftCode(promotion.code)
-                          : undefined
+                        canSelect ? () => setDraftCode(promotion.code) : undefined
                       }
                     />
-                    {promotion.source === "CLAIMABLE" && onClaim && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={promotion.remainingClaims === 0}
-                        onClick={() => void onClaim(promotion)}
-                        className="justify-self-end text-xs"
-                      >
-                        {promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                  );
+
+                  return (
+                    <div key={promotion.id} className="grid gap-1">
+                      {canSelect ? (
+                        ticket
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <span
+                                tabIndex={0}
+                                aria-label={`${promotion.code}: ${unavailableReason}`}
+                                className="block"
+                              />
+                            }
+                          >
+                            {ticket}
+                          </TooltipTrigger>
+                          <TooltipContent>{unavailableReason}</TooltipContent>
+                        </Tooltip>
+                      )}
+                      {promotion.source === "CLAIMABLE" && onClaim && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={promotion.remainingClaims === 0}
+                          onClick={() => void onClaim(promotion)}
+                          className="justify-self-end text-xs"
+                        >
+                          {promotion.applicable ? "เก็บแล้วใช้เลย" : "เก็บโค้ด"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
               </section>
             );
           })}
@@ -242,15 +280,15 @@ export function CodePickerDialog({
               <TicketPercent className="size-8 text-muted-foreground/60" />
               <p className="text-sm font-medium text-foreground">ยังไม่มีโค้ดที่เก็บไว้</p>
               <p className="text-xs text-muted-foreground">ยังไม่มีโค้ดสำหรับรายการนี้</p>
-              {onNavigateHome && (
+              {onNavigateToPromotions && (
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onNavigateHome}
+                  onClick={onNavigateToPromotions}
                   className="mt-2 text-xs"
                 >
                   <Ticket className="mr-1.5 size-3.5" />
-                  ไปหน้าแรกเพื่อเก็บโค้ด
+                  {navigateLabel}
                 </Button>
               )}
             </div>
@@ -266,7 +304,13 @@ export function CodePickerDialog({
                 <strong className="font-semibold text-foreground">
                   {draftPromotion.code}
                 </strong>
-                <span className="ml-1 text-teal-700 font-medium">
+                <span
+                  className={`ml-1 font-medium ${
+                    draftPromotion.ownerType === "PLATFORM"
+                      ? "text-promotion-pegasus"
+                      : "text-promotion-shop"
+                  }`}
+                >
                   ({formatPromotionValue(draftPromotion)})
                 </span>
               </p>

@@ -49,7 +49,7 @@ export function CheckoutOrderSummary({
   onReturnToCart,
 }: CheckoutOrderSummaryProps) {
   return (
-    <Card className="checkout-panel gap-3">
+    <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
       <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
 
       <div className="flex items-center justify-between gap-3 text-[13px]">
@@ -112,25 +112,27 @@ export function CheckoutOrderSummary({
       </div>
 
       {!!preview?.sellerDiscountTotal && preview.sellerDiscountTotal > 0 && (
-        <div className="flex justify-between text-[13px] text-teal-700">
-          <span>ส่วนลดร้าน</span>
-          <span>− {checkoutMoney(preview.sellerDiscountTotal)}</span>
+        <div className="flex justify-between text-[13px]">
+          <span className="text-promotion-label">ส่วนลดร้าน</span>
+          <span className="font-medium text-promotion-shop">
+            − {checkoutMoney(preview.sellerDiscountTotal)}
+          </span>
         </div>
       )}
 
       {!!preview?.sellers && preview.sellerDiscountTotal > 0 && (
-        <div className="grid gap-1 pl-3 text-xs text-teal-700">
+        <div className="grid gap-1 pl-3 text-xs">
           {preview.sellers
             .filter((seller) => seller.sellerDiscount > 0)
             .map((seller) => {
               const code = promotionSelection.sellerCodes[seller.sellerProfileId];
               return (
                 <div key={seller.sellerProfileId} className="flex justify-between">
-                  <span className="min-w-0 truncate text-teal-800">
+                  <span className="min-w-0 truncate text-promotion-muted">
                     {seller.sellerName}
                     {code ? ` (${code})` : ""}
                   </span>
-                  <span className="shrink-0 font-medium">
+                  <span className="shrink-0 text-promotion-muted">
                     − {checkoutMoney(seller.sellerDiscount)}
                   </span>
                 </div>
@@ -140,12 +142,14 @@ export function CheckoutOrderSummary({
       )}
 
       {!!preview?.platformDiscountTotal && preview.platformDiscountTotal > 0 && (
-        <div className="flex justify-between text-[13px] text-blue-700">
-          <span>
+        <div className="flex justify-between text-[13px]">
+          <span className="text-promotion-label">
             ส่วนลด Pegasus
             {appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}
           </span>
-          <span>− {checkoutMoney(preview.platformDiscountTotal)}</span>
+          <span className="font-medium text-promotion-pegasus">
+            − {checkoutMoney(preview.platformDiscountTotal)}
+          </span>
         </div>
       )}
 
@@ -159,7 +163,7 @@ export function CheckoutOrderSummary({
       </div>
 
       {!!preview && preview.sellerDiscountTotal + preview.platformDiscountTotal > 0 && (
-        <p className="text-right text-xs font-semibold text-teal-700">
+        <p className="text-right text-xs font-semibold text-promotion-shop">
           ประหยัดไป{" "}
           {checkoutMoney(
             preview.sellerDiscountTotal + preview.platformDiscountTotal,

@@ -196,6 +196,13 @@ export function CheckoutPage() {
     }));
   }, [checkoutItems, quotes.data]);
 
+  const promotionStoreUsername =
+    promotionPicker == null || promotionPicker === "PLATFORM"
+      ? undefined
+      : sellerGroups
+          .find((group) => group.sellerId === promotionPicker)
+          ?.items.find((item) => item.sellerUsername)?.sellerUsername ?? undefined;
+
   const selectedOptions = sellerGroups.map(
     ({ sellerId, quote }) =>
       quote?.options.find(
@@ -767,7 +774,7 @@ export function CheckoutPage() {
           </div>
 
           <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
-            <Card className="checkout-panel">
+            <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
               <div className="flex items-center justify-between gap-3 text-[13px]">
                 <h2 className="font-semibold">ที่อยู่จัดส่ง</h2>
                 <button
@@ -813,7 +820,7 @@ export function CheckoutPage() {
               )}
             </Card>
 
-            <Card className="checkout-panel">
+            <Card className="gap-3 rounded-[var(--radius-card)] border border-border bg-card px-5 py-[18px] shadow-none ring-0">
               <div className="flex items-center justify-between gap-3 text-[13px]">
                 <h2 className="font-semibold">วิธีชำระเงิน</h2>
                 <span className="text-muted-foreground">โอนผ่าน PromptPay</span>
@@ -918,6 +925,11 @@ export function CheckoutPage() {
                 : null
           }
           onNavigateHome={() => navigate("/")}
+          onNavigateToStore={
+            promotionStoreUsername
+              ? () => navigate(`/u/${encodeURIComponent(promotionStoreUsername)}`)
+              : undefined
+          }
           loading={
             pendingTypedCode?.owner === promotionPicker &&
             (!previewReady || promoPreview.isFetching)

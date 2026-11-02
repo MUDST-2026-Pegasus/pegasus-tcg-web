@@ -51,16 +51,16 @@ export function PromotionTicketFrame({
       onClick={onClick}
       {...buttonProps}
       className={cn(
-        "relative flex h-[92px] w-full min-w-0 overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border text-left transition-colors",
+        "relative flex h-[90px] w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-transparent bg-card text-left shadow-promotion-ticket ring-1 ring-promotion-ticket transition-colors",
         className,
       )}
     >
       <div
         className={cn(
-          "flex w-[88px] shrink-0 flex-col items-center justify-center px-1 text-center text-white",
+          "flex w-[88px] shrink-0 flex-col items-center justify-center pl-2 pr-1 text-center text-white",
           variant === "shop"
-            ? "bg-gradient-to-br from-teal-800 via-teal-600 to-teal-400"
-            : "bg-gradient-to-br from-blue-900 via-primary to-sky-500",
+            ? "bg-gradient-to-br from-promotion-shop-start via-promotion-shop-mid to-promotion-shop-end"
+            : "bg-gradient-to-br from-promotion-platform-start via-promotion-platform-mid to-promotion-platform-end",
           stubClassName,
         )}
       >
@@ -68,7 +68,7 @@ export function PromotionTicketFrame({
       </div>
       <div
         className={cn(
-          "flex min-w-0 flex-1 flex-col justify-center gap-1 border-l border-dashed border-border px-3 py-2",
+          "flex min-w-0 flex-1 flex-col justify-center gap-1 border-l border-dashed border-border py-3 pr-3 pl-3.5",
           bodyClassName,
         )}
       >
