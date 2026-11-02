@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AlertCircle, Lock, Minus, Plus } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
+import { useAuth } from "@/features/auth/auth.queries";
+import { PromotionCodeForm } from "@/features/promotions/PromotionCodeForm";
 import { ApiError } from "@/lib/api/errors";
 import {
   useCart,
@@ -14,14 +16,45 @@ import {
   useRemoveCartItem,
   useUpdateCartItemQuantity,
 } from "../cart.queries";
-import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
-import type { CardCondition } from "@/features/catalog/catalog.types";
+import { codeHint } from "../cart.format";
 import type { CartItemResponse } from "../cart.types";
+import { checkoutMoney } from "../checkout.format";
+import { AppliedCodeBox, AutoPickedNote, DroppedCodeNotice, PickCodeRow } from "../components/CartCodeRows";
+import { CartCodePicker } from "../components/CartCodePicker";
+import { CartSellerGroup } from "../components/CartSellerGroup";
+import { useCartPromotions, type PromotionOwnerKey } from "../useCartPromotions";
+
+type SellerGroup = {
+  sellerId: number | null;
+  name: string;
+  username: string | null;
+  items: CartItemResponse[];
+};
+
+const lineTotal = (item: CartItemResponse) => (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity;
+
+function groupBySeller(items: CartItemResponse[]): SellerGroup[] {
+  const groups = new Map<string, SellerGroup>();
+  for (const item of items) {
+    const key = String(item.sellerProfileId ?? "none");
+    const group = groups.get(key) ?? {
+      sellerId: item.sellerProfileId,
+      name: item.sellerName || item.sellerUsername || "Pegasus Seller",
+      username: item.sellerUsername ?? null,
+      items: [],
+    };
+    group.items.push(item);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
+}
 
 export function CartPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const reorderListingIds = (location.state as { reorderListingIds?: number[] } | undefined)?.reorderListingIds;
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const isGuest = !authLoading && !isAuthenticated;
 
   const { data: cart, isLoading, error, refetch } = useCart();
   const updateQuantityMutation = useUpdateCartItemQuantity();
@@ -30,6 +63,7 @@ export function CartPage() {
 
   const [selectedItemIds, setSelectedItemIds] = useState<Set<number>>(new Set());
   const [prevItems, setPrevItems] = useState<CartItemResponse[] | null>(null);
+  const [guestDraft, setGuestDraft] = useState("");
 
   const items = useMemo(() => cart?.items ?? [], [cart]);
 
@@ -64,16 +98,19 @@ export function CartPage() {
     });
   };
 
+  const setChecked = (ids: number[], checked: boolean) => {
+    setSelectedItemIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  };
+
   const allChecked =
     items.length > 0 && items.every((item) => selectedItemIds.has(item.id));
-
-  const toggleAll = () => {
-    if (allChecked) {
-      setSelectedItemIds(new Set());
-    } else {
-      setSelectedItemIds(new Set(items.map((item) => item.id)));
-    }
-  };
 
   const handleUpdateQuantity = (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -81,30 +118,18 @@ export function CartPage() {
       { itemId, data: { quantity: newQuantity } },
       {
         onError: (err) => {
-          if (err instanceof ApiError) {
-            if (err.status === 409 || err.code === "INSUFFICIENT_STOCK") {
-              toast.add({
-                title: "Insufficient Stock",
-                description: err.message || "Requested quantity exceeds available stock.",
-                type: "error",
-              });
-            } else if (err.code === "CANNOT_BUY_OWN_LISTING") {
-              toast.add({
-                title: "Cannot Buy Own Listing",
-                description: "You cannot purchase your own listing.",
-                type: "error",
-              });
-            } else {
-              toast.add({
-                title: "Cannot Update Quantity",
-                description: err.message,
-                type: "error",
-              });
-            }
+          if (err instanceof ApiError && (err.status === 409 || err.code === "INSUFFICIENT_STOCK")) {
+            toast.add({
+              title: "สินค้าเหลือไม่พอ",
+              description: err.message || "จำนวนที่เลือกเกินกว่าสินค้าที่มี",
+              type: "error",
+            });
+          } else if (err instanceof ApiError && err.code === "CANNOT_BUY_OWN_LISTING") {
+            toast.add({ title: "ไม่สามารถซื้อสินค้าของตัวเองได้", type: "error" });
           } else {
             toast.add({
-              title: "Error",
-              description: "Failed to update item quantity",
+              title: "ปรับจำนวนไม่สำเร็จ",
+              description: err instanceof ApiError ? err.message : "กรุณาลองอีกครั้ง",
               type: "error",
             });
           }
@@ -116,21 +141,13 @@ export function CartPage() {
   const handleRemoveItem = (itemId: number) => {
     removeItemMutation.mutate(itemId, {
       onSuccess: () => {
-        setSelectedItemIds((prev) => {
-          const next = new Set(prev);
-          next.delete(itemId);
-          return next;
-        });
-        toast.add({
-          title: "Item Removed",
-          description: "Item has been removed from your cart.",
-          type: "info",
-        });
+        setChecked([itemId], false);
+        toast.add({ title: "นำสินค้าออกจากตะกร้าแล้ว", type: "info" });
       },
       onError: (err) => {
         toast.add({
-          title: "Failed to Remove Item",
-          description: err instanceof ApiError ? err.message : "Network error",
+          title: "นำสินค้าออกไม่สำเร็จ",
+          description: err instanceof ApiError ? err.message : "เครือข่ายขัดข้อง",
           type: "error",
         });
       },
@@ -146,24 +163,15 @@ export function CartPage() {
         // continue with other items
       }
     }
-    setSelectedItemIds((prev) => {
-      const next = new Set(prev);
-      for (const id of ids) {
-        next.delete(id);
-      }
-      return next;
-    });
-    toast.add({
-      title: "Selected Items Removed",
-      description: "Selected items were removed from your cart.",
-      type: "info",
-    });
+    setChecked(ids, false);
+    toast.add({ title: "ลบสินค้าที่เลือกแล้ว", type: "info" });
   };
 
   const checkedItems = useMemo(
     () => items.filter((item) => selectedItemIds.has(item.id)),
     [items, selectedItemIds],
   );
+  const groups = useMemo(() => groupBySeller(items), [items]);
 
   const changedItems = items.filter((item) => item.priceChanged && item.purchasable);
   const hasSelectedPriceChanges = checkedItems.some((item) => item.priceChanged);
@@ -184,25 +192,67 @@ export function CartPage() {
     });
   };
 
-  const subtotal = useMemo(
-    () =>
-      checkedItems.reduce(
-        (acc, item) => acc + (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity,
-        0,
-      ),
-    [checkedItems],
-  );
+  // The auto-pick toast offers "เปลี่ยน"; the picker lives in the hook below.
+  const openPickerRef = useRef<(owner: PromotionOwnerKey) => void>(() => {});
+  const handleAutoPicked = useCallback((saving: number) => {
+    toast.add({
+      type: "info",
+      title: `เลือกโค้ดที่ลดมากที่สุดให้แล้ว${saving > 0 ? ` (– ${checkoutMoney(saving)})` : ""}`,
+      actionProps: { children: "เปลี่ยน", onClick: () => openPickerRef.current("PLATFORM") },
+    });
+  }, []);
 
-  // Group checked items by seller to calculate estimated shipping
-  const estimatedShipping = useMemo(() => {
-    if (checkedItems.length === 0) return 0;
-    const sellers = new Set(checkedItems.map((i) => i.sellerProfileId ?? 1));
-    return sellers.size * 50;
-  }, [checkedItems]);
+  const promotions = useCartPromotions({
+    items: checkedItems,
+    enabled: !isLoading && !authLoading && !checkoutBlocked,
+    userId: user?.id,
+    cartId: cart?.id,
+    onAutoPicked: handleAutoPicked,
+  });
+  useEffect(() => {
+    openPickerRef.current = promotions.setPicker;
+  });
 
-  const total = subtotal > 0 ? subtotal + estimatedShipping : 0;
+  const preview = checkedItems.length ? promotions.preview : undefined;
+  const localSubtotal = checkedItems.reduce((sum, item) => sum + lineTotal(item), 0);
+  const itemsSubtotal = preview?.itemsSubtotal ?? localSubtotal;
+  const sellerDiscountTotal = preview?.sellerDiscountTotal ?? 0;
+  const platformDiscountTotal = preview?.platformDiscountTotal ?? 0;
+  const saving = sellerDiscountTotal + platformDiscountTotal;
+  const total = Math.max(0, itemsSubtotal - saving);
+  const checkedQuantity = checkedItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const formatPrice = (price: number) => `฿${price.toLocaleString()}`;
+  const promotionsFor = (owner: PromotionOwnerKey) =>
+    (promotions.promotionList.data ?? []).filter((promotion) =>
+      owner === "PLATFORM" ? promotion.ownerType === "PLATFORM" : promotion.sellerProfileId === owner);
+  const findPromotion = (owner: PromotionOwnerKey, code: string) =>
+    promotionsFor(owner).find((promotion) => promotion.code === code);
+
+  const codeRow = (owner: PromotionOwnerKey, label: string) => {
+    const notice = promotions.notices[String(owner)];
+    if (notice) return <DroppedCodeNotice message={notice} />;
+    const applied = promotions.appliedCode(owner);
+    if (applied) {
+      return (
+        <AppliedCodeBox
+          owner={owner === "PLATFORM" ? "PLATFORM" : "SELLER"}
+          code={applied.code}
+          promotion={findPromotion(owner, applied.code)}
+          discount={applied.discount}
+          pendingShipping={applied.pendingShipping}
+          claimed={promotions.claimedCodes.has(applied.code)}
+          onChange={() => promotions.setPicker(owner)}
+        />
+      );
+    }
+    return <PickCodeRow label={label} hint={codeHint(promotionsFor(owner))} onOpen={() => promotions.setPicker(owner)} />;
+  };
+
+  const pickerGroup = typeof promotions.picker === "number"
+    ? groups.find((group) => group.sellerId === promotions.picker)
+    : undefined;
+  const platformApplied = promotions.appliedCode("PLATFORM");
+  const claimedCount = (promotions.promotionList.data ?? []).filter((p) => p.source === "CLAIMED").length;
 
   const handleProceedToCheckout = () => {
     if (checkedItems.length === 0 || checkoutBlocked || isLoading || acceptPricesMutation.isPending) return;
@@ -215,11 +265,11 @@ export function CartPage() {
 
   return (
     <div className="bg-muted flex-1 font-sans min-h-screen">
-      <main className="max-w-[1200px] w-full mx-auto px-6 py-12 flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-bold text-foreground">Shopping Cart</h1>
-          <p className="text-muted-foreground text-lg">
-            Review your items and complete your purchase.
+      <main className="mx-auto flex w-full max-w-[1072px] flex-col gap-6 px-4 py-10 sm:px-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[28px] font-bold text-foreground">ตะกร้าสินค้า</h1>
+          <p className="text-sm text-muted-foreground">
+            เลือกสินค้าและโค้ดส่วนลด แล้วไปเลือกการจัดส่งในหน้าถัดไป
           </p>
         </div>
 
@@ -227,10 +277,10 @@ export function CartPage() {
           <div className="flex items-center gap-3 p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div className="flex-1 text-sm font-medium">
-              {error instanceof ApiError ? error.message : "Failed to load cart."}
+              {error instanceof ApiError ? error.message : "โหลดตะกร้าไม่สำเร็จ"}
             </div>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Retry
+              ลองใหม่
             </Button>
           </div>
         )}
@@ -248,231 +298,182 @@ export function CartPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Column: Cart Items */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            {/* Select All */}
-            <Card className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0">
-              <CardContent className="px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Checkbox
-                    id="select-all"
-                    checked={allChecked}
-                    onCheckedChange={toggleAll}
-                    disabled={items.length === 0}
-                  />
-                  <label
-                    htmlFor="select-all"
-                    className="text-base font-medium cursor-pointer text-foreground"
-                  >
-                    Select All ({items.length} items)
-                  </label>
-                </div>
-                <button
-                  className="text-destructive text-sm font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleRemoveSelected}
-                  disabled={checkedItems.length === 0 || removeItemMutation.isPending}
-                >
-                  Remove Selected
-                </button>
-              </CardContent>
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="flex flex-col gap-4">
+            <Card className="flex-row items-center justify-between rounded-xl px-5 py-3.5 shadow-none">
+              <label className="flex cursor-pointer items-center gap-3 text-sm font-medium text-foreground">
+                <Checkbox
+                  checked={allChecked}
+                  onCheckedChange={() => setSelectedItemIds(allChecked ? new Set() : new Set(items.map((item) => item.id)))}
+                  disabled={items.length === 0}
+                />
+                เลือกทั้งหมด ({items.length} รายการ)
+              </label>
+              <button
+                type="button"
+                className="text-sm font-medium text-destructive hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={handleRemoveSelected}
+                disabled={checkedItems.length === 0 || removeItemMutation.isPending}
+              >
+                ลบที่เลือก
+              </button>
             </Card>
 
-            {/* Items */}
             {isLoading ? (
-              <div role="status" aria-busy="true" aria-label="Loading your cart">
+              <div role="status" aria-busy="true" aria-label="กำลังโหลดตะกร้า">
                 <ProductRowsSkeleton />
               </div>
             ) : items.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground bg-card rounded-xl border flex flex-col items-center gap-4">
-                <p className="text-lg">Your cart is empty.</p>
+              <div className="flex flex-col items-center gap-4 rounded-xl border bg-card py-16 text-center text-muted-foreground">
+                <p className="text-lg">ยังไม่มีสินค้าในตะกร้า</p>
                 <Button variant="outline" onClick={() => navigate("/products")}>
-                  Explore Products
+                  เลือกซื้อสินค้า
                 </Button>
               </div>
             ) : (
-              items.map((item) => {
-                const isItemChecked = selectedItemIds.has(item.id);
-                const displayPrice = item.currentPrice ?? item.unitPriceAtAdd;
-
+              groups.map((group) => {
+                const checked = group.items.filter((item) => selectedItemIds.has(item.id));
+                const sellerSubtotal = checked.reduce((sum, item) => sum + lineTotal(item), 0);
+                const discount = group.sellerId != null && checked.length ? promotions.sellerDiscount(group.sellerId) : 0;
                 return (
-                  <Card
-                    key={item.id}
-                    className="rounded-xl border shadow-none bg-card p-0 !py-0 gap-0"
-                  >
-                    <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                      <div className="flex items-center gap-4 sm:gap-6 self-start sm:self-auto h-full mt-2 sm:mt-0">
-                        <Checkbox
-                          aria-label={`เลือก ${item.productName || `Listing #${item.listingId}`}`}
-                          checked={isItemChecked}
-                          onCheckedChange={() => toggleCheck(item.id)}
-                        />
-                        <div className="w-24 h-32 bg-[#F9F9F9] border border-border/50 rounded-lg overflow-hidden shrink-0 flex items-center justify-center p-1">
-                          {item.imageUrl ? (
-                            <img
-                              src={item.imageUrl}
-                              alt={item.productName || "Product"}
-                              className="w-full h-full object-contain"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-xs text-muted-foreground bg-muted/40 rounded">
-                              <span>No Image</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex-1 flex flex-col justify-between min-h-32 py-1 w-full">
-                        <div className="flex flex-col gap-1">
-                          <h3 className="font-bold text-xl text-foreground">
-                            {item.productName || `Listing #${item.listingId}`}
-                          </h3>
-                          <p className="text-muted-foreground text-sm">
-                            {item.variantLabel || "Card variant"}
-                            {item.condition && (
-                              <span>
-                                {" • Condition: "}
-                                {CONDITION_LABELS[item.condition as CardCondition] ?? item.condition}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-sm mt-1 text-foreground">
-                            Seller:{" "}
-                            {item.sellerUsername ? (
-                              <Link
-                                to={`/u/${encodeURIComponent(item.sellerUsername)}`}
-                                className="text-primary font-medium hover:underline focus-visible:underline"
-                              >
-                                {item.sellerName || item.sellerUsername}
-                              </Link>
-                            ) : (
-                              <span className="text-primary font-medium">
-                                {item.sellerName || "Pegasus Seller"}
-                              </span>
-                            )}
-                          </p>
-
-                          {item.priceChanged && (
-                            <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-200 w-fit mt-1">
-                              Price updated: {formatPrice(item.unitPriceAtAdd)} → {item.currentPrice == null ? "ไม่พร้อมจำหน่าย" : formatPrice(item.currentPrice)}
-                            </p>
-                          )}
-
-                          {!item.purchasable && (
-                            <p className="text-xs text-destructive bg-destructive/10 px-2 py-1 rounded-md border border-destructive/20 w-fit mt-1">
-                              Listing no longer available
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          className="text-destructive text-sm font-medium hover:underline text-left w-fit mt-3"
-                          onClick={() => handleRemoveItem(item.id)}
-                          disabled={removeItemMutation.isPending}
-                        >
-                          Remove
-                        </button>
-                      </div>
-
-                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:h-32 py-1 w-full sm:w-auto mt-4 sm:mt-0">
-                        <div className="text-2xl font-bold text-foreground">
-                          {formatPrice(displayPrice)}
-                        </div>
-                        <div className="flex items-center rounded-full border border-border px-4 py-1.5 gap-4">
-                          <button
-                            className="text-muted-foreground hover:text-foreground disabled:opacity-50"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity - 1)
-                            }
-                            disabled={
-                              item.quantity <= 1 || updateQuantityMutation.isPending
-                            }
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="w-4 text-center font-medium">
-                            {item.quantity}
-                          </span>
-                          <button
-                            className="text-muted-foreground hover:text-foreground disabled:opacity-50"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity + 1)
-                            }
-                            disabled={
-                              (item.quantityAvailable !== null &&
-                                item.quantity >= item.quantityAvailable) ||
-                              updateQuantityMutation.isPending
-                            }
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <CartSellerGroup
+                    key={group.sellerId ?? "none"}
+                    sellerName={group.name}
+                    sellerUsername={group.username}
+                    items={group.items}
+                    selectedIds={selectedItemIds}
+                    onToggleItem={toggleCheck}
+                    onToggleSeller={(value) => setChecked(group.items.map((item) => item.id), value)}
+                    onQuantity={handleUpdateQuantity}
+                    onRemove={handleRemoveItem}
+                    quantityBusy={updateQuantityMutation.isPending}
+                    removeBusy={removeItemMutation.isPending}
+                    codeSlot={group.sellerId != null && checked.length > 0 && !checkoutBlocked
+                      ? codeRow(group.sellerId, "โค้ดร้าน")
+                      : null}
+                    subtotal={Math.max(0, sellerSubtotal - discount)}
+                  />
                 );
               })
             )}
           </div>
 
-          {/* Right Column: Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="rounded-xl border shadow-none bg-card p-6 !py-6 flex flex-col gap-6">
-              <h2 className="text-2xl font-bold text-foreground">Order Summary</h2>
-
-              <div className="flex flex-col gap-4 text-base">
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground">
-                    Subtotal ({checkedItems.length} items)
-                  </span>
-                  <span className="font-medium text-foreground">
-                    {formatPrice(subtotal)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground">Estimated Shipping</span>
-                  <span className="font-medium text-foreground">
-                    {subtotal > 0 ? formatPrice(estimatedShipping) : "฿0"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground">Tax</span>
-                  <span className="font-medium text-foreground">Included</span>
-                </div>
+          <div className="flex flex-col gap-4 lg:sticky lg:top-28">
+            <Card className="gap-3 rounded-xl p-5 shadow-none">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-foreground">โค้ดส่วนลด Pegasus</h2>
+                {!isGuest && (
+                  <Link to="/account/coupons" className="text-xs font-medium text-primary hover:underline">
+                    โค้ดของฉัน{claimedCount ? ` (${claimedCount})` : ""}
+                  </Link>
+                )}
               </div>
+              {isGuest && (
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-primary/5 px-3 py-2.5 text-xs">
+                  <span className="text-foreground/80">เข้าสู่ระบบเพื่อใช้โค้ดที่เก็บไว้</span>
+                  <Link to="/login?next=%2Fcart" className="shrink-0 font-semibold text-primary hover:underline">เข้าสู่ระบบ</Link>
+                </div>
+              )}
+              {checkedItems.length === 0 || checkoutBlocked ? (
+                <p className="text-xs text-muted-foreground">เลือกสินค้าก่อน แล้วจึงเลือกโค้ด</p>
+              ) : isGuest && !platformApplied && !promotions.notices.PLATFORM ? (
+                <>
+                  <PromotionCodeForm
+                    id="cart-guest-code"
+                    label="กรอกโค้ดอื่นที่ไม่ได้เก็บไว้"
+                    placeholder="กรอกโค้ดอื่นที่ไม่ได้เก็บไว้"
+                    showLabel={false}
+                    value={guestDraft}
+                    onChange={setGuestDraft}
+                    onSubmit={() => promotions.tryCode("PLATFORM", guestDraft)}
+                    error={promotions.typedError?.owner === "PLATFORM" ? promotions.typedError.message : null}
+                    loading={promotions.checking}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    พิมพ์โค้ดเพื่อดูส่วนลดได้ แต่ต้องเข้าสู่ระบบตอนไปชำระเงิน
+                  </p>
+                </>
+              ) : (
+                <>
+                  {codeRow("PLATFORM", "เลือกโค้ดส่วนลด")}
+                  {promotions.autoPicked && platformApplied && <AutoPickedNote />}
+                </>
+              )}
+            </Card>
 
-              <Separator className="my-2 bg-border/50" />
+            <Card className="gap-0 rounded-xl p-5 shadow-none">
+              <h2 className="mb-4 text-base font-bold text-foreground">สรุปคำสั่งซื้อ</h2>
+              <dl className="grid gap-2.5 text-sm">
+                <div className="flex justify-between">
+                  <dt>ยอดสินค้า ({checkedQuantity} ใบ)</dt>
+                  <dd>{checkoutMoney(itemsSubtotal)}</dd>
+                </div>
+                {sellerDiscountTotal > 0 && (
+                  <>
+                    <div className="flex justify-between">
+                      <dt>ส่วนลดร้าน</dt>
+                      <dd className="text-emerald-700">– {checkoutMoney(sellerDiscountTotal)}</dd>
+                    </div>
+                    {preview?.sellers.filter((seller) => seller.sellerDiscount > 0).map((seller) => (
+                      <div key={seller.sellerProfileId} className="flex justify-between pl-3 text-xs text-muted-foreground">
+                        <dt>{[promotions.selection.sellerCodes[seller.sellerProfileId], seller.sellerName].filter(Boolean).join(" · ")}</dt>
+                        <dd>– {checkoutMoney(seller.sellerDiscount)}</dd>
+                      </div>
+                    ))}
+                  </>
+                )}
+                {platformDiscountTotal > 0 && (
+                  <div className="flex justify-between">
+                    <dt>ส่วนลด Pegasus{platformApplied ? ` · ${platformApplied.code}` : ""}</dt>
+                    <dd className="text-primary">– {checkoutMoney(platformDiscountTotal)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <dt>ค่าจัดส่ง</dt>
+                  <dd className="text-muted-foreground">คิดในหน้าถัดไป</dd>
+                </div>
+              </dl>
 
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xl font-bold text-foreground">Total</span>
-                <span className="text-4xl font-bold text-primary">
-                  {formatPrice(total)}
-                </span>
+              <Separator className="my-4" />
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">ยอดรวม (ยังไม่รวมค่าส่ง)</span>
+                <strong className="text-2xl font-black text-foreground" aria-label="ยอดรวม">{checkoutMoney(total)}</strong>
               </div>
+              {saving > 0 && (
+                <p className="mt-1 text-right text-xs font-semibold text-emerald-700">ประหยัดไป {checkoutMoney(saving)}</p>
+              )}
 
               <Button
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg py-6 rounded-full shadow-md"
+                className="mt-4 h-12 w-full rounded-full text-base font-semibold"
                 disabled={checkedItems.length === 0 || isLoading || checkoutBlocked || acceptPricesMutation.isPending}
                 aria-describedby={checkoutBlocked ? "checkout-blocked-reason" : undefined}
                 onClick={handleProceedToCheckout}
               >
-                Proceed to Checkout
+                ไปชำระเงิน ({checkedQuantity})
               </Button>
 
               {checkoutBlocked && (
-                <div id="checkout-blocked-reason" className="text-sm text-destructive" role="status">
+                <div id="checkout-blocked-reason" className="mt-3 text-sm text-destructive" role="status">
                   {hasSelectedPriceChanges && <p>กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ</p>}
                   {hasSelectedUnavailableItems && <p>กรุณานำสินค้าที่ไม่พร้อมจำหน่ายออก หรือยกเลิกเลือกก่อนสั่งซื้อ</p>}
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm font-medium mt-2">
-                <Lock className="w-4 h-4" />
-                <span>Secure Checkout Guarantee</span>
-              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                ส่วนลดคิดจากสินค้าที่เลือก ยืนยันอีกครั้งหลังเลือกการจัดส่ง
+              </p>
             </Card>
           </div>
         </div>
       </main>
+
+      <CartCodePicker
+        promotions={promotions}
+        sellerName={pickerGroup?.name}
+        sellerUsername={pickerGroup?.username}
+        isGuest={isGuest}
+      />
     </div>
   );
 }

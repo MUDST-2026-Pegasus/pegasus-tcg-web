@@ -1,6 +1,8 @@
 import type { PromotionSelection } from "./promotions.types";
 
 export const PROMOTION_SELECTION_KEY = "pegasus.checkout.promotions";
+/** Set once the buyer picks or clears a code in the cart; auto-pick never overrides it after that. */
+export const PROMOTION_MANUAL_KEY = "pegasus.checkout.promotions.manual";
 
 export function readPromotionSelection(): PromotionSelection {
   try {
@@ -32,4 +34,21 @@ export function savePromotionSelection(selection: PromotionSelection) {
 
 export function clearPromotionSelection() {
   sessionStorage.removeItem(PROMOTION_SELECTION_KEY);
+  sessionStorage.removeItem(PROMOTION_MANUAL_KEY);
+}
+
+export function readPromotionManual(): boolean {
+  try {
+    return sessionStorage.getItem(PROMOTION_MANUAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function savePromotionManual() {
+  try {
+    sessionStorage.setItem(PROMOTION_MANUAL_KEY, "1");
+  } catch {
+    // Without storage the cart just auto-picks again on the next visit.
+  }
 }
