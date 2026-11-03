@@ -35,8 +35,8 @@ describe('Catalog UI', () => {
         success: true,
         message: 'OK',
         data: [
-          { id: 1, code: 'POKEMON', name: 'Pokémon', active: true },
-          { id: 2, code: 'ONE_PIECE', name: 'One Piece Card Game', active: true },
+          { id: 1, code: 'POKEMON', slug: 'pokemon-tcg', name: 'Pokémon', active: true },
+          { id: 2, code: 'ONE_PIECE', slug: 'one-piece-card-game', name: 'One Piece Card Game', active: true },
         ],
       },
     }).as('getGames');
@@ -187,15 +187,17 @@ describe('Catalog UI', () => {
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
 
-  it('loads Pokémon and One Piece category shortcut routes (/pokemon and /one-piece)', () => {
+  it('redirects the old /pokemon and /one-piece routes to search filtered by game', () => {
     cy.visit('/pokemon');
-    cy.wait('@getGames');
-    cy.wait('@getCatalogProducts');
+    cy.location('pathname', { timeout: 10000 }).should('eq', '/search');
+    cy.location('search').should('include', 'game=pokemon-tcg');
+    cy.wait('@getCatalogProducts').its('request.url').should('include', 'gameId=1');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
 
     cy.visit('/one-piece');
-    cy.wait('@getGames');
-    cy.wait('@getCatalogProducts');
+    cy.location('pathname', { timeout: 10000 }).should('eq', '/search');
+    cy.location('search').should('include', 'game=one-piece-card-game');
+    cy.wait('@getCatalogProducts').its('request.url').should('include', 'gameId=2');
     cy.contains('Legend of Blue Eyes White Dragon').should('be.visible');
   });
 });
