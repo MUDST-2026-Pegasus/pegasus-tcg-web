@@ -1,15 +1,11 @@
 .checkout-page {
-  --checkout-selected: #f0f7fc;
   --checkout-subtle: var(--muted);
-  --checkout-success: #007a4a;
   background: #f6f8f9;
   min-height: calc(100svh - 80px);
   padding: 40px 24px 64px;
 }
 .checkout-container { width: 100%; max-width: 1024px; margin: 0 auto; }
 .checkout-columns { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
-.checkout-panel { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 18px 20px; gap: 12px; box-shadow: none; --tw-ring-shadow: 0 0 #0000; }
-.checkout-seller { gap: 16px; }
 .checkout-seller-avatar { display: flex; width: 28px; height: 28px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: #0d9488; color: white; font-size: 11px; font-weight: 600; }
 .checkout-seller:nth-child(even) .checkout-seller-avatar { background: var(--primary); }
 .checkout-item-thumb { width: 44px; height: 60px; flex-shrink: 0; border-radius: 4px; background: var(--checkout-subtle); overflow: hidden; }

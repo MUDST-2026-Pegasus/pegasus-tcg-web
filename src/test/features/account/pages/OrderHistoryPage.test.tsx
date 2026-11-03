@@ -11,6 +11,7 @@ import { financeApi } from "@/features/finance/finance.api";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { Review } from "@/features/finance/after-sales.types";
 import type { OrderDetails } from "@/features/account/orders.types";
+import { toast } from "@/components/ui/toast";
 
 const mockOrders: OrderDetails[] = [
   {
@@ -141,6 +142,73 @@ describe("OrderHistoryPage", () => {
     // Unpaid order and a paid one the seller has not shipped yet
     expect(screen.getByText("Awaiting Payment")).toBeInTheDocument();
     expect(screen.getByText("Preparing")).toBeInTheDocument();
+  });
+
+  it("notifies the buyer when a pending order times out and its code is released", async () => {
+    const notify = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+    const view = renderWithProviders(<OrderHistoryPage />);
+    const expired = {
+      ...mockOrders[0],
+      status: "CANCELLED",
+      promotionsRestoredOnCancel: true,
+      promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 50, status: "RELEASED" }],
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        status: "CANCELLED",
+        statusHistory: [{
+          id: 1,
+          sellerOrderId: mockOrders[0].sellerOrders[0].id,
+          fromStatus: "PENDING_PAYMENT",
+          toStatus: "CANCELLED",
+          changedBy: null,
+          note: null,
+          createdAt: "2026-10-10T13:00:00Z",
+        }],
+      }],
+    };
+    vi.mocked(orderQueries.useBuyerOrders).mockReturnValue({ data: [expired, mockOrders[1]], isLoading: false, error: null, refetch: vi.fn() } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    view.rerender(<OrderHistoryPage />);
+    await waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({
+      title: "คำสั่งซื้อ ORD-101 หมดเวลาชำระ", description: "คืนสิทธิ์ PEGASUS10 แล้ว", type: "warning",
+    })));
+  });
+
+  it("shows split discount owners and the seller-order payable amount in buyer order details", async () => {
+    const discounted = {
+      ...mockOrders[0],
+      status: "PAID",
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 49.06,
+      discountTotal: 99.06,
+      grandTotal: 775.94,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER" as const, sellerProfileId: 1, amount: 50, status: "CONSUMED" },
+        { code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 49.06, status: "CONSUMED" },
+      ],
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        sellerName: "minmin_tcg",
+        status: "PREPARING",
+        sellerDiscount: 50,
+        platformDiscount: 49.06,
+        grandTotal: 775.94,
+        promotions: [
+          { code: "MINMIN50", ownerType: "SELLER" as const, sellerProfileId: 1, amount: 50, status: "CONSUMED" },
+          { code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 49.06, status: "CONSUMED" },
+        ],
+      }],
+    } as OrderDetails;
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [discounted], isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+    await userEvent.click(screen.getAllByRole("button", { name: /view details/i })[0]);
+
+    expect(screen.getAllByText(/ส่วนลดร้าน · MINMIN50/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/ส่วนลด Pegasus · PEGASUS10/).length).toBeGreaterThan(0);
+    expect(screen.getByText("ลูกค้าจ่ายร้านนี้")).toBeInTheDocument();
+    expect(screen.getAllByText("฿775.94").length).toBeGreaterThan(0);
   });
 
   it("opens the linked order details and closes without reopening the query link", async () => {
@@ -290,13 +358,11 @@ describe("OrderHistoryPage", () => {
     expect(confirmSpy).not.toHaveBeenCalled();
 
     // Verify custom modal is opened
-    expect(screen.getByRole("heading", { name: /cancel this order\?/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/this action cannot be undone and reserved items will be released/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ยกเลิกคำสั่งซื้อนี้?" })).toBeInTheDocument();
+    expect(screen.getByText(/ยังไม่ได้ชำระเงิน/)).toBeInTheDocument();
 
-    // Click "Confirm Cancel" inside the custom dialog
-    const confirmCancelBtn = screen.getByRole("button", { name: /confirm cancel/i });
+    // Click the confirmation action inside the custom dialog
+    const confirmCancelBtn = screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" });
     await userEvent.click(confirmCancelBtn);
 
     await waitFor(() => {
@@ -317,7 +383,7 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     await userEvent.click(screen.getByRole("button", { name: /cancel order/i }));
-    await userEvent.click(screen.getByRole("button", { name: /confirm cancel/i }));
+    await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
 
     expect(await screen.findByRole("textbox", { name: "เลขบัญชีสำหรับคืนเงิน 11" })).toBeInTheDocument();
   });

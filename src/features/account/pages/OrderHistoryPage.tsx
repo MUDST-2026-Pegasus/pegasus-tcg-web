@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
@@ -82,7 +82,7 @@ export function OrderHistoryPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
+  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders(0, 50, true);
   const refunds = useBuyerRefunds();
 
   const scrollPosRef = useRef(0);
@@ -113,6 +113,35 @@ export function OrderHistoryPage() {
     }
     return [];
   }, [ordersData]);
+
+  const previousStatuses = useRef<Map<number, string>>(new Map());
+  useEffect(() => {
+    if (!ordersData) return;
+    for (const order of orders) {
+      const previousStatus = previousStatuses.current.get(order.id);
+      const systemTimedOut = order.sellerOrders.some((seller) =>
+        seller.statusHistory?.some((change) =>
+          change.changedBy === null
+          && change.fromStatus === "PENDING_PAYMENT"
+          && change.toStatus === "CANCELLED",
+        ) ?? false,
+      );
+      if (order.status !== "CANCELLED" || previousStatus !== "PENDING_PAYMENT" || !systemTimedOut) continue;
+      const codeNames = (order.promotions?.length
+        ? order.promotions
+        : order.sellerOrders.flatMap((seller) => seller.promotions ?? []))
+        .map((promotion) => promotion.code)
+        .filter(Boolean);
+      toast.add({
+        title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
+        description: order.promotionsRestoredOnCancel && codeNames.length
+          ? `คืนสิทธิ์ ${codeNames.join(", ")} แล้ว`
+          : "คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+        type: "warning",
+      });
+    }
+    previousStatuses.current = new Map(orders.map((order) => [order.id, order.status]));
+  }, [orders, ordersData]);
 
   const tabCounts = useMemo(() => {
     const counts: Record<OrderFilterTab, number> = {
@@ -180,12 +209,12 @@ export function OrderHistoryPage() {
     setTimeout(restoreScroll, 50);
   };
 
-  const handleConfirmCancelOrder = async () => {
+  const handleConfirmCancelOrder = async (reason?: string) => {
     if (!selectedOrderToCancel) return;
     const orderId = selectedOrderToCancel.id;
     setCancellingOrderId(orderId);
     try {
-      await ordersApi.cancelOrder(orderId, "Buyer requested cancellation");
+      await ordersApi.cancelOrder(orderId, reason ?? "Buyer requested cancellation");
       toast.add({
         title: "Order Cancelled",
         description: "Your order has been cancelled successfully.",

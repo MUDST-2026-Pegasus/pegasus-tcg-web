@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PromotionStatusPill } from "@/features/admin/components/PromotionBadges";
 import { money, limitLabel } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
-import { CouponTicket } from "./CouponTicket";
+import { CouponTicket } from "@/features/promotions/CouponTicket";
 
 export type PromotionActionKind = "pause" | "resume" | "delete" | "admin";
 export type PromotionAction = { kind: PromotionActionKind; code: SellerPromotion };

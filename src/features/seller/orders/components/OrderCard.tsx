@@ -22,6 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { PromotionOrderIndicator } from "@/features/promotions/PromotionOrderIndicator";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 
@@ -130,6 +131,9 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
 
           <div className="flex shrink-0 flex-col items-end gap-[3px]">
             <span className="text-base font-bold text-foreground">{formatBaht(order.grandTotal)}</span>
+            {((order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0 || (order.promotions?.length ?? 0) > 0) && (
+              <PromotionOrderIndicator codes={order.promotions?.map((promotion) => promotion.code)} />
+            )}
             <span className={cn("text-[10px]", PAYMENT_TEXT[payment])}>
               {PAYMENT_STATE_LABEL[payment]}
             </span>

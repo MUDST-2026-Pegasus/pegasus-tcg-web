@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { ApiError } from "@/lib/api/errors";
 import type { CartResponse } from "@/features/cart/cart.types";
 import type { Address } from "@/features/account/address.types";
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
+import { PROMOTION_SELECTION_KEY } from "@/features/cart/promotions.storage";
 
 const mockNavigate = vi.fn();
 
@@ -145,6 +146,7 @@ async function ready() { await waitFor(() => expect(purchase()).toBeEnabled()); 
 describe("CheckoutPage", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    sessionStorage.removeItem(PROMOTION_SELECTION_KEY);
     mockNavigate.mockReset();
     vi.spyOn(toast, "add").mockImplementation(vi.fn());
     vi.spyOn(authQueries, "useAuth").mockReturnValue({
@@ -158,6 +160,14 @@ describe("CheckoutPage", () => {
     } as unknown as ReturnType<typeof addressQueries.useAddresses>);
     vi.spyOn(checkoutApi, "getShippingQuotes").mockImplementation(async (ids) =>
       [quoteA, quoteB].filter(q => ids.includes(q.sellerProfileId === 1 ? 42 : 45)));
+    vi.spyOn(checkoutApi, "getPromotions").mockResolvedValue([]);
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => {
+      const sellers = [
+        ...(request.cartItemIds.includes(42) ? [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: request.shippingOptionBySeller?.[1] === 12 ? 65 : 40, sellerDiscount: 0, platformDiscount: 0, grandTotal: request.shippingOptionBySeller?.[1] === 12 ? 365 : 340 }] : []),
+        ...(request.cartItemIds.includes(45) ? [{ sellerProfileId: 2, sellerName: "Store B", itemsSubtotal: 500, shippingFee: 0, sellerDiscount: 0, platformDiscount: 0, grandTotal: 500 }] : []),
+      ];
+      return { sellers, itemsSubtotal: sellers.reduce((sum, seller) => sum + seller.itemsSubtotal, 0), shippingTotal: sellers.reduce((sum, seller) => sum + seller.shippingFee, 0), sellerDiscountTotal: 0, platformDiscountTotal: 0, grandTotal: sellers.reduce((sum, seller) => sum + seller.grandTotal, 0), shippingEstimated: false, codes: [], bestPick: null };
+    });
   });
 
   it("quotes only selected cart items and uses the API fee instead of a flat 50", async () => {
@@ -167,6 +177,140 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("Pikachu Illustrator")).toBeInTheDocument();
     expect(screen.queryByText("Charizard Base Set")).not.toBeInTheDocument();
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+  });
+
+  it("keeps cart promotion codes and submits the total returned by preview", async () => {
+    sessionStorage.setItem(PROMOTION_SELECTION_KEY, JSON.stringify({ platformCode: "PEGASUS10", sellerCodes: { 1: "STORE50" } }));
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 50, platformDiscount: 29, grandTotal: 261 }],
+      itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 50, platformDiscountTotal: 29, grandTotal: 261,
+      shippingEstimated: false, bestPick: null,
+      codes: [{ code: request.platformCode || "", ownerType: "PLATFORM", sellerProfileId: null, sellerName: null, status: "APPLIED", discount: 29, shortfall: null, pendingShipping: false }],
+    }));
+    const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿261");
+    await userEvent.setup().click(purchase());
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
+    expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({
+      platformCode: "PEGASUS10", sellerCodes: { 1: "STORE50" }, expectedGrandTotal: 261,
+    }));
+    await waitFor(() => expect(sessionStorage.getItem(PROMOTION_SELECTION_KEY)).toBeNull());
+  });
+
+  it("asks for confirmation when the promotion total changes before ordering", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "PEGASUS10", sellerCodes: {} }),
+    );
+    let changed = false;
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: changed ? 40 : 0, grandTotal: changed ? 300 : 340 }],
+      itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 0,
+      platformDiscountTotal: changed ? 40 : 0, grandTotal: changed ? 300 : 340,
+      shippingEstimated: false,
+      codes: request.platformCode
+        ? [{ code: request.platformCode, ownerType: "PLATFORM", sellerProfileId: null, sellerName: null, status: "APPLIED", discount: changed ? 40 : 0, shortfall: null, pendingShipping: false }]
+        : [],
+      bestPick: null,
+    }));
+    const submit = vi.spyOn(checkoutApi, "checkout")
+      .mockImplementationOnce(async () => { changed = true; throw new ApiError({ status: 409, code: "PROMO_CHANGED", message: "total changed", details: { grandTotal: 300, code: "PEGASUS10" } }); })
+      .mockResolvedValue(orderResponse);
+    renderCheckout("/checkout?items=42");
+    await ready();
+    await userEvent.setup().click(purchase());
+    expect(await screen.findByRole("dialog", { name: "ยอดชำระเปลี่ยนไป" })).toBeInTheDocument();
+    expect(screen.getByText(/ยอดเดิม: ฿340/)).toBeInTheDocument();
+    expect(await screen.findByText(/ยอดใหม่: ฿300/)).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "สั่งซื้อด้วยยอดใหม่" }));
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
+    expect(submit.mock.calls[1][0].expectedGrandTotal).toBe(300);
+  });
+
+  it("opens the seller picker when PROMO_CHANGED identifies a selected seller code", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: null, sellerCodes: { 1: "STORE50" } }),
+    );
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 50, platformDiscount: 0, grandTotal: 290 }],
+      itemsSubtotal: 300,
+      shippingTotal: 40,
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 0,
+      grandTotal: 290,
+      shippingEstimated: false,
+      codes: request.sellerCodes[1]
+        ? [{ code: "STORE50", ownerType: "SELLER", sellerProfileId: 1, sellerName: "Store A", status: "APPLIED", discount: 50, shortfall: null, pendingShipping: false }]
+        : [],
+      bestPick: null,
+    }));
+    vi.spyOn(checkoutApi, "checkout").mockRejectedValueOnce(
+      new ApiError({
+        status: 409,
+        code: "PROMO_CHANGED",
+        message: "total changed",
+        details: { grandTotal: 340, code: "STORE50" },
+      }),
+    );
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+    await userEvent.setup().click(purchase());
+    await userEvent.setup().click(
+      await screen.findByRole("button", { name: "เลือกโค้ดอื่น" }),
+    );
+    expect(await screen.findByRole("dialog", { name: "โค้ดร้าน Store A" })).toBeInTheDocument();
+  });
+
+  it("keeps the seller picker open and shows an invalid typed-code error", async () => {
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: 0, grandTotal: 340 }],
+      itemsSubtotal: 300,
+      shippingTotal: 40,
+      sellerDiscountTotal: 0,
+      platformDiscountTotal: 0,
+      grandTotal: 340,
+      shippingEstimated: false,
+      codes: request.sellerCodes[1]
+        ? [{ code: request.sellerCodes[1], ownerType: "SELLER", sellerProfileId: 1, sellerName: "Store A", status: "PROMO_EXPIRED", discount: null, shortfall: null, pendingShipping: false }]
+        : [],
+      bestPick: null,
+    }));
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+    await userEvent.setup().click(
+      screen.getByRole("button", { name: /เลือกหรือกรอกโค้ด/ }),
+    );
+    const dialog = screen.getByRole("dialog", { name: "โค้ดร้าน Store A" });
+    await userEvent.setup().type(within(dialog).getByLabelText("กรอกโค้ดอื่น"), "expired");
+    await userEvent.setup().click(within(dialog).getByRole("button", { name: "ใช้โค้ด" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("โค้ดหมดอายุแล้ว");
+    expect(dialog).toBeInTheDocument();
+  });
+
+  it("renders summary subtotal and shipping from the authoritative preview", async () => {
+    vi.spyOn(checkoutApi, "previewPromotions").mockResolvedValue({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 999, shippingFee: 77, sellerDiscount: 0, platformDiscount: 0, grandTotal: 1076 }],
+      itemsSubtotal: 999,
+      shippingTotal: 77,
+      sellerDiscountTotal: 0,
+      platformDiscountTotal: 0,
+      grandTotal: 1076,
+      shippingEstimated: false,
+      codes: [],
+      bestPick: null,
+    });
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByText("฿999")).toBeInTheDocument();
+    expect(screen.getAllByText("฿77").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿1,076");
   });
 
   it("shows every item grouped by seller, physical quantity, and free shipping", async () => {
@@ -286,7 +430,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
     await user.click(purchase());
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
-    expect(submit.mock.calls[0][0]).toEqual({ cartItemIds: [42], shippingAddressId: 1, shippingOptionBySeller: { 1: 12 } });
+    expect(submit.mock.calls[0][0]).toEqual({ cartItemIds: [42], shippingAddressId: 1, shippingOptionBySeller: { 1: 12 }, platformCode: null, sellerCodes: {}, expectedGrandTotal: 365 });
     expect(submit.mock.calls[0][1]).toMatch(/^[0-9a-f-]{36}$/i);
     expect(mockNavigate).toHaveBeenCalledWith("/payment?orderId=1001", { state: { orderId: 1001, order: orderResponse } });
   });
@@ -444,7 +588,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340"));
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
     expect(quoteSpy).toHaveBeenCalledTimes(3);
@@ -493,5 +637,286 @@ describe("CheckoutPage", () => {
     expect(screen.getByRole("radio", { name: /EMS Store A/ })).toBeChecked();
     await user.click(purchase());
     expect(submit.mock.calls[1][0].shippingOptionBySeller).toEqual({ 1: 12, 2: 23 });
+  });
+
+  it("renders Figma B1 totals, discount colors, and shared Card geometry", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "PEGASUS200", sellerCodes: { 1: "STORE50" } }),
+    );
+    vi.spyOn(checkoutApi, "previewPromotions").mockResolvedValue({
+      sellers: [
+        {
+          sellerProfileId: 1,
+          sellerName: "Store A",
+          itemsSubtotal: 3230,
+          shippingFee: 45,
+          sellerDiscount: 50,
+          platformDiscount: 200,
+          grandTotal: 3025,
+        },
+      ],
+      itemsSubtotal: 3230,
+      shippingTotal: 45,
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 200,
+      grandTotal: 3025,
+      shippingEstimated: false,
+      codes: [
+        {
+          code: "STORE50",
+          ownerType: "SELLER",
+          sellerProfileId: 1,
+          sellerName: "Store A",
+          status: "APPLIED",
+          discount: 50,
+          shortfall: null,
+          pendingShipping: false,
+        },
+        {
+          code: "PEGASUS200",
+          ownerType: "PLATFORM",
+          sellerProfileId: null,
+          sellerName: null,
+          status: "APPLIED",
+          discount: 200,
+          shortfall: null,
+          pendingShipping: false,
+        },
+      ],
+      bestPick: null,
+    });
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿3,025");
+    expect(screen.getByText(/ประหยัดไป ฿250/)).toBeInTheDocument();
+    expect(screen.getAllByText("− ฿50").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("− ฿200").length).toBeGreaterThanOrEqual(1);
+
+    const summaryCard = screen.getByRole("heading", { name: "สรุปคำสั่งซื้อ" }).parentElement;
+    expect(summaryCard).toHaveClass(
+      "rounded-xl",
+      "border",
+      "border-border",
+      "bg-card",
+      "shadow-none",
+    );
+    const sellerDiscount = screen.getByText("ส่วนลดร้าน").parentElement;
+    expect(sellerDiscount?.children[0]).toHaveClass("text-foreground/75");
+    expect(sellerDiscount?.children[1]).toHaveClass("text-teal-700");
+    const platformDiscount = screen.getByText("ส่วนลด Pegasus · PEGASUS200").parentElement;
+    expect(platformDiscount?.children[0]).toHaveClass("text-foreground/75");
+    expect(platformDiscount?.children[1]).toHaveClass("text-primary");
+  });
+
+  it("applies and removes platform code via user interaction", async () => {
+    const user = userEvent.setup();
+    const previewSpy = vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (req) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: req.platformCode ? 50 : 0, grandTotal: req.platformCode ? 290 : 340 }],
+      itemsSubtotal: 300,
+      shippingTotal: 40,
+      sellerDiscountTotal: 0,
+      platformDiscountTotal: req.platformCode ? 50 : 0,
+      grandTotal: req.platformCode ? 290 : 340,
+      shippingEstimated: false,
+      codes: req.platformCode
+        ? [{ code: req.platformCode, ownerType: "PLATFORM", sellerProfileId: null, sellerName: null, status: "APPLIED", discount: 50, shortfall: null, pendingShipping: false }]
+        : [],
+      bestPick: null,
+    }));
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+
+    // Type platform code
+    await user.type(screen.getByLabelText("กรอกโค้ด Pegasus"), "pegasus50");
+    await user.click(screen.getByRole("button", { name: "ใช้โค้ด" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿290");
+    });
+    expect(previewSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ platformCode: "PEGASUS50" }),
+      expect.anything(),
+    );
+
+    // Remove platform code
+    await user.click(screen.getByRole("button", { name: "นำโค้ด Pegasus ออก" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+    });
+  });
+
+  it("recalculates a free-shipping promotion when delivery changes", async () => {
+    sessionStorage.setItem(PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "FREESHIP", sellerCodes: {} }));
+    const previewSpy = vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => {
+      const shippingFee = request.shippingOptionBySeller?.[1] === 12 ? 65 : 40;
+      return {
+        sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300,
+          shippingFee, sellerDiscount: 0, platformDiscount: shippingFee, grandTotal: 300 }],
+        itemsSubtotal: 300, shippingTotal: shippingFee, sellerDiscountTotal: 0,
+        platformDiscountTotal: shippingFee, grandTotal: 300, shippingEstimated: false,
+        codes: [{ code: "FREESHIP", ownerType: "PLATFORM", sellerProfileId: null,
+          sellerName: null, status: "APPLIED", discount: shippingFee,
+          shortfall: null, pendingShipping: false }],
+        bestPick: null,
+      };
+    });
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+
+    await userEvent.setup().click(screen.getByRole("radio", { name: /EMS Store A/ }));
+    await waitFor(() => expect(previewSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ shippingOptionBySeller: { 1: 12 } }), expect.anything(),
+    ));
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+    expect(screen.getAllByText("− ฿65")).toHaveLength(2);
+  });
+
+  it("displays Thai error with seller name when promo is for wrong seller", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "WRONGSHOP", sellerCodes: {} }),
+    );
+    vi.spyOn(checkoutApi, "previewPromotions").mockResolvedValue({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: 0, grandTotal: 340 }],
+      itemsSubtotal: 300,
+      shippingTotal: 40,
+      sellerDiscountTotal: 0,
+      platformDiscountTotal: 0,
+      grandTotal: 340,
+      shippingEstimated: false,
+      codes: [
+        {
+          code: "WRONGSHOP",
+          ownerType: "PLATFORM",
+          sellerProfileId: 1,
+          sellerName: "Store A",
+          status: "PROMO_WRONG_SELLER",
+          discount: null,
+          shortfall: null,
+          pendingShipping: false,
+        },
+      ],
+      bestPick: null,
+    });
+
+    renderCheckout("/checkout?items=42");
+    expect(
+      await screen.findByText("โค้ดนี้เป็นของร้าน Store A — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น"),
+    ).toBeInTheDocument();
+  });
+
+  it("displays Thai shortfall error when min spend is not met and drops invalid code while keeping valid code", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "MINSPEND100", sellerCodes: { 1: "VALIDSHOP" } }),
+    );
+    vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (req) => ({
+      sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: req.sellerCodes[1] ? 30 : 0, platformDiscount: 0, grandTotal: 310 }],
+      itemsSubtotal: 300,
+      shippingTotal: 40,
+      sellerDiscountTotal: 30,
+      platformDiscountTotal: 0,
+      grandTotal: 310,
+      shippingEstimated: false,
+      codes: [
+        ...(req.platformCode
+          ? [
+              {
+                code: "MINSPEND100",
+                ownerType: "PLATFORM" as const,
+                sellerProfileId: null,
+                sellerName: null,
+                status: "PROMO_MIN_SPEND_NOT_MET",
+                discount: null,
+                shortfall: 200,
+                pendingShipping: false,
+              },
+            ]
+          : []),
+        ...(req.sellerCodes[1]
+          ? [
+              {
+                code: "VALIDSHOP",
+                ownerType: "SELLER" as const,
+                sellerProfileId: 1,
+                sellerName: "Store A",
+                status: "APPLIED",
+                discount: 30,
+                shortfall: null,
+                pendingShipping: false,
+              },
+            ]
+          : []),
+      ],
+      bestPick: null,
+    }));
+
+    const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
+    renderCheckout("/checkout?items=42");
+    await ready();
+
+    expect(await screen.findByText("ซื้อสินค้าเพิ่มอีก ฿200 เพื่อใช้โค้ดนี้")).toBeInTheDocument();
+    // Valid shop promo remains active
+    expect(screen.getByText("โค้ดร้าน · VALIDSHOP")).toBeInTheDocument();
+
+    await ready();
+    await userEvent.setup().click(purchase());
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
+    expect(submit.mock.calls[0][0].platformCode).toBeNull();
+    expect(submit.mock.calls[0][0].sellerCodes).toEqual({ 1: "VALIDSHOP" });
+  });
+
+  it("prevents duplicate orders from double clicking submit", async () => {
+    const user = userEvent.setup();
+    let resolveSubmit: (val: CheckoutResponse) => void;
+    const submitPromise = new Promise<CheckoutResponse>((res) => {
+      resolveSubmit = res;
+    });
+    const submit = vi.spyOn(checkoutApi, "checkout").mockReturnValue(submitPromise);
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+
+    const buyBtn = purchase();
+    await user.click(buyBtn);
+    await user.click(buyBtn);
+
+    expect(submit).toHaveBeenCalledTimes(1);
+    resolveSubmit!(orderResponse);
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/payment?orderId=1001", expect.anything()));
+  });
+
+  it("handles preview error and retries successfully", async () => {
+    const user = userEvent.setup();
+    const previewSpy = vi
+      .spyOn(checkoutApi, "previewPromotions")
+      .mockRejectedValueOnce(new ApiError({ status: 500, code: "INTERNAL_ERROR", message: "Server error" }))
+      .mockResolvedValue({
+        sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: 0, grandTotal: 340 }],
+        itemsSubtotal: 300,
+        shippingTotal: 40,
+        sellerDiscountTotal: 0,
+        platformDiscountTotal: 0,
+        grandTotal: 340,
+        shippingEstimated: false,
+        codes: [],
+        bestPick: null,
+      });
+
+    renderCheckout("/checkout?items=42");
+    expect(await screen.findByText("คำนวณส่วนลดและยอดรวมไม่สำเร็จ")).toBeInTheDocument();
+    expect(purchase()).toBeDisabled();
+
+    // Click retry
+    await user.click(screen.getByRole("button", { name: "ลองอีกครั้ง" }));
+    await ready();
+    expect(screen.queryByText("คำนวณส่วนลดและยอดรวมไม่สำเร็จ")).not.toBeInTheDocument();
+    expect(previewSpy).toHaveBeenCalledTimes(2);
   });
 });

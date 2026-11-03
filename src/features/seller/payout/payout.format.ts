@@ -41,6 +41,7 @@ export function payoutDetail(payout: Payout): string {
 
 const walletEntryLabels: Record<string, string> = {
   SELLER_EARNING: "รายได้จากออเดอร์",
+  PROMO_SUBSIDY: "Pegasus ชดเชยส่วนลด",
   REFUND_OUT: "คืนเงินผู้ซื้อ",
   PAYOUT_OUT: "ถอนเงิน",
   ADJUSTMENT: "ปรับยอดโดยแอดมิน",

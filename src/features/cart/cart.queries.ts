@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { cartApi } from "./cart.api";
 import { checkoutApi } from "./checkout.api";
 import type { AddCartItemRequest, CartItemResponse, UpdateCartItemRequest } from "./cart.types";
+import type { PromotionSelection } from "./promotions.types";
 
 export const cartKeys = {
   all: ["cart"] as const,
@@ -26,6 +27,52 @@ export function useShippingQuotes(cartItemIds: number[], context: {
     queryFn: () => checkoutApi.getShippingQuotes(cartItemIds),
     enabled: (context.enabled ?? true) && cartItemIds.length > 0,
     placeholderData: keepPreviousData,
+    retry: false,
+  });
+}
+
+export function useCheckoutPromotionList(cartItemIds: number[], context: {
+  userId?: number;
+  cartId?: number;
+  enabled: boolean;
+  /** Quantities and prices, so applicability is rechecked when they change in the cart. */
+  itemsKey?: unknown;
+}) {
+  return useQuery({
+    queryKey: ["checkout-promotions", context.userId, context.cartId, cartItemIds, context.itemsKey ?? null],
+    queryFn: () => checkoutApi.getPromotions(cartItemIds),
+    enabled: context.enabled,
+    // The cart re-asks on every tick; keep the last list so badges and "collected" don't blink.
+    placeholderData: context.itemsKey === undefined ? undefined : keepPreviousData,
+  });
+}
+
+export function useCheckoutPromotionPreview(context: {
+  cartItemIds: number[];
+  shippingOptionBySeller: Record<number, number>;
+  selection: PromotionSelection;
+  userId?: number;
+  cartId?: number;
+  enabled: boolean;
+  /** Ignore the selection and let the BE return its bestPick (cart, until the buyer picks). */
+  autoPick?: boolean;
+  /** Quantities and prices — the cart re-previews whenever they change. */
+  itemsKey?: unknown;
+  /** Keep showing the last totals while the next preview loads. */
+  keepPrevious?: boolean;
+}) {
+  return useQuery({
+    queryKey: ["checkout-promo-preview", context.userId, context.cartId,
+      context.cartItemIds, context.shippingOptionBySeller, context.selection,
+      context.autoPick ?? false, context.itemsKey ?? null],
+    queryFn: ({ signal }) => checkoutApi.previewPromotions({
+      cartItemIds: context.cartItemIds,
+      shippingOptionBySeller: context.shippingOptionBySeller,
+      ...context.selection,
+      ...(context.autoPick ? { autoPick: true } : {}),
+    }, signal),
+    enabled: context.enabled,
+    placeholderData: context.keepPrevious ? keepPreviousData : undefined,
     retry: false,
   });
 }

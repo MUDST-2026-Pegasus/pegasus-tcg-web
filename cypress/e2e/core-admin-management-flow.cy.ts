@@ -31,6 +31,7 @@ describe('Core Admin Management Flow', () => {
         sparkline: [1, 2, 3, 4, 5, 6, 7, 8],
         averageRatePercent: 3,
       },
+      promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
     },
     monthlySales: [
       { month: '2026-08', singles: 200000, sealed: 50000 },

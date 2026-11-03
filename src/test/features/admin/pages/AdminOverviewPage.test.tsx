@@ -29,6 +29,7 @@ function mockOverviewData(overrides: Partial<AdminOverview["stats"]> = {}): Admi
         sparkline: [1, 2, 3, 4, 5, 6, 7, 8],
         averageRatePercent: 3,
       },
+      promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
       ...overrides,
     },
     monthlySales: [

@@ -1,3 +1,5 @@
+import type { AppliedPromotion } from "@/features/promotions/order.types";
+
 /**
  * ลอกจาก `dto/AdminOrderViews.java` และ `dto/SellerOrderDetailsResponse.java`
  * ของ pegasus-tcg-api ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
@@ -178,6 +180,11 @@ export type SellerOrderDetail = {
   shipments: OrderShipment[];
   statusHistory: OrderStatusChange[];
   sellerName: string | null;
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: AppliedPromotion[];
 };
 
 /** `payment.method` */

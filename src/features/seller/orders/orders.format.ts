@@ -421,10 +421,15 @@ export function profitSummary(detail: SellerOrderDetail): ProfitSummary | null {
   if (order.status === "CANCELLED") {
     return null;
   }
+  const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
   return {
     rows: [
-      { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
-      { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
+      ...(hasPromotionDiscount
+        ? []
+        : [
+            { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
+            { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
+          ]),
       { id: "cost", label: "− ต้นทุนสินค้า", value: formatBaht(roundMoney(detail.costTotal)) },
     ],
     net: formatBaht(roundMoney(order.sellerNetAmount - detail.costTotal)),

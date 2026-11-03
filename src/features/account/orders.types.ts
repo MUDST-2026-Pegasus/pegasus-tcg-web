@@ -1,3 +1,5 @@
+import type { AppliedPromotion } from "@/features/promotions/order.types";
+
 export interface OrderItemDetails {
   id: number;
   listingId: number | null;
@@ -12,6 +14,13 @@ export interface OrderItemDetails {
   imageKey: string | null;
   imageUrl?: string | null;
   unitIds: number[];
+  /** Discount share across the whole line; divide by quantity for per-unit display. */
+  discountAllocated?: number;
+  /** Discount shares across the whole line; divide by quantity for per-unit display. */
+  sellerDiscountAllocated?: number;
+  platformDiscountAllocated?: number;
+  /** API-provided per-unit refund estimate. */
+  refundEstimatePerUnit?: number;
 }
 
 export interface ShipmentDetails {
@@ -31,8 +40,9 @@ export interface OrderStatusHistory {
   sellerOrderId: number;
   fromStatus: string | null;
   toStatus: string;
-  changedAt: string;
-  notes: string | null;
+  changedBy: number | null;
+  createdAt: string;
+  note: string | null;
 }
 
 export interface SellerOrderDetails {
@@ -59,6 +69,12 @@ export interface SellerOrderDetails {
   items: OrderItemDetails[];
   shipments: ShipmentDetails[];
   statusHistory: OrderStatusHistory[];
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface OrderDetails {
@@ -83,6 +99,10 @@ export interface OrderDetails {
   paymentUnderReview?: boolean;
   /** Last moment a paid order can be cancelled; null before payment. */
   cancellableUntil?: string | null;
+  sellerDiscountTotal?: number;
+  platformDiscountTotal?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface PageResponse<T> {

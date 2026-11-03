@@ -113,6 +113,33 @@ describe("SellerPayoutPage", () => {
     expect(screen.getByText("+฿1,500.00")).toBeInTheDocument();
   });
 
+  it("shows Pegasus subsidy postings in the wallet ledger", async () => {
+    vi.mocked(financeApi.wallet).mockResolvedValue({
+      ...mockWallet,
+      entries: {
+        items: [{
+          ...mockWallet.entries.items[0],
+          id: 102,
+          type: "PROMO_SUBSIDY",
+          amount: 49.06,
+          balanceAfter: 5049.06,
+          referenceType: "SELLER_ORDER",
+          referenceId: 41,
+        }],
+        totalItems: 1,
+      },
+    });
+    vi.mocked(financeApi.myPayouts).mockResolvedValue(mockPayouts);
+    vi.mocked(financeApi.payoutAccount).mockResolvedValue(mockAccount);
+
+    const user = userEvent.setup();
+    renderWithProviders(<SellerPayoutPage />, { route: "/seller/payout" });
+    await user.click(await screen.findByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
+
+    expect(await screen.findByText("Pegasus ชดเชยส่วนลด")).toBeInTheDocument();
+    expect(screen.getByText("+฿49.06")).toBeInTheDocument();
+  });
+
   it("opens request payout dialog and submits a withdrawal request", async () => {
     vi.mocked(financeApi.wallet).mockResolvedValue(mockWallet);
     vi.mocked(financeApi.myPayouts).mockResolvedValue(mockPayouts);
