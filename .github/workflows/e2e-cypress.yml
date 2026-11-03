@@ -71,6 +71,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
-          path: cypress/screenshots/
+          path: src/test/cypress/screenshots/
           if-no-files-found: ignore
           retention-days: 7
