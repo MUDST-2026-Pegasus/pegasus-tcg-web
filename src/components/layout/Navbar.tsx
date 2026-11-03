@@ -1,22 +1,48 @@
 import { SearchIcon, ShoppingCartIcon } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation, useSearchParams } from "react-router-dom";
 
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/features/cart/cart.queries";
+import { useGameList } from "@/features/catalog/catalog.queries";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { label: "HOME", to: "/" },
-  { label: "ALL PRODUCTS", to: "/products" },
-  { label: "POKEMON", to: "/pokemon" },
-  { label: "ONE PIECE", to: "/one-piece" },
-] as const;
-
 export function Navbar() {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { data: cart } = useCart();
   const cartQuantity = cart?.totalQuantity ?? 0;
+  const { data: games } = useGameList();
+
+  const pokemonSlug = games?.find((g) => g.code === "POKEMON")?.slug ?? "pokemon-tcg";
+  const onePieceSlug = games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
+
+  const currentGame = searchParams.get("game");
+  const isSearch = location.pathname === "/search";
+
+  const navLinks = [
+    {
+      label: "HOME",
+      to: "/",
+      isActive: location.pathname === "/",
+    },
+    {
+      label: "ALL PRODUCTS",
+      to: "/search",
+      isActive: isSearch && !currentGame,
+    },
+    {
+      label: "POKEMON",
+      to: `/search?game=${encodeURIComponent(pokemonSlug)}`,
+      isActive: isSearch && currentGame === pokemonSlug,
+    },
+    {
+      label: "ONE PIECE",
+      to: `/search?game=${encodeURIComponent(onePieceSlug)}`,
+      isActive: isSearch && currentGame === onePieceSlug,
+    },
+  ];
 
   return (
     <header className="sticky top-0 z-40 h-20 border-b border-border bg-card px-4 py-3.5 backdrop-blur-[6px] lg:px-10">
@@ -31,31 +57,27 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden h-full items-center justify-center gap-8 lg:flex">
-          {NAV_LINKS.map(({ label, to }) => (
+          {navLinks.map(({ label, to, isActive }) => (
             <NavLink
-              key={to}
+              key={label}
               to={to}
-              end={to === "/"}
+              aria-current={isActive ? "page" : undefined}
               className="relative flex h-8 items-center whitespace-nowrap px-2"
             >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className={cn(
-                      "text-sm font-bold uppercase leading-none tracking-wide",
-                      isActive ? "text-primary" : "text-zinc-700",
-                    )}
-                  >
-                    {label}
-                  </span>
-                  <span
-                    className={cn(
-                      "absolute bottom-0 left-0 h-[2px] w-full rounded-full",
-                      isActive ? "bg-primary" : "bg-transparent",
-                    )}
-                  />
-                </>
-              )}
+              <span
+                className={cn(
+                  "text-sm font-bold uppercase leading-none tracking-wide",
+                  isActive ? "text-primary" : "text-zinc-700",
+                )}
+              >
+                {label}
+              </span>
+              <span
+                className={cn(
+                  "absolute bottom-0 left-0 h-[2px] w-full rounded-full",
+                  isActive ? "bg-primary" : "bg-transparent",
+                )}
+              />
             </NavLink>
           ))}
         </nav>

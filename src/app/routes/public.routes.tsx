@@ -11,6 +11,10 @@ import {
 } from "@/components/common/PageSkeletons";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
+import {
+  LegacyGameRedirect,
+  LegacyProductsRedirect,
+} from "@/features/catalog/LegacyRedirects";
 import { HomePageSkeleton } from "@/features/home/components/HomePageSkeleton";
 import { StoreRedirect } from "@/features/store/components/StoreRedirect";
 
@@ -20,7 +24,6 @@ import { StoreRedirect } from "@/features/store/components/StoreRedirect";
  */
 const HomePage = lazyPage(() => import("@/features/home/pages/HomePage").then((m) => m.HomePage), <HomePageSkeleton />);
 
-const ProductListPage = lazyPage(() => import("@/features/catalog/pages/ProductListPage").then((m) => m.ProductListPage), <CatalogPageSkeleton label="กำลังโหลดสินค้า" />);
 const ProductDetailPage = lazyPage(() => import("@/features/catalog/pages/ProductDetailPage").then((m) => m.ProductDetailPage), <DetailPageSkeleton label="กำลังโหลดสินค้า" />);
 const CollectorProfilePage = lazyPage(() => import("@/features/catalog/pages/CollectorProfilePage").then((m) => m.CollectorProfilePage), <ProfilePageSkeleton label="กำลังโหลดโปรไฟล์นักสะสม" />);
 const MarketListingsPage = lazyPage(() => import("@/features/catalog/pages/MarketListingsPage").then((m) => m.MarketListingsPage), <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />);
@@ -57,13 +60,13 @@ export const publicRoutes: RouteObject = {
   children: [
     { index: true, element: <HomePage /> },
 
-    { path: "products", element: <ProductListPage key="all" /> },
+    { path: "products", element: <LegacyProductsRedirect /> },
     { path: "products/:productId", element: <ProductDetailPage /> },
     { path: "collectors/:username", element: <CollectorProfilePage /> },
     { path: "products/:productId/listings", element: <MarketListingsPage /> },
     { path: "listings/:listingId", element: <ListingDetailPage /> },
-    { path: "pokemon", element: <ProductListPage key="pokemon" gameCode="POKEMON" title="Pokémon" /> },
-    { path: "one-piece", element: <ProductListPage key="one-piece" gameCode="ONE_PIECE" title="One Piece" /> },
+    { path: "pokemon", element: <LegacyGameRedirect gameCode="POKEMON" fallbackSlug="pokemon-tcg" /> },
+    { path: "one-piece", element: <LegacyGameRedirect gameCode="ONE_PIECE" fallbackSlug="one-piece-card-game" /> },
     { path: "search", element: <SearchResultsPage /> },
     // ระบบประมูล [TCG-627] — guest ดูได้ บิดต้องล็อกอิน (เช็กตอนกดบิด)
     { path: "auctions", element: <AuctionListPage /> },
