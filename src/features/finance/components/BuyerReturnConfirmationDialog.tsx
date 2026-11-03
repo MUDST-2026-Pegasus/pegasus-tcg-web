@@ -1,19 +1,19 @@
 import { Fragment } from "react";
+import { RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { PromotionDiscountLines } from "@/features/promotions/components/PromotionDiscountLines";
+import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import type { OrderItemDetails, SellerOrderDetails } from "@/features/account/orders.types";
 
-import { returnReasonLabel } from "../after-sales.format";
+import { formatBaht, returnReasonLabel } from "../after-sales.format";
 
 type BuyerReturnConfirmationDialogProps = {
   open: boolean;
@@ -26,8 +26,6 @@ type BuyerReturnConfirmationDialogProps = {
   isSubmitting: boolean;
   onConfirm: () => void;
 };
-
-const money = (amount: number) => `฿${amount.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 function returnDeadline(value: string | null) {
   if (!value) return null;
@@ -47,6 +45,11 @@ function selectedItems(items: OrderItemDetails[], quantities: Record<number, num
     .map((item) => ({ item, quantity: quantities[item.id] }));
 }
 
+function perUnitAllocation(amount: number | null | undefined, lineQuantity: number): number {
+  if (!amount || lineQuantity <= 0) return 0;
+  return Math.round((amount / lineQuantity) * 100) / 100;
+}
+
 export function BuyerReturnConfirmationDialog({
   open,
   onOpenChange,
@@ -63,44 +66,17 @@ export function BuyerReturnConfirmationDialog({
     || (order.discountAmount ?? 0) > 0
     || selected.some(({ item }) => (item.sellerDiscountAllocated ?? 0) > 0 || (item.platformDiscountAllocated ?? 0) > 0);
   const oneItem = selected.length === 1 ? selected[0].item : null;
-  const title = oneItem
+  const title = hasPromotions && oneItem
     ? `ขอคืน ${oneItem.productName}${oneItem.variantLabel ? ` · ${oneItem.variantLabel}` : ""}?`
     : "ยืนยันคำขอคืนสินค้า";
   const deadline = returnDeadline(order.autoCompleteAt);
-
-  if (!hasPromotions) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>ยืนยันคำขอคืนสินค้า</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-2 text-sm">
-            {selected.map(({ item, quantity }) => (
-              <div key={item.id} className="rounded-lg border p-3">
-                <strong>{item.productName} × {quantity}</strong>
-              </div>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
-              กลับไปแก้ไข
-            </Button>
-            <Button type="button" disabled={isSubmitting || selected.length === 0} onClick={onConfirm}>
-              ยืนยัน
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden rounded-xl p-0 sm:max-w-[440px]">
         <div className="flex flex-col gap-3 px-6 pb-5 pt-6">
           <div className="flex size-10 items-center justify-center rounded-[10px] bg-blue-50">
-            <img src="/images/promotions/promotion-return.svg" alt="" />
+            <RotateCcw aria-hidden="true" className="size-5 text-primary" />
           </div>
           <div className="flex flex-col gap-1">
             <DialogTitle className="text-base font-bold text-foreground sm:text-lg">{title}</DialogTitle>
@@ -118,16 +94,16 @@ export function BuyerReturnConfirmationDialog({
             ))}
           </div>
 
-          {selected.some(({ item }) => (item.discountAllocated ?? 0) > 0) || (order.promotions?.length ?? 0) > 0 ? (
+          {hasPromotions && (
             <p className="text-[11px] leading-relaxed text-muted-foreground">
               ส่วนลดคิดตามสัดส่วนราคาสินค้าในคำสั่งซื้อ · โค้ดไม่ได้คืนสิทธิ์ · ยอดจริงยืนยันหลังร้านรับของคืน
             </p>
-          ) : null}
+          )}
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-foreground" htmlFor="buyer-return-reason">เหตุผล *</label>
             <Select items={reasons.map((value) => ({ value, label: returnReasonLabel(value) }))} value={reason} onValueChange={(value) => onReasonChange(value ?? reasons[0])}>
-              <SelectTrigger id="buyer-return-reason" aria-label="เหตุผลการคืนสินค้า" className="w-full rounded-lg border-border bg-background">
+              <SelectTrigger id="buyer-return-reason" aria-label="สาเหตุคืนสินค้า" className="w-full rounded-lg border-border bg-background">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -163,34 +139,39 @@ function ReturnItemSummary({
   quantity: number;
   promotions: SellerOrderDetails["promotions"];
 }) {
-  const hasAllocatedDiscount = (item.discountAllocated ?? 0) > 0 || (promotions?.length ?? 0) > 0;
-  const moneyFormatter = (amount: number) => money(amount);
+  const hasAllocatedDiscount = (item.discountAllocated ?? 0) > 0
+    || (item.sellerDiscountAllocated ?? 0) > 0
+    || (item.platformDiscountAllocated ?? 0) > 0
+    || (promotions?.length ?? 0) > 0;
   const labels = {
-    SELLER: `ส่วนลดร้านที่ปันให้ชิ้นนี้`,
-    PLATFORM: `ส่วนลด Pegasus ที่ปันให้ชิ้นนี้`,
+    SELLER: "ส่วนลดร้านต่อใบ",
+    PLATFORM: "ส่วนลด Pegasus ต่อใบ",
   };
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3 text-xs">
         <span className="min-w-0 font-medium text-foreground">{item.productName} × {quantity}</span>
-        {hasAllocatedDiscount && <span className="shrink-0 font-semibold tabular-nums">{money(item.unitPrice)}</span>}
+        {hasAllocatedDiscount && (
+          <span className="shrink-0 font-semibold tabular-nums">{quantity} × {formatBaht(item.unitPrice)}</span>
+        )}
       </div>
       {hasAllocatedDiscount && (
         <>
           <PromotionDiscountLines
-            sellerDiscount={item.sellerDiscountAllocated}
-            platformDiscount={item.platformDiscountAllocated}
+            sellerDiscount={perUnitAllocation(item.sellerDiscountAllocated, item.quantity)}
+            platformDiscount={perUnitAllocation(item.platformDiscountAllocated, item.quantity)}
             promotions={promotions}
-            formatAmount={moneyFormatter}
+            formatAmount={formatBaht}
             labels={labels}
+            colorScheme="return"
             className="flex flex-col gap-2"
           />
           <Separator />
           <div className="flex items-center justify-between gap-3 text-[13px] font-semibold">
             <span>ยอดคืนโดยประมาณ{quantity > 1 ? "ต่อใบ" : ""}</span>
             <span className="shrink-0 text-lg font-black tabular-nums text-foreground">
-              {item.refundEstimatePerUnit == null ? "—" : money(item.refundEstimatePerUnit)}
+              {item.refundEstimatePerUnit == null ? "—" : formatBaht(item.refundEstimatePerUnit)}
             </span>
           </div>
         </>

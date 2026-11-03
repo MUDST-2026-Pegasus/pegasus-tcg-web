@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ordersApi } from "@/features/account/orders.api";
 import { financeApi } from "@/features/finance/finance.api";
-import { PromotionDiscountLines } from "@/features/promotions/components/PromotionDiscountLines";
+import { checkoutMoney } from "@/features/cart/checkout.format";
+import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import { paymentMethodName, paymentSuccessDate } from "../payment-success.format";
 import "./payment-success.css";
 
@@ -50,7 +51,6 @@ export function PaymentSuccessPage() {
   const hasOrderPromotions = (order.data?.discountTotal ?? 0) > 0
     || (order.data?.promotions?.length ?? 0) > 0
     || order.data?.sellerOrders.some((seller) => (seller.sellerDiscount ?? 0) > 0 || (seller.platformDiscount ?? 0) > 0) === true;
-  const formatPromotionAmount = (value: number) => `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const heading = loading ? "Checking Payment" : failedRequest ? "Unable to Verify Payment"
     : paid ? "Payment Successful" : terminal ? "Payment Not Completed" : "Payment Under Review";
   const statusMessage = !validRequest ? "ไม่พบข้อมูลคำสั่งซื้อ กรุณาเปิดจากประวัติคำสั่งซื้อ"
@@ -92,7 +92,7 @@ export function PaymentSuccessPage() {
                     sellerDiscount={order.data.sellerDiscountTotal}
                     platformDiscount={order.data.platformDiscountTotal}
                     promotions={order.data.promotions}
-                    formatAmount={formatPromotionAmount}
+                    formatAmount={checkoutMoney}
                     asDefinitionList
                     rowClassName="payment-success-row"
                   />
@@ -100,12 +100,12 @@ export function PaymentSuccessPage() {
                 {hasOrderPromotions && order.data?.sellerOrders.map((seller) => (
                   <div key={seller.id} className="payment-success-row">
                     <dt>ลูกค้าจ่ายร้านนี้ · {seller.sellerName || seller.sellerOrderNumber}</dt>
-                    <dd>{formatPromotionAmount(seller.grandTotal)}</dd>
+                    <dd>{checkoutMoney(seller.grandTotal)}</dd>
                   </div>
                 ))}
                 {hasOrderPromotions && order.data && order.data.discountTotal > 0
                   && order.data.sellerDiscountTotal == null && order.data.platformDiscountTotal == null && (
-                    <div className="payment-success-row"><dt>ส่วนลด</dt><dd>−{formatPromotionAmount(order.data.discountTotal)}</dd></div>
+                    <div className="payment-success-row"><dt>ส่วนลด</dt><dd>−{checkoutMoney(order.data.discountTotal)}</dd></div>
                   )}
                 <div className="payment-success-row payment-success-total"><dt>Total Amount</dt><dd>{amountText}</dd></div>
               </dl>

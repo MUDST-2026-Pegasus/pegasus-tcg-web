@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TextLinesSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import type { SellerOrderDetails } from "@/features/account/orders.types";
@@ -17,7 +16,6 @@ import { BuyerReturnConfirmationDialog } from "./components/BuyerReturnConfirmat
 import { returnReasonLabel, returnStatusLabel } from "./after-sales.format";
 
 const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "COUNTERFEIT", "OTHER"];
-const reasonItems = reasons.map((value) => ({ value, label: returnReasonLabel(value) }));
 
 export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const cache = useQueryClient();
@@ -35,9 +33,6 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
   const canReturn = ["SHIPPED", "DELIVERED"].includes(order.status)
     && !!order.autoCompleteAt
     && Date.parse(order.autoCompleteAt) > returns.dataUpdatedAt;
-  const hasPromotions = (order.promotions?.length ?? 0) > 0
-    || (order.discountAmount ?? 0) > 0
-    || order.items.some((item) => (item.sellerDiscountAllocated ?? 0) > 0 || (item.platformDiscountAllocated ?? 0) > 0);
 
   async function act(action: () => Promise<unknown>, success: string) {
     setBusy(true);
@@ -115,12 +110,6 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       {canReturn && returns.data?.length === 0 && (
         <div className="space-y-3 rounded border p-3">
           <p className="font-medium">ขอคืนสินค้า (ก่อนสิ้นสุดระยะคืนสินค้า)</p>
-          {!hasPromotions && (
-            <Select items={reasonItems} value={reason} onValueChange={(value) => setReason(value ?? reasons[0])}>
-              <SelectTrigger aria-label="สาเหตุคืนสินค้า" className="w-full rounded-md border-border bg-background"><SelectValue /></SelectTrigger>
-              <SelectContent><SelectGroup>{reasonItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectGroup></SelectContent>
-            </Select>
-          )}
           <Input aria-label="รายละเอียดการคืน" placeholder="รายละเอียด" value={description} onChange={(event) => setDescription(event.target.value)} />
           {order.items.map((item) => (
             <label key={item.id} className="flex items-center gap-2">

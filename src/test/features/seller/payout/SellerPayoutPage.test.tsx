@@ -136,7 +136,7 @@ describe("SellerPayoutPage", () => {
     renderWithProviders(<SellerPayoutPage />, { route: "/seller/payout" });
     await user.click(await screen.findByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
 
-    expect(await screen.findByText("PROMO_SUBSIDY · Pegasus จ่ายส่วนลดแทน")).toBeInTheDocument();
+    expect(await screen.findByText("Pegasus ชดเชยส่วนลด")).toBeInTheDocument();
     expect(screen.getByText("+฿49.06")).toBeInTheDocument();
   });
 

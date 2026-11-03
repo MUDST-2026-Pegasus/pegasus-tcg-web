@@ -82,7 +82,7 @@ export function OrderHistoryPage() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders();
+  const { data: ordersData, isLoading, error, refetch } = useBuyerOrders(0, 50, true);
   const refunds = useBuyerRefunds();
 
   const scrollPosRef = useRef(0);
@@ -115,20 +115,23 @@ export function OrderHistoryPage() {
   }, [ordersData]);
 
   const previousStatuses = useRef<Map<number, string>>(new Map());
-  const timeoutNotices = useRef(new Set<number>());
   useEffect(() => {
     if (!ordersData) return;
     for (const order of orders) {
-      if (order.status !== "CANCELLED" || timeoutNotices.current.has(order.id)) continue;
-      const timedOut = order.sellerOrders.some((seller) => seller.cancelReason?.includes("Cancelled automatically: payment was not received in time"));
-      if (!timedOut) continue;
       const previousStatus = previousStatuses.current.get(order.id);
-      const restoredPromoLoadedAfterExpiry = previousStatus === undefined
-        && order.promotionsRestoredOnCancel
-        && (order.promotions?.length ?? 0) > 0;
-      if (previousStatus !== "PENDING_PAYMENT" && !restoredPromoLoadedAfterExpiry) continue;
-      timeoutNotices.current.add(order.id);
-      const codeNames = order.promotions?.map((promotion) => promotion.code).filter(Boolean) ?? [];
+      const systemTimedOut = order.sellerOrders.some((seller) =>
+        seller.statusHistory?.some((change) =>
+          change.changedBy === null
+          && change.fromStatus === "PENDING_PAYMENT"
+          && change.toStatus === "CANCELLED",
+        ) ?? false,
+      );
+      if (order.status !== "CANCELLED" || previousStatus !== "PENDING_PAYMENT" || !systemTimedOut) continue;
+      const codeNames = (order.promotions?.length
+        ? order.promotions
+        : order.sellerOrders.flatMap((seller) => seller.promotions ?? []))
+        .map((promotion) => promotion.code)
+        .filter(Boolean);
       toast.add({
         title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
         description: order.promotionsRestoredOnCancel && codeNames.length

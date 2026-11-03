@@ -142,14 +142,13 @@ describe("SellerOrderDetailPage", () => {
 
     renderWithRoute("/seller/orders/501");
 
-    expect(await screen.findByText("โค้ดร้าน MINMIN50 · ร้านออก")).toBeInTheDocument();
-    expect(screen.getByText("โค้ด Pegasus PEGASUS10 · Pegasus ออก")).toBeInTheDocument();
+    expect(await screen.findByText("ส่วนลดร้าน · MINMIN50")).toBeInTheDocument();
+    expect(screen.getByText("ส่วนลด Pegasus · PEGASUS10")).toBeInTheDocument();
     expect(screen.getByText("ลูกค้าจ่าย")).toBeInTheDocument();
-    expect(screen.getByText("ฐานคอมมิชชั่น")).toBeInTheDocument();
-    expect(screen.getByText("+ Pegasus จ่ายแทน")).toBeInTheDocument();
+    expect(screen.getByText("คอมมิชชั่น 5% ของ ฿780")).toBeInTheDocument();
+    expect(screen.getByText("Pegasus ชดเชยส่วนลด")).toBeInTheDocument();
     expect(screen.getByText("ร้านได้รับ")).toBeInTheDocument();
     expect(screen.getByText("฿786")).toBeInTheDocument();
-    expect(screen.getByText(/โค้ด Pegasus ไม่ลดรายได้ร้าน/)).toBeInTheDocument();
   });
 
   it("renders not found state when order ID is not numeric or not found", async () => {

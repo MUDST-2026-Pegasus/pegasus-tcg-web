@@ -340,13 +340,11 @@ describe("OrderHistoryPage", () => {
     expect(confirmSpy).not.toHaveBeenCalled();
 
     // Verify custom modal is opened
-    expect(screen.getByRole("heading", { name: /cancel this order\?/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/this action cannot be undone and reserved items will be released/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ยกเลิกคำสั่งซื้อนี้?" })).toBeInTheDocument();
+    expect(screen.getByText(/ยังไม่ได้ชำระเงิน/)).toBeInTheDocument();
 
-    // Click "Confirm Cancel" inside the custom dialog
-    const confirmCancelBtn = screen.getByRole("button", { name: /confirm cancel/i });
+    // Click the confirmation action inside the custom dialog
+    const confirmCancelBtn = screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" });
     await userEvent.click(confirmCancelBtn);
 
     await waitFor(() => {
@@ -367,7 +365,7 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     await userEvent.click(screen.getByRole("button", { name: /cancel order/i }));
-    await userEvent.click(screen.getByRole("button", { name: /confirm cancel/i }));
+    await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
 
     expect(await screen.findByRole("textbox", { name: "เลขบัญชีสำหรับคืนเงิน 11" })).toBeInTheDocument();
   });

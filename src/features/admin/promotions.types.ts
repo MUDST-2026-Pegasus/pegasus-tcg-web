@@ -1,4 +1,5 @@
 import type { PageResponse } from "@/lib/api";
+import type { PromotionOwnerType } from "@/features/promotions/order.types";
 
 /**
  * โปรโมชั่นฝั่งแอดมิน — ตรงกับ `dto/AdminPromotionViews.java` และ `AdminPromotionRequest.java`
@@ -6,7 +7,7 @@ import type { PageResponse } from "@/lib/api";
  */
 
 export type PromotionStatus = "ACTIVE" | "SCHEDULED" | "PAUSED" | "EXPIRED" | "USED_UP";
-export type PromotionOwnerType = "PLATFORM" | "SELLER";
+export type { PromotionOwnerType } from "@/features/promotions/order.types";
 export type PromotionDiscountType = "PERCENT" | "FIXED" | "FREE_SHIPPING";
 export type PromotionScopeType = "ALL" | "GAME" | "CATEGORY";
 export type PromotionVisibility = "PUBLIC" | "PRIVATE";

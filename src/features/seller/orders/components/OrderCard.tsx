@@ -22,7 +22,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { PromotionOrderIndicator } from "@/features/promotions/components/PromotionOrderIndicator";
+import { PromotionOrderIndicator } from "@/features/promotions/PromotionOrderIndicator";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 

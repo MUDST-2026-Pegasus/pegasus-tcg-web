@@ -11,7 +11,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PromotionOrderTable } from "@/features/promotions/components/PromotionOrderTable";
+import { PromotionOrderTable } from "@/features/promotions/PromotionOrderTable";
 
 import { formatBaht } from "../catalog.format";
 import {
@@ -119,7 +119,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           </ul>
         </Section>
 
-        <Section title={hasPromotionDiscount ? "ส่วนลดตามร้าน" : "ยอดเงิน"}>
+        <Section title="ยอดเงินคำสั่งซื้อ">
           {hasPromotionDiscount ? (
             <PromotionOrderTable
               rows={[{
@@ -128,6 +128,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
                 itemsSubtotal: order.itemsSubtotal,
                 sellerDiscount: order.sellerDiscount ?? 0,
                 platformDiscount: order.platformDiscount ?? 0,
+                shippingFee: order.shippingFee,
                 grandTotal: order.grandTotal,
                 commissionAmount: order.commissionAmount,
                 sellerNetAmount: order.sellerNetAmount,

@@ -33,7 +33,7 @@ describe("CancelOrderConfirmationDialog", () => {
   });
 
   it("explains that a paid order does not restore its code", () => {
-    renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, status: "PAID", promotionsRestoredOnCancel: false, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "CONSUMED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
+    renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={{ ...mockOrder, status: "PAID", paidAt: "2026-11-01T10:00:00Z", promotionsRestoredOnCancel: false, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 100, status: "CONSUMED" }] }} onConfirm={vi.fn()} isCancelling={false} />);
     expect(screen.getByText(/จะไม่ได้คืนสิทธิ์ เพราะชำระเงินแล้ว/)).toBeInTheDocument();
   });
 
@@ -42,6 +42,7 @@ describe("CancelOrderConfirmationDialog", () => {
     const order = {
       ...mockOrder,
       status: "PAID",
+      paidAt: "2026-11-01T10:00:00Z",
       grandTotal: 775.94,
       sellerDiscountTotal: 50,
       platformDiscountTotal: 49.06,
@@ -54,7 +55,7 @@ describe("CancelOrderConfirmationDialog", () => {
     } as OrderDetails;
     renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={order} onConfirm={onConfirm} isCancelling={false} />);
 
-    expect(screen.getByText("ยอดที่จ่ายให้ร้านนี้")).toBeInTheDocument();
+    expect(screen.getByText("ยอดที่ชำระ")).toBeInTheDocument();
     expect(screen.getAllByText("฿775.94")).toHaveLength(2);
     expect(screen.getByText(/MINMIN50/)).toBeInTheDocument();
     expect(screen.getByText("PEGASUS10")).toBeInTheDocument();
@@ -75,13 +76,11 @@ describe("CancelOrderConfirmationDialog", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: /cancel this order\?/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/this action cannot be undone and reserved items will be released/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ยกเลิกคำสั่งซื้อนี้?" })).toBeInTheDocument();
+    expect(screen.getByText(/ยังไม่ได้ชำระเงิน/)).toBeInTheDocument();
     expect(screen.getByText(/ORD-2026-0042/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /keep order/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /confirm cancel/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ไม่ยกเลิก" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" })).toBeInTheDocument();
     expect(screen.queryByText(/โค้ดที่ใช้กับคำสั่งซื้อนี้/)).not.toBeInTheDocument();
   });
 
@@ -97,7 +96,7 @@ describe("CancelOrderConfirmationDialog", () => {
       />,
     );
 
-    const keepButton = screen.getByRole("button", { name: /keep order/i });
+    const keepButton = screen.getByRole("button", { name: "ไม่ยกเลิก" });
     await userEvent.click(keepButton);
 
     expect(handleOpenChange).toHaveBeenCalledWith(false);
@@ -115,7 +114,7 @@ describe("CancelOrderConfirmationDialog", () => {
       />,
     );
 
-    const confirmButton = screen.getByRole("button", { name: /confirm cancel/i });
+    const confirmButton = screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" });
     await userEvent.click(confirmButton);
 
     expect(handleConfirm).toHaveBeenCalled();
@@ -132,10 +131,10 @@ describe("CancelOrderConfirmationDialog", () => {
       />,
     );
 
-    const keepButton = screen.getByRole("button", { name: /keep order/i });
+    const keepButton = screen.getByRole("button", { name: "ไม่ยกเลิก" });
     expect(keepButton).toBeDisabled();
 
-    const cancellingButton = screen.getByRole("button", { name: /cancelling\.\.\./i });
+    const cancellingButton = screen.getByRole("button", { name: "กำลังยกเลิก..." });
     expect(cancellingButton).toBeDisabled();
   });
 });

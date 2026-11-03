@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
-import { PromotionDiscountLines } from "@/features/promotions/components/PromotionDiscountLines";
+import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import type { OrderDetails } from "../orders.types";
 import {
   confirmableSellerOrders,

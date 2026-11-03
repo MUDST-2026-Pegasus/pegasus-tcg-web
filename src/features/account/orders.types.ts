@@ -1,3 +1,5 @@
+import type { AppliedPromotion } from "@/features/promotions/order.types";
+
 export interface OrderItemDetails {
   id: number;
   listingId: number | null;
@@ -12,13 +14,14 @@ export interface OrderItemDetails {
   imageKey: string | null;
   imageUrl?: string | null;
   unitIds: number[];
+  /** Discount share across the whole line; divide by quantity for per-unit display. */
   discountAllocated?: number;
+  /** Discount shares across the whole line; divide by quantity for per-unit display. */
   sellerDiscountAllocated?: number;
   platformDiscountAllocated?: number;
+  /** API-provided per-unit refund estimate. */
   refundEstimatePerUnit?: number;
 }
-
-export interface AppliedPromotion { code: string; ownerType: "PLATFORM" | "SELLER"; sellerProfileId: number | null; amount: number; status: string }
 
 export interface ShipmentDetails {
   id: number;
@@ -37,8 +40,9 @@ export interface OrderStatusHistory {
   sellerOrderId: number;
   fromStatus: string | null;
   toStatus: string;
-  changedAt: string;
-  notes: string | null;
+  changedBy: number | null;
+  createdAt: string;
+  note: string | null;
 }
 
 export interface SellerOrderDetails {

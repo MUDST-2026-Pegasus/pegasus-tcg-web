@@ -330,7 +330,7 @@ describe("payment, timeline and profit", () => {
     expect(profitSummary(detail({ status: "CANCELLED" }))).toBeNull();
   });
 
-  it("uses the API's O1 promotion allocations for the seller money summary", () => {
+  it("keeps O1 order totals in the money card instead of the profit summary", () => {
     const summary = profitSummary(detail({
       itemsSubtotal: 830, shippingFee: 45, sellerDiscount: 50, platformDiscount: 49.06,
       platformSubsidy: 49.06, commissionBase: 780, grandTotal: 775.94,
@@ -340,23 +340,9 @@ describe("payment, timeline and profit", () => {
         { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
       ],
     }));
-    expect(summary?.promotionBreakdown).toEqual({
-      sellerDiscount: 50,
-      platformDiscount: 49.06,
-      promotions: [
-        { code: "MINMIN50", ownerType: "SELLER", amount: 50 },
-        { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
-      ],
-    });
-    expect(summary?.rows).toEqual(expect.arrayContaining([
-      { id: "items", label: "ยอดสินค้า", value: "฿830" },
-      { id: "shipping", label: "ค่าส่ง", value: "฿45" },
-      { id: "buyer-paid", label: "ลูกค้าจ่าย", value: "฿775.94" },
-      { id: "subsidy", label: "+ Pegasus จ่ายแทน", value: "฿49.06" },
-      { id: "commission-base", label: "ฐานคอมมิชชั่น", value: "฿780" },
-      { id: "commission", label: "− ค่าคอมมิชชั่น", value: "฿39" },
-      { id: "seller-net", label: "ร้านได้รับ", value: "฿786" },
-    ]));
+    expect(summary?.rows).toEqual([
+      { id: "cost", label: "− ต้นทุนสินค้า", value: "฿980" },
+    ]);
     expect(summary?.rows.some((row) => row.id === "sales")).toBe(false);
   });
 

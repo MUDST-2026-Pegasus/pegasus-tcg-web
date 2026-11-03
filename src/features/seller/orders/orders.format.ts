@@ -409,11 +409,6 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
 export type ProfitSummary = {
   rows: { id: string; label: string; value: string }[];
   net: string;
-  promotionBreakdown?: {
-    sellerDiscount: number;
-    platformDiscount: number;
-    promotions: NonNullable<SellerOrderDetails["promotions"]>;
-  };
 };
 
 /**
@@ -426,28 +421,18 @@ export function profitSummary(detail: SellerOrderDetail): ProfitSummary | null {
   if (order.status === "CANCELLED") {
     return null;
   }
+  const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
   return {
     rows: [
-      ...(!order.sellerDiscount && !order.platformDiscount ? [{ id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) }] : []),
-      ...(order.sellerDiscount || order.platformDiscount ? [
-        { id: "items", label: "ยอดสินค้า", value: formatBaht(order.itemsSubtotal) },
-        { id: "shipping", label: "ค่าส่ง", value: formatBaht(order.shippingFee) },
-        { id: "buyer-paid", label: "ลูกค้าจ่าย", value: formatBaht(order.grandTotal) },
-        ...(order.platformSubsidy ? [{ id: "subsidy", label: "+ Pegasus จ่ายแทน", value: formatBaht(order.platformSubsidy) }] : []),
-        { id: "commission-base", label: "ฐานคอมมิชชั่น", value: formatBaht(order.commissionBase ?? order.itemsSubtotal) },
-      ] : []),
-      { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
-      ...(order.sellerDiscount || order.platformDiscount ? [{ id: "seller-net", label: "ร้านได้รับ", value: formatBaht(order.sellerNetAmount) }] : []),
+      ...(hasPromotionDiscount
+        ? []
+        : [
+            { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
+            { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
+          ]),
       { id: "cost", label: "− ต้นทุนสินค้า", value: formatBaht(roundMoney(detail.costTotal)) },
     ],
     net: formatBaht(roundMoney(order.sellerNetAmount - detail.costTotal)),
-    ...((order.sellerDiscount || 0) > 0 || (order.platformDiscount || 0) > 0 ? {
-      promotionBreakdown: {
-        sellerDiscount: order.sellerDiscount ?? 0,
-        platformDiscount: order.platformDiscount ?? 0,
-        promotions: order.promotions ?? [],
-      },
-    } : {}),
   };
 }
 

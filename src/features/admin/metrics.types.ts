@@ -43,7 +43,6 @@ export type OverviewStats = {
   newSellers: CountStat;
   activeListings: ActiveListingsStat;
   commission: CommissionStat;
-  promotionCost?: MoneyStat;
 };
 
 export type MonthlySales = {
