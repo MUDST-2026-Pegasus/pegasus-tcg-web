@@ -40,6 +40,7 @@ describe('Core Admin Portal Flow', () => {
       newSellers: { value: 12, previous: 8, sparkline: [1, 1, 2, 1, 2, 2, 1, 2] },
       activeListings: { value: 450, sellerCount: 35 },
       commission: { value: 12500, previous: 10000, sparkline: [1, 2, 1, 2, 1, 2, 1, 2], averageRatePercent: 5.0 },
+      promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
     },
     monthlySales: [
       { month: '2026-09', singles: 180000, sealed: 20000 },
