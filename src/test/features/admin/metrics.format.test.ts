@@ -33,6 +33,7 @@ function overview(overrides: Partial<AdminOverview["stats"]> = {}): AdminOvervie
         sparkline: [1, 2, 3, 4, 5, 6, 7, 8],
         averageRatePercent: 3,
       },
+      promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
       ...overrides,
     },
     monthlySales: [],
@@ -120,6 +121,18 @@ describe("statCards", () => {
       }),
     );
     expect(cards[3].footnote).toBe("ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้");
+  });
+
+  it("adds what Pegasus paid shops back for its codes to the commission card", () => {
+    const cards = statCards(
+      overview({ promotionCost: { value: 1250.5, previous: 0, sparkline: [] } }),
+    );
+    expect(cards[3].footnote).toContain("ชดเชยโค้ด Pegasus");
+    expect(cards[3].footnote).toContain("1,250");
+  });
+
+  it("leaves the commission note alone when no Pegasus code was paid for", () => {
+    expect(statCards(overview())[3].footnote).toBe("เฉลี่ย 3.0% ของยอดขายที่สำเร็จ");
   });
 });
 
