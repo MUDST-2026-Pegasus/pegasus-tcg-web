@@ -1,6 +1,6 @@
 import type { ProfitSummary } from "../../orders.format";
 
-/** การ์ดพื้นดำสรุปกำไรของออเดอร์ — ยอดขายรวมค่าจัดส่งที่ผู้ซื้อจ่ายแล้ว */
+/** การ์ดพื้นดำสรุปกำไรหลังหักต้นทุนสินค้า */
 export function OrderProfitCard({ rows, net }: ProfitSummary) {
   return (
     <div className="flex w-full flex-col gap-3.5 rounded-xl bg-foreground p-5">
@@ -9,11 +9,7 @@ export function OrderProfitCard({ rows, net }: ProfitSummary) {
       {rows.map((row, index) => (
         <div key={row.id} className="flex items-center justify-between gap-2">
           <p className="text-xs text-gray-400">{row.label}</p>
-          <p
-            className={
-              index === 0 ? "text-xs font-medium text-white" : "text-xs font-medium text-gray-400"
-            }
-          >
+          <p className={index === 0 ? "text-xs font-medium text-white" : "text-xs font-medium text-gray-400"}>
             {row.value}
           </p>
         </div>

@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/toast";
 import { checkoutMoney, formatPromotionError } from "@/features/cart/checkout.format";
 import { getErrorMessage, isApiError } from "@/lib/api";
 import type { ClaimableCode, PromotionTerms } from "./claim.types";
+import type { PromotionOwnerType } from "./order.types";
 
 export type ClaimTicketState = "claimable" | "claimed" | "soldOut";
 
@@ -103,7 +104,7 @@ export async function copyPromotionCode(code: string) {
 
 /** "ลด 10% สูงสุด ฿200 · ขั้นต่ำ ฿500 · เฉพาะ CardVault BKK" — W1's second line. */
 export function walletRuleSummary(code: {
-  ownerType: "PLATFORM" | "SELLER";
+  ownerType: PromotionOwnerType;
   shop: { name: string } | null;
   discountType: "PERCENT" | "FIXED" | "FREE_SHIPPING";
   discountValue: number;

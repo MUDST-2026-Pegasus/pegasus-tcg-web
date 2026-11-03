@@ -52,6 +52,7 @@ import { OrderProfitCard } from "./OrderProfitCard";
 import { OrderTimelineCard } from "./OrderTimelineCard";
 import { PackingListCard } from "./PackingListCard";
 import { PaymentCard } from "./PaymentCard";
+import { PromotionOrderMoneyCard } from "./PromotionOrderMoneyCard";
 import { ShippingInfoCard } from "./ShippingInfoCard";
 
 type OrderDetailContentProps = {
@@ -100,6 +101,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
   const shippable = canShip(order.status);
   const tracking = trackingNumber.trim();
   const profit = profitSummary(detail);
+  const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
   const busy = accept.isPending || ship.isPending;
 
   function handleTogglePacked(id: number) {
@@ -264,6 +266,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             note={summary.buyerNote}
           />
           <PaymentCard state={paymentStateOf(order.status, summary.paidAt)} rows={paymentRows(detail.payment)} />
+          {hasPromotionDiscount && <PromotionOrderMoneyCard order={order} />}
           {profit ? <OrderProfitCard {...profit} /> : null}
         </div>
       </div>

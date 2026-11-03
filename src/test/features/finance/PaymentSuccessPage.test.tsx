@@ -45,6 +45,36 @@ describe("PaymentSuccessPage", () => {
     expect(icon).toHaveAttribute("src", "/images/payment/success-check.svg");
   });
 
+  it("shows promotion owners and each seller-order payable amount after payment", async () => {
+    vi.mocked(ordersApi.getOrder).mockResolvedValue({
+      ...order,
+      itemsSubtotal: 3230,
+      shippingTotal: 45,
+      discountTotal: 250,
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 200,
+      grandTotal: 3025,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER", sellerProfileId: 12, amount: 50, status: "CONSUMED" },
+        { code: "PEGASUS10", ownerType: "PLATFORM", sellerProfileId: null, amount: 200, status: "CONSUMED" },
+      ],
+      sellerOrders: [
+        { id: 12, sellerName: "minmin_tcg", sellerOrderNumber: "PGS-1-S12", grandTotal: 775.94, sellerDiscount: 50, platformDiscount: 49.06, items: [{ id: 1, productName: "Gengar", quantity: 1 }] },
+        { id: 13, sellerName: "CardVault BKK", sellerOrderNumber: "PGS-1-S13", grandTotal: 2249.06, sellerDiscount: 0, platformDiscount: 150.94, items: [{ id: 2, productName: "Pikachu", quantity: 2 }] },
+      ],
+    } as OrderDetails);
+    vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, amount: 3025 });
+
+    renderSuccess();
+
+    expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
+    expect(screen.getByText(/ส่วนลดร้าน · MINMIN50/)).toBeInTheDocument();
+    expect(screen.getByText(/ส่วนลด Pegasus · PEGASUS10/)).toBeInTheDocument();
+    expect(screen.getByText("ลูกค้าจ่ายร้านนี้ · minmin_tcg")).toBeInTheDocument();
+    expect(screen.getByText("฿775.94")).toBeInTheDocument();
+    expect(screen.getByText("฿2,249.06")).toBeInTheDocument();
+  });
+
   it("uses the actual bank transfer method instead of hardcoding QR", async () => {
     vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, method: "BANK_TRANSFER" });
     renderSuccess();

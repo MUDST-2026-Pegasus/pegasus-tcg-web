@@ -1,4 +1,6 @@
-export type PromotionOwner = "PLATFORM" | "SELLER";
+import type { PromotionOwnerType } from "@/features/promotions/order.types";
+
+export type PromotionOwner = PromotionOwnerType;
 export type PromotionSource = "CLAIMED" | "CLAIMABLE" | "PUBLIC";
 
 export interface AvailablePromotion {

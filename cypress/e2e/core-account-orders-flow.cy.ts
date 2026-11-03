@@ -227,9 +227,9 @@ describe('Core Account Orders Flow', () => {
     cy.contains('button', 'Cancel Order').click({ force: true });
 
     // Confirm in dialog
-    cy.contains('Cancel this order?').should('be.visible');
+    cy.contains('ยกเลิกคำสั่งซื้อนี้?').should('be.visible');
     cy.get('[data-slot="dialog-content"]').within(() => {
-      cy.contains('button', 'Confirm Cancel').click();
+      cy.contains('button', 'ยกเลิกคำสั่งซื้อ').click();
     });
 
     cy.wait('@cancelOrder');
