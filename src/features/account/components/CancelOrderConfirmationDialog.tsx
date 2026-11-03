@@ -86,7 +86,7 @@ export function CancelOrderConfirmationDialog({
               {order.sellerOrders.map((seller) => (
                 <div key={seller.id} className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">
-                    {order.sellerOrders.length === 1 ? "ยอดที่ชำระ" : `ยอดที่ชำระ · ${seller.sellerName || seller.sellerOrderNumber}`}
+                    {order.sellerOrders.length === 1 ? "ยอดที่จ่ายให้ร้านนี้" : `ยอดที่จ่าย · ${seller.sellerName || seller.sellerOrderNumber}`}
                   </span>
                   <span className="shrink-0 font-semibold tabular-nums">{formatBaht(seller.grandTotal)}</span>
                 </div>
@@ -107,7 +107,7 @@ export function CancelOrderConfirmationDialog({
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between gap-3 text-[13px] font-semibold">
                 <span>เงินคืน</span>
-                <span className="shrink-0 text-lg font-black tabular-nums text-primary">{formatBaht(order.grandTotal)}</span>
+                <span className="shrink-0 text-lg font-black tabular-nums text-emerald-700">{formatBaht(order.grandTotal)}</span>
               </div>
             </div>
           )}

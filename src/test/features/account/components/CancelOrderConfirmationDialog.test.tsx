@@ -55,7 +55,7 @@ describe("CancelOrderConfirmationDialog", () => {
     } as OrderDetails;
     renderWithProviders(<CancelOrderConfirmationDialog open onOpenChange={vi.fn()} order={order} onConfirm={onConfirm} isCancelling={false} />);
 
-    expect(screen.getByText("ยอดที่ชำระ")).toBeInTheDocument();
+    expect(screen.getByText("ยอดที่จ่ายให้ร้านนี้")).toBeInTheDocument();
     expect(screen.getAllByText("฿775.94")).toHaveLength(2);
     expect(screen.getByText(/MINMIN50/)).toBeInTheDocument();
     expect(screen.getByText("PEGASUS10")).toBeInTheDocument();

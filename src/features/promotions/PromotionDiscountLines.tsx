@@ -49,7 +49,7 @@ export function PromotionDiscountLines({
         <span className="text-muted-foreground">
           {labels[ownerType] ?? DEFAULT_LABEL[ownerType]}{codeText}
         </span>
-        <PromotionOwnerTag owner={ownerType} tone={colorScheme} />
+        {colorScheme === "order" && <PromotionOwnerTag owner={ownerType} tone="order" />}
       </>
     );
     const valueTone = colorScheme === "return"
