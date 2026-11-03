@@ -147,7 +147,25 @@ describe("OrderHistoryPage", () => {
   it("notifies the buyer when a pending order times out and its code is released", async () => {
     const notify = vi.spyOn(toast, "add").mockImplementation(vi.fn());
     const view = renderWithProviders(<OrderHistoryPage />);
-    const expired = { ...mockOrders[0], status: "CANCELLED", promotionsRestoredOnCancel: true, promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 50, status: "RELEASED" }], sellerOrders: [{ ...mockOrders[0].sellerOrders[0], status: "CANCELLED", cancelReason: "Cancelled automatically: payment was not received in time" }] };
+    const expired = {
+      ...mockOrders[0],
+      status: "CANCELLED",
+      promotionsRestoredOnCancel: true,
+      promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 50, status: "RELEASED" }],
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        status: "CANCELLED",
+        statusHistory: [{
+          id: 1,
+          sellerOrderId: mockOrders[0].sellerOrders[0].id,
+          fromStatus: "PENDING_PAYMENT",
+          toStatus: "CANCELLED",
+          changedBy: null,
+          note: null,
+          createdAt: "2026-10-10T13:00:00Z",
+        }],
+      }],
+    };
     vi.mocked(orderQueries.useBuyerOrders).mockReturnValue({ data: [expired, mockOrders[1]], isLoading: false, error: null, refetch: vi.fn() } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
     view.rerender(<OrderHistoryPage />);
     await waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({

@@ -77,7 +77,7 @@ describe("OrderDetailSheet promotion breakdown", () => {
     vi.mocked(ordersApi.getAdminOrder).mockResolvedValue(detail);
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
-    const table = await screen.findByRole("table", { name: "ส่วนลดตามร้าน" });
+    const table = await screen.findByRole("table", { name: "ยอดเงินตามร้าน" });
     expect(table).toHaveTextContent("minmin_tcg");
     expect(table).toHaveTextContent("MINMIN50");
     expect(table).toHaveTextContent("PEGASUS10");
@@ -95,6 +95,6 @@ describe("OrderDetailSheet promotion breakdown", () => {
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
     expect(await screen.findByText("ค่าสินค้า")).toBeInTheDocument();
-    expect(screen.queryByRole("table", { name: "ส่วนลดตามร้าน" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table", { name: "ยอดเงินตามร้าน" })).not.toBeInTheDocument();
   });
 });
