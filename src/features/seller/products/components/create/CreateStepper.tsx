@@ -33,7 +33,7 @@ export function CreateStepper({ steps, currentStepIndex }: CreateStepperProps) {
                   aria-hidden="true"
                   className={cn(
                     "h-0.5 flex-1 rounded-full",
-                    index <= currentStepIndex ? "bg-teal-600" : "bg-gray-100",
+                    index <= currentStepIndex ? "bg-teal-600" : "bg-secondary",
                   )}
                 />
               ) : null}
@@ -44,7 +44,7 @@ export function CreateStepper({ steps, currentStepIndex }: CreateStepperProps) {
                     "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
                     isDone || isCurrent
                       ? "bg-teal-600 text-white"
-                      : "bg-white text-gray-400 ring-1 ring-zinc-200 ring-inset",
+                      : "bg-card text-gray-400 ring-1 ring-border ring-inset",
                   )}
                 >
                   {isDone ? (
@@ -57,8 +57,8 @@ export function CreateStepper({ steps, currentStepIndex }: CreateStepperProps) {
                 <span
                   className={cn(
                     "text-xs max-sm:sr-only",
-                    isCurrent && "font-semibold text-zinc-950",
-                    isDone && "text-zinc-950",
+                    isCurrent && "font-semibold text-foreground",
+                    isDone && "text-foreground",
                     !isDone && !isCurrent && "text-gray-400",
                   )}
                 >

@@ -62,7 +62,7 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 | **2** | **Buyer Login** | Logs in with valid credentials, obtains auth session tokens, redirects to landing page | **Implemented** |
 | **3** | **Catalog & Search** | Browses product catalog, verifies card listings with prices and details | **Implemented** |
 | **4** | **Product Detail & Add to Cart** | Navigates to product detail page (`/products/pikachu-ex-025-187`), adds card listing to shopping cart | **Implemented** |
-| **5** | **Shopping Cart Multi-Seller Math** | Views cart with multi-seller items (Shop A: ฿250, Shop B: ฿500), verifies Subtotal ฿750, Shipping ฿100, Total ฿850 | **Implemented** |
+| **5** | **Shopping Cart Multi-Seller Math** | Views cart grouped by shop (Shop A: ฿250, Shop B: ฿500), verifies ยอดสินค้า ฿750, shipping "คิดในหน้าถัดไป", ยอดรวม ฿750 before shipping | **Implemented** |
 | **6** | **Checkout & Place Order** | Enters `/checkout?items=101`, validates default shipping address, selects payment, submits order, navigates to `/payment` | **Implemented** |
 
 ---

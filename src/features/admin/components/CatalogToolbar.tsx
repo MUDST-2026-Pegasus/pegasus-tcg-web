@@ -83,12 +83,12 @@ export function CatalogToolbar({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Badge className="h-5 w-fit rounded-full bg-[#eef1f2] px-2 text-[11px] text-muted-foreground">
+      <Badge className="h-5 w-fit rounded-full bg-muted px-2 text-[11px] text-muted-foreground">
         {resultLabel}
       </Badge>
 
       <div className="flex flex-wrap items-center gap-2.5">
-        <InputGroup className="h-8 w-full rounded-lg bg-white sm:w-[320px]">
+        <InputGroup className="h-8 w-full rounded-lg bg-card sm:w-[320px]">
           <InputGroupAddon>
             <SearchIcon />
           </InputGroupAddon>
@@ -117,7 +117,7 @@ export function CatalogToolbar({
           >
             <SelectTrigger
               aria-label={select.label}
-              className="h-8 w-full rounded-lg bg-white text-sm sm:w-[200px]"
+              className="h-8 w-full rounded-lg bg-card text-sm sm:w-[200px]"
             >
               <SelectValue />
             </SelectTrigger>

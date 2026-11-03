@@ -43,6 +43,8 @@ export type OverviewStats = {
   newSellers: CountStat;
   activeListings: ActiveListingsStat;
   commission: CommissionStat;
+  /** เงินที่ Pegasus จ่ายชดเชยร้านแทนโค้ด Pegasus (ledger `PROMO_SUBSIDY`) นับตามวันที่ปล่อยเงิน */
+  promotionCost: MoneyStat;
 };
 
 export type MonthlySales = {

@@ -1,4 +1,5 @@
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
+import type { AppliedPromotion } from "@/features/promotions/order.types";
 
 // ---------- ข้อมูลจาก `/sellers/me/orders` ----------
 // ลอกมาจาก `dto/SellerOrderViews.java`, `dto/SellerOrderDetailsResponse.java`,
@@ -23,6 +24,12 @@ export type OrderItem = {
   /** presigned GET อายุสั้น — ห้ามเก็บไว้ใช้ทีหลัง */
   imageUrl: string | null;
   unitIds: number[];
+  /** Discount share across the entire line, before dividing by quantity. */
+  discountAllocated?: number;
+  /** Discount shares across the entire line, before dividing by quantity. */
+  sellerDiscountAllocated?: number;
+  platformDiscountAllocated?: number;
+  refundEstimatePerUnit?: number;
 };
 
 export type Shipment = {
@@ -78,6 +85,12 @@ export type SellerOrderDetails = {
   /** เก่าสุดก่อน */
   statusHistory: StatusHistoryEntry[];
   sellerName: string | null;
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 };
 
 export type OrderBuyer = {

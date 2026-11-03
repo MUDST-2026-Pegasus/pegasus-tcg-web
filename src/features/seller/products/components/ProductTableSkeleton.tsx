@@ -11,14 +11,14 @@ export function ProductTableSkeleton({ rows = 6 }: { rows?: number }) {
       aria-busy="true"
       className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0"
     >
-      <div className="flex h-9 items-center gap-6 border-y border-gray-100 bg-neutral-50 px-5">
+      <div className="flex h-9 items-center gap-6 border-y border-muted bg-neutral-50 px-5">
         <Skeleton className="size-3.5 rounded-sm" />
         <Skeleton className="h-3 w-16" />
       </div>
       {Array.from({ length: rows }, (_, index) => (
         <div
           key={index}
-          className="flex items-center gap-4 border-b border-gray-100 px-5 py-3 last:border-b-0"
+          className="flex items-center gap-4 border-b border-muted px-5 py-3 last:border-b-0"
         >
           <Skeleton className="size-3.5 rounded-sm" />
           <Skeleton className="size-10 rounded-md" />

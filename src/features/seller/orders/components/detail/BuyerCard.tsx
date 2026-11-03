@@ -23,12 +23,12 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
       <div className="flex items-center gap-2.5">
         <Avatar className="size-9">
           {buyer.avatarUrl && <AvatarImage src={buyer.avatarUrl} alt="" />}
-          <AvatarFallback className="bg-sky-700 text-sm font-normal text-white">
+          <AvatarFallback className="bg-primary text-sm font-normal text-white">
             {initialsOf(buyer.username)}
           </AvatarFallback>
         </Avatar>
         <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-          <p className="truncate text-xs font-semibold text-zinc-950">
+          <p className="truncate text-xs font-semibold text-foreground">
             {buyer.displayName ?? buyer.username}
           </p>
           <p className="text-[10px] text-gray-400">

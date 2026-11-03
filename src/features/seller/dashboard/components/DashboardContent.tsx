@@ -20,7 +20,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-zinc-950">{data.greeting}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{data.greeting}</h1>
           <p className="text-xs text-gray-500">{data.subtitle}</p>
         </div>
 

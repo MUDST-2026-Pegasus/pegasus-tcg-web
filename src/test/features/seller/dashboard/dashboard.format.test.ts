@@ -188,11 +188,20 @@ describe("recentOrders and lowStock", () => {
     });
   });
 
-  it("names the lot and flags a last card as critical", () => {
-    expect(lowStock(dashboard()).items).toEqual([
-      { listingId: 7, name: "Charizard ex — Box A", remainingLabel: "เหลือ 1", percent: 10, severity: "critical" },
-      { listingId: 8, name: "Pikachu VMAX", remainingLabel: "เหลือ 2", percent: 50, severity: "warning" },
+  it("separates the lot from the name and labels stock in pieces", () => {
+    const result = lowStock(dashboard());
+    expect(result.subtitle).toBe("ประกาศที่เหลือไม่เกิน 2 ชิ้น · น้อยสุดก่อน");
+    expect(result.actionTo).toBe("/seller/products?status=ACTIVE&sort=stock_asc");
+    expect(result.items).toEqual([
+      { listingId: 7, name: "Charizard ex", metaLabel: "Box A · NM", remainingLabel: "เหลือ 1 ชิ้น", severity: "critical" },
+      { listingId: 8, name: "Pikachu VMAX", metaLabel: null, remainingLabel: "เหลือ 2 ชิ้น", severity: "warning" },
     ]);
+  });
+
+  it("shows the total count when more listings exist than the preview", () => {
+    const data = dashboard();
+    expect(lowStock({ ...data, listings: { ...data.listings, lowStockCount: 6 } }).actionLabel)
+      .toBe("ดูทั้งหมด 6 รายการ");
   });
 });
 

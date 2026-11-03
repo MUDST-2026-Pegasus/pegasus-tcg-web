@@ -108,7 +108,7 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
         </div>
 
         {/* ดีไซน์ใช้เส้นคั่นสั้น 240px ต้องใส่ ! ทับ data-horizontal:w-full ของ ui/separator */}
-        <Separator className="w-60! bg-[#eef1f2]" />
+        <Separator className="w-60! bg-muted" />
 
         <div className="grid grid-cols-1 gap-y-[18px] sm:grid-cols-2">
           {details.map((detail) => (

@@ -91,7 +91,7 @@ export function RestockContent({ data }: RestockContentProps) {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-zinc-950">{data.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{data.title}</h1>
           <p className="text-xs text-gray-500">{data.subtitle}</p>
         </div>
 
@@ -160,7 +160,7 @@ export function RestockContent({ data }: RestockContentProps) {
             />
           ) : null}
 
-          <div className="flex w-full flex-col gap-2 rounded-xl border border-zinc-200 bg-neutral-50 p-4">
+          <div className="flex w-full flex-col gap-2 rounded-xl border border-border bg-neutral-50 p-4">
             <div className="flex items-center gap-2">
               <Info aria-hidden="true" className="size-4 text-slate-500" />
               <p className="text-xs font-semibold text-gray-700">

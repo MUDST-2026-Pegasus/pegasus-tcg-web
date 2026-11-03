@@ -1,8 +1,10 @@
 import {
+  TicketPercent,
   ArrowUpRight,
   BadgeCheck,
   Clock2,
   FileText,
+  Gavel,
   LayoutDashboard,
   LayoutGrid,
   Package,
@@ -68,7 +70,9 @@ export const adminNav: NavGroup[] = [
     items: [
       { label: "จัดการผู้ใช้", to: "/admin/users", icon: Users },
       { label: "ภาพรวมคำสั่งซื้อ", to: "/admin/orders", icon: ShoppingCart },
+      { label: "การประมูล", to: "/admin/auctions", icon: Gavel },
       { label: "ค่าคอมมิชชั่น", to: "/admin/commission", icon: Wallet },
+      { label: "โปรโมชั่น & โค้ดส่วนลด", to: "/admin/promotions", icon: TicketPercent },
       { label: "จัดการรีวิว", to: "/admin/reviews", icon: Star },
     ],
   },
@@ -102,8 +106,10 @@ export const sellerNav: NavGroup[] = [
       { label: "จัดการร้านค้า", to: "/seller/shop", icon: Store },
       { label: "จัดการสินค้า", to: "/seller/products", icon: Package },
       { label: "จัดการคำสั่งซื้อ", to: "/seller/orders", icon: Receipt },
+      { label: "โค้ดส่วนลดร้าน", to: "/seller/promotions", icon: TicketPercent },
       { label: "คำขอคืนสินค้า", to: "/seller/returns", icon: Undo2 },
       { label: "รีวิวร้านค้า", to: "/seller/reviews", icon: Star },
+      { label: "การประมูล", to: "/seller/auctions", icon: Gavel },
     ],
   },
   {

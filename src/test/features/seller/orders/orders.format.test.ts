@@ -330,6 +330,22 @@ describe("payment, timeline and profit", () => {
     expect(profitSummary(detail({ status: "CANCELLED" }))).toBeNull();
   });
 
+  it("keeps O1 order totals in the money card instead of the profit summary", () => {
+    const summary = profitSummary(detail({
+      itemsSubtotal: 830, shippingFee: 45, sellerDiscount: 50, platformDiscount: 49.06,
+      platformSubsidy: 49.06, commissionBase: 780, grandTotal: 775.94,
+      commissionAmount: 39, sellerNetAmount: 786,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER", amount: 50 },
+        { code: "PEGASUS10", ownerType: "PLATFORM", amount: 49.06 },
+      ],
+    }));
+    expect(summary?.rows).toEqual([
+      { id: "cost", label: "− ต้นทุนสินค้า", value: "฿980" },
+    ]);
+    expect(summary?.rows.some((row) => row.id === "sales")).toBe(false);
+  });
+
   it("words the month from the dashboard numbers", () => {
     expect(monthlySummary({ revenue: 26000, cost: 16420, commission: 1242.5, net: 8337.5 })).toMatchObject({
       rows: [

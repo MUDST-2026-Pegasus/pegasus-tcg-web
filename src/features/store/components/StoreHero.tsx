@@ -31,7 +31,7 @@ export function StoreHero({
   return (
     <section
       aria-label="Store profile"
-      className="overflow-hidden rounded-2xl border border-[#E3E7E8] bg-white shadow-2xs sm:rounded-3xl"
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xs sm:rounded-3xl"
     >
       {/* Section 1: Cover Gradient Banner */}
       <div className="relative h-44 w-full overflow-hidden bg-gradient-to-r from-[#0B4D94] via-[#083568] to-[#031B38] sm:h-52">
@@ -46,9 +46,9 @@ export function StoreHero({
       </div>
 
       {/* Section 2: Store Info */}
-      <div className="bg-white px-5 pb-6 pt-0 sm:px-8 sm:pb-6">
+      <div className="bg-card px-5 pb-6 pt-0 sm:px-8 sm:pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-          <Avatar className="-mt-12 size-24 shrink-0 rounded-full border-4 border-white bg-white shadow-md sm:-mt-14 sm:size-28">
+          <Avatar className="-mt-12 size-24 shrink-0 rounded-full border-4 border-white bg-card shadow-md sm:-mt-14 sm:size-28">
             {profile.avatarUrl ? (
               <AvatarImage src={profile.avatarUrl} alt={displayName} />
             ) : null}
@@ -97,15 +97,15 @@ export function StoreHero({
       {/* Section 3: Unified Stats Row (Flush at the bottom, divided by clean borders) */}
       <div
         className={cn(
-          "border-t border-[#E3E7E8] bg-[#F8F9FA]",
+          "border-t border-border bg-[#F8F9FA]",
           isNonSeller
-            ? "grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-[#E3E7E8]"
+            ? "grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border"
             : "grid grid-cols-2 md:grid-cols-4",
         )}
       >
         {/* Card 1: คะแนนร้านค้า (hidden if not a seller) */}
         {!isNonSeller && (
-          <div className="flex items-center gap-3.5 p-4 border-r border-[#E3E7E8] sm:gap-4 md:px-6 md:py-4">
+          <div className="flex items-center gap-3.5 p-4 border-r border-border sm:gap-4 md:px-6 md:py-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#FEF6E7] text-[#F59E0B]">
               <Star className="size-5 fill-[#F59E0B] text-[#F59E0B]" />
             </div>
@@ -130,7 +130,7 @@ export function StoreHero({
         <div
           className={cn(
             "flex items-center gap-3.5 p-4 sm:gap-4 md:px-6 md:py-4",
-            !isNonSeller && "md:border-r md:border-[#E3E7E8]",
+            !isNonSeller && "md:border-r md:border-border",
           )}
         >
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#EDF5FD] text-[#0B63C5]">
@@ -148,7 +148,7 @@ export function StoreHero({
 
         {/* Card 3: รีวิวเชิงบวก (hidden if not a seller) */}
         {!isNonSeller && (
-          <div className="flex items-center gap-3.5 p-4 border-t border-r border-[#E3E7E8] sm:gap-4 md:border-t-0 md:px-6 md:py-4">
+          <div className="flex items-center gap-3.5 p-4 border-t border-r border-border sm:gap-4 md:border-t-0 md:px-6 md:py-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#EDF5FD] text-[#0B63C5]">
               <ThumbsUp className="size-5" />
             </div>
@@ -172,7 +172,7 @@ export function StoreHero({
         <div
           className={cn(
             "flex items-center gap-3.5 p-4 sm:gap-4 md:px-6 md:py-4",
-            !isNonSeller && "border-t border-[#E3E7E8] md:border-t-0",
+            !isNonSeller && "border-t border-border md:border-t-0",
           )}
         >
           <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#EDF5FD] text-[#0B63C5]">

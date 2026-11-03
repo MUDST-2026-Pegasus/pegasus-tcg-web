@@ -29,7 +29,7 @@ export function WalletLedger({ wallet, payouts, page, pageSize, isFetching, onPa
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left text-sm">
-          <thead className="bg-[#f0f3f3] text-xs text-muted-foreground">
+          <thead className="bg-muted text-xs text-muted-foreground">
             <tr>
               <th className="px-5 py-3">วันที่</th>
               <th>รายการ</th>
@@ -54,7 +54,7 @@ export function WalletLedger({ wallet, payouts, page, pageSize, isFetching, onPa
                       </button>
                     ) : entry.referenceId ? `${entry.referenceType ?? "รายการ"} #${entry.referenceId}` : "—"}
                   </td>
-                  <td className={`text-right font-semibold ${entry.direction === "CREDIT" ? "text-emerald-700" : "text-red-600"}`}>
+                  <td className={`text-right font-semibold ${entry.direction === "CREDIT" ? "text-emerald-700" : "text-destructive"}`}>
                     {entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}
                   </td>
                   <td className="pr-5 text-right text-muted-foreground">{money(entry.balanceAfter)}</td>

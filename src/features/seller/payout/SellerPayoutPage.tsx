@@ -133,7 +133,7 @@ export function SellerPayoutPage() {
           {payouts.data ? (
             <PayoutTracker payouts={active} onSelect={setSelected} />
           ) : (
-            <p role="alert" className="rounded-xl border bg-white p-5 text-sm text-muted-foreground">ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน</p>
+            <p role="alert" className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน</p>
           )}
 
           <Card className="gap-0 overflow-hidden rounded-xl py-0">

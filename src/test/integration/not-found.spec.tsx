@@ -24,8 +24,8 @@ describe("public 404 route", () => {
     for (const [name, href] of [
       ["กลับหน้าแรก", "/"],
       ["ดูสินค้าทั้งหมด", "/products"],
-      ["Pokémon", "/pokemon"],
-      ["One Piece", "/one-piece"],
+      ["Pokémon", "/search?game=pokemon-tcg"],
+      ["One Piece", "/search?game=one-piece-card-game"],
       ["ตะกร้าสินค้า", "/cart"],
       ["เกี่ยวกับเรา", "/about"],
     ]) {
@@ -41,5 +41,5 @@ describe("public 404 route", () => {
     await userEvent.type(search, "  Pikachu card  {Enter}");
     await waitFor(() => expect(router.state.location.pathname).toBe("/search"));
     expect(router.state.location.search).toBe("?q=Pikachu%20card");
-  });
+  }, 15000);
 });

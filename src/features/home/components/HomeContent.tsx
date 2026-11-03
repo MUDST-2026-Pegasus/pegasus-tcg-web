@@ -36,6 +36,8 @@ import type {
   ProductCategory,
   TrendingProduct,
 } from "@/features/home/home.types";
+import { ClaimTicketRail } from "@/features/promotions/ClaimTicketRail";
+import { useFeaturedPromotions } from "@/features/promotions/claim.queries";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -570,6 +572,31 @@ function HeroSection() {
   return <HeroCarousel slides={data?.length ? data : [FALLBACK_HERO_SLIDE]} />;
 }
 
+/** H1 "โค้ดส่วนลด" — ไม่มีโค้ดหรือโหลดไม่ขึ้นก็ซ่อนทั้ง section ไม่ให้กินที่หน้าแรก */
+function PromotionsSection() {
+  const query = useFeaturedPromotions();
+
+  if (!query.data?.length) return null;
+  return (
+    <section
+      className="bg-secondary px-4 pt-7 sm:px-6 lg:px-8"
+      aria-labelledby="home-promotions-title"
+    >
+      <div className="mx-auto max-w-[1216px]">
+        <div id="home-promotions-title">
+          <SectionHeader
+            title="โค้ดส่วนลด"
+            description="กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้"
+            actionLabel="ดูโค้ดของฉัน"
+            actionHref="/account/coupons"
+          />
+        </div>
+        <ClaimTicketRail codes={query.data} source="HOME" />
+      </div>
+    </section>
+  );
+}
+
 function NewReleasesSection() {
   const query = useNewReleases();
 
@@ -638,6 +665,7 @@ export function HomeContent() {
   return (
     <div className="bg-secondary font-sans">
       <HeroSection />
+      <PromotionsSection />
       <NewReleasesSection />
       <GamesSection />
       <TrendingSection />

@@ -101,7 +101,7 @@ export function CategoryTable({
             </TableRow>
           </TableHeader>
 
-          <TableBody className="[&_tr]:border-[#eef1f2]">
+          <TableBody className="[&_tr]:border-muted">
             {rows.map(({ category, depth }) => {
               const image = imageUrls.get(category.id);
 
@@ -120,7 +120,7 @@ export function CategoryTable({
                           └
                         </span>
                       )}
-                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[#f1f3f4] text-[#9aa5ad]">
+                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
                         {image ? (
                           <img src={image} alt="" className="size-full object-cover" />
                         ) : (

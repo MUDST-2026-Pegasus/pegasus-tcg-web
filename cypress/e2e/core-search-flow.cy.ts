@@ -113,7 +113,7 @@ describe('Core Search & Navigation Flow', () => {
     cy.visit('/');
 
     // Click search icon in Navbar
-    cy.get('header a[href="/search"]').click();
+    cy.get('header a[aria-label="Search"]').click();
 
     // Verify URL
     cy.url().should('include', '/search');

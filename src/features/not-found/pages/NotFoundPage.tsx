@@ -4,18 +4,23 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { useGameList } from "@/features/catalog/catalog.queries";
 import "./not-found.css";
-
-const quickLinks = [
-  { label: "Pokémon", to: "/pokemon" },
-  { label: "One Piece", to: "/one-piece" },
-  { label: "ตะกร้าสินค้า", to: "/cart" },
-  { label: "เกี่ยวกับเรา", to: "/about" },
-];
 
 export function NotFoundPage() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { data: games } = useGameList();
+
+  const pokemonSlug = games?.find((g) => g.code === "POKEMON")?.slug ?? "pokemon-tcg";
+  const onePieceSlug = games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
+
+  const quickLinks = [
+    { label: "Pokémon", to: `/search?game=${encodeURIComponent(pokemonSlug)}` },
+    { label: "One Piece", to: `/search?game=${encodeURIComponent(onePieceSlug)}` },
+    { label: "ตะกร้าสินค้า", to: "/cart" },
+    { label: "เกี่ยวกับเรา", to: "/about" },
+  ];
 
   useEffect(() => {
     const previousTitle = document.title;

@@ -92,19 +92,25 @@ export function useAuth(): AuthState {
   };
 }
 
-/** ล้าง cache เมื่อ session จบ กันข้อมูลคนก่อนหน้าค้างให้คนถัดไปเห็น */
+/**
+ * ล้าง cache เมื่อ session จบ กันข้อมูลคนก่อนหน้าค้างให้คนถัดไปเห็น
+ *
+ * ล้างเฉพาะตอนเปลี่ยนจากมี session → ไม่มี — guest ที่ bootstrap เสร็จก็ notify เหมือนกัน
+ * ถ้าล้างตอนนั้น query สาธารณะที่กำลังโหลด (เช่น games) จะหายกลางทางแล้วค้าง loading
+ */
 export function useAuthSessionSync(): void {
   const queryClient = useQueryClient();
 
-  useEffect(
-    () =>
-      subscribeSession(() => {
-        if (getSession() === null) {
-          queryClient.removeQueries();
-        }
-      }),
-    [queryClient],
-  );
+  useEffect(() => {
+    let hadSession = getSession() !== null;
+    return subscribeSession(() => {
+      const hasSession = getSession() !== null;
+      if (hadSession && !hasSession) {
+        queryClient.removeQueries();
+      }
+      hadSession = hasSession;
+    });
+  }, [queryClient]);
 }
 
 async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClient>) {
