@@ -9,6 +9,16 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 720,
     video: false,
+    setupNodeEvents(_on, config) {
+      config.expose = config.expose || {};
+      if (config.env?.runPromotions !== undefined) {
+        config.expose.runPromotions = config.env.runPromotions;
+      }
+      if (config.env?.apiBaseUrl !== undefined) {
+        config.expose.apiBaseUrl = config.env.apiBaseUrl;
+      }
+      return config;
+    },
   },
   screenshotsFolder: "src/test/cypress/screenshots",
   videosFolder: "src/test/cypress/videos",
