@@ -117,6 +117,26 @@ export interface PageResponse<T> {
   last?: boolean;
 }
 
+export interface ReorderItemDto {
+  orderItemId: number;
+  catalogVariantId: number;
+  productSlug: string;
+  productName: string;
+  variantLabel: string;
+  rarity?: string;
+  imageUrl?: string;
+  originalCondition: string;
+  originalPrice: number;
+  originalQuantity: number;
+  originalSellerName?: string;
+}
+
+export interface ReorderItemsResponse {
+  orderId: number;
+  orderNumber: string;
+  items: ReorderItemDto[];
+}
+
 export interface ReorderListingInfo {
   listingId: number;
   condition: string; // "NM" | "LP" | "MP" | "HP" | "DMG" | "SEALED"
