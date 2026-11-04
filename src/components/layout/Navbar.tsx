@@ -15,8 +15,10 @@ export function Navbar() {
   const cartQuantity = cart?.totalQuantity ?? 0;
   const { data: games } = useGameList();
 
-  const pokemonSlug = games?.find((g) => g.code === "POKEMON")?.slug ?? "pokemon-tcg";
-  const onePieceSlug = games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
+  const pokemonSlug =
+    games?.find((g) => g.code === "POKEMON")?.slug ?? "pokemon-tcg";
+  const onePieceSlug =
+    games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
 
   const currentGame = searchParams.get("game");
   const isSearch = location.pathname === "/search";
@@ -53,7 +55,7 @@ export function Navbar() {
           aria-label="Pegasus TCG — กลับหน้าแรก"
           className="flex h-full min-w-0 cursor-pointer items-center justify-self-start text-xl sm:text-2xl font-bold uppercase leading-none tracking-[-1.2px] text-primary"
         >
-          pegasus
+          pegasus-1111
         </Link>
 
         <nav className="hidden h-full items-center justify-center gap-8 lg:flex">
@@ -114,7 +116,11 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={cart ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น` : "ตะกร้าสินค้า"}
+            aria-label={
+              cart
+                ? `ตะกร้าสินค้า มีสินค้า ${cartQuantity} ชิ้น`
+                : "ตะกร้าสินค้า"
+            }
             className="relative flex cursor-pointer items-center justify-center overflow-visible text-primary hover:text-primary"
             nativeButton={false}
             render={<Link to="/cart" />}
