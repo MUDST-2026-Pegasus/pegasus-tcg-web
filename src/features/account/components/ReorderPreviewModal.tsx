@@ -143,6 +143,7 @@ export function ReorderPreviewModal({
   return (
     <Dialog open={isModalOpen} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent
+        data-testid="reorder-modal"
         showCloseButton={false}
         overlayClassName="bg-black/50"
         className="max-h-[90vh] sm:max-w-2xl flex flex-col p-0 overflow-hidden rounded-2xl gap-0 bg-white text-slate-900 shadow-2xl border border-slate-200/80 outline-none"
@@ -257,6 +258,7 @@ export function ReorderPreviewModal({
                 {/* Right Column: Action Button */}
                 <Button
                   type="button"
+                  data-testid="reorder-item-btn"
                   onClick={() => handleReorderClick(item)}
                   className="bg-[#006699] hover:bg-[#005580] text-white rounded-lg px-4 py-2 font-medium text-xs sm:text-sm shrink-0 flex items-center gap-1 transition-colors shadow-none cursor-pointer"
                 >

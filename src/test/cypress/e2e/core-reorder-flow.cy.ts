@@ -7,6 +7,7 @@ describe('Reorder and order status filter', () => {
     sellerOrders: [],
     placedAt: '2026-10-15T10:00:00Z',
   };
+
   const completedOrder = {
     id: 67,
     orderNumber: 'ORD-COMPLETED-67',
@@ -19,105 +20,148 @@ describe('Reorder and order status filter', () => {
     grandTotal: 8000,
     placedAt: '2026-10-17T12:00:00Z',
     completedAt: '2026-10-19T14:00:00Z',
-    sellerOrders: [{
-      id: 88,
-      salesOrderId: 67,
-      sellerProfileId: 1,
-      sellerName: 'Card Kingdom TH',
-      sellerOrderNumber: 'SO-88',
-      status: 'COMPLETED',
-      itemsSubtotal: 8000,
-      shippingFee: 0,
-      discountAmount: 0,
-      grandTotal: 8000,
-      createdAt: '2026-10-17T12:00:00Z',
-      items: [{
-        id: 501,
-        listingId: 1001,
-        catalogVariantId: 10,
-        quantity: 1,
-        unitPrice: 8000,
-        lineTotal: 8000,
-        productName: 'Bio-Broly (SR)',
-        variantLabel: 'JP • FOIL',
-        condition: 'DMG',
-        gameName: 'Dragon Ball Super Card Game',
-        imageUrl: null,
-        unitIds: [1],
-      }],
-      shipments: [],
-      statusHistory: [],
-    }],
+    sellerOrders: [
+      {
+        id: 88,
+        salesOrderId: 67,
+        sellerProfileId: 1,
+        sellerName: 'Card Kingdom TH',
+        sellerOrderNumber: 'SO-88',
+        status: 'COMPLETED',
+        itemsSubtotal: 8000,
+        shippingFee: 0,
+        discountAmount: 0,
+        grandTotal: 8000,
+        createdAt: '2026-10-17T12:00:00Z',
+        items: [
+          {
+            id: 501,
+            listingId: 1001,
+            catalogVariantId: 10,
+            quantity: 1,
+            unitPrice: 8000,
+            lineTotal: 8000,
+            productName: 'Bio-Broly (SR)',
+            variantLabel: 'JP • FOIL',
+            condition: 'DMG',
+            gameName: 'Dragon Ball Super Card Game',
+            imageUrl: null,
+            unitIds: [1],
+          },
+        ],
+        shipments: [],
+        statusHistory: [],
+      },
+    ],
   };
-  const preview = {
+
+  const reorderItemsResponse = {
     orderId: 67,
-    sellerOrders: [{
-      sellerProfileId: 1,
-      sellerName: 'Card Kingdom TH',
-      sellerAvailable: true,
-      vacationMode: false,
-      items: [{
-        originalOrderItemId: 501,
+    orderNumber: 'ORD-COMPLETED-67',
+    items: [
+      {
+        orderItemId: 501,
         catalogVariantId: 10,
+        productSlug: 'bio-broly-sr',
         productName: 'Bio-Broly (SR)',
-        variantLabel: 'JP • FOIL',
+        variantLabel: 'JP • FOIL • Dragon Ball Super Card Game',
+        rarity: 'SR',
+        imageUrl: null,
         originalCondition: 'DMG',
         originalPrice: 8000,
         originalQuantity: 1,
+        originalSellerName: 'Card Kingdom TH',
+      },
+      {
+        orderItemId: 502,
+        catalogVariantId: 10,
+        productSlug: 'bio-broly-sr',
+        productName: 'Bio-Broly (SR)',
+        variantLabel: 'JP • FOIL • Dragon Ball Super Card Game',
+        rarity: 'SR',
         imageUrl: null,
-        currentListing: { listingId: 1001, condition: 'DMG', price: 8000, quantityAvailable: 0, isAvailable: false },
-        alternativeConditions: [
-          { listingId: 1002, condition: 'NM', price: 9500, quantityAvailable: 2, isAvailable: true },
-          { listingId: 1003, condition: 'LP', price: 8900, quantityAvailable: 1, isAvailable: true },
-        ],
-        status: 'AVAILABLE',
-      }],
-    }],
+        originalCondition: 'DMG',
+        originalPrice: 8000,
+        originalQuantity: 2,
+        originalSellerName: 'Card Kingdom TH',
+      },
+    ],
   };
-  const cartItem = {
-    id: 201,
-    cartId: 1,
-    listingId: 1003,
-    quantity: 1,
-    unitPriceAtAdd: 8900,
-    currentPrice: 8900,
-    priceChanged: false,
-    purchasable: true,
-    quantityAvailable: 1,
-    sellerProfileId: 1,
-    catalogVariantId: 10,
-    condition: 'LP',
-    currency: 'THB',
-    addedAt: '2026-11-02T10:00:00Z',
-    updatedAt: '2026-11-02T10:00:00Z',
-    productName: 'Bio-Broly (SR)',
-    variantLabel: 'JP • FOIL',
-    sellerName: 'Card Kingdom TH',
-    imageUrl: null,
-    productId: 10,
+
+  const visitAuthenticated = (url: string) => {
+    cy.intercept('POST', '**/api/v1/auth/refresh*', {
+      statusCode: 200,
+      body: { success: true, data: { tokens: { accessToken: 'mock-buyer-token', expiresIn: 3600 } } },
+    });
+    cy.visit(url);
   };
-  const cart = { id: 1, userId: 1, sessionKey: null, currency: 'THB', items: [cartItem], totalQuantity: 1, itemsSubtotal: 8900, expiresAt: null };
 
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clearCookies();
-    cy.intercept('POST', '**/api/v1/auth/refresh', {
+
+    cy.intercept('POST', '**/api/v1/auth/refresh*', {
       statusCode: 200,
       body: { success: true, data: { tokens: { accessToken: 'mock-buyer-token', expiresIn: 3600 } } },
     });
-    cy.intercept('GET', '**/api/v1/auth/me*', {
+
+    cy.intercept('GET', '**/auth/me*', {
       statusCode: 200,
-      body: { success: true, data: { id: 1, email: 'buyer@pegasus.com', username: 'buyeruser', displayName: 'Buyer User', roles: ['BUYER'], status: 'ACTIVE' } },
+      body: {
+        success: true,
+        data: {
+          id: 1,
+          email: 'buyer@pegasus.com',
+          username: 'buyeruser',
+          displayName: 'Buyer User',
+          roles: ['BUYER'],
+          status: 'ACTIVE',
+        },
+      },
     });
-    cy.intercept('GET', '**/api/v1/refunds*', { statusCode: 200, body: { success: true, data: [] } });
+
+    cy.intercept('GET', '**/api/v1/games*', {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    });
+
+    cy.intercept('GET', '**/api/v1/cart*', {
+      statusCode: 200,
+      body: { success: true, data: { id: 1, items: [], totalQuantity: 0, itemsSubtotal: 0 } },
+    });
+
+    cy.intercept('GET', '**/api/v1/refunds*', {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    });
+
+    cy.intercept('GET', '**/api/v1/orders/*/reviews/mine*', {
+      statusCode: 200,
+      body: { success: true, data: null },
+    });
+
+    cy.intercept('GET', '**/api/v1/orders/*/returns*', {
+      statusCode: 200,
+      body: { success: true, data: [] },
+    });
+
     cy.intercept('GET', '**/api/v1/orders?*', {
       statusCode: 200,
-      body: { success: true, data: { items: [pendingOrder, completedOrder], totalItems: 2, totalPages: 1, page: 0, size: 50 } },
+      body: {
+        success: true,
+        data: {
+          items: [pendingOrder, completedOrder],
+          totalItems: 2,
+          totalPages: 1,
+          page: 0,
+          size: 50,
+        },
+      },
     }).as('orders');
   });
 
   it('filters Completed orders', () => {
-    cy.visit('/account/orders');
+    visitAuthenticated('/account/orders');
     cy.wait('@orders');
     cy.contains('[role="tab"]', 'Completed').click();
     cy.contains('[role="tab"]', 'Completed').should('have.attr', 'aria-selected', 'true');
@@ -125,35 +169,59 @@ describe('Reorder and order status filter', () => {
     cy.contains('ORD-PENDING-11').should('not.exist');
   });
 
-  it('reorders an available condition and selects the new item in the cart', () => {
-    cy.intercept('GET', '**/api/v1/orders/67/reorder-preview*', {
+  it('reorders a completed item, deduplicates duplicate cards, and navigates to the product detail page', () => {
+    cy.intercept('GET', '**/api/v1/orders/67/reorder-items*', {
       statusCode: 200,
-      body: { success: true, data: preview },
-    }).as('preview');
-    cy.intercept('POST', '**/api/v1/cart/items/batch', {
-      statusCode: 200,
-      body: { success: true, data: cart },
-    }).as('batch');
-    cy.intercept('GET', '**/api/v1/cart*', {
-      statusCode: 200,
-      body: { success: true, data: cart },
-    }).as('cart');
+      body: { success: true, data: reorderItemsResponse },
+    }).as('reorderItems');
 
-    cy.visit('/account/orders');
+    cy.intercept('GET', '**/api/v1/catalog/products/bio-broly-sr*', {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: {
+          id: 10,
+          slug: 'bio-broly-sr',
+          name: 'Bio-Broly (SR)',
+          gameId: 1,
+          gameName: 'Dragon Ball Super Card Game',
+          rarity: 'SR',
+          images: [],
+          variants: [],
+        },
+      },
+    }).as('getProduct');
+
+    cy.intercept('GET', '**/api/v1/catalog/products/*/market*', { statusCode: 200, body: { success: true, data: [] } });
+    cy.intercept('GET', '**/api/v1/catalog/products/*/effects*', { statusCode: 200, body: { success: true, data: [] } });
+    cy.intercept('GET', '**/api/v1/catalog/products/*/collectors*', { statusCode: 200, body: { success: true, data: [] } });
+
+    visitAuthenticated('/account/orders');
     cy.wait('@orders');
+
     cy.contains('[role="tab"]', 'Completed').click();
     cy.contains('button', 'Reorder').click();
-    cy.wait('@preview');
-    cy.contains('[role="dialog"]', 'Reorder Items').should('be.visible');
-    cy.get('[role="dialog"]').within(() => {
-      cy.contains('button', /^DMG/).should('be.disabled');
-      cy.contains('button', /^LP/).click();
-      cy.contains('button', /^LP/).should('have.attr', 'aria-pressed', 'true');
-      cy.contains('button', 'สั่งสินค้านี้อีกครั้ง').click();
-    });
-    cy.wait('@batch').its('request.body').should('deep.equal', [{ listingId: 1003, quantity: 1 }]);
-    cy.location('pathname').should('eq', '/cart');
-    cy.wait('@cart');
-    cy.get('[role="checkbox"][aria-label="เลือก Bio-Broly (SR)"]').next('input[type="checkbox"]').should('be.checked');
+    cy.wait('@reorderItems');
+
+    // Assert reorder modal is open with title and order number
+    cy.get('[data-testid="reorder-modal"]').should('be.visible');
+    cy.contains('สั่งซื้อสินค้าอีกครั้ง').should('be.visible');
+    cy.contains('#ORD-COMPLETED-67').should('be.visible');
+
+    // Assert cards are deduplicated (order had 2 items of Bio-Broly (SR), but only 1 row appears)
+    cy.get('[data-testid="reorder-item-btn"]').should('have.length', 1);
+    cy.contains('Bio-Broly (SR)').should('be.visible');
+    cy.contains('สภาพเดิม: DMG').should('be.visible');
+    cy.contains('ราคาเดิมที่เคยซื้อ').should('be.visible');
+
+    // Click "สั่งซื้ออีกครั้ง →" button
+    cy.get('[data-testid="reorder-item-btn"]').first().click();
+
+    // Assert modal is closed
+    cy.get('[data-testid="reorder-modal"]').should('not.exist');
+
+    // Assert URL matches the Product Detail Page route (/products/:slug)
+    cy.url().should('match', /\/products\/[a-zA-Z0-9-]+/);
+    cy.location('pathname').should('eq', '/products/bio-broly-sr');
   });
 });
