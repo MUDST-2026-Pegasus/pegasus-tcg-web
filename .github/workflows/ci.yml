@@ -74,9 +74,14 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  e2e:
+    name: Cypress E2E
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    uses: ./.github/workflows/e2e-cypress.yml
+
   publish:
     name: Publish web image
-    needs: quality
+    needs: [quality, e2e]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     timeout-minutes: 15

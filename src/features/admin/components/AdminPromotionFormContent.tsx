@@ -121,7 +121,13 @@ function emptyPromotion(): AdminPromotionInput {
 function toLocalInput(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return Number.isFinite(local.getTime()) ? local.toISOString().slice(0, 16) : "";
+}
+
+function fromLocalInput(value: string): string {
+  const date = value ? new Date(value) : null;
+  return date && Number.isFinite(date.getTime()) ? date.toISOString() : "";
 }
 
 /** หน้า /admin/promotions/new และ /:id/edit (Figma PRM-A2) */
@@ -550,7 +556,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                     value={toLocalInput(form.startsAt)}
                     disabled={locked("startsAt")}
                     onChange={(event) =>
-                      change("startsAt", event.target.value ? new Date(event.target.value).toISOString() : "")
+                      change("startsAt", fromLocalInput(event.target.value))
                     }
                   />
                   <LockedSuffix locked={locked("startsAt")} />
@@ -572,7 +578,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                   value={toLocalInput(form.endsAt)}
                   min={locks.used && existing ? toLocalInput(existing.endsAt) : undefined}
                   onChange={(event) =>
-                    change("endsAt", event.target.value ? new Date(event.target.value).toISOString() : "")
+                    change("endsAt", fromLocalInput(event.target.value))
                   }
                 />
               </FormField>

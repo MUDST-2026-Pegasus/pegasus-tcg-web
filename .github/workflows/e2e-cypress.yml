@@ -1,10 +1,9 @@
 name: Cypress E2E Tests
 
 on:
-  push:
-    branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
+  workflow_call:
 
 concurrency:
   group: e2e-${{ github.workflow }}-${{ github.ref }}
@@ -71,6 +70,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
-          path: cypress/screenshots/
+          path: src/test/cypress/screenshots/
           if-no-files-found: ignore
           retention-days: 7

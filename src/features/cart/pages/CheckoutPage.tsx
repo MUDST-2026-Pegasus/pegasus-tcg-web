@@ -390,7 +390,10 @@ export function CheckoutPage() {
             return next;
           });
           await quotes.refetch();
-        } else if (error.code === "PROMO_CHANGED") {
+        } else if (
+          error.code === "PROMO_CHANGED" ||
+          error.code === "PROMO_USED_UP"
+        ) {
           const details = error.details as Record<string, unknown> | undefined;
           const droppedCode =
             typeof details?.code === "string" ? details.code : undefined;
