@@ -147,7 +147,7 @@ describe("ReorderPreviewModal", () => {
     ).toBeInTheDocument();
   });
 
-  it("triggers onClose and navigates to /products/:id when clicking 'สั่งซื้ออีกครั้ง →'", async () => {
+  it("triggers onClose and navigates to /products/${item.productSlug} when clicking 'สั่งซื้ออีกครั้ง →'", async () => {
     const user = userEvent.setup();
     const handleClose = vi.fn();
 
@@ -168,7 +168,115 @@ describe("ReorderPreviewModal", () => {
     await user.click(reorderButtons[0]);
 
     expect(handleClose).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith("/products/101");
+    expect(mockNavigate).toHaveBeenCalledWith("/products/charizard-ex");
+  });
+
+  it("navigates to /products/${item.catalogVariantId} as fallback when productSlug is missing", async () => {
+    const user = userEvent.setup();
+    const handleClose = vi.fn();
+
+    const noSlugResponse: ReorderItemsResponse = {
+      orderId: 67,
+      orderNumber: "PGS-TEST-REORDER-002",
+      items: [
+        {
+          orderItemId: 1,
+          catalogVariantId: 136,
+          productSlug: "",
+          productName: "Playmat",
+          variantLabel: "ACCESSORY",
+          originalCondition: "SEALED",
+          originalPrice: 900,
+          originalQuantity: 1,
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useReorderItems").mockReturnValue({
+      data: noSlugResponse,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderItems>);
+
+    renderWithProviders(
+      <ReorderPreviewModal isOpen onClose={handleClose} orderId={67} />
+    );
+
+    const reorderButtons = screen.getAllByRole("button", {
+      name: /สั่งซื้ออีกครั้ง/i,
+    });
+    await user.click(reorderButtons[0]);
+
+    expect(handleClose).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).toHaveBeenCalledWith("/products/136");
+  });
+
+  it("deduplicates identical cards in an order and renders only 1 row", () => {
+    const duplicatedResponse: ReorderItemsResponse = {
+      orderId: 67,
+      orderNumber: "PGS-TEST-DUPLICATES",
+      items: [
+        {
+          orderItemId: 1,
+          catalogVariantId: 101,
+          productSlug: "charizard-ex",
+          productName: "Charizard ex",
+          variantLabel: "EN / FOIL • Obsidian Flames #125",
+          rarity: "HOLO",
+          imageUrl: "https://example.com/charizard.png",
+          originalCondition: "NM",
+          originalPrice: 150,
+          originalQuantity: 1,
+          originalSellerName: "Card Kingdom TH",
+        },
+        {
+          orderItemId: 2,
+          catalogVariantId: 101,
+          productSlug: "charizard-ex",
+          productName: "Charizard ex",
+          variantLabel: "EN / FOIL • Obsidian Flames #125",
+          rarity: "HOLO",
+          imageUrl: "https://example.com/charizard.png",
+          originalCondition: "NM",
+          originalPrice: 150,
+          originalQuantity: 2,
+          originalSellerName: "Card Kingdom TH",
+        },
+        {
+          orderItemId: 3,
+          catalogVariantId: 102,
+          productSlug: "bio-broly-sr",
+          productName: "Bio-Broly (SR)",
+          variantLabel: "JP / FOIL • Dragon Ball Super Card Game",
+          rarity: "SR",
+          imageUrl: undefined,
+          originalCondition: "DMG",
+          originalPrice: 8000,
+          originalQuantity: 1,
+          originalSellerName: "Dragon Ball Store",
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useReorderItems").mockReturnValue({
+      data: duplicatedResponse,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useReorderItems>);
+
+    renderWithProviders(<ReorderPreviewModal isOpen orderId={67} />);
+
+    // Charizard ex should appear only ONCE
+    const charizards = screen.getAllByText("Charizard ex");
+    expect(charizards).toHaveLength(1);
+
+    // Total reorder buttons should be 2 (Charizard ex + Bio-Broly (SR))
+    const reorderButtons = screen.getAllByRole("button", {
+      name: /สั่งซื้ออีกครั้ง/i,
+    });
+    expect(reorderButtons).toHaveLength(2);
   });
 
   it("triggers onClose when clicking 'ปิด'", async () => {

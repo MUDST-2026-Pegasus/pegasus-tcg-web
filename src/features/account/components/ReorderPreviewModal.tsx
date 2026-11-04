@@ -115,19 +115,29 @@ export function ReorderPreviewModal({
     return null;
   }, [previewData, order]);
 
-  const items: ReorderItemDto[] = useMemo(
-    () => activeData?.items ?? [],
-    [activeData]
-  );
+  const uniqueItems = useMemo(() => {
+    if (!activeData?.items) return [];
+    return activeData.items.filter(
+      (item, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            (t.productSlug && t.productSlug === item.productSlug) ||
+            (t.catalogVariantId && t.catalogVariantId === item.catalogVariantId)
+        )
+    );
+  }, [activeData]);
 
   const displayOrderNumber =
     activeData?.orderNumber ||
     order?.orderNumber ||
     (activeOrderId ? String(activeOrderId) : "");
 
-  const handleReorderItem = (item: ReorderItemDto) => {
+  const handleReorderClick = (item: ReorderItemDto) => {
     handleClose();
-    navigate(`/products/${item.catalogVariantId}`);
+    // Prioritize productSlug for PDP routing (e.g. /products/fb05-119-son-goku-scr)
+    const targetSlug = item.productSlug || item.catalogVariantId;
+    navigate(`/products/${targetSlug}`);
   };
 
   return (
@@ -203,12 +213,12 @@ export function ReorderPreviewModal({
                 ลองใหม่
               </Button>
             </div>
-          ) : items.length === 0 ? (
+          ) : uniqueItems.length === 0 ? (
             <div className="border border-slate-200 rounded-xl p-8 text-center text-sm text-slate-500">
               ไม่พบรายการสินค้าในคำสั่งซื้อนี้
             </div>
           ) : (
-            items.map((item) => (
+            uniqueItems.map((item) => (
               <div
                 key={item.orderItemId}
                 className="rounded-xl border border-slate-200 p-4 bg-white hover:bg-slate-50/50 transition flex items-center justify-between gap-4"
@@ -247,7 +257,7 @@ export function ReorderPreviewModal({
                 {/* Right Column: Action Button */}
                 <Button
                   type="button"
-                  onClick={() => handleReorderItem(item)}
+                  onClick={() => handleReorderClick(item)}
                   className="bg-[#006699] hover:bg-[#005580] text-white rounded-lg px-4 py-2 font-medium text-xs sm:text-sm shrink-0 flex items-center gap-1 transition-colors shadow-none cursor-pointer"
                 >
                   สั่งซื้ออีกครั้ง →
