@@ -402,14 +402,14 @@ function RuleForm({
             <div className="grid gap-4 sm:grid-cols-2">
               <Field className="gap-1.5" data-invalid={!!errors.effectiveFrom}>
                 <FieldLabel htmlFor={`${id}-from`} className="text-xs">เริ่มมีผล</FieldLabel>
-                <DateTimePicker id={`${id}-from`} aria-label="เริ่มมีผล" className={FIELD}
+                <DateTimePicker id={`${id}-from`} aria-label="เริ่มมีผล" className={cn(FIELD, "hover:bg-card")}
                   invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
                   onChange={(value) => update("effectiveFrom", value)} />
                 <FieldError className="text-xs">{errors.effectiveFrom}</FieldError>
               </Field>
               <Field className="gap-1.5" data-invalid={!!errors.effectiveTo}>
                 <FieldLabel htmlFor={`${id}-to`} className="text-xs">สิ้นสุด</FieldLabel>
-                <DateTimePicker id={`${id}-to`} aria-label="สิ้นสุด" className={FIELD} defaultTime="23:59"
+                <DateTimePicker id={`${id}-to`} aria-label="สิ้นสุด" className={cn(FIELD, "hover:bg-card")} defaultTime="23:59"
                   invalid={!!errors.effectiveTo} min={draft.effectiveFrom} value={draft.effectiveTo}
                   onChange={(value) => update("effectiveTo", value)} />
                 <FieldDescription className="text-[11px]">เว้นว่าง = ใช้ต่อไปจนกว่าจะปิด</FieldDescription>

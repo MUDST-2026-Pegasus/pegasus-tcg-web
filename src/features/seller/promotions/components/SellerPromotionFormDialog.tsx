@@ -463,7 +463,7 @@ function DateField({
             invalid={!!errors[name]}
             min={min}
             defaultTime={name === "endsAt" ? "23:59" : "00:00"}
-            className="rounded-lg border-border text-[13px]"
+            className="rounded-lg border-border bg-card text-[13px] hover:bg-card disabled:bg-muted"
             value={toLocal(field.value)}
             onChange={(value) => {
               field.onChange(value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : "");

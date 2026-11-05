@@ -97,6 +97,7 @@ export function DateTimePicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
+        data-slot="date-picker"
         id={id}
         aria-label={ariaLabel}
         aria-invalid={invalid || undefined}
@@ -106,8 +107,9 @@ export function DateTimePicker({
             type="button"
             variant="outline"
             className={cn(
-              "h-9 w-full justify-start gap-2 bg-card px-3 text-left font-normal text-foreground hover:bg-card",
-              "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 disabled:bg-muted",
+              // หน้าตาเดียวกับ `Input` — หน้าไหนปรับมุม/กรอบของ input ให้ปรับ `data-slot="date-picker"` ด้วย
+              "h-9 w-full justify-start gap-2 rounded-3xl border-transparent bg-input/50 px-3 text-left text-sm font-normal text-foreground hover:bg-input/50",
+              "aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20",
               className,
             )}
           />
