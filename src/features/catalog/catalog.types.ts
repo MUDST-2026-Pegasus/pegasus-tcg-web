@@ -190,6 +190,7 @@ export type ProductCollectorDto = {
 };
 
 export type ProductSort =
+  | "relevance"
   | "name"
   | "newest"
   | "cardNumber"

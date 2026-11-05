@@ -29,6 +29,7 @@ export type PageResponse<T> = {
   size: number;
   totalItems: number;
   totalPages: number;
+  correctedQuery?: string;
 };
 
 export const API_ERROR_CODES = [
