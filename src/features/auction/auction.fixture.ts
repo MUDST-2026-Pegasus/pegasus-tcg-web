@@ -257,7 +257,23 @@ export const MY_AUCTION_PAGE_FIXTURE: MyAuctionPage = {
   unpaidStrikes: 0,
   strikeLimit: STRIKE_LIMIT,
   bannedUntil: null,
+  lastStrikeCardName: null,
   serverTime: serverTime(),
+};
+
+/** W1 + B3-H: ไม่ชำระมาแล้ว 1 ครั้ง */
+export const MY_AUCTION_PAGE_STRIKE_FIXTURE: MyAuctionPage = {
+  ...MY_AUCTION_PAGE_FIXTURE,
+  unpaidStrikes: 1,
+  lastStrikeCardName: I.charizard.card.productName,
+};
+
+/** W1 + B3-H: ครบ 3 ครั้ง ถูกห้ามบิด 30 วัน */
+export const MY_AUCTION_PAGE_BANNED_FIXTURE: MyAuctionPage = {
+  ...MY_AUCTION_PAGE_FIXTURE,
+  unpaidStrikes: 3,
+  bannedUntil: at(24 * DAY),
+  lastStrikeCardName: I.charizard.card.productName,
 };
 
 /** W1 ว่าง (AUC-E1) */
