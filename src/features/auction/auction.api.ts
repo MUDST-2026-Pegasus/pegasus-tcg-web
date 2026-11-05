@@ -214,8 +214,16 @@ export type SellerAuctionListParams = { status?: AuctionStatus; q?: string; page
 export function getSellerAuctions(params: SellerAuctionListParams = {}): Promise<SellerAuctionPage> {
   if (AUCTION_MOCK.seller) {
     const fixture = SELLER_AUCTION_PAGE_FIXTURE;
-    const items = params.status ? fixture.page.items.filter((r) => r.status === params.status) : fixture.page.items;
-    return mock({ ...fixture, page: { ...fixture.page, items } });
+    const q = params.q?.trim().toLowerCase();
+    const items = fixture.page.items.filter(
+      (r) => (!params.status || r.status === params.status) && (!q || r.item.card.productName.toLowerCase().includes(q)),
+    );
+    const filtered = items.length !== fixture.page.items.length;
+    return mock({
+      ...fixture,
+      page: filtered ? { ...fixture.page, items, totalItems: items.length, totalPages: items.length ? 1 : 0 } : fixture.page,
+      serverTime: nowIso(),
+    });
   }
   return api.get<SellerAuctionPage>("/sellers/me/auctions", { query: params });
 }
