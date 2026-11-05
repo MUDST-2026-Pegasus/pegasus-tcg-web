@@ -58,9 +58,11 @@ export const AUCTION_POLL_MS = 5_000;
 
 // ---------- public / ผู้ซื้อ ----------
 
-export function useAuctions(params: AuctionListParams = {}) {
+/** @param options.enabled `false` = ยังไม่พร้อมยิง เช่น รอรายชื่อเกมไปแปลง slug */
+export function useAuctions(params: AuctionListParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: auctionKeys.list(params),
+    enabled: options.enabled ?? true,
     queryFn: () => auctionApi.getAuctions(params),
     placeholderData: keepPreviousData,
     staleTime: 0,
