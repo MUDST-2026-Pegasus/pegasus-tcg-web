@@ -94,8 +94,18 @@ export function PaymentPage() {
       query.state.data?.status === "AWAITING_VERIFICATION" ? 5000 : false,
   });
   const payment = statusQuery.data ?? paymentQuery.data;
-  const account = transferAccount(payment?.transferAccountJson);
+  const rawAccount = transferAccount(payment?.transferAccountJson);
+  const account = {
+    ...rawAccount,
+    bankName: payment?.bankName ?? rawAccount.bankName,
+    accountName: payment?.accountName ?? rawAccount.accountName,
+    promptPayId: payment?.promptpayId ?? rawAccount.promptpayId ?? rawAccount.promptPayId,
+    promptpayId: payment?.promptpayId ?? rawAccount.promptpayId ?? rawAccount.promptPayId,
+    qrPayload: payment?.qrPayload ?? rawAccount.qrPayload,
+  };
+  const qrPayload = payment?.qrPayload ?? rawAccount.qrPayload;
   const timeLeft = usePaymentCountdown(payment?.expiresAt);
+  const isExpired = timeLeft === "00:00" || payment?.status === "EXPIRED";
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -203,7 +213,8 @@ export function PaymentPage() {
     !hasUploadedSlip ||
     slip.isUploading ||
     isSubmitting ||
-    isAwaitingVerification;
+    isAwaitingVerification ||
+    isExpired;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[#F8FAFC]/50 py-6 md:py-8">
@@ -242,14 +253,32 @@ export function PaymentPage() {
                 </div>
 
                 {/* Expiration Timer Badge */}
-                <div className="inline-flex items-center gap-2.5 bg-[#FFF6ED] border border-[#FFE8D1] rounded-full px-4 py-2 self-start sm:self-center">
-                  <Clock className="size-4.5 text-amber-600 shrink-0" />
+                <div
+                  className={`inline-flex items-center gap-2.5 rounded-full px-4 py-2 self-start sm:self-center border transition-colors ${
+                    isExpired
+                      ? "bg-red-50 border-red-200"
+                      : "bg-[#FFF6ED] border-[#FFE8D1]"
+                  }`}
+                >
+                  <Clock
+                    className={`size-4.5 shrink-0 ${
+                      isExpired ? "text-red-600" : "text-amber-600"
+                    }`}
+                  />
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-medium text-amber-600 leading-tight">
-                      Expires in
+                    <span
+                      className={`text-[10px] font-medium leading-tight ${
+                        isExpired ? "text-red-600" : "text-amber-600"
+                      }`}
+                    >
+                      {isExpired ? "Status" : "Expires in"}
                     </span>
-                    <span className="text-sm font-bold text-amber-900 leading-tight">
-                      {timeLeft}
+                    <span
+                      className={`text-sm font-bold leading-tight ${
+                        isExpired ? "text-red-700" : "text-amber-900"
+                      }`}
+                    >
+                      {isExpired ? "Expired (00:00)" : timeLeft}
                     </span>
                   </div>
                 </div>
@@ -265,7 +294,9 @@ export function PaymentPage() {
                   <PaymentQrCard
                     amount={payment.amount}
                     orderNumber={orderNumber}
+                    qrPayload={qrPayload}
                     account={account}
+                    isExpired={isExpired}
                   />
                 </div>
 
@@ -364,10 +395,14 @@ export function PaymentPage() {
               {/* Status Alert for Failed / Expired */}
               {(payment.status === "FAILED" ||
                 payment.status === "EXPIRED" ||
-                payment.status === "CANCELLED") && (
+                payment.status === "CANCELLED" ||
+                isExpired) && (
                 <div className="mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-center space-y-3">
                   <p role="alert" className="text-sm font-medium text-destructive">
-                    {payment.failureReason || `การชำระเงินสถานะ: ${payment.status}`}
+                    {payment.failureReason ||
+                      (isExpired
+                        ? "การชำระเงินหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง"
+                        : `การชำระเงินสถานะ: ${payment.status}`)}
                   </p>
                   <Button
                     variant="outline"

@@ -8,6 +8,10 @@ export type Payment = {
   transferAccountJson: string;
   referenceCode: string | null;
   failureReason: string | null;
+  qrPayload?: string | null;
+  promptpayId?: string | null;
+  bankName?: string | null;
+  accountName?: string | null;
 };
 
 export type Refund = {

@@ -160,4 +160,46 @@ describe("PaymentPage", () => {
     const dropzone = screen.getByRole("button", { name: /payment submitted/i });
     expect(dropzone).toHaveAttribute("aria-disabled", "true");
   });
+
+  it("renders dynamic QR and bank info when backend returns qrPayload, promptpayId, bankName, accountName", async () => {
+    const dynamicPayment = {
+      ...payment,
+      amount: 2990,
+      qrPayload: "00020101021229370016A00000067701011101130066812345678530376454072990.005802TH6304XXXX",
+      promptpayId: "081-234-5678",
+      bankName: "Kasikornbank",
+      accountName: "Pegasus Card Shop",
+    };
+    vi.mocked(financeApi.createPayment).mockResolvedValue(dynamicPayment);
+    vi.mocked(financeApi.getPayment).mockResolvedValue(dynamicPayment);
+    vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "PGS-42" } as never);
+
+    renderPaymentPage(42);
+
+    expect(await screen.findByText("Pegasus Card Shop")).toBeInTheDocument();
+    expect(screen.getByText(/Kasikornbank/)).toBeInTheDocument();
+    expect(screen.getByText("PromptPay ID 081-234-5678")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
+    expect(screen.queryByText(/DEMO QR/i)).not.toBeInTheDocument();
+  });
+
+  it("shows expired overlay and disables submit button when payment has expired", async () => {
+    const expiredPayment = {
+      ...payment,
+      status: "EXPIRED",
+      amount: 1500,
+      promptpayId: "081-234-5678",
+      qrPayload: "EXPIRED_PAYLOAD",
+    };
+    vi.mocked(financeApi.createPayment).mockResolvedValue(expiredPayment);
+    vi.mocked(financeApi.getPayment).mockResolvedValue(expiredPayment);
+    vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "ORD-42" } as never);
+
+    renderPaymentPage(42);
+
+    expect(await screen.findByText("QR หมดอายุแล้ว")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Submit payment for verification/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Save QR/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /เริ่มการชำระเงินใหม่/i })).toBeInTheDocument();
+  });
 });
