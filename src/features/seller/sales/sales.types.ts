@@ -1,9 +1,9 @@
-import type { SaleType } from "@/components/sale";
+import type { CardCondition } from "@/features/catalog/catalog.types";
 import type { PageResponse } from "@/lib/api";
 
 /**
  * การลดราคาสินค้าของร้าน (TCG-682 · SAL-03 `/sellers/me/sales`) — ร้านออกเงินเอง
- * ลอกตามสัญญา API ใน Jira SAL-03 (TCG-678) — ถ้า DTO ฝั่ง `pegasus-tcg-api` ต่างไป ต้องตามมาแก้ที่นี่
+ * ตรงกับ `SellerSaleViews` / `SellerSaleRequest` ใน `pegasus-tcg-api` — แก้ DTO ฝั่งนั้นต้องตามมาแก้ที่นี่
  */
 
 export type SellerSaleStatus = "SCHEDULED" | "ACTIVE" | "PAUSED" | "ENDED" | "SOLD_OUT" | "BUDGET_EXHAUSTED";
@@ -11,36 +11,59 @@ export type SellerSaleScope = "SHOP" | "CATEGORY" | "LISTINGS";
 /** `FIXED_PRICE` = ราคาใหม่รายแถว (เฉพาะแบบเลือก listing) */
 export type SellerSaleDiscountType = "PERCENT" | "FIXED_OFF" | "FIXED_PRICE";
 
-export type SellerSaleItem = { listingId: number; salePrice: number };
+/** แคมเปญ Pegasus ที่ครอบ listing นี้อยู่ด้วย (เตือนใน S2) */
+export type SellerSalePlatformPrice = {
+  saleId: number;
+  name: string;
+  slug: string | null;
+  salePrice: number;
+  startsAt: string;
+  endsAt: string;
+};
+
+/** listing ของแบบเลือก listing (`items` ว่างสำหรับ SHOP / CATEGORY) */
+export type SellerSaleItem = {
+  listingId: number;
+  productName: string;
+  condition: CardCondition;
+  listPrice: number;
+  /** `null` = listing ไม่ได้ขายอยู่แล้ว */
+  salePrice: number | null;
+  platform: SellerSalePlatformPrice | null;
+  /** ราคาที่ผู้ซื้อได้ระหว่างที่ทับกัน (เท่ากันให้ Pegasus) — `null` เมื่อไม่มีแคมเปญ Pegasus */
+  winner: "THIS_SALE" | "PLATFORM" | null;
+};
 
 export type SellerSale = {
   id: number;
   name: string;
-  saleType: Extract<SaleType, "SHOP_SALE">;
-  discountType: SellerSaleDiscountType;
-  /** % หรือบาทต่อชิ้น · `FIXED_PRICE` = 0 */
-  discountValue: number;
-  /** ช่วง % ของราคารายแถว เช่น 12–35 */
-  minDiscountPercent: number | null;
-  maxDiscountPercent: number | null;
+  slug: string | null;
   scopeType: SellerSaleScope;
   scopeIds: number[];
-  /** ชื่อหมวดของขอบเขต CATEGORY (แสดงในตาราง) */
-  scopeNames: string[];
-  listingCount: number;
-  soldUnits: number;
-  orderCount: number;
+  discountType: SellerSaleDiscountType;
+  /** % หรือบาทต่อชิ้น · `FIXED_PRICE` ไม่ใช้ */
+  discountValue: number | null;
+  maxDiscountPerUnit: number | null;
+  conditions: CardCondition[];
+  minUnitPrice: number | null;
   startsAt: string;
   endsAt: string;
+  endedAt: string | null;
   status: SellerSaleStatus;
   pausedAt: string | null;
-  /** แอดมินหยุด — ร้าน resume เองไม่ได้ (`SALE_PAUSED`) */
-  pausedByAdmin: boolean;
+  /** Pegasus หยุด — ร้าน resume เองไม่ได้ (`SALE_PAUSED`) และ `pauseReason` บอกเหตุผล */
+  pausedByPegasus: boolean;
   pauseReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** ชิ้นที่ขายด้วยราคานี้ (ทุกออเดอร์) — มากกว่า 0 = มีออเดอร์แล้ว */
+  soldUnits: number;
+  listingCount: number;
+  items: SellerSaleItem[];
 };
 
-/** `GET /sellers/me/sales/{id}` — มีราคารายแถวสำหรับแบบเลือก listing */
-export type SellerSaleDetail = SellerSale & { items: SellerSaleItem[] };
+/** `GET /sellers/me/sales/{id}` — ตัวเดียวกับในรายการ */
+export type SellerSaleDetail = SellerSale;
 
 /** body ของ `POST/PUT /sellers/me/sales` */
 export type SellerSaleInput = {
@@ -49,10 +72,12 @@ export type SellerSaleInput = {
   endsAt: string;
   scopeType: SellerSaleScope;
   scopeIds: number[];
-  discountType: SellerSaleDiscountType;
-  /** SHOP / CATEGORY: % หรือบาท · LISTINGS: `null` (ราคาอยู่ใน `items`) */
+  /** `null` / `FIXED_PRICE` เมื่อทุก item มีราคาของตัวเอง */
+  discountType: SellerSaleDiscountType | null;
+  /** SHOP / CATEGORY: % หรือบาท · LISTINGS ราคารายแถว: `null` */
   discountValue: number | null;
-  items: SellerSaleItem[] | null;
+  /** item ที่ `salePrice = null` ใช้ส่วนลดทั้งแคมเปญ */
+  items: { listingId: number; salePrice: number | null }[] | null;
 };
 
 export type SellerSalePage = {
@@ -63,30 +88,23 @@ export type SellerSalePage = {
 /** `GET /sellers/me/sales/summary` */
 export type SellerSaleSummary = {
   activeSales: number;
-  scheduledSales: number;
   listingsOnSale: number;
-  totalListings: number;
-  saleRevenue30d: number;
-  saleUnits30d: number;
+  /** ยอดที่ผู้ซื้อจ่ายด้วยราคาลดของร้าน (ออเดอร์จ่ายแล้ว 30 วัน) */
+  saleSales30d: number;
   shopDiscount30d: number;
 };
 
-/** `GET /sellers/me/sales/platform-listings` — listing ของร้านที่อยู่ในแคมเปญ Pegasus */
+/** `GET /sellers/me/sales/platform-listings` (แบ่งหน้า) — listing ของร้านที่ขายด้วยราคาแคมเปญ Pegasus อยู่ตอนนี้ */
 export type PlatformSaleListing = {
   listingId: number;
   productName: string;
-  conditionLabel: string;
-  saleId: number;
-  saleName: string;
-  saleType: SaleType;
+  condition: CardCondition;
   listPrice: number;
   salePrice: number;
-  discountPercent: number;
-  startsAt: string;
+  saleId: number;
+  saleName: string;
+  saleSlug: string | null;
   endsAt: string;
-  status: SellerSaleStatus;
-  soldUnits: number;
-  quota: number | null;
   /** ขึ้นราคาไม่ได้ระหว่างแคมเปญ */
   priceLocked: boolean;
 };

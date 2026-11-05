@@ -11,26 +11,30 @@ export const SAMPLE_SELLER_COMMISSION = 0.05;
 
 const DAY_MS = 86_400_000;
 
-/** "ทุกสินค้าในร้าน" / "หมวด Booster Box" / "เลือก 6 listing" */
-export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeNames" | "listingCount">): string {
+/** "ทุกสินค้าในร้าน" / "2 หมวด" / "เลือก 6 listing" — API ไม่ส่งชื่อหมวดมา */
+export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeIds" | "items">): string {
   if (sale.scopeType === "SHOP") return "ทุกสินค้าในร้าน";
-  if (sale.scopeType === "LISTINGS") return `เลือก ${sale.listingCount.toLocaleString("th-TH")} listing`;
-  return sale.scopeNames.length ? `หมวด ${sale.scopeNames.join(", ")}` : "หมวดหมู่";
+  if (sale.scopeType === "LISTINGS") return `เลือก ${sale.items.length.toLocaleString("th-TH")} listing`;
+  return `${sale.scopeIds.length.toLocaleString("th-TH")} หมวด`;
 }
 
 /** "ลด 15%" / "ลด ฿150/ชิ้น" / "ราคาใหม่รายชิ้น" */
 export function sellerDiscountLabel(sale: Pick<SellerSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
-  if (sale.discountType === "FIXED_OFF") return `ลด ${formatSaleBaht(sale.discountValue)}/ชิ้น`;
+  if (sale.discountType === "FIXED_OFF") return `ลด ${formatSaleBaht(sale.discountValue ?? 0)}/ชิ้น`;
   return "ราคาใหม่รายชิ้น";
 }
 
 export function sellerDiscountDetail(sale: SellerSale): string {
   if (sale.discountType !== "FIXED_PRICE") return "ร้านออกเงิน";
-  if (sale.minDiscountPercent == null || sale.maxDiscountPercent == null) return "ตั้งรายแถว";
-  return sale.minDiscountPercent === sale.maxDiscountPercent
-    ? `ลด ${sale.minDiscountPercent}%`
-    : `ลด ${sale.minDiscountPercent}–${sale.maxDiscountPercent}%`;
+  // ช่วง % คิดจากราคารายแถว (item ที่ยังขายอยู่)
+  const percents = sale.items
+    .filter((item) => item.salePrice != null && item.listPrice > 0)
+    .map((item) => Math.round((100 * (item.listPrice - (item.salePrice ?? item.listPrice))) / item.listPrice));
+  if (percents.length === 0) return "ตั้งรายแถว";
+  const min = Math.min(...percents);
+  const max = Math.max(...percents);
+  return min === max ? `ลด ${min}%` : `ลด ${min}–${max}%`;
 }
 
 /** "เหลือ 7 วัน" / "เริ่มใน 24 วัน" / "ทีมงานหยุด" */
@@ -42,7 +46,7 @@ export function sellerPeriodHint(sale: SellerSale, now: number): string {
     case "SCHEDULED":
       return `เริ่มใน ${days(sale.startsAt)} วัน`;
     case "PAUSED":
-      return sale.pausedByAdmin ? "ทีมงานหยุด" : "หยุดไว้";
+      return sale.pausedByPegasus ? "ทีมงานหยุด" : "หยุดไว้";
     default:
       return "สิ้นสุดแล้ว";
   }
