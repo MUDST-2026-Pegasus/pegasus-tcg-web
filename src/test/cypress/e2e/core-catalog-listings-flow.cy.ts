@@ -202,7 +202,7 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
     cy.visit('/listings/101');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Card Kingdom').should('be.visible');
-    cy.contains('จำนวนที่มี: 1').should('be.visible');
+    cy.contains('มี 1 ชิ้น').should('be.visible');
     cy.contains('รายละเอียดจากผู้ขาย').should('be.visible');
     cy.contains('Near mint condition').should('be.visible');
     cy.contains('PSA 9').should('be.visible');
