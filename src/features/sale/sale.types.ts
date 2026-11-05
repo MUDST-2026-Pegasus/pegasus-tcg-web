@@ -4,44 +4,51 @@ import type { PageResponse } from "@/lib/api";
 
 /**
  * ฝั่งผู้ซื้อของการลดราคาโดยตรง (TCG-683 · SAL-04 `/sales`, `/sales/{slug}`, `/sales/featured`, `/search?onSale=true`)
- * ลอกตามสัญญา API ใน Jira SAL-04 (TCG-679) — ถ้า DTO ฝั่ง `pegasus-tcg-api` ต่างไป ต้องตามมาแก้ที่นี่
+ * ตรงกับ `BuyerSaleViews` ใน `pegasus-tcg-api` — แก้ DTO ฝั่งนั้นต้องตามมาแก้ที่นี่
  * ผู้ซื้อไม่เห็นว่าใครออกเงินส่วนลด
  */
 
 export type PublicSaleStatus = "SCHEDULED" | "ACTIVE" | "PAUSED" | "ENDED" | "SOLD_OUT" | "BUDGET_EXHAUSTED";
 
-/** แคมเปญหนึ่งรายการ (แท็บหน้า SALE / hero / แบนเนอร์หน้าแรก) */
+/** หัวแคมเปญ (`SaleHeader`) — แท็บหน้า SALE / hero / แบนเนอร์หน้าแรก */
 export type PublicSale = {
   id: number;
   /** `null` = การลดราคาของร้าน (ไม่มีหน้า /sale/{slug}) */
   slug: string | null;
   name: string;
   type: SaleType;
+  /** Flash ที่ใกล้เริ่มเป็น `SCHEDULED` · จบแล้ว `ENDED` */
+  status: PublicSaleStatus;
   discountType: "PERCENT" | "FIXED_OFF" | "FIXED_PRICE";
-  discountValue: number;
+  discountValue: number | null;
   maxDiscountPerUnit: number | null;
-  conditions: CardCondition[];
-  minUnitPrice: number | null;
+  perListingQuota: number | null;
   perBuyerLimit: number | null;
-  /** ชื่อขอบเขตสั้น ๆ เช่น "ทุกการ์ด Pokémon" / "ชุด OP-09" */
-  scopeLabel: string | null;
   bannerImageUrl: string | null;
   startsAt: string;
   endsAt: string;
-  status: PublicSaleStatus;
+  /** ร้านที่ลดเอง — `null` = แคมเปญ Pegasus */
+  shop: { username: string; displayName: string | null } | null;
+  /** listing ที่ขายด้วยราคานี้ตอนนี้ */
   listingCount: number;
-  sellerCount: number;
 };
 
-/** `GET /sales/featured` — ไม่มีอะไรบนหน้าแรก backend ส่ง `null` */
+/** การ์ด Flash ที่ขายครบโควตาแล้ว — `listing.pricing` คือราคาตอนนี้ · `flashPrice` คือราคาตอน Flash */
+export type SoldOutFlashCard = {
+  listing: PublicListingDto;
+  flashPrice: number;
+  discountPercent: number;
+};
+
+/** `GET /sales/featured` */
 export type FeaturedSales = {
-  /** Flash Sale บนหน้าแรก (ครั้งละ 1) + 12 listing แรก · ก่อนเริ่ม ≤ 24 ชม. `status = SCHEDULED` */
-  flash: { sale: PublicSale; listings: PublicListingDto[] } | null;
-  /** แบนเนอร์ CATEGORY_SALE ที่ featured เรียงตาม home_sort */
-  banners: PublicSale[];
+  /** Flash Sale บนหน้าแรก + การ์ดสูงสุด 12 ใบ (ที่ยังขาย + ที่หมดโควตา) — `null` เมื่อไม่มี */
+  flashSale: { sale: PublicSale; listings: PublicListingDto[]; soldOut: SoldOutFlashCard[] } | null;
+  /** แบนเนอร์แคมเปญ Pegasus ที่ featured */
+  categorySales: PublicSale[];
 };
 
-/** `GET /sales/{slug}` */
+/** `GET /sales/{slug}` — แคมเปญจบแล้วไม่มี listing */
 export type SaleDetail = {
   sale: PublicSale;
   listings: PageResponse<PublicListingDto>;
@@ -49,16 +56,14 @@ export type SaleDetail = {
 
 export type SaleSort = "discount_desc" | "price_asc" | "ending_soon";
 
-/** filter เดียวกับ search (SAL-04) */
+/** filter เดียวกับ `GET /listings` (ตลาด) */
 export type SaleListingQuery = {
-  categoryId?: number;
-  condition?: CardCondition[];
+  gameId?: number;
+  condition?: CardCondition;
   minDiscount?: number;
   minPrice?: number;
   maxPrice?: number;
   sort?: SaleSort;
-  /** `/sale` แท็บ "ร้านลดราคา" */
-  owner?: "SELLER";
   page?: number;
   size?: number;
 };

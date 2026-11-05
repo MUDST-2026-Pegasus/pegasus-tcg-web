@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
-import { useCategoryList } from "@/features/catalog/catalog.queries";
+import { useGameList } from "@/features/catalog/catalog.queries";
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { cn } from "@/lib/utils";
 
@@ -29,29 +29,27 @@ const CHIP =
   "inline-flex h-8 items-center gap-1 rounded-full border bg-card px-3 text-[13px] text-foreground aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background";
 
 /**
- * Figma SAL-B2 — `/sale` (ทุกอย่างที่ลด · `GET /search?onSale=true`) และ `/sale/:slug` (`GET /sales/{slug}`)
+ * Figma SAL-B2 — `/sale` (ทุกอย่างที่ลด · `GET /listings?onSale=true`) และ `/sale/:slug` (`GET /sales/{slug}`)
  * filter / sort อยู่ใน URL · ราคาทุกใบมาจาก `pricing` ของ API
  */
 export function SalePage() {
   const { slug = null } = useParams<{ slug: string }>();
   const [params, setParams] = useSearchParams();
-  const shopOnly = !slug && params.get("tab") === "shop";
   const query = useMemo<SaleListingQuery>(
     () => ({
-      categoryId: Number(params.get("category")) || undefined,
-      condition: params.get("condition") ? [params.get("condition") as CardCondition] : undefined,
+      gameId: Number(params.get("game")) || undefined,
+      condition: (params.get("condition") as CardCondition | null) ?? undefined,
       minDiscount: Number(params.get("minDiscount")) || undefined,
       minPrice: Number(params.get("minPrice")) || undefined,
       maxPrice: Number(params.get("maxPrice")) || undefined,
       sort: (params.get("sort") as SaleSort | null) ?? "discount_desc",
-      owner: shopOnly ? "SELLER" : undefined,
     }),
-    [params, shopOnly],
+    [params],
   );
 
   const sales = useSales();
   const listings = useSaleListings(slug, query);
-  const categories = useCategoryList();
+  const games = useGameList();
   const pages = listings.data?.pages ?? [];
   const items = pages.flatMap((page) => page.page.items);
   const total = pages[0]?.page.totalItems ?? 0;
@@ -93,7 +91,7 @@ export function SalePage() {
       </header>
 
       <nav aria-label="แคมเปญลดราคา" className="flex flex-wrap gap-2">
-        <TabLink to="/sale" active={!slug && !shopOnly}>
+        <TabLink to="/sale" active={!slug}>
           ทั้งหมด {allCount ? allCount.toLocaleString("th-TH") : ""}
         </TabLink>
         {(sales.data ?? [])
@@ -105,24 +103,21 @@ export function SalePage() {
               {item.status === "SCHEDULED" ? " · เร็วๆ นี้" : ""}
             </TabLink>
           ))}
-        <TabLink to="/sale?tab=shop" active={shopOnly}>
-          ร้านลดราคา
-        </TabLink>
       </nav>
 
       {sale ? <CampaignHero key={sale.id} sale={sale} /> : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <NativeSelect
-          aria-label="หมวดหมู่"
+          aria-label="เกม"
           className="h-8 rounded-full text-[13px]"
-          value={params.get("category") ?? ""}
-          onChange={(event) => setParam("category", event.target.value || null)}
+          value={params.get("game") ?? ""}
+          onChange={(event) => setParam("game", event.target.value || null)}
         >
-          <NativeSelectOption value="">หมวดหมู่</NativeSelectOption>
-          {(categories.data ?? []).map((category) => (
-            <NativeSelectOption key={category.id} value={String(category.id)}>
-              {category.name}
+          <NativeSelectOption value="">ทุกเกม</NativeSelectOption>
+          {(games.data ?? []).map((game) => (
+            <NativeSelectOption key={game.id} value={String(game.id)}>
+              {game.name}
             </NativeSelectOption>
           ))}
         </NativeSelect>
@@ -290,7 +285,7 @@ function CampaignHero({ sale }: { sale: PublicSale }) {
           <p className="text-xs opacity-80">{ended ? "สถานะ" : upcoming ? "เริ่มในอีก" : "เหลืออีก"}</p>
           <p className="text-2xl font-black tabular-nums">{ended ? "จบแล้ว" : formatCountdown(left)}</p>
           <p className="text-xs opacity-80">
-            {sale.listingCount.toLocaleString("th-TH")} listing จาก {sale.sellerCount.toLocaleString("th-TH")} ร้าน
+            {sale.listingCount.toLocaleString("th-TH")} listing{sale.shop ? ` · ร้าน ${sale.shop.displayName ?? sale.shop.username}` : ""}
           </p>
         </div>
       </section>
