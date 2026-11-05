@@ -20,7 +20,7 @@ export function DashboardLayout({ role, groups }: DashboardLayoutProps) {
   return (
     <div
       className="flex min-h-svh flex-col"
-      style={{ "--navbar-h": "75px" } as React.CSSProperties}
+      style={{ "--navbar-h": "109px" } as React.CSSProperties}
     >
       <Navbar />
 

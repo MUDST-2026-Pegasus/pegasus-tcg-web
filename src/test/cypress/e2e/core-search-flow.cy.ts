@@ -112,18 +112,18 @@ describe('Core Search & Navigation Flow', () => {
 
     cy.visit('/');
 
-    // Click search icon in Navbar
-    cy.get('header a[aria-label="Search"]').click();
+    // Submit the navbar search field
+    cy.get('header form[role="search"] input').first().type('Blue-Eyes{enter}');
 
     // Verify URL
-    cy.url().should('include', '/search');
+    cy.url().should('include', '/search?q=Blue-Eyes');
 
     // Wait for API calls
     cy.wait('@getGames');
     cy.wait('@getProducts');
 
     // Verify search page contents
-    cy.contains('h1', 'All products').should('be.visible');
+    cy.contains('Search results for "Blue-Eyes"').should('be.visible');
     cy.contains('2 results').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
