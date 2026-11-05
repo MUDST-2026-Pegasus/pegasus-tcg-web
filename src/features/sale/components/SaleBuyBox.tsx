@@ -110,27 +110,31 @@ export function SaleBuyBox({
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span>จำนวน:</span>
           <div className="flex items-center rounded-full border">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               aria-label="ลดจำนวน"
-              className="p-1.5 disabled:opacity-40"
+              className="size-7 rounded-full"
               disabled={quantity <= 1}
               onClick={() => setQuantity((value) => value - 1)}
             >
               <Minus className="size-3.5" />
-            </button>
+            </Button>
             <span className="w-6 text-center font-semibold text-foreground" aria-live="polite">
               {quantity}
             </span>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               aria-label="เพิ่มจำนวน"
-              className="p-1.5 disabled:opacity-40"
+              className="size-7 rounded-full"
               disabled={quantity >= max}
               onClick={() => setQuantity((value) => value + 1)}
             >
               <Plus className="size-3.5" />
-            </button>
+            </Button>
           </div>
           {flash && limit != null && pricing ? (
             <span>
