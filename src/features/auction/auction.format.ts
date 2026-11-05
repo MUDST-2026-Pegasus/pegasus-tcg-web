@@ -91,9 +91,7 @@ export type AuctionPillKind =
   | "Lost"
   | "Ended"
   | "Unsold"
-  | "SecondChance"
-  | "Suspended"
-  | "NeedsDecision";
+  | "Suspended";
 
 export const AUCTION_PILL_LABEL: Record<AuctionPillKind, string> = {
   Live: "กำลังประมูล",
@@ -105,9 +103,7 @@ export const AUCTION_PILL_LABEL: Record<AuctionPillKind, string> = {
   Lost: "ไม่ชนะ",
   Ended: "จบแล้ว",
   Unsold: "ไม่มีผู้บิด",
-  SecondChance: "ข้อเสนออันดับ 2",
   Suspended: "ถูกระงับ",
-  NeedsDecision: "รอผู้ขายเลือก",
 };
 
 /** ป้ายของประมูลตามสถานะ (มุมผู้ขาย / แอดมิน / คนทั่วไป) — LIVE ที่เหลือ < 2 นาทีเป็น "ใกล้จบ" */
@@ -117,10 +113,6 @@ export function pillForStatus(status: AuctionStatus, remaining?: number): Auctio
       return remaining !== undefined && remaining < URGENT_THRESHOLD_MS ? "EndingSoon" : "Live";
     case "AWAITING_PAYMENT":
       return "AwaitingPayment";
-    case "AWAITING_SELLER_DECISION":
-      return "NeedsDecision";
-    case "OFFERED_TO_SECOND":
-      return "SecondChance";
     case "SOLD":
       return "Ended";
     case "UNSOLD":
@@ -140,8 +132,6 @@ export function pillForViewer(state: AuctionViewerState): AuctionPillKind {
       return "Outbid";
     case "WON_AWAITING_PAYMENT":
       return "AwaitingPayment";
-    case "SECOND_CHANCE":
-      return "SecondChance";
     case "WON":
       return "Won";
     case "LOST":
@@ -153,8 +143,6 @@ export function pillForViewer(state: AuctionViewerState): AuctionPillKind {
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   LIVE: "กำลังประมูล",
   AWAITING_PAYMENT: "รอชำระ",
-  AWAITING_SELLER_DECISION: "รอเลือกทางต่อ",
-  OFFERED_TO_SECOND: "เสนออันดับ 2",
   SOLD: "ขายแล้ว",
   UNSOLD: "ไม่มีผู้บิด",
   CANCELLED: "ยกเลิก",

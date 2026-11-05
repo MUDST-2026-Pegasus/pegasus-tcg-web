@@ -15,7 +15,6 @@ import type {
   MyAuctionTab,
   PlaceBidRequest,
   SellerAuctionDetail,
-  SellerDecisionRequest,
   SuspendAuctionRequest,
   UpdateAuctionRequest,
 } from "./auction.types";
@@ -134,22 +133,6 @@ export function useCheckoutAuction(auctionId: number) {
   });
 }
 
-export function useAcceptSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.acceptSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
-export function useDeclineSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.declineSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
 // ---------- ผู้ขาย ----------
 
 export function useSellerAuctions(params: SellerAuctionListParams = {}) {
@@ -207,14 +190,6 @@ export function useCancelAuction(auctionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => auctionApi.cancelAuction(auctionId),
-    onSuccess: (detail) => settleSeller(queryClient, detail),
-  });
-}
-
-export function useDecideAuction(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: SellerDecisionRequest) => auctionApi.decideAuction(auctionId, payload),
     onSuccess: (detail) => settleSeller(queryClient, detail),
   });
 }

@@ -36,14 +36,13 @@ import type {
   PlaceBidRequest,
   SellerAuctionDetail,
   SellerAuctionPage,
-  SellerDecisionRequest,
   SuspendAuctionRequest,
   UpdateAuctionRequest,
 } from "./auction.types";
 import type { CardCondition } from "@/features/catalog/catalog.types";
 
 // ---------- API ของระบบประมูล [TCG-627 · FE-1] ----------
-// endpoint ครบทั้ง 21 ตัวตาม contract C-2 (`AuctionController`, `SellerAuctionController`,
+// endpoint ครบทั้ง 18 ตัวตาม contract C-2 (`AuctionController`, `SellerAuctionController`,
 // `AdminAuctionController`) — component ไม่เรียกตรง ๆ ให้ผ่าน hook ใน `auction.queries.ts`
 //
 // ระหว่างที่ BE ยังไม่มี logic ทุกฟังก์ชันคืนข้อมูลจาก `auction.fixture.ts`
@@ -53,7 +52,7 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 export const AUCTION_MOCK = {
   /** รายการ / รายละเอียด / ประวัติบิด */
   public: true,
-  /** บิด / ซื้อทันที / checkout / ข้อเสนออันดับ 2 / การประมูลของฉัน */
+  /** บิด / ซื้อทันที / checkout / การประมูลของฉัน */
   buyer: true,
   /** หน้าผู้ขายทั้งหมด */
   seller: true,
@@ -151,20 +150,6 @@ export function checkoutAuction(
   });
 }
 
-export function acceptSecondChance(id: number): Promise<AuctionWin> {
-  if (AUCTION_MOCK.buyer) {
-    const offer = AUCTION_DETAIL_FIXTURES[id]?.viewer?.offer;
-    const price = offer?.amount ?? 4650;
-    return mock({ auctionId: id, auctionNumber: `AUC-2026-${String(id).padStart(4, "0")}`, price, shippingFee: 50, total: price + 50, paymentDueAt: inHours(24), serverTime: nowIso() });
-  }
-  return api.post<AuctionWin>(`/auctions/${id}/second-chance/accept`);
-}
-
-export function declineSecondChance(id: number): Promise<null> {
-  if (AUCTION_MOCK.buyer) return mock(null);
-  return api.post<null>(`/auctions/${id}/second-chance/decline`);
-}
-
 export function getMyAuctions(tab: MyAuctionTab = "ALL", page = 0, size = 20): Promise<MyAuctionPage> {
   if (AUCTION_MOCK.buyer) {
     const fixture = MY_AUCTION_PAGE_FIXTURE;
@@ -250,20 +235,6 @@ export function cancelAuction(id: number): Promise<SellerAuctionDetail> {
     return mock({ ...base, status: "CANCELLED", editable: false, cancellable: false, buyNowAvailable: false, serverTime: nowIso() });
   }
   return api.post<SellerAuctionDetail>(`/sellers/me/auctions/${id}/cancel`);
-}
-
-/** ได้เฉพาะ AWAITING_SELLER_DECISION — error: NO_SECOND_BIDDER, AUCTION_CLOSED */
-export function decideAuction(id: number, payload: SellerDecisionRequest): Promise<SellerAuctionDetail> {
-  if (AUCTION_MOCK.seller) {
-    const base = SELLER_AUCTION_DETAIL_FIXTURES[id] ?? SELLER_AUCTION_DETAIL_FIXTURES[119];
-    const second = base.decision?.secondBidder;
-    return mock(
-      payload.choice === "OFFER_TO_SECOND" && second
-        ? { ...base, status: "OFFERED_TO_SECOND", decision: null, offer: { bidderAlias: second.bidderAlias, amount: second.amount, status: "PENDING", expiresAt: inHours(24) }, serverTime: nowIso() }
-        : { ...base, status: "UNSOLD", decision: null, serverTime: nowIso() },
-    );
-  }
-  return api.post<SellerAuctionDetail>(`/sellers/me/auctions/${id}/decision`, payload);
 }
 
 // ---------- แอดมิน ----------
