@@ -68,6 +68,8 @@ Copy these from [`.env.example`](.env.example). Values beginning with `VITE_` ar
 
 Cypress expects the app at `http://localhost:5173`. Start `pnpm dev` in one terminal, then run `pnpm cyrun` in another. If the Cypress binary is missing, run `pnpm exec cypress install` first. The E2E workflow in `.github/workflows/e2e-cypress.yml` builds the app and starts a preview server before running Cypress.
 
+For the TCG-693 live search check, run the API at `http://localhost:8080` with an active Pokémon game and products, start the web app with `VITE_API_BASE_URL=http://localhost:8080 pnpm dev`, then run `pnpm exec cypress run --spec 'src/test/cypress/e2e/tolerant-search-live.cy.ts' --env runLiveSearch=true,apiBaseUrl=http://localhost:8080`. This opt-in spec calls the real API and verifies the corrected query, game filter, and visible results.
+
 ## Find your way around
 
 ```text

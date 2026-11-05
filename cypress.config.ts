@@ -17,6 +17,9 @@ export default defineConfig({
       if (config.env?.apiBaseUrl !== undefined) {
         config.expose.apiBaseUrl = config.env.apiBaseUrl;
       }
+      if (config.env?.runLiveSearch !== undefined) {
+        config.expose.runLiveSearch = config.env.runLiveSearch;
+      }
       return config;
     },
   },
