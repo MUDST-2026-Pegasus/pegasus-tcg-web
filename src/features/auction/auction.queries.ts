@@ -15,7 +15,6 @@ import type {
   MyAuctionTab,
   PlaceBidRequest,
   SellerAuctionDetail,
-  SellerDecisionRequest,
   SuspendAuctionRequest,
   UpdateAuctionRequest,
 } from "./auction.types";
@@ -59,9 +58,11 @@ export const AUCTION_POLL_MS = 5_000;
 
 // ---------- public / ผู้ซื้อ ----------
 
-export function useAuctions(params: AuctionListParams = {}) {
+/** @param options.enabled `false` = ยังไม่พร้อมยิง เช่น รอรายชื่อเกมไปแปลง slug */
+export function useAuctions(params: AuctionListParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: auctionKeys.list(params),
+    enabled: options.enabled ?? true,
     queryFn: () => auctionApi.getAuctions(params),
     placeholderData: keepPreviousData,
     staleTime: 0,
@@ -74,7 +75,9 @@ export function useAuction(id: number | null, options: { poll?: boolean } = {}) 
     queryKey: auctionKeys.detail(id ?? 0),
     queryFn: () => auctionApi.getAuction(id ?? 0),
     enabled: id !== null,
-    refetchInterval: options.poll === false ? false : AUCTION_POLL_MS,
+    // ดึงใหม่เฉพาะตอนประมูลยังเปิด จบแล้วไม่มีอะไรเปลี่ยนเอง
+    refetchInterval: (query) =>
+      options.poll === false || (query.state.data && query.state.data.status !== "LIVE") ? false : AUCTION_POLL_MS,
     // 404 คือคำตอบ ลองซ้ำก็ได้ผลเดิม
     retry: false,
   });
@@ -131,22 +134,6 @@ export function useCheckoutAuction(auctionId: number) {
     mutationFn: ({ payload, idempotencyKey }: { payload: AuctionCheckoutRequest; idempotencyKey?: string }) =>
       auctionApi.checkoutAuction(auctionId, payload, idempotencyKey),
     onSuccess: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
-export function useAcceptSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.acceptSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
-export function useDeclineSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.declineSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
   });
 }
 
@@ -207,14 +194,6 @@ export function useCancelAuction(auctionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => auctionApi.cancelAuction(auctionId),
-    onSuccess: (detail) => settleSeller(queryClient, detail),
-  });
-}
-
-export function useDecideAuction(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: SellerDecisionRequest) => auctionApi.decideAuction(auctionId, payload),
     onSuccess: (detail) => settleSeller(queryClient, detail),
   });
 }

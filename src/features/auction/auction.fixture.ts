@@ -25,7 +25,7 @@ import type {
 // เวลาคิดจากตอนโหลดไฟล์ ตัวนับถอยหลังจึงเดินได้จริง
 // ใบที่ตั้งใจให้เห็นแต่ละสถานะ:
 //   142 LIVE มีบิด ต่อเวลาแล้ว · 150 LIVE ยังไม่มีบิด ซื้อทันทีได้ · 151 LIVE เหลือไม่ถึง 2 นาที
-//   117 AWAITING_PAYMENT · 119 AWAITING_SELLER_DECISION · 128 OFFERED_TO_SECOND
+//   117 AWAITING_PAYMENT
 //   133 SOLD · 126 UNSOLD · 140 CANCELLED · 98 SUSPENDED
 
 const NOW = Date.now();
@@ -149,7 +149,7 @@ const CHARIZARD_DETAIL: AuctionDetail = {
   extensionCount: 3,
   shippingFee: SHIPPING,
   recentBids: CHARIZARD_BIDS.slice(0, 5),
-  viewer: { state: "LEADING", myHighestBid: 8450, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+  viewer: { state: "LEADING", myHighestBid: 8450, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   serverTime: serverTime(),
 };
 
@@ -177,7 +177,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(3 * DAY + 4 * HOUR),
     extensionCount: 0,
     recentBids: [],
-    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   },
   151: {
     ...CHARIZARD_DETAIL,
@@ -194,7 +194,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(102 * SECOND),
     originalEndsAt: at(-6 * MINUTE),
     extensionCount: 4,
-    viewer: { state: "OUTBID", myHighestBid: 15000, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: "OUTBID", myHighestBid: 15000, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   },
   117: {
     ...CHARIZARD_DETAIL,
@@ -210,31 +210,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(-6 * HOUR),
     originalEndsAt: at(-6 * HOUR),
     extensionCount: 0,
-    viewer: { state: "WON_AWAITING_PAYMENT", myHighestBid: 6100, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: at(18 * HOUR), offer: null },
-  },
-  128: {
-    ...CHARIZARD_DETAIL,
-    id: 128,
-    auctionNumber: "AUC-2026-0128",
-    status: "OFFERED_TO_SECOND",
-    item: I.mew,
-    currentPrice: 4800,
-    minNextBid: 4800,
-    bidCount: 14,
-    bidderCount: 6,
-    buyNowPrice: null,
-    endsAt: at(-2 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    extensionCount: 1,
-    viewer: {
-      state: "SECOND_CHANCE",
-      myHighestBid: 4650,
-      ownAuction: false,
-      blockers: [],
-      bannedUntil: null,
-      paymentDueAt: null,
-      offer: { amount: 4650, shippingFee: SHIPPING, total: 4700, status: "PENDING", expiresAt: at(20 * HOUR) },
-    },
+    viewer: { state: "WON_AWAITING_PAYMENT", myHighestBid: 6100, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: at(18 * HOUR) },
   },
   133: {
     ...CHARIZARD_DETAIL,
@@ -250,7 +226,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(-4 * DAY),
     originalEndsAt: at(-4 * DAY),
     extensionCount: 0,
-    viewer: { state: "LOST", myHighestBid: 3900, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: "LOST", myHighestBid: 3900, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   },
 };
 
@@ -258,7 +234,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
 export function withViewer(id: number, viewer: Partial<NonNullable<AuctionDetail["viewer"]>> | null): AuctionDetail {
   const base = AUCTION_DETAIL_FIXTURES[id] ?? CHARIZARD_DETAIL;
   if (viewer === null) return { ...base, viewer: null };
-  const current = base.viewer ?? { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null };
+  const current = base.viewer ?? { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null };
   return { ...base, viewer: { ...current, ...viewer } };
 }
 
@@ -269,7 +245,6 @@ export const BID_HISTORY_FIXTURE: BidHistory = {
 
 const MY_AUCTIONS: MyAuction[] = [
   { id: 142, auctionNumber: "AUC-2026-0142", item: I.charizard, shopName: "CardVault BKK", bidCount: 12, state: "WON_AWAITING_PAYMENT", currentPrice: 8450, myHighestBid: 8450, shippingFee: SHIPPING, totalDue: 8500, minNextBid: null, extended: false, endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 40 * MINUTE), orderId: null },
-  { id: 128, auctionNumber: "AUC-2026-0128", item: I.mew, shopName: "PokeHub Thailand", bidCount: 14, state: "SECOND_CHANCE", currentPrice: 4800, myHighestBid: 4650, shippingFee: SHIPPING, totalDue: 4700, minNextBid: null, extended: false, endsAt: at(-2 * DAY), deadline: at(20 * HOUR), orderId: null },
   { id: 151, auctionNumber: "AUC-2026-0151", item: I.umbreon, shopName: "RareCard Station", bidCount: 27, state: "LEADING", currentPrice: 15200, myHighestBid: 15200, shippingFee: SHIPPING, totalDue: null, minNextBid: 15300, extended: false, endsAt: at(1 * DAY), deadline: null, orderId: null },
   { id: 139, auctionNumber: "AUC-2026-0139", item: I.rayquaza, shopName: "RareCard Station", bidCount: 41, state: "OUTBID", currentPrice: 21500, myHighestBid: 21000, shippingFee: SHIPPING, totalDue: null, minNextBid: 21600, extended: true, endsAt: at(2 * MINUTE), deadline: null, orderId: null },
   { id: 133, auctionNumber: "AUC-2026-0133", item: I.mewtwo, shopName: "CardVault BKK", bidCount: 18, state: "WON", currentPrice: 4200, myHighestBid: 4200, shippingFee: SHIPPING, totalDue: null, minNextBid: null, extended: false, endsAt: at(-4 * DAY), deadline: null, orderId: 10388 },
@@ -277,8 +252,8 @@ const MY_AUCTIONS: MyAuction[] = [
 ];
 
 export const MY_AUCTION_PAGE_FIXTURE: MyAuctionPage = {
-  page: { items: MY_AUCTIONS, page: 0, size: 20, totalItems: 15, totalPages: 1 },
-  tabCounts: { ALL: 15, BIDDING: 3, TO_PAY: 1, SECOND_CHANCE: 1, WON: 4, LOST: 6 },
+  page: { items: MY_AUCTIONS, page: 0, size: 20, totalItems: 14, totalPages: 1 },
+  tabCounts: { ALL: 14, BIDDING: 3, TO_PAY: 1, WON: 4, LOST: 6 },
   unpaidStrikes: 0,
   strikeLimit: STRIKE_LIMIT,
   bannedUntil: null,
@@ -289,7 +264,7 @@ export const MY_AUCTION_PAGE_FIXTURE: MyAuctionPage = {
 export const MY_AUCTION_PAGE_EMPTY_FIXTURE: MyAuctionPage = {
   ...MY_AUCTION_PAGE_FIXTURE,
   page: { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 },
-  tabCounts: { ALL: 0, BIDDING: 0, TO_PAY: 0, SECOND_CHANCE: 0, WON: 0, LOST: 0 },
+  tabCounts: { ALL: 0, BIDDING: 0, TO_PAY: 0, WON: 0, LOST: 0 },
 };
 
 // ---------- ผู้ขาย ----------
@@ -300,8 +275,6 @@ const SELLER_ROWS: SellerAuctionRow[] = [
   { id: 151, auctionNumber: "AUC-2026-0151", item: I.umbreon, unitLabel: "U-0870", startingPrice: 5000, currentPrice: 15200, bidCount: 27, buyNowPrice: null, buyNowAvailable: false, status: "LIVE", endsAt: at(1 * DAY), deadline: null, orderId: null },
   { id: 155, auctionNumber: "AUC-2026-0155", item: I.gengar, unitLabel: "U-0641", startingPrice: 6000, currentPrice: 8200, bidCount: 5, buyNowPrice: null, buyNowAvailable: false, status: "LIVE", endsAt: at(6 * HOUR), deadline: null, orderId: null },
   { id: 117, auctionNumber: "AUC-2026-0117", item: I.lugia, unitLabel: "U-0912", startingPrice: 3000, currentPrice: 6100, bidCount: 9, buyNowPrice: null, buyNowAvailable: false, status: "AWAITING_PAYMENT", endsAt: at(-6 * HOUR), deadline: at(18 * HOUR + 22 * MINUTE), orderId: 10377 },
-  { id: 119, auctionNumber: "AUC-2026-0119", item: I.espeon, unitLabel: "U-0655", startingPrice: 2500, currentPrice: 7900, bidCount: 11, buyNowPrice: null, buyNowAvailable: false, status: "AWAITING_SELLER_DECISION", endsAt: at(-2 * DAY), deadline: at(47 * HOUR + 12 * MINUTE), orderId: null },
-  { id: 128, auctionNumber: "AUC-2026-0128", item: I.mew, unitLabel: "U-0702", startingPrice: 1500, currentPrice: 4800, bidCount: 14, buyNowPrice: null, buyNowAvailable: false, status: "OFFERED_TO_SECOND", endsAt: at(-2 * DAY), deadline: at(20 * HOUR + 5 * MINUTE), orderId: null },
   { id: 133, auctionNumber: "AUC-2026-0133", item: I.mewtwo, unitLabel: "U-0533", startingPrice: 500, currentPrice: 4200, bidCount: 18, buyNowPrice: null, buyNowAvailable: false, status: "SOLD", endsAt: at(-4 * DAY), deadline: null, orderId: 10388 },
   { id: 126, auctionNumber: "AUC-2026-0126", item: I.blastoise, unitLabel: "U-0590", startingPrice: 4500, currentPrice: 4500, bidCount: 0, buyNowPrice: null, buyNowAvailable: false, status: "UNSOLD", endsAt: at(-5 * DAY), deadline: null, orderId: null },
   { id: 140, auctionNumber: "AUC-2026-0140", item: I.charizardEx, unitLabel: "U-1041", startingPrice: 900, currentPrice: 900, bidCount: 0, buyNowPrice: 1500, buyNowAvailable: false, status: "CANCELLED", endsAt: at(-1 * DAY), deadline: null, orderId: null },
@@ -310,8 +283,6 @@ const SELLER_ROWS: SellerAuctionRow[] = [
 const STATUS_COUNTS: Record<AuctionStatus, number> = {
   LIVE: 4,
   AWAITING_PAYMENT: 1,
-  AWAITING_SELLER_DECISION: 1,
-  OFFERED_TO_SECOND: 1,
   SOLD: 1,
   UNSOLD: 1,
   CANCELLED: 1,
@@ -319,7 +290,7 @@ const STATUS_COUNTS: Record<AuctionStatus, number> = {
 };
 
 export const SELLER_AUCTION_PAGE_FIXTURE: SellerAuctionPage = {
-  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 10, totalPages: 1 },
+  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 8, totalPages: 1 },
   statusCounts: STATUS_COUNTS,
   kpis: {
     liveCount: 4,
@@ -375,14 +346,12 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   firstBidAt: at(-3 * DAY + 40 * MINUTE),
   winnerAlias: null,
   paymentDueAt: null,
-  decision: null,
-  offer: null,
   orderId: null,
   bids: CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
   serverTime: serverTime(),
 };
 
-/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 (142, 150), S4b (119), ส่งข้อเสนอแล้ว (128) */
+/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 (142, 150) */
 export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail> = {
   142: SELLER_CHARIZARD,
   150: {
@@ -407,52 +376,6 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
     firstBidAt: null,
     bids: [],
   },
-  119: {
-    ...SELLER_CHARIZARD,
-    id: 119,
-    auctionNumber: "AUC-2026-0119",
-    status: "AWAITING_SELLER_DECISION",
-    item: I.espeon,
-    unitLabel: "U-0655",
-    startingPrice: 2500,
-    currentPrice: 7900,
-    bidCount: 11,
-    bidderCount: 5,
-    estimatedPayout: 7505,
-    buyNowPrice: null,
-    startedAt: at(-5 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    endsAt: at(-2 * DAY),
-    extensionCount: 0,
-    firstBidAt: at(-5 * DAY + 20 * MINUTE),
-    winnerAlias: "k***a",
-    decision: {
-      winnerAlias: "k***a",
-      winningBid: 7900,
-      cancelledOrderNumber: "ORD-10351",
-      decideBy: at(47 * HOUR + 12 * MINUTE),
-      secondBidder: { bidderAlias: "m***a", amount: 7600, estimatedPayout: 7220 },
-    },
-  },
-  128: {
-    ...SELLER_CHARIZARD,
-    id: 128,
-    auctionNumber: "AUC-2026-0128",
-    status: "OFFERED_TO_SECOND",
-    item: I.mew,
-    unitLabel: "U-0702",
-    startingPrice: 1500,
-    currentPrice: 4800,
-    bidCount: 14,
-    bidderCount: 6,
-    estimatedPayout: 4418,
-    buyNowPrice: null,
-    endsAt: at(-2 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    extensionCount: 1,
-    winnerAlias: "s***p",
-    offer: { bidderAlias: "m***a", amount: 4650, status: "PENDING", expiresAt: at(20 * HOUR + 5 * MINUTE) },
-  },
 };
 
 // ---------- แอดมิน ----------
@@ -464,7 +387,6 @@ export const ADMIN_AUCTION_PAGE_FIXTURE: AdminAuctionPage = {
       { id: 142, auctionNumber: "AUC-2026-0142", cardName: "Charizard VMAX #020", shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 8450, bidCount: 12, bidderCount: 7, status: "AWAITING_PAYMENT", endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 41 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
       { id: 155, auctionNumber: "AUC-2026-0155", cardName: "Pikachu Illustrator", shopName: "newshop_99", sellerUsername: "newshop_99", currentPrice: 2000, bidCount: 0, bidderCount: 0, status: "LIVE", endsAt: at(2 * DAY), deadline: null, signals: ["REPORTED"], reportCount: 3, suspendedAt: null },
       { id: 151, auctionNumber: "AUC-2026-0151", cardName: "Umbreon VMAX Alt Art", shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 15200, bidCount: 27, bidderCount: 11, status: "LIVE", endsAt: at(1 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
-      { id: 128, auctionNumber: "AUC-2026-0128", cardName: "Mew ex SIR #232", shopName: "PokeHub Thailand", sellerUsername: "pokehub_th", currentPrice: 4800, bidCount: 14, bidderCount: 6, status: "OFFERED_TO_SECOND", endsAt: at(-2 * DAY), deadline: at(20 * HOUR + 5 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
       { id: 98, auctionNumber: "AUC-2026-0098", cardName: "Gengar VMAX Alt Art", shopName: "fakecards_th", sellerUsername: "fakecards_th", currentPrice: 6000, bidCount: 3, bidderCount: 2, status: "SUSPENDED", endsAt: at(-6 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: at(-6 * DAY) },
     ],
     page: 0,
@@ -473,7 +395,7 @@ export const ADMIN_AUCTION_PAGE_FIXTURE: AdminAuctionPage = {
     totalPages: 61,
   },
   tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 12, ENDED: 1050, SUSPENDED: 2 },
-  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, offeredToSecond: 3, suspendedLast30Days: 2 },
+  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, suspendedLast30Days: 2 },
   flaggedCount: 2,
   serverTime: serverTime(),
 };

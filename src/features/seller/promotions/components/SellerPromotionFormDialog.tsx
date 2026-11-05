@@ -466,7 +466,7 @@ function DateField({
             value={toLocal(field.value)}
             onBlur={field.onBlur}
             onChange={(event) =>
-              field.onChange(event.target.value ? new Date(event.target.value).toISOString() : "")
+              field.onChange(event.target.value && Number.isFinite(Date.parse(event.target.value)) ? new Date(event.target.value).toISOString() : "")
             }
           />
         )}

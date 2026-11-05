@@ -54,7 +54,7 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 
 ## 3. Cypress E2E Automation Specifications
 
-### 3.1 Flow 1: Buyer Complete Journey (`cypress/e2e/01-buyer-journey.cy.ts` & `QA/e2e/01-buyer-journey.cy.ts`)
+### 3.1 Flow 1: Buyer Complete Journey (`src/test/cypress/e2e/01-buyer-journey.cy.ts` & `QA/e2e/01-buyer-journey.cy.ts`)
 
 | Scenario # | Step Description | Verified Assertion | Status |
 | :---: | :--- | :--- | :--- |
@@ -67,7 +67,7 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 
 ---
 
-### 3.2 Flow 2: Seller KYC & Admin Verification Flow (`cypress/e2e/02-seller-admin-flow.cy.ts` & `QA/e2e/02-seller-admin-flow.cy.ts`)
+### 3.2 Flow 2: Seller KYC & Admin Verification Flow (`src/test/cypress/e2e/02-seller-admin-flow.cy.ts` & `QA/e2e/02-seller-admin-flow.cy.ts`)
 
 | Scenario # | Step Description | Verified Assertion | Status |
 | :---: | :--- | :--- | :--- |
@@ -85,8 +85,8 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 | :--- | :--- | :---: | :---: | :---: |
 | Vitest (Cart) | `src/test/features/cart/CartSummary.test.tsx` | 8 | 8 | 0 |
 | Vitest (Payment) | `src/test/features/payment/PromptPayModal.test.tsx` | 8 | 8 | 0 |
-| Cypress E2E (Flow 1) | `cypress/e2e/01-buyer-journey.cy.ts` | 6 | 6 | 0 |
-| Cypress E2E (Flow 2) | `cypress/e2e/02-seller-admin-flow.cy.ts` | 5 | 5 | 0 |
+| Cypress E2E (Flow 1) | `src/test/cypress/e2e/01-buyer-journey.cy.ts` | 6 | 6 | 0 |
+| Cypress E2E (Flow 2) | `src/test/cypress/e2e/02-seller-admin-flow.cy.ts` | 5 | 5 | 0 |
 | **Total** | **4 Suites** | **27** | **27** | **0** |
 
 All tests pass 100% with 0 failures. No application source code was modified.

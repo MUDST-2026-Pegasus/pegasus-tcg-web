@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck, Minus, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
 
-import { DetailPageSkeleton, ListRowsSkeleton, TextLinesSkeleton } from "@/components/common/PageSkeletons";
+import { DetailPageSkeleton, ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,9 +22,10 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { CardAttributesCard, CardEffectsCard, ProductBadges, ProductGallery, TrustStrip } from "../components/ProductDetailSections";
 import { ListingSeller } from "../ListingSeller";
 import { formatListingDelivery, formatListingPrice } from "../listing.format";
-import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
+import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
@@ -35,35 +36,6 @@ function formatPrice(amount: number, currency = "THB") {
     style: "currency",
     currency,
   }).format(amount);
-}
-
-function ProductImage({
-                        src,
-                        alt,
-                        className,
-                      }: {
-  src: string;
-  alt: string;
-  className?: string;
-}) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return (
-        <div className="flex min-h-24 items-center justify-center p-4 text-center text-sm text-muted-foreground">
-          โหลดรูปไม่ได้ กรุณาลองโหลดข้อมูลใหม่
-        </div>
-    );
-  }
-
-  return (
-      <img
-          src={src}
-          alt={alt}
-          className={className}
-          onError={() => setFailed(true)}
-      />
-  );
 }
 
 export function ProductDetailPage() {
@@ -165,11 +137,9 @@ function ProductDetailContent({
   const listingsQuery = useProductListings(product.id);
   const marketQuery = useProductMarket(product.id);
   const collectorsQuery = useProductCollectors(product.id, collectorPage);
-  const effectsQuery = useProductCardEffects(product.id);
   const gamesQuery = useGameList();
 
   const listings = listingsQuery.data ?? [];
-  const effects = effectsQuery.data ?? [];
 
   const gallery = [...images]
       .filter(
@@ -184,11 +154,7 @@ function ProductDetailContent({
               a.sortOrder - b.sortOrder,
       );
 
-  const currentImage =
-      gallery.find((image) => image.id === selectedImageId) ??
-      gallery[0];
-
-  const variantListings = selectedVariant
+    const variantListings = selectedVariant
       ? listings.filter(
           (listing) =>
               listing.card.variantId === Number(selectedVariant),
@@ -217,19 +183,6 @@ function ProductDetailContent({
   const visibleListings = filteredListings.slice(0, listingPreviewLimit);
   const hasMoreListings = filteredListings.length > listingPreviewLimit;
 
-  const attributes = product.attributes ?? {};
-  const displayAttribute = (key: string) => {
-    const value = attributes[key];
-    return typeof value === "string" || typeof value === "number" ? String(value) : "—";
-  };
-  const attributeRows = [
-    ["Card number", product.cardNumber || "—"],
-    ["Rarity", product.rarityCode || "—"],
-    ["Card type", displayAttribute("card_type")],
-    ["Stage", displayAttribute("stage")],
-    ["HP", displayAttribute("hp")],
-    ["Artist", displayAttribute("artist")],
-  ];
   const conditionOptions: CardCondition[] = product.productType === "SINGLE_CARD"
       ? [...new Set<CardCondition>(["NM", "LP", "MP", ...availableConditions])]
       : availableConditions;
@@ -326,33 +279,20 @@ function ProductDetailContent({
         </nav>
 
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1.03fr)_minmax(390px,.97fr)] lg:gap-12">
-          <div className={`grid min-w-0 gap-4 ${gallery.length > 0 ? "sm:grid-cols-[78px_minmax(0,1fr)]" : "sm:grid-cols-1"}`}>
-            {gallery.length > 0 && <div className="order-2 flex gap-3 overflow-x-auto sm:order-1 sm:flex-col">
-              {gallery.map((image, index) => (
-                <button key={image.id} type="button" onClick={() => setSelectedImageId(image.id)}
-                  aria-label={`ดูรูปสินค้าที่ ${index + 1}`} aria-pressed={currentImage?.id === image.id}
-                  className={`flex aspect-[3/4] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-card p-1.5 transition sm:w-full ${currentImage?.id === image.id ? "border-primary shadow-sm" : "border-transparent hover:border-primary/40"}`}>
-                  <ProductImage key={image.url} src={image.url} alt={image.altText ?? product.name} className="h-full w-full object-contain" />
-                </button>
-              ))}
-            </div>}
-            <div className="order-1 flex min-h-[500px] flex-col items-center justify-center gap-4 rounded-2xl border bg-card p-8 shadow-sm sm:order-2 lg:min-h-[620px]">
-              {currentImage ? (
-                <ProductImage key={currentImage.url} src={currentImage.url} alt={currentImage.altText ?? product.name}
-                  className="max-h-[560px] w-full object-contain drop-shadow-[0_18px_24px_rgba(24,24,27,0.22)]" />
-              ) : <p className="text-center text-sm text-muted-foreground">ยังไม่มีรูปสินค้า</p>}
-              {!currentImage && <Button variant="ghost" size="sm" onClick={onRefresh} disabled={refreshing} className="text-sm text-muted-foreground">
+          <ProductGallery
+            images={gallery.map((image) => ({ id: image.id, url: image.url, alt: image.altText ?? product.name }))}
+            selectedId={selectedImageId}
+            onSelect={(id) => setSelectedImageId(Number(id))}
+            emptyAction={
+              <Button variant="ghost" size="sm" onClick={onRefresh} disabled={refreshing} className="text-sm text-muted-foreground">
                 {refreshing ? "กำลังโหลด..." : "โหลดรูปใหม่"}
-              </Button>}
-            </div>
-          </div>
+              </Button>
+            }
+          />
 
           <div className="flex min-w-0 flex-col gap-6">
             <div>
-              <div className="mb-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">{gameName ?? PRODUCT_TYPE_LABELS[product.productType]}</span>
-                {product.rarityCode && <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">{product.rarityCode}</span>}
-              </div>
+              <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
               <p className="mt-2 min-h-6 text-muted-foreground">{[product.nameLocal, product.cardNumber].filter(Boolean).join(" · ") || "—"}</p>
             </div>
@@ -442,11 +382,7 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
               </Button>
             </div>
-            <div className="grid grid-cols-3 divide-x rounded-2xl border bg-card px-2 py-4 text-center">
-              <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Tracked shipping</p></div>
-              <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Buyer protection</p></div>
-              <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Verified sellers</p></div>
-            </div>
+            <TrustStrip />
           </div>
         </section>
 
@@ -528,38 +464,8 @@ function ProductDetailContent({
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />Card attributes</h2>
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">{attributeRows.map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-semibold">{value}</dd></div>)}</dl>
-            {product.description && <p className="mt-5 whitespace-pre-wrap border-t pt-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>}
-          </CardContent></Card>
-          {product.productType === "SINGLE_CARD" && (
-            <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-              <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />Abilities &amp; Attacks</h2>
-              {effectsQuery.isPending ? (
-                <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>
-              ) : effectsQuery.isError ? (
-                <div role="alert" className="space-y-2 text-sm"><p>โหลดความสามารถการ์ดไม่สำเร็จ</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>ลองใหม่</Button></div>
-              ) : effects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลความสามารถและท่าโจมตีของการ์ดใบนี้</p>
-              ) : (
-                <div className="divide-y">
-                  {effects.map((effect, index) => (
-                    <div key={`${effect.effectType}-${effect.displayOrder}-${index}`} className="py-4 first:pt-0 last:pb-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary">{effect.effectType === "ABILITY" ? "Ability" : effect.effectType === "ATTACK" ? "Attack" : "Rule"}</Badge>
-                        <h3 className="font-semibold">{effect.name}</h3>
-                        {effect.damage !== null && <strong className="ml-auto text-lg">{effect.damage}</strong>}
-                      </div>
-                      {effect.energyCost.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Energy: {effect.energyCost.join(" · ")}</p>}
-                      {effect.effectText && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{effect.effectText}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-            </CardContent></Card>
-          )}
+          <CardAttributesCard product={product} />
+          {product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.id} />}
         </section>
       </main>
     </div>

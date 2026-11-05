@@ -15,7 +15,7 @@ const TONE: Record<CountdownTone, string> = {
 };
 
 type AuctionCountdownProps = {
-  /** เวลาที่นับไปหา เช่น `endsAt`, `paymentDueAt`, `decideBy`, `offer.expiresAt` */
+  /** เวลาที่นับไปหา เช่น `endsAt`, `paymentDueAt` */
   target: string;
   /** `serverTime` จาก response เดียวกับ target — ใช้ชดเชยนาฬิกาเครื่อง */
   serverTime?: string;

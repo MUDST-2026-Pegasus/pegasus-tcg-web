@@ -7,7 +7,8 @@ export const orderKeys = {
   all: ["orders"] as const,
   list: (page = 0, size = 50) => [...orderKeys.all, "list", { page, size }] as const,
   detail: (id: number) => [...orderKeys.all, "detail", id] as const,
-  reorderPreview: (orderId: number | null) => ["orders", orderId, "reorder-preview"] as const,
+  reorderItems: (orderId: number | null) => ["orders", orderId, "reorder-items"] as const,
+  reorderPreview: (orderId: number | null) => ["orders", orderId, "reorder-items"] as const,
 };
 
 export function useBuyerOrders(page = 0, size = 50, pollPending = false) {
@@ -44,15 +45,17 @@ export function useCancelOrder() {
   });
 }
 
-export function useReorderPreview(orderId: number | null, enabled = false) {
+export function useReorderItems(orderId: number | null, enabled = false) {
   return useQuery({
-    queryKey: ["orders", orderId, "reorder-preview"],
+    queryKey: orderKeys.reorderItems(orderId),
     queryFn: () => {
       if (!orderId) {
-        throw new Error("orderId is required for reorder preview");
+        throw new Error("orderId is required for reorder items");
       }
-      return ordersApi.getReorderPreview(orderId);
+      return ordersApi.getReorderItems(orderId);
     },
     enabled: enabled && Boolean(orderId),
   });
 }
+
+export const useReorderPreview = useReorderItems;
