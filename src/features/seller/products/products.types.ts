@@ -60,6 +60,8 @@ export type SellerListingSummary = {
   /** รูปแรกของประกาศ เป็น presigned URL อายุสั้น ห้ามเก็บไว้ใช้ภายหลัง */
   primaryPhotoUrl: string | null;
   updatedAt: string;
+  /** ผูกกับการประมูลอยู่ — เลือกเข้าการลดราคาไม่ได้ (SAL-03) · API เก่าไม่ส่งมา = `false` */
+  inAuction?: boolean;
 };
 
 /** `dto/ListingPhotoResponse.java` */
