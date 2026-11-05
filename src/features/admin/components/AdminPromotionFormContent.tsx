@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
 import { Info, Lock, LogOut } from "lucide-react";
 
-import { EmptyState, ErrorState } from "@/components/common";
+import { DateTimePicker, EmptyState, ErrorState } from "@/components/common";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -127,7 +127,7 @@ function emptyPromotion(): AdminPromotionInput {
   };
 }
 
-/** ISO → ค่าใน `<input type="datetime-local">` ตามเวลาเครื่อง */
+/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
 function toLocalInput(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
@@ -568,19 +568,15 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           <Section title="4. ระยะเวลาและจำนวนสิทธิ์">
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField field="startsAt" htmlFor="promotion-startsAt" label="เริ่มใช้ได้" required error={errors.startsAt}>
-                <InputGroup data-disabled={locked("startsAt") || undefined}>
-                  <InputGroupInput
-                    id="promotion-startsAt"
-                    aria-label="เริ่มใช้ได้"
-                    type="datetime-local"
-                    value={toLocalInput(form.startsAt)}
-                    disabled={locked("startsAt")}
-                    onChange={(event) =>
-                      change("startsAt", fromLocalInput(event.target.value))
-                    }
-                  />
-                  <LockedSuffix locked={locked("startsAt")} />
-                </InputGroup>
+                <DateTimePicker
+                  id="promotion-startsAt"
+                  aria-label="เริ่มใช้ได้"
+                  value={toLocalInput(form.startsAt)}
+                  disabled={locked("startsAt")}
+                  invalid={!!errors.startsAt}
+                  suffix={locked("startsAt") ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+                  onChange={(value) => change("startsAt", fromLocalInput(value))}
+                />
               </FormField>
               <FormField
                 field="endsAt"
@@ -590,16 +586,14 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 hint="ต้องหลังวันเริ่มใช้"
                 error={errors.endsAt}
               >
-                <Input
+                <DateTimePicker
                   id="promotion-endsAt"
                   aria-label="สิ้นสุด"
-                  aria-invalid={!!errors.endsAt || undefined}
-                  type="datetime-local"
+                  invalid={!!errors.endsAt}
+                  defaultTime="23:59"
                   value={toLocalInput(form.endsAt)}
-                  min={locks.used && existing ? toLocalInput(existing.endsAt) : undefined}
-                  onChange={(event) =>
-                    change("endsAt", fromLocalInput(event.target.value))
-                  }
+                  min={locks.used && existing ? toLocalInput(existing.endsAt) : toLocalInput(form.startsAt)}
+                  onChange={(value) => change("endsAt", fromLocalInput(value))}
                 />
               </FormField>
             </div>

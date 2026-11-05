@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch, type Control, type FieldErrors } from "react-hook-form";
 import { Lock, LogOut, Pencil } from "lucide-react";
 
+import { DateTimePicker } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
@@ -59,7 +60,7 @@ function fromExisting(source: SellerPromotion): SellerPromotionInput {
   };
 }
 
-/** ISO → ค่าใน `<input type="datetime-local">` ตามเวลาเครื่อง */
+/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
 function toLocal(value: string) {
   const date = new Date(value);
   return Number.isFinite(date.getTime())
@@ -457,17 +458,17 @@ function DateField({
         control={control}
         name={name}
         render={({ field }) => (
-          <FieldBox
-            ref={field.ref}
+          <DateTimePicker
             aria-label={label}
-            aria-invalid={!!errors[name] || undefined}
-            type="datetime-local"
+            invalid={!!errors[name]}
             min={min}
+            defaultTime={name === "endsAt" ? "23:59" : "00:00"}
+            className="rounded-lg border-border text-[13px]"
             value={toLocal(field.value)}
-            onBlur={field.onBlur}
-            onChange={(event) =>
-              field.onChange(event.target.value && Number.isFinite(Date.parse(event.target.value)) ? new Date(event.target.value).toISOString() : "")
-            }
+            onChange={(value) => {
+              field.onChange(value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : "");
+              field.onBlur();
+            }}
           />
         )}
       />
