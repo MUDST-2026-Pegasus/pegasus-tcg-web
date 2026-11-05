@@ -64,13 +64,15 @@ import {
   type SearchFilters,
   type SearchSort,
 } from "@/features/catalog/search.params";
+import { PriceTag, SaleBadge, isOnSale } from "@/components/sale";
 import { cn } from "@/lib/utils";
 
 const TYPING_DELAY_MS = 300;
 const ALL_CATEGORIES = "all";
 
 function SearchProductCard({ product }: { product: ProductSummaryDto }) {
-  const price = formatPrice(product.lowestPrice);
+  const onSale = isOnSale(product.pricing);
+  const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.lowestPrice);
 
   return (
     <Link
@@ -80,7 +82,14 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
     >
       <Card className="h-[231px] gap-3 rounded-[11px] py-[15px] shadow-none ring-1 ring-foreground/5">
         <CardContent className="px-[19px]">
-          <div className="h-[92px] overflow-hidden rounded-lg bg-muted">
+          <div className="relative h-[92px] overflow-hidden rounded-lg bg-muted">
+            {onSale && product.pricing ? (
+              <SaleBadge
+                type={product.pricing.sale?.type === "FLASH_SALE" ? "flash" : "percent"}
+                percent={product.pricing.discountPercent}
+                className="absolute top-1.5 left-1.5"
+              />
+            ) : null}
             {product.primaryImageUrl ? (
               <img
                 src={product.primaryImageUrl}
@@ -100,14 +109,14 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
           </CardTitle>
         </CardHeader>
         <CardFooter className="mt-auto px-[19px]">
-          <p
+          {onSale ? <PriceTag pricing={product.pricing} size="sm" /> : <p
             className={cn(
               "text-base leading-[22px] font-semibold",
               product.lowestPrice === null ? "text-muted-foreground" : "text-primary",
             )}
           >
             {price}
-          </p>
+          </p>}
         </CardFooter>
       </Card>
     </Link>

@@ -48,6 +48,8 @@ interface PaymentOrderSummaryProps {
   subtotal?: number;
   shippingTotal?: number;
   grandTotal?: number;
+  /** ส่วนลดราคาสินค้า (ราคาลด) แยกจากโค้ด — `subtotal` เป็นยอดหลังลดแล้ว (TCG-683) */
+  saleDiscount?: number | null;
 }
 
 export function PaymentOrderSummary({
@@ -55,6 +57,7 @@ export function PaymentOrderSummary({
   subtotal,
   shippingTotal,
   grandTotal,
+  saleDiscount,
 }: PaymentOrderSummaryProps) {
   const hasRealItems = Boolean(items && items.length > 0);
 
@@ -137,8 +140,20 @@ export function PaymentOrderSummary({
 
       {/* Price Breakdown */}
       <div className="space-y-3 text-sm">
+        {hasRealItems && saleDiscount ? (
+          <>
+            <div className="flex justify-between items-center">
+              <span className="font-normal text-slate-600">ราคาสินค้า (ก่อนลด)</span>
+              <span className="font-normal text-slate-900">THB {Number((subtotal ?? 0) + saleDiscount).toLocaleString("th-TH")}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-normal text-slate-600">ส่วนลดราคาสินค้า</span>
+              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString("th-TH")}</span>
+            </div>
+          </>
+        ) : null}
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Subtotal</span>
+          <span className="font-normal text-slate-600">{saleDiscount ? "Subtotal (หลังลดราคา)" : "Subtotal"}</span>
           <span className="font-normal text-slate-900">{formattedSubtotal}</span>
         </div>
         <div className="flex justify-between items-center">

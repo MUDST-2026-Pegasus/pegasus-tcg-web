@@ -1,3 +1,4 @@
+import type { ListingPricing } from "@/components/sale";
 import type {
   ProductSummaryDto,
 } from "@/features/catalog/catalog.types";
@@ -51,6 +52,8 @@ export type HomeProduct = {
   type: string;
   /** null = ตอนนี้ไม่มีใครขาย */
   price: number | null;
+  /** ราคาที่มีผล (SAL-04) — มีการลดแสดงเป็น PriceTag */
+  pricing?: ListingPricing | null;
   image?: string;
   imageAlt: string;
   href: string;

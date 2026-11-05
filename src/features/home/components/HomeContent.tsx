@@ -11,7 +11,9 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { PriceTag, SaleBadge, isOnSale } from "@/components/sale";
 import { formatPrice } from "@/features/catalog/catalog.mappers";
+import { FeaturedSalesSection } from "@/features/sale/components/FeaturedSalesSection";
 import {
   FeaturedSkeleton,
   GamesSkeleton,
@@ -186,7 +188,8 @@ function HomeProductCard({
   product: HomeProduct;
   rank?: number;
 }) {
-  const price = formatPrice(product.price);
+  const onSale = isOnSale(product.pricing);
+  const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.price);
 
   return (
     <div className="relative h-[260px] min-w-0">
@@ -200,10 +203,18 @@ function HomeProductCard({
           imageAlt={product.imageAlt}
           badge={product.type}
           title={product.name}
-          price={price}
+          price={onSale ? undefined : price}
+          footer={onSale ? <PriceTag pricing={product.pricing} /> : undefined}
           className="h-full w-full [&_img]:object-contain"
         />
       </Link>
+      {onSale && product.pricing ? (
+        <SaleBadge
+          type={product.pricing.sale?.type === "FLASH_SALE" ? "flash" : "percent"}
+          percent={product.pricing.discountPercent}
+          className="absolute top-6 right-7"
+        />
+      ) : null}
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
           {rank}
@@ -665,6 +676,8 @@ export function HomeContent() {
   return (
     <div className="bg-secondary font-sans">
       <HeroSection />
+      {/* Flash Sale + แบนเนอร์ลดทั้งหมวด (TCG-683) — เหนือแถบโค้ดส่วนลด (PRM-H1) */}
+      <FeaturedSalesSection />
       <PromotionsSection />
       <NewReleasesSection />
       <GamesSection />

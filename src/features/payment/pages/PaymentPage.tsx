@@ -383,6 +383,7 @@ export function PaymentPage() {
               items={summaryItems}
               subtotal={order?.itemsSubtotal}
               shippingTotal={order?.shippingTotal}
+              saleDiscount={order?.saleDiscountTotal}
               grandTotal={payment.amount ?? order?.grandTotal}
             />
           </div>

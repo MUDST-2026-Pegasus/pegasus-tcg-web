@@ -8,6 +8,8 @@ import type { AppliedPromotion } from "@/features/promotions/order.types";
  * การแปลงเป็นข้อความอยู่ที่ `orders.format.ts`
  */
 
+import type { OrderItemSale } from "@/components/sale";
+
 /** `model/SellerOrderStatus.java` */
 export type SellerOrderStatus =
   | "PENDING_PAYMENT"
@@ -113,7 +115,8 @@ export type AdminOrderListParams = {
 
 // ---------- รายละเอียด (ลอกจาก SellerOrderDetailsResponse) ----------
 
-export type OrderItemDetail = {
+/** มี `listPrice` / `saleDiscount` (OrderItemSale) เมื่อแถวได้ราคาลด (SAL-05) */
+export type OrderItemDetail = OrderItemSale & {
   id: number;
   listingId: number | null;
   catalogVariantId: number;

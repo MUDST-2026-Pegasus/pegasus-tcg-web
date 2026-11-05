@@ -11,8 +11,10 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, marketForListing, productHref } from "../catalog.mappers";
+import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
+import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
 import { ListingSeller } from "../ListingSeller";
-import { formatListingDelivery, formatListingPrice } from "../listing.format";
+import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 
@@ -98,6 +100,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   async function addListingToCart(listing: PublicListingDto) {
     try {
       await addCartItem.mutateAsync({ listingId: listing.id, quantity: 1 });
+      if (notifyAddedAtSalePrice(listing.card.productName, 1, listing.pricing)) return;
       toast.add({
         title: "เพิ่มลงรถเข็นแล้ว",
         description: `${listing.seller.displayName || listing.seller.username} · ${CONDITION_LABELS[listing.condition]}`,
@@ -157,7 +160,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
-                  <strong className="text-right text-[15px]">{formatListingPrice(listing.price)}</strong>
+                  <ListingRowPrice price={listing.price} pricing={listing.pricing} />
                   <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={() => void addListingToCart(listing)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}

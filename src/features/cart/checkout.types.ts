@@ -8,6 +8,10 @@ export interface CheckoutOrderItemResponse {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  /** ราคาตั้งต้นต่อชิ้น ณ checkout (SAL-05) — มากกว่า `unitPrice` เมื่อได้ราคาลด */
+  listPrice?: number | null;
+  /** ส่วนลดราคาสินค้ารวมของแถว */
+  saleDiscount?: number | null;
   unitIds: number[];
   imageUrl?: string | null;
 }
@@ -34,6 +38,8 @@ export interface CheckoutResponse {
   itemsSubtotal: number;
   shippingTotal: number;
   discountTotal: number;
+  /** ส่วนลดราคาสินค้า (ราคาลด) แยกจากโค้ด (SAL-05) — `itemsSubtotal` เป็นยอดหลังลดราคาแล้ว */
+  saleDiscountTotal?: number | null;
   grandTotal: number;
   placedAt: string;
   sellerOrders: CheckoutSellerOrderResponse[];

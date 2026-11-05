@@ -9,7 +9,10 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { useAddresses, addressKeys } from "@/features/account/address.queries";
-import { useCart, useShippingQuotes, cartKeys } from "../cart.queries";
+import { useCart, useShippingQuotes, cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
+import { SaleQuotaDialog } from "@/features/sale/components/SaleBuyerDialogs";
+import { cartSaleTotals } from "@/features/sale/sale.cart";
+import { notifyBuyerLimit, quotaListingId } from "@/features/sale/sale.notify";
 import { checkoutApi } from "../checkout.api";
 import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
 import { CheckoutAddressSummary } from "../components/CheckoutAddressSummary";
@@ -63,6 +66,9 @@ export function CheckoutPage() {
   const targetProductId = Number(searchParams.get("productId"));
   const targetListingId = Number(searchParams.get("listingId"));
 
+  const [quotaItem, setQuotaItem] = useState<CartItemResponse | null>(null);
+  const removeCartItem = useRemoveCartItem();
+  const acceptPrices = useAcceptCartPrices();
   const checkoutItems = useMemo(() => {
     const items = cart?.items ?? [];
     if (targetItemIds.length) {
@@ -229,6 +235,8 @@ export function CheckoutPage() {
   );
 
   const itemCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
+  // ราคาสินค้า (ก่อนลด) / ส่วนลดราคาสินค้า แยกจากโค้ด (Figma SAL-B3 D)
+  const saleTotals = cartSaleTotals(checkoutItems);
 
   const canPurchase =
     shippingReady &&
@@ -419,6 +427,21 @@ export function CheckoutPage() {
             description: "ที่อยู่เดิมไม่พร้อมใช้งาน",
             type: "warning",
           });
+        } else if (error.code === "SALE_QUOTA_REACHED") {
+          // โควตาราคา Flash เต็มระหว่างทาง → modal ให้เลือกนำออกหรือซื้อราคาปกติ (Figma SAL-M1)
+          const listingId = quotaListingId(error);
+          setQuotaItem(
+            checkoutItems.find((item) => item.listingId === listingId) ??
+              checkoutItems.find((item) => item.pricing?.sale?.type === "FLASH_SALE") ??
+              null,
+          );
+          void queryClient.invalidateQueries({ queryKey: cartKeys.all });
+        } else if (error.code === "SALE_BUYER_LIMIT_REACHED") {
+          const item =
+            checkoutItems.find((row) => row.listingId === quotaListingId(error)) ??
+            checkoutItems.find((row) => row.pricing?.sale?.perBuyerLimit != null);
+          notifyBuyerLimit(item?.pricing?.sale?.perBuyerLimit ?? 1, item?.pricing?.listPrice ?? 0);
+          void queryClient.invalidateQueries({ queryKey: cartKeys.all });
         } else if (
           error.code === "PRICE_CHANGED" ||
           error.code === "CART_PRICE_CHANGED"
@@ -652,6 +675,7 @@ export function CheckoutPage() {
             <CheckoutOrderSummary
               itemCount={itemCount}
               subtotal={subtotal}
+              saleTotals={saleTotals}
               shippingFee={shippingFee}
               shippingReady={shippingReady}
               previewReady={previewReady}
@@ -672,6 +696,16 @@ export function CheckoutPage() {
               onReturnToCart={() => navigate("/cart")}
             />
           </aside>
+          <SaleQuotaDialog
+            open={quotaItem !== null}
+            productName={quotaItem?.productName || "สินค้านี้"}
+            salePrice={quotaItem?.pricing?.salePrice ?? null}
+            listPrice={quotaItem?.pricing?.listPrice ?? null}
+            pending={removeCartItem.isPending || acceptPrices.isPending}
+            onClose={() => setQuotaItem(null)}
+            onRemove={() => quotaItem && removeCartItem.mutate(quotaItem.id, { onSettled: () => setQuotaItem(null) })}
+            onBuyAtListPrice={() => quotaItem && acceptPrices.mutate([quotaItem.id], { onSettled: () => setQuotaItem(null) })}
+          />
         </div>
 
         <CheckoutAddressPicker

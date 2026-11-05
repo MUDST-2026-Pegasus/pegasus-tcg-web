@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/features/cart/cart.queries";
 import { useGameList } from "@/features/catalog/catalog.queries";
+import { useSales } from "@/features/sale/sale.queries";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -14,6 +15,7 @@ export function Navbar() {
   const { data: cart } = useCart();
   const cartQuantity = cart?.totalQuantity ?? 0;
   const { data: games } = useGameList();
+  const { data: sales } = useSales();
 
   const pokemonSlug = games?.find((g) => g.code === "POKEMON")?.slug ?? "pokemon-tcg";
   const onePieceSlug = games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
@@ -42,6 +44,10 @@ export function Navbar() {
       to: `/search?game=${encodeURIComponent(onePieceSlug)}`,
       isActive: isSearch && currentGame === onePieceSlug,
     },
+    // เมนู SALE (เอาออกใน TCG-467) กลับมาเฉพาะตอนมีแคมเปญลดราคาอยู่ [TCG-683]
+    ...(sales && sales.length > 0
+      ? [{ label: "SALE", to: "/sale", isActive: location.pathname.startsWith("/sale") }]
+      : []),
   ];
 
   return (
@@ -67,7 +73,7 @@ export function Navbar() {
               <span
                 className={cn(
                   "text-sm font-bold uppercase leading-none tracking-wide",
-                  isActive ? "text-primary" : "text-zinc-700",
+                  label === "SALE" ? "text-red-600" : isActive ? "text-primary" : "text-zinc-700",
                 )}
               >
                 {label}

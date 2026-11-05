@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { QueryBoundary } from "@/components/common";
+import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -147,6 +148,8 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
               <Row label="ผู้ขายได้รับ" strong>{formatBaht(order.sellerNetAmount)}</Row>
             </>
           )}
+          {/* ราคาลดสินค้า — ใครออกเงิน (TCG-683 · Figma SAL-B3 F) */}
+          <SaleOrderBreakdown items={order.items} viewer="admin" />
         </Section>
 
         <Section title="การชำระเงิน">

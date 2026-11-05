@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import { PriceTag, isOnSale } from "@/components/sale";
 import { EmptyState, ErrorState, ItemCard } from "@/components/common";
 import {
   HeadingSkeleton,
@@ -266,12 +267,13 @@ function Storefront({ username }: { username: string }) {
                           badge={
                             CONDITION_LABELS[listing.condition] ?? listing.condition
                           }
-                          price={new Intl.NumberFormat("th-TH", {
+                          price={isOnSale(listing.pricing) ? undefined : new Intl.NumberFormat("th-TH", {
                             style: "currency",
                             currency: listing.currency,
                             maximumFractionDigits: 2,
                             minimumFractionDigits: 0,
                           }).format(listing.price)}
+                          footer={isOnSale(listing.pricing) ? <PriceTag pricing={listing.pricing} /> : undefined}
                           className={cardClassName}
                         />
                       ))}
