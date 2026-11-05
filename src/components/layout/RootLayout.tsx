@@ -1,5 +1,7 @@
 import { Outlet, ScrollRestoration } from "react-router-dom";
 
+import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
+
 /**
  * Root layout component placed at the top level of the router hierarchy.
  * Includes <ScrollRestoration /> to ensure that any route navigation
@@ -8,6 +10,7 @@ import { Outlet, ScrollRestoration } from "react-router-dom";
 export function RootLayout() {
   return (
     <>
+      <FaroPageViewTracker />
       <ScrollRestoration />
       <Outlet />
     </>
