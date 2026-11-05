@@ -82,6 +82,17 @@ export function formatAuctionShortDateTime(iso: string): string {
   return shortDateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
 }
 
+const dayMonthFormatter = new Intl.DateTimeFormat("th-TH", {
+  day: "numeric",
+  month: "short",
+  timeZone: "Asia/Bangkok",
+});
+
+/** "27 ต.ค." — วันที่จบในตารางผู้ขาย */
+export function formatAuctionDayMonth(iso: string): string {
+  return dayMonthFormatter.format(new Date(iso));
+}
+
 const dateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
   day: "numeric",
   month: "short",

@@ -334,6 +334,8 @@ const SELLER_ROWS: SellerAuctionRow[] = [
   { id: 117, auctionNumber: "AUC-2026-0117", item: I.lugia, unitLabel: "U-0912", startingPrice: 3000, currentPrice: 6100, bidCount: 9, buyNowPrice: null, buyNowAvailable: false, status: "AWAITING_PAYMENT", endsAt: at(-6 * HOUR), deadline: at(18 * HOUR + 22 * MINUTE), orderId: 10377 },
   { id: 133, auctionNumber: "AUC-2026-0133", item: I.mewtwo, unitLabel: "U-0533", startingPrice: 500, currentPrice: 4200, bidCount: 18, buyNowPrice: null, buyNowAvailable: false, status: "SOLD", endsAt: at(-4 * DAY), deadline: null, orderId: 10388 },
   { id: 126, auctionNumber: "AUC-2026-0126", item: I.blastoise, unitLabel: "U-0590", startingPrice: 4500, currentPrice: 4500, bidCount: 0, buyNowPrice: null, buyNowAvailable: false, status: "UNSOLD", endsAt: at(-5 * DAY), deadline: null, orderId: null },
+  // ผู้ชนะไม่ชำระ → UNSOLD ที่มีบิด ("ไม่มีผู้ชำระ") [TCG-632]
+  { id: 121, auctionNumber: "AUC-2026-0121", item: I.espeon, unitLabel: "U-0702", startingPrice: 3000, currentPrice: 5200, bidCount: 6, buyNowPrice: null, buyNowAvailable: false, status: "UNSOLD", endsAt: at(-3 * DAY), deadline: null, orderId: null },
   { id: 140, auctionNumber: "AUC-2026-0140", item: I.charizardEx, unitLabel: "U-1041", startingPrice: 900, currentPrice: 900, bidCount: 0, buyNowPrice: 1500, buyNowAvailable: false, status: "CANCELLED", endsAt: at(-1 * DAY), deadline: null, orderId: null },
 ];
 
@@ -341,13 +343,13 @@ const STATUS_COUNTS: Record<AuctionStatus, number> = {
   LIVE: 4,
   AWAITING_PAYMENT: 1,
   SOLD: 1,
-  UNSOLD: 1,
+  UNSOLD: 2,
   CANCELLED: 1,
   SUSPENDED: 0,
 };
 
 export const SELLER_AUCTION_PAGE_FIXTURE: SellerAuctionPage = {
-  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 8, totalPages: 1 },
+  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 9, totalPages: 1 },
   statusCounts: STATUS_COUNTS,
   kpis: {
     liveCount: 4,
