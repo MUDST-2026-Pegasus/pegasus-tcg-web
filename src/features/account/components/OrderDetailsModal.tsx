@@ -223,6 +223,20 @@ export function OrderDetailsModal({
 
           {/* Pricing Summary */}
           <div className="flex flex-col gap-2 text-sm">
+            {order.saleDiscountTotal ? (
+              <>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>ราคาสินค้า (ก่อนลด)</span>
+                  <span className="font-medium text-foreground">
+                    {formatPrice(order.itemsSubtotal + order.saleDiscountTotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[#dc2626]">
+                  <span>ส่วนลดราคาสินค้า</span>
+                  <span>-{formatPrice(order.saleDiscountTotal)}</span>
+                </div>
+              </>
+            ) : null}
             <div className="flex justify-between text-muted-foreground">
               <span>Items Subtotal</span>
               <span className="font-medium text-foreground">
@@ -244,7 +258,7 @@ export function OrderDetailsModal({
             />
             {order.discountTotal > 0 && order.sellerDiscountTotal == null && order.platformDiscountTotal == null && (
               <div className="flex justify-between text-emerald-600">
-                <span>Discount</span>
+                <span>{order.saleDiscountTotal ? "โค้ดส่วนลด" : "Discount"}</span>
                 <span>-{formatPrice(order.discountTotal)}</span>
               </div>
             )}

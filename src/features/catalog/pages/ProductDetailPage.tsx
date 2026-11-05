@@ -22,9 +22,12 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { effectivePrice } from "@/components/sale";
+import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
+import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
 import { CardAttributesCard, CardEffectsCard, ProductBadges, ProductGallery, TrustStrip } from "../components/ProductDetailSections";
 import { ListingSeller } from "../ListingSeller";
-import { formatListingDelivery, formatListingPrice } from "../listing.format";
+import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 
@@ -203,6 +206,8 @@ function ProductDetailContent({
   async function addListingToCart(listingId: number, amount: number) {
     try {
       await addCartItem.mutateAsync({ listingId, quantity: amount });
+      const added = listings.find((item) => item.id === listingId);
+      if (added && notifyAddedAtSalePrice(added.card.productName, amount, added.pricing)) return true;
       toast.add({
         title: "เพิ่มลงรถเข็นแล้ว",
         description: `เพิ่มสินค้า ${amount} ${amount === 1 ? itemLabel.slice(0, -1) : itemLabel}`,
@@ -306,7 +311,7 @@ function ProductDetailContent({
                 {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
                   <div><span className="block text-xs text-muted-foreground">Last sold</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">Listed from</span><strong>{listingsReady && firstListing ? formatPrice(firstListing.price, firstListing.currency) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">Listed from</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price), firstListing.currency) : "—"}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">Available</span><strong>{listingsReady ? `${availableQuantity} ${itemLabel}` : "—"}</strong></div>
                 </div>
               </CardContent>
@@ -348,7 +353,7 @@ function ProductDetailContent({
                       className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-card p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
                       <span className="text-sm font-bold">{condition}</span>
                       <span className="text-xs text-muted-foreground">{CONDITION_LABELS[condition]}</span>
-                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(offer.price, offer.currency) : "—"}</span>
+                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price), offer.currency) : "—"}</span>
                     </button>
                   );
                 })}
@@ -375,7 +380,7 @@ function ProductDetailContent({
             <div className="grid grid-cols-2 gap-3">
               <Button type="button" className="h-14 text-base font-bold shadow-md" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing || isAuthLoading} onClick={() => void handleBuyNow()}>
                 {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? "Out of Stock" : isAuthLoading ? "Loading…" : "Buy now"}{purchasableListing ? ` · ${formatPrice(purchasableListing.price, purchasableListing.currency)}` : ""}
+                {availableForSelectedListing === 0 ? "Out of Stock" : isAuthLoading ? "Loading…" : "Buy now"}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price), purchasableListing.currency)}` : ""}
               </Button>
               <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={() => void handleAddToCart()}>
                 {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
@@ -399,7 +404,7 @@ function ProductDetailContent({
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
                   <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><strong className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]">{formatListingPrice(listing.price)}</strong><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>

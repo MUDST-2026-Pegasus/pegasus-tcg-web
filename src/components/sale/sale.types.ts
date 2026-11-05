@@ -33,3 +33,16 @@ export type ListingPricing = {
 
 /** ใครออกเงินส่วนลด — เห็นเฉพาะฝั่งผู้ขายและแอดมิน */
 export type SaleFundedBy = "PLATFORM" | "SELLER";
+
+/**
+ * ราคาลดของแถวในออเดอร์ (SAL-05 · snapshot ตอน checkout) — ฝั่งผู้ขาย/แอดมินเห็นว่าใครออกเงิน
+ * API เก่าไม่ส่งมา = ไม่มีราคาลด
+ */
+export type OrderItemSale = {
+  /** ราคาตั้งต้นต่อชิ้น */
+  listPrice?: number | null;
+  /** ส่วนลดราคาสินค้ารวมของแถว แยกตามผู้ออกเงิน */
+  saleDiscount?: { platform: number; seller: number } | null;
+  /** ชื่อแคมเปญ/การลดราคา ณ ตอนสั่ง */
+  saleName?: string | null;
+};

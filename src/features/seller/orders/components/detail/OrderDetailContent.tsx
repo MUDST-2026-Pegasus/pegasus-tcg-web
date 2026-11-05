@@ -48,6 +48,8 @@ import { ConfirmShipDialog } from "../ConfirmShipDialog";
 
 import { BuyerCard } from "./BuyerCard";
 import { CancelOrderDialog } from "./CancelOrderDialog";
+import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
+
 import { OrderProfitCard } from "./OrderProfitCard";
 import { OrderTimelineCard } from "./OrderTimelineCard";
 import { PackingListCard } from "./PackingListCard";
@@ -268,6 +270,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
           <PaymentCard state={paymentStateOf(order.status, summary.paidAt)} rows={paymentRows(detail.payment)} />
           {hasPromotionDiscount && <PromotionOrderMoneyCard order={order} />}
           {profit ? <OrderProfitCard {...profit} /> : null}
+          <SaleOrderBreakdown items={order.items} viewer="seller" />
         </div>
       </div>
 

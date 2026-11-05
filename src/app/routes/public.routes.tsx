@@ -28,6 +28,7 @@ const ProductDetailPage = lazyPage(() => import("@/features/catalog/pages/Produc
 const CollectorProfilePage = lazyPage(() => import("@/features/catalog/pages/CollectorProfilePage").then((m) => m.CollectorProfilePage), <ProfilePageSkeleton label="กำลังโหลดโปรไฟล์นักสะสม" />);
 const MarketListingsPage = lazyPage(() => import("@/features/catalog/pages/MarketListingsPage").then((m) => m.MarketListingsPage), <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />);
 const ListingDetailPage = lazyPage(() => import("@/features/catalog/pages/ListingDetailPage").then((m) => m.ListingDetailPage), <DetailPageSkeleton label="กำลังโหลดประกาศขาย" />);
+const SalePage = lazyPage(() => import("@/features/sale/pages/SalePage").then((m) => m.SalePage), <CatalogPageSkeleton label="กำลังโหลดสินค้าลดราคา" />);
 const SearchResultsPage = lazyPage(() => import("@/features/catalog/pages/SearchResultsPage").then((m) => m.SearchResultsPage), <CatalogPageSkeleton label="กำลังโหลดผลการค้นหา" />);
 
 const PublicSellerPage = lazyPage(() => import("@/features/store/pages/PublicSellerPage").then((m) => m.PublicSellerPage), <ProfilePageSkeleton label="กำลังโหลดร้านค้า" />);
@@ -68,6 +69,9 @@ export const publicRoutes: RouteObject = {
     { path: "pokemon", element: <LegacyGameRedirect gameCode="POKEMON" fallbackSlug="pokemon-tcg" /> },
     { path: "one-piece", element: <LegacyGameRedirect gameCode="ONE_PIECE" fallbackSlug="one-piece-card-game" /> },
     { path: "search", element: <SearchResultsPage /> },
+    // หน้า SALE — ราคาลดแล้วไม่ต้องใช้โค้ด [TCG-683]
+    { path: "sale", element: <SalePage /> },
+    { path: "sale/:slug", element: <SalePage /> },
     // ระบบประมูล [TCG-627] — guest ดูได้ บิดต้องล็อกอิน (เช็กตอนกดบิด)
     { path: "auctions", element: <AuctionListPage /> },
     { path: "auctions/:auctionId", element: <AuctionDetailPage /> },

@@ -86,6 +86,8 @@ export interface OrderDetails {
   itemsSubtotal: number;
   shippingTotal: number;
   discountTotal: number;
+  /** ส่วนลดราคาสินค้า (ราคาลด) แยกจากโค้ด (SAL-05) — `itemsSubtotal` เป็นยอดหลังลดแล้ว */
+  saleDiscountTotal?: number | null;
   grandTotal: number;
   shippingAddressId: number | null;
   shippingAddressSnapshot: string | null;
