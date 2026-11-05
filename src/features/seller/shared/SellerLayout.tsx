@@ -25,6 +25,7 @@ export function SellerLayout() {
   const pathname = useLocation().pathname;
   const isShop = pathname === "/seller/shop";
   const isPayout = pathname === "/seller/payout" || pathname === "/seller/verification";
+  const isPromotions = pathname === "/seller/promotions";
 
   return (
     <div
@@ -41,7 +42,7 @@ export function SellerLayout() {
             <SidebarTrigger />
           </header>
 
-          <div className={isShop || isPayout ? "min-w-0 flex-1 bg-[#f6f8f9] px-4 pt-7 pb-10 md:px-8" : "flex-1 bg-muted px-8 pt-7 pb-10"}>
+          <div className={isShop || isPayout || isPromotions ? "min-w-0 flex-1 bg-[#f6f8f9] px-4 pt-7 pb-10 md:px-8" : "flex-1 bg-muted px-8 pt-7 pb-10"}>
             {!isShop && <SellerStatusBanner profile={profile} />}
             <PageTransition>
               <Outlet />

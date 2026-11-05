@@ -79,7 +79,7 @@ export function OrdersContent({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-zinc-950">จัดการคำสั่งซื้อ</h1>
+        <h1 className="text-2xl font-bold text-foreground">จัดการคำสั่งซื้อ</h1>
         <p className="text-xs text-gray-500">{ordersSubtitle(counts.data)}</p>
       </div>
 

@@ -101,7 +101,11 @@ export type StatCardModel = {
 
 /** การ์ดสถิติ 4 ใบเรียงตามดีไซน์ */
 export function statCards(overview: AdminOverview): StatCardModel[] {
-  const { gmv, newSellers, activeListings, commission } = overview.stats;
+  const { gmv, newSellers, activeListings, commission, promotionCost } = overview.stats;
+  const commissionNote =
+    commission.averageRatePercent === null
+      ? "ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้"
+      : `เฉลี่ย ${commission.averageRatePercent.toFixed(1)}% ของยอดขายที่สำเร็จ`;
   return [
     {
       id: "gmv",
@@ -135,10 +139,11 @@ export function statCards(overview: AdminOverview): StatCardModel[] {
       label: "ค่าคอมมิชชั่นที่เก็บได้",
       value: formatBaht(commission.value),
       delta: formatDelta(commission.value, commission.previous),
+      // ต้นทุนโค้ด Pegasus ไม่หักจากค่าคอม แต่แสดงคู่กันให้เห็นว่าเดือนนี้จ่ายชดเชยร้านไปเท่าไร
       footnote:
-        commission.averageRatePercent === null
-          ? "ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้"
-          : `เฉลี่ย ${commission.averageRatePercent.toFixed(1)}% ของยอดขายที่สำเร็จ`,
+        promotionCost.value > 0
+          ? `${commissionNote} · ชดเชยโค้ด Pegasus ${formatBaht(promotionCost.value)}`
+          : commissionNote,
       bars: sparkBars(commission.sparkline),
       accent: "green",
     },

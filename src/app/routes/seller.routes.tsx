@@ -26,6 +26,7 @@ const SellerAuctionsPage = lazyPage(() => import("@/features/auction/pages/Selle
 const SellerAuctionCreatePage = lazyPage(() => import("@/features/auction/pages/SellerAuctionCreatePage").then((m) => m.SellerAuctionCreatePage), formSkeleton);
 const SellerAuctionDetailPage = lazyPage(() => import("@/features/auction/pages/SellerAuctionDetailPage").then((m) => m.SellerAuctionDetailPage), pageSkeleton);
 const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
+const SellerPromotionsPage = lazyPage(() => import("@/features/seller/promotions/SellerPromotionsPage").then((m) => m.SellerPromotionsPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ขาย — ใช้ SellerLayout ของตัวเอง (sidebar แยกจาก admin)
@@ -51,6 +52,7 @@ export const sellerRoutes: RouteObject = {
     },
     { path: "products/:productId/edit", element: <SellerProductEditPage /> },
     { path: "orders", element: <SellerOrdersPage /> },
+    { path: "promotions", element: <SellerPromotionsPage /> },
     { path: "orders/:orderId", element: <SellerOrderDetailPage /> },
     { path: "payout", element: <SellerPayoutPage /> },
     { path: "verification", element: <SellerVerificationPage /> },

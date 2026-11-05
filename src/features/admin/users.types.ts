@@ -17,6 +17,8 @@ export type AdminUser = {
   displayName: string;
   bio: string | null;
   phone: string | null;
+  /** เจ้าของบัญชีเลือกให้เบอร์โทรขึ้นบนหน้าร้านสาธารณะหรือไม่ */
+  phonePublic: boolean;
   /** presigned GET อายุสั้น ห้ามเก็บ */
   avatarUrl: string | null;
   status: UserStatus;

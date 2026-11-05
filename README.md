@@ -78,8 +78,8 @@ src/
   hooks/            Shared React hooks
   lib/              API client, environment values, navigation, and utilities
   styles/           Global styles and theme tokens
-  test/             Vitest unit and integration tests
-cypress/            E2E specs, fixtures, and support commands
+  test/             Vitest and Cypress tests
+    cypress/        Cypress E2E specs, fixtures, and support commands
 public/             Static assets
 nginx/              Static-site server configuration for Docker
 ```

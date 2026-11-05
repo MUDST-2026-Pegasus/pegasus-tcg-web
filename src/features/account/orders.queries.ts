@@ -7,15 +7,18 @@ export const orderKeys = {
   all: ["orders"] as const,
   list: (page = 0, size = 50) => [...orderKeys.all, "list", { page, size }] as const,
   detail: (id: number) => [...orderKeys.all, "detail", id] as const,
+  reorderItems: (orderId: number | null) => ["orders", orderId, "reorder-items"] as const,
+  reorderPreview: (orderId: number | null) => ["orders", orderId, "reorder-items"] as const,
 };
 
-export function useBuyerOrders(page = 0, size = 50) {
+export function useBuyerOrders(page = 0, size = 50, pollPending = false) {
   return useQuery({
     queryKey: orderKeys.list(page, size),
     queryFn: async (): Promise<OrderDetails[]> => {
       const response = await ordersApi.listOrders(page, size);
       return response.items ?? response.content ?? [];
     },
+    refetchInterval: pollPending ? (query) => query.state.data?.some((order) => order.status === "PENDING_PAYMENT") ? 30_000 : false : false,
   });
 }
 
@@ -41,3 +44,18 @@ export function useCancelOrder() {
     },
   });
 }
+
+export function useReorderItems(orderId: number | null, enabled = false) {
+  return useQuery({
+    queryKey: orderKeys.reorderItems(orderId),
+    queryFn: () => {
+      if (!orderId) {
+        throw new Error("orderId is required for reorder items");
+      }
+      return ordersApi.getReorderItems(orderId);
+    },
+    enabled: enabled && Boolean(orderId),
+  });
+}
+
+export const useReorderPreview = useReorderItems;

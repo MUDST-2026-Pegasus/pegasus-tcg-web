@@ -1,3 +1,5 @@
+import type { AppliedPromotion } from "@/features/promotions/order.types";
+
 export interface OrderItemDetails {
   id: number;
   listingId: number | null;
@@ -12,6 +14,13 @@ export interface OrderItemDetails {
   imageKey: string | null;
   imageUrl?: string | null;
   unitIds: number[];
+  /** Discount share across the whole line; divide by quantity for per-unit display. */
+  discountAllocated?: number;
+  /** Discount shares across the whole line; divide by quantity for per-unit display. */
+  sellerDiscountAllocated?: number;
+  platformDiscountAllocated?: number;
+  /** API-provided per-unit refund estimate. */
+  refundEstimatePerUnit?: number;
 }
 
 export interface ShipmentDetails {
@@ -31,8 +40,9 @@ export interface OrderStatusHistory {
   sellerOrderId: number;
   fromStatus: string | null;
   toStatus: string;
-  changedAt: string;
-  notes: string | null;
+  changedBy: number | null;
+  createdAt: string;
+  note: string | null;
 }
 
 export interface SellerOrderDetails {
@@ -59,6 +69,12 @@ export interface SellerOrderDetails {
   items: OrderItemDetails[];
   shipments: ShipmentDetails[];
   statusHistory: OrderStatusHistory[];
+  sellerDiscount?: number;
+  platformDiscount?: number;
+  platformSubsidy?: number;
+  commissionBase?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface OrderDetails {
@@ -83,6 +99,10 @@ export interface OrderDetails {
   paymentUnderReview?: boolean;
   /** Last moment a paid order can be cancelled; null before payment. */
   cancellableUntil?: string | null;
+  sellerDiscountTotal?: number;
+  platformDiscountTotal?: number;
+  promotions?: AppliedPromotion[];
+  promotionsRestoredOnCancel?: boolean;
 }
 
 export interface PageResponse<T> {
@@ -95,4 +115,60 @@ export interface PageResponse<T> {
   totalPages: number;
   first?: boolean;
   last?: boolean;
+}
+
+export interface ReorderItemDto {
+  orderItemId: number;
+  catalogVariantId: number;
+  productSlug: string;
+  productName: string;
+  variantLabel: string;
+  rarity?: string;
+  imageUrl?: string;
+  originalCondition: string;
+  originalPrice: number;
+  originalQuantity: number;
+  originalSellerName?: string;
+}
+
+export interface ReorderItemsResponse {
+  orderId: number;
+  orderNumber: string;
+  items: ReorderItemDto[];
+}
+
+export interface ReorderListingInfo {
+  listingId: number;
+  condition: string; // "NM" | "LP" | "MP" | "HP" | "DMG" | "SEALED"
+  price: number;
+  priceChanged?: boolean;
+  quantityAvailable: number;
+  isAvailable?: boolean;
+}
+
+export interface ReorderPreviewItem {
+  originalOrderItemId: number;
+  catalogVariantId: number;
+  productName: string;
+  variantLabel: string;
+  originalCondition: string;
+  originalPrice: number;
+  originalQuantity: number;
+  imageUrl: string | null;
+  currentListing: ReorderListingInfo | null;
+  alternativeConditions: ReorderListingInfo[];
+  status: "AVAILABLE" | "AVAILABLE_PRICE_CHANGED" | "ALTERNATIVE_AVAILABLE" | "OUT_OF_STOCK";
+}
+
+export interface ReorderSellerOrder {
+  sellerProfileId: number;
+  sellerName: string;
+  sellerAvailable: boolean;
+  vacationMode: boolean;
+  items: ReorderPreviewItem[];
+}
+
+export interface ReorderPreviewResponse {
+  orderId: number;
+  sellerOrders: ReorderSellerOrder[];
 }

@@ -20,6 +20,7 @@ import { hasErrorCode, isApiError } from "@/lib/api";
 
 import { StoreHero } from "../components/StoreHero";
 import { StorePagination } from "../components/StorePagination";
+import { StorePromotionStrip } from "../components/StorePromotionStrip";
 import { StoreReviewsSnippet } from "../components/StoreReviewsSnippet";
 import { StoreReviewsTab } from "../components/StoreReviewsTab";
 import { StoreTabs } from "../components/StoreTabs";
@@ -180,6 +181,8 @@ function Storefront({ username }: { username: string }) {
               positivePercent={positivePercent}
               isNonSeller={isNonSeller}
             />
+
+            {!isNonSeller && <StorePromotionStrip username={username} displayName={displayName} />}
 
             {/* Underline Tabs */}
             <Tabs

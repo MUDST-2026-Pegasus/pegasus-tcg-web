@@ -20,7 +20,7 @@ const TREND_BADGE: Record<Trend, string> = {
   up: "bg-[#e3f4ec] text-[#12805c]",
   new: "bg-[#e3f4ec] text-[#12805c]",
   down: "bg-[#fbe9e8] text-[#d0342c]",
-  flat: "bg-[#eef1f2] text-muted-foreground",
+  flat: "bg-muted text-muted-foreground",
 };
 
 export function StatCard({

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { OrderDetails, PageResponse } from "./orders.types";
+import type { OrderDetails, PageResponse, ReorderItemsResponse } from "./orders.types";
 
 function isRecord(val: unknown): val is Record<string, unknown> {
   return typeof val === "object" && val !== null;
@@ -70,4 +70,10 @@ export const ordersApi = {
 
   confirmReceived: (id: number): Promise<OrderDetails> =>
     api.post<OrderDetails>(`/orders/${id}/confirm-received`),
+
+  getReorderItems: (orderId: number): Promise<ReorderItemsResponse> =>
+    api.get<ReorderItemsResponse>(`/orders/${orderId}/reorder-items`),
+
+  getReorderPreview: (orderId: number): Promise<ReorderItemsResponse> =>
+    api.get<ReorderItemsResponse>(`/orders/${orderId}/reorder-items`),
 };

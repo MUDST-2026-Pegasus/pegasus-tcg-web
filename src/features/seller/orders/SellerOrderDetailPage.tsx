@@ -37,7 +37,7 @@ export function SellerOrderDetailPage() {
   // เลขไม่ใช่ตัวเลข หรือเป็นของร้านอื่น (backend ตอบ 404 ไม่บอกว่ามีอยู่จริง)
   if (id === null || (order.isError && hasErrorCode(order.error, "ORDER_NOT_FOUND"))) {
     return (
-      <Empty className="rounded-xl border border-border bg-white">
+      <Empty className="rounded-xl border border-border bg-card">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <SearchXIcon />

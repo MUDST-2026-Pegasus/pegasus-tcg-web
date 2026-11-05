@@ -302,7 +302,7 @@ export function ListingCreateContent() {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-zinc-950">ลงขายสินค้าใหม่</h1>
+          <h1 className="text-2xl font-bold text-foreground">ลงขายสินค้าใหม่</h1>
           <p className="text-xs text-gray-500">
             เลือกการ์ดจากแคตตาล็อกกลาง แล้วกำหนดสภาพ ราคา และจำนวนของคุณเอง
           </p>

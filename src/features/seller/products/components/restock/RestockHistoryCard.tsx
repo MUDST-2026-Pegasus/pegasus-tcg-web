@@ -77,7 +77,7 @@ export function RestockHistoryCard({
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3.5">
         <div className="flex flex-col gap-[3px]">
-          <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
+          <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <p className="text-xs text-gray-500">
             {lotCount} ล็อต · รับเข้าสะสม {receivedCount} {unit} · ขายไปแล้ว{" "}
             {soldCount} {unit}
@@ -91,7 +91,7 @@ export function RestockHistoryCard({
 
       <Table>
         <TableHeader>
-          <TableRow className="border-y border-gray-100 bg-neutral-50 hover:bg-neutral-50">
+          <TableRow className="border-y border-muted bg-neutral-50 hover:bg-neutral-50">
             <TableHead className={cn(HEAD_CLASS, "pl-5")}>
               {columns.receivedAt}
             </TableHead>
@@ -105,7 +105,7 @@ export function RestockHistoryCard({
           </TableRow>
         </TableHeader>
 
-        <TableBody className="[&_tr]:border-gray-100">
+        <TableBody className="[&_tr]:border-muted">
           {stockIns.isPending ? <HistorySkeletonRows /> : null}
 
           {stockIns.isError ? (
@@ -163,14 +163,14 @@ export function RestockHistoryCard({
                 <TableCell className={cn(CELL_CLASS, "text-gray-700")}>
                   {formatBaht(lot.unitCost)}
                 </TableCell>
-                <TableCell className={cn(CELL_CLASS, "font-medium text-zinc-950")}>
+                <TableCell className={cn(CELL_CLASS, "font-medium text-foreground")}>
                   {formatBaht(lot.totalCost)}
                 </TableCell>
                 <TableCell className={cn(CELL_CLASS, "text-gray-500")}>
                   {lot.sourceLabel}
                 </TableCell>
                 <TableCell
-                  className={cn(CELL_CLASS, "pr-5 font-semibold text-zinc-950")}
+                  className={cn(CELL_CLASS, "pr-5 font-semibold text-foreground")}
                 >
                   {lot.averageCostAfter === null ? "—" : formatBaht(lot.averageCostAfter)}
                 </TableCell>
@@ -181,7 +181,7 @@ export function RestockHistoryCard({
       </Table>
 
       {stockIns.hasNextPage ? (
-        <div className="flex justify-center border-t border-gray-100 px-5 py-3">
+        <div className="flex justify-center border-t border-muted px-5 py-3">
           <Button
             variant="outline"
             size="sm"

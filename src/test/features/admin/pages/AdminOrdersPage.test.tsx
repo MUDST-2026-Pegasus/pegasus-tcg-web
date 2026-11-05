@@ -118,4 +118,13 @@ describe("AdminOrdersPage", () => {
 
     expect(await screen.findByText("โหลดภาพรวมคำสั่งซื้อไม่สำเร็จ")).toBeInTheDocument();
   });
+
+  it("finds the exact order linked from a promotion redemption", async () => {
+    vi.mocked(ordersApi.getOrderBoard).mockResolvedValue(mockBoard);
+    vi.mocked(ordersApi.getAdminOrders).mockResolvedValue({ items: [mockBoard.columns[0].items[0]], page: 0, size: 20, totalItems: 1, totalPages: 1 });
+    renderWithProviders(<AdminOrdersPage />, { route: "/admin/orders?q=PGS-20261014-000101" });
+    expect(await screen.findByText("คำสั่งซื้อ PGS-20261014-000101")).toBeInTheDocument();
+    expect(ordersApi.getAdminOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "PGS-20261014-000101" }));
+    expect((await screen.findAllByRole("button", { name: /PGS-20261014-000101-1/ })).length).toBeGreaterThan(0);
+  });
 });

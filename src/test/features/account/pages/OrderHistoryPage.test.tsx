@@ -11,6 +11,7 @@ import { financeApi } from "@/features/finance/finance.api";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { Review } from "@/features/finance/after-sales.types";
 import type { OrderDetails } from "@/features/account/orders.types";
+import { toast } from "@/components/ui/toast";
 
 const mockOrders: OrderDetails[] = [
   {
@@ -141,6 +142,73 @@ describe("OrderHistoryPage", () => {
     // Unpaid order and a paid one the seller has not shipped yet
     expect(screen.getByText("Awaiting Payment")).toBeInTheDocument();
     expect(screen.getByText("Preparing")).toBeInTheDocument();
+  });
+
+  it("notifies the buyer when a pending order times out and its code is released", async () => {
+    const notify = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+    const view = renderWithProviders(<OrderHistoryPage />);
+    const expired = {
+      ...mockOrders[0],
+      status: "CANCELLED",
+      promotionsRestoredOnCancel: true,
+      promotions: [{ code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 50, status: "RELEASED" }],
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        status: "CANCELLED",
+        statusHistory: [{
+          id: 1,
+          sellerOrderId: mockOrders[0].sellerOrders[0].id,
+          fromStatus: "PENDING_PAYMENT",
+          toStatus: "CANCELLED",
+          changedBy: null,
+          note: null,
+          createdAt: "2026-10-10T13:00:00Z",
+        }],
+      }],
+    };
+    vi.mocked(orderQueries.useBuyerOrders).mockReturnValue({ data: [expired, mockOrders[1]], isLoading: false, error: null, refetch: vi.fn() } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+    view.rerender(<OrderHistoryPage />);
+    await waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({
+      title: "คำสั่งซื้อ ORD-101 หมดเวลาชำระ", description: "คืนสิทธิ์ PEGASUS10 แล้ว", type: "warning",
+    })));
+  });
+
+  it("shows split discount owners and the seller-order payable amount in buyer order details", async () => {
+    const discounted = {
+      ...mockOrders[0],
+      status: "PAID",
+      sellerDiscountTotal: 50,
+      platformDiscountTotal: 49.06,
+      discountTotal: 99.06,
+      grandTotal: 775.94,
+      promotions: [
+        { code: "MINMIN50", ownerType: "SELLER" as const, sellerProfileId: 1, amount: 50, status: "CONSUMED" },
+        { code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 49.06, status: "CONSUMED" },
+      ],
+      sellerOrders: [{
+        ...mockOrders[0].sellerOrders[0],
+        sellerName: "minmin_tcg",
+        status: "PREPARING",
+        sellerDiscount: 50,
+        platformDiscount: 49.06,
+        grandTotal: 775.94,
+        promotions: [
+          { code: "MINMIN50", ownerType: "SELLER" as const, sellerProfileId: 1, amount: 50, status: "CONSUMED" },
+          { code: "PEGASUS10", ownerType: "PLATFORM" as const, sellerProfileId: null, amount: 49.06, status: "CONSUMED" },
+        ],
+      }],
+    } as OrderDetails;
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [discounted], isLoading: false, error: null, refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+    await userEvent.click(screen.getAllByRole("button", { name: /view details/i })[0]);
+
+    expect(screen.getAllByText(/ส่วนลดร้าน · MINMIN50/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/ส่วนลด Pegasus · PEGASUS10/).length).toBeGreaterThan(0);
+    expect(screen.getByText("ลูกค้าจ่ายร้านนี้")).toBeInTheDocument();
+    expect(screen.getAllByText("฿775.94").length).toBeGreaterThan(0);
   });
 
   it("opens the linked order details and closes without reopening the query link", async () => {
@@ -290,13 +358,11 @@ describe("OrderHistoryPage", () => {
     expect(confirmSpy).not.toHaveBeenCalled();
 
     // Verify custom modal is opened
-    expect(screen.getByRole("heading", { name: /cancel this order\?/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/this action cannot be undone and reserved items will be released/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ยกเลิกคำสั่งซื้อนี้?" })).toBeInTheDocument();
+    expect(screen.getByText(/ยังไม่ได้ชำระเงิน/)).toBeInTheDocument();
 
-    // Click "Confirm Cancel" inside the custom dialog
-    const confirmCancelBtn = screen.getByRole("button", { name: /confirm cancel/i });
+    // Click the confirmation action inside the custom dialog
+    const confirmCancelBtn = screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" });
     await userEvent.click(confirmCancelBtn);
 
     await waitFor(() => {
@@ -317,7 +383,7 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     await userEvent.click(screen.getByRole("button", { name: /cancel order/i }));
-    await userEvent.click(screen.getByRole("button", { name: /confirm cancel/i }));
+    await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
 
     expect(await screen.findByRole("textbox", { name: "เลขบัญชีสำหรับคืนเงิน 11" })).toBeInTheDocument();
   });
@@ -345,5 +411,162 @@ describe("OrderHistoryPage", () => {
     await waitFor(() => {
       expect(screen.queryByText("Order #ORD-101")).not.toBeInTheDocument();
     });
+  });
+
+  it("renders status filter tabs with dynamic counts and filters orders by selected status tab", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Verify all 7 filter tabs are rendered
+    const allTab = screen.getByRole("tab", { name: /ทั้งหมด/i });
+    const pendingTab = screen.getByRole("tab", { name: /รอชำระเงิน/i });
+    const preparingTab = screen.getByRole("tab", { name: /กำลังเตรียมพัสดุ/i });
+    const inTransitTab = screen.getByRole("tab", { name: /กำลังจัดส่ง/i });
+    const completedTab = screen.getByRole("tab", { name: /สำเร็จแล้ว/i });
+    const returnRefundTab = screen.getByRole("tab", { name: /ขอคืนเงิน\/คืนสินค้า/i });
+    const cancelledTab = screen.getByRole("tab", { name: /ยกเลิกแล้ว/i });
+
+    expect(allTab).toBeInTheDocument();
+    expect(pendingTab).toBeInTheDocument();
+    expect(preparingTab).toBeInTheDocument();
+    expect(inTransitTab).toBeInTheDocument();
+    expect(completedTab).toBeInTheDocument();
+    expect(returnRefundTab).toBeInTheDocument();
+    expect(cancelledTab).toBeInTheDocument();
+
+    // Both orders visible initially
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+
+    // Filter to Pending (ORD-101 is pending payment)
+    await user.click(pendingTab);
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
+
+    // Filter to Preparing (ORD-102 is paid/preparing)
+    await user.click(preparingTab);
+    expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+
+    // Filter to Cancelled (0 orders)
+    await user.click(cancelledTab);
+    expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
+    expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
+    expect(screen.getByText("No orders found")).toBeInTheDocument();
+
+    // Click "View all orders" button in empty state
+    await user.click(screen.getByRole("button", { name: /view all orders/i }));
+    expect(screen.getByText("ORD-101")).toBeInTheDocument();
+    expect(screen.getByText("ORD-102")).toBeInTheDocument();
+  });
+
+  it("preserves scroll position when opening and closing OrderDetailsModal", async () => {
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    Object.defineProperty(window, "scrollY", { value: 750, writable: true, configurable: true });
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    const viewDetailsButtons = screen.getAllByRole("button", { name: /view details/i });
+    await userEvent.click(viewDetailsButtons[0]);
+
+    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+
+    const closeBtn = screen.getByRole("button", { name: /close/i });
+    await userEvent.click(closeBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("heading", { name: /order details/i })).not.toBeInTheDocument();
+    });
+
+    expect(scrollToSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ top: 750, behavior: "instant" })
+    );
+  });
+
+  it("renders Reorder button ONLY on completed orders and directly opens ReorderPreviewModal", async () => {
+    const user = userEvent.setup();
+    const completedOrder: OrderDetails = {
+      ...mockOrders[0],
+      id: 106,
+      orderNumber: "ORD-106",
+      status: "COMPLETED",
+      sellerOrders: [
+        {
+          ...mockOrders[0].sellerOrders[0],
+          id: 206,
+          salesOrderId: 106,
+          status: "COMPLETED",
+          items: [
+            {
+              ...mockOrders[0].sellerOrders[0].items[0],
+              productName: "Mega Evolution Booster Box",
+            },
+          ],
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [mockOrders[0], completedOrder],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Reorder button should exist only for completed order
+    const reorderButtons = screen.getAllByRole("button", { name: /^reorder$/i });
+    expect(reorderButtons).toHaveLength(1);
+
+    // Clicking Reorder directly opens ReorderPreviewModal without opening OrderDetailsModal
+    await user.click(reorderButtons[0]);
+    expect(
+      screen.getByRole("heading", { name: /reorder items \(สั่งซื้อสินค้าอีกครั้ง\)/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/#ord-106/i)).toBeInTheDocument();
+  });
+
+  it("renders Reorder button inside OrderDetailsModal for completed order and opens preview", async () => {
+    const user = userEvent.setup();
+    const completedOrder: OrderDetails = {
+      ...mockOrders[0],
+      id: 107,
+      orderNumber: "ORD-107",
+      status: "COMPLETED",
+      sellerOrders: [
+        {
+          ...mockOrders[0].sellerOrders[0],
+          id: 207,
+          salesOrderId: 107,
+          status: "COMPLETED",
+        },
+      ],
+    };
+
+    vi.spyOn(orderQueries, "useBuyerOrders").mockReturnValue({
+      data: [completedOrder],
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
+
+    renderWithProviders(<OrderHistoryPage />);
+
+    // Open View Details
+    await user.click(screen.getByRole("button", { name: /view details/i }));
+    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+
+    // Reorder button should exist inside the details modal (card is inert while modal is open)
+    const reorderInModal = screen.getByRole("button", { name: /^reorder$/i });
+    expect(reorderInModal).toBeInTheDocument();
+
+    // Click Reorder inside the modal
+    await user.click(reorderInModal);
+
+    // ReorderPreviewModal should open
+    expect(
+      screen.getByRole("heading", { name: /reorder items \(สั่งซื้อสินค้าอีกครั้ง\)/i })
+    ).toBeInTheDocument();
   });
 });
