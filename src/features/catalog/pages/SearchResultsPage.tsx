@@ -192,7 +192,9 @@ export function SearchResultsPage() {
   // เรียก update ของ render ล่าสุดเสมอ
   const commitQuery = useEffectEvent((next: string) => {
     // replace: ไม่ต้องกด back ย้อนทีละคำที่เคยพิมพ์
-    update({ q: next }, { replace: true });
+    const defaultSort = filters.q ? "relevance" : "featured";
+    update({ q: next, sort: filters.sort === defaultSort ? (next ? "relevance" : "featured") : filters.sort },
+      { replace: true });
   });
   useEffect(() => {
     const next = searchInput.trim();
@@ -256,9 +258,7 @@ export function SearchResultsPage() {
         </Breadcrumb>
 
         <header className="flex flex-col gap-[7px] border-b border-border pb-[22px]">
-          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">
-            {filters.q ? <>Search results for &quot;{filters.q}&quot;</> : "All products"}
-          </h1>
+          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">All products</h1>
           <p className="text-[12px] leading-[18px] text-muted-foreground" aria-live="polite">
             {lookupFailure
               ? ""
@@ -266,6 +266,11 @@ export function SearchResultsPage() {
                 ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
                 : "Searching…"}
           </p>
+          {data?.correctedQuery && !waiting ? (
+            <p className="text-sm text-primary" aria-live="polite">
+              Showing results for “{data.correctedQuery}” · You searched “{filters.q}”
+            </p>
+          ) : null}
         </header>
 
         <div className="grid items-start gap-[28px] pt-[7px] lg:grid-cols-[228px_minmax(0,1fr)]">

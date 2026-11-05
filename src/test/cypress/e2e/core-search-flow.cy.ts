@@ -123,7 +123,7 @@ describe('Core Search & Navigation Flow', () => {
     cy.wait('@getProducts');
 
     // Verify search page contents
-    cy.contains('Search results for "Blue-Eyes"').should('be.visible');
+    cy.contains('All products').should('be.visible');
     cy.contains('2 results').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
@@ -189,7 +189,34 @@ describe('Core Search & Navigation Flow', () => {
     cy.url().should('include', 'q=Pikachu');
 
     // Results header and item should appear
-    cy.contains('Search results for "Pikachu"').should('be.visible');
+    cy.contains('All products').should('be.visible');
     cy.contains('Pikachu Illustrator').should('be.visible');
+  });
+
+  it('shows corrected results without changing the original search term', () => {
+    cy.intercept('GET', '**/api/v1/catalog/products*', (req) => {
+      expect(req.query.q).to.eq('pokamon');
+      expect(req.query.sort).to.eq('relevance');
+      req.reply({
+        statusCode: 200,
+        body: {
+          success: true,
+          data: {
+            items: [{
+              id: 3, slug: 'pikachu', name: 'Pikachu', gameId: 2, categoryId: 1,
+              productType: 'SINGLE_CARD', cardNumber: '025', rarityCode: 'C',
+              primaryImageUrl: null, variantCount: 1, lowestPrice: 100, listingCount: 1,
+            }],
+            page: 0, size: 20, totalItems: 1, totalPages: 1, correctedQuery: 'Pokemon',
+          },
+        },
+      });
+    }).as('correctedProducts');
+
+    cy.visit('/search?q=pokamon');
+    cy.wait('@correctedProducts');
+    cy.contains('Showing results for “Pokemon” · You searched “pokamon”').should('be.visible');
+    cy.get('input[aria-label="Search products"]').should('have.value', 'pokamon');
+    cy.contains('Pikachu').should('be.visible');
   });
 });

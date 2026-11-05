@@ -17,6 +17,7 @@ import type {
 export const SEARCH_PAGE_SIZE = 20;
 
 export const SEARCH_SORTS = [
+  { value: "relevance", label: "Most relevant" },
   { value: "featured", label: "Featured" },
   { value: "newest", label: "Newest" },
   { value: "price_asc", label: "Price: Low to High" },
@@ -45,6 +46,7 @@ export type SearchFilters = {
 };
 
 const SORT_TO_API: Record<SearchSort, ProductSort> = {
+  relevance: "relevance",
   featured: "popular",
   newest: "newest",
   price_asc: "price_asc",
@@ -68,6 +70,7 @@ function priceText(value: string | null): string {
 export function readFilters(params: URLSearchParams): SearchFilters {
   const page = Number(params.get("page"));
   const sort = params.get("sort");
+  const q = params.get("q")?.trim() ?? "";
   let minPrice = priceText(params.get("min"));
   let maxPrice = priceText(params.get("max"));
   // ลิงก์ที่แก้มือหรือแชร์มาผิด (?min=500&max=100) — backend ตอบ VALIDATION_FAILED
@@ -77,14 +80,14 @@ export function readFilters(params: URLSearchParams): SearchFilters {
     maxPrice = "";
   }
   return {
-    q: params.get("q")?.trim() ?? "",
+    q,
     games: params.getAll("game").filter(Boolean),
     category: params.get("category") || null,
     conditions: params.getAll("condition").filter(isCondition),
     minPrice,
     maxPrice,
     inStock: params.get("inStock") === "true",
-    sort: isSort(sort) ? sort : "featured",
+    sort: isSort(sort) ? sort : q ? "relevance" : "featured",
     page: Number.isInteger(page) && page > 1 ? page : 1,
   };
 }
@@ -99,7 +102,7 @@ export function writeFilters(filters: SearchFilters): URLSearchParams {
   if (filters.minPrice) params.set("min", filters.minPrice);
   if (filters.maxPrice) params.set("max", filters.maxPrice);
   if (filters.inStock) params.set("inStock", "true");
-  if (filters.sort !== "featured") params.set("sort", filters.sort);
+  if (filters.sort !== (filters.q ? "relevance" : "featured")) params.set("sort", filters.sort);
   if (filters.page > 1) params.set("page", String(filters.page));
   return params;
 }
