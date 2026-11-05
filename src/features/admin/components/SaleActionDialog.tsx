@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CirclePlay, Info, Pause, Square, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
@@ -145,9 +146,12 @@ function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: ()
         </>
       }
     >
-      <label className="grid gap-1.5 text-xs font-medium">
-        เหตุผล (ร้านเห็น) *
+      <Field className="gap-1.5">
+        <FieldLabel htmlFor="sale-pause-reason" className="text-xs">
+          เหตุผล (ร้านเห็น) *
+        </FieldLabel>
         <Textarea
+          id="sale-pause-reason"
           autoFocus
           className="min-h-16 text-sm"
           maxLength={300}
@@ -155,7 +159,7 @@ function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: ()
           value={reason}
           onChange={(event) => setReason(event.target.value)}
         />
-      </label>
+      </Field>
       <CheckRow id="sale-notify-paused" label="ส่งอีเมลแจ้งร้าน" checked={notifySeller} onChange={setNotifySeller} />
     </PromotionDialog>
   );
