@@ -22,13 +22,27 @@ import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import { clearPromotionSelection } from "../promotions.storage";
 import type { CartItemResponse } from "../cart.types";
+import { AuctionCheckout } from "@/features/auction/components/AuctionCheckout";
 import "./checkout.css";
 
 interface CheckoutLocationState {
   selectedCartItemIds?: number[];
 }
 
+/**
+ * `/checkout` — `?auction={id}` เป็นโหมดประมูล (การ์ดใบเดียวที่ชนะ) [TCG-631]
+ * ไม่มี = checkout จากตะกร้าแบบเดิม ทั้งสองแบบแยก component กันเพื่อให้ flow ตะกร้าไม่เปลี่ยน
+ */
 export function CheckoutPage() {
+  const [searchParams] = useSearchParams();
+  const auctionId = Number(searchParams.get("auction"));
+  if (searchParams.has("auction") && Number.isSafeInteger(auctionId) && auctionId > 0) {
+    return <AuctionCheckout auctionId={auctionId} />;
+  }
+  return <CartCheckout />;
+}
+
+function CartCheckout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();

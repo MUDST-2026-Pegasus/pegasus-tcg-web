@@ -11,6 +11,8 @@ import { ordersApi } from "@/features/account/orders.api";
 import { cartKeys } from "@/features/cart/cart.queries";
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
 import { financeApi } from "@/features/finance/finance.api";
+import { parseAuctionNumber } from "@/features/auction/auction.format";
+import { AuctionOrderBadge } from "@/features/auction/components/AuctionOrderBadge";
 import { PaymentQrCard } from "../components/PaymentQrCard";
 import { PaymentSteps } from "../components/PaymentSteps";
 import { PaymentOrderSummary, type OrderItemSummaryData } from "../components/PaymentOrderSummary";
@@ -60,6 +62,8 @@ export function PaymentPage() {
   const [searchParams] = useSearchParams();
   const state = location.state as { orderId?: number; order?: CheckoutResponse } | null;
   const orderId = Number(state?.orderId ?? searchParams.get("orderId"));
+  // คำสั่งซื้อจากประมูล — ยังไม่มี `source` ใน order จึงส่งเลขประมูลมาทาง query [TCG-631]
+  const auctionNumber = parseAuctionNumber(searchParams.get("auction"));
   const validOrderId = Number.isSafeInteger(orderId) && orderId > 0;
   const [attemptKey, setAttemptKey] = useState(() => crypto.randomUUID());
   const [referenceCode, setReferenceCode] = useState("");
@@ -101,11 +105,12 @@ export function PaymentPage() {
     if (payment?.status === "SUCCEEDED") {
       void queryClient.invalidateQueries({ queryKey: cartKeys.all });
       void queryClient.invalidateQueries({ queryKey: ["orders"] });
-      navigate(`/payment/success?orderId=${orderId}&paymentId=${payment.id}`, {
+      const auctionQuery = auctionNumber ? `&auction=${encodeURIComponent(auctionNumber)}` : "";
+      navigate(`/payment/success?orderId=${orderId}&paymentId=${payment.id}${auctionQuery}`, {
         replace: true,
       });
     }
-  }, [payment?.status, payment?.id, orderId, navigate, queryClient]);
+  }, [payment?.status, payment?.id, orderId, auctionNumber, navigate, queryClient]);
 
   async function submitSlip() {
     const key = slip.objectKeys[0];
@@ -233,6 +238,7 @@ export function PaymentPage() {
                   <p className="text-sm text-muted-foreground mt-1">
                     Order #{orderNumber} · Pay exactly this amount
                   </p>
+                  {auctionNumber && <AuctionOrderBadge auctionNumber={auctionNumber} className="mt-2" />}
                 </div>
 
                 {/* Expiration Timer Badge */}
