@@ -30,6 +30,7 @@ import { PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
 import type { AdminPromotion, PromotionOwnerType, PromotionStatus } from "../promotions.types";
 import { PromotionActionDialog, type PromotionActionState } from "./PromotionActionDialog";
 import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
+import { PromotionPageTabs } from "./PromotionPageTabs";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
 
@@ -41,7 +42,10 @@ const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> 
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-/** หน้า /admin/promotions (Figma PRM-A1) — filter แท็บ หน้า และ sheet อยู่ใน URL ทั้งหมด */
+/**
+ * แท็บ "โค้ดส่วนลด" ของ /admin/promotions (Figma PRM-A1) — filter แท็บ หน้า และ sheet อยู่ใน URL ทั้งหมด
+ * แท็บ "ลดราคาสินค้า" (`?tab=sales`) อยู่ที่ `AdminSalesContent`
+ */
 export function AdminPromotionsContent() {
   const [params, setParams] = useSearchParams();
   const owner = params.get("owner") as PromotionOwnerType | null;
@@ -125,7 +129,7 @@ export function AdminPromotionsContent() {
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; โค้ดส่วนลด</h1>
+          <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
           <p className="text-sm text-muted-foreground">สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง</p>
         </div>
         <div className="flex gap-2">
@@ -138,6 +142,8 @@ export function AdminPromotionsContent() {
           </Button>
         </div>
       </header>
+
+      <PromotionPageTabs value="codes" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard

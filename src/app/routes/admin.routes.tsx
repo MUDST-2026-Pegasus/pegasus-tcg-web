@@ -25,6 +25,7 @@ const AdminBannedBiddersPage = lazyPage(() => import("@/features/auction/pages/A
 const AdminActivityLogPage = lazyPage(() => import("@/features/admin/pages/AdminActivityLogPage").then((m) => m.AdminActivityLogPage), pageSkeleton);
 const AdminPromotionsPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionsPage").then((m) => m.AdminPromotionsPage), pageSkeleton);
 const AdminPromotionFormPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionFormPage").then((m) => m.AdminPromotionFormPage), pageSkeleton);
+const AdminSaleFormPage = lazyPage(() => import("@/features/admin/pages/AdminSaleFormPage").then((m) => m.AdminSaleFormPage), pageSkeleton);
 
 /**
  * หลังบ้านฝั่งผู้ดูแลระบบ — ใช้ DashboardLayout (Sidebar + topbar + Footer)
@@ -54,6 +55,10 @@ export const adminRoutes: RouteObject = {
     { path: "promotions", element: <AdminPromotionsPage /> },
     { path: "promotions/new", element: <AdminPromotionFormPage /> },
     { path: "promotions/:id/edit", element: <AdminPromotionFormPage /> },
+    // ลดราคาสินค้า [TCG-681] — รายการอยู่ที่ /admin/promotions?tab=sales
+    { path: "sales", element: <Navigate to="/admin/promotions?tab=sales" replace /> },
+    { path: "sales/new", element: <AdminSaleFormPage /> },
+    { path: "sales/:id/edit", element: <AdminSaleFormPage /> },
     { path: "payments", element: <AdminPaymentsPage /> },
     { path: "refunds", element: <AdminRefundsPage /> },
     { path: "payouts", element: <AdminPayoutsPage /> },
