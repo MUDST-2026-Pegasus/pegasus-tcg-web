@@ -1,0 +1,75 @@
+import { formatSaleBaht } from "@/components/sale";
+import { SALE_STATUS_LABEL, SALE_STATUS_STYLE, salePeriod } from "@/features/admin/sales.format";
+import { hasErrorCode, isApiError } from "@/lib/api";
+
+import type { SalePriceLockedDetails, SellerSale, SellerSaleStatus } from "./sales.types";
+
+export { SALE_STATUS_LABEL, SALE_STATUS_STYLE, salePeriod };
+
+/** ตัวอย่างคอมมิชชั่นในการ์ด "คุณได้" (Figma SAL-S2) — อัตราจริงคิดที่ server ตามหมวด */
+export const SAMPLE_SELLER_COMMISSION = 0.05;
+
+const DAY_MS = 86_400_000;
+
+/** "ทุกสินค้าในร้าน" / "หมวด Booster Box" / "เลือก 6 listing" */
+export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeNames" | "listingCount">): string {
+  if (sale.scopeType === "SHOP") return "ทุกสินค้าในร้าน";
+  if (sale.scopeType === "LISTINGS") return `เลือก ${sale.listingCount.toLocaleString("th-TH")} listing`;
+  return sale.scopeNames.length ? `หมวด ${sale.scopeNames.join(", ")}` : "หมวดหมู่";
+}
+
+/** "ลด 15%" / "ลด ฿150/ชิ้น" / "ราคาใหม่รายชิ้น" */
+export function sellerDiscountLabel(sale: Pick<SellerSale, "discountType" | "discountValue">): string {
+  if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
+  if (sale.discountType === "FIXED_OFF") return `ลด ${formatSaleBaht(sale.discountValue)}/ชิ้น`;
+  return "ราคาใหม่รายชิ้น";
+}
+
+export function sellerDiscountDetail(sale: SellerSale): string {
+  if (sale.discountType !== "FIXED_PRICE") return "ร้านออกเงิน";
+  if (sale.minDiscountPercent == null || sale.maxDiscountPercent == null) return "ตั้งรายแถว";
+  return sale.minDiscountPercent === sale.maxDiscountPercent
+    ? `ลด ${sale.minDiscountPercent}%`
+    : `ลด ${sale.minDiscountPercent}–${sale.maxDiscountPercent}%`;
+}
+
+/** "เหลือ 7 วัน" / "เริ่มใน 24 วัน" / "ทีมงานหยุด" */
+export function sellerPeriodHint(sale: SellerSale, now: number): string {
+  const days = (iso: string) => Math.max(0, Math.ceil((Date.parse(iso) - now) / DAY_MS));
+  switch (sale.status) {
+    case "ACTIVE":
+      return `เหลือ ${days(sale.endsAt)} วัน`;
+    case "SCHEDULED":
+      return `เริ่มใน ${days(sale.startsAt)} วัน`;
+    case "PAUSED":
+      return sale.pausedByAdmin ? "ทีมงานหยุด" : "หยุดไว้";
+    default:
+      return "สิ้นสุดแล้ว";
+  }
+}
+
+export function isSaleFinished(status: SellerSaleStatus): boolean {
+  return status === "ENDED" || status === "SOLD_OUT" || status === "BUDGET_EXHAUSTED";
+}
+
+export function sellerSaleErrorMessage(error: unknown, fallback: string): string {
+  if (hasErrorCode(error, "SALE_OVERLAP")) return "มี listing อยู่ในการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP) — เอาออกจากอันเดิมก่อน";
+  if (hasErrorCode(error, "SALE_PAUSED")) return "ทีมงานหยุดการลดราคานี้ไว้ เปิดเองไม่ได้ — ติดต่อทีมงาน";
+  if (hasErrorCode(error, "SALE_IN_USE")) return "มีออเดอร์แล้ว ลบไม่ได้ — ใช้ “จบก่อนกำหนด” แทน";
+  if (hasErrorCode(error, "SALE_NOT_FOUND")) return "ไม่พบการลดราคานี้แล้ว ลองโหลดหน้าใหม่";
+  if (hasErrorCode(error, "SELLER_NOT_VERIFIED")) return "ร้านยังไม่ผ่านการยืนยัน จึงลดราคาสินค้าไม่ได้";
+  if (hasErrorCode(error, "SALE_INVALID")) return "ข้อมูลการลดราคาไม่ผ่านเงื่อนไข ตรวจราคาแต่ละแถวอีกครั้ง";
+  return fallback;
+}
+
+/** แกะ `details` ของ 409 `SALE_PRICE_LOCKED` */
+export function priceLockedDetails(error: unknown): SalePriceLockedDetails {
+  if (!isApiError(error)) return {};
+  const d = error.details;
+  return {
+    saleName: typeof d.saleName === "string" ? d.saleName : undefined,
+    ownerType: d.ownerType === "PLATFORM" || d.ownerType === "SELLER" ? d.ownerType : undefined,
+    endsAt: typeof d.endsAt === "string" ? d.endsAt : undefined,
+    currentPrice: typeof d.currentPrice === "number" ? d.currentPrice : undefined,
+  };
+}
