@@ -16,7 +16,7 @@ export const PROMOTION_DIALOG_CONTROLS = cn(
   "**:data-[slot=button]:rounded-md **:data-[slot=button]:text-[13px] **:data-[slot=button]:font-semibold",
   "**:data-[slot=input]:rounded-md **:data-[slot=input]:border-border **:data-[slot=input]:bg-card **:data-[slot=input]:text-[13px]",
   "**:data-[slot=textarea]:rounded-md **:data-[slot=textarea]:border-border **:data-[slot=textarea]:bg-card **:data-[slot=textarea]:text-[13px]",
-  "**:data-[slot=native-select]:rounded-md **:data-[slot=native-select]:border-border **:data-[slot=native-select]:bg-card **:data-[slot=native-select]:text-[13px]",
+  "**:data-[slot=select-trigger]:rounded-md **:data-[slot=select-trigger]:border-border **:data-[slot=select-trigger]:bg-card **:data-[slot=select-trigger]:text-[13px]",
 );
 
 /** ปุ่มยืนยันที่ทำลายข้อมูลใน modal เป็นแดงทึบ (Figma PRM-M1 / M2) ไม่ใช่แดงจางของ `variant="destructive"` */
