@@ -10,6 +10,7 @@ import { createTestQueryClient } from "@/test/utils";
 
 vi.mock("@/features/seller/orders/orders.api", () => ({
   getSellerOrder: vi.fn(),
+  downloadSellerOrderSummary: vi.fn(),
   acceptSellerOrder: vi.fn(),
   shipSellerOrder: vi.fn(),
   cancelSellerOrder: vi.fn(),

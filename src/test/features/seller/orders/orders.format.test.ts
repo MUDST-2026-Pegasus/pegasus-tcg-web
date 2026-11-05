@@ -11,6 +11,7 @@ import {
   formatAgo,
   monthlySummary,
   orderErrorMessage,
+  orderSummaryDownloadErrorMessage,
   ordersSubtitle,
   parseShippingAddress,
   paymentRows,
@@ -116,6 +117,26 @@ describe("what the seller may do", () => {
     expect(canShip("SHIPPED")).toBe(false);
     expect(canCancel("PENDING_PAYMENT")).toBe(true);
     expect(canCancel("SHIPPED")).toBe(false);
+  });
+});
+
+describe("order summary download errors", () => {
+  it.each([
+    [401, "UNAUTHENTICATED", "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่"],
+    [403, "ACCESS_DENIED", "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารของร้าน"],
+    [404, "ORDER_NOT_FOUND", "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ"],
+    [500, "INTERNAL_ERROR", "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง"],
+  ])("maps HTTP %s to an actionable message", (status, code, expected) => {
+    expect(orderSummaryDownloadErrorMessage(new ApiError({ status, code, message: "failed" })))
+      .toBe(expected);
+  });
+
+  it("explains network failures", () => {
+    expect(orderSummaryDownloadErrorMessage(new ApiError({
+      status: 0,
+      code: "NETWORK_ERROR",
+      message: "offline",
+    }))).toBe("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
   });
 });
 

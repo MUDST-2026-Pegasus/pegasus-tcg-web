@@ -9,6 +9,7 @@ import type { SellerOrderDetail } from "@/features/seller/orders/orders.types";
 import { renderWithProviders } from "@/test/utils";
 
 vi.mock("@/features/seller/orders/orders.api", () => ({
+  downloadSellerOrderSummary: vi.fn(),
   shipSellerOrder: vi.fn(),
   acceptSellerOrder: vi.fn(),
   cancelSellerOrder: vi.fn(),

@@ -4,7 +4,7 @@ import {
 } from "@/features/seller/shared/order-status";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { getErrorMessage, hasErrorCode, isApiError, isNetworkError } from "@/lib/api";
 
 import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
 
@@ -510,4 +510,23 @@ export function orderErrorMessage(error: unknown, fallback: string): string {
     return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
   }
   return getErrorMessage(error, fallback);
+}
+
+export function orderSummaryDownloadErrorMessage(error: unknown): string {
+  if (isNetworkError(error)) {
+    return "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่";
+  }
+  if (isApiError(error)) {
+    switch (error.status) {
+      case 401:
+        return "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่";
+      case 403:
+        return "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารของร้าน";
+      case 404:
+        return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
+      default:
+        if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
+    }
+  }
+  return getErrorMessage(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
 }

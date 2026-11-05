@@ -35,11 +35,17 @@ describe("api client", () => {
     vi.restoreAllMocks();
   });
 
-  const createResponse = (ok: boolean, status: number, body: unknown) => ({
+  const createResponse = (
+    ok: boolean,
+    status: number,
+    body: unknown,
+    headers: HeadersInit = {},
+  ) => ({
     ok,
     status,
-    headers: new Headers(),
+    headers: new Headers(headers),
     text: async () => (body === null ? "" : JSON.stringify(body)),
+    blob: async () => body instanceof Blob ? body : new Blob(),
   });
 
   it("should perform GET request and unwrap success response", async () => {
@@ -239,6 +245,47 @@ describe("api client", () => {
       code: "VALIDATION_FAILED",
       message: "Bad request",
       violations: [{ field: "name", message: "Required" }],
+    });
+  });
+
+  it("downloads a PDF with authentication and preserves its response metadata", async () => {
+    vi.mocked(session.getAccessToken).mockReturnValue("seller-token");
+    const pdf = new Blob(["%PDF-test"], { type: "application/pdf" });
+    mockFetch.mockResolvedValueOnce(createResponse(true, 200, pdf, {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename*=UTF-8''order-summary-PGS-101.pdf",
+    }));
+
+    const result = await api.download("/sellers/me/orders/41/summary.pdf");
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://mock/sellers/me/orders/41/summary.pdf",
+      expect.objectContaining({
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+          Authorization: "Bearer seller-token",
+        },
+      }),
+    );
+    expect(result).toEqual({
+      blob: pdf,
+      filename: "order-summary-PGS-101.pdf",
+    });
+    expect(result.blob.type).toBe("application/pdf");
+  });
+
+  it("keeps structured API errors for failed PDF downloads", async () => {
+    mockFetch.mockResolvedValueOnce(createResponse(false, 404, {
+      success: false,
+      message: "Order not found",
+      data: { code: "ORDER_NOT_FOUND" },
+    }, { "Content-Type": "application/json" }));
+
+    await expect(api.download("/sellers/me/orders/999/summary.pdf")).rejects.toMatchObject({
+      status: 404,
+      code: "ORDER_NOT_FOUND",
+      message: "Order not found",
     });
   });
 
