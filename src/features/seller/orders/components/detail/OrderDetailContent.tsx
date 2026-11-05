@@ -19,6 +19,7 @@ import {
   SELLER_ORDER_STATUS_TONE,
 } from "@/features/seller/shared/order-status";
 import { cn } from "@/lib/utils";
+import { downloadBlob } from "@/lib/download";
 
 import {
   CARRIER_OPTIONS,
@@ -31,6 +32,7 @@ import {
   formatAgo,
   isReturnStatus,
   orderErrorMessage,
+  orderSummaryDownloadErrorMessage,
   parseShippingAddress,
   paymentRows,
   paymentStateOf,
@@ -41,7 +43,7 @@ import {
   tabOfStatus,
   timelineEntries,
 } from "../../orders.format";
-import { useAcceptOrder, useShipOrder } from "../../orders.queries";
+import { useAcceptOrder, useDownloadOrderSummary, useShipOrder } from "../../orders.queries";
 import type { SellerOrderDetail } from "../../orders.types";
 
 import { ConfirmShipDialog } from "../ConfirmShipDialog";
@@ -94,6 +96,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
 
   const accept = useAcceptOrder();
   const ship = useShipOrder();
+  const downloadSummary = useDownloadOrderSummary();
   const [carrier, setCarrier] = useState(CARRIER_OPTIONS[0].value);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [packedIds, setPackedIds] = useState<number[]>([]);
@@ -104,7 +107,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
   const tracking = trackingNumber.trim();
   const profit = profitSummary(detail);
   const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
-  const busy = accept.isPending || ship.isPending;
+  const busy = accept.isPending || ship.isPending || downloadSummary.isPending;
 
   function handleTogglePacked(id: number) {
     setPackedIds((current) =>
@@ -145,6 +148,25 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
           }),
       },
     );
+  }
+
+  function handleDownloadSummary() {
+    downloadSummary.mutate(order.id, {
+      onSuccess: ({ blob, filename }) => {
+        downloadBlob(blob, filename ?? `order-summary-${summary.orderNumber}.pdf`);
+        toast.add({
+          type: "success",
+          title: "ดาวน์โหลด Order Summary แล้ว",
+          description: filename ?? `order-summary-${summary.orderNumber}.pdf`,
+        });
+      },
+      onError: (error) =>
+        toast.add({
+          type: "error",
+          title: "ดาวน์โหลด Order Summary ไม่สำเร็จ",
+          description: orderSummaryDownloadErrorMessage(error),
+        }),
+    });
   }
 
   return (
@@ -235,6 +257,18 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               ยืนยันจัดส่ง
             </Button>
           ) : null}
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-2.5"
+            disabled={busy}
+            aria-busy={downloadSummary.isPending}
+            aria-label={downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            onClick={handleDownloadSummary}
+          >
+            {downloadSummary.isPending ? <Spinner /> : null}
+            {downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+          </Button>
         </div>
       </div>
 
