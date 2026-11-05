@@ -27,6 +27,7 @@ import type {
 //   142 LIVE มีบิด ต่อเวลาแล้ว · 150 LIVE ยังไม่มีบิด ซื้อทันทีได้ · 151 LIVE เหลือไม่ถึง 2 นาที
 //   117 AWAITING_PAYMENT
 //   133 SOLD · 126 UNSOLD · 140 CANCELLED · 98 SUSPENDED
+// กล่องบิด B4 อื่น ๆ (guest / ร้านตัวเอง / ห้ามบิด / ไม่มีที่อยู่) ดูด้วย `withViewer` ด้านล่าง
 
 const NOW = Date.now();
 const SECOND = 1000;
@@ -211,6 +212,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     originalEndsAt: at(-6 * HOUR),
     extensionCount: 0,
     viewer: { state: "WON_AWAITING_PAYMENT", myHighestBid: 6100, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: at(18 * HOUR) },
+    winnerAlias: "n***t",
   },
   133: {
     ...CHARIZARD_DETAIL,
@@ -227,6 +229,45 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     originalEndsAt: at(-4 * DAY),
     extensionCount: 0,
     viewer: { state: "LOST", myHighestBid: 3900, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
+  },
+  // B4-F ไม่มีผู้บิด
+  126: {
+    ...CHARIZARD_DETAIL,
+    id: 126,
+    auctionNumber: "AUC-2026-0126",
+    status: "UNSOLD",
+    item: I.blastoise,
+    sellerNote: null,
+    startingPrice: 4500,
+    currentPrice: 4500,
+    minNextBid: 4500,
+    bidCount: 0,
+    bidderCount: 0,
+    buyNowPrice: null,
+    endsAt: at(-5 * DAY),
+    originalEndsAt: at(-5 * DAY),
+    extensionCount: 0,
+    recentBids: [],
+    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
+  },
+  // B4-G ถูกระงับ
+  98: {
+    ...CHARIZARD_DETAIL,
+    id: 98,
+    auctionNumber: "AUC-2026-0098",
+    status: "SUSPENDED",
+    item: I.rayquaza,
+    seller: AUCTION_SELLERS.rareCard,
+    currentPrice: 21500,
+    minNextBid: 21500,
+    bidCount: 41,
+    bidderCount: 9,
+    buyNowPrice: null,
+    endsAt: at(-6 * DAY),
+    originalEndsAt: at(-6 * DAY),
+    extensionCount: 0,
+    viewer: null,
+    suspendReason: "พบรูปแบบบิดผิดปกติ",
   },
 };
 

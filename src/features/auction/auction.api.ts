@@ -143,8 +143,12 @@ export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHisto
 
 // ---------- ผู้ซื้อ (ต้องล็อกอิน) ----------
 
-/** บิดแล้วถอนไม่ได้ — error ที่ต้องรับ: BID_TOO_LOW, AUCTION_CLOSED, BIDDING_BANNED, OWN_AUCTION, NO_SHIPPING_ADDRESS, EMAIL_NOT_VERIFIED */
-export function placeBid(id: number, payload: PlaceBidRequest): Promise<BidPlaced> {
+/**
+ * บิดแล้วถอนไม่ได้ — error ที่ต้องรับ: BID_TOO_LOW, AUCTION_CLOSED, BIDDING_BANNED, OWN_AUCTION, NO_SHIPPING_ADDRESS, EMAIL_NOT_VERIFIED
+ * ส่ง `Idempotency-Key` ใหม่ทุกครั้งที่กดยืนยัน กันเน็ตกระตุกแล้วบิดซ้ำ [TCG-630]
+ * ⚠️ contract C-2 ยังรับ header นี้เฉพาะ checkout — BE-4 (TCG-617) ต้องรับด้วย
+ */
+export function placeBid(id: number, payload: PlaceBidRequest, idempotencyKey: string = newIdempotencyKey()): Promise<BidPlaced> {
   if (AUCTION_MOCK.buyer) {
     return mock({
       auctionId: id,
@@ -158,16 +162,19 @@ export function placeBid(id: number, payload: PlaceBidRequest): Promise<BidPlace
       serverTime: nowIso(),
     });
   }
-  return api.post<BidPlaced>(`/auctions/${id}/bids`, payload);
+  return api.post<BidPlaced>(`/auctions/${id}/bids`, payload, { headers: { "Idempotency-Key": idempotencyKey } });
 }
 
-/** ได้เฉพาะ LIVE + ยังไม่มีบิด — error: BUY_NOW_UNAVAILABLE, AUCTION_CLOSED */
-export function buyNow(id: number): Promise<AuctionWin> {
+/**
+ * ได้เฉพาะ LIVE + ยังไม่มีบิด — error: BUY_NOW_UNAVAILABLE, AUCTION_CLOSED
+ * ⚠️ `Idempotency-Key` ยังไม่อยู่ใน contract — BE-5 (TCG-618) ต้องรับด้วย
+ */
+export function buyNow(id: number, idempotencyKey: string = newIdempotencyKey()): Promise<AuctionWin> {
   if (AUCTION_MOCK.buyer) {
     const price = AUCTION_DETAIL_FIXTURES[id]?.buyNowPrice ?? 3500;
     return mock({ auctionId: id, auctionNumber: `AUC-2026-${String(id).padStart(4, "0")}`, price, shippingFee: 50, total: price + 50, paymentDueAt: inHours(24), serverTime: nowIso() });
   }
-  return api.post<AuctionWin>(`/auctions/${id}/buy-now`);
+  return api.post<AuctionWin>(`/auctions/${id}/buy-now`, undefined, { headers: { "Idempotency-Key": idempotencyKey } });
 }
 
 /** ส่ง `Idempotency-Key` ทุกครั้ง — กดซ้ำด้วย key เดิมได้คำสั่งซื้อเดิม */
