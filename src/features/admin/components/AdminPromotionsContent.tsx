@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Info, Plus, Search, TicketPercent } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Plus, Search, TicketPercent } from "lucide-react";
 
+import { ErrorState } from "@/components/common";
+import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
@@ -192,20 +196,29 @@ export function AdminPromotionsContent() {
             </TabsList>
           </Tabs>
           <div className="flex flex-wrap items-center gap-3">
-            <div role="group" aria-label="เจ้าของโค้ด" className="flex overflow-hidden rounded-sm border">
+            <ToggleGroup
+              aria-label="เจ้าของโค้ด"
+              spacing={0}
+              variant="outline"
+              size="sm"
+              value={[owner ?? "ALL"]}
+              onValueChange={(next: string[]) => {
+                const value = next[0];
+                if (!value) return;
+                updateParams({ owner: value === "ALL" ? null : value });
+              }}
+              className="overflow-hidden rounded-sm"
+            >
               {OWNER_FILTERS.map((filter) => (
-                <Button
+                <ToggleGroupItem
                   key={filter.label}
-                  size="sm"
-                  variant="ghost"
-                  className="rounded-none! px-3 text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
-                  aria-pressed={owner === filter.value}
-                  onClick={() => updateParams({ owner: filter.value })}
+                  value={filter.value ?? "ALL"}
+                  className="rounded-none! text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                 >
                   {filter.label}
-                </Button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             <form
               role="search"
               className="w-[220px] max-w-full"
@@ -230,14 +243,14 @@ export function AdminPromotionsContent() {
           </div>
         </div>
 
-        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">กำลังโหลดโค้ด...</p> : null}
-        {list.isError ? (
-          <p role="alert" className="p-6 text-sm text-destructive">
-            โหลดโค้ดไม่สำเร็จ{" "}
-            <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void list.refetch()}>
-              ลองอีกครั้ง
-            </Button>
-          </p>
+        {list.isPending ? <TableSkeleton rows={5} columns={6} className="mx-5 mb-5 rounded-md" /> : null}
+        {list.isError && !list.data ? (
+          <ErrorState
+            error={list.error}
+            title="โหลดโค้ดไม่สำเร็จ"
+            onRetry={() => void list.refetch()}
+            className="m-5 min-h-48"
+          />
         ) : null}
         {list.data && rows.length === 0 ? (
           <Empty className="m-5 border border-dashed">
@@ -265,41 +278,48 @@ export function AdminPromotionsContent() {
             แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
             {totalItems} โค้ด
           </span>
-          <nav aria-label="หน้ารายการโปรโมชั่น" className="flex items-center gap-2">
-            <Button
-              size="icon-sm"
-              className="size-7 text-[13px] text-[#414755]"
-              variant="outline"
-              aria-label="หน้าก่อนหน้า"
-              disabled={page === 0}
-              onClick={() => updateParams({ page: String(page - 1) }, false)}
-            >
-              ‹
-            </Button>
-            {pageNumbers.map((number) => (
-              <Button
-                key={number}
-                size="icon-sm"
-                className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
-                variant={number === page ? "default" : "outline"}
-                aria-current={number === page ? "page" : undefined}
-                aria-label={`หน้า ${number + 1}`}
-                onClick={() => updateParams({ page: number ? String(number) : null }, false)}
-              >
-                {number + 1}
-              </Button>
-            ))}
-            <Button
-              size="icon-sm"
-              className="size-7 text-[13px] text-[#414755]"
-              variant="outline"
-              aria-label="หน้าถัดไป"
-              disabled={page + 1 >= totalPages}
-              onClick={() => updateParams({ page: String(page + 1) }, false)}
-            >
-              ›
-            </Button>
-          </nav>
+          <Pagination aria-label="หน้ารายการโปรโมชั่น" className="mx-0 w-auto">
+            <PaginationContent className="gap-2">
+              <PaginationItem>
+                <Button
+                  size="icon-sm"
+                  className="size-7 text-[13px] text-[#414755]"
+                  variant="outline"
+                  aria-label="หน้าก่อนหน้า"
+                  disabled={page === 0}
+                  onClick={() => updateParams({ page: String(page - 1) }, false)}
+                >
+                  <ChevronLeft />
+                </Button>
+              </PaginationItem>
+              {pageNumbers.map((number) => (
+                <PaginationItem key={number}>
+                  <Button
+                    size="icon-sm"
+                    className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
+                    variant={number === page ? "default" : "outline"}
+                    aria-current={number === page ? "page" : undefined}
+                    aria-label={`หน้า ${number + 1}`}
+                    onClick={() => updateParams({ page: number ? String(number) : null }, false)}
+                  >
+                    {number + 1}
+                  </Button>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <Button
+                  size="icon-sm"
+                  className="size-7 text-[13px] text-[#414755]"
+                  variant="outline"
+                  aria-label="หน้าถัดไป"
+                  disabled={page + 1 >= totalPages}
+                  onClick={() => updateParams({ page: String(page + 1) }, false)}
+                >
+                  <ChevronRight />
+                </Button>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </Card>
 
