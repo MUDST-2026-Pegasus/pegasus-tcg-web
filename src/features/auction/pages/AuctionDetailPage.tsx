@@ -26,14 +26,17 @@ import {
 import { ApiError } from "@/lib/api";
 
 import { useAuction } from "../auction.queries";
-import type { AuctionDetail } from "../auction.types";
+import type { AuctionDetail, BidPlaced } from "../auction.types";
+import { resolveBidPanelState } from "../bid-panel.state";
 import { AuctionRules } from "../components/AuctionRules";
-import { BidConfirmDialog } from "../components/BidConfirmDialog";
 import { BidHistory } from "../components/BidHistory";
 import { BidPanel } from "../components/BidPanel";
+import { BidStatusBanner } from "../components/BidStatusBanner";
+import { ConfirmBidDialog } from "../components/ConfirmBidDialog";
+import { ConfirmBuyNowDialog } from "../components/ConfirmBuyNowDialog";
 import { SellerNote } from "../components/SellerNote";
 
-/** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) [TCG-629] */
+/** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) + สถานะ B3/B4 [TCG-629 · TCG-630] */
 export function AuctionDetailPage() {
   const { auctionId } = useParams<{ auctionId: string }>();
   const id = auctionId && /^\d+$/.test(auctionId) ? Number(auctionId) : null;
@@ -68,6 +71,9 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
   const { item, seller } = auction;
   const [selectedImageId, setSelectedImageId] = useState<GalleryImage["id"] | null>(null);
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
+  const [buyNowOpen, setBuyNowOpen] = useState(false);
+  const [lastBid, setLastBid] = useState<BidPlaced | null>(null);
+  const panelState = resolveBidPanelState(auction);
   // คุณสมบัติ/ท่าโจมตีดึงจากแคตตาล็อก — โหลดไม่ได้ก็ซ่อนแถวล่างไป ไม่ให้หน้าประมูลพัง
   const product = useProductDetail(item.card.productSlug);
 
@@ -112,7 +118,14 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
             </div>
 
             <SellerNote note={auction.sellerNote} />
-            <BidPanel auction={auction} onBid={setConfirmAmount} onShowHistory={showHistory} />
+            <BidStatusBanner auction={auction} lastBid={lastBid} onBid={setConfirmAmount} />
+            <BidPanel
+              auction={auction}
+              state={panelState}
+              onBid={setConfirmAmount}
+              onBuyNow={() => setBuyNowOpen(true)}
+              onShowHistory={showHistory}
+            />
             {/* ยังไม่มี API ติดตามการประมูล — ปุ่มแสดงตามแบบไว้ก่อน */}
             <Button type="button" variant="outline" className="h-11 w-full rounded-full bg-card font-semibold">
               <Heart aria-hidden />
@@ -135,7 +148,13 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
         ) : null}
       </main>
 
-      <BidConfirmDialog amount={confirmAmount} onOpenChange={(open) => !open && setConfirmAmount(null)} />
+      <ConfirmBidDialog
+        auction={auction}
+        amount={confirmAmount}
+        onOpenChange={(open) => !open && setConfirmAmount(null)}
+        onPlaced={setLastBid}
+      />
+      <ConfirmBuyNowDialog auction={auction} open={buyNowOpen} onOpenChange={setBuyNowOpen} />
     </div>
   );
 }
