@@ -6,7 +6,7 @@ const live = Cypress.expose("runLiveSearch") === true || Cypress.expose("runLive
 
     cy.request(`${apiBaseUrl}/api/v1/games`).then(({ body }) => {
       const game = body.data.find((entry: { name: string }) => /pok[eé]mon/i.test(entry.name));
-      expect(game, "a seeded Pokémon game").to.exist;
+      expect(game, "a seeded Pokémon game").to.not.equal(undefined);
 
       cy.intercept("GET", "**/api/v1/catalog/products*").as("products");
       cy.visit(`/search?q=pokamon&game=${game.slug}`);
