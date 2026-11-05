@@ -1,4 +1,4 @@
-import { CircleUserRound, ClipboardList, MapPin, GalleryVerticalEnd, TicketPercent } from "lucide-react";
+import { CircleUserRound, ClipboardList, Gavel, MapPin, GalleryVerticalEnd, TicketPercent } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ export type AccountSidebarUser = {
 const ACCOUNT_LINKS = [
   { label: "Account Overview", to: "/account/profile", icon: CircleUserRound },
   { label: "Order History", to: "/account/orders", icon: ClipboardList },
+  { label: "การประมูลของฉัน", to: "/account/auctions", icon: Gavel },
   { label: "Address Book", to: "/account/addresses", icon: MapPin },
   { label: "My Coupons · โค้ดของฉัน", to: "/account/coupons", icon: TicketPercent },
   { label: "My Collection", to: "/account/collection", icon: GalleryVerticalEnd },
