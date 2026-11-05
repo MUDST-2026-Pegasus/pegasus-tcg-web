@@ -203,6 +203,16 @@ export type AuctionDetail = {
   /** ใหม่สุดก่อน ไม่เกิน 5 รายการ — ทั้งหมดอยู่ที่ `/auctions/:id/bids` */
   recentBids: AuctionBid[];
   viewer: AuctionViewer | null;
+  /**
+   * ชื่อผู้ชนะแบบปิดบัง ("n***t") — B4-D "ผู้ชนะ n***t · 12 บิด"
+   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-3 (TCG-616) · ไม่ส่งมา = ซ่อน
+   */
+  winnerAlias?: string | null;
+  /**
+   * เหตุผลที่แอดมินระงับ — B4-G "เหตุผล: …"
+   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-3 (TCG-616) · ไม่ส่งมา = ซ่อน
+   */
+  suspendReason?: string | null;
   serverTime: string;
 };
 
