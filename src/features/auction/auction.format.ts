@@ -149,6 +149,16 @@ export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   SUSPENDED: "ถูกระงับ",
 };
 
+// ---------- กล่องบิด (B2) ----------
+
+/** ปุ่มลัดบวกเพิ่มจากค่าในช่อง */
+export const BID_SHORTCUTS = [100, 500, 1_000] as const;
+
+/** บิดได้เมื่อประมูลยังเปิด และราคาไม่ต่ำกว่าขั้นต่ำ */
+export function canSubmitBid(amount: number, minNextBid: number, live: boolean): boolean {
+  return live && Number.isFinite(amount) && amount >= minNextBid;
+}
+
 // ---------- อื่น ๆ ----------
 
 /** "NM · CardVault BKK" */

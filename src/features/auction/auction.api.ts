@@ -131,7 +131,12 @@ export function getAuction(id: number): Promise<AuctionDetail> {
 }
 
 export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHistory> {
-  if (AUCTION_MOCK.public) return mock(BID_HISTORY_FIXTURE);
+  if (AUCTION_MOCK.public) {
+    // 142 มีประวัติเต็ม ใบอื่นใช้บิดล่าสุดของใบนั้น (ใบที่ยังไม่มีบิดจะได้รายการว่าง)
+    const recent = AUCTION_DETAIL_FIXTURES[id]?.recentBids;
+    if (id === 142 || !recent) return mock(BID_HISTORY_FIXTURE);
+    return mock({ page: { items: recent, page: 0, size, totalItems: recent.length, totalPages: recent.length ? 1 : 0 }, serverTime: nowIso() });
+  }
   return api.get<BidHistory>(`/auctions/${id}/bids`, { query: { page, size }, auth: false });
 }
 

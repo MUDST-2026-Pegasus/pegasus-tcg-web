@@ -75,7 +75,9 @@ export function useAuction(id: number | null, options: { poll?: boolean } = {}) 
     queryKey: auctionKeys.detail(id ?? 0),
     queryFn: () => auctionApi.getAuction(id ?? 0),
     enabled: id !== null,
-    refetchInterval: options.poll === false ? false : AUCTION_POLL_MS,
+    // ดึงใหม่เฉพาะตอนประมูลยังเปิด จบแล้วไม่มีอะไรเปลี่ยนเอง
+    refetchInterval: (query) =>
+      options.poll === false || (query.state.data && query.state.data.status !== "LIVE") ? false : AUCTION_POLL_MS,
     // 404 คือคำตอบ ลองซ้ำก็ได้ผลเดิม
     retry: false,
   });
