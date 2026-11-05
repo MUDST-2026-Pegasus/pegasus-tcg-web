@@ -11,9 +11,9 @@ export function getSales(): Promise<PublicSale[]> {
   return api.get<PublicSale[]>("/sales", PUBLIC);
 }
 
-/** แถบ Flash Sale + แบนเนอร์บนหน้าแรก — `null` เมื่อไม่มีอะไร */
-export function getFeaturedSales(): Promise<FeaturedSales | null> {
-  return api.get<FeaturedSales | null>("/sales/featured", PUBLIC);
+/** แถบ Flash Sale + แบนเนอร์บนหน้าแรก */
+export function getFeaturedSales(): Promise<FeaturedSales> {
+  return api.get<FeaturedSales>("/sales/featured", PUBLIC);
 }
 
 /** หัวแคมเปญ + listing แบ่งหน้า · แคมเปญจบแล้วคืน `status: ENDED` */
@@ -21,7 +21,7 @@ export function getSaleDetail(slug: string, query: SaleListingQuery): Promise<Sa
   return api.get<SaleDetail>(`/sales/${encodeURIComponent(slug)}`, { ...PUBLIC, query });
 }
 
-/** `/sale` (ทุกอย่างที่ลด) — `GET /search?onSale=true` */
+/** `/sale` (ทุกอย่างที่ลด) — ตลาด `GET /listings?onSale=true` */
 export function searchOnSale(query: SaleListingQuery): Promise<PageResponse<PublicListingDto>> {
-  return api.get<PageResponse<PublicListingDto>>("/search", { ...PUBLIC, query: { ...query, onSale: true } });
+  return api.get<PageResponse<PublicListingDto>>("/listings", { ...PUBLIC, query: { ...query, onSale: true } });
 }

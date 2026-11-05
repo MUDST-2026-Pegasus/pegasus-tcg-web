@@ -21,19 +21,21 @@ export function FeaturedSalesSection() {
 }
 
 function FeaturedSales({ data }: { data: FeaturedSales }) {
-  const hasFlash = !!data.flash && data.flash.listings.length > 0;
-  if (!hasFlash && data.banners.length === 0) return null;
+  const flash = data.flashSale;
+  const hasFlash = !!flash && flash.listings.length + flash.soldOut.length > 0;
+  if (!hasFlash && data.categorySales.length === 0) return null;
   return (
     <div className="grid gap-4 bg-secondary px-4 py-6 lg:px-10">
       <div className="mx-auto grid w-full max-w-[1280px] gap-4">
-        {hasFlash && data.flash ? <FlashSaleStrip sale={data.flash.sale} listings={data.flash.listings} /> : null}
-        {data.banners.length > 0 ? <CategorySaleBanners banners={data.banners} /> : null}
+        {hasFlash && flash ? <FlashSaleStrip flash={flash} /> : null}
+        {data.categorySales.length > 0 ? <CategorySaleBanners banners={data.categorySales} /> : null}
       </div>
     </div>
   );
 }
 
-function FlashSaleStrip({ sale, listings }: { sale: PublicSale; listings: NonNullable<FeaturedSales["flash"]>["listings"] }) {
+function FlashSaleStrip({ flash }: { flash: NonNullable<FeaturedSales["flashSale"]> }) {
+  const { sale, listings, soldOut } = flash;
   const queryClient = useQueryClient();
   const upcoming = sale.status === "SCHEDULED";
   // ถึง 0 → ดึงแถบใหม่ (เริ่มแล้ว / จบแล้ว) และราคาในหน้าอื่น ๆ ที่เปิดค้างไว้
@@ -78,6 +80,20 @@ function FlashSaleStrip({ sale, listings }: { sale: PublicSale; listings: NonNul
             className="w-[190px] shrink-0 snap-start sm:w-[225px]"
           />
         ))}
+        {/* หมดโควตาแล้ว — ต่อท้ายแบบจาง ๆ (ราคา Flash ตอนขาย ไม่ใช่ราคาตอนนี้) */}
+        {soldOut.map((card) => (
+          <SaleProductCard
+            key={`sold-${card.listing.id}`}
+            {...listingCardProps(card.listing)}
+            pricing={{
+              listPrice: card.listing.price,
+              salePrice: card.flashPrice,
+              discountPercent: card.discountPercent,
+              sale: { id: sale.id, slug: sale.slug, name: sale.name, type: "FLASH_SALE", endsAt: sale.endsAt, quotaLeft: 0, perBuyerLimit: sale.perBuyerLimit },
+            }}
+            className="w-[190px] shrink-0 snap-start sm:w-[225px]"
+          />
+        ))}
       </div>
     </section>
   );
@@ -112,7 +128,7 @@ function CategorySaleBanners({ banners }: { banners: PublicSale[] }) {
               <p className="text-xs font-semibold tracking-wide uppercase opacity-80">{sale.name}</p>
               <p className={cn("font-black", wide ? "text-2xl" : "text-xl")}>{saleHeadline(sale)}</p>
               <p className="mt-1 truncate text-xs opacity-85">
-                {wide ? `ราคาลดแล้วในหน้าสินค้า ไม่ต้องใช้โค้ด · ${untilLabel(sale.endsAt)} · ใช้โค้ดส่วนลดซ้อนได้` : `${sale.scopeLabel ?? saleTerms(sale)} · ${untilLabel(sale.endsAt)}`}
+                {wide ? `ราคาลดแล้วในหน้าสินค้า ไม่ต้องใช้โค้ด · ${untilLabel(sale.endsAt)} · ใช้โค้ดส่วนลดซ้อนได้` : `${saleTerms(sale)} · ${untilLabel(sale.endsAt)}`}
               </p>
             </div>
             {wide ? (

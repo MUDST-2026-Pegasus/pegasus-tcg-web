@@ -23,7 +23,7 @@ export function useFeaturedSales() {
 
 /**
  * listing ที่ลดราคา แบ่งหน้าแบบ "โหลดเพิ่ม"
- * `slug = null` → ทุกอย่างที่ลด (`/search?onSale=true`) · มี slug → `/sales/{slug}` (ได้หัวแคมเปญด้วย)
+ * `slug = null` → ทุกอย่างที่ลด (`/listings?onSale=true`) · มี slug → `/sales/{slug}` (ได้หัวแคมเปญด้วย)
  */
 export function useSaleListings(slug: string | null, query: SaleListingQuery) {
   return useInfiniteQuery({

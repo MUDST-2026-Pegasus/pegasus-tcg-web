@@ -28,10 +28,9 @@ const valid: AdminSaleInput = {
   perListingQuota: 20,
   perBuyerLimit: 1,
   budgetCap: 80_000,
-  bannerImageKey: null,
+  bannerImageUrl: null,
   featuredOnHome: true,
   homeSort: null,
-  showOnSalePage: true,
   startsAt: new Date(start).toISOString(),
   endsAt: new Date(start + 24 * HOUR).toISOString(),
 };
@@ -42,18 +41,15 @@ const existing: AdminSale = {
   id: 7,
   slug: valid.slug,
   ownerType: "PLATFORM",
-  seller: null,
-  minDiscountPercent: null,
-  maxDiscountPercent: null,
+  owner: null,
   subsidyReserved: 24_300,
   soldUnits: 412,
   listingCount: 3410,
-  orderCount: 380,
-  bannerImageUrl: null,
   status: "ACTIVE",
   pausedAt: null,
   pauseReason: null,
-  pausedByAdmin: false,
+  pausedBy: null,
+  createdBy: null,
   endedAt: null,
   createdAt: valid.startsAt,
   updatedAt: valid.startsAt,
@@ -126,7 +122,7 @@ describe("sales.schema — locked fields after orders", () => {
   });
 
   it("locks nothing before the first order", () => {
-    const locks = getSaleLocks({ ...existing, orderCount: 0, soldUnits: 0 });
+    const locks = getSaleLocks({ ...existing, soldUnits: 0 });
     expect(locks.hasOrders).toBe(false);
     expect(locks.isLocked("discountValue")).toBe(false);
   });
@@ -139,7 +135,7 @@ describe("sales.schema — locked fields after orders", () => {
   });
 
   it("budget cannot go below what was already subsidised", () => {
-    const fresh = { ...existing, orderCount: 0, soldUnits: 0 };
+    const fresh = { ...existing, soldUnits: 0 };
     expect(getSaleErrors({ ...toSaleInput(fresh), budgetCap: 1000 }, { existing: fresh }).budgetCap).toMatch(/ไม่น้อยกว่า/);
   });
 });

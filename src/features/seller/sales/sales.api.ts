@@ -56,8 +56,12 @@ export function endSellerSale(id: number) {
   return api.post<SellerSale>(`${ROOT}/${id}/end`);
 }
 
-export function getPlatformListings() {
-  return api.get<PlatformSaleListing[]>(`${ROOT}/platform-listings`);
+/** API ส่งกลับเป็น PageResponse — การ์ดแสดงแค่หน้าแรก (สูงสุด 100 รายการ) */
+export async function getPlatformListings(): Promise<PlatformSaleListing[]> {
+  const result = await api.get<PageResponse<PlatformSaleListing>>(`${ROOT}/platform-listings`, {
+    query: { page: 0, size: 100 },
+  });
+  return result.items;
 }
 
 /** listing ที่เปิดขายอยู่ทั้งหมดของร้าน — ใช้เลือกในตาราง S2 */

@@ -16,15 +16,13 @@ export function saleDiscountText(sale: Pick<PublicSale, "discountType" | "discou
 /** หัวแคมเปญ: "ลด 10% ทุกการ์ด Pokémon" / "ลด ฿50 ทุกชิ้น" */
 export function saleHeadline(sale: PublicSale): string {
   const discount = sale.discountType === "FIXED_OFF" ? `ลด ${formatSaleBaht(sale.discountValue)}` : `ลด ${sale.discountValue}%`;
-  return `${discount} ${sale.scopeLabel ?? "ทุกชิ้น"}`;
+  return `${discount} ทุกชิ้นในแคมเปญ`;
 }
 
-/** บรรทัดเงื่อนไขใต้หัว hero: "สูงสุด ฿500 ต่อชิ้น · ทุกสภาพ · ราคา ≥ ฿100 · ใช้โค้ดส่วนลดซ้อนได้" */
+/** บรรทัดเงื่อนไขใต้หัว hero: "สูงสุด ฿500 ต่อชิ้น · คนละ 1 ชิ้นต่อสินค้า · ใช้โค้ดส่วนลดซ้อนได้" */
 export function saleTerms(sale: PublicSale): string {
   return [
     sale.discountType === "PERCENT" && sale.maxDiscountPerUnit != null ? `สูงสุด ${formatSaleBaht(sale.maxDiscountPerUnit)} ต่อชิ้น` : null,
-    sale.conditions.length ? sale.conditions.map((code) => CONDITION_LABELS[code] ?? code).join(", ") : "ทุกสภาพ",
-    sale.minUnitPrice ? `ราคา ≥ ${formatSaleBaht(sale.minUnitPrice)}` : null,
     sale.perBuyerLimit != null ? `คนละ ${sale.perBuyerLimit} ชิ้นต่อสินค้า` : null,
     "ใช้โค้ดส่วนลดซ้อนได้",
   ]

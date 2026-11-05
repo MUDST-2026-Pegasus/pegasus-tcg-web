@@ -6,7 +6,7 @@ import type { PromotionParty } from "./promotions.types";
 
 /**
  * แคมเปญลดราคาฝั่งแอดมิน (TCG-675 · SAL-02 `/admin/sales`)
- * ลอกตามสัญญา API ใน Jira SAL-01/SAL-02 (TCG-676/677) — ถ้า DTO ฝั่ง `pegasus-tcg-api` ต่างไป ต้องตามมาแก้ที่นี่
+ * ตรงกับ `AdminSaleViews` / `AdminSaleRequest` ใน `pegasus-tcg-api` — แก้ DTO ฝั่งนั้นต้องตามมาแก้ที่นี่
  */
 
 export type { SaleType };
@@ -23,17 +23,14 @@ export type AdminSale = {
   /** ลิงก์ /sale/{slug} — `null` สำหรับการลดราคาของร้าน */
   slug: string | null;
   ownerType: SaleOwnerType;
-  /** ร้านเจ้าของ — `null` สำหรับแคมเปญ Pegasus */
-  seller: PromotionParty | null;
+  /** ร้านเจ้าของ (id = seller profile) — `null` สำหรับแคมเปญ Pegasus */
+  owner: PromotionParty | null;
   saleType: SaleType;
   discountType: SaleDiscountType;
-  /** % หรือบาทต่อชิ้น · `FIXED_PRICE` = 0 (ราคาอยู่รายแถว) */
-  discountValue: number;
+  /** % หรือบาทต่อชิ้น · `FIXED_PRICE` ราคาอยู่รายแถว */
+  discountValue: number | null;
   /** เพดานบาทต่อชิ้น (PERCENT) — `null` = ไม่จำกัด */
   maxDiscountPerUnit: number | null;
-  /** ช่วง % ของร้านที่ตั้งราคารายแถว เช่น 12–35 */
-  minDiscountPercent: number | null;
-  maxDiscountPercent: number | null;
   scopeType: SaleScopeType;
   scopeIds: number[];
   /** ว่าง = ทุกสภาพ */
@@ -47,22 +44,21 @@ export type AdminSale = {
   /** งบอุดหนุน — `null` = ไม่จำกัด (แคมเปญร้านเป็น `null` เสมอ) */
   budgetCap: number | null;
   /** ยอดอุดหนุนที่จอง/ใช้แล้ว */
-  subsidyReserved: number;
+  subsidyReserved: number | null;
+  /** ชิ้นที่ขายด้วยราคานี้ (ทุกออเดอร์) — มากกว่า 0 = มีออเดอร์แล้ว: ล็อกฟิลด์และลบไม่ได้ */
   soldUnits: number;
   listingCount: number;
-  /** ออเดอร์ที่ใช้ราคานี้ — มากกว่า 0 = ล็อกฟิลด์และลบไม่ได้ */
-  orderCount: number;
   bannerImageUrl: string | null;
   featuredOnHome: boolean;
   homeSort: number | null;
-  showOnSalePage: boolean;
   startsAt: string;
   endsAt: string;
   status: SaleStatus;
   pausedAt: string | null;
   pauseReason: string | null;
-  /** หยุดโดยแอดมิน (การลดราคาของร้าน) — ร้าน resume เองไม่ได้ */
-  pausedByAdmin: boolean;
+  /** คนที่หยุด — `null` ถ้าไม่ได้หยุด */
+  pausedBy: PromotionParty | null;
+  createdBy: PromotionParty | null;
   endedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -84,11 +80,10 @@ export type AdminSaleInput = {
   perListingQuota: number | null;
   perBuyerLimit: number | null;
   budgetCap: number | null;
-  /** object key จาก `useFileUpload` — `null` = ไม่มี/คงรูปเดิม */
-  bannerImageKey: string | null;
+  /** URL รูปแบนเนอร์ — `null` = ไม่มี */
+  bannerImageUrl: string | null;
   featuredOnHome: boolean;
   homeSort: number | null;
-  showOnSalePage: boolean;
   startsAt: string;
   endsAt: string;
 };
@@ -112,10 +107,8 @@ export type AdminSaleSummary = {
   activePlatformSales: number;
   activeSellerSales: number;
   listingsOnSale: number;
-  sellersOnSale: number;
-  saleRevenue30d: number;
-  /** `null` เมื่อเดือนก่อนยังไม่มียอด */
-  saleRevenueChangePercent: number | null;
+  /** ยอดที่ผู้ซื้อจ่ายด้วยราคาลด (ออเดอร์จ่ายแล้ว 30 วัน) */
+  saleSales30d: number;
   saleSubsidy30d: number;
 };
 
@@ -127,9 +120,9 @@ export type SaleScopePreviewInput = Pick<
 
 export type SaleScopePreview = {
   listingCount: number;
-  sellerCount: number;
+  shopCount: number;
   /** ราคารวมก่อนลดของ listing ที่เข้าเงื่อนไข */
-  totalListPrice: number;
+  listTotal: number;
 };
 
 /** ร้านในช่อง "ยกเว้นร้าน" */

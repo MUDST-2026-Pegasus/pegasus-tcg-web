@@ -39,7 +39,7 @@ export function SellerSaleActionDialog({
         },
         onError: (error) => {
           if (verb === "resume" && hasErrorCode(error, "SALE_PAUSED")) {
-            onChange({ kind: "admin-paused", sale: { ...sale, pausedByAdmin: true } });
+            onChange({ kind: "admin-paused", sale: { ...sale, pausedByPegasus: true } });
             return;
           }
           if (verb === "delete" && hasErrorCode(error, "SALE_IN_USE")) {

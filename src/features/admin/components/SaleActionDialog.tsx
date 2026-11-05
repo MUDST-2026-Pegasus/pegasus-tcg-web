@@ -107,7 +107,7 @@ function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: ()
   const pause = usePauseSale();
   const [reason, setReason] = useState("");
   const [notifySeller, setNotifySeller] = useState(true);
-  const shop = sale.seller?.username ?? "ร้านค้า";
+  const shop = sale.owner?.username ?? "ร้านค้า";
 
   const submit = () =>
     pause.mutate(
@@ -306,7 +306,7 @@ function DeleteBlockedSaleDialog({ sale, onClose, onEnd }: { sale: AdminSale; on
       tone="info"
       icon={<Info />}
       title="ลบแคมเปญนี้ไม่ได้"
-      description={`แคมเปญมีออเดอร์แล้ว ${sale.orderCount.toLocaleString("th-TH")} รายการ ต้องเก็บไว้เพื่อบัญชีและการคืนเงิน${canEnd ? " · ใช้ “จบแคมเปญ” แทน" : ""}`}
+      description={`แคมเปญมีออเดอร์แล้ว (ขายไป ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น) ต้องเก็บไว้เพื่อบัญชีและการคืนเงิน${canEnd ? " · ใช้ “จบแคมเปญ” แทน" : ""}`}
       actions={
         <>
           <Button variant="outline" onClick={onClose}>

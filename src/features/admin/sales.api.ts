@@ -54,8 +54,8 @@ export function pauseSale(id: number, reason: string | null, notifySeller: boole
   return api.post<AdminSale>(`${ROOT}/${id}/pause`, { reason, notifySeller });
 }
 
-export function resumeSale(id: number) {
-  return api.post<AdminSale>(`${ROOT}/${id}/resume`);
+export function resumeSale(id: number, notifySeller = false) {
+  return api.post<AdminSale>(`${ROOT}/${id}/resume`, { notifySeller });
 }
 
 /** จบทันที — listing กลับราคาปกติภายใน 1 นาที ออเดอร์ที่จ่ายแล้วไม่กระทบ */

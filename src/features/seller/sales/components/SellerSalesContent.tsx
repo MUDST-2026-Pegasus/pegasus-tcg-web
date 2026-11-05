@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import { useSellerProfile } from "@/features/seller/shared/seller.queries";
 import { cn } from "@/lib/utils";
 
@@ -85,16 +86,16 @@ export function SellerSalesContent() {
       <SellerPromotionPageTabs value="sales" />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="กำลังลดราคา" value={String(s?.activeSales ?? 0)} note={`${s?.scheduledSales ?? 0} ตั้งเวลาไว้`} />
+        <Kpi label="กำลังลดราคา" value={String(s?.activeSales ?? 0)} note={`${list.data?.statusCounts.SCHEDULED ?? 0} ตั้งเวลาไว้`} />
         <Kpi
           label="Listing ที่ลดอยู่"
           value={(s?.listingsOnSale ?? 0).toLocaleString("th-TH")}
-          note={`จาก ${(s?.totalListings ?? 0).toLocaleString("th-TH")} listing`}
+          note="ด้วยราคาลดของร้าน"
         />
         <Kpi
           label="ยอดขายจากราคาลด (30 วัน)"
-          value={formatSaleBaht(s?.saleRevenue30d)}
-          note={`${(s?.saleUnits30d ?? 0).toLocaleString("th-TH")} ชิ้น`}
+          value={formatSaleBaht(s?.saleSales30d)}
+          note="ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว"
         />
         <Kpi label="ส่วนลดที่ร้านออก (30 วัน)" value={formatSaleBaht(s?.shopDiscount30d)} note="คอมมิชชั่นคิดจากราคาที่ลดแล้ว" />
       </div>
@@ -235,7 +236,7 @@ function SaleRow({
             {!finished && verified ? (
               <DropdownMenuItem render={<Link to={`/seller/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
             ) : null}
-            {paused && sale.pausedByAdmin ? (
+            {paused && sale.pausedByPegasus ? (
               <DropdownMenuItem onClick={() => onAction({ kind: "admin-paused", sale })}>ดูเหตุผลที่ทีมงานหยุด</DropdownMenuItem>
             ) : !finished ? (
               <DropdownMenuItem onClick={() => onAction({ kind: paused ? "resume" : "pause", sale })}>
@@ -245,7 +246,7 @@ function SaleRow({
             {sale.status === "ACTIVE" ? (
               <DropdownMenuItem onClick={() => onAction({ kind: "end", sale })}>จบก่อนกำหนด</DropdownMenuItem>
             ) : null}
-            {sale.orderCount === 0 ? (
+            {sale.soldUnits === 0 ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction({ kind: "delete", sale })}>
                 ลบ
               </DropdownMenuItem>
@@ -260,7 +261,7 @@ function SaleRow({
 /** การ์ด "สินค้าของคุณในแคมเปญ Pegasus" (Figma SAL-S1) — ราคาล็อก ขึ้นราคาไม่ได้ระหว่างแคมเปญ */
 function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleListing[]; loading: boolean }) {
   if (!loading && listings.length === 0) return null;
-  const startLabel = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
+  const endLabel = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
   return (
     <Card className="gap-0 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-wrap items-center gap-2">
@@ -276,27 +277,23 @@ function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleLis
           <li key={`${item.saleId}-${item.listingId}`} className="grid items-center gap-3 py-3.5 sm:grid-cols-[1.2fr_1fr_auto]">
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">
-                {item.productName} · {item.conditionLabel}
+                {item.productName} · {CONDITION_LABELS[item.condition] ?? item.condition}
               </p>
               <p className="truncate text-[11px] text-muted-foreground">
-                {item.saleName} ·{" "}
-                {item.status === "SCHEDULED" ? `เริ่ม ${startLabel.format(new Date(item.startsAt))}` : `ลด ${item.discountPercent}%`}
+                {item.saleName} · ลด {discountPercent(item)}%
               </p>
             </div>
             <PriceTag
               pricing={{
                 listPrice: item.listPrice,
                 salePrice: item.salePrice,
-                discountPercent: item.discountPercent,
-                sale: { id: item.saleId, slug: null, name: item.saleName, type: item.saleType, endsAt: item.endsAt, quotaLeft: null, perBuyerLimit: null },
+                discountPercent: discountPercent(item),
+                // API ไม่บอกประเภทแคมเปญของแถวนี้ — แสดงแบบลดราคาทั่วไป
+                sale: { id: item.saleId, slug: item.saleSlug, name: item.saleName, type: "CATEGORY_SALE", endsAt: item.endsAt, quotaLeft: null, perBuyerLimit: null },
               }}
             />
             <div className="flex items-center gap-4 text-xs text-muted-foreground sm:justify-end">
-              <span>
-                {item.status === "SCHEDULED" && item.quota != null
-                  ? `โควตา ${item.quota} ชิ้น`
-                  : `ขายแล้ว ${item.soldUnits.toLocaleString("th-TH")} ชิ้น`}
-              </span>
+              <span>ถึง {endLabel.format(new Date(item.endsAt))}</span>
               {item.priceLocked ? (
                 <span className="inline-flex items-center gap-1 font-medium text-[#b45309]">
                   <Lock className="size-3" aria-hidden />
@@ -309,4 +306,10 @@ function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleLis
       </ul>
     </Card>
   );
+}
+
+/** % ส่วนลดเต็มหน่วย — คิดแบบเดียวกับ `SalePricing.discountPercent` ของ backend */
+function discountPercent(item: Pick<PlatformSaleListing, "listPrice" | "salePrice">): number {
+  if (item.listPrice <= 0) return 0;
+  return Math.round((100 * (item.listPrice - item.salePrice)) / item.listPrice);
 }
