@@ -8,6 +8,8 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useAuth } from "@/features/auth/auth.queries";
 import type { PromotionOwner } from "@/features/cart/promotions.types";
 import { normalizePromotionCode } from "@/features/cart/checkout.format";
@@ -17,7 +19,6 @@ import { WalletTicket } from "@/features/promotions/WalletTicket";
 import { claimErrorMessage, copyPromotionCode } from "@/features/promotions/claim.format";
 import { useClaimByCode, useWallet } from "@/features/promotions/claim.queries";
 import type { WalletTab } from "@/features/promotions/claim.types";
-import { cn } from "@/lib/utils";
 import { toSidebarUser } from "../account.format";
 import { AccountSidebar } from "../components/AccountSidebar";
 
@@ -129,44 +130,43 @@ export function MyCouponsPage() {
           <ClaimByCodeForm onClaimed={(code) => { setTab("AVAILABLE"); setClaimedCode(code); }} />
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div role="tablist" aria-label="สถานะโค้ด" className="flex rounded-full bg-muted p-1">
-              {TABS.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === item.value}
-                  onClick={() => setTab(item.value)}
-                  className={cn(
-                    "rounded-full px-4 py-1.5 text-sm text-muted-foreground transition-colors",
-                    tab === item.value && "bg-background font-semibold text-foreground shadow-sm",
-                  )}
-                >
-                  {item.label}
-                  {counts?.[item.value] != null && (
-                    <span className="ml-1.5 text-xs text-muted-foreground">{counts[item.value]}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2" role="group" aria-label="เจ้าของโค้ด">
+            <Tabs value={tab} onValueChange={(value) => setTab(value as WalletTab)}>
+              <TabsList aria-label="สถานะโค้ด" className="h-auto rounded-full bg-muted p-1">
+                {TABS.map((item) => (
+                  <TabsTrigger
+                    key={item.value}
+                    value={item.value}
+                    className="h-auto rounded-full border-0! px-4 py-1.5 text-sm text-muted-foreground data-active:font-semibold data-active:text-foreground data-active:shadow-sm"
+                  >
+                    {item.label}
+                    {counts?.[item.value] != null && (
+                      <span className="ml-1.5 text-xs text-muted-foreground">{counts[item.value]}</span>
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <ToggleGroup
+              aria-label="เจ้าของโค้ด"
+              size="sm"
+              variant="outline"
+              value={[owner ?? "ALL"]}
+              onValueChange={(next: string[]) => {
+                const value = next[0];
+                if (!value) return;
+                setOwner(value === "ALL" ? undefined : (value as PromotionOwner));
+              }}
+            >
               {OWNERS.map((item) => (
-                <Button
+                <ToggleGroupItem
                   key={item.label}
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  aria-pressed={owner === item.value}
-                  onClick={() => setOwner(item.value)}
-                  className={cn(
-                    "rounded-full bg-background",
-                    owner === item.value && "border-primary text-primary hover:text-primary",
-                  )}
+                  value={item.value ?? "ALL"}
+                  className="bg-background aria-pressed:border-primary aria-pressed:bg-background aria-pressed:text-primary"
                 >
                   {item.label}
-                </Button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
           </div>
 
           <QueryBoundary
