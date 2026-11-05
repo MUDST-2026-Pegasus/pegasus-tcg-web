@@ -1,7 +1,7 @@
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import type { AuctionStatus, AuctionViewerState } from "./auction.types";
+import type { AuctionStatus, AuctionViewerState, MyAuctionTab } from "./auction.types";
 
 /**
  * ตัวช่วยแปลงค่าดิบของระบบประมูล → ข้อความบนหน้าจอ [TCG-627 · FE-1]
@@ -67,6 +67,31 @@ const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
 /** "จ. 2 พ.ย. 21:00" — เวลาประเทศไทยเสมอ */
 export function formatAuctionDateTime(iso: string): string {
   return dateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+}
+
+const shortDateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Asia/Bangkok",
+});
+
+/** "31 ต.ค. 21:06" — ไม่มีวันในสัปดาห์ (หัวแถวในหน้าการประมูลของฉัน) */
+export function formatAuctionShortDateTime(iso: string): string {
+  return shortDateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+}
+
+const dateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "Asia/Bangkok",
+});
+
+/** "29 พ.ย. 2026" — ปี ค.ศ. ตาม Figma (วันที่หมดโทษห้ามบิด) */
+export function formatAuctionDate(iso: string): string {
+  return dateFormatter.format(new Date(iso));
 }
 
 /** "2 นาทีที่แล้ว", "1 ชม.ที่แล้ว", "เมื่อวาน 22:14" สำหรับประวัติบิด */
@@ -157,6 +182,83 @@ export const BID_SHORTCUTS = [100, 500, 1_000] as const;
 /** บิดได้เมื่อประมูลยังเปิด และราคาไม่ต่ำกว่าขั้นต่ำ */
 export function canSubmitBid(amount: number, minNextBid: number, live: boolean): boolean {
   return live && Number.isFinite(amount) && amount >= minNextBid;
+}
+
+// ---------- การประมูลของฉัน (W1) ----------
+
+export const MY_AUCTION_TABS: { key: MyAuctionTab; label: string }[] = [
+  { key: "ALL", label: "ทั้งหมด" },
+  { key: "BIDDING", label: "กำลังบิด" },
+  { key: "TO_PAY", label: "ต้องชำระ" },
+  { key: "WON", label: "ชนะแล้ว" },
+  { key: "LOST", label: "ไม่ชนะ" },
+];
+
+/** แถวนี้อยู่ในแท็บไหน — ใช้ทั้ง mock และหน้า */
+export function matchesMyAuctionTab(tab: MyAuctionTab, state: AuctionViewerState): boolean {
+  switch (tab) {
+    case "ALL":
+      return true;
+    case "BIDDING":
+      return state === "LEADING" || state === "OUTBID";
+    case "TO_PAY":
+      return state === "WON_AWAITING_PAYMENT";
+    case "WON":
+      return state === "WON";
+    case "LOST":
+      return state === "LOST";
+  }
+}
+
+/** ประมูลยังเปิดอยู่ไหม (หัวแถวเขียน "ปิด" แทน "ปิดเมื่อ") */
+export function isBiddingState(state: AuctionViewerState): boolean {
+  return state === "LEADING" || state === "OUTBID";
+}
+
+/** ป้ายของแถว — ชนะแล้วแต่ยังไม่ชำระก็ใช้ "ชนะประมูล" ตาม W1 */
+export function myAuctionPill(state: AuctionViewerState): AuctionPillKind {
+  return state === "WON_AWAITING_PAYMENT" ? "Won" : pillForViewer(state);
+}
+
+export type MyAuctionAction = "VIEW_AUCTION" | "PAY" | "BID" | "VIEW_ORDER";
+
+/** ปุ่มท้ายแถวตามสถานะ เรียงซ้ายไปขวา (ตัวสุดท้ายเป็นปุ่มหลัก) */
+export function myAuctionActions(state: AuctionViewerState): MyAuctionAction[] {
+  switch (state) {
+    case "WON_AWAITING_PAYMENT":
+      return ["VIEW_AUCTION", "PAY"];
+    case "LEADING":
+      return ["VIEW_AUCTION"];
+    case "OUTBID":
+      return ["VIEW_AUCTION", "BID"];
+    case "WON":
+      return ["VIEW_ORDER"];
+    case "LOST":
+      return [];
+  }
+}
+
+export type StrikeTone = "clear" | "warning" | "banned";
+
+/** สีชิป "ไม่ชำระหลังชนะ n / 3 ครั้ง" — เขียวถ้า 0, amber ถ้ายังไม่ครบ */
+export function strikeTone(strikes: number, limit: number): StrikeTone {
+  if (strikes <= 0) return "clear";
+  return strikes >= limit ? "banned" : "warning";
+}
+
+/** ยังติดโทษห้ามบิดอยู่ไหม */
+export function isBiddingBanned(bannedUntil: string | null, now: number = Date.now()): boolean {
+  return bannedUntil !== null && Date.parse(bannedUntil) > now;
+}
+
+/** "จากการประมูล #AUC-2026-0142" — ป้ายในหน้า checkout / ชำระเงิน */
+export function auctionOrderLabel(auctionNumber: string): string {
+  return `จากการประมูล #${auctionNumber.replace(/^#/, "")}`;
+}
+
+/** เลขประมูลจาก query `?auction=` — ค่าแปลก ๆ ไม่แสดงป้าย */
+export function parseAuctionNumber(raw: string | null): string | null {
+  return raw && /^AUC-\d{4}-\d{1,8}$/.test(raw) ? raw : null;
 }
 
 // ---------- อื่น ๆ ----------

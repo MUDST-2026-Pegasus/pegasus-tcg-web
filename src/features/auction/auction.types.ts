@@ -282,6 +282,11 @@ export type MyAuctionPage = {
   unpaidStrikes: number;
   strikeLimit: number;
   bannedUntil: string | null;
+  /**
+   * ชื่อการ์ดของครั้งล่าสุดที่ไม่ชำระ — ใช้ในแบนเนอร์ B3-H "{การ์ด} · คำสั่งซื้อถูกยกเลิกแล้ว"
+   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-10 (TCG-623) · ไม่ส่งมา = ซ่อนชื่อการ์ด
+   */
+  lastStrikeCardName?: string | null;
   serverTime: string;
 };
 

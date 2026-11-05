@@ -13,6 +13,7 @@ import {
   SELLER_AUCTION_DETAIL_FIXTURES,
   SELLER_AUCTION_PAGE_FIXTURE,
 } from "./auction.fixture";
+import { matchesMyAuctionTab } from "./auction.format";
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,
@@ -200,19 +201,8 @@ export function checkoutAuction(
 export function getMyAuctions(tab: MyAuctionTab = "ALL", page = 0, size = 20): Promise<MyAuctionPage> {
   if (AUCTION_MOCK.buyer) {
     const fixture = MY_AUCTION_PAGE_FIXTURE;
-    const items = fixture.page.items.filter((a) => {
-      switch (tab) {
-        case "ALL":
-          return true;
-        case "BIDDING":
-          return a.state === "LEADING" || a.state === "OUTBID";
-        case "TO_PAY":
-          return a.state === "WON_AWAITING_PAYMENT";
-        default:
-          return a.state === tab;
-      }
-    });
-    return mock({ ...fixture, page: { ...fixture.page, items } });
+    const items = fixture.page.items.filter((a) => matchesMyAuctionTab(tab, a.state));
+    return mock({ ...fixture, page: { ...fixture.page, items }, serverTime: nowIso() });
   }
   return api.get<MyAuctionPage>("/me/auctions", { query: { tab, page, size } });
 }

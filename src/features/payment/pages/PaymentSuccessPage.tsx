@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ordersApi } from "@/features/account/orders.api";
 import { financeApi } from "@/features/finance/finance.api";
+import { parseAuctionNumber } from "@/features/auction/auction.format";
+import { AuctionOrderBadge } from "@/features/auction/components/AuctionOrderBadge";
 import { checkoutMoney } from "@/features/cart/checkout.format";
 import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import { paymentMethodName, paymentSuccessDate } from "../payment-success.format";
@@ -16,6 +18,7 @@ export function PaymentSuccessPage() {
   const [params] = useSearchParams();
   const orderId = Number(params.get("orderId"));
   const paymentId = Number(params.get("paymentId"));
+  const auctionNumber = parseAuctionNumber(params.get("auction"));
   const validOrder = Number.isSafeInteger(orderId) && orderId > 0;
   const hasPayment = params.has("paymentId");
   const validPayment = Number.isSafeInteger(paymentId) && paymentId > 0;
@@ -79,6 +82,7 @@ export function PaymentSuccessPage() {
         <p className="payment-success-order">
           {order.data && !mismatch ? `Order Number: #${order.data.orderNumber.replace(/^#/, "")}` : validOrder ? `Order #${orderId}` : "Order not found"}
         </p>
+        {auctionNumber && validRequest && !mismatch && <AuctionOrderBadge auctionNumber={auctionNumber} className="mx-auto" />}
         {paid ? (
           <>
             <section className="payment-success-summary" aria-labelledby="transaction-summary-title">
