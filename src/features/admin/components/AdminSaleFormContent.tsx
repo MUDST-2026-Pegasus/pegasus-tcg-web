@@ -288,7 +288,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
   const lockNote = "แก้ไขหลังมีออเดอร์: ได้เฉพาะชื่อ, วันจบ, งบ (เพิ่ม), โควตา (เพิ่ม), หยุด/จบทันที";
 
   return (
-    <main className={cn("grid w-full max-w-[1100px] gap-6", PROMOTION_PAGE_CONTROLS)}>
+    <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <div className="grid gap-4">
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
@@ -321,7 +321,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         </Alert>
       ) : null}
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid min-w-0 gap-4">
           <Section title="1. ประเภทแคมเปญ">
             <RadioGroup
