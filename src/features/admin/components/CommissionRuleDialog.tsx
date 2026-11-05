@@ -2,6 +2,7 @@ import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Pencil, Plus, Power, Trash2, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { DateTimePicker } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
@@ -401,16 +402,16 @@ function RuleForm({
             <div className="grid gap-4 sm:grid-cols-2">
               <Field className="gap-1.5" data-invalid={!!errors.effectiveFrom}>
                 <FieldLabel htmlFor={`${id}-from`} className="text-xs">เริ่มมีผล</FieldLabel>
-                <InputGroup className={FIELD}><InputGroupInput id={`${id}-from`} type="datetime-local"
-                  aria-invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
-                  onChange={(event) => update("effectiveFrom", event.target.value)} /></InputGroup>
+                <DateTimePicker id={`${id}-from`} aria-label="เริ่มมีผล" className={FIELD}
+                  invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
+                  onChange={(value) => update("effectiveFrom", value)} />
                 <FieldError className="text-xs">{errors.effectiveFrom}</FieldError>
               </Field>
               <Field className="gap-1.5" data-invalid={!!errors.effectiveTo}>
                 <FieldLabel htmlFor={`${id}-to`} className="text-xs">สิ้นสุด</FieldLabel>
-                <InputGroup className={FIELD}><InputGroupInput id={`${id}-to`} type="datetime-local"
-                  aria-invalid={!!errors.effectiveTo} value={draft.effectiveTo}
-                  onChange={(event) => update("effectiveTo", event.target.value)} /></InputGroup>
+                <DateTimePicker id={`${id}-to`} aria-label="สิ้นสุด" className={FIELD} defaultTime="23:59"
+                  invalid={!!errors.effectiveTo} min={draft.effectiveFrom} value={draft.effectiveTo}
+                  onChange={(value) => update("effectiveTo", value)} />
                 <FieldDescription className="text-[11px]">เว้นว่าง = ใช้ต่อไปจนกว่าจะปิด</FieldDescription>
                 <FieldError className="text-xs">{errors.effectiveTo}</FieldError>
               </Field>
