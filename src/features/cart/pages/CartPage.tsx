@@ -18,6 +18,9 @@ import {
 } from "../cart.queries";
 import { codeHint } from "../cart.format";
 import type { CartItemResponse } from "../cart.types";
+import { formatSaleBaht } from "@/components/sale";
+import { CartPriceChangedDialog } from "@/features/sale/components/SaleBuyerDialogs";
+import { cartSaleTotals, cartUnitPrice, saleEndedInCart } from "@/features/sale/sale.cart";
 import { checkoutMoney } from "../checkout.format";
 import { AppliedCodeBox, AutoPickedNote, DroppedCodeNotice, PickCodeRow } from "../components/CartCodeRows";
 import { CartCodePicker } from "../components/CartCodePicker";
@@ -177,9 +180,23 @@ export function CartPage() {
   const hasSelectedPriceChanges = checkedItems.some((item) => item.priceChanged);
   const hasSelectedUnavailableItems = checkedItems.some((item) => !item.purchasable);
   const checkoutBlocked = hasSelectedPriceChanges || hasSelectedUnavailableItems;
+  // modal "ราคาสินค้าบางรายการเปลี่ยน" (Figma SAL-M1 Buyer) — เฉพาะราคาที่เปลี่ยนเพราะราคาลดจบ
+  // การเปลี่ยนราคาทั่วไปใช้แถบเตือนเดิม (TCG-513)
+  const saleEndedItems = changedItems.filter(saleEndedInCart);
+  const changedKey = saleEndedItems.map((item) => `${item.id}:${item.currentPrice}`).join(",");
+  const [dismissedChange, setDismissedChange] = useState("");
+  const priceDialogOpen = saleEndedItems.length > 0 && dismissedChange !== changedKey;
+  const handleRemoveChanged = () => {
+    for (const item of saleEndedItems) handleRemoveItem(item.id);
+    setDismissedChange(changedKey);
+  };
+  // แถว "ราคาสินค้า (ก่อนลด)" / "ส่วนลดราคาสินค้า" (Figma SAL-B3 C) — ตัวเลขจาก pricing ของ API
+  const saleTotals = cartSaleTotals(checkedItems);
+
   const handleAcceptPrices = () => {
     acceptPricesMutation.mutate(changedItems.map((item) => item.id), {
       onSuccess: () => {
+        setDismissedChange(changedKey);
         toast.add({ title: "ยอมรับราคาใหม่แล้ว", type: "success" });
       },
       onError: (error) => {
@@ -409,6 +426,18 @@ export function CartPage() {
             <Card className="gap-0 rounded-xl p-5 shadow-none">
               <h2 className="mb-4 text-base font-bold text-foreground">สรุปคำสั่งซื้อ</h2>
               <dl className="grid gap-2.5 text-sm">
+                {saleTotals.saleDiscount > 0 && (
+                  <>
+                    <div className="flex justify-between">
+                      <dt>ราคาสินค้า (ก่อนลด)</dt>
+                      <dd>{formatSaleBaht(saleTotals.listTotal)}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt>ส่วนลดราคาสินค้า</dt>
+                      <dd className="text-[#dc2626]">−{formatSaleBaht(saleTotals.saleDiscount)}</dd>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between">
                   <dt>ยอดสินค้า ({checkedQuantity} ใบ)</dt>
                   <dd>{checkoutMoney(itemsSubtotal)}</dd>
@@ -472,6 +501,21 @@ export function CartPage() {
           </div>
         </div>
       </main>
+
+      <CartPriceChangedDialog
+        open={priceDialogOpen}
+        items={saleEndedItems.map((item) => ({
+          id: item.id,
+          name: item.productName || `Listing #${item.listingId}`,
+          from: item.unitPriceAtAdd,
+          to: item.currentPrice,
+        }))}
+        newTotal={items.reduce((sum, item) => sum + cartUnitPrice(item) * item.quantity, 0)}
+        pending={acceptPricesMutation.isPending || removeItemMutation.isPending}
+        onRemove={handleRemoveChanged}
+        onAccept={handleAcceptPrices}
+        onClose={() => setDismissedChange(changedKey)}
+      />
 
       <CartCodePicker
         promotions={promotions}

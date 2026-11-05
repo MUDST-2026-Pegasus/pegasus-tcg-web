@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { PriceTag, isOnSale } from "@/components/sale";
 import { EmptyState, ErrorState } from "@/components/common";
 import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export function ProductListPage({ gameCode, title = "สินค้าทั้
                     </div>
                     <h2 className="font-semibold">{product.name}</h2>
                     {product.cardNumber && <p className="text-sm text-muted-foreground">{product.cardNumber}</p>}
-                    <p className="mt-auto pt-3 font-semibold text-primary">{formatPrice(product.lowestPrice)}</p>
+                    {isOnSale(product.pricing) ? <PriceTag pricing={product.pricing} className="mt-auto pt-3" /> : <p className="mt-auto pt-3 font-semibold text-primary">{formatPrice(product.lowestPrice)}</p>}
                   </CardContent>
                 </Card>
               </Link>

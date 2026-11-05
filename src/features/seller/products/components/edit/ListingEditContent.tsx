@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { Eye } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -20,7 +21,11 @@ import { toast } from "@/components/ui/toast";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { usePublishPermission } from "@/features/seller/shared/seller.queries";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
+import { SalePriceLockedDialog } from "@/features/seller/sales/components/SalePriceLockedDialog";
+import { priceLockedDetails } from "@/features/seller/sales/sales.format";
+import type { SalePriceLockedDetails } from "@/features/seller/sales/sales.types";
 
 import {
   CONDITION_OPTIONS,
@@ -71,6 +76,7 @@ export function ListingEditContent({
   focusPrice,
 }: ListingEditContentProps) {
   const { canPublish, reason } = usePublishPermission();
+  const [priceLocked, setPriceLocked] = useState<{ price: number | null; details: SalePriceLockedDetails } | null>(null);
   const updateListing = useUpdateListing(listing.id);
 
   const form = useForm<ListingFormValues>({
@@ -128,6 +134,10 @@ export function ListingEditContent({
       if (latest) reset(toListingForm(latest));
       toast.add({ type: "success", title: "บันทึกการเปลี่ยนแปลงแล้ว" });
     } catch (error) {
+      if (hasErrorCode(error, "SALE_PRICE_LOCKED")) {
+        setPriceLocked({ price: toNumber(submitted.price), details: priceLockedDetails(error) });
+        return;
+      }
       if (!applyApiErrors(error, setError)) {
         setError("root.server", {
           message: listingFormErrorMessage(
@@ -300,6 +310,14 @@ export function ListingEditContent({
           <PricingTipCard />
         </div>
       </div>
+      <SalePriceLockedDialog
+        open={priceLocked !== null}
+        onClose={() => setPriceLocked(null)}
+        productName={listing.card.productName}
+        currentPrice={listing.price}
+        attemptedPrice={priceLocked?.price ?? null}
+        details={priceLocked?.details ?? {}}
+      />
     </form>
   );
 }

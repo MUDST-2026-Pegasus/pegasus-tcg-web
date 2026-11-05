@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import type { CardCondition } from "@/features/catalog/catalog.types";
+import { PriceTag, isOnSale } from "@/components/sale";
+import { saleEndedInCart } from "@/features/sale/sale.cart";
 import { checkoutMoney } from "../checkout.format";
 import type { CartItemResponse } from "../cart.types";
 
@@ -93,9 +95,16 @@ export function CartSellerGroup({
                 <p className="truncate text-xs text-muted-foreground">
                   {[item.variantLabel, condition].filter(Boolean).join(" · ")}
                 </p>
+                {isOnSale(item.pricing) && !item.priceChanged && (
+                  <p className="mt-0.5 text-[11px] font-medium text-[#dc2626]">
+                    {item.pricing.sale.name} −{item.pricing.discountPercent}%
+                  </p>
+                )}
                 {item.priceChanged && (
                   <p className="mt-1 w-fit rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
-                    ราคาเปลี่ยน: {checkoutMoney(item.unitPriceAtAdd)} → {item.currentPrice == null ? "ไม่พร้อมจำหน่าย" : checkoutMoney(item.currentPrice)}
+                    {saleEndedInCart(item)
+                      ? `⚠ ราคาลดจบแล้ว ราคากลับเป็น ${checkoutMoney(item.currentPrice ?? 0)} (เดิม ${checkoutMoney(item.unitPriceAtAdd)}) · กด "ยอมรับราคาใหม่" ก่อนไปต่อ`
+                      : <>ราคาเปลี่ยน: {checkoutMoney(item.unitPriceAtAdd)} → {item.currentPrice == null ? "ไม่พร้อมจำหน่าย" : checkoutMoney(item.currentPrice)}</>}
                   </p>
                 )}
                 {!item.purchasable && (
@@ -119,7 +128,11 @@ export function CartSellerGroup({
                   <Plus className="size-3" />
                 </button>
               </div>
-              <strong className="w-20 text-right text-sm font-semibold">{checkoutMoney(price)}</strong>
+              {isOnSale(item.pricing) && !item.priceChanged ? (
+                <PriceTag pricing={item.pricing} size="sm" showBadge={false} className="w-20 items-end text-right" />
+              ) : (
+                <strong className="w-20 text-right text-sm font-semibold">{checkoutMoney(price)}</strong>
+              )}
               <Button type="button" variant="ghost" size="icon-xs" aria-label={`ลบ ${name}`}
                 disabled={removeBusy} onClick={() => onRemove(item.id)}
                 className="text-muted-foreground hover:text-destructive">

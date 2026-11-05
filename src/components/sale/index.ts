@@ -19,5 +19,5 @@ export {
   quotaProgress,
   savingPerUnit,
 } from "./sale.format";
-export type { ListingPricing, PricingSale, SaleFundedBy, SaleType } from "./sale.types";
+export type { ListingPricing, OrderItemSale, PricingSale, SaleFundedBy, SaleType } from "./sale.types";
 export { useCountdown } from "./use-countdown";

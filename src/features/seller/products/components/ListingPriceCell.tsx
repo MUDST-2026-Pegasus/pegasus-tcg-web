@@ -15,7 +15,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SalePriceLockedDialog } from "@/features/seller/sales/components/SalePriceLockedDialog";
+import { priceLockedDetails } from "@/features/seller/sales/sales.format";
+import type { SalePriceLockedDetails } from "@/features/seller/sales/sales.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
+import { hasErrorCode } from "@/lib/api";
 
 import { listingErrorMessage, toNumber } from "../products.format";
 import { useChangeListingPrice } from "../products.queries";
@@ -44,6 +48,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
   const changePrice = useChangeListingPrice();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [locked, setLocked] = useState<{ price: number; details: SalePriceLockedDetails } | null>(null);
   const inputId = useId();
 
   const name = listing.card.productName;
@@ -101,7 +106,12 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
             title: "เปลี่ยนราคาแล้ว",
             description: `${name} · ${formatBaht(next)}`,
           }),
-        onError: (error) =>
+        onError: (error) => {
+          // อยู่ในการลดราคา — modal อธิบายแทน toast ทั่วไป (Figma SAL-M1)
+          if (hasErrorCode(error, "SALE_PRICE_LOCKED")) {
+            setLocked({ price: next, details: priceLockedDetails(error) });
+            return;
+          }
           toast.add({
             type: "error",
             title: "เปลี่ยนราคาไม่สำเร็จ",
@@ -109,12 +119,22 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
               error,
               "ราคากลับเป็นค่าเดิมแล้ว ลองใหม่อีกครั้ง",
             ),
-          }),
+          });
+        },
       },
     );
   }
 
   return (
+    <>
+    <SalePriceLockedDialog
+      open={locked !== null}
+      onClose={() => setLocked(null)}
+      productName={name}
+      currentPrice={listing.price}
+      attemptedPrice={locked?.price ?? null}
+      details={locked?.details ?? {}}
+    />
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
         render={
@@ -171,5 +191,6 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
         </form>
       </PopoverContent>
     </Popover>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ChevronRightIcon, LogOutIcon, MenuIcon, SearchIcon, ShoppingCartIcon, SparklesIcon, StoreIcon, XIcon } from "lucide-react";
+import { ChevronRightIcon, LogOutIcon, PercentIcon, MenuIcon, SearchIcon, ShoppingCartIcon, SparklesIcon, StoreIcon, XIcon } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { AccountAvatar, useAccountLinks } from "@/components/layout/nav-shared";
@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/features/cart/cart.queries";
 import { useGameList } from "@/features/catalog/catalog.queries";
+import { useSales } from "@/features/sale/sale.queries";
 import { cn } from "@/lib/utils";
 
 export function LanguageSwitch() {
@@ -25,6 +26,7 @@ export function Navbar() {
   const [searchParams] = useSearchParams();
   const { data: cart } = useCart();
   const { data: games } = useGameList();
+  const { data: sales } = useSales();
   const { user, isAuthenticated, isLoading, sellerLink, links, handleLogout, logoutPending } = useAccountLinks();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [draft, setDraft] = useState<{ key: string; value: string } | null>(null);
@@ -43,6 +45,8 @@ export function Navbar() {
     { label: "Pokémon", to: `/search?game=${encodeURIComponent(pokemonSlug)}`, active: isSearch && currentGame === pokemonSlug },
     { label: "One Piece", to: `/search?game=${encodeURIComponent(onePieceSlug)}`, active: isSearch && currentGame === onePieceSlug },
     { label: "New arrivals", to: "/search?sort=newest", active: isSearch && !currentGame && newest, icon: SparklesIcon },
+    // Sale pill shows only while a sale campaign is live [TCG-683]
+    ...(sales && sales.length > 0 ? [{ label: "Sale", to: "/sale", active: location.pathname.startsWith("/sale"), icon: PercentIcon }] : []),
   ];
 
   useEffect(() => {

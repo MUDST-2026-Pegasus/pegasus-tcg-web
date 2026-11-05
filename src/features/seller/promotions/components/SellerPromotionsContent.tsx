@@ -8,6 +8,7 @@ import { QueryBoundary } from "@/components/common/QueryBoundary";
 import { useSellerProfile } from "@/features/seller/shared/seller.queries";
 import { useSellerPromotions, useSellerPromotionSummary } from "../promotions.queries";
 import type { PromotionStatus, SellerPromotion } from "../promotions.types";
+import { SellerPromotionPageTabs } from "@/features/seller/sales/components/SellerPromotionPageTabs";
 import { PromotionKpiRow } from "./PromotionKpiRow";
 import { SellerPromotionCard, type PromotionAction } from "./SellerPromotionCard";
 import { SellerPromotionActionDialog } from "./SellerPromotionActionDialog";
@@ -43,13 +44,14 @@ export function SellerPromotionsContent({
     <main className="grid w-full min-w-0 content-start gap-5 text-foreground">
       <header className="flex flex-wrap items-end justify-between gap-4 [&_h1]:text-2xl [&_h1]:font-extrabold [&_p]:mt-1 [&_p]:text-xs [&_p]:text-muted-foreground">
         <div>
-          <h1>โค้ดส่วนลดร้าน</h1>
+          <h1>โปรโมชั่นของร้าน</h1>
           <p>สร้างโค้ดลดราคาสินค้าในร้านคุณ ร้านเป็นผู้ออกส่วนลดเอง</p>
         </div>
         <Button disabled={!verified} onClick={() => setEditing("new")}>
           <Plus className="size-4" />สร้างโค้ดร้าน
         </Button>
       </header>
+      <SellerPromotionPageTabs value="codes" />
       <PromotionKpiRow summary={summary.data} total={total} />
       <Alert className="border-sky-200 bg-sky-50 text-sky-800">
         <Info className="size-4" />

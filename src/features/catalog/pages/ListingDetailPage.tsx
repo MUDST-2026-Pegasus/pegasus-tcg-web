@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { DetailPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
+import { SaleBuyBox } from "@/features/sale/components/SaleBuyBox";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
 import { useListingDetail } from "../catalog.queries";
@@ -42,7 +43,6 @@ export function ListingDetailPage() {
 
   const { listing, photoUrls } = query.data;
   const sellerName = listing.seller.displayName || listing.seller.username;
-  const price = new Intl.NumberFormat("th-TH", { style: "currency", currency: listing.currency }).format(listing.price);
   const photos = photoUrls.length ? photoUrls : [listing.primaryPhotoUrl || listing.card.officialImageUrl].filter((url): url is string => Boolean(url));
 
   return <main className="mx-auto max-w-5xl space-y-6 px-5 py-8">
@@ -51,9 +51,9 @@ export function ListingDetailPage() {
       <ListingPhotos photos={photos} productName={listing.card.productName} />
       <section className="space-y-5">
         <div><h1 className="text-3xl font-bold">{listing.card.productName}</h1><p className="mt-2 text-sm text-muted-foreground">{listing.card.variantLabel} · {CONDITION_LABELS[listing.condition]}</p></div>
-        <p className="text-3xl font-bold text-primary">{price}</p>
+        {/* ราคาและปุ่มซื้อ — ราคาลด/Flash ตาม pricing ของ API (TCG-683) · นับถอยหลังจบแล้วโหลดราคาใหม่ */}
+        <SaleBuyBox listing={listing} title={`${listing.card.productName} · ${CONDITION_LABELS[listing.condition]}`} onExpired={() => void query.refetch()} />
         <div className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">ผู้ขาย</p><Link to={`/u/${encodeURIComponent(listing.seller.username)}?from=${encodeURIComponent(listing.card.productSlug)}`} className="font-semibold hover:underline">{sellerName}</Link></div>
-        <p>จำนวนที่มี: {listing.quantityAvailable}</p>
         {listing.publicNote && <div><h2 className="font-semibold">รายละเอียดจากผู้ขาย</h2><p className="mt-1 whitespace-pre-wrap text-sm">{listing.publicNote}</p></div>}
         {listing.gradingCompany && <p>เกรด: {listing.gradingCompany}{listing.gradeValue != null ? ` ${listing.gradeValue}` : ""}</p>}
       </section>

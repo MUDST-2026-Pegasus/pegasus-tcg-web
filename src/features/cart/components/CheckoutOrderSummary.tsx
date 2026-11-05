@@ -1,3 +1,4 @@
+import { formatSaleBaht } from "@/components/sale";
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ interface SellerSummaryGroup {
 interface CheckoutOrderSummaryProps {
   itemCount: number;
   subtotal: number;
+  /** ราคาสินค้า (ก่อนลด) / ส่วนลดราคาสินค้า จาก pricing ของ API (TCG-683) — แยกจากโค้ด */
+  saleTotals?: { listTotal: number; saleDiscount: number };
   shippingFee: number;
   shippingReady: boolean;
   previewReady: boolean;
@@ -35,6 +38,7 @@ interface CheckoutOrderSummaryProps {
 export function CheckoutOrderSummary({
   itemCount,
   subtotal,
+  saleTotals,
   shippingFee,
   shippingReady,
   previewReady,
@@ -52,6 +56,19 @@ export function CheckoutOrderSummary({
   return (
     <Card className={CHECKOUT_CARD_CLASS}>
       <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
+
+      {saleTotals && saleTotals.saleDiscount > 0 && (
+        <>
+          <div className="flex items-center justify-between gap-3 text-[13px]">
+            <span className="text-muted-foreground">ราคาสินค้า (ก่อนลด)</span>
+            <span>{checkoutMoney(saleTotals.listTotal)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-3 text-[13px]">
+            <span className="text-muted-foreground">ส่วนลดราคาสินค้า</span>
+            <span className="text-[#dc2626]">−{formatSaleBaht(saleTotals.saleDiscount)}</span>
+          </div>
+        </>
+      )}
 
       <div className="flex items-center justify-between gap-3 text-[13px]">
         <span className="text-muted-foreground">ยอดสินค้า ({itemCount} ใบ)</span>
