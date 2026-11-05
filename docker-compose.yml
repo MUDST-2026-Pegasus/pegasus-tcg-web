@@ -8,6 +8,9 @@ services:
       args:
         # This nginx does not proxy /api: call the API running on the host.
         VITE_API_BASE_URL: http://localhost:8080
+        VITE_FARO_URL: ${VITE_FARO_URL:-}
+        VITE_APP_VERSION: ${VITE_APP_VERSION:-dev}
+        VITE_APP_ENV: ${VITE_APP_ENV:-development}
     ports:
       - "4433:80"
     container_name: pegasus-tcg-web
