@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { FLASH_MAX_HOURS, hoursBetween } from "./sales.format";
+import { FLASH_MAX_HOURS, hoursBetween, saleHasOrders } from "./sales.format";
 import type { AdminSale, AdminSaleInput } from "./sales.types";
 
 /**
@@ -21,8 +21,8 @@ export type SaleLocks = {
   isLocked: (field: keyof AdminSaleInput) => boolean;
 };
 
-export function getSaleLocks(existing?: Pick<AdminSale, "orderCount" | "soldUnits">): SaleLocks {
-  const hasOrders = (existing?.orderCount ?? 0) > 0 || (existing?.soldUnits ?? 0) > 0;
+export function getSaleLocks(existing?: Pick<AdminSale, "soldUnits">): SaleLocks {
+  const hasOrders = existing ? saleHasOrders(existing) : false;
   return { hasOrders, isLocked: (field) => hasOrders && !EDITABLE_AFTER_ORDERS.has(field) };
 }
 
@@ -57,17 +57,16 @@ const saleShape = z.object({
   perListingQuota: optionalCount("โควตาต่อ listing"),
   perBuyerLimit: optionalCount("จำกัดต่อผู้ซื้อ"),
   budgetCap: z.number({ error: "กรอกเป็นตัวเลข" }).positive("งบต้องมากกว่า ฿0").nullable(),
-  bannerImageKey: z.string().nullable(),
+  bannerImageUrl: z.string().nullable(),
   featuredOnHome: z.boolean(),
   homeSort: z.number().int().min(0, "ลำดับต้องไม่ติดลบ").nullable(),
-  showOnSalePage: z.boolean(),
   startsAt: isoDate("วันเริ่ม"),
   endsAt: isoDate("วันสิ้นสุด"),
 });
 
 /** zod schema factory — กติกาข้ามฟิลด์ขึ้นกับแคมเปญเดิม */
 export function createSaleSchema({ existing, now = Date.now() }: SaleFormContext = {}) {
-  const locks = getSaleLocks({ orderCount: existing?.orderCount ?? 0, soldUnits: existing?.soldUnits ?? 0 });
+  const locks = getSaleLocks({ soldUnits: existing?.soldUnits ?? 0 });
   return saleShape.superRefine((value, ctx) => {
     const issue = (path: keyof AdminSaleInput, message: string) =>
       ctx.addIssue({ code: "custom", path: [path], message });
@@ -151,10 +150,9 @@ export function toSaleInput(sale: AdminSale): AdminSaleInput {
     perListingQuota: sale.perListingQuota,
     perBuyerLimit: sale.perBuyerLimit,
     budgetCap: sale.budgetCap,
-    bannerImageKey: null,
+    bannerImageUrl: sale.bannerImageUrl,
     featuredOnHome: sale.featuredOnHome,
     homeSort: sale.homeSort,
-    showOnSalePage: sale.showOnSalePage,
     startsAt: sale.startsAt,
     endsAt: sale.endsAt,
   };

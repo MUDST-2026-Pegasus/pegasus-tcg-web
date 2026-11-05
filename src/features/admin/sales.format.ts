@@ -120,7 +120,7 @@ export function salePeriodHint(sale: AdminSale, now: number): string {
     case "ACTIVE":
       return clock ?? `เหลือ ${days(end.getTime())} วัน`;
     case "PAUSED":
-      return sale.pausedByAdmin || sale.ownerType === "PLATFORM"
+      return isPausedByAdmin(sale)
         ? `หยุดโดยแอดมิน${sale.pauseReason ? ` · ${sale.pauseReason}` : ""}`
         : "ร้านหยุดไว้";
     case "SOLD_OUT":
@@ -132,6 +132,19 @@ export function salePeriodHint(sale: AdminSale, now: number): string {
   }
 }
 
+/** มีออเดอร์ใช้ราคานี้แล้ว — `soldUnits` นับจากทุก order_item ของแคมเปญ ตรงกับ `hasOrders` ของ backend */
+export function saleHasOrders(sale: Pick<AdminSale, "soldUnits">): boolean {
+  return sale.soldUnits > 0;
+}
+
+/**
+ * หยุดโดยแอดมิน — กติกาเดียวกับ backend: แคมเปญ Pegasus หยุดได้แค่แอดมิน ·
+ * แอดมินหยุดการลดราคาของร้านต้องมีเหตุผลเสมอ ส่วนร้านหยุดเองไม่มีเหตุผล
+ */
+export function isPausedByAdmin(sale: Pick<AdminSale, "ownerType" | "pauseReason">): boolean {
+  return sale.ownerType === "PLATFORM" || sale.pauseReason != null;
+}
+
 /** "ลด 30%" / "ลด ฿50/ชิ้น" / "ราคาใหม่รายชิ้น" */
 export function saleDiscountLabel(sale: Pick<AdminSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
@@ -140,12 +153,7 @@ export function saleDiscountLabel(sale: Pick<AdminSale, "discountType" | "discou
 }
 
 export function saleDiscountDetail(sale: AdminSale): string {
-  if (sale.discountType === "FIXED_PRICE") {
-    if (sale.minDiscountPercent == null || sale.maxDiscountPercent == null) return "ตั้งรายแถว";
-    return sale.minDiscountPercent === sale.maxDiscountPercent
-      ? `ลด ${sale.minDiscountPercent}%`
-      : `ลด ${sale.minDiscountPercent}–${sale.maxDiscountPercent}%`;
-  }
+  if (sale.discountType === "FIXED_PRICE") return "ตั้งรายแถว";
   if (sale.ownerType === "SELLER") return "ร้านออกเงิน";
   if (sale.discountType === "PERCENT" && sale.maxDiscountPerUnit != null) {
     return `สูงสุด ${formatBaht(sale.maxDiscountPerUnit)}/ชิ้น`;
@@ -222,7 +230,7 @@ export function saleScopeDetail(sale: AdminSale): string {
 /** บรรทัดรองของคอลัมน์แคมเปญ */
 export function saleSubtitle(sale: AdminSale): string {
   if (sale.ownerType === "SELLER") {
-    return `${sale.seller?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString("th-TH")} listing`;
+    return `${sale.owner?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString("th-TH")} listing`;
   }
   const link = sale.slug ? `/sale/${sale.slug}` : "ไม่มีหน้าแคมเปญ";
   return sale.featuredOnHome ? `${link} · หน้าแรก` : link;
@@ -231,7 +239,7 @@ export function saleSubtitle(sale: AdminSale): string {
 /** % ของงบที่ใช้ไปแล้ว — ไม่มีงบคืน `null` */
 export function budgetPercent(sale: Pick<AdminSale, "budgetCap" | "subsidyReserved">): number | null {
   if (!sale.budgetCap) return null;
-  return Math.min(100, (100 * sale.subsidyReserved) / sale.budgetCap);
+  return Math.min(100, (100 * (sale.subsidyReserved ?? 0)) / sale.budgetCap);
 }
 
 /** ป้ายประเภทในตาราง (Figma SAL-A1): Flash / ลดทั้งหมวด / ลดทั้งชุดการ์ด / ร้านลดเอง */

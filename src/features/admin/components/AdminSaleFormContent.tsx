@@ -86,10 +86,9 @@ function emptySale(): AdminSaleInput {
     perListingQuota: 20,
     perBuyerLimit: 1,
     budgetCap: null,
-    bannerImageKey: null,
+    bannerImageUrl: null,
     featuredOnHome: true,
     homeSort: null,
-    showOnSalePage: true,
     startsAt: start.toISOString(),
     endsAt: end.toISOString(),
   };
@@ -156,7 +155,8 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
 
   const banner = useFileUpload({
     purpose: "CATALOG_IMAGE",
-    onChange: (keys) => change("bannerImageKey", keys[0] ?? null),
+    // API เก็บค่านี้ตามที่ส่ง — ส่ง object key ที่อัปแล้ว · เอารูปออกกลับไปใช้รูปเดิม
+    onChange: (keys) => change("bannerImageUrl", keys[0] ?? existing?.bannerImageUrl ?? null),
   });
 
   const games = useAdminGames();
@@ -315,7 +315,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         <Alert className="border-[#cfe0f7] bg-[#e8f1fc] text-[#0058bc]">
           <Info />
           <AlertDescription className="text-xs text-[#0058bc]">
-            แคมเปญนี้มีออเดอร์แล้ว {existing?.orderCount.toLocaleString("th-TH")} รายการ — ฟิลด์ที่มี{" "}
+            แคมเปญนี้มีออเดอร์แล้ว (ขายไป {(existing?.soldUnits ?? 0).toLocaleString("th-TH")} ชิ้น) — ฟิลด์ที่มี{" "}
             <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้ · งบและโควตาเพิ่มได้อย่างเดียว
           </AlertDescription>
         </Alert>
@@ -468,8 +468,8 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
               loading={preview.isFetching && !preview.data}
               error={preview.isError}
               listingCount={preview.data?.listingCount}
-              sellerCount={preview.data?.sellerCount}
-              total={preview.data?.totalListPrice}
+              sellerCount={preview.data?.shopCount}
+              total={preview.data?.listTotal}
             />
           </Section>
 
@@ -632,7 +632,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                   invalid={!!errors.budgetCap}
                 />
               </FormField>
-              <FormField field="bannerImageKey" htmlFor="sale-banner" label="แบนเนอร์ (ไม่บังคับ)" hint="ใช้บนหน้า /sale/{slug} · แนะนำ 1200×300">
+              <FormField field="bannerImageUrl" htmlFor="sale-banner" label="แบนเนอร์ (ไม่บังคับ)" hint="ใช้บนหน้า /sale/{slug} · แนะนำ 1200×300">
                 {existing?.bannerImageUrl && banner.items.length === 0 ? (
                   <img src={existing.bannerImageUrl} alt="แบนเนอร์ปัจจุบัน" className="aspect-[4/1] w-full rounded-md object-cover" />
                 ) : null}
@@ -665,13 +665,6 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 />
               </FormField>
             ) : null}
-            <ToggleRow
-              id="sale-sale-page"
-              title="แสดงในหน้า SALE"
-              hint="/sale รวมแคมเปญที่กำลังลดทั้งหมด"
-              checked={form.showOnSalePage}
-              onChange={(checked) => change("showOnSalePage", checked)}
-            />
           </Section>
         </div>
 
@@ -729,7 +722,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
             <dt>listing ที่เข้าตอนนี้</dt>
             <dd>
               {preview.data
-                ? `${preview.data.listingCount.toLocaleString("th-TH")} จาก ${preview.data.sellerCount.toLocaleString("th-TH")} ร้าน`
+                ? `${preview.data.listingCount.toLocaleString("th-TH")} จาก ${preview.data.shopCount.toLocaleString("th-TH")} ร้าน`
                 : "—"}
             </dd>
           </div>

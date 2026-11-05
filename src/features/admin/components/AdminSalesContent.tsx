@@ -14,7 +14,7 @@ import { useAdminGames } from "../catalog.queries";
 import { formatBaht } from "../promotions.format";
 import { usePromotionCategories } from "../promotions.queries";
 import { PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
-import { SALE_PAGE_SIZE, SALE_STATUS_TABS, SALE_TYPE_FILTERS, type SaleScopeNames } from "../sales.format";
+import { SALE_PAGE_SIZE, SALE_STATUS_TABS, SALE_TYPE_FILTERS, saleHasOrders, type SaleScopeNames } from "../sales.format";
 import { useSaleCardSets, useSaleSummary, useSales } from "../sales.queries";
 import type { AdminSale, SaleStatus, SaleType } from "../sales.types";
 import { PromotionPageTabs } from "./PromotionPageTabs";
@@ -83,7 +83,7 @@ export function AdminSalesContent() {
 
   const onRowAction = (kind: SaleRowAction, sale: AdminSale) => {
     // รู้อยู่แล้วว่ามีออเดอร์ ไม่ต้องให้กดยืนยันก่อนค่อยบอกว่าลบไม่ได้
-    const blocked = kind === "delete" && sale.orderCount > 0;
+    const blocked = kind === "delete" && saleHasOrders(sale);
     setAction({ kind: blocked ? "blocked" : kind, sale });
   };
 
@@ -93,7 +93,6 @@ export function AdminSalesContent() {
   const firstPage = Math.max(0, Math.min(page - 1, totalPages - 3));
   const pageNumbers = Array.from({ length: Math.min(3, totalPages) }, (_, index) => firstPage + index);
   const s = summary.data;
-  const change = s?.saleRevenueChangePercent;
 
   return (
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
@@ -122,13 +121,12 @@ export function AdminSalesContent() {
         <KpiCard
           label="Listing ที่ลดอยู่ตอนนี้"
           value={(s?.listingsOnSale ?? 0).toLocaleString("th-TH")}
-          note={`จาก ${(s?.sellersOnSale ?? 0).toLocaleString("th-TH")} ร้าน`}
+          note="ทั้งแคมเปญ Pegasus และร้านลดเอง"
         />
         <KpiCard
           label="ยอดขายจากราคาลด (30 วัน)"
-          value={formatBaht(s?.saleRevenue30d)}
-          note={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`}
-          tone={change == null || change === 0 ? undefined : change > 0 ? "up" : "down"}
+          value={formatBaht(s?.saleSales30d)}
+          note="ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว"
         />
         <KpiCard
           label="Pegasus อุดหนุน (30 วัน)"
