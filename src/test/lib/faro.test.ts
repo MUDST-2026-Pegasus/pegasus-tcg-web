@@ -1,18 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getWebInstrumentations, initializeFaro } = vi.hoisted(() => ({
-  initializeFaro: vi.fn(() => ({
-    api: {
-      pushView: vi.fn(),
-    },
-  })),
-  getWebInstrumentations: vi.fn(() => []),
-}));
+const {
+  getWebInstrumentations,
+  initializeFaro,
+  tracingInstrumentation,
+  TracingInstrumentation,
+  webInstrumentation,
+} = vi.hoisted(() => {
+  const webInstrumentation = { name: "web" };
+  const tracingInstrumentation = { name: "tracing" };
+
+  return {
+    initializeFaro: vi.fn(() => ({
+      api: {
+        pushView: vi.fn(),
+      },
+    })),
+    getWebInstrumentations: vi.fn(() => [webInstrumentation]),
+    TracingInstrumentation: vi.fn(function TracingInstrumentationMock() {
+      return tracingInstrumentation;
+    }),
+    tracingInstrumentation,
+    webInstrumentation,
+  };
+});
 
 vi.mock("@grafana/faro-web-sdk", () => ({
   getWebInstrumentations,
   initializeFaro,
 }));
+vi.mock("@grafana/faro-web-tracing", () => ({ TracingInstrumentation }));
 
 import { initializeFaroClient, scrubFaroEvent } from "@/observability/faro";
 
@@ -20,6 +37,7 @@ describe("Faro frontend observability", () => {
   beforeEach(() => {
     initializeFaro.mockClear();
     getWebInstrumentations.mockClear();
+    TracingInstrumentation.mockClear();
     vi.stubEnv("VITE_FARO_URL", "");
     vi.stubEnv("MODE", "production");
     delete window.Cypress;
@@ -46,6 +64,25 @@ describe("Faro frontend observability", () => {
     expect(initializeFaroClient()).toBeNull();
     expect(initializeFaro).not.toHaveBeenCalled();
     expect(getWebInstrumentations).not.toHaveBeenCalled();
+    expect(TracingInstrumentation).not.toHaveBeenCalled();
+  });
+
+  it("initializes tracing and propagates trace headers to the configured API", () => {
+    vi.stubEnv("VITE_FARO_URL", "https://faro.example.test/collect/app");
+    vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
+
+    initializeFaroClient();
+
+    expect(TracingInstrumentation).toHaveBeenCalledWith({
+      instrumentationOptions: {
+        propagateTraceHeaderCorsUrls: ["https://api.example.test"],
+      },
+    });
+    expect(initializeFaro).toHaveBeenCalledWith(
+      expect.objectContaining({
+        instrumentations: [webInstrumentation, tracingInstrumentation],
+      }),
+    );
   });
 
   it("scrubs PII from URLs, logs, exceptions, stackframes, and context", () => {

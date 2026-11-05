@@ -28,6 +28,9 @@ export default defineConfig(() => {
       tailwindcss(),
       babel({ presets: [reactCompilerPreset()] }),
     ],
+    build: {
+      sourcemap: "hidden" as const,
+    },
     resolve: {
       alias: {
         // "@" ชี้ไปที่ src/ — ต้องตรงกับ paths ใน tsconfig.app.json

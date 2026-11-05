@@ -2,6 +2,7 @@ import {
   getWebInstrumentations,
   initializeFaro,
 } from "@grafana/faro-web-sdk";
+import { TracingInstrumentation } from "@grafana/faro-web-tracing";
 
 const REDACTED = "[REDACTED]";
 const SENSITIVE_KEYS = new Set([
@@ -108,7 +109,17 @@ export function initializeFaroClient(): FaroClient | null {
       version: import.meta.env.VITE_APP_VERSION || "dev",
       environment: import.meta.env.VITE_APP_ENV || import.meta.env.MODE,
     },
-    instrumentations: [...getWebInstrumentations({ captureConsole: true })],
+    instrumentations: [
+      ...getWebInstrumentations({ captureConsole: true }),
+      new TracingInstrumentation({
+        instrumentationOptions: {
+          propagateTraceHeaderCorsUrls: [
+            import.meta.env.VITE_API_BASE_URL?.trim() ||
+              (import.meta.env.DEV ? "http://localhost:8080" : window.location.origin),
+          ],
+        },
+      }),
+    ],
     beforeSend: (item) => scrubFaroEvent(item),
   });
 
