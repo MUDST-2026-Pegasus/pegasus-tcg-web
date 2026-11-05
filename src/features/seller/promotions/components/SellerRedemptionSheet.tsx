@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ChartColumn } from "lucide-react";
 
+import { EmptyState, ErrorState } from "@/components/common";
+import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
@@ -9,7 +11,7 @@ import { RedemptionStatusPill } from "@/features/admin/components/PromotionBadge
 import { useSellerRedemptions } from "../promotions.queries";
 import { discountLabel, formatPeriod, limitLabel, maskBuyer, minSpendLabel, money } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
-import { SellerPromotionPagination } from "./SellerPromotionPagination";
+import { PromotionPagination } from "@/features/promotions/PromotionPagination";
 
 /**
  * การใช้โค้ด (Figma PRM-M2 SHEET) — ช่อง "ยอดขาย" ในบอร์ดยังไม่มีข้อมูลจาก backend จึงแสดงสามช่อง
@@ -60,17 +62,17 @@ export function SellerRedemptionSheet({
         <Metric label="ร้านออกส่วนลด" value={money(promotion.discountTotal)} />
       </div>
       <div className="min-w-0 overflow-x-auto">
-        {redemptions.isPending ? <p className="py-6 text-xs text-muted-foreground">กำลังโหลด...</p> : null}
-        {redemptions.isError ? (
-          <p role="alert" className="py-6 text-xs text-destructive">
-            โหลดประวัติไม่สำเร็จ
-            <Button variant="link" size="sm" onClick={() => void redemptions.refetch()}>
-              ลองอีกครั้ง
-            </Button>
-          </p>
+        {redemptions.isPending ? <TableSkeleton rows={4} columns={4} className="rounded-md" /> : null}
+        {redemptions.isError && !redemptions.data ? (
+          <ErrorState
+            error={redemptions.error}
+            title="โหลดประวัติไม่สำเร็จ"
+            onRetry={() => void redemptions.refetch()}
+            className="min-h-40"
+          />
         ) : null}
         {redemptions.data?.items.length === 0 ? (
-          <p className="py-6 text-xs text-muted-foreground">ยังไม่มีการใช้โค้ด</p>
+          <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
         ) : null}
         {redemptions.data?.items.length ? (
           <Table className="text-xs">
@@ -112,7 +114,7 @@ export function SellerRedemptionSheet({
           </Table>
         ) : null}
       </div>
-      <SellerPromotionPagination
+      <PromotionPagination
         page={page}
         totalPages={redemptions.data?.totalPages ?? 0}
         onPageChange={onPageChange}

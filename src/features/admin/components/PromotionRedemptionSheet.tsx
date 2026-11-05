@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
+import { EmptyState, ErrorState } from "@/components/common";
+import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -13,6 +14,8 @@ import {
   maskBuyer,
   minSpendLabel,
 } from "../promotions.format";
+import { PromotionPagination } from "@/features/promotions/PromotionPagination";
+
 import { usePromotion, useRedemptions } from "../promotions.queries";
 import { PromotionStatusPill, RedemptionStatusPill } from "./PromotionBadges";
 
@@ -66,17 +69,17 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
         ) : null}
 
         <div className="px-6 pt-5 pb-6">
-          {redemptions.isPending ? <p className="py-6 text-sm text-muted-foreground">กำลังโหลด...</p> : null}
-          {redemptions.isError ? (
-            <p role="alert" className="py-6 text-sm text-destructive">
-              โหลดการใช้โค้ดไม่สำเร็จ{" "}
-              <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void redemptions.refetch()}>
-                ลองอีกครั้ง
-              </Button>
-            </p>
+          {redemptions.isPending ? <TableSkeleton rows={4} columns={4} className="rounded-md" /> : null}
+          {redemptions.isError && !redemptions.data ? (
+            <ErrorState
+              error={redemptions.error}
+              title="โหลดการใช้โค้ดไม่สำเร็จ"
+              onRetry={() => void redemptions.refetch()}
+              className="min-h-40"
+            />
           ) : null}
           {redemptions.data?.items.length === 0 ? (
-            <p className="py-6 text-sm text-muted-foreground">ยังไม่มีการใช้โค้ด</p>
+            <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
           ) : null}
           {redemptions.data && redemptions.data.items.length > 0 ? (
             <Table className="text-xs">
@@ -109,21 +112,13 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
               </TableBody>
             </Table>
           ) : null}
-          {totalPages > 1 ? (
-            <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                หน้า {page + 1} จาก {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" disabled={page === 0} onClick={() => onPageChange(page - 1)}>
-                  ก่อนหน้า
-                </Button>
-                <Button size="sm" variant="outline" disabled={page + 1 >= totalPages} onClick={() => onPageChange(page + 1)}>
-                  ถัดไป
-                </Button>
-              </div>
-            </div>
-          ) : null}
+          <PromotionPagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            label="หน้าการใช้โค้ด"
+            className="mt-4"
+          />
           <p className="mt-4 text-[11px] leading-4 text-muted-foreground">
             จองไว้ = สร้างออเดอร์แล้วรอชำระ · คืนสิทธิ์ = ออเดอร์หมดเวลาชำระ/ยกเลิกก่อนจ่าย (สิทธิ์กลับเข้าโควตา)
           </p>
