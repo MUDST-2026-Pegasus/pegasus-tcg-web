@@ -8,7 +8,7 @@ import { createTestQueryClient, render } from "@/test/utils";
 
 const authState = vi.hoisted(() => ({ isLoading: false, isAuthenticated: false, role: "" }));
 vi.mock("@/components/layout/AccountMenu", () => ({ AccountMenu: () => null }));
-vi.mock("@/components/layout/nav-shared", () => ({ useAccountLinks: () => ({ user: null, isAuthenticated: authState.isAuthenticated, isLoading: authState.isLoading, sellerLink: authState.role === "SELLER" ? { label: "Seller Dashboard", to: "/seller" } : { label: "Become a Seller", to: "/become-a-seller" }, links: [], handleLogout: vi.fn(), logoutPending: false }), AccountAvatar: () => null }));
+vi.mock("@/components/layout/nav-shared", () => ({ useAccountLinks: () => { const sellerLink = authState.role === "SELLER" ? { label: "Seller Dashboard", to: "/seller" } : { label: "Become a Seller", to: "/become-a-seller" }; return { user: null, isAuthenticated: authState.isAuthenticated, isLoading: authState.isLoading, sellerLink, links: authState.isAuthenticated ? [sellerLink] : [], handleLogout: vi.fn(), logoutPending: false }; }, AccountAvatar: () => null }));
 vi.mock("@/features/cart/cart.api", () => ({ cartApi: { getCart: vi.fn().mockResolvedValue({ items: [], totalQuantity: 0 }) } }));
 const getGames = vi.spyOn(catalogApi, "getGames");
 function Location() { const location = useLocation(); return <div data-testid="location">{location.pathname}{location.search}</div>; }
@@ -52,10 +52,14 @@ describe("Navbar", () => {
     fireEvent.keyDown(input, { key: "Escape" });
     expect(input).not.toHaveFocus();
   });
-  it("shows the guest seller link and switches to the seller dashboard by role", () => {
+  it("hides the seller link for guests, shows it for buyers, and sends sellers to their dashboard", () => {
     const { unmount } = renderNavbar();
-    expect(categoryNav().querySelector('a[href="/become-a-seller"]')).toHaveTextContent("Become a seller");
+    expect(categoryNav().querySelector('a[href="/become-a-seller"]')).not.toBeInTheDocument();
     unmount();
+    authState.isAuthenticated = true;
+    const buyer = renderNavbar();
+    expect(categoryNav().querySelector('a[href="/become-a-seller"]')).toHaveTextContent("Become a seller");
+    buyer.unmount();
     authState.isAuthenticated = true; authState.role = "SELLER";
     renderNavbar();
     expect(categoryNav().querySelector('a[href="/seller"]')).toHaveTextContent("Seller Dashboard");
@@ -66,14 +70,23 @@ describe("Navbar", () => {
     expect(categoryNav().querySelector('a[href="/become-a-seller"]')).not.toBeInTheDocument();
     expect(categoryNav().querySelector('a[href="/seller"]')).not.toBeInTheDocument();
   });
-  it("shows guest account actions and the SELL group in the mobile drawer", async () => {
+  it("shows guest account actions without a seller link in the mobile drawer", async () => {
     renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     expect(await screen.findByText("เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ")).toBeInTheDocument();
-    expect(screen.getByText("SELL")).toBeInTheDocument();
+    expect(screen.queryByText("SELL")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Become a seller/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Log in" })).toHaveAttribute("href", "/login");
     expect(screen.getByRole("button", { name: "Sign up" })).toHaveAttribute("href", "/register");
     fireEvent.click(screen.getByRole("dialog").querySelector('a[href="/"]')!);
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+  it.each([["", "Become a Seller", "/become-a-seller"], ["SELLER", "Seller Dashboard", "/seller"]])("shows the correct mobile seller destination for role %s", async (role, label, to) => {
+    authState.isAuthenticated = true; authState.role = role;
+    renderNavbar();
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("ACCOUNT")).toBeInTheDocument();
+    expect(screen.getByRole("dialog").querySelector(`a[href="${to}"]`)).toHaveTextContent(label);
   });
 });
