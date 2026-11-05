@@ -10,10 +10,13 @@ export function useAccountLinks() {
   const auth = useAuth();
   const logout = useLogout();
   const navigate = useNavigate();
+  const sellerLink = auth.hasRole("SELLER")
+    ? { label: "Seller Dashboard", to: "/seller" }
+    : { label: "Become a Seller", to: "/become-a-seller" };
   const links = auth.isAuthenticated ? [
     { label: "My Account", to: "/account/profile" },
     { label: "My Collection", to: "/account/collection" },
-    auth.hasRole("SELLER") ? { label: "Seller Dashboard", to: "/seller" } : { label: "Become a Seller", to: "/become-a-seller" },
+    sellerLink,
     ...(auth.hasRole("ADMIN") ? [{ label: "Admin Dashboard", to: "/admin" }] : []),
   ] : guestLinks;
   const handleLogout = async () => {
@@ -21,7 +24,7 @@ export function useAccountLinks() {
     navigate("/login", { replace: true });
     toast.add({ type: "success", title: "ออกจากระบบเรียบร้อยแล้ว" });
   };
-  return { ...auth, links, handleLogout, logoutPending: logout.isPending };
+  return { ...auth, sellerLink, links, handleLogout, logoutPending: logout.isPending };
 }
 
 export function AccountAvatar({ user, size = "default" }: { user: { displayName: string; avatarUrl: string | null }; size?: "default" | "lg" }) {
