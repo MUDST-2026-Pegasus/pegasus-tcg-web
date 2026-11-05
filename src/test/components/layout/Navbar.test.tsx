@@ -6,22 +6,24 @@ import { Navbar } from "@/components/layout/Navbar";
 import * as catalogApi from "@/features/catalog/catalog.api";
 import { createTestQueryClient, render } from "@/test/utils";
 
+const authState = vi.hoisted(() => ({ isLoading: false, isAuthenticated: false, role: "" }));
 vi.mock("@/components/layout/AccountMenu", () => ({ AccountMenu: () => null }));
-vi.mock("@/components/layout/nav-shared", () => ({ useAccountLinks: () => ({ user: null, isAuthenticated: false, hasRole: () => false, links: [], handleLogout: vi.fn(), logoutPending: false }), AccountAvatar: () => null }));
+vi.mock("@/components/layout/nav-shared", () => ({ useAccountLinks: () => ({ user: null, isAuthenticated: authState.isAuthenticated, isLoading: authState.isLoading, sellerLink: authState.role === "SELLER" ? { label: "Seller Dashboard", to: "/seller" } : { label: "Become a Seller", to: "/become-a-seller" }, links: [], handleLogout: vi.fn(), logoutPending: false }), AccountAvatar: () => null }));
 vi.mock("@/features/cart/cart.api", () => ({ cartApi: { getCart: vi.fn().mockResolvedValue({ items: [], totalQuantity: 0 }) } }));
 const getGames = vi.spyOn(catalogApi, "getGames");
 function Location() { const location = useLocation(); return <div data-testid="location">{location.pathname}{location.search}</div>; }
 function renderNavbar(path = "/") {
-  render(<QueryClientProvider client={createTestQueryClient()}><MemoryRouter initialEntries={[path]}><Navbar /><Location /></MemoryRouter></QueryClientProvider>);
+  return render(<QueryClientProvider client={createTestQueryClient()}><MemoryRouter initialEntries={[path]}><Navbar /><Location /></MemoryRouter></QueryClientProvider>);
 }
 const categoryNav = () => screen.getByRole("navigation", { name: "Shop categories" });
 const activeLabels = () => Array.from(categoryNav().querySelectorAll('[aria-current="page"]')).map((element) => element.textContent);
 
 describe("Navbar", () => {
-  beforeEach(() => { vi.clearAllMocks(); getGames.mockResolvedValue([]); });
+  beforeEach(() => { vi.clearAllMocks(); getGames.mockResolvedValue([]); authState.isLoading = false; authState.isAuthenticated = false; authState.role = ""; });
   it.each([
     ["/", "Home"], ["/search", "All products"], ["/search?game=pokemon-tcg", "Pokémon"],
-    ["/search?game=one-piece-card-game", "One Piece"], ["/search?sort=newest", "New arrivals"], ["/cart", null],
+    ["/search?game=one-piece-card-game", "One Piece"], ["/search?sort=newest", "New arrivals"],
+    ["/search?q=Pikachu", "All products"], ["/search?game=pokemon-tcg&sort=newest", "Pokémon"], ["/cart", null],
   ])("marks only the current category at %s", (path, label) => {
     renderNavbar(path);
     expect(activeLabels()).toEqual(label ? [label] : []);
@@ -46,6 +48,32 @@ describe("Navbar", () => {
     expect(input).toHaveFocus();
     const other = document.createElement("input"); document.body.append(other); other.focus();
     fireEvent.keyDown(other, { key: "/" });
-    expect(other).toHaveFocus(); other.remove();
+    expect(other).toHaveFocus(); other.remove(); input.focus();
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(input).not.toHaveFocus();
+  });
+  it("shows the guest seller link and switches to the seller dashboard by role", () => {
+    const { unmount } = renderNavbar();
+    expect(categoryNav().querySelector('a[href="/become-a-seller"]')).toHaveTextContent("Become a seller");
+    unmount();
+    authState.isAuthenticated = true; authState.role = "SELLER";
+    renderNavbar();
+    expect(categoryNav().querySelector('a[href="/seller"]')).toHaveTextContent("Seller Dashboard");
+  });
+  it("hides the seller link while the account role is loading", () => {
+    authState.isLoading = true;
+    renderNavbar();
+    expect(categoryNav().querySelector('a[href="/become-a-seller"]')).not.toBeInTheDocument();
+    expect(categoryNav().querySelector('a[href="/seller"]')).not.toBeInTheDocument();
+  });
+  it("shows guest account actions and the SELL group in the mobile drawer", async () => {
+    renderNavbar();
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(await screen.findByText("เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ")).toBeInTheDocument();
+    expect(screen.getByText("SELL")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Log in" })).toHaveAttribute("href", "/login");
+    expect(screen.getByRole("button", { name: "Sign up" })).toHaveAttribute("href", "/register");
+    fireEvent.click(screen.getByRole("dialog").querySelector('a[href="/"]')!);
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });
