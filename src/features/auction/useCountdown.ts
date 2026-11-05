@@ -6,7 +6,7 @@ import { clockOffset, remainingMs } from "./auction.format";
  * ms ที่เหลือจนถึง `target` อัปเดตทุกวินาที ชดเชยนาฬิกาเครื่องด้วย `serverTime` ของ response
  * หยุดเดินเมื่อหมดเวลา (ค่าเป็น 0) — ใช้กับ AuctionCountdown หรือหน้าที่ต้องรู้ว่าหมดเวลาแล้ว
  *
- * @param target     `endsAt`, `paymentDueAt`, `decideBy` ฯลฯ — `null` = ไม่นับ (คืน null)
+ * @param target     `endsAt`, `paymentDueAt` ฯลฯ — `null` = ไม่นับ (คืน null)
  * @param serverTime `serverTime` จาก response เดียวกับ target
  */
 export function useCountdown(target: string | null, serverTime?: string): number | null {

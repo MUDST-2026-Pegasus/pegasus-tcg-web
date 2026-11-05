@@ -21,6 +21,8 @@ import type {
   AuctionDetail,
   AuctionListParams,
   AuctionPage,
+  AuctionSort,
+  AuctionSummary,
   AuctionStatus,
   AuctionWin,
   BannedBidder,
@@ -36,14 +38,13 @@ import type {
   PlaceBidRequest,
   SellerAuctionDetail,
   SellerAuctionPage,
-  SellerDecisionRequest,
   SuspendAuctionRequest,
   UpdateAuctionRequest,
 } from "./auction.types";
 import type { CardCondition } from "@/features/catalog/catalog.types";
 
 // ---------- API ของระบบประมูล [TCG-627 · FE-1] ----------
-// endpoint ครบทั้ง 21 ตัวตาม contract C-2 (`AuctionController`, `SellerAuctionController`,
+// endpoint ครบทั้ง 18 ตัวตาม contract C-2 (`AuctionController`, `SellerAuctionController`,
 // `AdminAuctionController`) — component ไม่เรียกตรง ๆ ให้ผ่าน hook ใน `auction.queries.ts`
 //
 // ระหว่างที่ BE ยังไม่มี logic ทุกฟังก์ชันคืนข้อมูลจาก `auction.fixture.ts`
@@ -53,7 +54,7 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 export const AUCTION_MOCK = {
   /** รายการ / รายละเอียด / ประวัติบิด */
   public: true,
-  /** บิด / ซื้อทันที / checkout / ข้อเสนออันดับ 2 / การประมูลของฉัน */
+  /** บิด / ซื้อทันที / checkout / การประมูลของฉัน */
   buyer: true,
   /** หน้าผู้ขายทั้งหมด */
   seller: true,
@@ -79,8 +80,48 @@ const nowIso = () => new Date().toISOString();
 
 // ---------- public (guest เรียกได้) ----------
 
+/**
+ * mock ของหน้า B1 — กรอง/ค้น/เรียงจาก fixture ให้แท็บและ empty state เห็นผลจริง
+ * (ไม่กรองเกม เพราะ fixture ไม่มี gameId) ตัวนับในแท็บยังเป็นตัวเลขตาม Figma
+ */
+function mockAuctionPage(params: AuctionListParams): AuctionPage {
+  const now = Date.now();
+  const q = params.q?.toLowerCase();
+  let items = AUCTION_PAGE_FIXTURE.page.items.filter((auction) => {
+    if (q && !auction.item.card.productName.toLowerCase().includes(q)) return false;
+    switch (params.filter) {
+      case "ENDING_SOON":
+        return new Date(auction.endsAt).getTime() - now < 3_600_000;
+      case "BUY_NOW":
+        return auction.buyNowPrice !== null;
+      case "NO_BIDS":
+        return auction.bidCount === 0;
+      case "NEW":
+        return auction.id >= 150;
+      default:
+        return true;
+    }
+  });
+  const by: Record<AuctionSort, (a: AuctionSummary, b: AuctionSummary) => number> = {
+    ENDING_SOON: (a, b) => a.endsAt.localeCompare(b.endsAt),
+    NEWEST: (a, b) => b.id - a.id,
+    PRICE_ASC: (a, b) => a.currentPrice - b.currentPrice,
+    PRICE_DESC: (a, b) => b.currentPrice - a.currentPrice,
+    MOST_BIDS: (a, b) => b.bidCount - a.bidCount,
+  };
+  items = [...items].sort(by[params.sort ?? "ENDING_SOON"]);
+  const filtered = items.length !== AUCTION_PAGE_FIXTURE.page.items.length;
+  return {
+    ...AUCTION_PAGE_FIXTURE,
+    page: filtered
+      ? { items, page: 0, size: params.size ?? 20, totalItems: items.length, totalPages: items.length ? 1 : 0 }
+      : { ...AUCTION_PAGE_FIXTURE.page, items, page: params.page ?? 0 },
+    serverTime: nowIso(),
+  };
+}
+
 export function getAuctions(params: AuctionListParams = {}): Promise<AuctionPage> {
-  if (AUCTION_MOCK.public) return mock(AUCTION_PAGE_FIXTURE);
+  if (AUCTION_MOCK.public) return mock(mockAuctionPage(params));
   return api.get<AuctionPage>("/auctions", { query: params, auth: false });
 }
 
@@ -90,7 +131,12 @@ export function getAuction(id: number): Promise<AuctionDetail> {
 }
 
 export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHistory> {
-  if (AUCTION_MOCK.public) return mock(BID_HISTORY_FIXTURE);
+  if (AUCTION_MOCK.public) {
+    // 142 มีประวัติเต็ม ใบอื่นใช้บิดล่าสุดของใบนั้น (ใบที่ยังไม่มีบิดจะได้รายการว่าง)
+    const recent = AUCTION_DETAIL_FIXTURES[id]?.recentBids;
+    if (id === 142 || !recent) return mock(BID_HISTORY_FIXTURE);
+    return mock({ page: { items: recent, page: 0, size, totalItems: recent.length, totalPages: recent.length ? 1 : 0 }, serverTime: nowIso() });
+  }
   return api.get<BidHistory>(`/auctions/${id}/bids`, { query: { page, size }, auth: false });
 }
 
@@ -149,20 +195,6 @@ export function checkoutAuction(
   return api.post<CheckoutResponse>(`/auctions/${id}/checkout`, payload, {
     headers: { "Idempotency-Key": idempotencyKey },
   });
-}
-
-export function acceptSecondChance(id: number): Promise<AuctionWin> {
-  if (AUCTION_MOCK.buyer) {
-    const offer = AUCTION_DETAIL_FIXTURES[id]?.viewer?.offer;
-    const price = offer?.amount ?? 4650;
-    return mock({ auctionId: id, auctionNumber: `AUC-2026-${String(id).padStart(4, "0")}`, price, shippingFee: 50, total: price + 50, paymentDueAt: inHours(24), serverTime: nowIso() });
-  }
-  return api.post<AuctionWin>(`/auctions/${id}/second-chance/accept`);
-}
-
-export function declineSecondChance(id: number): Promise<null> {
-  if (AUCTION_MOCK.buyer) return mock(null);
-  return api.post<null>(`/auctions/${id}/second-chance/decline`);
 }
 
 export function getMyAuctions(tab: MyAuctionTab = "ALL", page = 0, size = 20): Promise<MyAuctionPage> {
@@ -250,20 +282,6 @@ export function cancelAuction(id: number): Promise<SellerAuctionDetail> {
     return mock({ ...base, status: "CANCELLED", editable: false, cancellable: false, buyNowAvailable: false, serverTime: nowIso() });
   }
   return api.post<SellerAuctionDetail>(`/sellers/me/auctions/${id}/cancel`);
-}
-
-/** ได้เฉพาะ AWAITING_SELLER_DECISION — error: NO_SECOND_BIDDER, AUCTION_CLOSED */
-export function decideAuction(id: number, payload: SellerDecisionRequest): Promise<SellerAuctionDetail> {
-  if (AUCTION_MOCK.seller) {
-    const base = SELLER_AUCTION_DETAIL_FIXTURES[id] ?? SELLER_AUCTION_DETAIL_FIXTURES[119];
-    const second = base.decision?.secondBidder;
-    return mock(
-      payload.choice === "OFFER_TO_SECOND" && second
-        ? { ...base, status: "OFFERED_TO_SECOND", decision: null, offer: { bidderAlias: second.bidderAlias, amount: second.amount, status: "PENDING", expiresAt: inHours(24) }, serverTime: nowIso() }
-        : { ...base, status: "UNSOLD", decision: null, serverTime: nowIso() },
-    );
-  }
-  return api.post<SellerAuctionDetail>(`/sellers/me/auctions/${id}/decision`, payload);
 }
 
 // ---------- แอดมิน ----------
