@@ -20,6 +20,7 @@ import { formatReportBaht, weekRangeLabel } from "../weekly-report.format";
 import { useExportWeeklyReport } from "../weekly-report.queries";
 import type {
   WeeklyReport,
+  WeeklyReportExportDataset,
   WeeklyReportExportFormat,
   WeeklyReportFilters,
 } from "../weekly-report.types";
@@ -29,8 +30,10 @@ const FORMATS: { value: WeeklyReportExportFormat; label: string; hint: string }[
   { value: "xlsx", label: "Excel (.xlsx)", hint: "เปิดดูต่อใน Excel ได้ทันที" },
 ];
 
-/** export ของ backend รวมข้อมูลสองชุดนี้เสมอ ยังเลือกทีละชุดไม่ได้ */
-const INCLUDED_SECTIONS = ["รวมข้อมูลสรุป KPI รายสัปดาห์", "รวมตารางแยกตามเกมและประเภทสินค้า"];
+const DATASETS: { value: WeeklyReportExportDataset; label: string }[] = [
+  { value: "kpi", label: "รวมข้อมูลสรุป KPI รายสัปดาห์" },
+  { value: "breakdown", label: "รวมตารางแยกตามเกมและประเภทสินค้า" },
+];
 
 type WeeklyReportExportDialogProps = {
   open: boolean;
@@ -48,15 +51,16 @@ export function WeeklyReportExportDialog({
   report,
 }: WeeklyReportExportDialogProps) {
   const [format, setFormat] = useState<WeeklyReportExportFormat>("csv");
+  const [datasets, setDatasets] = useState<WeeklyReportExportDataset[]>(["kpi", "breakdown"]);
   const exportReport = useExportWeeklyReport();
   // `isPending` อัปเดตหลังเรนเดอร์รอบถัดไป คลิกซ้อนในจังหวะนั้นต้องกันด้วย ref
   const inFlight = useRef(false);
 
   const download = () => {
-    if (inFlight.current) return;
+    if (inFlight.current || datasets.length === 0) return;
     inFlight.current = true;
     exportReport.mutate(
-      { filters, format },
+      { filters, format, datasets },
       {
         onSettled: () => {
           inFlight.current = false;
@@ -82,7 +86,7 @@ export function WeeklyReportExportDialog({
     { label: "หมวดหมู่", value: gameLabel },
     {
       label: "จำนวนรายการ",
-      value: `${formatCount(report.breakdownTable.length)} หมวดหมู่ (ยอดขายรวม ${formatReportBaht(report.totals.gmv)})`,
+      value: `${formatCount(report.breakdownByGameAndType.length)} หมวดหมู่ (ยอดขายรวม ${formatReportBaht(report.totals.gmv)})`,
     },
   ];
 
@@ -140,12 +144,29 @@ export function WeeklyReportExportDialog({
           </RadioGroup>
 
           <p className="pt-3 text-[13px] font-medium text-foreground">ข้อมูลที่ต้องการรวม</p>
-          {INCLUDED_SECTIONS.map((section) => (
-            <label key={section} className="flex items-center gap-2.5 py-0.5 text-sm text-foreground">
-              <Checkbox checked disabled />
-              {section}
+          {DATASETS.map((dataset) => (
+            <label
+              key={dataset.value}
+              className="flex cursor-pointer items-center gap-2.5 py-0.5 text-sm text-foreground"
+            >
+              <Checkbox
+                checked={datasets.includes(dataset.value)}
+                onCheckedChange={(checked) =>
+                  setDatasets((current) =>
+                    checked
+                      ? DATASETS.map((item) => item.value).filter(
+                          (value) => value === dataset.value || current.includes(value),
+                        )
+                      : current.filter((value) => value !== dataset.value),
+                  )
+                }
+              />
+              {dataset.label}
             </label>
           ))}
+          {datasets.length === 0 ? (
+            <p className="text-xs text-destructive">เลือกข้อมูลอย่างน้อย 1 ชุด</p>
+          ) : null}
         </div>
 
         <DialogFooter className="m-0 rounded-none border-t border-border bg-background px-6 py-4">
@@ -159,7 +180,7 @@ export function WeeklyReportExportDialog({
           </Button>
           <Button
             className="h-[41px] rounded-lg px-4"
-            disabled={exportReport.isPending}
+            disabled={exportReport.isPending || datasets.length === 0}
             onClick={download}
           >
             {exportReport.isPending ? (
