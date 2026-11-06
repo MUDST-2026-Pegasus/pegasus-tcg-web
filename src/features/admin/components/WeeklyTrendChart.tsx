@@ -55,6 +55,7 @@ export function WeeklyTrendChart({ points }: { points: WeeklyTrendPoint[] }) {
             fillOpacity={0.5}
           />
           <ChartLegend
+            itemSorter={(item) => (item.dataKey === "singles" ? 0 : 1)}
             content={<ChartLegendContent className="justify-start pt-3" />}
           />
         </AreaChart>

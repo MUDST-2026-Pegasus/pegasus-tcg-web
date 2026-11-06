@@ -172,7 +172,10 @@ function WeeklyReportEmptyCard({
 }) {
   return (
     <Card className="items-center gap-0 rounded-xl border border-border px-6 py-20 text-center shadow-none ring-0">
-      <img src={emptyIllustration} alt="" width={96} height={96} />
+      {/* Card ตัด padding บนออกเมื่อลูกตัวแรกเป็น img จึงต้องมีกรอบครอบ */}
+      <div>
+        <img src={emptyIllustration} alt="" width={96} height={96} />
+      </div>
       <p className="mt-5 text-xl font-semibold text-foreground">
         ไม่พบรายการเคลื่อนไหวสต็อกและกำไรในสัปดาห์ที่เลือก
       </p>
