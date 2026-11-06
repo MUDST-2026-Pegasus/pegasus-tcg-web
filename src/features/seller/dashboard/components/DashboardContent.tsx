@@ -8,6 +8,7 @@ import type { DashboardData } from "../dashboard.types";
 import { LowStockCard } from "./LowStockCard";
 import { RecentOrdersCard } from "./RecentOrdersCard";
 import { SalesCard } from "./SalesCard";
+import { AuctionStatCards } from "./AuctionStatCards";
 import { StatCard } from "./StatCard";
 import { TodoCard } from "./TodoCard";
 
@@ -49,6 +50,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
         {data.stats.map((stat) => (
           <StatCard key={stat.id} {...stat} />
         ))}
+        <AuctionStatCards />
       </div>
 
       <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-start">

@@ -51,7 +51,8 @@ export type TodoList = {
   emptyLabel: string;
 };
 
-export type StatKind = "listings" | "escrow" | "rating" | "withdrawable";
+/** `auctionsLive` / `auctionsAwaiting` = ตัวเลขประมูล [TCG-636] */
+export type StatKind = "listings" | "escrow" | "rating" | "withdrawable" | "auctionsLive" | "auctionsAwaiting";
 
 export type StatAccent = "primary" | "violet" | "amber" | "green";
 
@@ -61,6 +62,8 @@ export type StatCardData = {
   label: string;
   value: string;
   footnote: string;
+  /** ทั้งการ์ดเป็นลิงก์ (ตัวเลขประมูลไป `/seller/auctions`) */
+  to?: string;
 };
 
 export type OrderRow = {
