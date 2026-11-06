@@ -19,6 +19,9 @@ import {
   weekStartOf,
 } from "../weekly-report.format";
 
+/** แคปชันปฏิทินเป็นปี พ.ศ. ให้ตรงกับช่วงสัปดาห์ที่แสดงทั้งหน้า */
+const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
+
 function FilterTrigger({ open, children, ...props }: { open: boolean; children: ReactNode; disabled?: boolean }) {
   return (
     <PopoverTrigger
@@ -96,6 +99,7 @@ export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
             selected={parseISO(weekStart)}
             defaultMonth={parseISO(weekStart)}
             disabled={{ after: parseISO(lastSelectable) }}
+            formatters={{ formatCaption: (month) => monthCaption.format(month) }}
             onSelect={(date) => {
               if (date) choose(weekStartOf(format(date, "yyyy-MM-dd")));
             }}

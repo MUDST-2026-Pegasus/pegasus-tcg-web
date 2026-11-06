@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,11 +49,18 @@ export function WeeklyReportExportDialog({
 }: WeeklyReportExportDialogProps) {
   const [format, setFormat] = useState<WeeklyReportExportFormat>("csv");
   const exportReport = useExportWeeklyReport();
+  // `isPending` อัปเดตหลังเรนเดอร์รอบถัดไป คลิกซ้อนในจังหวะนั้นต้องกันด้วย ref
+  const inFlight = useRef(false);
 
   const download = () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     exportReport.mutate(
       { filters, format },
       {
+        onSettled: () => {
+          inFlight.current = false;
+        },
         onSuccess: ({ blob, filename }) => {
           downloadBlob(blob, filename ?? `pegasus_weekly_report_${filters.weekStart}.${format}`);
           toast.add({ type: "success", title: "ดาวน์โหลดรายงานสำเร็จ" });

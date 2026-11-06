@@ -16,7 +16,9 @@ type WeeklyGameShareChartProps = {
   items: WeeklyGameDistribution[];
 };
 
-export function WeeklyGameShareChart({ description, items }: WeeklyGameShareChartProps) {
+export function WeeklyGameShareChart({ description, items: allItems }: WeeklyGameShareChartProps) {
+  // เกมที่ส่วนแบ่ง 0% ไม่มีชิ้นบนโดนัท ไม่ต้องกินที่ในคำอธิบายสี
+  const items = allItems.filter((item) => item.percentage > 0);
   const colorOf = (index: number) => GAME_COLORS[index % GAME_COLORS.length];
   const leader = items.reduce<WeeklyGameDistribution | null>(
     (best, item) => (best === null || item.percentage > best.percentage ? item : best),

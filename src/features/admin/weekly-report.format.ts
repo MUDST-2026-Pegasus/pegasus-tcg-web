@@ -97,10 +97,10 @@ export function weekOptions(today: string): WeekOption[] {
   ].map((option) => ({ ...option, range: weekRangeLabel(option.weekStart) }));
 }
 
-/** 56 → "56%", 56.4 → "56.4%" — ค่าเสียหายไม่ออกเป็น NaN% */
+/** 56 → "56%", 56.42 → "56.4%", 83.96 → "84%" — ค่าเสียหายไม่ออกเป็น NaN% */
 export function formatShare(percent: number | null | undefined): string {
   const value = Number.isFinite(percent) ? Number(percent) : 0;
-  return `${Number.isInteger(value) ? value : value.toFixed(1)}%`;
+  return `${Number(value.toFixed(1))}%`;
 }
 
 /**

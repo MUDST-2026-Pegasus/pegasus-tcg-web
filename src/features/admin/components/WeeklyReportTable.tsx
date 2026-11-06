@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
-import { formatReportBaht, formatShare, productTypeLabel, STOCK_STATUS_BADGE } from "../weekly-report.format";
+import { formatReportBaht, productTypeLabel, STOCK_STATUS_BADGE } from "../weekly-report.format";
 import type { WeeklyReport } from "../weekly-report.types";
 
 const HEAD = "h-[45px] px-4 text-xs font-medium text-muted-foreground";
@@ -20,7 +20,7 @@ const CELL = "px-4 py-3.5 text-sm text-foreground";
 
 /** ตารางแถวละเกมตาม `breakdownTable` แถวท้ายคือ `totals` ที่ backend รวมให้ */
 export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
-  const { breakdownTable: rows, totals, meta } = report;
+  const { breakdownTable: rows, totals } = report;
 
   return (
     <Card className="gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-none ring-0">
@@ -36,9 +36,8 @@ export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
             <TableHead className={HEAD}>ขายออกสัปดาห์นี้</TableHead>
             <TableHead className={HEAD}>สต็อกคงเหลือ</TableHead>
             <TableHead className={HEAD}>ยอดขายรวม</TableHead>
-            <TableHead className={HEAD}>
-              กำไรสุทธิ ({formatShare(meta.commissionRatePercent)})
-            </TableHead>
+            {/* ไม่ใส่ % ท้ายชื่อ: กำไรหักต้นทุนและค่าคอมจริงต่อออเดอร์ ไม่ใช่อัตราคงที่ */}
+            <TableHead className={HEAD}>กำไรสุทธิ</TableHead>
             <TableHead className={HEAD}>สถานะสต็อก</TableHead>
           </TableRow>
         </TableHeader>

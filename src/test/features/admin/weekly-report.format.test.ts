@@ -168,6 +168,7 @@ describe("small formatters", () => {
   it("formats shares without NaN", () => {
     expect(formatShare(56)).toBe("56%");
     expect(formatShare(56.42)).toBe("56.4%");
+    expect(formatShare(83.96)).toBe("84%");
     expect(formatShare(Number.NaN)).toBe("0%");
     expect(formatShare(null)).toBe("0%");
   });

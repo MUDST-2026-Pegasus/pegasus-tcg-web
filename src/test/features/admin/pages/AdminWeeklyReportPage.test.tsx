@@ -125,7 +125,7 @@ describe("AdminWeeklyReportPage", () => {
     expect(within(totals).getByText("7,654")).toBeInTheDocument();
     expect(within(totals).getByText("฿428,500")).toBeInTheDocument();
     expect(within(totals).getByText("฿12,855")).toBeInTheDocument();
-    expect(screen.getByText("กำไรสุทธิ (3%)")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "กำไรสุทธิ" })).toBeInTheDocument();
   });
 
   it("refetches when the game filter changes and lists only active games with shares", async () => {
@@ -217,6 +217,20 @@ describe("AdminWeeklyReportPage", () => {
     );
     expect(add).toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("sends one export request when the button is clicked twice in the same tick", async () => {
+    const user = userEvent.setup();
+    vi.mocked(reportApi.exportWeeklyReport).mockReturnValue(new Promise(() => {}));
+    renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
+
+    const dialog = await openExportDialog(user);
+    const button = within(dialog).getByRole<HTMLButtonElement>("button", { name: "ดาวน์โหลดรายงาน" });
+    button.click();
+    button.click();
+
+    await within(dialog).findByRole("button", { name: /กำลังสร้างไฟล์/ });
+    expect(reportApi.exportWeeklyReport).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the dialog open with an error toast when export fails", async () => {
