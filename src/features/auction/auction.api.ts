@@ -6,6 +6,7 @@ import {
   ADMIN_AUCTION_PAGE_FIXTURE,
   AUCTION_DETAIL_FIXTURES,
   AUCTION_PAGE_FIXTURE,
+  AUCTION_SELLERS,
   BANNED_BIDDER_PAGE_FIXTURE,
   BID_HISTORY_FIXTURE,
   ELIGIBLE_UNIT_PAGE_FIXTURE,
@@ -88,8 +89,13 @@ const nowIso = () => new Date().toISOString();
 function mockAuctionPage(params: AuctionListParams): AuctionPage {
   const now = Date.now();
   const q = params.q?.toLowerCase();
+  const shopName = params.sellerUsername
+    ? (Object.values(AUCTION_SELLERS).find((s) => s.username === params.sellerUsername)?.shopName ?? null)
+    : undefined;
   let items = AUCTION_PAGE_FIXTURE.page.items.filter((auction) => {
     if (q && !auction.item.card.productName.toLowerCase().includes(q)) return false;
+    if (params.variantId !== undefined && auction.item.card.variantId !== params.variantId) return false;
+    if (shopName !== undefined && auction.shopName !== shopName) return false;
     switch (params.filter) {
       case "ENDING_SOON":
         return new Date(auction.endsAt).getTime() - now < 3_600_000;
@@ -112,10 +118,13 @@ function mockAuctionPage(params: AuctionListParams): AuctionPage {
   };
   items = [...items].sort(by[params.sort ?? "ENDING_SOON"]);
   const filtered = items.length !== AUCTION_PAGE_FIXTURE.page.items.length;
+  // ขอน้อยกว่าที่มี (เช่น Home ขอ 4 ใบ) — ตัดตาม size แต่นับรวมตามจริง
+  const totalMatched = items.length;
+  if (params.size !== undefined && items.length > params.size) items = items.slice(0, params.size);
   return {
     ...AUCTION_PAGE_FIXTURE,
     page: filtered
-      ? { items, page: 0, size: params.size ?? 20, totalItems: items.length, totalPages: items.length ? 1 : 0 }
+      ? { items, page: 0, size: params.size ?? 20, totalItems: totalMatched, totalPages: totalMatched ? Math.ceil(totalMatched / (params.size ?? 20)) : 0 }
       : { ...AUCTION_PAGE_FIXTURE.page, items, page: params.page ?? 0 },
     serverTime: nowIso(),
   };

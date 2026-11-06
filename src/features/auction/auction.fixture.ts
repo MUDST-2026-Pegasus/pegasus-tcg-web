@@ -608,7 +608,7 @@ export const ADMIN_AUCTION_PAGE_FIXTURE: AdminAuctionPage = {
     totalPages: 61,
   },
   tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 12, ENDED: 1050, SUSPENDED: 2 },
-  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, suspendedLast30Days: 2 },
+  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, suspendedLast30Days: 2, soldLast30Days: 486200 },
   flaggedCount: 2,
   serverTime: serverTime(),
 };
