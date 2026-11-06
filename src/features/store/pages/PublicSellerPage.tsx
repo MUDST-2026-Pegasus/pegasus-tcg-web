@@ -24,6 +24,9 @@ import { StorePagination } from "../components/StorePagination";
 import { StorePromotionStrip } from "../components/StorePromotionStrip";
 import { StoreReviewsSnippet } from "../components/StoreReviewsSnippet";
 import { StoreReviewsTab } from "../components/StoreReviewsTab";
+import { useAuctions } from "@/features/auction/auction.queries";
+import { AuctionCard } from "@/features/auction/components/AuctionCard";
+
 import { StoreTabs } from "../components/StoreTabs";
 import { calculatePositivePercent } from "../store.format";
 
@@ -98,9 +101,13 @@ function Storefront({ username }: { username: string }) {
     (hasErrorCode(reviews.error, "SELLER_NOT_FOUND") ||
       (isApiError(reviews.error) && reviews.error.status === 404));
 
+  // 5. ประมูลที่เปิดอยู่ของร้าน — ไม่มีก็ไม่แสดงแท็บ [TCG-636]
+  const auctions = useAuctions({ sellerUsername: username, sort: "ENDING_SOON" });
+  const auctionsTotal = auctions.data?.page.totalItems ?? 0;
+
   // Determine active tab
   const rawTab = searchParams.get("tab");
-  const availableTabs = ["products", "collection", ...(isNonSeller ? [] : ["reviews"])];
+  const availableTabs = ["products", "collection", ...(auctionsTotal > 0 ? ["auctions"] : []), ...(isNonSeller ? [] : ["reviews"])];
   const activeTab = availableTabs.includes(rawTab ?? "") ? rawTab! : "products";
 
   const handleTabChange = (value: string) => {
@@ -197,6 +204,7 @@ function Storefront({ username }: { username: string }) {
                 collectionTotal={collectionTotal}
                 ratingCount={ratingCount}
                 isNonSeller={isNonSeller}
+                auctionsTotal={auctionsTotal}
               />
 
               {/* Products Tab */}
@@ -361,6 +369,17 @@ function Storefront({ username }: { username: string }) {
                   )}
                 </div>
               </TabsContent>
+
+              {/* Auctions Tab [TCG-636] */}
+              {auctions.data && auctionsTotal > 0 && (
+                <TabsContent value="auctions" className="outline-none">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {auctions.data.page.items.map((auction) => (
+                      <AuctionCard key={auction.id} auction={auction} serverTime={auctions.data.serverTime} />
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
 
               {/* Reviews Tab */}
               {!isNonSeller && (

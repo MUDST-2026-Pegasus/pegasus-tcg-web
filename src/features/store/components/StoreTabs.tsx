@@ -7,6 +7,8 @@ export type StoreTabsProps = {
   collectionTotal?: number;
   ratingCount?: number;
   isNonSeller?: boolean;
+  /** ประมูลที่เปิดอยู่ของร้าน — 0/ไม่ส่ง = ซ่อนแท็บ "ประมูล" [TCG-636] */
+  auctionsTotal?: number;
 };
 
 export function StoreTabs({
@@ -15,6 +17,7 @@ export function StoreTabs({
   collectionTotal,
   ratingCount,
   isNonSeller = false,
+  auctionsTotal = 0,
 }: StoreTabsProps) {
   return (
     <TabsList
@@ -66,6 +69,31 @@ export function StoreTabs({
           {collectionTotal ?? "—"}
         </span>
       </TabsTrigger>
+
+      {auctionsTotal > 0 && (
+        <TabsTrigger
+          value="auctions"
+          aria-label={`ประมูล (${auctionsTotal})`}
+          className={cn(
+            "flex-none! w-auto! h-12 rounded-none border-0 border-b-2 bg-transparent! px-1 pb-3 pt-2 text-sm sm:text-base font-medium transition-colors hover:text-foreground after:hidden!",
+            activeTab === "auctions"
+              ? "border-primary! text-primary! font-semibold"
+              : "border-transparent! text-muted-foreground hover:border-border",
+          )}
+        >
+          <span>ประมูล</span>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-colors",
+              activeTab === "auctions"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            {auctionsTotal}
+          </span>
+        </TabsTrigger>
+      )}
 
       {!isNonSeller && (
         <TabsTrigger
