@@ -238,7 +238,17 @@ export function getSellerAuctions(params: SellerAuctionListParams = {}): Promise
 export type EligibleUnitParams = { q?: string; gameId?: number; condition?: CardCondition; page?: number; size?: number };
 
 export function getEligibleUnits(params: EligibleUnitParams = {}): Promise<EligibleUnitPage> {
-  if (AUCTION_MOCK.seller) return mock(ELIGIBLE_UNIT_PAGE_FIXTURE);
+  if (AUCTION_MOCK.seller) {
+    // mock กรองแค่คำค้นกับสภาพ — fixture ไม่มีรหัสเกม
+    const fixture = ELIGIBLE_UNIT_PAGE_FIXTURE;
+    const q = params.q?.trim().toLowerCase();
+    const items = fixture.page.items.filter(
+      (u) =>
+        (!params.condition || u.item.condition === params.condition) &&
+        (!q || [u.item.card.productName, u.item.cardNumber, u.unitLabel].some((field) => field.toLowerCase().includes(q))),
+    );
+    return mock({ ...fixture, page: { ...fixture.page, items, totalItems: items.length, totalPages: items.length ? 1 : 0 } });
+  }
   return api.get<EligibleUnitPage>("/sellers/me/auctions/eligible-units", { query: params });
 }
 
@@ -267,7 +277,18 @@ export function createAuction(payload: CreateAuctionRequest): Promise<SellerAuct
 }
 
 export function getSellerAuction(id: number): Promise<SellerAuctionDetail> {
-  if (AUCTION_MOCK.seller) return mock(SELLER_AUCTION_DETAIL_FIXTURES[id] ?? SELLER_AUCTION_DETAIL_FIXTURES[142]);
+  if (AUCTION_MOCK.seller) {
+    const detail = SELLER_AUCTION_DETAIL_FIXTURES[id];
+    if (detail) return mock(detail);
+    // id อื่นในตาราง S1 — ใช้ค่าของแถวนั้นทับรายละเอียดตัวอย่าง ให้ "ประมูลใหม่" เติมราคาตรงกับแถวที่กด
+    const row = SELLER_AUCTION_PAGE_FIXTURE.page.items.find((r) => r.id === id);
+    const base = SELLER_AUCTION_DETAIL_FIXTURES[142];
+    return mock(
+      row
+        ? { ...base, id: row.id, auctionNumber: row.auctionNumber, item: row.item, unitLabel: row.unitLabel, status: row.status, startingPrice: row.startingPrice, currentPrice: row.currentPrice, bidCount: row.bidCount, buyNowPrice: row.buyNowPrice, buyNowAvailable: row.buyNowAvailable, endsAt: row.endsAt, sellerNote: null }
+        : base,
+    );
+  }
   return api.get<SellerAuctionDetail>(`/sellers/me/auctions/${id}`);
 }
 
