@@ -11,22 +11,32 @@ type AuctionCardProps = {
   /** `serverTime` ของหน้ารายการ ให้ตัวนับทุกใบตรงกัน */
   serverTime?: string;
   className?: string;
+  /** ตัวอย่างในหน้าเปิดประมูล — แสดงอย่างเดียว ไม่เป็นลิงก์ */
+  preview?: boolean;
 };
 
 /**
  * การ์ดประมูลในหน้ารวม ตาม Figma Components › AUC / Auction Card (กว้าง 240px ใน grid) [TCG-627]
  * รูป + ตัวนับมุมซ้ายบน → ชื่อ → สภาพ · ร้าน → ราคา + จำนวนบิด → แถบซื้อทันที (ถ้ายังซื้อได้)
  */
-export function AuctionCard({ auction, serverTime, className }: AuctionCardProps) {
-  const { item } = auction;
+export function AuctionCard({ auction, serverTime, className, preview = false }: AuctionCardProps) {
+  const body = <AuctionCardBody auction={auction} serverTime={serverTime} />;
+  const frame = "flex w-full flex-col gap-2.5 rounded-2xl border border-border bg-card p-3";
+  if (preview) return <div className={cn(frame, className)}>{body}</div>;
   return (
     <Link
       to={`/auctions/${auction.id}`}
-      className={cn(
-        "flex w-full flex-col gap-2.5 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-        className,
-      )}
+      className={cn(frame, "transition-colors hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none", className)}
     >
+      {body}
+    </Link>
+  );
+}
+
+function AuctionCardBody({ auction, serverTime }: { auction: AuctionSummary; serverTime?: string }) {
+  const { item } = auction;
+  return (
+    <>
       <div className="rounded-xl bg-slate-50 p-2.5">
         <div className="relative aspect-square w-full overflow-hidden">
           {item.card.officialImageUrl ? (
@@ -66,6 +76,6 @@ export function AuctionCard({ auction, serverTime, className }: AuctionCardProps
           <span className="font-bold tabular-nums">{formatBaht(auction.buyNowPrice)}</span>
         </div>
       ) : null}
-    </Link>
+    </>
   );
 }
