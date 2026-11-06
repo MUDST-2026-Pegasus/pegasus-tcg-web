@@ -177,7 +177,7 @@ describe("PaymentPage", () => {
     renderPaymentPage(42);
 
     expect(await screen.findByText("Pegasus Card Shop")).toBeInTheDocument();
-    expect(screen.getByText(/Kasikornbank/)).toBeInTheDocument();
+    expect(screen.queryByText(/Kasikornbank/)).not.toBeInTheDocument();
     expect(screen.getByText("PromptPay ID 081-234-5678")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
     expect(screen.queryByText(/DEMO QR/i)).not.toBeInTheDocument();

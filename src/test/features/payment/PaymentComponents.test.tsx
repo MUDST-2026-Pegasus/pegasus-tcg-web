@@ -65,7 +65,7 @@ describe("Payment Components", () => {
       expect(screen.queryByText(/ยอดตัวอย่าง/i)).not.toBeInTheDocument();
     });
 
-    it("displays bankName, promptpayId, and accountName properly under the QR code", () => {
+    it("displays promptpayId and accountName under QR code, and omits bankName entirely", () => {
       renderWithProviders(
         <PaymentQrCard
           amount={2500}
@@ -81,8 +81,30 @@ describe("Payment Components", () => {
       );
 
       expect(screen.getByText("PEGASUS TCG CO., LTD.")).toBeInTheDocument();
-      expect(screen.getByText("Kasikornbank · 012-3-45678-9")).toBeInTheDocument();
+      expect(screen.queryByText(/Kasikornbank/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/012-3-45678-9/)).not.toBeInTheDocument();
       expect(screen.getByText("PromptPay ID 081-999-8888")).toBeInTheDocument();
+    });
+
+    it("omits bank name line and dummy account number entirely under QR code", () => {
+      renderWithProviders(
+        <PaymentQrCard
+          amount={673}
+          orderNumber="PGS-100"
+          qrPayload="DUMMY_PAYLOAD"
+          account={{
+            accountName: "PEGASUS TCG",
+            bankName: "SCB",
+            accountNumber: "000-0-00000-0",
+            promptpayId: "094-xxx-1119",
+          }}
+        />,
+      );
+
+      expect(screen.getByText("PEGASUS TCG")).toBeInTheDocument();
+      expect(screen.queryByText(/SCB/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/000-0-00000-0/)).not.toBeInTheDocument();
+      expect(screen.getByText("PromptPay ID 094-xxx-1119")).toBeInTheDocument();
     });
 
     it("shows expired overlay and disables Save QR button when expired", () => {

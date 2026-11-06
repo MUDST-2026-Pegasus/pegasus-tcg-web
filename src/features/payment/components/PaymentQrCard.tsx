@@ -142,16 +142,6 @@ async function exportQrCardPng(
       context.font = "16px 'Inter', system-ui, sans-serif";
       context.fillText(`PromptPay ID: ${promptpayId}`, width / 2, 672);
     }
-
-    if (options.account.bankName) {
-      context.fillStyle = "#94A3B8";
-      context.font = "14px 'Inter', system-ui, sans-serif";
-      context.fillText(
-        `${options.account.bankName}${options.account.accountNumber ? ` · ${options.account.accountNumber}` : ""}`,
-        width / 2,
-        702,
-      );
-    }
   }
 
   return new Promise((resolve, reject) => {
@@ -272,29 +262,46 @@ export function PaymentQrCard({
         </p>
       )}
 
-      <div className="mt-4 text-center space-y-1">
-        {account.accountName && (
-          <p className="font-semibold text-sm text-foreground">
-            {account.accountName}
-          </p>
-        )}
-        {account.bankName && (
-          <p className="text-xs text-muted-foreground">
-            {account.bankName}
-            {account.accountNumber ? ` · ${account.accountNumber}` : ""}
-          </p>
-        )}
-        {!account.bankName && account.accountNumber && (
-          <p className="text-xs text-muted-foreground">
-            {account.accountNumber}
-          </p>
-        )}
-        {promptpayId && (
-          <p className="text-xs text-muted-foreground">
-            PromptPay ID {promptpayId}
-          </p>
-        )}
-      </div>
+      {payload ? (
+        <div className="mt-4 text-center space-y-1">
+          {account.accountName && (
+            <p className="font-semibold text-sm text-foreground">
+              {account.accountName}
+            </p>
+          )}
+          {promptpayId && (
+            <p className="text-xs text-muted-foreground">
+              PromptPay ID {promptpayId}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4 text-center space-y-1">
+          {account.accountName && (
+            <p className="font-semibold text-sm text-foreground">
+              {account.accountName}
+            </p>
+          )}
+          {account.bankName && (
+            <p className="text-xs text-muted-foreground">
+              {account.bankName}
+              {account.accountNumber &&
+              account.accountNumber !== "000-0-00000-0" &&
+              account.accountNumber !== "0000000000"
+                ? ` · ${account.accountNumber}`
+                : ""}
+            </p>
+          )}
+          {!account.bankName &&
+            account.accountNumber &&
+            account.accountNumber !== "000-0-00000-0" &&
+            account.accountNumber !== "0000000000" && (
+              <p className="text-xs text-muted-foreground">
+                {account.accountNumber}
+              </p>
+            )}
+        </div>
+      )}
 
       {payload && (
         <Button

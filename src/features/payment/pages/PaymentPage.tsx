@@ -95,8 +95,14 @@ export function PaymentPage() {
   });
   const payment = statusQuery.data ?? paymentQuery.data;
   const rawAccount = transferAccount(payment?.transferAccountJson);
+  const cleanAccountNumber =
+    rawAccount.accountNumber === "000-0-00000-0" ||
+    rawAccount.accountNumber === "0000000000"
+      ? undefined
+      : rawAccount.accountNumber;
   const account = {
     ...rawAccount,
+    accountNumber: cleanAccountNumber,
     bankName: payment?.bankName ?? rawAccount.bankName,
     accountName: payment?.accountName ?? rawAccount.accountName,
     promptPayId: payment?.promptpayId ?? rawAccount.promptpayId ?? rawAccount.promptPayId,
