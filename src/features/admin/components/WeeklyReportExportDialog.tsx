@@ -15,8 +15,8 @@ import { toast } from "@/components/ui/toast";
 import { downloadBlob } from "@/lib/download";
 import { cn } from "@/lib/utils";
 
-import { formatBaht, formatCount } from "../catalog.format";
-import { weekRangeLabel } from "../weekly-report.format";
+import { formatCount } from "../catalog.format";
+import { formatReportBaht, weekRangeLabel } from "../weekly-report.format";
 import { useExportWeeklyReport } from "../weekly-report.queries";
 import type {
   WeeklyReport,
@@ -75,7 +75,7 @@ export function WeeklyReportExportDialog({
     { label: "หมวดหมู่", value: gameLabel },
     {
       label: "จำนวนรายการ",
-      value: `${formatCount(report.breakdownTable.length)} หมวดหมู่ (ยอดขายรวม ${formatBaht(report.totals.gmv)})`,
+      value: `${formatCount(report.breakdownTable.length)} หมวดหมู่ (ยอดขายรวม ${formatReportBaht(report.totals.gmv)})`,
     },
   ];
 

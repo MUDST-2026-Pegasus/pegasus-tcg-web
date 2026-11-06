@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-import { formatBaht, formatCount } from "../catalog.format";
-import { formatShare, productTypeLabel, STOCK_STATUS_BADGE } from "../weekly-report.format";
+import { formatCount } from "../catalog.format";
+import { formatReportBaht, formatShare, productTypeLabel, STOCK_STATUS_BADGE } from "../weekly-report.format";
 import type { WeeklyReport } from "../weekly-report.types";
 
 const HEAD = "h-[45px] px-4 text-xs font-medium text-muted-foreground";
@@ -57,8 +57,8 @@ export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
                   </span>
                 ) : null}
               </TableCell>
-              <TableCell className={CELL}>{formatBaht(row.gmv)}</TableCell>
-              <TableCell className={CELL}>{formatBaht(row.netProfit)}</TableCell>
+              <TableCell className={CELL}>{formatReportBaht(row.gmv)}</TableCell>
+              <TableCell className={CELL}>{formatReportBaht(row.netProfit)}</TableCell>
               <TableCell className={CELL}>
                 <Badge className={cn("h-[22px] rounded-full px-2 text-xs", STOCK_STATUS_BADGE[row.status])}>
                   {row.statusLabel}
@@ -74,8 +74,8 @@ export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
             <TableCell className={cn(CELL, "font-bold")}>{formatCount(totals.initialStock)}</TableCell>
             <TableCell className={cn(CELL, "font-bold")}>{formatCount(totals.soldCount)}</TableCell>
             <TableCell className={cn(CELL, "font-bold")}>{formatCount(totals.remainingStock)}</TableCell>
-            <TableCell className={cn(CELL, "font-bold")}>{formatBaht(totals.gmv)}</TableCell>
-            <TableCell className={cn(CELL, "font-bold")}>{formatBaht(totals.netProfit)}</TableCell>
+            <TableCell className={cn(CELL, "font-bold")}>{formatReportBaht(totals.gmv)}</TableCell>
+            <TableCell className={cn(CELL, "font-bold")}>{formatReportBaht(totals.netProfit)}</TableCell>
             <TableCell className={cn(CELL, "font-bold")}>-</TableCell>
           </TableRow>
         </TableFooter>

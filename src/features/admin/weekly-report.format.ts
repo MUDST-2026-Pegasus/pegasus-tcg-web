@@ -1,6 +1,6 @@
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 
-import { formatBaht, formatCount } from "./catalog.format";
+import { formatCount } from "./catalog.format";
 import {
   percentDelta,
   sparkBars,
@@ -21,6 +21,16 @@ import type {
 
 const ISO_DATE = "yyyy-MM-dd";
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** 428500 → "฿428,500" ตามดีไซน์ ยอดที่มีสตางค์คงไว้ 2 ตำแหน่ง ตัวเลขจะได้ตรงกับ API */
+export function formatReportBaht(amount: number): string {
+  return new Intl.NumberFormat("th-TH", {
+    style: "currency",
+    currency: "THB",
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
 
 const toIso = (date: Date) => format(date, ISO_DATE);
 
@@ -122,12 +132,12 @@ export function weeklyStatCards(
     {
       id: "net-profit",
       label: "กำไรสุทธิสัปดาห์นี้",
-      value: formatBaht(summary.netProfit),
+      value: formatReportBaht(summary.netProfit),
       delta: delta(summary.netProfit, previous?.summary.netProfit),
       footnote: !hasData
         ? "ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก"
         : previous
-          ? `หักค่าธรรมเนียมระบบแล้ว (เทียบ ${formatBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
+          ? `หักค่าธรรมเนียมระบบแล้ว (เทียบ ${formatReportBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
           : "หักค่าธรรมเนียมระบบแล้ว",
       bars: noHistory,
       accent: "primary",
@@ -135,7 +145,7 @@ export function weeklyStatCards(
     {
       id: "gmv",
       label: "ยอดขายรวมรายสัปดาห์",
-      value: formatBaht(summary.gmv),
+      value: formatReportBaht(summary.gmv),
       delta: percentDelta(summary.wowChangePercent),
       footnote: `จากคำสั่งซื้อที่สำเร็จแล้ว ${formatCount(summary.soldCount)} รายการ`,
       bars: sparkBars(dailySales),
@@ -153,7 +163,7 @@ export function weeklyStatCards(
     {
       id: "commission",
       label: "ค่าคอมมิชชั่นที่เก็บได้",
-      value: formatBaht(summary.commission),
+      value: formatReportBaht(summary.commission),
       delta: delta(summary.commission, previous?.summary.commission),
       footnote: `${hasData ? "คิดเป็น" : "เฉลี่ย"} ${commissionShare.toFixed(1)}% ของยอดขายรวมรายสัปดาห์`,
       bars: noHistory,
