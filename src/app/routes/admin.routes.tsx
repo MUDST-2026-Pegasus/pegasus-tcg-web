@@ -15,6 +15,7 @@ const AdminSellerApprovalPage = lazyPage(() => import("@/features/admin/pages/Ad
 const AdminUsersPage = lazyPage(() => import("@/features/admin/pages/AdminUsersPage").then((m) => m.AdminUsersPage), pageSkeleton);
 const AdminOrdersPage = lazyPage(() => import("@/features/admin/pages/AdminOrdersPage").then((m) => m.AdminOrdersPage), pageSkeleton);
 const AdminCommissionPage = lazyPage(() => import("@/features/admin/pages/AdminCommissionPage").then((m) => m.AdminCommissionPage), pageSkeleton);
+const AdminWeeklyReportPage = lazyPage(() => import("@/features/admin/pages/AdminWeeklyReportPage").then((m) => m.AdminWeeklyReportPage), pageSkeleton);
 const AdminPaymentsPage = lazyPage(() => import("@/features/admin/pages/AdminPaymentsPage").then((m) => m.AdminPaymentsPage), pageSkeleton);
 const AdminRefundsPage = lazyPage(() => import("@/features/admin/pages/AdminRefundsPage").then((m) => m.AdminRefundsPage), pageSkeleton);
 const AdminPayoutsPage = lazyPage(() => import("@/features/admin/pages/AdminPayoutsPage").then((m) => m.AdminPayoutsPage), pageSkeleton);
@@ -52,6 +53,7 @@ export const adminRoutes: RouteObject = {
     { path: "auctions/banned-bidders", element: <AdminBannedBiddersPage /> },
     { path: "auctions/:auctionId", element: <AdminAuctionDetailPage /> },
     { path: "commission", element: <AdminCommissionPage /> },
+    { path: "reports/weekly-stock-profit", element: <AdminWeeklyReportPage /> },
     { path: "promotions", element: <AdminPromotionsPage /> },
     { path: "promotions/new", element: <AdminPromotionFormPage /> },
     { path: "promotions/:id/edit", element: <AdminPromotionFormPage /> },
