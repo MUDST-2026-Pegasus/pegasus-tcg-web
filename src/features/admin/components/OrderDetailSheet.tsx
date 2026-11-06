@@ -96,15 +96,15 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
 
   return (
     <>
-      <SheetHeader className="pr-14">
-        <div className="flex flex-wrap items-center gap-2">
+      <SheetHeader>
+        <div className="flex flex-wrap items-center gap-2 pr-8">
           <SheetTitle className="text-lg font-semibold">
             {summary.sellerOrderNumber}
           </SheetTitle>
           <Badge variant="secondary">{ORDER_STATUS_LABEL[summary.status]}</Badge>
           <AuctionSourcePill order={summary} basePath="/admin/auctions" />
         </div>
-        <SheetDescription>
+        <SheetDescription className="pr-8">
           คำสั่งซื้อ {summary.orderNumber} · สั่งเมื่อ{" "}
           {formatThaiDateTime(summary.createdAt)}
         </SheetDescription>
