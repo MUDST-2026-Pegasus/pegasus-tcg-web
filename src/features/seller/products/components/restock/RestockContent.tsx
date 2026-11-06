@@ -24,6 +24,7 @@ import { ProfitWarningCard } from "./ProfitWarningCard";
 import { RestockFormCard } from "./RestockFormCard";
 import { RestockHistoryCard } from "./RestockHistoryCard";
 import { RestockSummaryCard } from "./RestockSummaryCard";
+import { StockForecastCard } from "./StockForecastCard";
 import { WeightedCostCard } from "./WeightedCostCard";
 
 const PRODUCTS_PATH = "/seller/products";
@@ -173,6 +174,7 @@ export function RestockContent({ data }: RestockContentProps) {
           </div>
         </div>
       </div>
+      <StockForecastCard listingId={Number(data.productId)} />
     </div>
   );
 }
