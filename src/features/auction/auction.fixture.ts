@@ -27,6 +27,7 @@ import type {
 //   142 LIVE มีบิด ต่อเวลาแล้ว · 150 LIVE ยังไม่มีบิด ซื้อทันทีได้ · 151 LIVE เหลือไม่ถึง 2 นาที
 //   117 AWAITING_PAYMENT
 //   133 SOLD · 126 UNSOLD · 140 CANCELLED · 98 SUSPENDED
+//   ฝั่งผู้ขาย S4 เพิ่ม: 121 UNSOLD ผู้ชนะไม่ชำระ · 158 ขายด้วยซื้อทันที รอชำระ
 // กล่องบิด B4 อื่น ๆ (guest / ร้านตัวเอง / ห้ามบิด / ไม่มีที่อยู่) ดูด้วย `withViewer` ด้านล่าง
 
 const NOW = Date.now();
@@ -391,6 +392,7 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   currentPrice: 8450,
   bidCount: 12,
   bidderCount: 7,
+  watcherCount: 34,
   estimatedPayout: 8027,
   commissionPercent: COMMISSION_PERCENT,
   buyNowPrice: 12000,
@@ -406,11 +408,33 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   winnerAlias: null,
   paymentDueAt: null,
   orderId: null,
-  bids: CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
+  // ผู้ขายเห็นบิดแรกสุดด้วย (แถวท้าย "· บิดแรก" ใน S4)
+  bids: [
+    ...CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
+    { bidderAlias: "k***e", bidderInitials: "KE", mine: false, amount: 2000, placedAt: at(-3 * DAY + 40 * MINUTE) },
+  ],
   serverTime: serverTime(),
 };
 
-/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 (142, 150) */
+/** ประมูลที่จบแล้ว — ใช้เป็นฐานของใบ 117 / 133 / 121 / 126 / 140 / 158 */
+const SELLER_ENDED: SellerAuctionDetail = {
+  ...SELLER_CHARIZARD,
+  buyNowPrice: null,
+  buyNowAvailable: false,
+  sellerNote: null,
+  extensionCount: 0,
+  watcherCount: 0,
+};
+
+function endedBids(amounts: number[], lastAt: number): AuctionBid[] {
+  const aliases = ["s***j", "m***a", "t***n", "p***m", "k***e"];
+  return amounts.map((amount, index) => {
+    const alias = aliases[index % aliases.length];
+    return { bidderAlias: alias, bidderInitials: alias.slice(0, 1).toUpperCase() + alias.slice(-1).toUpperCase(), mine: false, amount, placedAt: at(lastAt - index * HOUR) };
+  });
+}
+
+/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 ทุกสถานะ (id ตรงกับแถวในตาราง S1) [TCG-634] */
 export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail> = {
   142: SELLER_CHARIZARD,
   150: {
@@ -423,6 +447,7 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
     currentPrice: 2400,
     bidCount: 0,
     bidderCount: 0,
+    watcherCount: 5,
     estimatedPayout: 2280,
     buyNowPrice: 3500,
     buyNowAvailable: true,
@@ -433,6 +458,135 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
     endsAt: at(3 * DAY),
     extensionCount: 0,
     firstBidAt: null,
+    bids: [],
+  },
+  // จบแล้ว รอผู้ชนะชำระ
+  117: {
+    ...SELLER_ENDED,
+    id: 117,
+    auctionNumber: "AUC-2026-0117",
+    status: "AWAITING_PAYMENT",
+    item: I.lugia,
+    unitLabel: "U-0912",
+    startingPrice: 3000,
+    currentPrice: 6100,
+    bidCount: 9,
+    bidderCount: 4,
+    watcherCount: 18,
+    estimatedPayout: 5795,
+    startedAt: at(-3 * DAY - 6 * HOUR),
+    originalEndsAt: at(-6 * HOUR),
+    endsAt: at(-6 * HOUR),
+    firstBidAt: at(-3 * DAY),
+    winnerAlias: "s***j",
+    paymentDueAt: at(18 * HOUR + 22 * MINUTE),
+    orderId: 10377,
+    bids: endedBids([6100, 5800, 5000, 4200, 3000], -6 * HOUR - 5 * MINUTE),
+  },
+  // ผู้ชนะชำระแล้ว
+  133: {
+    ...SELLER_ENDED,
+    id: 133,
+    auctionNumber: "AUC-2026-0133",
+    status: "SOLD",
+    item: I.mewtwo,
+    unitLabel: "U-0533",
+    startingPrice: 500,
+    currentPrice: 4200,
+    bidCount: 18,
+    bidderCount: 6,
+    watcherCount: 22,
+    estimatedPayout: 3990,
+    startedAt: at(-7 * DAY),
+    originalEndsAt: at(-4 * DAY),
+    endsAt: at(-4 * DAY),
+    firstBidAt: at(-7 * DAY + 2 * HOUR),
+    winnerAlias: "m***a",
+    orderId: 10388,
+    bids: endedBids([4200, 4000, 3500, 2800, 2000], -4 * DAY - 10 * MINUTE),
+  },
+  // ผู้ชนะไม่ชำระใน 24 ชม. → UNSOLD การ์ดกลับเข้าสต็อก
+  121: {
+    ...SELLER_ENDED,
+    id: 121,
+    auctionNumber: "AUC-2026-0121",
+    status: "UNSOLD",
+    item: I.espeon,
+    unitLabel: "U-0702",
+    startingPrice: 3000,
+    currentPrice: 5200,
+    bidCount: 6,
+    bidderCount: 3,
+    watcherCount: 11,
+    estimatedPayout: 4940,
+    startedAt: at(-6 * DAY),
+    originalEndsAt: at(-3 * DAY),
+    endsAt: at(-3 * DAY),
+    firstBidAt: at(-6 * DAY + 3 * HOUR),
+    winnerAlias: "k***a",
+    bids: endedBids([5200, 4800, 4100, 3600, 3000], -3 * DAY - 15 * MINUTE),
+  },
+  // หมดเวลาแบบไม่มีผู้บิด
+  126: {
+    ...SELLER_ENDED,
+    id: 126,
+    auctionNumber: "AUC-2026-0126",
+    status: "UNSOLD",
+    item: I.blastoise,
+    unitLabel: "U-0590",
+    startingPrice: 4500,
+    currentPrice: 4500,
+    bidCount: 0,
+    bidderCount: 0,
+    watcherCount: 3,
+    estimatedPayout: 4275,
+    startedAt: at(-8 * DAY),
+    originalEndsAt: at(-5 * DAY),
+    endsAt: at(-5 * DAY),
+    firstBidAt: null,
+    bids: [],
+  },
+  140: {
+    ...SELLER_ENDED,
+    id: 140,
+    auctionNumber: "AUC-2026-0140",
+    status: "CANCELLED",
+    item: I.charizardEx,
+    unitLabel: "U-1041",
+    startingPrice: 900,
+    currentPrice: 900,
+    bidCount: 0,
+    bidderCount: 0,
+    estimatedPayout: 855,
+    buyNowPrice: 1500,
+    startedAt: at(-2 * DAY),
+    originalEndsAt: at(-1 * DAY),
+    endsAt: at(-1 * DAY),
+    firstBidAt: null,
+    bids: [],
+  },
+  // ขายด้วยซื้อทันที (ไม่มีบิด แต่มีผู้ชนะ) รอผู้ซื้อชำระ — ไม่อยู่ในตาราง S1 เปิดจาก URL ตรง ๆ
+  158: {
+    ...SELLER_ENDED,
+    id: 158,
+    auctionNumber: "AUC-2026-0158",
+    status: "AWAITING_PAYMENT",
+    item: I.pikachu,
+    unitLabel: "U-0990",
+    startingPrice: 2400,
+    currentPrice: 3500,
+    bidCount: 0,
+    bidderCount: 0,
+    watcherCount: 7,
+    estimatedPayout: 3325,
+    buyNowPrice: 3500,
+    startedAt: at(-1 * DAY),
+    originalEndsAt: at(2 * DAY),
+    endsAt: at(-2 * HOUR),
+    firstBidAt: null,
+    winnerAlias: "p***m",
+    paymentDueAt: at(22 * HOUR),
+    orderId: 10391,
     bids: [],
   },
 };

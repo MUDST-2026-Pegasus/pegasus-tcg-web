@@ -124,6 +124,24 @@ function moneyIssue(text: string, path: AuctionFormField, label: string, require
   return null;
 }
 
+/**
+ * ราคาซื้อทันที (ตอนเปิดซื้อทันที) — ใช้ทั้งฟอร์มเปิดประมูลและ dialog แก้ราคาใน S4 [TCG-634]
+ * @param startingPrice `null` = ราคาเริ่มต้นยังไม่ถูกต้อง ข้ามการเทียบ
+ */
+export function buyNowPriceIssue(text: string, startingPrice: number | null): AuctionFormIssue | null {
+  const issue = moneyIssue(text, "buyNowPrice", "ราคาซื้อทันที", "กรอกราคาซื้อทันที");
+  if (issue) return issue;
+  const buyNow = toNumber(text);
+  if (buyNow !== null && startingPrice !== null && buyNow <= startingPrice) {
+    return {
+      path: "buyNowPrice",
+      message: "ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น",
+      detail: `ตอนนี้ ${formatBaht(buyNow)} ≤ ${formatBaht(startingPrice)}`,
+    };
+  }
+  return null;
+}
+
 /** ข้อผิดพลาดของเวลาปิด — ใช้ทั้งตอนกรอกและตอน backend ตอบกลับ */
 function closeTooSoon(): AuctionFormIssue {
   return { path: "closeDate", message: "เวลาปิดเร็วเกินไป", detail: "ต้องห่างจากตอนนี้อย่างน้อย 1 ชม." };
@@ -178,17 +196,7 @@ export function auctionFormIssues(values: AuctionFormValues, now: number): Aucti
   }
 
   if (values.buyNowEnabled) {
-    const buyNowIssue = moneyIssue(values.buyNowPrice, "buyNowPrice", "ราคาซื้อทันที", "กรอกราคาซื้อทันที");
-    issues.push(buyNowIssue);
-    const buyNow = toNumber(values.buyNowPrice);
-    const start = toNumber(values.startingPrice);
-    if (!buyNowIssue && !startIssue && buyNow !== null && start !== null && buyNow <= start) {
-      issues.push({
-        path: "buyNowPrice",
-        message: "ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น",
-        detail: `ตอนนี้ ${formatBaht(buyNow)} ≤ ${formatBaht(start)}`,
-      });
-    }
+    issues.push(buyNowPriceIssue(values.buyNowPrice, startIssue ? null : toNumber(values.startingPrice)));
   }
 
   if (values.sellerNote.trim().length > MAX_SELLER_NOTE) {
