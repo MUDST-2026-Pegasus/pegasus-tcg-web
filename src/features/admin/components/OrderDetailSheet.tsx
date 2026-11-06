@@ -96,7 +96,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
 
   return (
     <>
-      <SheetHeader>
+      <SheetHeader className="px-4">
         <div className="flex flex-wrap items-center gap-2 pr-8">
           <SheetTitle className="text-lg font-semibold">
             {summary.sellerOrderNumber}
