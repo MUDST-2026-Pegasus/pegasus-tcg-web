@@ -1,17 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
 
-export function SellerPromotionPagination({
-  page, totalPages, onPageChange, label,
+/** ก่อนหน้า / หน้า x / y / ถัดไป — ใช้ทั้งหน้าโค้ดร้านและ sheet การใช้โค้ดของแอดมิน */
+export function PromotionPagination({
+  page, totalPages, onPageChange, label, className,
 }: {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   label: string;
+  className?: string;
 }) {
   if (totalPages <= 1) return null;
   return (
-    <Pagination aria-label={label} className="justify-end">
+    <Pagination aria-label={label} className={cn("justify-end", className)}>
       <PaginationContent>
         <PaginationItem>
           <Button variant="outline" size="sm" disabled={page === 0}

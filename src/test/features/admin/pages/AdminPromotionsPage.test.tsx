@@ -260,7 +260,8 @@ describe("AdminPromotionsPage", () => {
     expect(screen.getByText("หยุดโค้ด SHADY90 ของร้าน shady_cards?")).toBeInTheDocument();
     const confirm = screen.getByRole("button", { name: "หยุดโค้ดร้าน" });
     expect(confirm).toBeDisabled();
-    await user.selectOptions(screen.getByRole("combobox"), "ข้อมูลโค้ดไม่ถูกต้อง");
+    await user.click(screen.getByRole("combobox", { name: "เหตุผลที่หยุดโค้ด" }));
+    await user.click(await screen.findByRole("option", { name: "ข้อมูลโค้ดไม่ถูกต้อง" }));
     expect(confirm).toBeDisabled();
     await user.type(screen.getByPlaceholderText("ระบุรายละเอียดที่ร้านจะได้รับ"), "แก้ส่วนลด");
     await user.click(confirm);

@@ -1,14 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Info } from "lucide-react";
+import { ChevronDown, Info, Tag } from "lucide-react";
 
+import { EmptyState, ErrorState } from "@/components/common";
 import { SaleProductCard, formatCountdown, useCountdown } from "@/components/sale";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
+import { Toggle } from "@/components/ui/toggle";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import { useGameList } from "@/features/catalog/catalog.queries";
 import type { CardCondition } from "@/features/catalog/catalog.types";
@@ -25,8 +35,16 @@ const SORTS: Array<{ value: SaleSort; label: string }> = [
 ];
 
 const CONDITIONS = Object.keys(CONDITION_LABELS) as CardCondition[];
+/** ค่าแทน "ไม่กรอง" ใน Select — URL ไม่เก็บค่านี้ */
+const ALL = "ALL";
+const CONDITION_ITEMS = [
+  { value: ALL, label: "ทุกสภาพ" },
+  ...CONDITIONS.map((code) => ({ value: code, label: CONDITION_LABELS[code] })),
+];
+const FILTER_TRIGGER = "h-8 rounded-full border-border bg-card text-[13px]";
+/** chip กรองแบบกดค้าง — ตอนเลือกเป็นพื้นดำ (Figma SAL-B2) */
 const CHIP =
-  "inline-flex h-8 items-center gap-1 rounded-full border bg-card px-3 text-[13px] text-foreground aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background";
+  "h-8 rounded-full bg-card px-3 text-[13px] aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:hover:bg-foreground/90";
 
 /**
  * Figma SAL-B2 — `/sale` (ทุกอย่างที่ลด · `GET /listings?onSale=true`) และ `/sale/:slug` (`GET /sales/{slug}`)
@@ -55,6 +73,10 @@ export function SalePage() {
   const total = pages[0]?.page.totalItems ?? 0;
   const sale = pages[0]?.sale ?? null;
   const allCount = (sales.data ?? []).reduce((sum, item) => sum + item.listingCount, 0);
+  const gameItems = useMemo(
+    () => [{ value: ALL, label: "ทุกเกม" }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: game.name }))],
+    [games.data],
+  );
 
   const setParam = (key: string, value: string | null) => {
     const next = new URLSearchParams(params);
@@ -65,25 +87,25 @@ export function SalePage() {
 
   return (
     <main className="mx-auto grid w-full max-w-[1280px] gap-5 px-4 py-6 lg:px-10">
-      <nav aria-label="Breadcrumb" className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
-        <Link to="/" className="hover:underline">
-          หน้าแรก
-        </Link>
-        <span>/</span>
-        {slug ? (
-          <Link to="/sale" className="hover:underline">
-            SALE
-          </Link>
-        ) : (
-          <span>SALE</span>
-        )}
-        {slug ? (
-          <>
-            <span>/</span>
-            <span>{sale?.name ?? slug}</span>
-          </>
-        ) : null}
-      </nav>
+      <Breadcrumb>
+        <BreadcrumbList className="text-xs">
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link to="/" />}>หน้าแรก</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            {slug ? <BreadcrumbLink render={<Link to="/sale" />}>SALE</BreadcrumbLink> : <BreadcrumbPage>SALE</BreadcrumbPage>}
+          </BreadcrumbItem>
+          {slug ? (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{sale?.name ?? slug}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </>
+          ) : null}
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h1 className="text-3xl font-black text-[#dc2626]">SALE</h1>
@@ -108,42 +130,29 @@ export function SalePage() {
       {sale ? <CampaignHero key={sale.id} sale={sale} /> : null}
 
       <div className="flex flex-wrap items-center gap-2">
-        <NativeSelect
-          aria-label="เกม"
-          className="h-8 rounded-full text-[13px]"
-          value={params.get("game") ?? ""}
-          onChange={(event) => setParam("game", event.target.value || null)}
-        >
-          <NativeSelectOption value="">ทุกเกม</NativeSelectOption>
-          {(games.data ?? []).map((game) => (
-            <NativeSelectOption key={game.id} value={String(game.id)}>
-              {game.name}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-        <NativeSelect
-          aria-label="สภาพ"
-          className="h-8 rounded-full text-[13px]"
-          value={params.get("condition") ?? ""}
-          onChange={(event) => setParam("condition", event.target.value || null)}
-        >
-          <NativeSelectOption value="">สภาพ</NativeSelectOption>
-          {CONDITIONS.map((code) => (
-            <NativeSelectOption key={code} value={code}>
-              {CONDITION_LABELS[code]}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
+        <FilterSelect
+          label="เกม"
+          items={gameItems}
+          value={params.get("game") ?? ALL}
+          onChange={(value) => setParam("game", value === ALL ? null : value)}
+        />
+        <FilterSelect
+          label="สภาพ"
+          items={CONDITION_ITEMS}
+          value={params.get("condition") ?? ALL}
+          onChange={(value) => setParam("condition", value === ALL ? null : value)}
+        />
         {[10, 20].map((value) => (
-          <button
+          <Toggle
             key={value}
-            type="button"
+            variant="outline"
+            size="sm"
             className={CHIP}
-            aria-pressed={query.minDiscount === value}
-            onClick={() => setParam("minDiscount", query.minDiscount === value ? null : String(value))}
+            pressed={query.minDiscount === value}
+            onPressedChange={(pressed) => setParam("minDiscount", pressed ? String(value) : null)}
           >
             ลด ≥ {value}%
-          </button>
+          </Toggle>
         ))}
         <PriceFilter
           min={query.minPrice}
@@ -160,21 +169,27 @@ export function SalePage() {
             setParams(next, { replace: true });
           }}
         />
-        <label className="ml-auto flex items-center gap-2 text-[13px] text-muted-foreground">
-          เรียง:
-          <NativeSelect
-            aria-label="เรียงตาม"
-            className="h-8 rounded-md text-[13px] text-foreground"
+        <div className="ml-auto flex items-center gap-2 text-[13px] text-muted-foreground">
+          <span aria-hidden>เรียง:</span>
+          <Select
+            items={SORTS}
             value={query.sort}
-            onChange={(event) => setParam("sort", event.target.value === "discount_desc" ? null : event.target.value)}
+            onValueChange={(value) => setParam("sort", !value || value === "discount_desc" ? null : value)}
           >
-            {SORTS.map((sort) => (
-              <NativeSelectOption key={sort.value} value={sort.value}>
-                {sort.label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </label>
+            <SelectTrigger aria-label="เรียงตาม" size="sm" className="min-w-36 rounded-md border-border bg-card text-[13px] text-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {SORTS.map((sort) => (
+                  <SelectItem key={sort.value} value={sort.value}>
+                    {sort.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {listings.isPending ? (
@@ -184,16 +199,18 @@ export function SalePage() {
           ))}
         </div>
       ) : listings.isError ? (
-        <div role="alert" className="grid justify-items-center gap-3 rounded-xl border border-dashed p-10 text-sm">
-          โหลดสินค้าลดราคาไม่สำเร็จ
-          <Button variant="outline" onClick={() => void listings.refetch()}>
-            ลองใหม่
-          </Button>
-        </div>
+        <ErrorState
+          error={listings.error}
+          title="โหลดสินค้าลดราคาไม่สำเร็จ"
+          onRetry={() => void listings.refetch()}
+          className="min-h-60"
+        />
       ) : items.length === 0 ? (
-        <p className="rounded-xl border border-dashed p-10 text-center text-sm text-muted-foreground">
-          {sale && sale.status !== "ACTIVE" ? "แคมเปญนี้ยังไม่มีสินค้าที่ลดราคา" : "ไม่มีสินค้าที่ตรงกับตัวกรอง"}
-        </p>
+        <EmptyState
+          icon={Tag}
+          title={sale && sale.status !== "ACTIVE" ? "แคมเปญนี้ยังไม่มีสินค้าที่ลดราคา" : "ไม่มีสินค้าที่ตรงกับตัวกรอง"}
+          className="min-h-60 border-dashed"
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {items.map((listing) => (
@@ -208,14 +225,15 @@ export function SalePage() {
           {listings.hasNextPage ? (
             <>
               {" · "}
-              <button
-                type="button"
-                className="font-semibold hover:underline disabled:opacity-60"
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-[13px] font-semibold"
                 disabled={listings.isFetchingNextPage}
                 onClick={() => void listings.fetchNextPage()}
               >
                 {listings.isFetchingNextPage ? "กำลังโหลด…" : "โหลดเพิ่ม"}
-              </button>
+              </Button>
             </>
           ) : null}
         </p>
@@ -226,16 +244,48 @@ export function SalePage() {
 
 function TabLink({ to, active, children }: { to: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link
-      to={to}
-      aria-current={active ? "page" : undefined}
+    <Button
+      variant={active ? "default" : "outline"}
+      size="sm"
+      nativeButton={false}
+      render={<Link to={to} aria-current={active ? "page" : undefined} />}
       className={cn(
-        "inline-flex h-8 items-center rounded-full border bg-card px-3.5 text-[13px] whitespace-nowrap",
-        active && "border-foreground bg-foreground font-semibold text-background",
+        "h-8 rounded-full px-3.5 text-[13px] whitespace-nowrap",
+        active ? "bg-foreground font-semibold text-background hover:bg-foreground/90" : "bg-card font-normal",
       )}
     >
       {children}
-    </Link>
+    </Button>
+  );
+}
+
+/** dropdown กรองของแถบ filter — ค่า `ALL` = ไม่กรอง */
+function FilterSelect({
+  label,
+  items,
+  value,
+  onChange,
+}: {
+  label: string;
+  items: Array<{ value: string; label: string }>;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Select items={items} value={value} onValueChange={(next) => onChange(next ?? ALL)}>
+      <SelectTrigger aria-label={label} size="sm" className={cn(FILTER_TRIGGER, "min-w-32")}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -308,8 +358,9 @@ function PriceFilter({
   const active = min != null || max != null;
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={<button type="button" className={CHIP} aria-pressed={active} />}>
-        ราคา{active ? `: ${min ?? 0}–${max ?? "∞"}` : ""} ▾
+      <PopoverTrigger render={<Button variant="outline" size="sm" className={CHIP} aria-pressed={active} />}>
+        ราคา{active ? `: ${min ?? 0}–${max ?? "∞"}` : ""}
+        <ChevronDown data-icon="inline-end" />
       </PopoverTrigger>
       <PopoverContent align="start" className="grid w-64 gap-3 p-3">
         <div className="grid grid-cols-2 gap-2">

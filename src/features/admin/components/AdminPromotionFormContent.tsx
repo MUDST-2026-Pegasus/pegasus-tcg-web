@@ -3,6 +3,8 @@ import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
 import { Info, Lock, LogOut } from "lucide-react";
 
+import { DateTimePicker, EmptyState, ErrorState } from "@/components/common";
+import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,7 +22,9 @@ import { Field, FieldError, FieldLabel, FieldLegend, FieldSet } from "@/componen
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { RadioGroup } from "@/components/ui/radio-group";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { hasErrorCode } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +55,12 @@ import {
   ToggleRow,
 } from "./PromotionFormControls";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
+
+const SCOPE_OPTIONS: Array<{ value: AdminPromotionInput["scopeType"]; label: string }> = [
+  { value: "ALL", label: "ทุกเกม" },
+  { value: "GAME", label: "เลือกเกม" },
+  { value: "CATEGORY", label: "เลือกหมวดหมู่" },
+];
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminPromotionInput> = [
@@ -117,7 +127,7 @@ function emptyPromotion(): AdminPromotionInput {
   };
 }
 
-/** ISO → ค่าใน `<input type="datetime-local">` ตามเวลาเครื่อง */
+/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
 function toLocalInput(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
@@ -133,25 +143,23 @@ function fromLocalInput(value: string): string {
 /** หน้า /admin/promotions/new และ /:id/edit (Figma PRM-A2) */
 export function AdminPromotionFormContent({ id }: { id: number }) {
   const existing = usePromotion(id);
-  if (id > 0 && existing.isPending) return <p className="p-8 text-sm text-muted-foreground">กำลังโหลดโค้ด...</p>;
+  if (id > 0 && existing.isPending) return <FormPageSkeleton label="กำลังโหลดโค้ด" />;
   if (id > 0 && existing.isError) {
     return (
-      <p role="alert" className="p-8 text-sm text-destructive">
-        {promotionErrorMessage(existing.error, "โหลดโค้ดไม่สำเร็จ")}{" "}
-        <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void existing.refetch()}>
-          ลองอีกครั้ง
-        </Button>
-      </p>
+      <ErrorState
+        title="โหลดโค้ดไม่สำเร็จ"
+        fallbackMessage={promotionErrorMessage(existing.error, "กรุณาลองอีกครั้ง")}
+        onRetry={() => void existing.refetch()}
+      />
     );
   }
   if (existing.data?.ownerType === "SELLER") {
     return (
-      <div role="alert" className="grid gap-3 p-8 text-sm">
-        <p>โค้ดร้านค้าแก้ไขโดยแอดมินไม่ได้</p>
-        <Link className="text-primary underline" to="/admin/promotions">
+      <EmptyState icon={Lock} title="โค้ดร้านค้าแก้ไขโดยแอดมินไม่ได้">
+        <Button variant="outline" nativeButton={false} render={<Link to="/admin/promotions" />}>
           กลับไปรายการโปรโมชั่น
-        </Link>
-      </div>
+        </Button>
+      </EmptyState>
     );
   }
   return <PromotionEditor key={id || "new"} existing={existing.data} />;
@@ -477,22 +485,29 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
               <FormField field="scopeType" label="ใช้กับสินค้า">
-                <div className="flex flex-wrap gap-1.5" role="group" aria-label="ใช้กับสินค้า">
-                  {(["ALL", "GAME", "CATEGORY"] as const).map((value) => (
-                    <Button
-                      key={value}
-                      type="button"
-                      size="xs"
-                      variant="outline"
-                      className="h-auto rounded-full! px-2.5 py-[5px] text-[#414755] aria-pressed:border-primary aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
-                      aria-pressed={form.scopeType === value}
-                      disabled={locked("scopeType")}
-                      onClick={() => change("scopeType", value)}
+                <ToggleGroup
+                  aria-label="ใช้กับสินค้า"
+                  size="sm"
+                  variant="outline"
+                  spacing={1.5}
+                  disabled={locked("scopeType")}
+                  value={[form.scopeType]}
+                  onValueChange={(next: string[]) => {
+                    const value = next[0] as AdminPromotionInput["scopeType"] | undefined;
+                    if (value) change("scopeType", value);
+                  }}
+                  className="flex-wrap"
+                >
+                  {SCOPE_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="h-auto min-w-0 rounded-full px-2.5 py-[5px] text-xs text-[#414755] aria-pressed:border-primary aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                     >
-                      {value === "ALL" ? "ทุกเกม" : value === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่"}
-                    </Button>
+                      {option.label}
+                    </ToggleGroupItem>
                   ))}
-                </div>
+                </ToggleGroup>
               </FormField>
             </div>
             {form.scopeType !== "ALL" ? (
@@ -526,7 +541,12 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                     </Field>
                   );
                 })}
-                {scopeOptions.isPending ? <span className="text-xs text-muted-foreground">กำลังโหลดรายการ...</span> : null}
+                {scopeOptions.isPending ? (
+                  <span role="status" className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Spinner className="size-3.5" />
+                    กำลังโหลดรายการ...
+                  </span>
+                ) : null}
                 {scopeOptions.isError ? (
                   <FieldError className="text-[11px]">โหลดรายการไม่สำเร็จ</FieldError>
                 ) : null}
@@ -548,19 +568,15 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           <Section title="4. ระยะเวลาและจำนวนสิทธิ์">
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField field="startsAt" htmlFor="promotion-startsAt" label="เริ่มใช้ได้" required error={errors.startsAt}>
-                <InputGroup data-disabled={locked("startsAt") || undefined}>
-                  <InputGroupInput
-                    id="promotion-startsAt"
-                    aria-label="เริ่มใช้ได้"
-                    type="datetime-local"
-                    value={toLocalInput(form.startsAt)}
-                    disabled={locked("startsAt")}
-                    onChange={(event) =>
-                      change("startsAt", fromLocalInput(event.target.value))
-                    }
-                  />
-                  <LockedSuffix locked={locked("startsAt")} />
-                </InputGroup>
+                <DateTimePicker
+                  id="promotion-startsAt"
+                  aria-label="เริ่มใช้ได้"
+                  value={toLocalInput(form.startsAt)}
+                  disabled={locked("startsAt")}
+                  invalid={!!errors.startsAt}
+                  suffix={locked("startsAt") ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+                  onChange={(value) => change("startsAt", fromLocalInput(value))}
+                />
               </FormField>
               <FormField
                 field="endsAt"
@@ -570,16 +586,14 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 hint="ต้องหลังวันเริ่มใช้"
                 error={errors.endsAt}
               >
-                <Input
+                <DateTimePicker
                   id="promotion-endsAt"
                   aria-label="สิ้นสุด"
-                  aria-invalid={!!errors.endsAt || undefined}
-                  type="datetime-local"
+                  invalid={!!errors.endsAt}
+                  defaultTime="23:59"
                   value={toLocalInput(form.endsAt)}
-                  min={locks.used && existing ? toLocalInput(existing.endsAt) : undefined}
-                  onChange={(event) =>
-                    change("endsAt", fromLocalInput(event.target.value))
-                  }
+                  min={locks.used && existing ? toLocalInput(existing.endsAt) : toLocalInput(form.startsAt)}
+                  onChange={(value) => change("endsAt", fromLocalInput(value))}
                 />
               </FormField>
             </div>

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { CirclePlay, Pause, ShieldAlert, Trash2, TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
@@ -31,6 +32,7 @@ import { CheckRow } from "./PromotionFormControls";
 const SUMMARY_BOX = "grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-xs";
 const SUMMARY_ROW = "flex justify-between gap-3 text-muted-foreground [&>strong]:font-semibold [&>strong]:text-foreground";
 const INFO_BOX = "rounded-md bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]";
+const PAUSE_REASON_ITEMS = SELLER_PAUSE_REASONS.map((reason) => ({ value: reason, label: reason }));
 
 export type PromotionActionKind = "pause" | "resume" | "delete" | "blocked";
 export type PromotionActionState = { kind: PromotionActionKind; promotion: AdminPromotion };
@@ -194,27 +196,42 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
         </>
       }
     >
-      <label className="grid gap-1.5 text-xs font-medium">
-        เหตุผล *
-        <NativeSelect value={category} onChange={(event) => setCategory(event.target.value)} className="w-full">
-          <NativeSelectOption value="">เลือกเหตุผล</NativeSelectOption>
-          {SELLER_PAUSE_REASONS.map((reason) => (
-            <NativeSelectOption key={reason} value={reason}>
-              {reason}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-      </label>
-      <label className="grid gap-1.5 text-xs font-medium">
-        รายละเอียดถึงร้าน *
+      <Field className="gap-1.5">
+        <FieldLabel htmlFor="promotion-pause-reason" className="text-xs">
+          เหตุผล *
+        </FieldLabel>
+        <Select
+          items={PAUSE_REASON_ITEMS}
+          value={category || null}
+          onValueChange={(value) => setCategory(value ?? "")}
+        >
+          <SelectTrigger id="promotion-pause-reason" aria-label="เหตุผลที่หยุดโค้ด" className="w-full">
+            <SelectValue placeholder="เลือกเหตุผล" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {PAUSE_REASON_ITEMS.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field className="gap-1.5">
+        <FieldLabel htmlFor="promotion-pause-detail" className="text-xs">
+          รายละเอียดถึงร้าน *
+        </FieldLabel>
         <Textarea
+          id="promotion-pause-detail"
           className="min-h-16 text-sm"
           maxLength={230}
           placeholder="ระบุรายละเอียดที่ร้านจะได้รับ"
           value={detail}
           onChange={(event) => setDetail(event.target.value)}
         />
-      </label>
+      </Field>
       <CheckRow
         id="promotion-notify-paused"
         label="แจ้งร้านทางอีเมลและแจ้งเตือนในแอป"
@@ -343,16 +360,19 @@ function DeleteDialog({
         </>
       }
     >
-      <label className="grid gap-1.5 text-xs font-medium">
-        พิมพ์ {promotion.code} เพื่อยืนยัน
+      <Field className="gap-1.5">
+        <FieldLabel htmlFor="promotion-delete-confirm" className="text-xs">
+          พิมพ์ {promotion.code} เพื่อยืนยัน
+        </FieldLabel>
         <Input
+          id="promotion-delete-confirm"
           autoFocus
           autoComplete="off"
           placeholder={promotion.code}
           value={typed}
           onChange={(event) => setTyped(event.target.value)}
         />
-      </label>
+      </Field>
     </PromotionDialog>
   );
 }

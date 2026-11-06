@@ -12,9 +12,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { DateTimePicker } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
@@ -53,7 +55,7 @@ type Form = {
   discountValue: number | null;
 };
 
-/** ISO → ค่าใน `<input type="datetime-local">` ตามเวลาเครื่อง */
+/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
 function toLocalInput(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
@@ -298,22 +300,23 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
               </FormField>
               <div className="grid grid-cols-2 gap-2">
                 <FormField field="startsAt" htmlFor="seller-sale-start" label="เริ่ม" required>
-                  <Input
+                  <DateTimePicker
                     id="seller-sale-start"
                     aria-label="เริ่ม"
-                    type="datetime-local"
                     value={toLocalInput(form.startsAt)}
                     disabled={!!existing && existing.status !== "SCHEDULED"}
-                    onChange={(event) => event.target.value && change("startsAt", new Date(event.target.value).toISOString())}
+                    onChange={(value) => value && change("startsAt", new Date(value).toISOString())}
                   />
                 </FormField>
                 <FormField field="endsAt" htmlFor="seller-sale-end" label="สิ้นสุด" required error={formErrors.endsAt}>
-                  <Input
+                  <DateTimePicker
                     id="seller-sale-end"
                     aria-label="สิ้นสุด"
-                    type="datetime-local"
+                    invalid={!!formErrors.endsAt}
+                    defaultTime="23:59"
+                    min={toLocalInput(form.startsAt)}
                     value={toLocalInput(form.endsAt)}
-                    onChange={(event) => event.target.value && change("endsAt", new Date(event.target.value).toISOString())}
+                    onChange={(value) => value && change("endsAt", new Date(value).toISOString())}
                   />
                 </FormField>
               </div>
@@ -394,10 +397,13 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                       onChange={(event) => setQ(event.target.value)}
                     />
                   </InputGroup>
-                  <label className="flex items-center gap-2 text-[13px]">
-                    ตั้งทุกแถวที่เลือก:
+                  <Field orientation="horizontal" className="w-auto gap-2">
+                    <FieldLabel htmlFor="sale-bulk-percent" className="text-[13px] font-normal whitespace-nowrap">
+                      ตั้งทุกแถวที่เลือก:
+                    </FieldLabel>
                     <InputGroup className="w-[90px]">
                       <InputGroupInput
+                        id="sale-bulk-percent"
                         aria-label="เปอร์เซ็นต์ที่ลดทุกแถวที่เลือก"
                         type="number"
                         min={1}
@@ -409,7 +415,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                         <InputGroupText>%</InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>
-                  </label>
+                  </Field>
                   <Button
                     variant="outline"
                     disabled={bulkPercent == null || bulkPercent < 1 || bulkPercent > 90 || selectedRows.length === 0}

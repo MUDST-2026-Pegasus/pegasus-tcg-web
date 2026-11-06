@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,41 +25,52 @@ export function Segmented<T extends string>({
   disabled?: boolean;
 }) {
   return (
-    <div role="group" aria-label={label} className="flex w-fit max-w-full flex-wrap gap-1 rounded-[8px] bg-[#eef1f2] p-1">
+    <ToggleGroup
+      aria-label={label}
+      spacing={1}
+      disabled={disabled}
+      value={[value]}
+      onValueChange={(next: string[]) => {
+        if (next[0]) onChange(next[0] as T);
+      }}
+      className="max-w-full flex-wrap rounded-[8px] bg-[#eef1f2] p-1"
+    >
       {options.map((option) => (
-        <button
+        <ToggleGroupItem
           key={option.value}
-          type="button"
-          aria-pressed={value === option.value}
-          disabled={disabled}
-          onClick={() => onChange(option.value)}
+          value={option.value}
           className={cn(
-            "rounded-[6px] px-3 py-1.5 text-[13px] text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+            "h-auto min-w-0 rounded-[6px] px-3 py-1.5 text-[13px] font-normal text-muted-foreground hover:bg-card/60 disabled:opacity-60",
             "aria-pressed:bg-card aria-pressed:font-semibold aria-pressed:text-foreground aria-pressed:shadow-xs",
           )}
         >
           {option.label}
-        </button>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   );
 }
 
 /** ชิปที่เลือกแล้ว (ฟ้า + ×) */
 export function SelectedChip({ label, onRemove, disabled }: { label: string; onRemove: () => void; disabled?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#b9d4f0] bg-[#e8f1fc] py-1 pr-1.5 pl-3 text-[13px] text-[#0058bc]">
+    <Badge
+      variant="outline"
+      className="h-auto gap-1.5 border-[#b9d4f0] bg-[#e8f1fc] py-1 pr-1 pl-3 text-[13px] font-normal text-[#0058bc]"
+    >
       {label}
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label={`เอา ${label} ออก`}
         disabled={disabled}
         onClick={onRemove}
-        className="grid size-4 place-items-center rounded-full hover:bg-[#cfe0f7] disabled:opacity-50"
+        className="size-4 rounded-full text-[#0058bc] hover:bg-[#cfe0f7] hover:text-[#0058bc]"
       >
-        <X className="size-3" />
-      </button>
-    </span>
+        <X />
+      </Button>
+    </Badge>
   );
 }
 
@@ -132,16 +146,23 @@ export function ChipPicker({
           />
           <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
             {matches.map((option) => (
-              <button
+              <Button
                 key={option.id}
                 type="button"
-                className="rounded-full border px-2.5 py-1 text-xs text-[#414755] hover:border-primary hover:text-primary"
+                size="xs"
+                variant="outline"
+                className="h-auto rounded-full px-2.5 py-1 text-xs font-normal text-[#414755] hover:border-primary hover:text-primary"
                 onClick={() => onChange([...selected, option.id])}
               >
                 {option.label}
-              </button>
+              </Button>
             ))}
-            {loading ? <span className="text-xs text-muted-foreground">กำลังโหลด…</span> : null}
+            {loading ? (
+              <span role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Spinner className="size-3.5" />
+                กำลังโหลด…
+              </span>
+            ) : null}
             {!loading && matches.length === 0 ? (
               <span className="text-xs text-muted-foreground">
                 {onSearch && needle.length < 2 ? "พิมพ์อย่างน้อย 2 ตัวอักษร" : "ไม่พบรายการ"}
@@ -170,26 +191,29 @@ export function ToggleChips<T extends string>({
   disabled?: boolean;
 }) {
   return (
-    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
-      {options.map((option) => {
-        const on = selected.includes(option.value);
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={on}
-            disabled={disabled}
-            onClick={() => onChange(on ? selected.filter((value) => value !== option.value) : [...selected, option.value])}
-            className={cn(
-              "rounded-full border px-3 py-1 text-[13px] text-[#414755] disabled:cursor-not-allowed disabled:opacity-60",
-              "aria-pressed:border-[#b9d4f0] aria-pressed:bg-[#e8f1fc] aria-pressed:text-[#0058bc]",
-            )}
-          >
-            {option.label}
-            {on ? " ×" : ""}
-          </button>
-        );
-      })}
-    </div>
+    <ToggleGroup
+      aria-label={label}
+      multiple
+      spacing={2}
+      disabled={disabled}
+      value={selected}
+      onValueChange={(next: string[]) => onChange(next as T[])}
+      className="flex-wrap"
+    >
+      {options.map((option) => (
+        <ToggleGroupItem
+          key={option.value}
+          value={option.value}
+          variant="outline"
+          className={cn(
+            "h-auto min-w-0 rounded-full px-3 py-1 text-[13px] font-normal text-[#414755] disabled:opacity-60",
+            "aria-pressed:border-[#b9d4f0] aria-pressed:bg-[#e8f1fc] aria-pressed:text-[#0058bc]",
+          )}
+        >
+          {option.label}
+          {selected.includes(option.value) ? <X aria-hidden className="size-3" /> : null}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 }

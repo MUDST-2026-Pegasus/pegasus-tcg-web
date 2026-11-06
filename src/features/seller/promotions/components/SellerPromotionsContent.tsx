@@ -14,7 +14,7 @@ import { SellerPromotionCard, type PromotionAction } from "./SellerPromotionCard
 import { SellerPromotionActionDialog } from "./SellerPromotionActionDialog";
 import { SellerPromotionForm } from "./SellerPromotionFormDialog";
 import { SellerRedemptionSheet } from "./SellerRedemptionSheet";
-import { SellerPromotionPagination } from "./SellerPromotionPagination";
+import { PromotionPagination } from "@/features/promotions/PromotionPagination";
 
 const tabs: Array<[PromotionStatus | "ALL", string]> = [
   ["ALL", "ทั้งหมด"], ["ACTIVE", "ใช้งานอยู่"], ["SCHEDULED", "ตั้งเวลาไว้"],
@@ -82,7 +82,7 @@ export function SellerPromotionsContent({
                   onRedemptions={() => { setRedemptionPage(0); setRedemptionCode(code); }} />
               ))}
             </div>
-            <SellerPromotionPagination page={page} totalPages={data.page.totalPages}
+            <PromotionPagination page={page} totalPages={data.page.totalPages}
               onPageChange={onPageChange} label="หน้ารายการโค้ด" />
           </>
         )}

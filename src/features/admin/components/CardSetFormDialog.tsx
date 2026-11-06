@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
+import { DateTimePicker } from "@/components/common";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -163,11 +164,21 @@ function CardSetForm({
 
           <Field data-invalid={Boolean(errors.releaseDate) || undefined}>
             <FieldLabel htmlFor="setRelease">วันวางจำหน่าย</FieldLabel>
-            <Input
-              id="setRelease"
-              type="date"
-              aria-invalid={Boolean(errors.releaseDate)}
-              {...register("releaseDate")}
+            <Controller
+              control={control}
+              name="releaseDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  id="setRelease"
+                  mode="date"
+                  invalid={Boolean(errors.releaseDate)}
+                  value={field.value ?? ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    field.onBlur();
+                  }}
+                />
+              )}
             />
             <FieldDescription className="text-xs">
               ใส่วันในอนาคตได้

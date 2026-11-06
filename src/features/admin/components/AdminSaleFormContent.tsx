@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
 import { CalendarClock, Check, Info, Lock, LogOut } from "lucide-react";
 
-import { FileUpload } from "@/components/common";
+import { DateTimePicker, FileUpload } from "@/components/common";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Breadcrumb,
@@ -94,7 +94,7 @@ function emptySale(): AdminSaleInput {
   };
 }
 
-/** ISO → ค่าใน `<input type="datetime-local">` ตามเวลาเครื่อง */
+/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
 function toLocalInput(value: string): string {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "";
@@ -288,7 +288,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
   const lockNote = "แก้ไขหลังมีออเดอร์: ได้เฉพาะชื่อ, วันจบ, งบ (เพิ่ม), โควตา (เพิ่ม), หยุด/จบทันที";
 
   return (
-    <main className={cn("grid w-full max-w-[1100px] gap-6", PROMOTION_PAGE_CONTROLS)}>
+    <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <div className="grid gap-4">
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
@@ -321,7 +321,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         </Alert>
       ) : null}
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid min-w-0 gap-4">
           <Section title="1. ประเภทแคมเปญ">
             <RadioGroup
@@ -537,19 +537,15 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField field="startsAt" htmlFor="sale-startsAt" label="เริ่ม" required error={errors.startsAt}>
-                <InputGroup data-disabled={locked("startsAt") || undefined}>
-                  <InputGroupInput
-                    id="sale-startsAt"
-                    aria-label="เริ่ม"
-                    type="datetime-local"
-                    value={toLocalInput(form.startsAt)}
-                    disabled={locked("startsAt")}
-                    onChange={(event) =>
-                      change("startsAt", event.target.value ? new Date(event.target.value).toISOString() : "")
-                    }
-                  />
-                  <LockedSuffix locked={locked("startsAt")} />
-                </InputGroup>
+                <DateTimePicker
+                  id="sale-startsAt"
+                  aria-label="เริ่ม"
+                  value={toLocalInput(form.startsAt)}
+                  disabled={locked("startsAt")}
+                  invalid={!!errors.startsAt}
+                  suffix={locked("startsAt") ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+                  onChange={(value) => change("startsAt", value ? new Date(value).toISOString() : "")}
+                />
               </FormField>
               <FormField
                 field="endsAt"
@@ -559,15 +555,14 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 hint={durationLabel(form.startsAt, form.endsAt) || "ต้องหลังวันเริ่ม"}
                 error={errors.endsAt}
               >
-                <Input
+                <DateTimePicker
                   id="sale-endsAt"
                   aria-label="สิ้นสุด"
-                  aria-invalid={!!errors.endsAt || undefined}
-                  type="datetime-local"
+                  invalid={!!errors.endsAt}
+                  defaultTime="23:59"
+                  min={toLocalInput(form.startsAt)}
                   value={toLocalInput(form.endsAt)}
-                  onChange={(event) =>
-                    change("endsAt", event.target.value ? new Date(event.target.value).toISOString() : "")
-                  }
+                  onChange={(value) => change("endsAt", value ? new Date(value).toISOString() : "")}
                 />
               </FormField>
             </div>
