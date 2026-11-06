@@ -1,7 +1,9 @@
 import { FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const sections = [
+type TermsSection = { id: string; title: string; content: string; rules?: string[] };
+
+const sections: TermsSection[] = [
   {
     id: "01",
     title: "Introduction",
@@ -29,6 +31,20 @@ const sections = [
   },
   {
     id: "06",
+    title: "การประมูล",
+    content: "กติกาการประมูลการ์ดบน PEGASUS:",
+    // กติกาจาก Epic TCG-612 [TCG-636]
+    rules: [
+      "บิดแล้วถอนไม่ได้ — ระบบให้ยืนยันก่อนบิดทุกครั้ง",
+      "ต่อเวลา: มีคนบิดใน 2 นาทีสุดท้าย เวลาจะกลับเป็น 2 นาที ต่อได้ไม่จำกัด",
+      "ซื้อทันที: ผู้ขายเปิดหรือแก้ราคาได้จนกว่าจะมีบิดแรก แล้วปุ่มซื้อทันทีจะหายไป",
+      "ผู้ชนะต้องชำระเงินภายใน 24 ชม. ผ่านหน้าชำระเงินปกติ ราคาล็อกตามที่ชนะ",
+      "ไม่ชำระภายในเวลา = ยกเลิกคำสั่งซื้อและยกเลิกประมูล การ์ดกลับเข้าสต็อกผู้ขาย และบันทึกโทษไม่ชำระ 1 ครั้ง",
+      "ไม่ชำระครบ 3 ครั้ง ห้ามบิด 30 วัน (ยังซื้อสินค้าปกติได้)",
+    ],
+  },
+  {
+    id: "07",
     title: "Limitation of Liability",
     content: "PEGASUS is not liable for indirect, incidental, or consequential damages arising from use of our services or products purchased through the platform.",
   },
@@ -143,6 +159,13 @@ export function TermsOfServicePage() {
                   <p className="mt-4 leading-relaxed text-muted-foreground">
                     {section.content}
                   </p>
+                  {section.rules ? (
+                    <ol className="mt-3 list-decimal space-y-1.5 pl-5 leading-relaxed text-muted-foreground">
+                      {section.rules.map((rule) => (
+                        <li key={rule}>{rule}</li>
+                      ))}
+                    </ol>
+                  ) : null}
                   {index < sections.length - 1 && (
                     <hr className="mt-10 border-border/60" />
                   )}

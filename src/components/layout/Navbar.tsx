@@ -7,6 +7,7 @@ import {
   SearchIcon,
   ShoppingCartIcon,
   SparklesIcon,
+  GavelIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react";
@@ -123,6 +124,13 @@ export function Navbar() {
       to: "/search?sort=newest",
       active: isSearch && !currentGame && newest,
       icon: SparklesIcon,
+    },
+    // ระบบประมูล [TCG-636]
+    {
+      label: "Auction",
+      to: "/auctions",
+      active: location.pathname.startsWith("/auctions"),
+      icon: GavelIcon,
     },
     // Sale pill shows only while a sale campaign is live [TCG-683]
     ...(sales && sales.length > 0
