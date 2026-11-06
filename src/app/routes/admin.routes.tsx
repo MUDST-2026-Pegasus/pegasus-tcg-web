@@ -19,9 +19,9 @@ const AdminPaymentsPage = lazyPage(() => import("@/features/admin/pages/AdminPay
 const AdminRefundsPage = lazyPage(() => import("@/features/admin/pages/AdminRefundsPage").then((m) => m.AdminRefundsPage), pageSkeleton);
 const AdminPayoutsPage = lazyPage(() => import("@/features/admin/pages/AdminPayoutsPage").then((m) => m.AdminPayoutsPage), pageSkeleton);
 const AdminReviewsPage = lazyPage(() => import("@/features/admin/pages/AdminReviewsPage").then((m) => m.AdminReviewsPage), pageSkeleton);
-const AdminAuctionsPage = lazyPage(() => import("@/features/auction/pages/AdminAuctionsPage").then((m) => m.AdminAuctionsPage), pageSkeleton);
-const AdminAuctionDetailPage = lazyPage(() => import("@/features/auction/pages/AdminAuctionDetailPage").then((m) => m.AdminAuctionDetailPage), pageSkeleton);
-const AdminBannedBiddersPage = lazyPage(() => import("@/features/auction/pages/AdminBannedBiddersPage").then((m) => m.AdminBannedBiddersPage), pageSkeleton);
+const AdminAuctionsPage = lazyPage(() => import("@/features/admin/auctions/AdminAuctionsPage").then((m) => m.AdminAuctionsPage), pageSkeleton);
+const AdminAuctionDetailPage = lazyPage(() => import("@/features/admin/auctions/AdminAuctionDetailPage").then((m) => m.AdminAuctionDetailPage), pageSkeleton);
+const AdminBannedBiddersPage = lazyPage(() => import("@/features/admin/auctions/AdminBannedBiddersPage").then((m) => m.AdminBannedBiddersPage), pageSkeleton);
 const AdminActivityLogPage = lazyPage(() => import("@/features/admin/pages/AdminActivityLogPage").then((m) => m.AdminActivityLogPage), pageSkeleton);
 const AdminPromotionsPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionsPage").then((m) => m.AdminPromotionsPage), pageSkeleton);
 const AdminPromotionFormPage = lazyPage(() => import("@/features/admin/pages/AdminPromotionFormPage").then((m) => m.AdminPromotionFormPage), pageSkeleton);
