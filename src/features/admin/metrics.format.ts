@@ -60,8 +60,12 @@ export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
     return value === 0 ? null : { label: "ใหม่", trend: "new" };
   }
-  const change = ((value - previous) / previous) * 100;
-  const rounded = Math.round(change * 10) / 10;
+  return percentDelta(((value - previous) / previous) * 100);
+}
+
+/** % ที่คำนวณไว้แล้ว → ป้ายบนการ์ด: ขึ้นเขียว ลงแดง ศูนย์เป็นเทา */
+export function percentDelta(percent: number): Delta {
+  const rounded = Number.isFinite(percent) ? Math.round(percent * 10) / 10 : 0;
   if (rounded === 0) {
     return { label: "0.0%", trend: "flat" };
   }
