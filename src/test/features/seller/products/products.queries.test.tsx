@@ -16,7 +16,7 @@ import {
   useDeleteListing,
 } from "@/features/seller/products/products.queries";
 import type { SellerListing } from "@/features/seller/products/products.types";
-import { useRestockListing } from "@/features/seller/products/restock.queries";
+import { stockForecastKeys, useRestockListing } from "@/features/seller/products/restock.queries";
 import { createTestQueryClient } from "@/test/utils";
 
 vi.mock("@/features/seller/products/products.api", () => ({
@@ -130,4 +130,13 @@ describe("after a seller changes a listing", () => {
     // ตารางสินค้าต้องดึงใหม่เหมือนเดิม
     expect(isStale(listingKeys.list({ page: 0, size: 20 }))).toBe(true);
   });
+});
+
+it("refreshes the listing forecast after restocking", async () => {
+  queryClient.setQueryData(stockForecastKeys.detail(7), { availableStock: 2 });
+  const { result } = renderHook(() => useRestockListing(), { wrapper });
+
+  await result.current.mutateAsync({ id: 7, payload: units });
+
+  expect(isStale(stockForecastKeys.detail(7))).toBe(true);
 });
