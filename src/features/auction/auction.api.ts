@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 
 import {
   ADMIN_AUCTION_DETAIL_FIXTURE,
+  ADMIN_AUCTION_DETAIL_FIXTURES,
   ADMIN_AUCTION_PAGE_FIXTURE,
   AUCTION_DETAIL_FIXTURES,
   AUCTION_PAGE_FIXTURE,
@@ -14,7 +15,7 @@ import {
   SELLER_AUCTION_DETAIL_FIXTURES,
   SELLER_AUCTION_PAGE_FIXTURE,
 } from "./auction.fixture";
-import { matchesMyAuctionTab } from "./auction.format";
+import { banTabOf, matchesAdminAuctionTab, matchesMyAuctionTab } from "./auction.format";
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,
@@ -324,21 +325,38 @@ export function cancelAuction(id: number): Promise<SellerAuctionDetail> {
 export type AdminAuctionListParams = { tab?: AdminAuctionTab; q?: string; page?: number; size?: number };
 
 export function getAdminAuctions(params: AdminAuctionListParams = {}): Promise<AdminAuctionPage> {
-  if (AUCTION_MOCK.admin) return mock(ADMIN_AUCTION_PAGE_FIXTURE);
+  if (AUCTION_MOCK.admin) {
+    // mock กรองแท็บ + ค้นชื่อการ์ด/ร้าน/รหัสประมูล ตัวนับในแท็บยังเป็นเลขตาม Figma
+    const fixture = ADMIN_AUCTION_PAGE_FIXTURE;
+    const q = params.q?.trim().toLowerCase();
+    const items = fixture.page.items.filter(
+      (row) =>
+        matchesAdminAuctionTab(params.tab ?? "ALL", row) &&
+        (!q || [row.cardName, row.shopName, row.sellerUsername, row.auctionNumber].some((field) => field.toLowerCase().includes(q))),
+    );
+    const filtered = items.length !== fixture.page.items.length;
+    return mock({
+      ...fixture,
+      page: filtered ? { ...fixture.page, items, totalItems: items.length, totalPages: items.length ? 1 : 0 } : fixture.page,
+      serverTime: nowIso(),
+    });
+  }
   return api.get<AdminAuctionPage>("/admin/auctions", { query: params });
 }
 
 export function getAdminAuction(id: number): Promise<AdminAuctionDetail> {
-  if (AUCTION_MOCK.admin) return mock({ ...ADMIN_AUCTION_DETAIL_FIXTURE, id });
+  if (AUCTION_MOCK.admin) return mock(ADMIN_AUCTION_DETAIL_FIXTURES[id] ?? { ...ADMIN_AUCTION_DETAIL_FIXTURE, id });
   return api.get<AdminAuctionDetail>(`/admin/auctions/${id}`);
 }
 
 export function suspendAuction(id: number, payload: SuspendAuctionRequest): Promise<AdminAuctionDetail> {
   if (AUCTION_MOCK.admin) {
+    const base = ADMIN_AUCTION_DETAIL_FIXTURES[id] ?? { ...ADMIN_AUCTION_DETAIL_FIXTURE, id };
     return mock({
-      ...ADMIN_AUCTION_DETAIL_FIXTURE,
-      id,
+      ...base,
       status: "SUSPENDED",
+      // ระงับแล้วบิดทั้งหมดถูกยกเลิก
+      bids: base.bids.map((bid) => ({ ...bid, status: "CANCELLED" as const })),
       actions: [{ action: "SUSPEND", adminName: "admin", reason: payload.reason, at: nowIso() }],
       serverTime: nowIso(),
     });
@@ -349,7 +367,16 @@ export function suspendAuction(id: number, payload: SuspendAuctionRequest): Prom
 export type BannedBidderParams = { tab?: BanTab; q?: string; page?: number; size?: number };
 
 export function getBannedBidders(params: BannedBidderParams = {}): Promise<BannedBidderPage> {
-  if (AUCTION_MOCK.admin) return mock(BANNED_BIDDER_PAGE_FIXTURE);
+  if (AUCTION_MOCK.admin) {
+    const fixture = BANNED_BIDDER_PAGE_FIXTURE;
+    const q = params.q?.trim().toLowerCase();
+    const items = fixture.page.items.filter(
+      (b) =>
+        banTabOf(b) === (params.tab ?? "BANNED") &&
+        (!q || b.username.toLowerCase().includes(q) || b.maskedEmail.toLowerCase().includes(q)),
+    );
+    return mock({ ...fixture, page: { ...fixture.page, items, totalItems: items.length, totalPages: items.length ? 1 : 0 } });
+  }
   return api.get<BannedBidderPage>("/admin/auctions/banned-bidders", { query: params });
 }
 

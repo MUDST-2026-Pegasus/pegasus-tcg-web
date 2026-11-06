@@ -1,6 +1,7 @@
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,
+  AdminAuctionRow,
   AuctionBid,
   AuctionDetail,
   AuctionItem,
@@ -593,27 +594,27 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
 
 // ---------- แอดมิน ----------
 
+const ADMIN_ROWS: AdminAuctionRow[] = [
+  { id: 139, auctionNumber: "AUC-2026-0139", cardName: "Rayquaza VMAX Alt Art", cardImageUrl: I.rayquaza.card.officialImageUrl, shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 21500, bidCount: 41, bidderCount: 9, status: "LIVE", endsAt: at(2 * MINUTE), deadline: null, signals: ["NEW_ACCOUNT_RAPID_BIDS", "SHARED_ADDRESS_WITH_SELLER"], reportCount: 0, suspendedAt: null },
+  { id: 142, auctionNumber: "AUC-2026-0142", cardName: "Charizard VMAX #020", cardImageUrl: I.charizard.card.officialImageUrl, shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 8450, bidCount: 12, bidderCount: 7, status: "AWAITING_PAYMENT", endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 41 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
+  { id: 155, auctionNumber: "AUC-2026-0155", cardName: "Pikachu Illustrator", cardImageUrl: I.pikachu.card.officialImageUrl, shopName: "newshop_99", sellerUsername: "newshop_99", currentPrice: 2000, bidCount: 0, bidderCount: 0, status: "LIVE", endsAt: at(6 * DAY), deadline: null, signals: ["REPORTED"], reportCount: 3, suspendedAt: null },
+  { id: 151, auctionNumber: "AUC-2026-0151", cardName: "Umbreon VMAX Alt Art", cardImageUrl: I.umbreon.card.officialImageUrl, shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 15200, bidCount: 27, bidderCount: 11, status: "LIVE", endsAt: at(18 * HOUR + 4 * MINUTE), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
+  { id: 133, auctionNumber: "AUC-2026-0133", cardName: "Mewtwo GX Rainbow", cardImageUrl: I.mewtwo.card.officialImageUrl, shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 4200, bidCount: 18, bidderCount: 6, status: "SOLD", endsAt: at(-4 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
+  { id: 98, auctionNumber: "AUC-2026-0098", cardName: "Gengar VMAX Alt Art", cardImageUrl: I.gengar.card.officialImageUrl, shopName: "fakecards_th", sellerUsername: "fakecards_th", currentPrice: 6000, bidCount: 3, bidderCount: 2, status: "SUSPENDED", endsAt: at(-6 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: at(-6 * DAY) },
+];
+
+/** ตาราง A1 — api กรองตามแท็บ/คำค้นจากรายการนี้ ตัวนับยังเป็นเลขตาม Figma */
 export const ADMIN_AUCTION_PAGE_FIXTURE: AdminAuctionPage = {
-  page: {
-    items: [
-      { id: 139, auctionNumber: "AUC-2026-0139", cardName: "Rayquaza VMAX Alt Art", shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 21500, bidCount: 41, bidderCount: 9, status: "LIVE", endsAt: at(2 * MINUTE), deadline: null, signals: ["NEW_ACCOUNT_RAPID_BIDS", "SHARED_ADDRESS_WITH_SELLER"], reportCount: 0, suspendedAt: null },
-      { id: 142, auctionNumber: "AUC-2026-0142", cardName: "Charizard VMAX #020", shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 8450, bidCount: 12, bidderCount: 7, status: "AWAITING_PAYMENT", endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 41 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
-      { id: 155, auctionNumber: "AUC-2026-0155", cardName: "Pikachu Illustrator", shopName: "newshop_99", sellerUsername: "newshop_99", currentPrice: 2000, bidCount: 0, bidderCount: 0, status: "LIVE", endsAt: at(2 * DAY), deadline: null, signals: ["REPORTED"], reportCount: 3, suspendedAt: null },
-      { id: 151, auctionNumber: "AUC-2026-0151", cardName: "Umbreon VMAX Alt Art", shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 15200, bidCount: 27, bidderCount: 11, status: "LIVE", endsAt: at(1 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
-      { id: 98, auctionNumber: "AUC-2026-0098", cardName: "Gengar VMAX Alt Art", shopName: "fakecards_th", sellerUsername: "fakecards_th", currentPrice: 6000, bidCount: 3, bidderCount: 2, status: "SUSPENDED", endsAt: at(-6 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: at(-6 * DAY) },
-    ],
-    page: 0,
-    size: 20,
-    totalItems: 1204,
-    totalPages: 61,
-  },
-  tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 12, ENDED: 1050, SUSPENDED: 2 },
+  page: { items: ADMIN_ROWS, page: 0, size: 20, totalItems: 1204, totalPages: 61 },
+  tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 9, ENDED: 1050, SUSPENDED: 14 },
   kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, suspendedLast30Days: 2, soldLast30Days: 486200 },
   flaggedCount: 2,
+  reportedCount: 1,
+  suspiciousCount: 1,
   serverTime: serverTime(),
 };
 
-export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = {
+const RAYQUAZA_ADMIN: AdminAuctionDetail = {
   id: 139,
   auctionNumber: "AUC-2026-0139",
   status: "LIVE",
@@ -646,6 +647,99 @@ export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = {
   serverTime: serverTime(),
 };
 
+/** ใบที่ไม่มีใน `ADMIN_AUCTION_DETAIL_FIXTURES` ใช้ใบนี้ */
+export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = RAYQUAZA_ADMIN;
+
+/** รายละเอียด A3 แยกตาม id ตรงกับแถวในตาราง A1 [TCG-635] */
+export const ADMIN_AUCTION_DETAIL_FIXTURES: Record<number, AdminAuctionDetail> = {
+  139: RAYQUAZA_ADMIN,
+  // ถูกรายงาน ยังไม่มีบิด
+  155: {
+    ...RAYQUAZA_ADMIN,
+    id: 155,
+    auctionNumber: "AUC-2026-0155",
+    item: I.pikachu,
+    seller: { sellerProfileId: 31, shopName: "newshop_99", username: "newshop_99", verified: false, auctionCount: 2, suspensionCount: 0 },
+    startingPrice: 2000,
+    currentPrice: 2000,
+    bidCount: 0,
+    bidderCount: 0,
+    originalEndsAt: at(6 * DAY),
+    endsAt: at(6 * DAY),
+    extensionCount: 0,
+    sellerNote: null,
+    sellerNoteUpdatedAt: null,
+    signals: [{ signal: "REPORTED", message: "ผู้ใช้ 3 คนรายงานว่าการ์ดในรูปอาจเป็นของปลอม" }],
+    reportCount: 3,
+    bids: [],
+  },
+  // จบแล้ว รอผู้ชนะชำระ
+  142: {
+    ...RAYQUAZA_ADMIN,
+    id: 142,
+    auctionNumber: "AUC-2026-0142",
+    status: "AWAITING_PAYMENT",
+    item: I.charizard,
+    seller: { sellerProfileId: 5, shopName: "CardVault BKK", username: "cardvault_bkk", verified: true, auctionCount: 48, suspensionCount: 0 },
+    startingPrice: 2000,
+    currentPrice: 8450,
+    bidCount: 12,
+    bidderCount: 7,
+    buyNowPrice: 12000,
+    originalEndsAt: at(-1 * HOUR),
+    endsAt: at(-20 * MINUTE),
+    extensionCount: 3,
+    signals: [],
+    bids: [
+      { bidId: 7012, userId: 7, username: "somchai.j", memberSince: at(-365 * DAY), orderCount: 23, amount: 8450, placedAt: at(-22 * MINUTE), status: "ACTIVE", signals: [] },
+      { bidId: 7011, userId: 303, username: "mina.k", memberSince: at(-730 * DAY), orderCount: 61, amount: 8300, placedAt: at(-24 * MINUTE), status: "ACTIVE", signals: [] },
+    ],
+  },
+  // ไม่มีสัญญาณ
+  151: {
+    ...RAYQUAZA_ADMIN,
+    id: 151,
+    auctionNumber: "AUC-2026-0151",
+    item: I.umbreon,
+    currentPrice: 15200,
+    bidCount: 27,
+    bidderCount: 11,
+    originalEndsAt: at(18 * HOUR + 4 * MINUTE),
+    endsAt: at(18 * HOUR + 4 * MINUTE),
+    extensionCount: 0,
+    signals: [],
+    bids: [
+      { bidId: 6027, userId: 303, username: "mina.k", memberSince: at(-730 * DAY), orderCount: 61, amount: 15200, placedAt: at(-2 * HOUR), status: "ACTIVE", signals: [] },
+      { bidId: 6026, userId: 7, username: "somchai.j", memberSince: at(-365 * DAY), orderCount: 23, amount: 15000, placedAt: at(-3 * HOUR), status: "ACTIVE", signals: [] },
+    ],
+  },
+  // ถูกระงับ — บิดทั้งหมดถูกยกเลิก เหตุผลอยู่ในบันทึกของแอดมิน
+  98: {
+    ...RAYQUAZA_ADMIN,
+    id: 98,
+    auctionNumber: "AUC-2026-0098",
+    status: "SUSPENDED",
+    item: I.gengar,
+    seller: { sellerProfileId: 44, shopName: "fakecards_th", username: "fakecards_th", verified: true, auctionCount: 6, suspensionCount: 1 },
+    startingPrice: 3000,
+    currentPrice: 6000,
+    bidCount: 3,
+    bidderCount: 2,
+    originalEndsAt: at(-5 * DAY),
+    endsAt: at(-6 * DAY),
+    extensionCount: 0,
+    sellerNote: null,
+    sellerNoteUpdatedAt: null,
+    signals: [{ signal: "REPORTED", message: "ผู้ซื้อ 2 คนรายงานว่ารูปการ์ดคัดลอกมาจากร้านอื่น" }],
+    reportCount: 2,
+    bids: [
+      { bidId: 5003, userId: 304, username: "pond.p", memberSince: at(-90 * DAY), orderCount: 5, amount: 6000, placedAt: at(-6 * DAY - HOUR), status: "CANCELLED", signals: [] },
+      { bidId: 5002, userId: 305, username: "beam.t", memberSince: at(-400 * DAY), orderCount: 12, amount: 5500, placedAt: at(-6 * DAY - 2 * HOUR), status: "CANCELLED", signals: [] },
+    ],
+    actions: [{ action: "SUSPEND", adminName: "admin", reason: "รูปการ์ดคัดลอกจากร้านอื่น ผู้ขายไม่มีการ์ดใบนี้จริง", at: at(-6 * DAY) }],
+  },
+};
+
 const KANOK: BannedBidder = {
   userId: 401,
   username: "kanok.a",
@@ -662,18 +756,26 @@ const KANOK: BannedBidder = {
   ],
 };
 
+/** A4 ทุกแท็บรวมกัน — api แยกแท็บด้วย `matchesBanTab` ตัวนับยังเป็นเลขตาม Figma */
 export const BANNED_BIDDER_PAGE_FIXTURE: BannedBidderPage = {
   page: {
     items: [
+      // ห้ามบิดอยู่
       KANOK,
       { ...KANOK, userId: 402, username: "bid_master99", maskedEmail: "b***9@hotmail.com", memberSince: at(-30 * DAY), bannedUntil: at(26 * DAY), strikes: [{ auctionId: 114, auctionNumber: "AUC-2026-0114", at: at(-4 * DAY) }] },
       { ...KANOK, userId: 403, username: "pon.tcg", maskedEmail: "p***g@gmail.com", memberSince: at(-730 * DAY), bannedUntil: at(20 * DAY), strikes: [{ auctionId: 103, auctionNumber: "AUC-2026-0103", at: at(-10 * DAY) }] },
       { ...KANOK, userId: 404, username: "newbie_th", maskedEmail: "n***h@yahoo.com", memberSince: at(-14 * DAY), bannedUntil: at(17 * DAY), strikes: [{ auctionId: 99, auctionNumber: "AUC-2026-0099", at: at(-13 * DAY) }] },
       { ...KANOK, userId: 405, username: "collector.b", maskedEmail: "c***b@gmail.com", memberSince: at(-365 * DAY), bannedUntil: at(9 * DAY), strikes: [{ auctionId: 88, auctionNumber: "AUC-2026-0088", at: at(-21 * DAY) }] },
+      // ใกล้ถูกห้าม (2/3)
+      { ...KANOK, userId: 406, username: "jay.collect", maskedEmail: "j***t@gmail.com", memberSince: at(-120 * DAY), strikeCount: 2, bannedUntil: null, strikes: [{ auctionId: 118, auctionNumber: "AUC-2026-0118", at: at(-2 * DAY) }, { auctionId: 97, auctionNumber: "AUC-2026-0097", at: at(-15 * DAY) }] },
+      { ...KANOK, userId: 407, username: "mook.tcg", maskedEmail: "m***g@hotmail.com", memberSince: at(-60 * DAY), strikeCount: 2, bannedUntil: null, strikes: [{ auctionId: 116, auctionNumber: "AUC-2026-0116", at: at(-3 * DAY) }, { auctionId: 105, auctionNumber: "AUC-2026-0105", at: at(-9 * DAY) }] },
+      // ประวัติ: แอดมินยกเลิกโทษแล้ว / พ้นโทษแล้ว
+      { ...KANOK, userId: 408, username: "aom.s", maskedEmail: "a***s@gmail.com", memberSince: at(-500 * DAY), strikeCount: 0, bannedUntil: at(12 * DAY), liftedAt: at(-3 * DAY), strikes: [{ auctionId: 92, auctionNumber: "AUC-2026-0092", at: at(-20 * DAY) }] },
+      { ...KANOK, userId: 409, username: "tee.k", maskedEmail: "t***k@yahoo.com", memberSince: at(-300 * DAY), strikeCount: 0, bannedUntil: at(-5 * DAY), strikes: [{ auctionId: 71, auctionNumber: "AUC-2026-0071", at: at(-36 * DAY) }] },
     ],
     page: 0,
     size: 20,
-    totalItems: 5,
+    totalItems: 9,
     totalPages: 1,
   },
   tabCounts: { BANNED: 5, AT_RISK: 12, HISTORY: 41 },

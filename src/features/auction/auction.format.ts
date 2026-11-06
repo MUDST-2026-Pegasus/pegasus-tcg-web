@@ -1,7 +1,7 @@
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import type { AuctionStatus, AuctionSummary, AuctionViewerState, MyAuctionTab } from "./auction.types";
+import type { AdminAuctionRow, AdminAuctionTab, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
 
 /**
  * ตัวช่วยแปลงค่าดิบของระบบประมูล → ข้อความบนหน้าจอ [TCG-627 · FE-1]
@@ -287,6 +287,35 @@ export function priceLabel(bidCount: number): string {
 /** "12 บิด" */
 export function formatBidCount(count: number): string {
   return `${count.toLocaleString("th-TH")} บิด`;
+}
+
+// ---------- แอดมิน [TCG-635] ----------
+
+/** แถว A1 อยู่ในแท็บไหน — ใช้ทั้ง mock และหน้า */
+export function matchesAdminAuctionTab(tab: AdminAuctionTab, row: AdminAuctionRow): boolean {
+  switch (tab) {
+    case "ALL":
+      return true;
+    case "FLAGGED":
+      return row.signals.length > 0;
+    case "LIVE":
+    case "AWAITING_PAYMENT":
+    case "SUSPENDED":
+      return row.status === tab;
+    case "ENDED":
+      return row.status === "SOLD" || row.status === "UNSOLD" || row.status === "CANCELLED";
+  }
+}
+
+/**
+ * ผู้ใช้ A4 อยู่แท็บไหน — ห้ามบิดอยู่ / ใกล้ถูกห้าม (ขาดอีกครั้งเดียว) / ประวัติ (ยกเลิกโทษหรือพ้นโทษแล้ว)
+ * `null` = ไม่อยู่ในหน้านี้ (ไม่ชำระครั้งเดียว)
+ */
+export function banTabOf(bidder: BannedBidder, now: number = Date.now()): BanTab | null {
+  if (bidder.liftedAt !== null) return "HISTORY";
+  if (isBiddingBanned(bidder.bannedUntil, now)) return "BANNED";
+  if (bidder.bannedUntil !== null) return "HISTORY";
+  return bidder.strikeCount >= bidder.strikeLimit - 1 ? "AT_RISK" : null;
 }
 
 /**
