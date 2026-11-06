@@ -119,9 +119,11 @@ export function DateTimePicker({
         <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder}</span>
         {suffix}
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto gap-0 rounded-xl p-0">
+      <PopoverContent align="start" className="w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-0">
         <Calendar
           mode="single"
+          className="w-full p-4 [--cell-size:--spacing(9)]"
+          classNames={{ root: "w-full", month: "w-full gap-3", week: "mt-1 flex w-full justify-around", weekdays: "flex justify-around", weekday: "flex-1 pb-1 text-center text-[0.8rem] font-normal text-muted-foreground" }}
           locale={th}
           selected={selected}
           defaultMonth={selected ?? minDay}
@@ -130,7 +132,7 @@ export function DateTimePicker({
           onSelect={pickDay}
         />
         {mode === "datetime" ? (
-          <div className="flex items-center gap-2 border-t px-3 py-2.5 text-sm">
+          <div className="flex items-center justify-center gap-2 border-t px-4 py-3 text-sm">
             <span className="text-muted-foreground">เวลา</span>
             <TimeSelect
               label="ชั่วโมง"
@@ -147,7 +149,7 @@ export function DateTimePicker({
               disabled={!selected}
               onChange={(next) => setTime("minute", next)}
             />
-            <Button type="button" size="sm" className="ml-auto" onClick={() => setOpen(false)}>
+            <Button type="button" size="sm" className="ml-2" onClick={() => setOpen(false)}>
               เสร็จ
             </Button>
           </div>
