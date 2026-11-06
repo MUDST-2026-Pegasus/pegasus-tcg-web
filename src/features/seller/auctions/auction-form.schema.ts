@@ -102,17 +102,16 @@ export function formatCloseDuration(ms: number): string {
   return `${minutes} นาที`;
 }
 
-const closeDateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  timeZone: "Asia/Bangkok",
-});
+// เขียนตัวย่อเอง ไม่ใช้ Intl — ข้อมูล locale (ICU) แต่ละเวอร์ชัน Node ย่อไม่เหมือนกัน
+// เช่น Node 22 ให้ "จันทร์" แทน "จ."
+const THAI_WEEKDAYS_SHORT = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+const THAI_MONTHS_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
 /** "จ. 2 พ.ย. 2026" — ปี ค.ศ. ตาม Figma */
 export function formatCloseDate(date: string): string {
-  return closeDateFormatter.format(new Date(`${date}T12:00:00${BANGKOK_OFFSET}`));
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return `${THAI_WEEKDAYS_SHORT[weekday]} ${day} ${THAI_MONTHS_SHORT[month - 1]} ${year}`;
 }
 
 // ---------- กติกา ----------
