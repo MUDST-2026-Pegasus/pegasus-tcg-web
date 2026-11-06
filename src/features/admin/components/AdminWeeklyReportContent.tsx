@@ -7,7 +7,6 @@ import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { useAdminGames } from "../catalog.queries";
 import {
@@ -23,6 +22,7 @@ import { useWeeklyReport } from "../weekly-report.queries";
 import { StatCard } from "./StatCard";
 import { WeeklyGameShareChart } from "./WeeklyGameShareChart";
 import { WeeklyReportExportDialog } from "./WeeklyReportExportDialog";
+import { WeeklyReportSettingsDialog } from "./WeeklyReportSettingsDialog";
 import { GameFilter, WeekFilter, type GameFilterOption } from "./WeeklyReportFilters";
 import { WeeklyReportTable } from "./WeeklyReportTable";
 import { WeeklyTrendChart } from "./WeeklyTrendChart";
@@ -42,6 +42,7 @@ export function AdminWeeklyReportContent() {
   const allGames = useWeeklyReport({ weekStart, game: null });
   const games = useAdminGames();
   const [exportOpen, setExportOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const gameOptions = useMemo<GameFilterOption[]>(
     () =>
@@ -106,15 +107,12 @@ export function AdminWeeklyReportContent() {
           >
             ส่งออกรายงาน
           </Button>
-          {/* backend ยังไม่มี endpoint เก็บเกณฑ์สต็อก ปิดไว้เหมือนหน้าภาพรวม */}
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button className="h-[41px] rounded-lg px-3.5 font-normal" disabled>
-                ตั้งค่าระบบ
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>ยังตั้งค่าเกณฑ์รายงานไม่ได้ในตอนนี้</TooltipContent>
-          </Tooltip>
+          <Button
+            className="h-[41px] rounded-lg px-3.5 font-normal"
+            onClick={() => setSettingsOpen(true)}
+          >
+            ตั้งค่าระบบ
+          </Button>
         </div>
       </div>
 
@@ -159,6 +157,8 @@ export function AdminWeeklyReportContent() {
           </>
         )}
       </QueryBoundary>
+
+      <WeeklyReportSettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </div>
   );
 }
