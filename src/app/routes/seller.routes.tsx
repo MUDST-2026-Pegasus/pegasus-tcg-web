@@ -24,7 +24,7 @@ const SellerReturnsPage = lazyPage(() => import("@/features/finance/seller-retur
 const SellerReviewsPage = lazyPage(() => import("@/features/finance/SellerReviewsPage").then((m) => m.SellerReviewsPage), pageSkeleton);
 const SellerAuctionsPage = lazyPage(() => import("@/features/seller/auctions/SellerAuctionsPage").then((m) => m.SellerAuctionsPage), pageSkeleton);
 const SellerAuctionCreatePage = lazyPage(() => import("@/features/seller/auctions/SellerAuctionCreatePage").then((m) => m.SellerAuctionCreatePage), formSkeleton);
-const SellerAuctionDetailPage = lazyPage(() => import("@/features/auction/pages/SellerAuctionDetailPage").then((m) => m.SellerAuctionDetailPage), pageSkeleton);
+const SellerAuctionDetailPage = lazyPage(() => import("@/features/seller/auctions/SellerAuctionDetailPage").then((m) => m.SellerAuctionDetailPage), pageSkeleton);
 const SellerLogoutPage = lazyPage(() => import("@/features/seller/logout/SellerLogoutPage").then((m) => m.SellerLogoutPage), pageSkeleton);
 const SellerSaleFormPage = lazyPage(() => import("@/features/seller/sales/SellerSaleFormPage").then((m) => m.SellerSaleFormPage), formSkeleton);
 const SellerPromotionsPage = lazyPage(() => import("@/features/seller/promotions/SellerPromotionsPage").then((m) => m.SellerPromotionsPage), pageSkeleton);
