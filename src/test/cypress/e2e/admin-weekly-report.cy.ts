@@ -20,12 +20,14 @@ describe('Admin weekly stock and profit report', () => {
   const row = (
     game: string,
     gameSlug: string,
-    [initialStock, soldCount, remainingStock, singleCards, sealedBoxes]: number[],
+    productType: string,
+    productTypeLabel: string,
+    [initialStock, soldCount, remainingStock]: number[],
     gmv: number,
     status: string,
     statusLabel: string,
   ) => ({
-    game, gameSlug, initialStock, soldCount, remainingStock, singleCards, sealedBoxes,
+    game, gameSlug, productType, productTypeLabel, initialStock, soldCount, remainingStock,
     gmv, commission: gmv * 0.03, netProfit: gmv * 0.03, status, statusLabel,
   });
 
@@ -49,19 +51,27 @@ describe('Admin weekly stock and profit report', () => {
       ['2026-08-07', 23000, 37000],
       ['2026-08-08', 23000, 40000],
       ['2026-08-09', 23000, 44000],
-    ].map(([date, singles, sealed]) => ({ date, singles, sealed })),
+    ].map(([date, singles, sealed]) => ({ date, singles, sealed, other: 0 })),
+    kpiHistory: ['2026-08-03', '2026-08-04', '2026-08-05', '2026-08-06', '2026-08-07', '2026-08-08', '2026-08-09'].map(
+      (date, index) => ({
+        date, gmv: 37000 + index * 5000, netProfit: 1100 + index * 150, commission: 1100 + index * 150,
+        remainingStock: 7000 - index * 100,
+      }),
+    ),
     gameDistribution: [
       { game: 'Pokémon', gameSlug: 'pokemon', gmv: 240000, netProfit: 7200, remainingStock: 2469, percentage: 56 },
       { game: 'One Piece', gameSlug: 'one-piece', gmv: 103500, netProfit: 3105, remainingStock: 1970, percentage: 24 },
       { game: 'Other TCG', gameSlug: 'other-tcg', gmv: 85000, netProfit: 2550, remainingStock: 1745, percentage: 20 },
     ],
-    breakdownTable: [
-      row('Pokémon', 'pokemon', [3499, 1030, 2469, 1740, 729], 240000, 'FAST_MOVING', 'สต็อกหมุนเวียนเร็ว'),
-      row('One Piece', 'one-piece', [2360, 390, 1970, 1575, 395], 103500, 'LOW_STOCK', 'สต็อกต่ำ'),
-      row('Other TCG', 'other-tcg', [1795, 50, 1745, 1185, 560], 85000, 'NORMAL', 'ปกติ'),
+    breakdownByGameAndType: [
+      row('Pokémon', 'pokemon', 'SINGLE_CARD', 'การ์ดเดี่ยว', [2350, 610, 1740], 146800, 'NORMAL', 'ปกติ'),
+      row('Pokémon', 'pokemon', 'SEALED', 'กล่อง/ซองสุ่ม', [1149, 420, 729], 93200, 'FAST_MOVING', 'สต็อกหมุนเวียนเร็ว'),
+      row('One Piece', 'one-piece', 'SINGLE_CARD', 'การ์ดเดี่ยว', [1820, 245, 1575], 64300, 'NORMAL', 'ปกติ'),
+      row('One Piece', 'one-piece', 'SEALED', 'กล่อง/ซองสุ่ม', [540, 145, 395], 39200, 'LOW_STOCK', 'สต็อกต่ำ'),
+      row('Other TCG', 'other-tcg', 'SINGLE_CARD', 'การ์ดเดี่ยว', [1795, 50, 1745], 85000, 'NORMAL', 'ปกติ'),
     ],
     totals: {
-      initialStock: 7654, soldCount: 1470, remainingStock: 6184, singleCards: 4500, sealedBoxes: 1684,
+      initialStock: 7654, soldCount: 1470, remainingStock: 6184, singleCards: 4500, sealedBoxes: 1684, otherItems: 0,
       gmv: 428500, weeklyGmv: 428500, commission: 12855, commissionCollected: 12855, netProfit: 12855,
     },
   };
@@ -75,11 +85,12 @@ describe('Admin weekly stock and profit report', () => {
       gmv: 0, weeklyGmv: 0, commission: 0, commissionCollected: 0, netProfit: 0,
       initialStock: 0, soldCount: 0, remainingStock: 0, stockDepleted: 0, wowChangePercent: 0,
     },
-    chartData: report.chartData.map(({ date }) => ({ date, singles: 0, sealed: 0 })),
+    chartData: report.chartData.map(({ date }) => ({ date, singles: 0, sealed: 0, other: 0 })),
+    kpiHistory: report.kpiHistory.map(({ date }) => ({ date, gmv: 0, netProfit: 0, commission: 0, remainingStock: 0 })),
     gameDistribution: [],
-    breakdownTable: [],
+    breakdownByGameAndType: [],
     totals: {
-      initialStock: 0, soldCount: 0, remainingStock: 0, singleCards: 0, sealedBoxes: 0,
+      initialStock: 0, soldCount: 0, remainingStock: 0, singleCards: 0, sealedBoxes: 0, otherItems: 0,
       gmv: 0, weeklyGmv: 0, commission: 0, commissionCollected: 0, netProfit: 0,
     },
   };
@@ -145,7 +156,8 @@ describe('Admin weekly stock and profit report', () => {
       cy.contains('7,654');
       cy.contains('฿428,500');
     });
-    cy.contains('td', 'Other TCG').parent().contains('การ์ดเดี่ยว 1,185 / กล่องสุ่ม 560');
+    cy.contains('td', 'Other TCG').parent().contains('1,745');
+    cy.contains('td', 'One Piece').parent().next().contains('สต็อกต่ำ');
     cy.contains('56%').should('be.visible');
     cy.screenshot('weekly-report-data', { capture: 'fullPage' });
 
@@ -192,13 +204,35 @@ describe('Admin weekly stock and profit report', () => {
     cy.visit(`${ROUTE}?week=2026-08-03`);
 
     cy.contains('button', 'ส่งออกรายงาน').click();
-    cy.contains('3 หมวดหมู่ (ยอดขายรวม ฿428,500)').should('be.visible');
+    cy.contains('5 หมวดหมู่ (ยอดขายรวม ฿428,500)').should('be.visible');
     cy.screenshot('weekly-report-export-dialog');
     cy.contains('button', 'ดาวน์โหลดรายงาน').click();
     cy.contains('button', 'กำลังสร้างไฟล์').should('be.disabled');
 
-    cy.wait('@export').its('request.url').should('match', /format=csv/);
+    cy.wait('@export').its('request.url').should('match', /format=csv.*datasets=kpi%2Cbreakdown/);
     cy.contains('ดาวน์โหลดรายงานสำเร็จ').should('be.visible');
+    cy.get('[data-slot="dialog-content"]').should('not.exist');
+  });
+
+  it('saves stock thresholds and refetches the report', () => {
+    signIn(adminUser);
+    stubReport();
+    cy.intercept('GET', `${API}/thresholds`, envelope({ lowStockThreshold: 500, fastMovingPercent: 30, standardCommissionRatePercent: 3 }));
+    cy.intercept('PUT', `${API}/thresholds`, envelope({ lowStockThreshold: 800, fastMovingPercent: 30, standardCommissionRatePercent: 3 })).as('saveThresholds');
+    cy.visit(`${ROUTE}?week=2026-08-03`);
+    cy.contains('p', 'ยอดขายรวมรายสัปดาห์').should('be.visible');
+
+    cy.contains('button', 'ตั้งค่าระบบ').click();
+    cy.get('#low-stock-threshold').should('have.value', '500').clear().type('800');
+    cy.get('#standard-commission-rate').should('have.value', '3%').and('be.disabled');
+    cy.screenshot('weekly-report-settings');
+    cy.get('@getReport.all').then((calls) => {
+      const before = (calls as unknown as unknown[]).length;
+      cy.contains('button', 'บันทึกการตั้งค่า').click();
+      cy.wait('@saveThresholds').its('request.body').should('deep.equal', { lowStockThreshold: 800, fastMovingPercent: 30 });
+      cy.get('@getReport.all').should('have.length.greaterThan', before);
+    });
+    cy.contains('บันทึกการตั้งค่าแล้ว').should('be.visible');
     cy.get('[data-slot="dialog-content"]').should('not.exist');
   });
 

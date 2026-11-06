@@ -5,7 +5,6 @@ import {
   compactBaht,
   formatReportBaht,
   formatShare,
-  productTypeLabel,
   resolveWeekParam,
   weekEnd,
   weekOptions,
@@ -42,17 +41,22 @@ function report(overrides: Partial<WeeklyReport> = {}): WeeklyReport {
       wowChangePercent: 18.2,
     },
     chartData: [
-      { date: "2026-08-03", singles: 100, sealed: 50 },
-      { date: "2026-08-09", singles: 300, sealed: 100 },
+      { date: "2026-08-03", singles: 100, sealed: 50, other: 0 },
+      { date: "2026-08-09", singles: 300, sealed: 100, other: 25 },
+    ],
+    kpiHistory: [
+      { date: "2026-08-03", gmv: 150, netProfit: 10, commission: 5, remainingStock: 6000 },
+      { date: "2026-08-09", gmv: 425, netProfit: 40, commission: 13, remainingStock: null },
     ],
     gameDistribution: [],
-    breakdownTable: [],
+    breakdownByGameAndType: [],
     totals: {
       initialStock: 7654,
       soldCount: 1470,
       remainingStock: 6184,
       singleCards: 4500,
       sealedBoxes: 1684,
+      otherItems: 0,
       gmv: 428500,
       weeklyGmv: 428500,
       commission: 12855,
@@ -126,6 +130,23 @@ describe("weeklyStatCards", () => {
     });
   });
 
+  it("draws every sparkline from the API's daily history", () => {
+    const cards = weeklyStatCards(report(), undefined);
+    expect(byId(cards, "net-profit").bars).toEqual([7, 26]);
+    expect(byId(cards, "gmv").bars).toEqual([9, 26]);
+    expect(byId(cards, "commission").bars).toEqual([10, 26]);
+    // วันที่ยังมาไม่ถึงไม่มีสต็อกสิ้นวัน
+    expect(byId(cards, "stock").bars).toEqual([26, 2]);
+  });
+
+  it("lists other items in the stock split only when there are some", () => {
+    const current = report();
+    current.totals = { ...current.totals, otherItems: 12 };
+    expect(byId(weeklyStatCards(current, undefined), "stock").footnote).toBe(
+      "การ์ดเดี่ยว 4,500 · กล่อง/ซองสุ่ม 1,684 · อื่น ๆ 12",
+    );
+  });
+
   it("hides comparisons until the previous week is known", () => {
     const cards = weeklyStatCards(report(), undefined);
     expect(byId(cards, "net-profit").delta).toBeNull();
@@ -139,9 +160,10 @@ describe("weeklyStatCards", () => {
         gmv: 0, weeklyGmv: 0, commission: 0, commissionCollected: 0, netProfit: 0,
         initialStock: 0, soldCount: 0, remainingStock: 0, stockDepleted: 0, wowChangePercent: 0,
       },
-      chartData: [{ date: "2026-08-10", singles: 0, sealed: 0 }],
+      chartData: [{ date: "2026-08-10", singles: 0, sealed: 0, other: 0 }],
+      kpiHistory: [{ date: "2026-08-10", gmv: 0, netProfit: 0, commission: 0, remainingStock: 0 }],
       totals: {
-        initialStock: 0, soldCount: 0, remainingStock: 0, singleCards: 0, sealedBoxes: 0,
+        initialStock: 0, soldCount: 0, remainingStock: 0, singleCards: 0, sealedBoxes: 0, otherItems: 0,
         gmv: 0, weeklyGmv: 0, commission: 0, commissionCollected: 0, netProfit: 0,
       },
     });
@@ -179,10 +201,4 @@ describe("small formatters", () => {
     expect(compactBaht(2500)).toBe("2.5k");
   });
 
-  it("labels product types from stock counts", () => {
-    expect(productTypeLabel({ singleCards: 1, sealedBoxes: 1 })).toBe("การ์ดเดี่ยวและกล่องสุ่ม");
-    expect(productTypeLabel({ singleCards: 1, sealedBoxes: 0 })).toBe("การ์ดเดี่ยว");
-    expect(productTypeLabel({ singleCards: 0, sealedBoxes: 1 })).toBe("กล่อง/ซองสุ่ม");
-    expect(productTypeLabel({ singleCards: 0, sealedBoxes: 0 })).toBe("-");
-  });
 });
