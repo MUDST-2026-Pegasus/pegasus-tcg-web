@@ -8,11 +8,7 @@ import {
   type Delta,
   type StatCardModel,
 } from "./metrics.format";
-import type {
-  WeeklyBreakdownRow,
-  WeeklyReport,
-  WeeklyStockStatus,
-} from "./weekly-report.types";
+import type { WeeklyReport, WeeklyStockStatus } from "./weekly-report.types";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -123,9 +119,12 @@ export function weeklyStatCards(
   const flat = percentDelta(0);
   const delta = (value: number, last: number | undefined) =>
     hasData ? changeFrom(value, last) : flat;
-  const dailySales = report.chartData.map((day) => day.singles + day.sealed);
-  // API มีประวัติรายวันเฉพาะยอดขาย สัปดาห์ว่างทุกการ์ดเป็นแท่งเตี้ยตามดีไซน์
-  const noHistory = hasData ? null : sparkBars(dailySales);
+  const history = report.kpiHistory;
+  const stockSplit = [
+    `การ์ดเดี่ยว ${formatCount(totals.singleCards)}`,
+    `กล่อง/ซองสุ่ม ${formatCount(totals.sealedBoxes)}`,
+    ...(totals.otherItems > 0 ? [`อื่น ๆ ${formatCount(totals.otherItems)}`] : []),
+  ].join(" · ");
   const commissionShare = summary.gmv > 0 ? (summary.commission / summary.gmv) * 100 : 0;
 
   return [
@@ -139,7 +138,7 @@ export function weeklyStatCards(
         : previous
           ? `หักค่าธรรมเนียมระบบแล้ว (เทียบ ${formatReportBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
           : "หักค่าธรรมเนียมระบบแล้ว",
-      bars: noHistory,
+      bars: sparkBars(history.map((day) => day.netProfit)),
       accent: "primary",
     },
     {
@@ -148,7 +147,7 @@ export function weeklyStatCards(
       value: formatReportBaht(summary.gmv),
       delta: percentDelta(summary.wowChangePercent),
       footnote: `จากคำสั่งซื้อที่สำเร็จแล้ว ${formatCount(summary.soldCount)} รายการ`,
-      bars: sparkBars(dailySales),
+      bars: sparkBars(history.map((day) => day.gmv)),
       accent: "primary",
     },
     {
@@ -156,8 +155,9 @@ export function weeklyStatCards(
       label: "สต็อกที่เปิดขายอยู่",
       value: formatCount(summary.remainingStock),
       delta: delta(summary.remainingStock, previous?.summary.remainingStock),
-      footnote: `การ์ดเดี่ยว ${formatCount(totals.singleCards)} · กล่อง/ซองสุ่ม ${formatCount(totals.sealedBoxes)}`,
-      bars: noHistory,
+      footnote: stockSplit,
+      // วันที่ยังมาไม่ถึงไม่มีสต็อกสิ้นวัน ให้เป็นแท่งเตี้ยสุด
+      bars: sparkBars(history.map((day) => day.remainingStock ?? 0)),
       accent: "primary",
     },
     {
@@ -166,7 +166,7 @@ export function weeklyStatCards(
       value: formatReportBaht(summary.commission),
       delta: delta(summary.commission, previous?.summary.commission),
       footnote: `${hasData ? "คิดเป็น" : "เฉลี่ย"} ${commissionShare.toFixed(1)}% ของยอดขายรวมรายสัปดาห์`,
-      bars: noHistory,
+      bars: sparkBars(history.map((day) => day.commission)),
       accent: "primary",
     },
   ];
@@ -174,27 +174,20 @@ export function weeklyStatCards(
 
 const WEEKDAY_SHORT = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
 
-export type WeeklyTrendPoint = { day: string; singles: number; sealed: number };
+export type WeeklyTrendPoint = { day: string; singles: number; sealed: number; other: number };
 
 export function weeklyTrendPoints(report: WeeklyReport): WeeklyTrendPoint[] {
-  return report.chartData.map(({ date, singles, sealed }) => ({
+  return report.chartData.map(({ date, singles, sealed, other }) => ({
     day: WEEKDAY_SHORT[parseISO(date).getDay()],
     singles,
     sealed,
+    other,
   }));
 }
 
 /** แกน Y: 20000 → "20k" */
 export function compactBaht(value: number): string {
   return value >= 1000 ? `${Number((value / 1000).toFixed(1))}k` : String(value);
-}
-
-/** "การ์ดเดี่ยวและกล่องสุ่ม" เมื่อเกมนั้นมีสต็อกทั้งสองประเภท */
-export function productTypeLabel(row: Pick<WeeklyBreakdownRow, "singleCards" | "sealedBoxes">): string {
-  if (row.singleCards > 0 && row.sealedBoxes > 0) return "การ์ดเดี่ยวและกล่องสุ่ม";
-  if (row.singleCards > 0) return "การ์ดเดี่ยว";
-  if (row.sealedBoxes > 0) return "กล่อง/ซองสุ่ม";
-  return "-";
 }
 
 export const STOCK_STATUS_BADGE: Record<WeeklyStockStatus, string> = {

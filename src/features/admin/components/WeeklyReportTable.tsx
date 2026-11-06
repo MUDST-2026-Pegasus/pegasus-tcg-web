@@ -12,15 +12,15 @@ import {
 import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
-import { formatReportBaht, productTypeLabel, STOCK_STATUS_BADGE } from "../weekly-report.format";
+import { formatReportBaht, STOCK_STATUS_BADGE } from "../weekly-report.format";
 import type { WeeklyReport } from "../weekly-report.types";
 
 const HEAD = "h-[45px] px-4 text-xs font-medium text-muted-foreground";
 const CELL = "px-4 py-3.5 text-sm text-foreground";
 
-/** ตารางแถวละเกมตาม `breakdownTable` แถวท้ายคือ `totals` ที่ backend รวมให้ */
+/** แถวละเกมและประเภทสินค้าตาม `breakdownByGameAndType` แถวท้ายคือ `totals` ที่ backend รวมให้ */
 export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
-  const { breakdownTable: rows, totals } = report;
+  const { breakdownByGameAndType: rows, totals } = report;
 
   return (
     <Card className="gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-none ring-0">
@@ -43,19 +43,12 @@ export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.gameSlug}>
+            <TableRow key={`${row.gameSlug}-${row.productType}`}>
               <TableCell className={CELL}>{row.game}</TableCell>
-              <TableCell className={CELL}>{productTypeLabel(row)}</TableCell>
+              <TableCell className={CELL}>{row.productTypeLabel}</TableCell>
               <TableCell className={CELL}>{formatCount(row.initialStock)}</TableCell>
               <TableCell className={CELL}>{formatCount(row.soldCount)}</TableCell>
-              <TableCell className={CELL}>
-                {formatCount(row.remainingStock)}
-                {row.singleCards > 0 && row.sealedBoxes > 0 ? (
-                  <span className="block text-[11px] text-muted-foreground">
-                    การ์ดเดี่ยว {formatCount(row.singleCards)} / กล่องสุ่ม {formatCount(row.sealedBoxes)}
-                  </span>
-                ) : null}
-              </TableCell>
+              <TableCell className={CELL}>{formatCount(row.remainingStock)}</TableCell>
               <TableCell className={CELL}>{formatReportBaht(row.gmv)}</TableCell>
               <TableCell className={CELL}>{formatReportBaht(row.netProfit)}</TableCell>
               <TableCell className={CELL}>

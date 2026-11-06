@@ -30,6 +30,17 @@ export type WeeklyDailySales = {
   date: string;
   singles: number;
   sealed: number;
+  /** สินค้าที่ไม่ใช่การ์ดเดี่ยวหรือกล่อง/ซอง — สามช่องรวมกันเท่ายอดขายของวันนั้น */
+  other: number;
+};
+
+export type WeeklyDailyKpi = {
+  date: string;
+  gmv: number;
+  netProfit: number;
+  commission: number;
+  /** สต็อกสิ้นวัน — `null` = วันที่ยังมาไม่ถึง */
+  remainingStock: number | null;
 };
 
 export type WeeklyGameDistribution = {
@@ -43,14 +54,17 @@ export type WeeklyGameDistribution = {
 
 export type WeeklyStockStatus = "NORMAL" | "LOW_STOCK" | "FAST_MOVING";
 
+export type WeeklyProductType = "SINGLE_CARD" | "SEALED" | "OTHER";
+
+/** แถวตารางแยกตามเกมและประเภทสินค้า — `breakdownByGameAndType` */
 export type WeeklyBreakdownRow = {
   game: string;
   gameSlug: string;
+  productType: WeeklyProductType;
+  productTypeLabel: string;
   initialStock: number;
   soldCount: number;
   remainingStock: number;
-  singleCards: number;
-  sealedBoxes: number;
   gmv: number;
   commission: number;
   netProfit: number;
@@ -64,6 +78,7 @@ export type WeeklyBreakdownTotals = {
   remainingStock: number;
   singleCards: number;
   sealedBoxes: number;
+  otherItems: number;
   gmv: number;
   weeklyGmv: number;
   commission: number;
@@ -78,8 +93,9 @@ export type WeeklyReport = {
   meta: WeeklyReportMeta;
   summary: WeeklyReportSummary;
   chartData: WeeklyDailySales[];
+  kpiHistory: WeeklyDailyKpi[];
   gameDistribution: WeeklyGameDistribution[];
-  breakdownTable: WeeklyBreakdownRow[];
+  breakdownByGameAndType: WeeklyBreakdownRow[];
   totals: WeeklyBreakdownTotals;
 };
 
@@ -91,3 +107,19 @@ export type WeeklyReportFilters = {
 };
 
 export type WeeklyReportExportFormat = "csv" | "xlsx";
+
+/** ชุดข้อมูลในไฟล์ export: สรุป KPI และแถวรายวัน / ตารางแยกเกมและประเภทสินค้า */
+export type WeeklyReportExportDataset = "kpi" | "breakdown";
+
+/** `StockThresholds` — อัตราค่าคอมอ่านอย่างเดียว เจ้าของคือหน้าตั้งค่าคอมมิชชั่น */
+export type WeeklyStockThresholds = {
+  lowStockThreshold: number;
+  fastMovingPercent: number;
+  standardCommissionRatePercent: number;
+};
+
+/** `StockThresholdsUpdate` */
+export type WeeklyStockThresholdsPayload = Pick<
+  WeeklyStockThresholds,
+  "lowStockThreshold" | "fastMovingPercent"
+>;
