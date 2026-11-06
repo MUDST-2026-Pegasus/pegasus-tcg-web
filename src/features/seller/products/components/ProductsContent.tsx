@@ -42,6 +42,7 @@ import { ProductFilterBar } from "./ProductFilterBar";
 import { ProductPagination } from "./ProductPagination";
 import { ProductTable } from "./ProductTable";
 import { ProductTableSkeleton } from "./ProductTableSkeleton";
+import { StockForecast } from "./StockForecast";
 
 const PAGE_SIZE = 20;
 
@@ -388,6 +389,8 @@ export function ProductsContent() {
           />
         )}
       </QueryBoundary>
+
+      <StockForecast />
 
       <BulkPriceDialog
         open={isBulkPriceOpen}
