@@ -31,16 +31,16 @@ const sections: TermsSection[] = [
   },
   {
     id: "06",
-    title: "การประมูล",
-    content: "กติกาการประมูลการ์ดบน PEGASUS:",
+    title: "Auctions",
+    content: "Auctions on PEGASUS follow these rules:",
     // กติกาจาก Epic TCG-612 [TCG-636]
     rules: [
-      "บิดแล้วถอนไม่ได้ — ระบบให้ยืนยันก่อนบิดทุกครั้ง",
-      "ต่อเวลา: มีคนบิดใน 2 นาทีสุดท้าย เวลาจะกลับเป็น 2 นาที ต่อได้ไม่จำกัด",
-      "ซื้อทันที: ผู้ขายเปิดหรือแก้ราคาได้จนกว่าจะมีบิดแรก แล้วปุ่มซื้อทันทีจะหายไป",
-      "ผู้ชนะต้องชำระเงินภายใน 24 ชม. ผ่านหน้าชำระเงินปกติ ราคาล็อกตามที่ชนะ",
-      "ไม่ชำระภายในเวลา = ยกเลิกคำสั่งซื้อและยกเลิกประมูล การ์ดกลับเข้าสต็อกผู้ขาย และบันทึกโทษไม่ชำระ 1 ครั้ง",
-      "ไม่ชำระครบ 3 ครั้ง ห้ามบิด 30 วัน (ยังซื้อสินค้าปกติได้)",
+      "Bids cannot be withdrawn. You confirm every bid before it is placed.",
+      "Extended bidding: a bid in the last 2 minutes resets the timer to 2 minutes, with no limit on extensions.",
+      "Buy now: the seller can turn it on or change its price until the first bid. After that, the Buy now option is removed.",
+      "The winner must pay within 24 hours through the regular checkout, at the winning price.",
+      "If the winner does not pay in time, the order and the auction are cancelled, the card returns to the seller's stock, and the winner receives one non-payment strike.",
+      "Three non-payment strikes ban the user from bidding for 30 days. Regular purchases are still allowed.",
     ],
   },
   {
