@@ -402,6 +402,11 @@ export type SellerAuctionDetail = {
   currentPrice: number;
   bidCount: number;
   bidderCount: number;
+  /**
+   * คนที่กดติดตามประมูลนี้ — การ์ด "ผู้ติดตาม" ใน S4 [TCG-634]
+   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `SellerAuctionDetailResponse`
+   */
+  watcherCount: number;
   /** ราคาปัจจุบันหลังหักค่าคอม */
   estimatedPayout: number;
   /** เท่าการขายปกติ เช่น 5 */
