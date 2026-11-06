@@ -450,6 +450,11 @@ export type AdminAuctionRow = {
   id: number;
   auctionNumber: string;
   cardName: string;
+  /**
+   * รูปในคอลัมน์ "การ์ด / รหัส" ของ A1 [TCG-635]
+   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionRowResponse`
+   */
+  cardImageUrl: string | null;
   shopName: string;
   sellerUsername: string;
   currentPrice: number;
@@ -470,6 +475,12 @@ export type AdminAuctionPage = {
   kpis: AdminAuctionKpis;
   /** แบนเนอร์เหนือตาราง */
   flaggedCount: number;
+  /**
+   * แบนเนอร์ A1 แยกนับ "ถูกรายงาน" กับ "รูปแบบบิดผิดปกติ" [TCG-635]
+   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionPageResponse`
+   */
+  reportedCount: number;
+  suspiciousCount: number;
   serverTime: string;
 };
 
