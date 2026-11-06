@@ -1,3 +1,4 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
 
 export interface OrderItemDetails {
@@ -77,7 +78,8 @@ export interface SellerOrderDetails {
   promotionsRestoredOnCancel?: boolean;
 }
 
-export interface OrderDetails {
+/** `source` / `auctionId` / `auctionNumber` มาจาก OrderAuctionSource [TCG-636] */
+export interface OrderDetails extends OrderAuctionSource {
   id: number;
   orderNumber: string;
   buyerId: number;

@@ -41,6 +41,7 @@ import type {
 import { ClaimTicketRail } from "@/features/promotions/ClaimTicketRail";
 import { useFeaturedPromotions } from "@/features/promotions/claim.queries";
 import { env } from "@/lib/env";
+import { AuctionEndingSoonSection } from "./AuctionEndingSoonSection";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
@@ -682,6 +683,8 @@ export function HomeContent() {
       <NewReleasesSection />
       <GamesSection />
       <TrendingSection />
+      {/* ระบบประมูล [TCG-636] */}
+      <AuctionEndingSoonSection />
       <FeaturedSection />
       <PegasusPicksSection />
       <ExploreSection />

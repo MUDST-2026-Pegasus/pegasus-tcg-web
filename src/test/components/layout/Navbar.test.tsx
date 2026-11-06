@@ -76,6 +76,8 @@ describe("Navbar", () => {
     ["/search?game=pokemon-tcg", "Pokémon"],
     ["/search?game=one-piece-card-game", "One Piece"],
     ["/search?sort=newest", "New arrivals"],
+    ["/auctions", "Auction"],
+    ["/auctions/142", "Auction"],
     ["/search?q=Pikachu", "All products"],
     ["/search?game=pokemon-tcg&sort=newest", "Pokémon"],
     ["/cart", null],

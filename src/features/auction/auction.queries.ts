@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import * as auctionApi from "./auction.api";
 import type {
@@ -28,7 +28,7 @@ export const auctionKeys = {
   // public / ผู้ซื้อ
   lists: () => [...auctionKeys.all, "list"] as const,
   list: (params: AuctionListParams) =>
-    [...auctionKeys.lists(), params.filter ?? "ALL", params.gameId ?? 0, params.q ?? "", params.sort ?? "ENDING_SOON", params.page ?? 0, params.size ?? 20] as const,
+    [...auctionKeys.lists(), params.filter ?? "ALL", params.gameId ?? 0, params.variantId ?? 0, params.sellerUsername ?? "", params.q ?? "", params.sort ?? "ENDING_SOON", params.page ?? 0, params.size ?? 20] as const,
   details: () => [...auctionKeys.all, "detail"] as const,
   detail: (id: number) => [...auctionKeys.details(), id] as const,
   bids: (id: number, page: number) => [...auctionKeys.detail(id), "bids", page] as const,
@@ -80,6 +80,21 @@ export function useAuction(id: number | null, options: { poll?: boolean } = {}) 
       options.poll === false || (query.state.data && query.state.data.status !== "LIVE") ? false : AUCTION_POLL_MS,
     // 404 คือคำตอบ ลองซ้ำก็ได้ผลเดิม
     retry: false,
+  });
+}
+
+/** ประมูลที่เปิดอยู่ของการ์ดรุ่นนี้ — กล่องในหน้ารายละเอียดสินค้า (หลายรุ่น = รวมทุกรุ่น) [TCG-636] */
+export function useVariantAuctions(variantIds: number[]) {
+  return useQueries({
+    queries: variantIds.map((variantId) => {
+      const params: AuctionListParams = { variantId, sort: "ENDING_SOON" };
+      return { queryKey: auctionKeys.list(params), queryFn: () => auctionApi.getAuctions(params) };
+    }),
+    combine: (results) => ({
+      auctions: results.flatMap((result) => result.data?.page.items ?? []),
+      total: results.reduce((sum, result) => sum + (result.data?.page.totalItems ?? 0), 0),
+      serverTime: results.find((result) => result.data)?.data?.serverTime,
+    }),
   });
 }
 

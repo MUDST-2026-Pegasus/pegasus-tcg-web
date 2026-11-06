@@ -96,6 +96,13 @@ export type MyAuctionTab = "ALL" | "BIDDING" | "TO_PAY" | "WON" | "LOST";
 export type AuctionListParams = {
   filter?: AuctionFilter;
   gameId?: number;
+  /** ประมูลของการ์ดรุ่นนี้ (กล่องในหน้ารายละเอียดสินค้า) [TCG-636] */
+  variantId?: number;
+  /**
+   * ประมูลของร้านนี้ (แท็บ "ประมูล" ในหน้าร้าน) — หน้าร้านรู้แค่ username [TCG-636]
+   * ⚠️ backend รับแค่ `sellerId` (profile id) — BE ต้องรับ `sellerUsername` ด้วย
+   */
+  sellerUsername?: string;
   q?: string;
   sort?: AuctionSort;
   page?: number;
@@ -444,6 +451,11 @@ export type AdminAuctionKpis = {
   endingWithinHour: number;
   awaitingPayment: number;
   suspendedLast30Days: number;
+  /**
+   * ยอดขายจากประมูล 30 วัน — ภาพรวมแพลตฟอร์มของแอดมิน [TCG-636]
+   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionViews.Kpis`
+   */
+  soldLast30Days: number;
 };
 
 export type AdminAuctionRow = {
@@ -570,3 +582,18 @@ export type BannedBidderPage = {
 
 /** body ของ `POST /admin/auctions/banned-bidders/:userId/lift` (ไม่บังคับ) */
 export type LiftBiddingBanRequest = { reason: string | null };
+
+// ---------- คำสั่งซื้อที่มาจากการประมูล [TCG-636] ----------
+
+/** `sales_order.source` — `CART` = ซื้อปกติ, `AUCTION` = ชนะประมูล / ซื้อทันที */
+export type OrderSource = "CART" | "AUCTION";
+
+/**
+ * ช่องที่ BE ส่งมากับคำสั่งซื้อ (`OrderDetailsResponse`, `SellerOrderViews.Summary`, `AdminOrderViews.Summary`)
+ * ไม่บังคับ — API เก่าไม่ส่งมา ถือว่าเป็น `CART`
+ */
+export type OrderAuctionSource = {
+  source?: OrderSource | null;
+  auctionId?: number | null;
+  auctionNumber?: string | null;
+};

@@ -27,6 +27,7 @@ import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
 import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
 import { CardAttributesCard, CardEffectsCard, ProductBadges, ProductGallery, TrustStrip } from "../components/ProductDetailSections";
 import { ListingSeller } from "../ListingSeller";
+import { ProductAuctionBox } from "../components/ProductAuctionBox";
 import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
@@ -387,6 +388,11 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
               </Button>
             </div>
+            {/* มีประมูลการ์ดรุ่นนี้เปิดอยู่ [TCG-636] */}
+            <ProductAuctionBox
+              variantIds={selectedVariant ? [Number(selectedVariant)] : variants.map((variant) => variant.id)}
+              productName={product.name}
+            />
             <TrustStrip />
           </div>
         </section>

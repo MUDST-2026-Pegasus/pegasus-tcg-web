@@ -1,3 +1,4 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
 
 /**
@@ -62,7 +63,7 @@ export type OrderTracking = {
 };
 
 /** หนึ่งแถว = seller_order หนึ่งใบ (ส่วนของผู้ขายหนึ่งคนในคำสั่งซื้อ) */
-export type AdminOrderSummary = {
+export type AdminOrderSummary = OrderAuctionSource & {
   sellerOrderId: number;
   sellerOrderNumber: string;
   salesOrderId: number;

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
@@ -507,6 +508,8 @@ function OrderCardItem({
           <div>
             <p className="text-xs text-muted-foreground font-medium">ORDER ID</p>
             <p className="font-semibold text-sm">{order.orderNumber}</p>
+            {/* มาจากการประมูล [TCG-636] */}
+            <AuctionSourcePill order={order} className="mt-1" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground font-medium">DATE</p>

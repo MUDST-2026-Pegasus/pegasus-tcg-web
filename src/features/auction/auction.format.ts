@@ -1,7 +1,7 @@
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import type { AdminAuctionRow, AdminAuctionTab, AuctionStatus, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
+import type { AdminAuctionRow, AdminAuctionTab, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
 
 /**
  * ตัวช่วยแปลงค่าดิบของระบบประมูล → ข้อความบนหน้าจอ [TCG-627 · FE-1]
@@ -316,4 +316,15 @@ export function banTabOf(bidder: BannedBidder, now: number = Date.now()): BanTab
   if (isBiddingBanned(bidder.bannedUntil, now)) return "BANNED";
   if (bidder.bannedUntil !== null) return "HISTORY";
   return bidder.strikeCount >= bidder.strikeLimit - 1 ? "AT_RISK" : null;
+}
+
+/**
+ * กล่อง "มีประมูลการ์ดนี้อยู่" ในหน้ารายละเอียดสินค้า [TCG-636]
+ * `null` = ไม่มีประมูลเปิด ไม่ต้องแสดงกล่อง
+ */
+export function summarizeAuctions(auctions: AuctionSummary[], total: number) {
+  if (auctions.length === 0) return null;
+  const soonest = auctions.reduce((a, b) => (a.endsAt <= b.endsAt ? a : b));
+  const lowest = Math.min(...auctions.map((auction) => auction.currentPrice));
+  return { count: Math.max(total, auctions.length), lowest, soonest };
 }

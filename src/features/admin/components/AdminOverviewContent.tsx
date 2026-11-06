@@ -22,6 +22,7 @@ import { useOverviewMetrics } from "../metrics.queries";
 import { GameShareChart } from "./GameShareChart";
 import { MonthlySalesChart } from "./MonthlySalesChart";
 import { RecentActivityCard } from "./RecentActivityCard";
+import { AuctionOverviewCards } from "./AuctionOverviewCards";
 import { StatCard } from "./StatCard";
 import { TopSellersCard } from "./TopSellersCard";
 
@@ -79,6 +80,9 @@ export function AdminOverviewContent() {
                   <StatCard key={card.id} {...card} />
                 ))}
               </div>
+
+              {/* ตัวเลขระบบประมูล [TCG-636] */}
+              <AuctionOverviewCards />
 
               <div className="flex flex-col items-start gap-4 lg:flex-row">
                 <MonthlySalesChart
