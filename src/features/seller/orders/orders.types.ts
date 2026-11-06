@@ -1,3 +1,4 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
 import type { OrderItemSale } from "@/components/sale";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
@@ -104,7 +105,7 @@ export type OrderBuyer = {
 };
 
 /** หนึ่งแถวในหน้ารายการ */
-export type SellerOrderSummary = {
+export type SellerOrderSummary = OrderAuctionSource & {
   order: SellerOrderDetails;
   /** เลขออเดอร์ของผู้ซื้อ `PGS-…` — ผู้ซื้อทักมาด้วยเลขนี้ */
   orderNumber: string;

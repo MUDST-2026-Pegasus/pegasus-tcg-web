@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Link } from "react-router-dom";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -203,6 +204,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             >
               {statusTitle(order.status)}
             </Badge>
+            <AuctionSourcePill order={summary} basePath="/seller/auctions" />
           </div>
           <p className="text-xs text-gray-500">
             คำสั่งซื้อของผู้ซื้อ {summary.orderNumber} · {nextStepNote(detail)}

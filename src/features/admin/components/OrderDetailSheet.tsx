@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { QueryBoundary } from "@/components/common";
 import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +76,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
             {summary.sellerOrderNumber}
           </SheetTitle>
           <Badge variant="secondary">{ORDER_STATUS_LABEL[summary.status]}</Badge>
+          <AuctionSourcePill order={summary} basePath="/admin/auctions" />
         </div>
         <SheetDescription>
           คำสั่งซื้อ {summary.orderNumber} · สั่งเมื่อ{" "}

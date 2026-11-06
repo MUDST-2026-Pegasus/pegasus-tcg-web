@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -112,6 +113,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
               >
                 {order.sellerOrderNumber}
               </Link>
+              <AuctionSourcePill order={summary} basePath="/seller/auctions" />
               {urgentLabel ? (
                 <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-xs text-[#b45309]">
                   {urgentLabel}
