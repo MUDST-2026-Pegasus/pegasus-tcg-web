@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { QueryBoundary } from "@/components/common";
-import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -13,7 +13,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { PromotionOrderTable } from "@/features/promotions/PromotionOrderTable";
+import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
+import { downloadBlob } from "@/lib/download";
 
 import { formatBaht } from "../catalog.format";
 import {
@@ -22,10 +26,11 @@ import {
   PAYMENT_METHOD_LABEL,
   PAYMENT_STATUS_LABEL,
   RETURN_REASON_LABEL,
+  adminOrderSummaryDownloadErrorMessage,
   formatAddressLine,
   parseShippingAddress,
 } from "../orders.format";
-import { useAdminOrder } from "../orders.queries";
+import { useAdminOrder, useDownloadAdminOrderSummary } from "../orders.queries";
 import type { AdminOrderDetail } from "../orders.types";
 import { formatThaiDateTime } from "../verification.format";
 
@@ -64,9 +69,30 @@ export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetPro
 
 function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
   const { summary, order, payment } = detail;
+  const downloadSummary = useDownloadAdminOrderSummary();
   const address = parseShippingAddress(detail.shippingAddressSnapshot);
   const shipment = order.shipments.at(-1);
   const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
+
+  function handleDownloadSummary() {
+    downloadSummary.mutate(summary.sellerOrderId, {
+      onSuccess: ({ blob, filename }) => {
+        const downloadFilename = filename ?? `order-summary-${summary.orderNumber}.pdf`;
+        downloadBlob(blob, downloadFilename);
+        toast.add({
+          type: "success",
+          title: "ดาวน์โหลด Order Summary แล้ว",
+          description: downloadFilename,
+        });
+      },
+      onError: (error) =>
+        toast.add({
+          type: "error",
+          title: "ดาวน์โหลด Order Summary ไม่สำเร็จ",
+          description: adminOrderSummaryDownloadErrorMessage(error),
+        }),
+    });
+  }
 
   return (
     <>
@@ -82,6 +108,20 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           คำสั่งซื้อ {summary.orderNumber} · สั่งเมื่อ{" "}
           {formatThaiDateTime(summary.createdAt)}
         </SheetDescription>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-2.5"
+            disabled={downloadSummary.isPending}
+            aria-busy={downloadSummary.isPending}
+            aria-label={downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            onClick={handleDownloadSummary}
+          >
+            {downloadSummary.isPending ? <Spinner /> : null}
+            {downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+          </Button>
+        </div>
       </SheetHeader>
 
       <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-6 text-sm">

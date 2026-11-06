@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adminOrderSummaryDownloadErrorMessage,
   formatAddressLine,
   formatElapsed,
   formatTimeout,
@@ -9,6 +10,7 @@ import {
   parseShippingAddress,
 } from "@/features/admin/orders.format";
 import type { AdminOrderSummary } from "@/features/admin/orders.types";
+import { ApiError, CLIENT_ERROR_CODES } from "@/lib/api";
 
 const NOW = new Date("2026-10-13T12:00:00+07:00");
 
@@ -147,5 +149,28 @@ describe("parseShippingAddress", () => {
     expect(parseShippingAddress(null)).toBeNull();
     expect(parseShippingAddress("{}")).toBeNull();
     expect(parseShippingAddress("not json")).toBeNull();
+  });
+});
+
+describe("adminOrderSummaryDownloadErrorMessage", () => {
+  it.each([
+    [401, "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่"],
+    [403, "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารคำสั่งซื้อ"],
+    [404, "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว"],
+    [500, "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง"],
+  ])("maps HTTP %s to an actionable message", (status, expected) => {
+    expect(adminOrderSummaryDownloadErrorMessage(new ApiError({
+      status,
+      code: "DOWNLOAD_FAILED",
+      message: "Download failed",
+    }))).toBe(expected);
+  });
+
+  it("explains network failures", () => {
+    expect(adminOrderSummaryDownloadErrorMessage(new ApiError({
+      status: 0,
+      code: CLIENT_ERROR_CODES.NETWORK_ERROR,
+      message: "Network failed",
+    }))).toBe("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
   });
 });

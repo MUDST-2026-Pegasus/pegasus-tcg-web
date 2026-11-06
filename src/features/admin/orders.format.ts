@@ -1,3 +1,5 @@
+import { getErrorMessage, isApiError, isNetworkError } from "@/lib/api";
+
 import type {
   AdminOrderSort,
   AdminOrderSummary,
@@ -209,4 +211,23 @@ export function formatAddressLine(address: ShippingAddressSnapshot): string {
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+export function adminOrderSummaryDownloadErrorMessage(error: unknown): string {
+  if (isNetworkError(error)) {
+    return "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่";
+  }
+  if (isApiError(error)) {
+    switch (error.status) {
+      case 401:
+        return "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่";
+      case 403:
+        return "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารคำสั่งซื้อ";
+      case 404:
+        return "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว";
+      default:
+        if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
+    }
+  }
+  return getErrorMessage(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
 }
