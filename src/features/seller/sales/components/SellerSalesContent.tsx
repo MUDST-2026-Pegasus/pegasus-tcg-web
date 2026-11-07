@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { BadgePercent, Info, Lock, MoreVertical, Plus } from "lucide-react";
@@ -40,6 +41,7 @@ const SUB = "block truncate text-[11px] text-muted-foreground";
 
 /** แท็บ "ลดราคาสินค้า" ของ /seller/promotions?tab=sales (Figma SAL-S1) */
 export function SellerSalesContent() {
+  useLanguage();
   const [params, setParams] = useSearchParams();
   const page = Math.max(0, (Number(params.get("page")) || 1) - 1);
   const profile = useSellerProfile();
@@ -65,7 +67,7 @@ export function SellerSalesContent() {
     <main className="grid w-full min-w-0 content-start gap-5 text-foreground">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold">โปรโมชั่นของร้าน</h1>
+          <h1 className="text-2xl font-extrabold">{translate("โปรโมชั่นของร้าน", "Shop promotions")}</h1>
           <p className="mt-1 text-xs text-muted-foreground">
             ลดราคาสินค้าให้ผู้ซื้อเห็นราคาใหม่ทันที ไม่ต้องใช้โค้ด · ร้านเป็นผู้ออกส่วนลด
           </p>
@@ -73,27 +75,25 @@ export function SellerSalesContent() {
         {verified ? (
           <Button render={<Link to="/seller/sales/new" />} nativeButton={false}>
             <Plus className="size-4" />
-            ลดราคาสินค้า
-          </Button>
+            {translate("ลดราคาสินค้า", "Product discounts")}</Button>
         ) : (
           <Button disabled title="ร้านต้องผ่านการยืนยันก่อน">
             <Plus className="size-4" />
-            ลดราคาสินค้า
-          </Button>
+            {translate("ลดราคาสินค้า", "Product discounts")}</Button>
         )}
       </header>
 
       <SellerPromotionPageTabs value="sales" />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="กำลังลดราคา" value={String(s?.activeSales ?? 0)} note={`${list.data?.statusCounts.SCHEDULED ?? 0} ตั้งเวลาไว้`} />
+        <Kpi label={translate("กำลังลดราคา", "On sale")} value={String(s?.activeSales ?? 0)} note={`${list.data?.statusCounts.SCHEDULED ?? 0} ตั้งเวลาไว้`} />
         <Kpi
           label="Listing ที่ลดอยู่"
           value={(s?.listingsOnSale ?? 0).toLocaleString("th-TH")}
           note="ด้วยราคาลดของร้าน"
         />
         <Kpi
-          label="ยอดขายจากราคาลด (30 วัน)"
+          label={translate("ยอดขายจากราคาลด (30 วัน)", "Discounted sales (30 days)")}
           value={formatSaleBaht(s?.saleSales30d)}
           note="ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว"
         />
@@ -106,8 +106,7 @@ export function SellerSalesContent() {
           <p role="alert" className="p-6 text-sm text-destructive">
             โหลดการลดราคาไม่สำเร็จ{" "}
             <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void list.refetch()}>
-              ลองอีกครั้ง
-            </Button>
+              {translate("ลองอีกครั้ง", "Try again")}</Button>
           </p>
         ) : null}
         {list.data && rows.length === 0 ? (
@@ -123,8 +122,7 @@ export function SellerSalesContent() {
               <EmptyContent>
                 <Button size="sm" render={<Link to="/seller/sales/new" />} nativeButton={false}>
                   <Plus />
-                  ลดราคาสินค้า
-                </Button>
+                  {translate("ลดราคาสินค้า", "Product discounts")}</Button>
               </EmptyContent>
             ) : null}
           </Empty>
@@ -134,12 +132,12 @@ export function SellerSalesContent() {
             <TableHeader>
               <TableRow className="bg-muted hover:bg-muted">
                 <TableHead className={cn(HEAD, "w-[27%]")}>การลดราคา</TableHead>
-                <TableHead className={cn(HEAD, "w-[16%]")}>ส่วนลด</TableHead>
-                <TableHead className={cn(HEAD, "w-[18%]")}>สินค้า</TableHead>
-                <TableHead className={cn(HEAD, "w-[18%]")}>ระยะเวลา</TableHead>
-                <TableHead className={cn(HEAD, "w-[15%]")}>สถานะ</TableHead>
+                <TableHead className={cn(HEAD, "w-[16%]")}>{translate("ส่วนลด", "Discount")}</TableHead>
+                <TableHead className={cn(HEAD, "w-[18%]")}>{translate("สินค้า", "Products")}</TableHead>
+                <TableHead className={cn(HEAD, "w-[18%]")}>{translate("ระยะเวลา", "Duration")}</TableHead>
+                <TableHead className={cn(HEAD, "w-[15%]")}>{translate("สถานะ", "Status")}</TableHead>
                 <TableHead className={cn(HEAD, "w-[6%]")}>
-                  <span className="sr-only">จัดการ</span>
+                  <span className="sr-only">{translate("จัดการ", "Manage")}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -153,14 +151,12 @@ export function SellerSalesContent() {
         {totalPages > 1 ? (
           <nav aria-label="หน้ารายการลดราคา" className="flex items-center justify-end gap-2 border-t px-4 py-3">
             <Button size="sm" variant="outline" disabled={page === 0} onClick={() => goPage(page - 1)}>
-              ก่อนหน้า
-            </Button>
+              {translate("ก่อนหน้า", "Previous")}</Button>
             <span className="text-xs text-muted-foreground">
-              หน้า {page + 1} / {totalPages}
+              {translate("หน้า", "Page") + " "}{page + 1} / {totalPages}
             </span>
             <Button size="sm" variant="outline" disabled={page + 1 >= totalPages} onClick={() => goPage(page + 1)}>
-              ถัดไป
-            </Button>
+              {translate("ถัดไป", "Next")}</Button>
           </nav>
         ) : null}
       </Card>
@@ -181,6 +177,7 @@ export function SellerSalesContent() {
 }
 
 function Kpi({ label, value, note }: { label: string; value: string; note: string }) {
+  useLanguage();
   return (
     <Card className="flex min-w-0 flex-col gap-1 rounded-xl border border-border p-4 shadow-none ring-0">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -201,6 +198,7 @@ function SaleRow({
   verified: boolean;
   onAction: (action: SellerSaleActionState) => void;
 }) {
+  useLanguage();
   const finished = isSaleFinished(sale.status);
   const paused = sale.status === "PAUSED";
   return (
@@ -234,22 +232,21 @@ function SaleRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={4} className="w-44 min-w-44">
             {!finished && verified ? (
-              <DropdownMenuItem render={<Link to={`/seller/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+              <DropdownMenuItem render={<Link to={`/seller/sales/${sale.id}/edit`} />}>{translate("แก้ไข", "Edit")}</DropdownMenuItem>
             ) : null}
             {paused && sale.pausedByPegasus ? (
               <DropdownMenuItem onClick={() => onAction({ kind: "admin-paused", sale })}>ดูเหตุผลที่ทีมงานหยุด</DropdownMenuItem>
             ) : !finished ? (
               <DropdownMenuItem onClick={() => onAction({ kind: paused ? "resume" : "pause", sale })}>
-                {paused ? "เปิดอีกครั้ง" : "หยุดชั่วคราว"}
+                {paused ? translate("เปิดอีกครั้ง", "Reopen") : translate("หยุดชั่วคราว", "Paused")}
               </DropdownMenuItem>
             ) : null}
             {sale.status === "ACTIVE" ? (
-              <DropdownMenuItem onClick={() => onAction({ kind: "end", sale })}>จบก่อนกำหนด</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAction({ kind: "end", sale })}>{translate("จบก่อนกำหนด", "End early")}</DropdownMenuItem>
             ) : null}
             {sale.soldUnits === 0 ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction({ kind: "delete", sale })}>
-                ลบ
-              </DropdownMenuItem>
+                {translate("ลบ", "Delete")}</DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -260,6 +257,7 @@ function SaleRow({
 
 /** การ์ด "สินค้าของคุณในแคมเปญ Pegasus" (Figma SAL-S1) — ราคาล็อก ขึ้นราคาไม่ได้ระหว่างแคมเปญ */
 function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleListing[]; loading: boolean }) {
+  useLanguage();
   if (!loading && listings.length === 0) return null;
   const endLabel = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
   return (
@@ -271,7 +269,7 @@ function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleLis
       <p className="mt-2 text-xs text-muted-foreground">
         Pegasus ออกส่วนลดให้ · คุณได้เงินเต็มราคาตั้งต้น · ระหว่างแคมเปญขึ้นราคา listing เหล่านี้ไม่ได้ (ลดได้)
       </p>
-      {loading ? <p className="mt-4 text-sm text-muted-foreground">กำลังโหลด…</p> : null}
+      {loading ? <p className="mt-4 text-sm text-muted-foreground">{translate("กำลังโหลด…", "Loading…")}</p> : null}
       <ul className="mt-3 divide-y border-t">
         {listings.map((item) => (
           <li key={`${item.saleId}-${item.listingId}`} className="grid items-center gap-3 py-3.5 sm:grid-cols-[1.2fr_1fr_auto]">

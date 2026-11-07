@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function GameListPanel({
   productCounts,
   showFieldTypes,
 }: GameListPanelProps) {
+  useLanguage();
   return (
     <div className="flex w-full flex-col gap-4 lg:w-[224px] lg:shrink-0">
       <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
@@ -45,8 +47,7 @@ export function GameListPanel({
             className="rounded-md px-2.5"
             onClick={onAddGame}
           >
-            + เพิ่มเกม
-          </Button>
+            {translate("+ เพิ่มเกม", "+ Add game")}</Button>
         </div>
 
         <ul className="flex flex-col gap-0.5 px-2 pb-3">
@@ -60,7 +61,7 @@ export function GameListPanel({
                 ? productCounts[game.id] === undefined
                   ? null
                   : `${formatCount(productCounts[game.id])} การ์ด`
-                : "ซ่อนจากหน้าร้าน",
+                : translate("ซ่อนจากหน้าร้าน", "Hide from storefront"),
             ]
               .filter(Boolean)
               .join(" · ");

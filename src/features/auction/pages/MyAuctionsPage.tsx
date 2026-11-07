@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Gavel, ShieldCheck } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
@@ -26,6 +27,7 @@ function parseTab(raw: string | null): MyAuctionTab {
 
 /** `/account/auctions` — การประมูลของฉัน ฝั่งผู้ซื้อ (Figma W1 + B3-H) [TCG-631 · FE-5] */
 export function MyAuctionsPage() {
+  useLanguage();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = parseTab(searchParams.get("tab"));
@@ -52,8 +54,8 @@ export function MyAuctionsPage() {
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">การประมูลของฉัน</h1>
-              <p className="mt-1 text-sm text-muted-foreground">ทุกประมูลที่คุณเคยบิด — ชนะแล้วชำระภายใน 24 ชม.</p>
+              <h1 className="text-2xl font-bold text-foreground">{translate("การประมูลของฉัน", "My auctions")}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{translate("ทุกประมูลที่คุณเคยบิด — ชนะแล้วชำระภายใน 24 ชม.", "All auctions you have bid on — pay within 24 hours after winning")}</p>
             </div>
             {data ? (
               <span
@@ -62,9 +64,7 @@ export function MyAuctionsPage() {
                   STRIKE_CHIP[strikeTone(data.unpaidStrikes, data.strikeLimit)],
                 )}
               >
-                <ShieldCheck aria-hidden className="size-3.5" />
-                ไม่ชำระหลังชนะ {data.unpaidStrikes} / {data.strikeLimit} ครั้ง
-              </span>
+                <ShieldCheck aria-hidden className="size-3.5" />{translate("ไม่ชำระหลังชนะ", "Unpaid auction wins")}{data.unpaidStrikes} / {data.strikeLimit}{translate("ครั้ง", "strikes")}</span>
             ) : null}
           </div>
 
@@ -78,7 +78,7 @@ export function MyAuctionsPage() {
           ) : null}
 
           {!neverBid ? (
-            <div role="tablist" aria-label="สถานะการประมูล" className="flex flex-wrap items-center gap-2 pb-1">
+            <div role="tablist" aria-label={translate("สถานะการประมูล", "Auction status")} className="flex flex-wrap items-center gap-2 pb-1">
               {MY_AUCTION_TABS.map(({ key, label }) => {
                 const active = tab === key;
                 return (
@@ -106,15 +106,13 @@ export function MyAuctionsPage() {
           ) : null}
 
           {isLoading ? (
-            <div role="status" aria-busy="true" aria-label="กำลังโหลดการประมูลของฉัน">
+            <div role="status" aria-busy="true" aria-label={translate("กำลังโหลดการประมูลของฉัน", "Loading your auctions")}>
               <ProductRowsSkeleton />
             </div>
           ) : isError || !data ? (
             <div role="alert" className="flex flex-col items-center gap-3 rounded-xl border bg-card p-6 py-16">
-              <p className="text-sm font-medium text-destructive">โหลดข้อมูลไม่สำเร็จ</p>
-              <Button variant="outline" size="sm" onClick={() => void refetch()}>
-                ลองใหม่
-              </Button>
+              <p className="text-sm font-medium text-destructive">{translate("โหลดข้อมูลไม่สำเร็จ", "Unable to load data")}</p>
+              <Button variant="outline" size="sm" onClick={() => void refetch()}>{translate("ลองใหม่", "Try again")}</Button>
             </div>
           ) : neverBid ? (
             <EmptyState />
@@ -133,18 +131,17 @@ export function MyAuctionsPage() {
 
 /** W1 ยังไม่เคยบิด (Figma Empty states) */
 function EmptyState() {
+  useLanguage();
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border bg-card px-6 py-16 text-center">
       <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <Gavel aria-hidden className="size-5" />
       </div>
       <div>
-        <p className="text-base font-semibold text-foreground">คุณยังไม่ได้บิดประมูลไหน</p>
-        <p className="mt-1 text-sm text-muted-foreground">ประมูลที่คุณบิดจะแสดงที่นี่ พร้อมสถานะนำอยู่ / ถูกแซง / ชนะ</p>
+        <p className="text-base font-semibold text-foreground">{translate("คุณยังไม่ได้บิดประมูลไหน", "You have not bid on any auctions yet")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{translate("ประมูลที่คุณบิดจะแสดงที่นี่ พร้อมสถานะนำอยู่ / ถูกแซง / ชนะ", "Auctions you bid on appear here with leading / outbid / won status")}</p>
       </div>
-      <Button className="rounded-full" nativeButton={false} render={<Link to="/auctions" />}>
-        ดูประมูลที่เปิดอยู่
-      </Button>
+      <Button className="rounded-full" nativeButton={false} render={<Link to="/auctions" />}>{translate("ดูประมูลที่เปิดอยู่", "View open auctions")}</Button>
     </div>
   );
 }

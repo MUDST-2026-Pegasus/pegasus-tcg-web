@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
@@ -39,15 +40,17 @@ function retry(count: number, error: unknown) {
 }
 
 export function PublicSellerPage() {
+  useLanguage();
   const { username } = useParams<{ username: string }>();
   return username ? (
     <Storefront key={username} username={username} />
   ) : (
-    <EmptyState title="ไม่พบชื่อผู้ขาย" />
+    <EmptyState title={translate("ไม่พบชื่อผู้ขาย", "Seller name not found")} />
   );
 }
 
 function Storefront({ username }: { username: string }) {
+  useLanguage();
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [username]);
@@ -145,14 +148,14 @@ function Storefront({ username }: { username: string }) {
               <Link
                 to={backHref}
                 role="link"
-                aria-label={from ? "Back to product detail" : "Back to products"}
+                aria-label={from ? translate("กลับหน้ารายละเอียดสินค้า", "Back to product detail") : translate("กลับหน้าสินค้า", "Back to products")}
               />
             }
           >
             <ArrowLeft className="mr-1.5 size-4" />
-            <span>กลับไปหน้ารายการสินค้า</span>
+            <span>{translate("กลับไปหน้ารายการสินค้า", "Back to product list")}</span>
             <span className="sr-only">
-              {from ? "Back to product detail" : "Back to products"}
+              {from ? translate("กลับหน้ารายละเอียดสินค้า", "Back to product detail") : translate("กลับหน้าสินค้า", "Back to products")}
             </span>
           </Button>
         </div>
@@ -161,7 +164,7 @@ function Storefront({ username }: { username: string }) {
           <div
             role="status"
             aria-busy="true"
-            aria-label="กำลังโหลดร้านค้า"
+            aria-label={translate("กำลังโหลดร้านค้า", "Loading store")}
             className="flex flex-col gap-8"
           >
             <ProfileHeaderSkeleton />
@@ -170,7 +173,7 @@ function Storefront({ username }: { username: string }) {
           </div>
         ) : profile.isError ? (
           isApiError(profile.error) && profile.error.status === 404 ? (
-            <EmptyState title="ไม่พบผู้ขายรายนี้" />
+            <EmptyState title={translate("ไม่พบผู้ขายรายนี้", "Seller not found")} />
           ) : (
             <ErrorState
               error={profile.error}
@@ -222,21 +225,21 @@ function Storefront({ username }: { username: string }) {
                 <div className="space-y-6">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold text-foreground">
-                        สินค้าที่วางขาย
-                      </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        เลือกสินค้าเพื่อดูรายละเอียดและสั่งซื้อจาก {displayName}
+                      <h2 className="text-xl font-bold text-foreground">{translate("สินค้าที่วางขาย", "Items for sale")}</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">{translate("เลือกสินค้าเพื่อดูรายละเอียดและสั่งซื้อจาก", "Choose a product to view details and buy from")}{displayName}
                       </p>
                     </div>
                     {listings.data && (
                       <p className="text-sm text-muted-foreground">
                         {listings.data.totalItems > 0
-                          ? `แสดง ${listingPage * PAGE_SIZE + 1}–${Math.min(
+                          ? translate(`แสดง ${listingPage * PAGE_SIZE + 1}–${Math.min(
                               (listingPage + 1) * PAGE_SIZE,
                               listings.data.totalItems,
-                            )} จาก ${listings.data.totalItems} รายการ`
-                          : "แสดง 0 รายการ"}
+                            )} จาก ${listings.data.totalItems} รายการ`, `Showing ${listingPage * PAGE_SIZE + 1}–${Math.min(
+                              (listingPage + 1) * PAGE_SIZE,
+                              listings.data.totalItems,
+                            )} of ${listings.data.totalItems} items`)
+                          : translate("แสดง 0 รายการ", "Showing 0 items")}
                       </p>
                     )}
                   </div>
@@ -245,7 +248,7 @@ function Storefront({ username }: { username: string }) {
                     <div
                       role="status"
                       aria-busy="true"
-                      aria-label="กำลังโหลดสินค้า"
+                      aria-label={translate("กำลังโหลดสินค้า", "Loading products")}
                     >
                       <ItemGridSkeleton className={gridClassName} />
                     </div>
@@ -256,8 +259,8 @@ function Storefront({ username }: { username: string }) {
                     />
                   ) : listings.data.items.length === 0 ? (
                     <EmptyState
-                      title="ยังไม่มีประกาศขาย"
-                      description="ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่"
+                      title={translate("ยังไม่มีประกาศขาย", "No listings yet")}
+                      description={translate("ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่", "This store has no active listings yet")}
                     />
                   ) : (
                     <div className={gridClassName} aria-busy={listings.isFetching}>
@@ -304,21 +307,20 @@ function Storefront({ username }: { username: string }) {
                 <div className="space-y-6">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-bold text-foreground">
-                        คอลเลกชัน
-                      </h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        การ์ดในคอลเลกชันสาธารณะของ {displayName} รายการเหล่านี้ไม่จำเป็นต้องวางขาย
-                      </p>
+                      <h2 className="text-xl font-bold text-foreground">{translate("คอลเลกชัน", "Collection")}</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">{translate("การ์ดในคอลเลกชันสาธารณะของ", "Cards in the public collection of")}{displayName}{translate("รายการเหล่านี้ไม่จำเป็นต้องวางขาย", "These items are not necessarily for sale")}</p>
                     </div>
                     {collection.data && (
                       <p className="text-sm text-muted-foreground">
                         {collection.data.totalItems > 0
-                          ? `แสดง ${collectionPage * PAGE_SIZE + 1}–${Math.min(
+                          ? translate(`แสดง ${collectionPage * PAGE_SIZE + 1}–${Math.min(
                               (collectionPage + 1) * PAGE_SIZE,
                               collection.data.totalItems,
-                            )} จาก ${collection.data.totalItems} รายการ`
-                          : "แสดง 0 รายการ"}
+                            )} จาก ${collection.data.totalItems} รายการ`, `Showing ${collectionPage * PAGE_SIZE + 1}–${Math.min(
+                              (collectionPage + 1) * PAGE_SIZE,
+                              collection.data.totalItems,
+                            )} of ${collection.data.totalItems} items`)
+                          : translate("แสดง 0 รายการ", "Showing 0 items")}
                       </p>
                     )}
                   </div>
@@ -327,7 +329,7 @@ function Storefront({ username }: { username: string }) {
                     <div
                       role="status"
                       aria-busy="true"
-                      aria-label="กำลังโหลดคอลเลกชัน"
+                      aria-label={translate("กำลังโหลดคอลเลกชัน", "Loading collection")}
                     >
                       <ItemGridSkeleton className={gridClassName} />
                     </div>
@@ -337,7 +339,7 @@ function Storefront({ username }: { username: string }) {
                       onRetry={() => void collection.refetch()}
                     />
                   ) : collection.data.items.length === 0 ? (
-                    <EmptyState title="ยังไม่มีคอลเลกชันสาธารณะ" />
+                    <EmptyState title={translate("ยังไม่มีคอลเลกชันสาธารณะ", "No public collection yet")} />
                   ) : (
                     <div className={gridClassName} aria-busy={collection.isFetching}>
                       {collection.data.items.map((item) => (

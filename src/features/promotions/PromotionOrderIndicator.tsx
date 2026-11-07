@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { TicketPercent } from "lucide-react";
 
 import {
@@ -12,9 +13,10 @@ type PromotionOrderIndicatorProps = {
 
 /** Accessible code indicator for discounted seller orders in the order list. */
 export function PromotionOrderIndicator({ codes = [] }: PromotionOrderIndicatorProps) {
+  useLanguage();
   const description = codes.length
-    ? `ใช้งานโค้ดส่วนลด ${codes.join(", ")}`
-    : "ออเดอร์นี้ใช้โค้ดส่วนลด";
+    ? translate(`ใช้งานโค้ดส่วนลด ${codes.join(", ")}`, `Discount codes used: ${codes.join(", ")}`)
+    : translate("ออเดอร์นี้ใช้โค้ดส่วนลด", "Discount codes used on this order");
 
   return (
     <Tooltip>

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -54,6 +55,7 @@ export function AddressFormDialog({
   address,
   onSaved,
 }: AddressFormDialogProps) {
+  useLanguage();
   const isEdit = address !== undefined;
 
   return (
@@ -61,11 +63,10 @@ export function AddressFormDialog({
       <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Address" : "Add New Address"}
+            {isEdit ? translate("แก้ไขที่อยู่", "Edit Address") : translate("เพิ่มที่อยู่ใหม่", "Add New Address")}
           </DialogTitle>
           <DialogDescription>
-            Saved addresses show up at checkout, so you only type this once.
-          </DialogDescription>
+            {translate("ที่อยู่ที่บันทึกไว้จะแสดงตอนชำระเงิน คุณจึงกรอกเพียงครั้งเดียว", "Saved addresses show up at checkout, so you only type this once.")}</DialogDescription>
         </DialogHeader>
         <AddressForm
           key={address?.id ?? "new"}
@@ -87,6 +88,7 @@ function AddressForm({
   address?: Address;
   onSaved: (address: Address) => void;
 }) {
+  useLanguage();
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
 
@@ -123,17 +125,17 @@ function AddressForm({
       {failed && (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(failed, "Could not save this address.")}
+            {getErrorMessage(failed, translate("บันทึกที่อยู่นี้ไม่สำเร็จ", "Could not save this address."))}
           </AlertDescription>
         </Alert>
       )}
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.label) || undefined}>
-          <FieldLabel htmlFor="label">Label</FieldLabel>
+          <FieldLabel htmlFor="label">{translate("ชื่อเรียกที่อยู่", "Label")}</FieldLabel>
           <Input
             id="label"
-            placeholder="Home, Office, …"
+            placeholder={translate("บ้าน ที่ทำงาน …", "Home, Office, …")}
             aria-invalid={Boolean(errors.label)}
             {...register("label")}
           />
@@ -141,7 +143,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.recipientName) || undefined}>
-          <FieldLabel htmlFor="recipientName">Recipient name</FieldLabel>
+          <FieldLabel htmlFor="recipientName">{translate("ชื่อผู้รับ", "Recipient name")}</FieldLabel>
           <Input
             id="recipientName"
             autoComplete="name"
@@ -152,7 +154,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.phone) || undefined}>
-          <FieldLabel htmlFor="phone">Phone number</FieldLabel>
+          <FieldLabel htmlFor="phone">{translate("หมายเลขโทรศัพท์", "Phone number")}</FieldLabel>
           <Input
             id="phone"
             inputMode="tel"
@@ -165,11 +167,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line1) || undefined}>
-          <FieldLabel htmlFor="line1">Address line 1</FieldLabel>
+          <FieldLabel htmlFor="line1">{translate("ที่อยู่บรรทัดที่ 1", "Address line 1")}</FieldLabel>
           <Input
             id="line1"
             autoComplete="address-line1"
-            placeholder="House number, street"
+            placeholder={translate("เลขที่บ้าน ถนน", "House number, street")}
             aria-invalid={Boolean(errors.line1)}
             {...register("line1")}
           />
@@ -177,11 +179,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line2) || undefined}>
-          <FieldLabel htmlFor="line2">Address line 2</FieldLabel>
+          <FieldLabel htmlFor="line2">{translate("ที่อยู่บรรทัดที่ 2", "Address line 2")}</FieldLabel>
           <Input
             id="line2"
             autoComplete="address-line2"
-            placeholder="Building, floor, room"
+            placeholder={translate("อาคาร ชั้น ห้อง", "Building, floor, room")}
             aria-invalid={Boolean(errors.line2)}
             {...register("line2")}
           />
@@ -190,7 +192,7 @@ function AddressForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.subdistrict) || undefined}>
-            <FieldLabel htmlFor="subdistrict">Subdistrict</FieldLabel>
+            <FieldLabel htmlFor="subdistrict">{translate("ตำบล/แขวง", "Subdistrict")}</FieldLabel>
             <Input
               id="subdistrict"
               aria-invalid={Boolean(errors.subdistrict)}
@@ -200,7 +202,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.district) || undefined}>
-            <FieldLabel htmlFor="district">District</FieldLabel>
+            <FieldLabel htmlFor="district">{translate("อำเภอ/เขต", "District")}</FieldLabel>
             <Input
               id="district"
               aria-invalid={Boolean(errors.district)}
@@ -210,7 +212,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.province) || undefined}>
-            <FieldLabel htmlFor="province">Province</FieldLabel>
+            <FieldLabel htmlFor="province">{translate("จังหวัด", "Province")}</FieldLabel>
             <Input
               id="province"
               autoComplete="address-level1"
@@ -221,7 +223,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.postalCode) || undefined}>
-            <FieldLabel htmlFor="postalCode">Postal code</FieldLabel>
+            <FieldLabel htmlFor="postalCode">{translate("รหัสไปรษณีย์", "Postal code")}</FieldLabel>
             <Input
               id="postalCode"
               inputMode="numeric"
@@ -250,18 +252,16 @@ function AddressForm({
             )}
           />
           <FieldLabel htmlFor="defaultShipping" className="font-normal">
-            Use as my default shipping address
-          </FieldLabel>
+            {translate("ใช้เป็นที่อยู่จัดส่งเริ่มต้น", "Use as my default shipping address")}</FieldLabel>
         </Field>
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          Cancel
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {address ? "Save changes" : "Add address"}
+          {address ? translate("บันทึกการเปลี่ยนแปลง", "Save changes") : translate("เพิ่มที่อยู่", "Add address")}
         </Button>
       </DialogFooter>
     </form>

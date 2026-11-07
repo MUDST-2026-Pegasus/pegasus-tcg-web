@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
@@ -82,6 +83,7 @@ function emptyForm(): Form {
 
 /** หน้า /seller/sales/new และ /seller/sales/:id/edit (Figma SAL-S2) */
 export function SellerSaleFormContent({ id }: { id: number }) {
+  useLanguage();
   const existing = useSellerSale(id);
   const listings = useSaleableListings();
   if ((id > 0 && existing.isPending) || listings.isPending) {
@@ -90,7 +92,7 @@ export function SellerSaleFormContent({ id }: { id: number }) {
   if ((id > 0 && existing.isError) || listings.isError) {
     return (
       <p role="alert" className="p-8 text-sm text-destructive">
-        {sellerSaleErrorMessage(existing.error ?? listings.error, "โหลดข้อมูลไม่สำเร็จ")}{" "}
+        {sellerSaleErrorMessage(existing.error ?? listings.error, translate("โหลดข้อมูลไม่สำเร็จ", "Unable to load data"))}{" "}
         <Button
           variant="link"
           size="sm"
@@ -100,8 +102,7 @@ export function SellerSaleFormContent({ id }: { id: number }) {
             void listings.refetch();
           }}
         >
-          ลองอีกครั้ง
-        </Button>
+          {translate("ลองอีกครั้ง", "Try again")}</Button>
       </p>
     );
   }
@@ -109,6 +110,7 @@ export function SellerSaleFormContent({ id }: { id: number }) {
 }
 
 function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail; listings: SellerListingSummary[] }) {
+  useLanguage();
   const navigate = useNavigate();
   const save = useSaveSellerSale();
   const profile = useSellerProfile();
@@ -194,12 +196,12 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
   const validateForm = () => {
     const next: Partial<Record<keyof Form, string>> = {};
     if (!form.name.trim()) next.name = "กรุณากรอกชื่อ";
-    if (Date.parse(form.endsAt) <= Date.parse(form.startsAt)) next.endsAt = "วันสิ้นสุดต้องหลังวันเริ่ม";
+    if (Date.parse(form.endsAt) <= Date.parse(form.startsAt)) next.endsAt = translate("วันสิ้นสุดต้องหลังวันเริ่ม", "End date must be after the start date");
     if (!listingMode) {
       const value = form.discountValue;
-      if (value == null) next.discountValue = "กรอกส่วนลด";
-      else if (form.discountType === "PERCENT" && (value < 1 || value > 90)) next.discountValue = "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90";
-      else if (form.discountType === "FIXED_OFF" && value <= 0) next.discountValue = "ต้องมากกว่า ฿0";
+      if (value == null) next.discountValue = translate("กรอกส่วนลด", "Enter discount");
+      else if (form.discountType === "PERCENT" && (value < 1 || value > 90)) next.discountValue = translate("เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90", "Percentage must be between 1 and 90");
+      else if (form.discountType === "FIXED_OFF" && value <= 0) next.discountValue = translate("ต้องมากกว่า ฿0", "Must be greater than ฿0");
       if (form.scopeType === "CATEGORY" && form.scopeIds.length === 0) next.scopeIds = "เลือกหมวดอย่างน้อยหนึ่งหมวด";
     }
     setFormErrors(next);
@@ -241,7 +243,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
             document.querySelector(`[data-row="${ids[0]}"]`)?.scrollIntoView?.({ behavior: "smooth", block: "center" });
             return;
           }
-          toast.add({ title: "บันทึกไม่สำเร็จ", description: sellerSaleErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" });
+          toast.add({ title: translate("บันทึกไม่สำเร็จ", "Unable to save"), description: sellerSaleErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" });
         },
       },
     );
@@ -266,11 +268,11 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/seller/promotions" />}>โปรโมชั่นของร้าน</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/seller/promotions" />}>{translate("โปรโมชั่นของร้าน", "Shop promotions")}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/seller/promotions?tab=sales" />}>ลดราคาสินค้า</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/seller/promotions?tab=sales" />}>{translate("ลดราคาสินค้า", "Product discounts")}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -279,7 +281,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
           </BreadcrumbList>
         </Breadcrumb>
         <header>
-          <h1 className="text-2xl font-extrabold">ลดราคาสินค้า</h1>
+          <h1 className="text-2xl font-extrabold">{translate("ลดราคาสินค้า", "Product discounts")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">ร้านออกส่วนลดเอง · คอมมิชชั่นคิดจากราคาที่ลดแล้ว</p>
         </header>
       </div>
@@ -299,19 +301,19 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                 />
               </FormField>
               <div className="grid grid-cols-2 gap-2">
-                <FormField field="startsAt" htmlFor="seller-sale-start" label="เริ่ม" required>
+                <FormField field="startsAt" htmlFor="seller-sale-start" label={translate("เริ่ม", "Start")} required>
                   <DateTimePicker
                     id="seller-sale-start"
-                    aria-label="เริ่ม"
+                    aria-label={translate("เริ่ม", "Start")}
                     value={toLocalInput(form.startsAt)}
                     disabled={!!existing && existing.status !== "SCHEDULED"}
                     onChange={(value) => value && change("startsAt", new Date(value).toISOString())}
                   />
                 </FormField>
-                <FormField field="endsAt" htmlFor="seller-sale-end" label="สิ้นสุด" required error={formErrors.endsAt}>
+                <FormField field="endsAt" htmlFor="seller-sale-end" label={translate("สิ้นสุด", "Ended")} required error={formErrors.endsAt}>
                   <DateTimePicker
                     id="seller-sale-end"
-                    aria-label="สิ้นสุด"
+                    aria-label={translate("สิ้นสุด", "Ended")}
                     invalid={!!formErrors.endsAt}
                     defaultTime="23:59"
                     min={toLocalInput(form.startsAt)}
@@ -329,9 +331,9 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
               value={form.scopeType}
               onChange={(value) => change("scopeType", value)}
               options={[
-                { value: "SHOP", label: "ทุกสินค้าในร้าน" },
-                { value: "CATEGORY", label: "หมวดหมู่" },
-                { value: "LISTINGS", label: "เลือก listing" },
+                { value: "SHOP", label: translate("ทุกสินค้าในร้าน", "All products in the shop") },
+                { value: "CATEGORY", label: translate("หมวดหมู่", "Category") },
+                { value: "LISTINGS", label: translate("เลือก listing", "Select listing") },
               ]}
             />
 
@@ -348,29 +350,29 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                   />
                 ) : null}
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField field="discountType" label="ประเภทส่วนลด">
+                  <FormField field="discountType" label={translate("ประเภทส่วนลด", "Discount type")}>
                     <Segmented
-                      label="ประเภทส่วนลด"
+                      label={translate("ประเภทส่วนลด", "Discount type")}
                       value={form.discountType}
                       onChange={(value) => change("discountType", value)}
                       options={[
-                        { value: "PERCENT", label: "ลดเป็น %" },
-                        { value: "FIXED_OFF", label: "ลดเป็นบาทต่อชิ้น" },
+                        { value: "PERCENT", label: translate("ลดเป็น %", "Percentage discount") },
+                        { value: "FIXED_OFF", label: translate("ลดเป็นบาทต่อชิ้น", "Fixed discount per item") },
                       ]}
                     />
                   </FormField>
                   <FormField
                     field="discountValue"
                     htmlFor="seller-sale-value"
-                    label="ลด"
+                    label={translate("ลด", "Discount")}
                     required
-                    hint={form.discountType === "PERCENT" ? "1–90% · ไม่รวมสินค้าประมูล" : "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1"}
+                    hint={form.discountType === "PERCENT" ? "1–90% · ไม่รวมสินค้าประมูล" : translate("บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1", "baht per item · discounted price cannot be below ฿1")}
                     error={formErrors.discountValue}
                   >
                     <InputGroup>
                       <InputGroupInput
                         id="seller-sale-value"
-                        aria-label="ส่วนลด"
+                        aria-label={translate("ส่วนลด", "Discount")}
                         type="number"
                         min={1}
                         value={form.discountValue ?? ""}
@@ -442,10 +444,10 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                           />
                         </th>
                         <th>Listing</th>
-                        <th className="w-[72px] whitespace-nowrap">คงเหลือ</th>
-                        <th className="w-24">ราคาปัจจุบัน</th>
+                        <th className="w-[72px] whitespace-nowrap">{translate("คงเหลือ", "Remaining")}</th>
+                        <th className="w-24">{translate("ราคาปัจจุบัน", "Current price")}</th>
                         <th className="w-32">ราคาลด</th>
-                        <th className="w-16">ลด</th>
+                        <th className="w-16">{translate("ลด", "Discount")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -481,7 +483,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  เลือกแล้ว {selectedRows.length} จาก {rows.length} listing · listing ประมูลเลือกไม่ได้
+                  เลือกแล้ว {selectedRows.length} {" " + translate("จาก", "of") + " "}{rows.length} listing · listing ประมูลเลือกไม่ได้
                 </p>
               </>
             )}
@@ -506,11 +508,11 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
           {sample ? (
             <Card className="gap-0 rounded-xl border border-border p-5 shadow-none ring-0">
               <h2 className="text-[13px] font-semibold">
-                ตัวอย่าง: {sample.listing?.card.productName ?? "listing"} (คอมมิชชั่น {SAMPLE_SELLER_COMMISSION * 100}%)
+                {translate("ตัวอย่าง:", "Example:") + " "}{sample.listing?.card.productName ?? "listing"} (คอมมิชชั่น {SAMPLE_SELLER_COMMISSION * 100}%)
               </h2>
               <dl className="mt-3 grid gap-2 text-xs [&>div]:flex [&>div]:justify-between [&_dt]:text-muted-foreground [&_dd]:font-semibold">
                 <div>
-                  <dt>ราคาปัจจุบัน</dt>
+                  <dt>{translate("ราคาปัจจุบัน", "Current price")}</dt>
                   <dd>{formatSaleBaht(sample.price)}</dd>
                 </div>
                 <div>
@@ -526,14 +528,14 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                   <dd className="text-[#007a4a]">{formatSaleBaht(sample.net)}</dd>
                 </div>
                 <div>
-                  <dt>ส่วนลดที่ร้านออก</dt>
+                  <dt>{translate("ส่วนลดที่ร้านออก", "Shop-funded discount")}</dt>
                   <dd className="text-[#c2410c]">{formatSaleBaht(sample.shopDiscount)}</dd>
                 </div>
               </dl>
             </Card>
           ) : null}
           <Card className="gap-2 rounded-xl border border-border p-5 shadow-none ring-0">
-            <h2 className="text-[13px] font-semibold">สรุป</h2>
+            <h2 className="text-[13px] font-semibold">{translate("สรุป", "Summary")}</h2>
             <ul className="grid gap-0.5 text-xs">
               {summary.map((line) => (
                 <li key={line}>• {line}</li>
@@ -542,10 +544,9 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
           </Card>
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" disabled={save.isPending} onClick={() => navigate("/seller/promotions?tab=sales")}>
-              ยกเลิก
-            </Button>
+              {translate("ยกเลิก", "Cancel")}</Button>
             <Button disabled={!canSave} onClick={submit}>
-              {rowsToFix > 0 ? `บันทึก (แก้ ${rowsToFix} แถวก่อน)` : "บันทึก"}
+              {rowsToFix > 0 ? `บันทึก (แก้ ${rowsToFix} แถวก่อน)` : translate("บันทึก", "Save")}
             </Button>
           </div>
           {!verified ? <p className="text-xs text-destructive">ร้านต้องผ่านการยืนยันก่อนจึงลดราคาสินค้าได้</p> : null}
@@ -558,16 +559,14 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
         onOpenChange={(open) => !open && blocker.reset?.()}
         tone="warning"
         icon={<LogOut />}
-        title="ทิ้งการแก้ไข?"
+        title={translate("ทิ้งการแก้ไข?", "Discard changes?")}
         description="การลดราคายังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด"
         actions={
           <>
             <Button variant="outline" onClick={() => blocker.reset?.()}>
-              อยู่ต่อ
-            </Button>
+              {translate("อยู่ต่อ", "Stay")}</Button>
             <Button className={PROMOTION_DANGER_BUTTON} onClick={() => blocker.proceed?.()}>
-              ทิ้งการแก้ไข
-            </Button>
+              {translate("ทิ้งการแก้ไข", "Discard changes")}</Button>
           </>
         }
       />
@@ -592,6 +591,7 @@ function ListingRow({
   onChange: (row: SaleRowDraft) => void;
   onFocus: () => void;
 }) {
+  useLanguage();
   const auction = !!listing?.inAuction;
   const percent = rowPercent(row.price, row.salePrice);
   const overlap = error === "overlap";
@@ -685,6 +685,7 @@ function ListingRow({
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  useLanguage();
   return (
     <Card className="gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <h2 className="text-[15px] font-semibold">{title}</h2>

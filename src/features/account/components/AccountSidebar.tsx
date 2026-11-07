@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleUserRound, ClipboardList, Gavel, MapPin, GalleryVerticalEnd, TicketPercent } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -14,15 +15,16 @@ export type AccountSidebarUser = {
 };
 
 const ACCOUNT_LINKS = [
-  { label: "Account Overview", to: "/account/profile", icon: CircleUserRound },
-  { label: "Order History", to: "/account/orders", icon: ClipboardList },
-  { label: "การประมูลของฉัน", to: "/account/auctions", icon: Gavel },
-  { label: "Address Book", to: "/account/addresses", icon: MapPin },
-  { label: "My Coupons · โค้ดของฉัน", to: "/account/coupons", icon: TicketPercent },
-  { label: "My Collection", to: "/account/collection", icon: GalleryVerticalEnd },
+  { get label() { return translate("ภาพรวมบัญชี", "Account Overview"); }, to: "/account/profile", icon: CircleUserRound },
+  { get label() { return translate("ประวัติคำสั่งซื้อ", "Order History"); }, to: "/account/orders", icon: ClipboardList },
+  { get label() { return translate("การประมูลของฉัน", "My auctions"); }, to: "/account/auctions", icon: Gavel },
+  { get label() { return translate("สมุดที่อยู่", "Address Book"); }, to: "/account/addresses", icon: MapPin },
+  { get label() { return translate("My Coupons · โค้ดของฉัน", "My coupons"); }, to: "/account/coupons", icon: TicketPercent },
+  { get label() { return translate("คอลเลกชันของฉัน", "My Collection"); }, to: "/account/collection", icon: GalleryVerticalEnd },
 ] as const;
 
 export function AccountSidebar({ user }: { user: AccountSidebarUser }) {
+  useLanguage();
   const { pathname } = useLocation();
 
   return (

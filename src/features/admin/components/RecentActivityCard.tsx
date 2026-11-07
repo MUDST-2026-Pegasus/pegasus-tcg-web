@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { QueryBoundary } from "@/components/common";
@@ -27,6 +28,7 @@ const SHOWN = 5;
  * พอ audit log มาแล้วค่อยเปลี่ยนแหล่งข้อมูลของการ์ดนี้
  */
 export function RecentActivityCard() {
+  useLanguage();
   const queue = useVerificationQueue("SUBMITTED", 0, SHOWN);
   const badge = VERIFICATION_STATUS_META.SUBMITTED;
 
@@ -106,6 +108,7 @@ export function RecentActivityCard() {
 }
 
 function ActivitySkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" className="flex flex-col gap-3 px-[18px] py-3">
       {Array.from({ length: 3 }, (_, index) => (

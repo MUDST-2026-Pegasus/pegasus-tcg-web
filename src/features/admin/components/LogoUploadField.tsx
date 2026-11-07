@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Trash2 } from "lucide-react";
 
 import { FileUpload } from "@/components/common";
@@ -27,6 +28,7 @@ export function LogoUploadField({
   saved,
   onRemove,
 }: LogoUploadFieldProps) {
+  useLanguage();
   const showCurrent =
     Boolean(saved?.logoImageUrl) &&
     value !== "" &&
@@ -50,8 +52,7 @@ export function LogoUploadField({
           onClick={onRemove}
         >
           <Trash2 data-icon="inline-start" />
-          เอารูปออก
-        </Button>
+          {translate("เอารูปออก", "Remove image")}</Button>
       </div>
     );
   }
@@ -60,7 +61,7 @@ export function LogoUploadField({
     <FileUpload
       upload={upload}
       id={id}
-      title="ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป"
+      title={translate("ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป", "Drop an image here, or click to choose one")}
     />
   );
 }

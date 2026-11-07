@@ -1,4 +1,5 @@
 import { InitialRouteReady } from "@/app/InitialRouteReady";
+import { useLanguage } from "@/lib/language";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 type PagePlaceholderProps = {
@@ -13,13 +14,14 @@ type PagePlaceholderProps = {
  * เมื่อลงมือทำหน้าไหนแล้ว ให้ลบ PagePlaceholder ออกจากไฟล์นั้นได้เลย
  */
 export function PagePlaceholder({ title, figmaNode }: PagePlaceholderProps) {
+  const { text } = useLanguage();
   return (
     <Empty className="min-h-[60svh]">
       <InitialRouteReady />
       <EmptyHeader>
         <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
-          ยังไม่ได้ทำหน้านี้
+          {text("ยังไม่ได้ทำหน้านี้", "This page is not available yet")}
           {figmaNode ? ` · Figma node ${figmaNode}` : null}
         </EmptyDescription>
       </EmptyHeader>

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 /**
@@ -5,6 +6,7 @@ import { cn } from "@/lib/utils";
  * ข้อความมาจาก `issueMessage` ใน auction-form.schema
  */
 export function AuctionFieldError({ message, className }: { message?: string; className?: string }) {
+  useLanguage();
   if (!message) return null;
   const [title, ...detail] = message.split("\n");
   return (

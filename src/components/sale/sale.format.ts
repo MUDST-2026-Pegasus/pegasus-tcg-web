@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type { ListingPricing } from "./sale.types";
 
 /** ราคาบาทแบบ "฿4,200" — ราคาที่มาจาก API เป็นบาทเต็มอยู่แล้ว */
@@ -52,7 +53,7 @@ export function formatCountdown(ms: number): string {
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = total % 60;
   const clock = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  return days > 0 ? `${days} วัน ${clock}` : clock;
+  return days > 0 ? translate(`${days} วัน ${clock}`, `${days} days ${clock}`) : clock;
 }
 
 /** แยกเป็นช่อง ชม./นาที/วินาที ให้กล่องนับถอยหลังบนหน้าแรก (ชั่วโมงรวมวันไว้แล้ว) */

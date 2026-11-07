@@ -1,3 +1,4 @@
+import { getLanguage, translate } from "@/lib/language";
 import type { OrderDetails, SellerOrderDetails } from "./orders.types";
 
 /**
@@ -30,14 +31,14 @@ const PREPARING = ["PAID", "PREPARING"];
 const RETURNING = ["RETURN_REQUESTED", "RETURNED"];
 
 const stageInfo: Record<OrderStage, Omit<OrderStageInfo, "stage">> = {
-  AWAITING_PAYMENT: { label: "Awaiting Payment", badgeClassName: "bg-destructive text-white border-transparent" },
-  PAYMENT_REVIEW: { label: "Verifying Payment", badgeClassName: "bg-amber-100 text-amber-800 border-transparent" },
-  PREPARING: { label: "Preparing", badgeClassName: "bg-blue-100 text-blue-800 border-transparent" },
-  IN_TRANSIT: { label: "In Transit", badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
-  RETURN_IN_PROGRESS: { label: "Return Requested", badgeClassName: "bg-orange-100 text-orange-800 border-transparent" },
-  COMPLETED: { label: "Completed", badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
-  CANCELLED: { label: "Cancelled", badgeClassName: "bg-muted text-muted-foreground border-transparent" },
-  REFUNDED: { label: "Refunded", badgeClassName: "bg-violet-100 text-violet-800 border-transparent" },
+  AWAITING_PAYMENT: { get label() { return translate("รอชำระเงิน", "Awaiting Payment"); }, badgeClassName: "bg-destructive text-white border-transparent" },
+  PAYMENT_REVIEW: { get label() { return translate("กำลังตรวจสอบการชำระเงิน", "Verifying Payment"); }, badgeClassName: "bg-amber-100 text-amber-800 border-transparent" },
+  PREPARING: { get label() { return translate("กำลังเตรียมสินค้า", "Preparing"); }, badgeClassName: "bg-blue-100 text-blue-800 border-transparent" },
+  IN_TRANSIT: { get label() { return translate("กำลังจัดส่ง", "In Transit"); }, badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
+  RETURN_IN_PROGRESS: { get label() { return translate("ขอคืนสินค้า", "Return Requested"); }, badgeClassName: "bg-orange-100 text-orange-800 border-transparent" },
+  COMPLETED: { get label() { return translate("เสร็จสิ้น", "Completed"); }, badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
+  CANCELLED: { get label() { return translate("ยกเลิกแล้ว", "Cancelled"); }, badgeClassName: "bg-muted text-muted-foreground border-transparent" },
+  REFUNDED: { get label() { return translate("คืนเงินแล้ว", "Refunded"); }, badgeClassName: "bg-violet-100 text-violet-800 border-transparent" },
 };
 
 function has(children: SellerOrderDetails[], statuses: string[]) {
@@ -102,7 +103,7 @@ export function firstTracking(order: OrderDetails): { carrier: string; trackingN
 }
 
 export function formatOrderDateTime(value: string): string {
-  return new Date(value).toLocaleString("en-US", {
+  return new Date(value).toLocaleString(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",

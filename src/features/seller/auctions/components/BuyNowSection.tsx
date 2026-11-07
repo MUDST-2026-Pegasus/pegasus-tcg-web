@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId } from "react";
 import { TriangleAlert } from "lucide-react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
@@ -10,6 +11,7 @@ import { BahtField } from "./BahtField";
 
 /** การ์ด "ซื้อทันที (ไม่บังคับ)" (Figma S2) [TCG-633 · FE-7] */
 export function BuyNowSection({ form }: { form: UseFormReturn<AuctionFormValues> }) {
+  useLanguage();
   const id = useId();
   const enabled = useWatch({ control: form.control, name: "buyNowEnabled" });
 
@@ -42,7 +44,7 @@ export function BuyNowSection({ form }: { form: UseFormReturn<AuctionFormValues>
       {enabled ? (
         <>
           <div className="sm:max-w-[calc(50%-0.5rem)]">
-            <BahtField form={form} name="buyNowPrice" id={`${id}-price`} label="ราคาซื้อทันที" hint="ต้องสูงกว่าราคาเริ่มต้น" />
+            <BahtField form={form} name="buyNowPrice" id={`${id}-price`} label={translate("ราคาซื้อทันที", "Buy now price")} hint="ต้องสูงกว่าราคาเริ่มต้น" />
           </div>
           <p className="flex items-start gap-2 rounded-lg bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800">
             <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useSearchParams } from "react-router-dom";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +11,7 @@ const TRIGGER =
 
 /** แท็บหน้า "โค้ดส่วนลดร้าน | ลดราคาสินค้า" ของ /seller/promotions (Figma SAL-S1) */
 export function SellerPromotionPageTabs({ value }: { value: "codes" | "sales" }) {
+  useLanguage();
   const [, setParams] = useSearchParams();
   const codes = useSellerPromotions("ALL", 0);
   const sales = useSellerSaleCount();
@@ -22,7 +24,7 @@ export function SellerPromotionPageTabs({ value }: { value: "codes" | "sales" })
           โค้ดส่วนลดร้าน <span className="text-[13px] font-medium">{codeCount ?? "–"}</span>
         </TabsTrigger>
         <TabsTrigger value="sales" className={TRIGGER}>
-          ลดราคาสินค้า <span className="text-[13px] font-medium">{sales.data ?? "–"}</span>
+          {translate("ลดราคาสินค้า", "Product discounts") + " "}<span className="text-[13px] font-medium">{sales.data ?? "–"}</span>
         </TabsTrigger>
       </TabsList>
     </Tabs>

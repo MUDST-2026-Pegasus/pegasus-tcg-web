@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type FormEvent } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -34,6 +35,7 @@ type FinanceReasonDialogProps = {
  * ฟอร์มอยู่ใน `DialogContent` ที่ถูก unmount ตอนปิด ค่าจึงรีเซ็ตเองทุกครั้ง
  */
 export function FinanceReasonDialog({ open, onOpenChange, title, description, ...form }: FinanceReasonDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -56,6 +58,7 @@ function ReasonForm({
 }: Pick<FinanceReasonDialogProps, "placeholder" | "confirmLabel" | "onConfirm" | "errorMessage"> & {
   onClose: () => void;
 }) {
+  useLanguage();
   const [reason, setReason] = useState("");
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -89,7 +92,7 @@ function ReasonForm({
       )}
 
       <Field data-invalid={(touched && missing) || undefined}>
-        <FieldLabel htmlFor="finance-reason">เหตุผล</FieldLabel>
+        <FieldLabel htmlFor="finance-reason">{translate("เหตุผล", "Reason")}</FieldLabel>
         <Textarea
           id="finance-reason"
           rows={4}
@@ -103,7 +106,7 @@ function ReasonForm({
       </Field>
 
       <DialogFooter>
-        <DialogClose render={<Button type="button" variant="outline" />}>ยกเลิก</DialogClose>
+        <DialogClose render={<Button type="button" variant="outline" />}>{translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" variant="destructive" disabled={submitting}>
           {submitting && <Spinner data-icon="inline-start" />}
           {confirmLabel}

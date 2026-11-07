@@ -1,3 +1,4 @@
+import { setLanguage } from "@/lib/language";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -60,3 +61,5 @@ describe("RouteError", () => {
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+beforeEach(() => setLanguage("th"));

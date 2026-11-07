@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { Card } from "@/components/ui/card";
@@ -13,9 +14,9 @@ import {
 import { compactBaht, type WeeklyTrendPoint } from "../weekly-report.format";
 
 const chartConfig = {
-  singles: { label: "การ์ดเดี่ยว", color: "#38bdf8" },
-  sealed: { label: "กล่อง/ซองสุ่ม", color: "var(--primary)" },
-  other: { label: "อื่น ๆ", color: "#cbd5e1" },
+  singles: { get label() { return translate("การ์ดเดี่ยว", "Single card"); }, color: "#38bdf8" },
+  sealed: { get label() { return translate("กล่อง/ซองสุ่ม", "Booster boxes / packs"); }, color: "var(--primary)" },
+  other: { get label() { return translate("อื่น ๆ", "Other"); }, color: "#cbd5e1" },
 } satisfies ChartConfig;
 
 const LEGEND_ORDER = ["singles", "sealed", "other"];
@@ -25,6 +26,7 @@ const LEGEND_ORDER = ["singles", "sealed", "other"];
  * ชั้น "อื่น ๆ" โผล่เฉพาะสัปดาห์ที่มี ทั้งกราฟจะได้รวมเท่ายอดขายบนการ์ด
  */
 export function WeeklyTrendChart({ points }: { points: WeeklyTrendPoint[] }) {
+  useLanguage();
   const hasOther = points.some((point) => point.other > 0);
 
   return (

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ type ConfirmOpenAuctionDialogProps = {
 
 /** ขั้น 3 · ยืนยันเปิดประมูล (Figma S3-A) — ต้องติ๊กรับทราบก่อนกด [TCG-633 · FE-7] */
 export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now, pending, onConfirm }: ConfirmOpenAuctionDialogProps) {
+  useLanguage();
   const [acknowledged, setAcknowledged] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
   // เปิดใหม่ทุกครั้งต้องติ๊กใหม่
@@ -38,14 +40,14 @@ export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now
   const closeAt = closeAtMs(values.closeDate, values.closeTime);
 
   const rows: [string, string][] = [
-    ["ราคาเริ่มต้น", start === null ? "—" : formatBaht(start)],
-    ["บิดขั้นต่ำครั้งละ", increment === null ? "—" : `+${formatBaht(increment)}`],
+    [translate("ราคาเริ่มต้น", "Starting price"), start === null ? "—" : formatBaht(start)],
+    [translate("บิดขั้นต่ำครั้งละ", "Minimum bid increment"), increment === null ? "—" : `+${formatBaht(increment)}`],
     [
       "ปิดประมูล",
       closeAt === null ? "—" : `${formatCloseDate(values.closeDate)} ${values.closeTime} (อีก ${formatCloseDuration(closeAt - now)})`,
     ],
-    ["ซื้อทันที", buyNow === null ? "ไม่เปิด" : `${formatBaht(buyNow)} (จนกว่าจะมีบิดแรก)`],
-    ["ค่าคอมมิชชั่น", `${ESTIMATED_COMMISSION_PERCENT}% เท่าการขายปกติ`],
+    [translate("ซื้อทันที", "Buy now"), buyNow === null ? "ไม่เปิด" : `${formatBaht(buyNow)} (จนกว่าจะมีบิดแรก)`],
+    [translate("ค่าคอมมิชชั่น", "Commission"), `${ESTIMATED_COMMISSION_PERCENT}% เท่าการขายปกติ`],
   ];
 
   return (
@@ -74,12 +76,10 @@ export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now
 
         <DialogFooter className="mt-5 flex-row justify-end gap-2.5 border-0 bg-transparent p-0">
           <DialogClose disabled={pending} render={<Button variant="outline" className="rounded-full px-5" />}>
-            ย้อนกลับ
-          </DialogClose>
+            {translate("ย้อนกลับ", "Back")}</DialogClose>
           <Button className="rounded-full px-5" disabled={!acknowledged || pending} onClick={onConfirm}>
             {pending ? <Spinner /> : null}
-            เปิดประมูล
-          </Button>
+            {translate("เปิดประมูล", "Start auction")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

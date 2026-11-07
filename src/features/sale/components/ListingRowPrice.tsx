@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { PriceTag, isOnSale, type ListingPricing } from "@/components/sale";
 import { formatListingPrice } from "@/features/catalog/listing.format";
 
@@ -6,6 +7,7 @@ import { formatListingPrice } from "@/features/catalog/listing.format";
  * ไม่ลดคงหน้าตาเดิม
  */
 export function ListingRowPrice({ price, pricing }: { price: number; pricing?: ListingPricing | null }) {
+  useLanguage();
   if (!isOnSale(pricing)) {
     return <strong className="text-right text-[15px]">{formatListingPrice(price)}</strong>;
   }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useId, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -50,7 +51,7 @@ const AUCTIONS_PATH = "/seller/auctions";
 const STEPS: CreateStep[] = [
   { id: "unit", label: "เลือกการ์ดจากสต็อก" },
   { id: "price-time", label: "ราคาและเวลา" },
-  { id: "review", label: "ตรวจสอบ" },
+  { id: "review", get label() { return translate("ตรวจสอบ", "Review"); } },
 ];
 const REVIEW_STEP = 2;
 
@@ -80,6 +81,7 @@ function readFromId(value: string | null): number | null {
  * โครงเดียวกับหน้า "ลงขายสินค้าใหม่" · `?from={auctionId}` = "ประมูลใหม่" เติมค่าจากประมูลเดิม
  */
 export function SellerAuctionCreatePage() {
+  useLanguage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -202,28 +204,26 @@ export function SellerAuctionCreatePage() {
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to={AUCTIONS_PATH} />}>การประมูลของฉัน</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to={AUCTIONS_PATH} />}>{translate("การประมูลของฉัน", "My auctions")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-medium text-gray-700">เปิดประมูลใหม่</BreadcrumbPage>
+            <BreadcrumbPage className="font-medium text-gray-700">{translate("เปิดประมูลใหม่", "Create auction")}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">เปิดประมูลใหม่</h1>
+          <h1 className="text-2xl font-bold text-foreground">{translate("เปิดประมูลใหม่", "Create auction")}</h1>
           <p className="text-xs text-gray-500">เลือกการ์ดจากสต็อกของคุณ ตั้งราคาเริ่มต้นและเวลา แล้วเลือกว่าจะเปิด "ซื้อทันที" หรือไม่</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-md px-2.5" nativeButton={false} render={<Link to={AUCTIONS_PATH} />}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           {step > 0 ? (
             <Button type="button" size="sm" className="rounded-md px-2.5" disabled={blocked || busy} title={blocked ? (reason ?? undefined) : undefined} onClick={openReview}>
-              เปิดประมูล
-            </Button>
+              {translate("เปิดประมูล", "Start auction")}</Button>
           ) : null}
         </div>
       </div>
@@ -260,7 +260,7 @@ export function SellerAuctionCreatePage() {
         <aside className="flex w-full shrink-0 flex-col gap-4 lg:w-80">
           <div className="flex items-center gap-1.5">
             <Eye aria-hidden className="size-4 text-slate-500" />
-            <p className="text-xs font-medium text-gray-500">ตัวอย่างที่ผู้ซื้อจะเห็น</p>
+            <p className="text-xs font-medium text-gray-500">{translate("ตัวอย่างที่ผู้ซื้อจะเห็น", "Buyer preview")}</p>
           </div>
           <div className="flex justify-center">
             <AuctionPreviewCard unit={unit} values={values} now={now} />
@@ -280,19 +280,17 @@ export function SellerAuctionCreatePage() {
             {step === 0 ? (
               <>
                 <Button variant="outline" size="sm" className="rounded-md px-2.5" nativeButton={false} render={<Link to={AUCTIONS_PATH} />}>
-                  ยกเลิก
-                </Button>
+                  {translate("ยกเลิก", "Cancel")}</Button>
                 <Button type="button" size="sm" className="rounded-md px-2.5" disabled={values.unitUid === null} onClick={handleNext}>
-                  ถัดไป: {STEPS[1].label}
+                  {translate("ถัดไป:", "Next:") + " "}{STEPS[1].label}
                 </Button>
               </>
             ) : (
               <>
                 <Button type="button" variant="outline" size="sm" className="rounded-md px-2.5" onClick={() => goTo(0)}>
-                  ย้อนกลับ
-                </Button>
+                  {translate("ย้อนกลับ", "Back")}</Button>
                 <Button type="button" size="sm" className="rounded-md px-2.5" disabled={blocked || busy} onClick={openReview}>
-                  ถัดไป: {STEPS[2].label}
+                  {translate("ถัดไป:", "Next:") + " "}{STEPS[2].label}
                 </Button>
               </>
             )}
@@ -315,6 +313,7 @@ export function SellerAuctionCreatePage() {
 
 /** ขั้น 2 หัวการ์ด: ใบที่เลือก + "เปลี่ยนการ์ด" + แถบสภาพตามสต็อก */
 function SelectedUnitCard({ unit, onChange }: { unit: EligibleUnit; onChange: () => void }) {
+  useLanguage();
   const { item } = unit;
   const chips = [item.gameName, item.cardNumber, item.rarity, item.setName].filter((chip): chip is string => Boolean(chip));
   return (
@@ -322,8 +321,7 @@ function SelectedUnitCard({ unit, onChange }: { unit: EligibleUnit; onChange: ()
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold text-foreground">การ์ดจากสต็อกของคุณ</h2>
         <Button type="button" variant="outline" size="sm" className="rounded-md px-2.5" onClick={onChange}>
-          เปลี่ยนการ์ด
-        </Button>
+          {translate("เปลี่ยนการ์ด", "Change card")}</Button>
       </div>
       <div className="flex items-center gap-4 rounded-xl bg-teal-50 p-3">
         <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-card">
@@ -346,7 +344,7 @@ function SelectedUnitCard({ unit, onChange }: { unit: EligibleUnit; onChange: ()
       </div>
       <p className="flex items-start gap-2 rounded-lg bg-slate-50 px-3.5 py-2.5 text-xs text-slate-600">
         <Lock aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-        สภาพ {conditionName(item.condition)} (ตามสต็อก) · การ์ดใบนี้จะถูกล็อกจากหน้าร้านระหว่างประมูล และกลับเข้าสต็อกเองถ้าไม่มีผู้บิด
+        {translate("สภาพ", "Condition") + " "}{conditionName(item.condition)} (ตามสต็อก) · การ์ดใบนี้จะถูกล็อกจากหน้าร้านระหว่างประมูล และกลับเข้าสต็อกเองถ้าไม่มีผู้บิด
       </p>
     </Card>
   );
@@ -354,6 +352,7 @@ function SelectedUnitCard({ unit, onChange }: { unit: EligibleUnit; onChange: ()
 
 /** การ์ด "ราคาและเวลาประมูล" */
 function PriceTimeCard({ form, unit, now }: { form: UseFormReturn<AuctionFormValues>; unit: EligibleUnit; now: number }) {
+  useLanguage();
   const id = useId();
   const [startingPrice, closeDate, closeTime] = useWatch({ control: form.control, name: ["startingPrice", "closeDate", "closeTime"] });
   const { errors, isSubmitted } = useFormState({ control: form.control, name: ["closeDate", "closeTime"] });
@@ -371,11 +370,11 @@ function PriceTimeCard({ form, unit, now }: { form: UseFormReturn<AuctionFormVal
           form={form}
           name="startingPrice"
           id={`${id}-start`}
-          label="ราคาเริ่มต้น"
+          label={translate("ราคาเริ่มต้น", "Starting price")}
           required
           hint={guide ? `ราคาตลาดตอนนี้ ${formatBaht(guide.median)}` : undefined}
         />
-        <BahtField form={form} name="bidIncrement" id={`${id}-increment`} label="บิดขั้นต่ำครั้งละ" required hint="แนะนำ ~5% ของราคาเริ่มต้น" />
+        <BahtField form={form} name="bidIncrement" id={`${id}-increment`} label={translate("บิดขั้นต่ำครั้งละ", "Minimum bid increment")} required hint="แนะนำ ~5% ของราคาเริ่มต้น" />
       </div>
 
       <Field className="gap-1.5">
@@ -404,6 +403,7 @@ function PriceTimeCard({ form, unit, now }: { form: UseFormReturn<AuctionFormVal
 
 /** การ์ด "หมายเหตุถึงผู้ซื้อ (ไม่บังคับ)" */
 function SellerNoteCard({ form }: { form: UseFormReturn<AuctionFormValues> }) {
+  useLanguage();
   const id = useId();
   const { errors } = useFormState({ control: form.control, name: "sellerNote" });
   return (

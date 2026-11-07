@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { toast } from "@/components/ui/toast";
@@ -17,6 +18,7 @@ type CategoriesSectionProps = {
 
 /** แท็บ "หมวดหมู่" — ตาราง + หน้าต่างเพิ่ม/แก้ สวิตช์เปิดใช้งานบันทึกทันที */
 export function CategoriesSection({ game, categories }: CategoriesSectionProps) {
+  useLanguage();
   const saveCategory = useSaveCategory();
   // ตัว admin ไม่มี URL รูป — รูปพังหรือโหลดไม่ขึ้นก็แค่โชว์ไอคอนแทน ไม่ต้องขวางทั้งตาราง
   const images = useCategoryImages(game.id);
@@ -42,7 +44,7 @@ export function CategoriesSection({ game, categories }: CategoriesSectionProps) 
           toast.add({
             type: "error",
             title: `บันทึก ${category.name} ไม่สำเร็จ`,
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            description: taxonomyErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );

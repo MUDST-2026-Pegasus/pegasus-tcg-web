@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { SaleProductCard } from "@/components/sale";
@@ -24,6 +25,7 @@ export function SaleFormAside({
   actions: ReactNode;
   note: string;
 }) {
+  useLanguage();
   const sample = sampleSaleCalculation(form);
   const flash = form.saleType === "FLASH_SALE";
   const percent = Math.round((100 * sample.discount) / sample.listPrice);
@@ -52,7 +54,7 @@ export function SaleFormAside({
                   sale: {
                     id: 0,
                     slug: form.slug || null,
-                    name: form.name || "แคมเปญ",
+                    name: form.name || translate("แคมเปญ", "Campaign"),
                     type: form.saleType,
                     endsAt: form.endsAt,
                     quotaLeft: flash ? Math.ceil(quota / 3) : null,
@@ -96,7 +98,7 @@ export function SaleFormAside({
         </dl>
       </Card>
       <Card className="gap-2 rounded-[12px] border border-border p-5 shadow-none ring-0">
-        <h2 className="text-[13px] font-semibold">สรุป</h2>
+        <h2 className="text-[13px] font-semibold">{translate("สรุป", "Summary")}</h2>
         <ul className="grid gap-0.5 text-xs">
           {summary.map((line) => (
             <li key={line}>• {line}</li>

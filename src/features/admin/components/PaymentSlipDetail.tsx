@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { AlertTriangle, CheckCircle2, ExternalLink, FileImage, Landmark } from "lucide-react";
 
@@ -29,6 +30,7 @@ type PaymentSlipDetailProps = {
  * ผู้เรียกใส่ `key={payment.id}` ให้ช่องเหตุผลล้างเองเมื่อเปลี่ยนรายการ
  */
 export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }: PaymentSlipDetailProps) {
+  useLanguage();
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState(false);
   const platformAccount = useTransferAccount();
@@ -54,7 +56,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
         : "—",
     },
     { label: "ชื่อบัญชีปลายทาง", value: account?.accountName ?? "—" },
-    { label: "วิธีชำระ", value: payment.method === "BANK_TRANSFER" ? "โอนผ่านธนาคาร" : payment.method },
+    { label: "วิธีชำระ", value: payment.method === "BANK_TRANSFER" ? translate("โอนผ่านธนาคาร", "Bank transfer") : payment.method },
     { label: "สร้างรายการเมื่อ", value: formatThaiDateTime(payment.createdAt) },
   ];
 
@@ -79,8 +81,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-foreground">{payment.buyer.username}</h2>
               <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-[11px] font-medium text-[#b45309]">
-                รอตรวจสอบ
-              </Badge>
+                {translate("รอตรวจสอบ", "Pending review")}</Badge>
               <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
                 {payment.status}
               </Badge>
@@ -153,14 +154,14 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
 
       <Card className="gap-3 rounded-xl border border-border px-5 py-[18px] shadow-none ring-0">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-sm font-semibold text-foreground">ผลการตรวจสอบ</p>
+          <p className="text-sm font-semibold text-foreground">{translate("ผลการตรวจสอบ", "Review result")}</p>
           <p className="text-xs text-muted-foreground">
             ตรวจยอด วันเวลา และบัญชีปลายทางในสลิปให้ตรงกับข้อมูลด้านบน · ถ้าปฏิเสธต้องระบุเหตุผล
             และผู้ซื้อต้องสร้างรายการชำระใหม่
           </p>
         </div>
         <Textarea
-          aria-label="เหตุผลที่ปฏิเสธ"
+          aria-label={translate("เหตุผลที่ปฏิเสธ", "Rejection reason")}
           rows={3}
           maxLength={255}
           value={reason}
@@ -214,6 +215,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
 
 /** รูปสลิปจาก presigned URL — เป็น PDF หรือลิงก์หมดอายุก็ยังมีปุ่มเปิดไฟล์ให้ */
 function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number }) {
+  useLanguage();
   const [broken, setBroken] = useState(false);
   const fileName = url ? fileNameOf(url) : null;
 

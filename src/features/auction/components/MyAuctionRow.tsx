@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { TriangleAlert } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -30,6 +31,7 @@ type MyAuctionRowProps = {
  * หัวสีเทาอ่อน (รหัส · เวลาปิด · ตัวนับ · ป้าย) → รูป + ชื่อ + ราคา → แถบปุ่ม (ตามแบบ Order History)
  */
 export function MyAuctionRow({ auction, serverTime }: MyAuctionRowProps) {
+  useLanguage();
   const { state, item } = auction;
   const toPay = state === "WON_AWAITING_PAYMENT";
   const actions = myAuctionActions(state);
@@ -42,13 +44,13 @@ export function MyAuctionRow({ auction, serverTime }: MyAuctionRowProps) {
       <CardHeader className="flex flex-row items-center justify-between gap-4 rounded-none border-b bg-muted/40 px-4 py-3">
         <div className="flex gap-6">
           <div>
-            <p className="text-[10px] font-medium text-muted-foreground">AUCTION</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{translate("ประมูล", "AUCTION")}</p>
             <p className="text-sm font-semibold">#{auction.auctionNumber}</p>
           </div>
           <div>
-            <p className="text-[10px] font-medium text-muted-foreground">{isBiddingState(state) ? "ปิด" : "ปิดเมื่อ"}</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{isBiddingState(state) ? translate("ปิด", "Close") : "ปิดเมื่อ"}</p>
             <p className="text-sm font-semibold">
-              {isBiddingState(state) && auction.extended ? "ต่อเวลาอยู่" : formatAuctionShortDateTime(auction.endsAt)}
+              {isBiddingState(state) && auction.extended ? translate("ต่อเวลาอยู่", "Extended") : formatAuctionShortDateTime(auction.endsAt)}
             </p>
           </div>
         </div>
@@ -71,9 +73,7 @@ export function MyAuctionRow({ auction, serverTime }: MyAuctionRowProps) {
           </p>
           {toPay ? (
             <p className="mt-1 flex items-center gap-1 text-xs font-medium text-amber-700">
-              <TriangleAlert aria-hidden className="size-3.5 shrink-0" />
-              ไม่ชำระใน 24 ชม. = คำสั่งซื้อถูกยกเลิก และถูกบันทึกไม่ชำระ 1 ครั้ง
-            </p>
+              <TriangleAlert aria-hidden className="size-3.5 shrink-0" />{translate("ไม่ชำระใน 24 ชม. = คำสั่งซื้อถูกยกเลิก และถูกบันทึกไม่ชำระ 1 ครั้ง", "No payment within 24 hours = order cancellation and one non-payment strike")}</p>
           ) : null}
         </div>
         <RowPrice auction={auction} />
@@ -91,8 +91,9 @@ export function MyAuctionRow({ auction, serverTime }: MyAuctionRowProps) {
 }
 
 function RowCountdown({ auction, serverTime }: MyAuctionRowProps) {
+  useLanguage();
   if (auction.state === "WON_AWAITING_PAYMENT" && auction.deadline) {
-    return <AuctionCountdown target={auction.deadline} serverTime={serverTime} prefix="ชำระภายใน" tone="urgent" />;
+    return <AuctionCountdown target={auction.deadline} serverTime={serverTime} prefix={translate("ชำระภายใน", "Pay within")} tone="urgent" />;
   }
   if (isBiddingState(auction.state)) {
     return <AuctionCountdown target={auction.endsAt} serverTime={serverTime} prefix="" />;
@@ -102,6 +103,7 @@ function RowCountdown({ auction, serverTime }: MyAuctionRowProps) {
 
 /** ราคาขวาของแถวตามตารางสถานะในการ์ด FE-5 */
 function RowPrice({ auction }: { auction: MyAuction }) {
+  useLanguage();
   const { state } = auction;
   const big = "text-2xl font-bold tabular-nums";
   const small = "text-xs text-muted-foreground tabular-nums";
@@ -112,16 +114,16 @@ function RowPrice({ auction }: { auction: MyAuction }) {
     case "WON_AWAITING_PAYMENT":
       content = (
         <>
-          <span className={label}>ยอดชำระ (รวมส่ง)</span>
+          <span className={label}>{translate("ยอดชำระ (รวมส่ง)", "Total payment (including shipping)")}</span>
           <span className={cn(big, "text-primary")}>{formatBaht(auction.totalDue ?? auction.currentPrice + auction.shippingFee)}</span>
-          <span className={small}>ราคาชนะ {formatBaht(auction.currentPrice)}</span>
+          <span className={small}>{translate("ราคาชนะ", "Winning price")}{formatBaht(auction.currentPrice)}</span>
         </>
       );
       break;
     case "LEADING":
       content = (
         <>
-          <span className={label}>บิดของคุณ (สูงสุด)</span>
+          <span className={label}>{translate("บิดของคุณ (สูงสุด)", "Your highest bid")}</span>
           <span className={cn(big, "text-emerald-700")}>{formatBaht(auction.myHighestBid)}</span>
         </>
       );
@@ -129,16 +131,16 @@ function RowPrice({ auction }: { auction: MyAuction }) {
     case "OUTBID":
       content = (
         <>
-          <span className={label}>ราคาตอนนี้</span>
+          <span className={label}>{translate("ราคาตอนนี้", "Current price")}</span>
           <span className={cn(big, "text-foreground")}>{formatBaht(auction.currentPrice)}</span>
-          <span className={small}>บิดของคุณ {formatBaht(auction.myHighestBid)}</span>
+          <span className={small}>{translate("บิดของคุณ", "Your bid")}{formatBaht(auction.myHighestBid)}</span>
         </>
       );
       break;
     case "WON":
       content = (
         <>
-          <span className={label}>ราคาชนะ</span>
+          <span className={label}>{translate("ราคาชนะ", "Winning price")}</span>
           <span className={cn(big, "text-foreground")}>{formatBaht(auction.currentPrice)}</span>
         </>
       );
@@ -146,9 +148,9 @@ function RowPrice({ auction }: { auction: MyAuction }) {
     case "LOST":
       content = (
         <>
-          <span className={label}>ราคาปิด</span>
+          <span className={label}>{translate("ราคาปิด", "Closing price")}</span>
           <span className={cn(big, "text-foreground")}>{formatBaht(auction.currentPrice)}</span>
-          <span className={small}>บิดสูงสุดของคุณ {formatBaht(auction.myHighestBid)}</span>
+          <span className={small}>{translate("บิดสูงสุดของคุณ", "Your highest bid")}{formatBaht(auction.myHighestBid)}</span>
         </>
       );
       break;
@@ -157,6 +159,7 @@ function RowPrice({ auction }: { auction: MyAuction }) {
 }
 
 function RowButton({ action, auction, primary }: { action: MyAuctionAction; auction: MyAuction; primary: boolean }) {
+  useLanguage();
   const { to, label } = buttonTarget(action, auction);
   return (
     <Button
@@ -174,12 +177,12 @@ function RowButton({ action, auction, primary }: { action: MyAuctionAction; auct
 function buttonTarget(action: MyAuctionAction, auction: MyAuction): { to: string; label: string } {
   switch (action) {
     case "VIEW_AUCTION":
-      return { to: `/auctions/${auction.id}`, label: "ดูประมูล" };
+      return { to: `/auctions/${auction.id}`, label: translate("ดูประมูล", "View auction") };
     case "PAY":
-      return { to: `/checkout?auction=${auction.id}`, label: "ชำระเงิน" };
+      return { to: `/checkout?auction=${auction.id}`, label: translate("ชำระเงิน", "Checkout") };
     case "BID":
-      return { to: `/auctions/${auction.id}`, label: `บิด ${formatBaht(auction.minNextBid ?? auction.currentPrice)}` };
+      return { to: `/auctions/${auction.id}`, label: translate(`บิด ${formatBaht(auction.minNextBid ?? auction.currentPrice)}`, `Bid ${formatBaht(auction.minNextBid ?? auction.currentPrice)}`) };
     case "VIEW_ORDER":
-      return { to: auction.orderId ? `/account/orders?orderId=${auction.orderId}` : "/account/orders", label: "ดูคำสั่งซื้อ" };
+      return { to: auction.orderId ? `/account/orders?orderId=${auction.orderId}` : "/account/orders", label: translate("ดูคำสั่งซื้อ", "View order") };
   }
 }

@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 
@@ -24,6 +25,7 @@ export function Segmented<T extends string>({
   onChange: (value: T) => void;
   disabled?: boolean;
 }) {
+  useLanguage();
   return (
     <ToggleGroup
       aria-label={label}
@@ -53,6 +55,7 @@ export function Segmented<T extends string>({
 
 /** ชิปที่เลือกแล้ว (ฟ้า + ×) */
 export function SelectedChip({ label, onRemove, disabled }: { label: string; onRemove: () => void; disabled?: boolean }) {
+  useLanguage();
   return (
     <Badge
       variant="outline"
@@ -98,6 +101,7 @@ export function ChipPicker({
   /** ค้นที่ server แทนการกรองในเครื่อง (ร้านค้า) */
   onSearch?: (q: string) => void;
 }) {
+  useLanguage();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const labels = new Map(options.map((option) => [option.id, option.label]));
@@ -160,8 +164,7 @@ export function ChipPicker({
             {loading ? (
               <span role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Spinner className="size-3.5" />
-                กำลังโหลด…
-              </span>
+                {translate("กำลังโหลด…", "Loading…")}</span>
             ) : null}
             {!loading && matches.length === 0 ? (
               <span className="text-xs text-muted-foreground">
@@ -190,6 +193,7 @@ export function ToggleChips<T extends string>({
   onChange: (values: T[]) => void;
   disabled?: boolean;
 }) {
+  useLanguage();
   return (
     <ToggleGroup
       aria-label={label}

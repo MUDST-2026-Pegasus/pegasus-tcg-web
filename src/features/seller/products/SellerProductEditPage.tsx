@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useEffect } from "react";
 
 import { useParams, useSearchParams } from "react-router-dom";
@@ -12,6 +13,7 @@ import { parseListingId } from "./products.format";
 import { useMyListing } from "./products.queries";
 
 export function SellerProductEditPage() {
+  useLanguage();
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
   const listingId = parseListingId(productId);
@@ -35,6 +37,7 @@ function ListingEditLoader({
   listingId: number;
   focusPrice: boolean;
 }) {
+  useLanguage();
   const listing = useMyListing(listingId);
 
   if (hasErrorCode(listing.error, "LISTING_NOT_FOUND")) {

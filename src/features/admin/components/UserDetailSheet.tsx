@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import {
@@ -64,6 +65,7 @@ export function UserDetailSheet({
   onStatusAction,
   onManageRoles,
 }: UserDetailSheetProps) {
+  useLanguage();
   const detail = useAdminUser(userId, preview);
 
   return (
@@ -89,7 +91,7 @@ export function UserDetailSheet({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="ปิด"
+                aria-label={translate("ปิด", "Close")}
                 className="size-7 rounded-[7px] text-muted-foreground"
               />
             }
@@ -133,13 +135,14 @@ type UserDetailBodyProps = {
 };
 
 function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDetailBodyProps) {
+  useLanguage();
   const isSeller = user.roles.includes("SELLER");
 
   function copyEmail() {
     navigator.clipboard
       .writeText(user.email)
       .then(() => toast.add({ type: "success", title: "คัดลอกอีเมลแล้ว" }))
-      .catch(() => toast.add({ type: "error", title: "คัดลอกไม่สำเร็จ" }));
+      .catch(() => toast.add({ type: "error", title: translate("คัดลอกไม่สำเร็จ", "Unable to copy") }));
   }
 
   return (
@@ -156,7 +159,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           <div className="flex min-w-0 flex-col gap-1">
             <p className="flex items-center gap-1.5">
               <span className="truncate text-[17px] font-bold text-foreground">{user.displayName}</span>
-              {isSelf ? <span className="text-[11px] font-medium text-[#0058bc]">(คุณ)</span> : null}
+              {isSelf ? <span className="text-[11px] font-medium text-[#0058bc]">{translate("(คุณ)", "(you)")}</span> : null}
             </p>
             <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
             <div className="flex flex-wrap items-center gap-1">
@@ -197,7 +200,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
             </span>
           }
         >
-          <Row label="อีเมล">
+          <Row label={translate("อีเมล", "Email")}>
             <span className="truncate">{user.email}</span>
             <button
               type="button"
@@ -212,7 +215,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
             <span>{formatPhone(user.phone)}</span>
             {user.phone ? (
               <span className="shrink-0 rounded-full bg-[#f1f3f4] px-2 py-[3px] text-[10px] font-medium text-muted-foreground">
-                {user.phonePublic ? "แสดงบนหน้าร้าน" : "ไม่แสดงต่อสาธารณะ"}
+                {user.phonePublic ? translate("แสดงบนหน้าร้าน", "Show on storefront") : "ไม่แสดงต่อสาธารณะ"}
               </span>
             ) : null}
           </Row>
@@ -221,10 +224,10 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
         <Divider />
 
         <Section title="บัญชี">
-          <Row label="สมัครเมื่อ">{formatThaiDate(user.createdAt)}</Row>
-          <Row label="เข้าใช้ล่าสุด">{formatLastLogin(user.lastLoginAt)}</Row>
+          <Row label={translate("สมัครเมื่อ", "Registered on")}>{formatThaiDate(user.createdAt)}</Row>
+          <Row label={translate("เข้าใช้ล่าสุด", "Last active")}>{formatLastLogin(user.lastLoginAt)}</Row>
           {user.status === "ACTIVE" && !isSelf ? (
-            <Row label="สถานะ">{USER_STATUS_LABEL[user.status]}</Row>
+            <Row label={translate("สถานะ", "Status")}>{USER_STATUS_LABEL[user.status]}</Row>
           ) : null}
         </Section>
 
@@ -241,7 +244,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
         <Divider />
 
         <Section
-          title="บทบาท"
+          title={translate("บทบาท", "Role")}
           aside={
             isSelf ? (
               <span className="text-[11px] font-medium text-[#9aa5ad]">ถอน ADMIN ตัวเองไม่ได้</span>
@@ -253,8 +256,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
                 onClick={() => onManageRoles(user)}
                 className="rounded-sm text-[11px] font-medium text-[#0058bc] hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
-                จัดการบทบาท…
-              </button>
+                {translate("จัดการบทบาท…", "Manage roles…")}</button>
             )
           }
         >
@@ -283,15 +285,13 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           <>
             <p className="text-[11px] text-[#9aa5ad]">ปุ่มจัดการถูกปิดสำหรับบัญชีตัวเอง</p>
             <Button size="sm" className={cn("ml-auto", USER_DANGER_BUTTON)} disabled>
-              ระงับบัญชี
-            </Button>
+              {translate("ระงับบัญชี", "Suspend account")}</Button>
           </>
         ) : (
           <>
             {user.status !== "DEACTIVATED" ? (
               <Button variant="ghost" size="sm" onClick={() => onStatusAction(user, "deactivate")}>
-                ปิดบัญชี
-              </Button>
+                {translate("ปิดบัญชี", "Close account")}</Button>
             ) : null}
             {user.status === "ACTIVE" ? (
               <Button
@@ -299,12 +299,10 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
                 className={cn("ml-auto", USER_DANGER_BUTTON)}
                 onClick={() => onStatusAction(user, "suspend")}
               >
-                ระงับบัญชี
-              </Button>
+                {translate("ระงับบัญชี", "Suspend account")}</Button>
             ) : (
               <Button size="sm" className="ml-auto" onClick={() => onStatusAction(user, "restore")}>
-                เปิดใช้งานอีกครั้ง
-              </Button>
+                {translate("เปิดใช้งานอีกครั้ง", "Enable again")}</Button>
             )}
           </>
         )}
@@ -322,6 +320,7 @@ function Section({
   aside?: ReactNode;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <section className="flex flex-col gap-2.5">
       <div className="flex min-h-[18px] items-center justify-between gap-2">
@@ -334,6 +333,7 @@ function Section({
 }
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
+  useLanguage();
   return (
     <div className="flex items-center gap-2 text-xs">
       <span className="shrink-0 text-muted-foreground">{label}</span>
@@ -345,6 +345,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function Divider() {
+  useLanguage();
   return <div aria-hidden="true" className="h-px shrink-0 bg-muted" />;
 }
 
@@ -365,6 +366,7 @@ function Banner({
   title: string;
   description: string;
 }) {
+  useLanguage();
   return (
     <div
       role="status"
@@ -383,6 +385,7 @@ function Banner({
 }
 
 function UserNotFound({ onClose }: { onClose: () => void }) {
+  useLanguage();
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 pt-5 pb-6 text-center">
@@ -397,14 +400,14 @@ function UserNotFound({ onClose }: { onClose: () => void }) {
       </div>
       <footer className="flex justify-end border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         <Button variant="outline" size="sm" onClick={onClose}>
-          ปิด
-        </Button>
+          {translate("ปิด", "Close")}</Button>
       </footer>
     </>
   );
 }
 
 function SkeletonRows() {
+  useLanguage();
   return (
     <div className="flex flex-col gap-2.5">
       <Skeleton className="h-2.5 w-20 rounded" />
@@ -421,6 +424,7 @@ function SkeletonRows() {
 }
 
 function UserDetailSkeleton() {
+  useLanguage();
   return (
     <>
       <div aria-busy="true" className="flex flex-1 flex-col gap-5 px-6 pt-5 pb-6">

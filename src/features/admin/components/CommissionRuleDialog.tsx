@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Pencil, Plus, Power, Trash2, TriangleAlert } from "lucide-react";
 
@@ -57,16 +58,17 @@ const SIGNED_INTEGER = /^-?\d*$/;
 function ruleErrorMessage(error: unknown) {
   if (hasErrorCode(error, "GAME_NOT_FOUND")) return "ไม่พบเกมนี้ในระบบแล้ว";
   if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return "ไม่พบหมวดหมู่นี้ในระบบแล้ว";
-  if (hasErrorCode(error, "SELLER_NOT_FOUND")) return "ไม่พบร้านค้ารหัสนี้";
+  if (hasErrorCode(error, "SELLER_NOT_FOUND")) return translate("ไม่พบร้านค้ารหัสนี้", "Shop ID not found");
   if (hasErrorCode(error, "COMMISSION_RULE_NOT_FOUND")) return "กฎนี้ไม่มีอยู่ในระบบแล้ว";
   if (hasErrorCode(error, "COMMISSION_RULE_INVALID", "VALIDATION_FAILED")) return "ข้อมูลกฎไม่ถูกต้อง กรุณาตรวจอีกครั้ง";
   if (isApiError(error) && error.status === 403) return "บัญชีนี้ไม่มีสิทธิ์ ADMIN";
-  return getErrorMessage(error, "กรุณาลองอีกครั้ง");
+  return getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again"));
 }
 
 export function CommissionRuleDialog({
   open, onOpenChange, request, rules, games, categories, onChanged,
 }: CommissionRuleDialogProps) {
+  useLanguage();
   const [view, setView] = useState<"list" | "form">(request.view);
   const [editing, setEditing] = useState<CommissionRule | null>(request.view === "form" ? request.rule : null);
   const [draft, setDraft] = useState<RuleDraft>(() => request.view !== "form" ? blankDraft()
@@ -78,7 +80,7 @@ export function CommissionRuleDialog({
   // error จาก backend (เช่นไม่พบร้านค้า) ผูกกับค่าที่ส่งไป — แก้ฟอร์มเมื่อไหร่ก็ล้างทิ้ง
   const changeDraft = (update: (old: RuleDraft) => RuleDraft) => { setServerErrors({}); setDraft(update); };
   const gameName = (id: number | null) => games.find((game) => game.id === id)?.name;
-  const categoryLabel = (category: CategoryDto) => `${gameName(category.gameId) ?? "ทุกเกม"} · ${category.name}`;
+  const categoryLabel = (category: CategoryDto) => `${gameName(category.gameId) ?? translate("ทุกเกม", "All games")} · ${category.name}`;
   const targetName = (rule: Pick<CommissionRule, "scope" | "gameId" | "categoryId" | "sellerProfileId">) => {
     switch (rule.scope) {
       case "GLOBAL": return "ทั้งแพลตฟอร์ม";
@@ -99,7 +101,7 @@ export function CommissionRuleDialog({
     setView("form");
   }
 
-  async function run(action: () => Promise<unknown>, success: string, failure = "บันทึกไม่สำเร็จ") {
+  async function run(action: () => Promise<unknown>, success: string, failure = translate("บันทึกไม่สำเร็จ", "Unable to save")) {
     setBusy(true);
     try {
       await action();
@@ -107,7 +109,7 @@ export function CommissionRuleDialog({
       toast.add({ type: "success", title: success });
       return true;
     } catch (error) {
-      if (hasErrorCode(error, "SELLER_NOT_FOUND")) setServerErrors({ target: "ไม่พบร้านค้ารหัสนี้" });
+      if (hasErrorCode(error, "SELLER_NOT_FOUND")) setServerErrors({ target: translate("ไม่พบร้านค้ารหัสนี้", "Shop ID not found") });
       toast.add({ type: "error", title: failure, description: ruleErrorMessage(error) });
       return false;
     } finally {
@@ -134,7 +136,7 @@ export function CommissionRuleDialog({
     : run(() => afterSalesApi.deactivateCommissionRule(rule.id), `ปิดใช้งานกฎ #${rule.id} แล้ว`);
   // ลบถาวร — คำสั่งซื้อเดิมเก็บอัตราและยอดค่าคอมที่คิดไว้ตอนสั่งซื้อ จึงไม่กระทบย้อนหลัง
   const remove = (rule: CommissionRule) =>
-    run(() => afterSalesApi.deleteCommissionRule(rule.id), `ลบกฎ #${rule.id} แล้ว`, "ลบไม่สำเร็จ");
+    run(() => afterSalesApi.deleteCommissionRule(rule.id), `ลบกฎ #${rule.id} แล้ว`, translate("ลบไม่สำเร็จ", "Unable to delete"));
   async function removeEditing() {
     if (editing && await remove(editing)) setView("list");
   }
@@ -169,6 +171,7 @@ type RuleListProps = {
 type PendingAction = { id: number; action: "deactivate" | "delete" };
 
 function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelete }: RuleListProps) {
+  useLanguage();
   const [scope, setScope] = useState<RuleScope | "ALL">("ALL");
   const [showInactive, setShowInactive] = useState(false);
   const [pending, setPending] = useState<PendingAction | null>(null);
@@ -196,14 +199,13 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
           <button key={value} type="button" role="tab" aria-selected={scope === value} onClick={() => setScope(value)}
             className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               scope === value ? "border-foreground bg-foreground text-background" : "border-border text-[#414755] hover:bg-[#fafbfb]")}>
-            {value === "ALL" ? "ทั้งหมด" : scopeLabel(value)} <span className="opacity-60">{count(value)}</span>
+            {value === "ALL" ? translate("ทั้งหมด", "All") : scopeLabel(value)} <span className="opacity-60">{count(value)}</span>
           </button>
         ))}
       </div>
       <label className="ml-auto flex items-center gap-2 text-xs text-[#414755]">
-        <Switch size="sm" checked={showInactive} onCheckedChange={setShowInactive} aria-label="แสดงกฎที่ปิดใช้งาน" />
-        แสดงกฎที่ปิดใช้งาน
-      </label>
+        <Switch size="sm" checked={showInactive} onCheckedChange={setShowInactive} aria-label={translate("แสดงกฎที่ปิดใช้งาน", "Show disabled rules")} />
+        {translate("แสดงกฎที่ปิดใช้งาน", "Show disabled rules")}</label>
       <Button size="sm" className="rounded-md px-2.5" onClick={onAdd}><Plus />เพิ่มกฎ</Button>
     </div>
 
@@ -227,7 +229,7 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
                 {rule.fixedFee > 0 && <> + {baht(rule.fixedFee)}</>}
                 {rule.minFee != null && <> · ขั้นต่ำ {baht(rule.minFee)}</>}
                 {rule.maxFee != null && <> · ขั้นสูง {baht(rule.maxFee)}</>}
-                {" · "}ลำดับ {rule.priority}
+                {" · "}{translate("ลำดับ", "Display order") + " "}{rule.priority}
               </p>
               <p className="text-[11px] text-[#9aa5ad]">
                 {dateTime(rule.effectiveFrom)} – {rule.effectiveTo ? dateTime(rule.effectiveTo) : "ไม่มีกำหนดสิ้นสุด"}
@@ -243,14 +245,14 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
                 }} />
               : <div className="flex items-center gap-1.5">
                 <Button size="sm" variant="outline" className="rounded-md px-2.5" disabled={busy}
-                  aria-label={`แก้ไขกฎ #${rule.id}`} onClick={() => onEdit(rule)}><Pencil />แก้ไข</Button>
+                  aria-label={`แก้ไขกฎ #${rule.id}`} onClick={() => onEdit(rule)}><Pencil />{translate("แก้ไข", "Edit")}</Button>
                 {rule.active
                   ? <Button size="sm" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
-                    aria-label={`ปิดใช้งานกฎ #${rule.id}`} onClick={() => setPending({ id: rule.id, action: "deactivate" })}><Power />ปิด</Button>
+                    aria-label={`ปิดใช้งานกฎ #${rule.id}`} onClick={() => setPending({ id: rule.id, action: "deactivate" })}><Power />{translate("ปิด", "Close")}</Button>
                   : <Button size="sm" variant="ghost" className="rounded-md px-2.5" disabled={busy}
-                    aria-label={`เปิดใช้งานกฎ #${rule.id}`} onClick={() => void onSetActive(rule, true)}><Power />เปิด</Button>}
+                    aria-label={`เปิดใช้งานกฎ #${rule.id}`} onClick={() => void onSetActive(rule, true)}><Power />{translate("เปิด", "Open")}</Button>}
                 <Button size="icon-sm" variant="ghost" className="rounded-md text-destructive" disabled={busy}
-                  aria-label={`ลบกฎ #${rule.id}`} title="ลบกฎ" onClick={() => setPending({ id: rule.id, action: "delete" })}><Trash2 /></Button>
+                  aria-label={`ลบกฎ #${rule.id}`} title={translate("ลบกฎ", "Delete rule")} onClick={() => setPending({ id: rule.id, action: "delete" })}><Trash2 /></Button>
               </div>}
           </li>
         );
@@ -280,6 +282,7 @@ type RuleFormProps = {
 function RuleForm({
   draft, setDraft, editing, rules, busy, errors, games, categories, categoryLabel, targetName, onBack, onSubmit, onDelete,
 }: RuleFormProps) {
+  useLanguage();
   const id = useId();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [samplePrice, setSamplePrice] = useState("1290");
@@ -328,8 +331,8 @@ function RuleForm({
 
       <div className="grid min-h-0 flex-1 gap-6 overflow-y-auto px-6 py-5 md:grid-cols-[minmax(0,1fr)_260px]">
         <div className="flex flex-col gap-5">
-          <Section title="ใช้กับ">
-            <div role="radiogroup" aria-label="ขอบเขต" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Section title={translate("ใช้กับ", "Applies to")}>
+            <div role="radiogroup" aria-label={translate("ขอบเขต", "Scope")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {SCOPE_OPTIONS.map((option) => (
                 <button key={option.value} type="button" role="radio" aria-checked={draft.scope === option.value}
                   onClick={() => setDraft((old) => ({ ...old, scope: option.value }))}
@@ -344,11 +347,11 @@ function RuleForm({
             <p className="text-[11px] text-muted-foreground">{scopeHint}</p>
 
             {draft.scope === "GAME" && <Field className="gap-1.5" data-invalid={!!errors.target}>
-              <FieldLabel htmlFor={`${id}-game`} className="text-xs">เกม</FieldLabel>
+              <FieldLabel htmlFor={`${id}-game`} className="text-xs">{translate("เกม", "Game")}</FieldLabel>
               <Select value={draft.gameId == null ? null : String(draft.gameId)} items={gameItems}
                 onValueChange={(value) => update("gameId", value == null ? null : Number(value))}>
                 <SelectTrigger id={`${id}-game`} aria-invalid={!!errors.target} className={cn(FIELD, "w-full")}>
-                  <SelectValue placeholder="เลือกเกม" />
+                  <SelectValue placeholder={translate("เลือกเกม", "Select game")} />
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false}><SelectGroup>
                   {gameItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
@@ -358,11 +361,11 @@ function RuleForm({
             </Field>}
 
             {draft.scope === "CATEGORY" && <Field className="gap-1.5" data-invalid={!!errors.target}>
-              <FieldLabel htmlFor={`${id}-category`} className="text-xs">หมวดหมู่</FieldLabel>
+              <FieldLabel htmlFor={`${id}-category`} className="text-xs">{translate("หมวดหมู่", "Category")}</FieldLabel>
               <Select value={draft.categoryId == null ? null : String(draft.categoryId)} items={categoryItems}
                 onValueChange={(value) => update("categoryId", value == null ? null : Number(value))}>
                 <SelectTrigger id={`${id}-category`} aria-invalid={!!errors.target} className={cn(FIELD, "w-full")}>
-                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                  <SelectValue placeholder={translate("เลือกหมวดหมู่", "Select category")} />
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false}><SelectGroup>
                   {categoryItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
@@ -391,9 +394,9 @@ function RuleForm({
               <NumberField id={`${id}-fixed`} label="ค่าธรรมเนียมคงที่ต่อคำสั่งซื้อ" prefix="฿" placeholder="0.00"
                 value={draft.fixedFee} onChange={typed("fixedFee", DECIMAL)} error={errors.fixedFee}
                 hint="บวกเพิ่มจากส่วนเปอร์เซ็นต์ เว้นว่าง = 0" />
-              <NumberField id={`${id}-min`} label="เก็บขั้นต่ำ" prefix="฿" placeholder="ไม่กำหนด"
+              <NumberField id={`${id}-min`} label="เก็บขั้นต่ำ" prefix="฿" placeholder={translate("ไม่กำหนด", "Not specified")}
                 value={draft.minFee} onChange={typed("minFee", DECIMAL)} error={errors.minFee} />
-              <NumberField id={`${id}-max`} label="เก็บสูงสุด" prefix="฿" placeholder="ไม่กำหนด"
+              <NumberField id={`${id}-max`} label="เก็บสูงสุด" prefix="฿" placeholder={translate("ไม่กำหนด", "Not specified")}
                 value={draft.maxFee} onChange={typed("maxFee", DECIMAL)} error={errors.maxFee} />
             </div>
           </Section>
@@ -401,15 +404,15 @@ function RuleForm({
           <Section title="ช่วงเวลาและลำดับ">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field className="gap-1.5" data-invalid={!!errors.effectiveFrom}>
-                <FieldLabel htmlFor={`${id}-from`} className="text-xs">เริ่มมีผล</FieldLabel>
-                <DateTimePicker id={`${id}-from`} aria-label="เริ่มมีผล" className={cn(FIELD, "hover:bg-card")}
+                <FieldLabel htmlFor={`${id}-from`} className="text-xs">{translate("เริ่มมีผล", "Effective from")}</FieldLabel>
+                <DateTimePicker id={`${id}-from`} aria-label={translate("เริ่มมีผล", "Effective from")} className={cn(FIELD, "hover:bg-card")}
                   invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
                   onChange={(value) => update("effectiveFrom", value)} />
                 <FieldError className="text-xs">{errors.effectiveFrom}</FieldError>
               </Field>
               <Field className="gap-1.5" data-invalid={!!errors.effectiveTo}>
-                <FieldLabel htmlFor={`${id}-to`} className="text-xs">สิ้นสุด</FieldLabel>
-                <DateTimePicker id={`${id}-to`} aria-label="สิ้นสุด" className={cn(FIELD, "hover:bg-card")} defaultTime="23:59"
+                <FieldLabel htmlFor={`${id}-to`} className="text-xs">{translate("สิ้นสุด", "Ended")}</FieldLabel>
+                <DateTimePicker id={`${id}-to`} aria-label={translate("สิ้นสุด", "Ended")} className={cn(FIELD, "hover:bg-card")} defaultTime="23:59"
                   invalid={!!errors.effectiveTo} min={draft.effectiveFrom} value={draft.effectiveTo}
                   onChange={(value) => update("effectiveTo", value)} />
                 <FieldDescription className="text-[11px]">เว้นว่าง = ใช้ต่อไปจนกว่าจะปิด</FieldDescription>
@@ -419,8 +422,8 @@ function RuleForm({
                 value={draft.priority} onChange={typed("priority", SIGNED_INTEGER)} error={errors.priority}
                 hint="ใช้ตัดสินเมื่อมีหลายกฎในขอบเขตเดียวกัน ค่ามากชนะ" />
               <Field orientation="horizontal" className="items-center gap-2.5 self-start pt-6">
-                <Switch id={`${id}-active`} aria-label="เปิดใช้งานกฎนี้" checked={draft.active} onCheckedChange={(checked) => update("active", checked)} />
-                <FieldLabel htmlFor={`${id}-active`} className="text-[13px] font-normal">เปิดใช้งานกฎนี้</FieldLabel>
+                <Switch id={`${id}-active`} aria-label={translate("เปิดใช้งานกฎนี้", "Enable this rule")} checked={draft.active} onCheckedChange={(checked) => update("active", checked)} />
+                <FieldLabel htmlFor={`${id}-active`} className="text-[13px] font-normal">{translate("เปิดใช้งานกฎนี้", "Enable this rule")}</FieldLabel>
               </Field>
             </div>
           </Section>
@@ -436,10 +439,9 @@ function RuleForm({
         </div>
 
         <aside className="flex h-fit flex-col gap-3 rounded-xl bg-foreground p-5 text-background md:sticky md:top-0">
-          <p className="text-[13px] font-semibold">ตัวอย่างการคำนวณ</p>
+          <p className="text-[13px] font-semibold">{translate("ตัวอย่างการคำนวณ", "Calculation example")}</p>
           <label className="flex items-center justify-between gap-3 text-xs text-[#9aa5ad]">
-            ราคาขาย
-            <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-white">
+            {translate("ราคาขาย", "Selling price")}<span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-white">
               ฿<input aria-label="ราคาขายตัวอย่าง" inputMode="decimal" value={samplePrice}
                 onChange={(event) => DECIMAL.test(event.target.value) && setSamplePrice(event.target.value)}
                 className="w-20 bg-transparent text-right font-medium tabular-nums outline-none" />
@@ -447,14 +449,14 @@ function RuleForm({
           </label>
           <dl className="flex flex-col gap-[11px] text-xs">
             <PreviewRow label={`ค่าคอมมิชชั่น (${Number(draft.ratePercent) || 0}%)`} value={`− ${baht(preview.percentPart)}`} />
-            <PreviewRow label="ค่าธรรมเนียมคงที่" value={`− ${baht(preview.fixedFee)}`} />
+            <PreviewRow label={translate("ค่าธรรมเนียมคงที่", "Fixed fee")} value={`− ${baht(preview.fixedFee)}`} />
             {preview.clamped && <PreviewRow label={{ min: "ปรับขึ้นเป็นขั้นต่ำ", max: "ปรับลงเป็นขั้นสูงสุด", price: "ไม่เกินราคาขาย" }[preview.clamped]}
               value={baht(preview.fee)} />}
             <PreviewRow label="ค่าธรรมเนียมรวม" value={`− ${baht(preview.fee)}`} />
           </dl>
           <div className="h-px bg-[#2c3336]" />
           <div className="flex items-baseline justify-between gap-3">
-            <span className="text-[13px] font-medium">ผู้ขายได้รับ</span>
+            <span className="text-[13px] font-medium">{translate("ผู้ขายได้รับ", "Seller receives")}</span>
             <span className="text-xl font-bold tracking-[-0.4px] tabular-nums">{baht(preview.sellerNet)}</span>
           </div>
         </aside>
@@ -466,11 +468,11 @@ function RuleForm({
             ? <ConfirmBar busy={busy} message={`ลบกฎ #${editing.id} ถาวร? กู้คืนไม่ได้`}
               onCancel={() => setConfirmDelete(false)} onConfirm={onDelete} />
             : <Button type="button" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
-              onClick={() => setConfirmDelete(true)}><Trash2 />ลบกฎ</Button>}
+              onClick={() => setConfirmDelete(true)}><Trash2 />{translate("ลบกฎ", "Delete rule")}</Button>}
         </div>}
-        <Button type="button" variant="outline" className="rounded-md px-2.5" disabled={busy} onClick={onBack}>ยกเลิก</Button>
+        <Button type="button" variant="outline" className="rounded-md px-2.5" disabled={busy} onClick={onBack}>{translate("ยกเลิก", "Cancel")}</Button>
         <Button type="submit" className="rounded-md px-2.5" disabled={busy}>
-          {busy ? "กำลังบันทึก..." : editing ? "บันทึกการแก้ไข" : "สร้างกฎ"}
+          {busy ? translate("กำลังบันทึก...", "Saving…") : editing ? translate("บันทึกการแก้ไข", "Save changes") : "สร้างกฎ"}
         </Button>
       </div>
     </form>
@@ -480,15 +482,17 @@ function RuleForm({
 function ConfirmBar({ message, busy, onCancel, onConfirm }: {
   message: string; busy: boolean; onCancel: () => void; onConfirm: () => Promise<unknown>;
 }) {
+  useLanguage();
   return <div className="flex items-center gap-2 rounded-lg bg-[#fdf0dd] px-3 py-1.5">
     <span className="text-xs text-[#b45309]">{message}</span>
-    <Button type="button" size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={onCancel}>ยกเลิก</Button>
+    <Button type="button" size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={onCancel}>{translate("ยกเลิก", "Cancel")}</Button>
     <Button type="button" size="xs" variant="destructive" className="rounded-md" disabled={busy}
       onClick={() => void onConfirm()}>ยืนยัน</Button>
   </div>;
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  useLanguage();
   return <fieldset className="flex flex-col gap-3">
     <legend className="mb-3 text-[13px] font-semibold text-foreground">{title}</legend>
     {children}
@@ -496,6 +500,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function PreviewRow({ label, value }: { label: string; value: string }) {
+  useLanguage();
   return <div className="flex items-center justify-between gap-3">
     <dt className="text-[#9aa5ad]">{label}</dt>
     <dd className="font-medium tabular-nums">{value}</dd>
@@ -509,6 +514,7 @@ type NumberFieldProps = {
 };
 
 function NumberField({ id, label, value, placeholder, prefix, suffix, hint, error, onChange }: NumberFieldProps) {
+  useLanguage();
   return <Field className="gap-1.5" data-invalid={!!error}>
     <FieldLabel htmlFor={id} className="text-xs">{label}</FieldLabel>
     <InputGroup className={FIELD}>

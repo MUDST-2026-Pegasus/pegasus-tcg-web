@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -24,6 +25,7 @@ import type { CollectionItem } from "../collection.types";
 import { CardDetailsRow } from "./CardDetailsRow";
 
 export function EditCardDialog({ item, onClose }: { item: CollectionItem | null; onClose: () => void }) {
+  useLanguage();
   // Keep showing the card while the dialog animates shut, instead of an empty box.
   const [shown, setShown] = useState(item);
   if (item && item !== shown) setShown(item);
@@ -43,6 +45,7 @@ export function EditCardDialog({ item, onClose }: { item: CollectionItem | null;
 }
 
 function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => void }) {
+  useLanguage();
   const update = useUpdateCollectionItem();
   const upload = useFileUpload({ purpose: "COLLECTION_IMAGE" });
   const [draft, setDraft] = useState<CardDraft>({
@@ -80,17 +83,15 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
       });
       onClose();
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not save this card. Please try again."));
+      setError(getErrorMessage(cause, translate("บันทึกการ์ดไม่สำเร็จ กรุณาลองใหม่", "Could not save this card. Please try again.")));
     }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Edit card</DialogTitle>
-        <DialogDescription>
-          Change the printing, condition, or quantity, or replace your photo.
-        </DialogDescription>
+        <DialogTitle>{translate("แก้ไขการ์ด", "Edit card")}</DialogTitle>
+        <DialogDescription>{translate("เปลี่ยนรุ่นพิมพ์ สภาพ จำนวน หรือรูปของคุณ", "Change the printing, condition, or quantity, or replace your photo.")}</DialogDescription>
       </DialogHeader>
 
       <ul className="flex flex-col">
@@ -124,13 +125,9 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
       </ul>
 
       <DialogFooter>
-        <Button variant="outline" disabled={update.isPending} onClick={onClose}>
-          Cancel
-        </Button>
+        <Button variant="outline" disabled={update.isPending} onClick={onClose}>{translate("ยกเลิก", "Cancel")}</Button>
         <Button disabled={!ready || update.isPending} onClick={() => void save()}>
-          {update.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Save Changes
-        </Button>
+          {update.isPending ? <Spinner data-icon="inline-start" /> : null}{translate("บันทึกการเปลี่ยนแปลง", "Save Changes")}</Button>
       </DialogFooter>
     </>
   );

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -26,6 +27,7 @@ import { OrderListSheet } from "./OrderListSheet";
  * กดการ์ดเปิดรายละเอียด, "ดูเพิ่มเติม" เปิดรายการเต็มของคอลัมน์นั้น
  */
 export function AdminOrdersContent() {
+  useLanguage();
   const board = useOrderBoard();
   const [listColumn, setListColumn] = useState<OrderBoardColumn | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -61,10 +63,9 @@ export function AdminOrdersContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออก CSV
-              </Button>
+                {translate("ส่งออก CSV", "Export CSV")}</Button>
             </TooltipTrigger>
-            <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
+            <TooltipContent>{translate("ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้", "File export is currently unavailable")}</TooltipContent>
           </Tooltip>
           <Button
             className="rounded-md px-2.5"
@@ -77,9 +78,9 @@ export function AdminOrdersContent() {
       </div>
 
       {searchedOrder && <div className="rounded-xl border bg-card p-4 text-sm">
-        <h2 className="font-semibold">คำสั่งซื้อ {searchedOrder}</h2>
+        <h2 className="font-semibold">{translate("คำสั่งซื้อ", "Orders") + " "}{searchedOrder}</h2>
         {orderMatches.isPending && <p className="mt-2 text-muted-foreground">กำลังค้นหาคำสั่งซื้อ...</p>}
-        {orderMatches.isError && <p role="alert" className="mt-2 text-destructive">ค้นหาคำสั่งซื้อไม่สำเร็จ <button onClick={() => void orderMatches.refetch()}>ลองอีกครั้ง</button></p>}
+        {orderMatches.isError && <p role="alert" className="mt-2 text-destructive">ค้นหาคำสั่งซื้อไม่สำเร็จ <button onClick={() => void orderMatches.refetch()}>{translate("ลองอีกครั้ง", "Try again")}</button></p>}
         {orderMatches.data && <div className="mt-2 grid gap-2">{orderMatches.data.items.filter((item) => item.orderNumber === searchedOrder).map((item) => <button key={item.sellerOrderId} type="button" className="rounded-lg border p-3 text-left hover:bg-muted" onClick={() => setSelectedId(item.sellerOrderId)}>{item.sellerOrderNumber} · {item.seller.displayName} · {item.status}</button>)}{!orderMatches.data.items.some((item) => item.orderNumber === searchedOrder) && <p className="text-muted-foreground">ไม่พบคำสั่งซื้อหมายเลขนี้</p>}</div>}
       </div>}
 

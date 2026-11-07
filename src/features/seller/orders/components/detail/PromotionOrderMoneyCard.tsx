@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import { formatBaht } from "@/features/seller/shared/seller.format";
@@ -7,6 +8,7 @@ import type { SellerOrderDetails } from "../../orders.types";
 
 /** Order payment and promotion breakdown shown separately from the seller's profit. */
 export function PromotionOrderMoneyCard({ order }: { order: SellerOrderDetails }) {
+  useLanguage();
   const commissionBase = order.commissionBase
     ?? Math.max(0, order.itemsSubtotal - (order.sellerDiscount ?? 0));
   const commissionRate = commissionBase > 0
@@ -17,10 +19,10 @@ export function PromotionOrderMoneyCard({ order }: { order: SellerOrderDetails }
 
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-xs font-semibold text-foreground">ยอดเงินคำสั่งซื้อ</p>
+      <p className="text-xs font-semibold text-foreground">{translate("ยอดเงินคำสั่งซื้อ", "Order amount")}</p>
 
-      <MoneyRow label="ยอดสินค้า" amount={order.itemsSubtotal} />
-      <MoneyRow label={carrierName ? `ค่าส่ง · ${carrierName}` : "ค่าส่ง"} amount={order.shippingFee} />
+      <MoneyRow label={translate("ยอดสินค้า", "Items subtotal")} amount={order.itemsSubtotal} />
+      <MoneyRow label={carrierName ? `ค่าส่ง · ${carrierName}` : translate("ค่าส่ง", "Shipping fee")} amount={order.shippingFee} />
       <dl className="flex flex-col gap-2">
         <PromotionDiscountLines
           sellerDiscount={order.sellerDiscount}
@@ -36,7 +38,7 @@ export function PromotionOrderMoneyCard({ order }: { order: SellerOrderDetails }
 
       <div className="h-px bg-border" />
       {(order.platformSubsidy ?? 0) > 0 && (
-        <MoneyRow label="Pegasus ชดเชยส่วนลด" amount={order.platformSubsidy ?? 0} positive />
+        <MoneyRow label={translate("Pegasus ชดเชยส่วนลด", "Pegasus discount subsidy")} amount={order.platformSubsidy ?? 0} positive />
       )}
       <MoneyRow
         label={`คอมมิชชั่น ${commissionRateText}% ของ ${formatBaht(commissionBase)}`}
@@ -72,6 +74,7 @@ function MoneyRow({
   negative?: boolean;
   positive?: boolean;
 }) {
+  useLanguage();
   return (
     <div className="flex items-start justify-between gap-3 text-xs">
       <span className="text-muted-foreground">{label}</span>

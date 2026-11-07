@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { MapPinPlus, Plus } from "lucide-react";
 
@@ -29,6 +30,7 @@ import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
  * - ทุก mutation `invalidateQueries` ให้เอง รายการจึงอัปเดตโดยไม่ต้อง reload
  */
 export function AddressBookPage() {
+  useLanguage();
   const { user } = useAuth();
   const addresses = useAddresses();
   const setDefault = useSetDefaultAddress();
@@ -42,8 +44,8 @@ export function AddressBookPage() {
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "Could not set the default address",
-          description: getErrorMessage(error, "Please try again."),
+          title: translate("ตั้งที่อยู่เริ่มต้นไม่สำเร็จ", "Could not set the default address"),
+          description: getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again.")),
         }),
     });
   };
@@ -54,28 +56,26 @@ export function AddressBookPage() {
         <AccountSidebar user={toSidebarUser(user)} />
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-semibold">Address Book</h1>
+            <h1 className="text-3xl font-semibold">{translate("สมุดที่อยู่", "Address Book")}</h1>
             <Button disabled={(addresses.data?.length ?? 0) >= MAX_ADDRESSES} onClick={() => setEditing("new")}>
-              <Plus data-icon="inline-start" /> Add New Address
-            </Button>
+              <Plus data-icon="inline-start" /> {translate("เพิ่มที่อยู่ใหม่", "Add New Address")}</Button>
           </div>
 
           <QueryBoundary
             query={addresses}
             loading={<AddressBookSkeleton />}
-            errorTitle="Could not load your addresses"
+            errorTitle={translate("โหลดที่อยู่ของคุณไม่สำเร็จ", "Could not load your addresses")}
             errorMessage="Check your connection and try again."
-            errorRetryLabel="Try again"
+            errorRetryLabel={translate("ลองอีกครั้ง", "Try again")}
             isEmpty={(items) => items.length === 0}
             empty={
               <EmptyState
                 icon={MapPinPlus}
-                title="No saved addresses yet"
-                description="Save a shipping destination now and checkout will be one step shorter."
+                title={translate("ยังไม่มีที่อยู่ที่บันทึกไว้", "No saved addresses yet")}
+                description={translate("บันทึกที่อยู่จัดส่งตอนนี้เพื่อให้ชำระเงินได้เร็วขึ้น", "Save a shipping destination now and checkout will be one step shorter.")}
               >
                 <Button onClick={() => setEditing("new")}>
-                  <Plus data-icon="inline-start" /> Add New Address
-                </Button>
+                  <Plus data-icon="inline-start" /> {translate("เพิ่มที่อยู่ใหม่", "Add New Address")}</Button>
               </EmptyState>
             }
           >
@@ -102,10 +102,9 @@ export function AddressBookPage() {
                   <span className="flex size-12 items-center justify-center rounded-full border">
                     <MapPinPlus />
                   </span>
-                  <span className="text-lg font-semibold">Add New Address</span>
+                  <span className="text-lg font-semibold">{translate("เพิ่มที่อยู่ใหม่", "Add New Address")}</span>
                   <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
-                    Save a new shipping destination for faster checkout.
-                  </span>
+                    {translate("บันทึกที่อยู่จัดส่งใหม่เพื่อชำระเงินได้เร็วขึ้น", "Save a new shipping destination for faster checkout.")}</span>
                 </Button>}
               </div>
             )}

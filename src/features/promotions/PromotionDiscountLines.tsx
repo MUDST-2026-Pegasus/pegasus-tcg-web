@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { PromotionOwnerTag } from "./PromotionOwnerTag";
 import type { PromotionCodeSummary, PromotionOwnerType } from "./order.types";
 
@@ -14,8 +15,8 @@ type PromotionDiscountLinesProps = {
 };
 
 const DEFAULT_LABEL: Record<PromotionOwnerType, string> = {
-  SELLER: "ส่วนลดร้าน",
-  PLATFORM: "ส่วนลด Pegasus",
+  get SELLER() { return translate("ส่วนลดร้าน", "Shop discount"); },
+  get PLATFORM() { return translate("ส่วนลด Pegasus", "Pegasus discount"); },
 };
 
 /** Shared owner tags and discount rows for buyer, seller, and admin order summaries. */
@@ -30,6 +31,7 @@ export function PromotionDiscountLines({
   asDefinitionList = false,
   labels = DEFAULT_LABEL,
 }: PromotionDiscountLinesProps) {
+  useLanguage();
   const appliedPromotions = promotions ?? [];
   const lines = [
     { ownerType: "SELLER" as const, amount: sellerDiscount ?? 0 },

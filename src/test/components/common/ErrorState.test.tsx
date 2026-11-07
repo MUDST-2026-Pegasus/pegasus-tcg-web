@@ -1,3 +1,5 @@
+import { beforeEach } from "vitest";
+import { setLanguage } from "@/lib/language";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -44,3 +46,5 @@ describe("ErrorState", () => {
     expect(screen.getByRole("button", { name: "Go Back" })).toBeInTheDocument();
   });
 });
+
+beforeEach(() => setLanguage("th"));

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { Search } from "lucide-react";
@@ -39,6 +40,7 @@ type OrderListSheetProps = {
 
 /** ทุกคำสั่งซื้อของคอลัมน์หนึ่ง แบ่งหน้า ค้นด้วยเลขคำสั่งซื้อหรือชื่อผู้ใช้ได้ */
 export function OrderListSheet({ column, onClose, onSelect }: OrderListSheetProps) {
+  useLanguage();
   // จำคอลัมน์ล่าสุดไว้ระหว่างเลื่อนปิด ไม่งั้นเนื้อหาหายก่อนหน้าต่างออกพ้นจอ
   const [shown, setShown] = useState(column);
   if (column !== null && column !== shown) {
@@ -75,6 +77,7 @@ function OrderListPanel({
   enabled: boolean;
   onSelect: (order: AdminOrderSummary) => void;
 }) {
+  useLanguage();
   const meta = ORDER_COLUMN_META[column.key];
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -102,7 +105,7 @@ function OrderListPanel({
       <SheetHeader className="pr-14">
         <SheetTitle className="text-lg font-semibold">{meta.title}</SheetTitle>
         <SheetDescription>
-          ทั้งหมด {formatCount(column.count)} รายการ · กดรายการเพื่อดูรายละเอียด
+          {translate("ทั้งหมด", "All") + " "}{formatCount(column.count)} รายการ · กดรายการเพื่อดูรายละเอียด
         </SheetDescription>
       </SheetHeader>
 
@@ -116,7 +119,7 @@ function OrderListPanel({
             value={search}
             onChange={(event) => handleSearchInput(event.target.value)}
             placeholder="ค้นหาเลขคำสั่งซื้อ หรือชื่อผู้ซื้อ/ผู้ขาย"
-            aria-label="ค้นหาคำสั่งซื้อ"
+            aria-label={translate("ค้นหาคำสั่งซื้อ", "Search orders")}
             className="pl-8"
           />
         </div>
@@ -128,7 +131,7 @@ function OrderListPanel({
           isEmpty={(result) => result.items.length === 0}
           empty={
             <EmptyState
-              title={q ? "ไม่พบคำสั่งซื้อที่ค้นหา" : "ยังไม่มีคำสั่งซื้อในสถานะนี้"}
+              title={q ? "ไม่พบคำสั่งซื้อที่ค้นหา" : translate("ยังไม่มีคำสั่งซื้อในสถานะนี้", "No orders with this status")}
             />
           }
         >
@@ -188,6 +191,7 @@ function OrderListPanel({
 }
 
 function OrderListSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" className="flex flex-col gap-2">
       {Array.from({ length: 6 }, (_, index) => (

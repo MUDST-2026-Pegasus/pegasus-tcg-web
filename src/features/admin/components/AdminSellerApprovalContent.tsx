@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Inbox } from "lucide-react";
 
@@ -38,6 +39,7 @@ const PAGE_SIZE = 20;
  * localStorage — การเลือกใบใช้ state ไม่ใช่ route param
  */
 export function AdminSellerApprovalContent() {
+  useLanguage();
   const [activeStatus, setActiveStatus] =
     useState<VerificationStatus>("SUBMITTED");
   const [page, setPage] = useState(0);
@@ -73,7 +75,7 @@ export function AdminSellerApprovalContent() {
         onError: async (error) => {
           toast.add({
             type: "error",
-            title: "รับคำขอมาตรวจไม่สำเร็จ",
+            title: translate("รับคำขอมาตรวจไม่สำเร็จ", "Unable to take request for review"),
             description: verificationErrorMessage(
               error,
               "คำขอนี้อาจถูกรับหรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
@@ -114,15 +116,15 @@ export function AdminSellerApprovalContent() {
         replaceSelected(updated);
         toast.add({
           type: "success",
-          title: "อนุมัติแล้ว",
+          title: translate("อนุมัติแล้ว", "Approved"),
           description: "ผู้ขายรายนี้ได้สิทธิ์เปิดร้านบนแพลตฟอร์มแล้ว",
         });
       },
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "อนุมัติไม่สำเร็จ",
-          description: verificationErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: translate("อนุมัติไม่สำเร็จ", "Unable to approve"),
+          description: verificationErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   };
@@ -185,10 +187,9 @@ export function AdminSellerApprovalContent() {
                       disabled={page <= 0 || queue.isFetching}
                       onClick={() => setPage((current) => Math.max(0, current - 1))}
                     >
-                      ก่อนหน้า
-                    </Button>
+                      {translate("ก่อนหน้า", "Previous")}</Button>
                     <span className="text-[11px] text-muted-foreground">
-                      หน้า {page + 1} จาก {totalPages}
+                      {translate("หน้า", "Page") + " "}{page + 1} {" " + translate("จาก", "of") + " "}{totalPages}
                     </span>
                     <Button
                       variant="outline"
@@ -197,8 +198,7 @@ export function AdminSellerApprovalContent() {
                       disabled={page + 1 >= totalPages || queue.isFetching}
                       onClick={() => setPage((current) => current + 1)}
                     >
-                      ถัดไป
-                    </Button>
+                      {translate("ถัดไป", "Next")}</Button>
                   </div>
                 )}
               </>

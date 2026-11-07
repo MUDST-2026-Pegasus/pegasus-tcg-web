@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ChevronRight, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function CommissionCategoryList({
   manageLabel,
   onManage,
 }: CommissionCategoryListProps & EditableProps) {
+  useLanguage();
   return (
     <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-4 px-5 pt-[18px] pb-3.5">

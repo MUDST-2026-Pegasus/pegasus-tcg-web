@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Lock, Shield, ShieldOff } from "lucide-react";
@@ -49,6 +50,7 @@ type UserRolesDialogProps = {
  * กดบันทึกแล้วยิงเฉพาะที่เปลี่ยน ถ้ามีการเปิด/ปิด ADMIN ต้องผ่านหน้า confirm ก่อน
  */
 export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialogProps) {
+  useLanguage();
   const updateRoles = useUpdateRoles();
   const [draft, setDraft] = useState<RoleCode[]>(user.roles);
   const [confirming, setConfirming] = useState(false);
@@ -76,8 +78,8 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
           setConfirming(false);
           toast.add({
             type: "error",
-            title: "ทำรายการไม่สำเร็จ",
-            description: userErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: translate("ทำรายการไม่สำเร็จ", "Action failed"),
+            description: userErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           });
         },
       },
@@ -110,16 +112,14 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
       actions={
         <>
           <Button variant="outline" size="sm" disabled={saving} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             size="sm"
             disabled={saving || changes.length === 0}
             onClick={() => (adminChange ? setConfirming(true) : save())}
           >
             {saving && <Spinner data-icon="inline-start" />}
-            บันทึก
-          </Button>
+            {translate("บันทึก", "Save")}</Button>
         </>
       }
     >
@@ -207,6 +207,7 @@ export function AdminRoleConfirmDialog({
   onCancel,
   onConfirm,
 }: AdminRoleConfirmDialogProps) {
+  useLanguage();
   const name = `@${user.username}`;
   return (
     <UserDialog
@@ -224,8 +225,7 @@ export function AdminRoleConfirmDialog({
       actions={
         <>
           <Button variant="outline" size="sm" disabled={saving} onClick={onCancel}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             size="sm"
             className={grant ? undefined : USER_DANGER_BUTTON}

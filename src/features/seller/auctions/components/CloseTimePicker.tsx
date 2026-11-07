@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 import { CalendarIcon, ChevronDown, Clock } from "lucide-react";
 import { th } from "react-day-picker/locale";
@@ -51,6 +52,7 @@ type CloseTimePickerProps = {
  * วันก่อนวันนี้และหลัง 30 วันกดไม่ได้ — ส่วนเวลาที่เร็ว/ไกลเกินไป schema เป็นคนบอก
  */
 export function CloseTimePicker({ date, time, onChange, now, error, defaultTime = "21:00" }: CloseTimePickerProps) {
+  useLanguage();
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
   const [typed, setTyped] = useState(time);
@@ -112,7 +114,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
                 }}
               />
               <div className="flex w-28 flex-col border-l">
-                <p className="px-3 pt-3 pb-1 text-xs text-muted-foreground">เวลา</p>
+                <p className="px-3 pt-3 pb-1 text-xs text-muted-foreground">{translate("เวลา", "Time")}</p>
                 <TimeList value={time} onPick={(next) => onChange({ date: date || range.first, time: next })} className="max-h-64" />
               </div>
             </div>
@@ -176,7 +178,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
       <div className="flex flex-col gap-0.5 rounded-lg bg-teal-50 px-3.5 py-2.5 text-xs">
         {closeAt !== null && closeAt > now ? (
           <p className="font-semibold text-teal-700">
-            เปิดทันทีเมื่อกด "เปิดประมูล" · ปิด {formatCloseDate(date)} เวลา {time} น. (อีก {formatCloseDuration(closeAt - now)})
+            เปิดทันทีเมื่อกด "เปิดประมูล" · ปิด {formatCloseDate(date)} {" " + translate("เวลา", "Time") + " "}{time} น. (อีก {formatCloseDuration(closeAt - now)})
           </p>
         ) : null}
         <p className="text-teal-700/80">
@@ -188,6 +190,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
 }
 
 function TimeList({ value, onPick, className }: { value: string; onPick: (time: string) => void; className?: string }) {
+  useLanguage();
   const selectedRef = useRef<HTMLButtonElement>(null);
   // เปิดมาแล้วเลื่อนให้เห็นเวลาที่เลือกอยู่
   useEffect(() => {
@@ -195,7 +198,7 @@ function TimeList({ value, onPick, className }: { value: string; onPick: (time: 
   }, []);
 
   return (
-    <div role="listbox" aria-label="เวลา" className={cn("flex flex-col gap-0.5 overflow-y-auto p-1.5", className)}>
+    <div role="listbox" aria-label={translate("เวลา", "Time")} className={cn("flex flex-col gap-0.5 overflow-y-auto p-1.5", className)}>
       {HALF_HOURS.map((slot) => {
         const active = slot === value;
         return (

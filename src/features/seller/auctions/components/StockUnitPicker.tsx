@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 import { ArrowRight, Lock, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -31,6 +32,7 @@ type StockUnitPickerProps = {
 
 /** ขั้น 1 · เลือกการ์ดจากสต็อก (Figma S2a) [TCG-633 · FE-7] */
 export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps) {
+  useLanguage();
   const [text, setText] = useState("");
   const [q, setQ] = useState("");
   const [gameId, setGameId] = useState<string>(ALL);
@@ -62,8 +64,7 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
         className="min-h-80 rounded-xl bg-card"
       >
         <Button variant="outline" size="sm" className="rounded-md px-2.5" nativeButton={false} render={<Link to={RESTOCK_PATH} />}>
-          เติมสต็อก
-        </Button>
+          {translate("เติมสต็อก", "Restock")}</Button>
       </EmptyState>
     );
   }
@@ -90,8 +91,8 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
             className="h-9 rounded-lg border-input bg-background pl-9 text-sm"
           />
         </div>
-        <FilterSelect label="เกม" items={gameItems} value={gameId} onChange={setGameId} />
-        <FilterSelect label="สภาพ" items={conditionItems} value={condition} onChange={setCondition} />
+        <FilterSelect label={translate("เกม", "Game")} items={gameItems} value={gameId} onChange={setGameId} />
+        <FilterSelect label={translate("สภาพ", "Condition")} items={conditionItems} value={condition} onChange={setCondition} />
       </div>
 
       {units.isPending ? (
@@ -136,6 +137,7 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
 }
 
 function UnitRow({ unit, selected }: { unit: EligibleUnit; selected: boolean }) {
+  useLanguage();
   const selectable = isSelectableUnit(unit);
   const { item } = unit;
   return (
@@ -187,6 +189,7 @@ function FilterSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  useLanguage();
   return (
     <Select items={items} value={value} onValueChange={(next) => onChange(next ?? ALL)}>
       <SelectTrigger aria-label={label} className="h-9 w-full rounded-lg border-input bg-background text-sm sm:w-40">

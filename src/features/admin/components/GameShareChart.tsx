@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Cell, Pie, PieChart } from "recharts";
 
 import { Card } from "@/components/ui/card";
@@ -32,6 +33,7 @@ export function GameShareChart({
   footnoteTitle,
   footnoteDescription,
 }: GameShareChartProps) {
+  useLanguage();
   const chartConfig = Object.fromEntries(
     slices.map((slice, index) => [
       slice.id,

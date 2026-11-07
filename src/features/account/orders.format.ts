@@ -1,17 +1,18 @@
+import { translate } from "@/lib/language";
 /**
  * Order status mappings and human-readable formatters for the buyer account portal.
  */
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
-  PENDING_PAYMENT: "Pending Payment",
-  PAID: "Paid",
-  PREPARING: "Processing",
-  PROCESSING: "Processing",
-  SHIPPED: "Shipped",
-  DELIVERED: "Completed",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-  CANCELED: "Cancelled",
+  get PENDING_PAYMENT() { return translate("รอชำระเงิน", "Pending Payment"); },
+  get PAID() { return translate("ชำระเงินแล้ว", "Paid"); },
+  get PREPARING() { return translate("กำลังเตรียมสินค้า", "Processing"); },
+  get PROCESSING() { return translate("กำลังเตรียมสินค้า", "Processing"); },
+  get SHIPPED() { return translate("จัดส่งแล้ว", "Shipped"); },
+  get DELIVERED() { return translate("เสร็จสิ้น", "Completed"); },
+  get COMPLETED() { return translate("เสร็จสิ้น", "Completed"); },
+  get CANCELLED() { return translate("ยกเลิกแล้ว", "Cancelled"); },
+  get CANCELED() { return translate("ยกเลิกแล้ว", "Cancelled"); },
 };
 
 /**

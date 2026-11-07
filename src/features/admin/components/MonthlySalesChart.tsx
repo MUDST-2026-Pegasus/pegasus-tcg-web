@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Area, AreaChart, XAxis } from "recharts";
 
 import { Card } from "@/components/ui/card";
@@ -12,8 +13,8 @@ import {
 import type { SalesPoint } from "../metrics.format";
 
 const chartConfig = {
-  singles: { label: "การ์ดเดี่ยว", color: "var(--chart-1)" },
-  sealed: { label: "กล่อง/ซองสุ่ม", color: "var(--chart-2)" },
+  singles: { get label() { return translate("การ์ดเดี่ยว", "Single card"); }, color: "var(--chart-1)" },
+  sealed: { get label() { return translate("กล่อง/ซองสุ่ม", "Booster boxes / packs"); }, color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 type MonthlySalesChartProps = {
@@ -27,6 +28,7 @@ export function MonthlySalesChart({
   description,
   points,
 }: MonthlySalesChartProps) {
+  useLanguage();
   return (
     <Card className="min-w-0 flex-1 gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-1">

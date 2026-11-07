@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 
 type OrderPaginationProps = {
@@ -17,15 +18,15 @@ export function OrderPagination({
   disabled,
   onPageChange,
 }: OrderPaginationProps) {
+  useLanguage();
   return (
     <div className="flex items-center justify-between gap-4 pt-1">
       <p className="text-xs text-gray-500">
-        ทั้งหมด {totalItems} คำสั่งซื้อ
-        {totalPages > 1 ? ` · หน้า ${page} จาก ${totalPages}` : null}
+        {translate("ทั้งหมด", "All") + " "}{totalItems} {" " + translate("คำสั่งซื้อ", "Orders")}{totalPages > 1 ? ` · หน้า ${page} จาก ${totalPages}` : null}
       </p>
 
       {totalPages > 1 ? (
-        <nav aria-label="เปลี่ยนหน้า" className="flex items-center gap-1.5">
+        <nav aria-label={translate("เปลี่ยนหน้า", "Change page")} className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -33,8 +34,7 @@ export function OrderPagination({
             disabled={disabled || page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
-          </Button>
+            {translate("ก่อนหน้า", "Previous")}</Button>
           <Button
             variant="outline"
             size="sm"
@@ -42,8 +42,7 @@ export function OrderPagination({
             disabled={disabled || page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
-          </Button>
+            {translate("ถัดไป", "Next")}</Button>
         </nav>
       ) : null}
     </div>

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { hasErrorCode } from "@/lib/api";
 
 import type {
@@ -20,19 +21,19 @@ export const SAMPLE_SUBTOTAL = 2400;
 export const SAMPLE_SHIPPING = 60;
 
 export const STATUS_TABS: Array<{ value: PromotionStatus | null; label: string }> = [
-  { value: null, label: "ทั้งหมด" },
-  { value: "ACTIVE", label: "ใช้งานอยู่" },
-  { value: "SCHEDULED", label: "ตั้งเวลาไว้" },
-  { value: "PAUSED", label: "หยุดชั่วคราว" },
-  { value: "EXPIRED", label: "หมดอายุ" },
+  { value: null, get label() { return translate("ทั้งหมด", "All"); } },
+  { value: "ACTIVE", get label() { return translate("ใช้งานอยู่", "Active"); } },
+  { value: "SCHEDULED", get label() { return translate("ตั้งเวลาไว้", "Scheduled"); } },
+  { value: "PAUSED", get label() { return translate("หยุดชั่วคราว", "Paused"); } },
+  { value: "EXPIRED", get label() { return translate("หมดอายุ", "Expired"); } },
 ];
 
 export const STATUS_LABEL: Record<PromotionStatus, string> = {
-  ACTIVE: "ใช้งานอยู่",
-  SCHEDULED: "ตั้งเวลาไว้",
-  PAUSED: "หยุดชั่วคราว",
-  EXPIRED: "หมดอายุ",
-  USED_UP: "สิทธิ์เต็ม",
+  get ACTIVE() { return translate("ใช้งานอยู่", "Active"); },
+  get SCHEDULED() { return translate("ตั้งเวลาไว้", "Scheduled"); },
+  get PAUSED() { return translate("หยุดชั่วคราว", "Paused"); },
+  get EXPIRED() { return translate("หมดอายุ", "Expired"); },
+  get USED_UP() { return translate("สิทธิ์เต็ม", "Fully redeemed"); },
 };
 
 export const STATUS_STYLE: Record<PromotionStatus, string> = {
@@ -44,7 +45,7 @@ export const STATUS_STYLE: Record<PromotionStatus, string> = {
 };
 
 export const REDEMPTION_STATUS_LABEL: Record<RedemptionStatus, string> = {
-  CONSUMED: "ใช้แล้ว",
+  get CONSUMED() { return translate("ใช้แล้ว", "Used"); },
   RESERVED: "จองไว้",
   RELEASED: "คืนสิทธิ์",
 };
@@ -115,7 +116,7 @@ export function periodHint(promotion: AdminPromotion, now: number): string {
     case "PAUSED":
       return "หยุดโดยแอดมิน";
     case "EXPIRED":
-      return "สิ้นสุดแล้ว";
+      return translate("สิ้นสุดแล้ว", "Ended");
     case "USED_UP":
       return "สิทธิ์ครบแล้ว";
   }
@@ -125,7 +126,7 @@ type DiscountFields = Pick<AdminPromotionInput, "discountType" | "discountValue"
 
 /** "ลด 10%" / "ลด ฿150" / "ส่งฟรี" */
 export function discountLabel(promotion: DiscountFields): string {
-  if (promotion.discountType === "FREE_SHIPPING") return "ส่งฟรี";
+  if (promotion.discountType === "FREE_SHIPPING") return translate("ส่งฟรี", "Free shipping");
   if (promotion.discountType === "PERCENT") return `ลด ${promotion.discountValue}%`;
   return `ลด ${formatBaht(promotion.discountValue)}`;
 }
@@ -142,7 +143,7 @@ export function discountCapLabel(promotion: DiscountFields): string {
 }
 
 export function minSpendLabel(minSpend: number): string {
-  return minSpend > 0 ? `ขั้นต่ำ ${formatBaht(minSpend)}` : "ไม่มีขั้นต่ำ";
+  return minSpend > 0 ? `ขั้นต่ำ ${formatBaht(minSpend)}` : translate("ไม่มีขั้นต่ำ", "No minimum");
 }
 
 /** id → ชื่อ แยกตามชนิดเพราะ id ของเกมกับหมวดชนกันได้ */
@@ -157,19 +158,19 @@ export function scopeLabel(
   names: ScopeNames,
 ): string {
   if (promotion.scopeType === "ALL") {
-    return promotion.ownerType === "SELLER" ? "ทุกสินค้าในร้าน" : "ทุกเกม";
+    return promotion.ownerType === "SELLER" ? translate("ทุกสินค้าในร้าน", "All products in the shop") : translate("ทุกเกม", "All games");
   }
   const lookup = promotion.scopeType === "GAME" ? names.games : names.categories;
   const known = promotion.scopeIds.map((id) => lookup.get(id)).filter(Boolean);
-  if (known.length === 0) return promotion.scopeType === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่";
-  const prefix = promotion.scopeType === "GAME" ? "เกม" : "หมวด";
+  if (known.length === 0) return promotion.scopeType === "GAME" ? translate("เลือกเกม", "Select game") : translate("เลือกหมวดหมู่", "Select category");
+  const prefix = promotion.scopeType === "GAME" ? translate("เกม", "Game") : translate("หมวด", "Category");
   const shown = known.slice(0, 2).join(", ");
   return known.length > 2 ? `${prefix} ${shown} +${known.length - 2}` : `${prefix} ${shown}`;
 }
 
 /** บรรทัดรองของคอลัมน์เงื่อนไข */
 export function conditionDetail(promotion: AdminPromotion, names: ScopeNames): string {
-  if (promotion.newBuyerOnly) return "เฉพาะผู้ซื้อใหม่";
+  if (promotion.newBuyerOnly) return translate("เฉพาะผู้ซื้อใหม่", "New buyers only");
   return `${scopeLabel(promotion, names)} · ${promotion.usageLimitPerUser} สิทธิ์/คน`;
 }
 
@@ -191,7 +192,7 @@ export function isUsageFull(promotion: AdminPromotion): boolean {
 }
 
 export function limitLabel(value: number | null): string {
-  return value == null ? "ไม่จำกัด" : value.toLocaleString("th-TH");
+  return value == null ? translate("ไม่จำกัด", "Unlimited") : value.toLocaleString("th-TH");
 }
 
 /**
@@ -215,7 +216,7 @@ export function campaignBudget(
 
 export function budgetLabel(input: DiscountFields & Pick<AdminPromotionInput, "usageLimitTotal">): string {
   const budget = campaignBudget(input);
-  return budget == null ? "ไม่จำกัด" : formatBaht(budget);
+  return budget == null ? translate("ไม่จำกัด", "Unlimited") : formatBaht(budget);
 }
 
 /**
@@ -227,7 +228,7 @@ export function budgetFormula(
   verbose = false,
 ): string {
   const perOrder = maxDiscountPerOrder(input);
-  const amount = perOrder == null ? "ไม่จำกัด" : formatBaht(perOrder);
+  const amount = perOrder == null ? translate("ไม่จำกัด", "Unlimited") : formatBaht(perOrder);
   const limit = limitLabel(input.usageLimitTotal);
   return verbose ? `${limit} สิทธิ์ × ส่วนลดสูงสุด ${amount}` : `${limit} × ${amount}`;
 }
@@ -273,8 +274,8 @@ export function promotionErrorMessage(error: unknown, fallback: string): string 
   if (hasErrorCode(error, "PROMO_CODE_TAKEN")) return "โค้ดนี้มีอยู่แล้ว (PROMO_CODE_TAKEN) — ลองเพิ่มตัวเลขต่อท้าย";
   if (hasErrorCode(error, "PROMO_IN_USE")) return "โค้ดถูกเก็บหรือใช้แล้ว (PROMO_IN_USE)";
   if (hasErrorCode(error, "PROMO_NOT_FOUND")) return "ไม่พบโค้ดนี้แล้ว ลองโหลดหน้าใหม่";
-  if (hasErrorCode(error, "GAME_NOT_FOUND")) return "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
-  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
+  if (hasErrorCode(error, "GAME_NOT_FOUND")) return translate("เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่", "The selected game was deleted. Choose another");
+  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return translate("หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่", "The selected category was deleted. Choose another");
   if (hasErrorCode(error, "PROMO_INVALID")) return "ข้อมูลโค้ดไม่ผ่านเงื่อนไข ตรวจค่าที่กรอกอีกครั้ง";
   if (hasErrorCode(error, "ACCESS_DENIED")) return "โค้ดร้านแก้ไขหรือลบจากหน้านี้ไม่ได้";
   return fallback;
@@ -301,36 +302,36 @@ export function currentHomeIds(promotions: AdminPromotion[]): number[] {
 /** ชื่อฟิลด์ใน modal "บันทึกการเปลี่ยนแปลง?" */
 export const FIELD_LABEL: Record<keyof AdminPromotionInput, string> = {
   code: "รหัสโค้ด",
-  name: "ชื่อแคมเปญ",
-  description: "คำอธิบาย",
-  discountType: "ประเภทส่วนลด",
-  discountValue: "มูลค่าส่วนลด",
-  maxDiscount: "ส่วนลดสูงสุด",
-  minSpend: "ยอดขั้นต่ำ",
-  scopeType: "ใช้กับสินค้า",
+  get name() { return translate("ชื่อแคมเปญ", "Campaign name"); },
+  get description() { return translate("คำอธิบาย", "Description"); },
+  get discountType() { return translate("ประเภทส่วนลด", "Discount type"); },
+  get discountValue() { return translate("มูลค่าส่วนลด", "Discount value"); },
+  get maxDiscount() { return translate("ส่วนลดสูงสุด", "Maximum discount"); },
+  get minSpend() { return translate("ยอดขั้นต่ำ", "Minimum amount"); },
+  get scopeType() { return translate("ใช้กับสินค้า", "Apply to products"); },
   scopeIds: "เกม / หมวดหมู่",
-  visibility: "การมองเห็น",
-  newBuyerOnly: "เฉพาะผู้ซื้อใหม่",
+  get visibility() { return translate("การมองเห็น", "Visibility"); },
+  get newBuyerOnly() { return translate("เฉพาะผู้ซื้อใหม่", "New buyers only"); },
   usageLimitTotal: "จำนวนสิทธิ์ใช้",
-  usageLimitPerUser: "สิทธิ์ต่อคน",
+  get usageLimitPerUser() { return translate("สิทธิ์ต่อคน", "Redemptions per person"); },
   startsAt: "วันเริ่ม",
   endsAt: "วันสิ้นสุด",
   claimable: "ให้กดเก็บ",
-  claimRequired: "ต้องเก็บก่อนใช้",
-  claimLimit: "จำนวนที่แจก",
-  featuredOnHome: "แสดงบนหน้าแรก",
-  homeSort: "ลำดับบนหน้าแรก",
+  get claimRequired() { return translate("ต้องเก็บก่อนใช้", "Must be claimed before use"); },
+  get claimLimit() { return translate("จำนวนที่แจก", "Number issued"); },
+  get featuredOnHome() { return translate("แสดงบนหน้าแรก", "Show on home page"); },
+  get homeSort() { return translate("ลำดับบนหน้าแรก", "Home page display order"); },
 };
 
-const DISCOUNT_TYPE_LABEL = { PERCENT: "เปอร์เซ็นต์", FIXED: "จำนวนเงิน", FREE_SHIPPING: "ส่งฟรี" } as const;
-const SCOPE_TYPE_LABEL = { ALL: "ทุกเกม", GAME: "เลือกเกม", CATEGORY: "เลือกหมวดหมู่" } as const;
+const DISCOUNT_TYPE_LABEL = { get PERCENT() { return translate("เปอร์เซ็นต์", "Percentage"); }, get FIXED() { return translate("จำนวนเงิน", "Amount"); }, get FREE_SHIPPING() { return translate("ส่งฟรี", "Free shipping"); } } as const;
+const SCOPE_TYPE_LABEL = { get ALL() { return translate("ทุกเกม", "All games"); }, get GAME() { return translate("เลือกเกม", "Select game"); }, get CATEGORY() { return translate("เลือกหมวดหมู่", "Select category"); } } as const;
 
 /** ค่าหนึ่งฟิลด์ในรูปที่คนอ่าน — "30 พ.ย. 2026" แทน ISO, "฿200" แทน 200 */
 export function formatFieldValue(key: keyof AdminPromotionInput, input: AdminPromotionInput, names: ScopeNames): string {
   const value = input[key];
   if (value == null || value === "") {
     if (key === "homeSort") return "—";
-    return key === "usageLimitTotal" || key === "claimLimit" || key === "maxDiscount" ? "ไม่จำกัด" : "—";
+    return key === "usageLimitTotal" || key === "claimLimit" || key === "maxDiscount" ? translate("ไม่จำกัด", "Unlimited") : "—";
   }
   switch (key) {
     case "startsAt":
@@ -348,7 +349,7 @@ export function formatFieldValue(key: keyof AdminPromotionInput, input: AdminPro
     case "scopeIds":
       return input.scopeIds.length === 0 ? "—" : scopeLabel({ ...input, ownerType: "PLATFORM" }, names);
     case "visibility":
-      return input.visibility === "PUBLIC" ? "สาธารณะ" : "ส่วนตัว";
+      return input.visibility === "PUBLIC" ? translate("สาธารณะ", "Public") : translate("ส่วนตัว", "Private");
     case "homeSort":
       return String(Number(value) + 1);
     case "usageLimitTotal":
@@ -356,6 +357,6 @@ export function formatFieldValue(key: keyof AdminPromotionInput, input: AdminPro
     case "claimLimit":
       return Number(value).toLocaleString("th-TH");
     default:
-      return typeof value === "boolean" ? (value ? "เปิด" : "ปิด") : String(value);
+      return typeof value === "boolean" ? (value ? translate("เปิด", "Open") : translate("ปิด", "Close")) : String(value);
   }
 }

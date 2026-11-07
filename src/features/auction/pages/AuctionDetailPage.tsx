@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Heart } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
@@ -38,6 +39,7 @@ import { SellerNote } from "../components/SellerNote";
 
 /** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) + สถานะ B3/B4 [TCG-629 · TCG-630] */
 export function AuctionDetailPage() {
+  useLanguage();
   const { auctionId } = useParams<{ auctionId: string }>();
   const id = auctionId && /^\d+$/.test(auctionId) ? Number(auctionId) : null;
   const auction = useAuction(id);
@@ -45,13 +47,13 @@ export function AuctionDetailPage() {
   if (id === null || (auction.isError && auction.error instanceof ApiError && auction.error.status === 404)) {
     return (
       <div className="flex-1 space-y-4 p-8 text-center">
-        <h1 className="text-xl font-bold">ไม่พบการประมูลนี้</h1>
-        <p className="text-muted-foreground">การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง</p>
-        <Link to="/auctions" className="inline-block underline">กลับหน้ารวมการประมูล</Link>
+        <h1 className="text-xl font-bold">{translate("ไม่พบการประมูลนี้", "Auction not found")}</h1>
+        <p className="text-muted-foreground">{translate("การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง", "The auction may have been removed or the URL is incorrect")}</p>
+        <Link to="/auctions" className="inline-block underline">{translate("กลับหน้ารวมการประมูล", "Back to auctions")}</Link>
       </div>
     );
   }
-  if (auction.isPending) return <DetailPageSkeleton label="กำลังโหลดการประมูล" />;
+  if (auction.isPending) return <DetailPageSkeleton label={translate("กำลังโหลดการประมูล", "Loading auction")} />;
   if (auction.isError) {
     return (
       <div className="flex-1 p-8">
@@ -68,6 +70,7 @@ function compactCount(count: number): string {
 }
 
 function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
+  useLanguage();
   const { item, seller } = auction;
   const [selectedImageId, setSelectedImageId] = useState<GalleryImage["id"] | null>(null);
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
@@ -78,7 +81,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
   const product = useProductDetail(item.card.productSlug);
 
   const gallery: GalleryImage[] = [
-    ...auction.photoUrls.map((url, index) => ({ id: `photo-${index}`, url, alt: `${item.card.productName} รูปที่ ${index + 1}` })),
+    ...auction.photoUrls.map((url, index) => ({ id: `photo-${index}`, url, alt: translate(`${item.card.productName} รูปที่ ${index + 1}`, `${item.card.productName}, image ${index + 1}`) })),
     ...(item.card.officialImageUrl ? [{ id: "official", url: item.card.officialImageUrl, alt: item.card.productName }] : []),
   ];
 
@@ -89,9 +92,9 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-8 sm:px-6 lg:py-10">
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{translate("หน้าแรก", "Home")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/auctions" />}>ประมูล</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/auctions" />}>{translate("ประมูล", "Auction")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>{item.gameName}</BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -107,13 +110,12 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
               <ProductBadges game={item.gameName} rarity={item.rarity} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{item.card.productName}</h1>
               <p className="mt-2 text-muted-foreground">{[item.setName, item.cardNumber].filter(Boolean).join(" · ")}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                ขายโดย{" "}
+              <p className="mt-1 text-sm text-muted-foreground">{translate("ขายโดย", "Sold by")}{" "}
                 <Link to={`/u/${encodeURIComponent(seller.username)}`} className="font-semibold text-primary hover:underline">
                   {seller.shopName}
                 </Link>
                 {seller.rating !== null ? <> <span className="text-amber-500">★</span> {seller.rating.toFixed(1)}</> : null}
-                {" · "}{compactCount(seller.soldCount)} ขาย · <span className="font-semibold text-foreground">สภาพ {item.condition} ({CONDITION_LABELS[item.condition]})</span>
+                {" · "}{compactCount(seller.soldCount)}{translate("ขาย ·", "Sold ·")}<span className="font-semibold text-foreground">{translate("สภาพ", "Condition")}{item.condition} ({CONDITION_LABELS[item.condition]})</span>
               </p>
             </div>
 
@@ -128,9 +130,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
             />
             {/* ยังไม่มี API ติดตามการประมูล — ปุ่มแสดงตามแบบไว้ก่อน */}
             <Button type="button" variant="outline" className="h-11 w-full rounded-full bg-card font-semibold">
-              <Heart aria-hidden />
-              ติดตามการประมูลนี้
-            </Button>
+              <Heart aria-hidden />{translate("ติดตามการประมูลนี้", "Follow this auction")}</Button>
             <TrustStrip />
           </div>
         </section>
@@ -143,7 +143,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
         {product.isSuccess ? (
           <section className="grid gap-6 lg:grid-cols-2">
             <CardAttributesCard product={product.data.product} />
-            {product.data.product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.data.product.id} title="Attacks" />}
+            {product.data.product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.data.product.id} title={translate("ท่าโจมตี", "Attacks")} />}
           </section>
         ) : null}
       </main>

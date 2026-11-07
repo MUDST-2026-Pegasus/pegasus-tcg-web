@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 import { ChartColumn } from "lucide-react";
 
@@ -28,6 +29,7 @@ export function SellerRedemptionSheet({
   onPageChange: (page: number) => void;
   onClose: () => void;
 }) {
+  useLanguage();
   const redemptions = useSellerRedemptions(promotion?.id ?? null, page);
   if (!promotion) return null;
 
@@ -48,8 +50,7 @@ export function SellerRedemptionSheet({
       actions={
         <>
           <Button variant="outline" onClick={onClose}>
-            ปิด
-          </Button>
+            {translate("ปิด", "Close")}</Button>
           <Button render={<Link to="/seller/orders" />} nativeButton={false}>
             ดูคำสั่งซื้อทั้งหมด
           </Button>
@@ -57,8 +58,8 @@ export function SellerRedemptionSheet({
       }
     >
       <div className="grid grid-cols-3 gap-2">
-        <Metric label="ใช้แล้ว" value={`${promotion.usedCount} / ${limitLabel(promotion.usageLimitTotal)}`} />
-        <Metric label="เก็บแล้ว" value={`${promotion.claimedCount} / ${limitLabel(promotion.claimLimit)}`} />
+        <Metric label={translate("ใช้แล้ว", "Used")} value={`${promotion.usedCount} / ${limitLabel(promotion.usageLimitTotal)}`} />
+        <Metric label={translate("เก็บแล้ว", "Claimed")} value={`${promotion.claimedCount} / ${limitLabel(promotion.claimLimit)}`} />
         <Metric label="ร้านออกส่วนลด" value={money(promotion.discountTotal)} />
       </div>
       <div className="min-w-0 overflow-x-auto">
@@ -66,22 +67,22 @@ export function SellerRedemptionSheet({
         {redemptions.isError && !redemptions.data ? (
           <ErrorState
             error={redemptions.error}
-            title="โหลดประวัติไม่สำเร็จ"
+            title={translate("โหลดประวัติไม่สำเร็จ", "Unable to load history")}
             onRetry={() => void redemptions.refetch()}
             className="min-h-40"
           />
         ) : null}
         {redemptions.data?.items.length === 0 ? (
-          <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
+          <EmptyState title={translate("ยังไม่มีการใช้โค้ด", "No code redemptions yet")} className="min-h-40" />
         ) : null}
         {redemptions.data?.items.length ? (
           <Table className="text-xs">
             <TableHeader>
               <TableRow className="text-[11px]">
-                <TableHead className="h-8 px-0">คำสั่งซื้อ</TableHead>
+                <TableHead className="h-8 px-0">{translate("คำสั่งซื้อ", "Orders")}</TableHead>
                 <TableHead className="h-8">ลูกค้า</TableHead>
-                <TableHead className="h-8">ส่วนลด</TableHead>
-                <TableHead className="h-8">สถานะ</TableHead>
+                <TableHead className="h-8">{translate("ส่วนลด", "Discount")}</TableHead>
+                <TableHead className="h-8">{translate("สถานะ", "Status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -126,6 +127,7 @@ export function SellerRedemptionSheet({
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
+  useLanguage();
   return (
     <div className="grid gap-0.5 rounded-lg bg-muted px-2.5 py-2.5">
       <span className="text-[10px] text-muted-foreground">{label}</span>

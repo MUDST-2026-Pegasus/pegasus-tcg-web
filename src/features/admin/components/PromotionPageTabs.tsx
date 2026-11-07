@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useSearchParams } from "react-router-dom";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +10,7 @@ import { type PromotionPageTab, useSaleCount } from "../sales.queries";
  * แท็บหน้า "โค้ดส่วนลด | ลดราคาสินค้า" (Figma SAL-A1 Page tabs) — เปลี่ยนแท็บแล้วล้าง filter ของอีกแท็บ
  */
 export function PromotionPageTabs({ value }: { value: PromotionPageTab }) {
+  useLanguage();
   const [, setParams] = useSearchParams();
   const codes = usePromotions({ page: 0, size: 1 });
   const sales = useSaleCount();
@@ -31,8 +33,7 @@ export function PromotionPageTabs({ value }: { value: PromotionPageTab }) {
           value="sales"
           className="h-auto gap-2 rounded-[6px] border-0! px-3.5 py-1.5 text-sm text-muted-foreground data-active:font-semibold data-active:text-foreground data-active:shadow-xs"
         >
-          ลดราคาสินค้า
-          <span className="text-[13px] font-medium">{sales.data ?? "–"}</span>
+          {translate("ลดราคาสินค้า", "Product discounts")}<span className="text-[13px] font-medium">{sales.data ?? "–"}</span>
         </TabsTrigger>
       </TabsList>
     </Tabs>

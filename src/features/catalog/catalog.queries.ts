@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import * as catalogApi from "./catalog.api";
@@ -22,9 +23,9 @@ export const catalogKeys = {
     [...catalogKeys.all, "product", productId, "market"] as const,
   listings: (productId: number) =>
     [...catalogKeys.all, "product", productId, "listings"] as const,
-  listing: (id: number) => [...catalogKeys.all, "listing", id] as const,
-  collectors: (productId: number, page: number) =>
-    [...catalogKeys.all, "product", productId, "collectors", page] as const,
+  get listing() { return (id: number) => [...catalogKeys.all, translate("ประกาศขาย", "listing"), id] as const; },
+  get collectors() { return (productId: number, page: number) =>
+    [...catalogKeys.all, "product", productId, translate("นักสะสม", "collectors"), page] as const; },
   effects: (productId: number) =>
     [...catalogKeys.all, "product", productId, "effects"] as const,
 };

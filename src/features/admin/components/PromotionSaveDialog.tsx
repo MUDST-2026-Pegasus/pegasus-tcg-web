@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ArrowRight, CircleCheck, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,10 +34,12 @@ type PromotionSaveDialogProps = {
 
 /** "เปิดใช้โค้ด …?" ตอนสร้าง และ "บันทึกการเปลี่ยนแปลง?" ตอนแก้ (Figma PRM-M1) */
 export function PromotionSaveDialog(props: PromotionSaveDialogProps) {
+  useLanguage();
   return props.existing ? <EditDialog {...props} existing={props.existing} /> : <CreateDialog {...props} />;
 }
 
 function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfirm }: PromotionSaveDialogProps) {
+  useLanguage();
   const cap = discountCapLabel(input);
   const audience =
     input.visibility === "PRIVATE"
@@ -60,17 +63,15 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
       actions={
         <>
           <Button variant="outline" disabled={pending} onClick={() => onOpenChange(false)}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button disabled={pending} onClick={onConfirm}>
-            เปิดใช้โค้ด
-          </Button>
+            {translate("เปิดใช้โค้ด", "Enable code")}</Button>
         </>
       }
     >
       <div className="grid gap-2 rounded-md bg-muted px-3.5 py-3 text-xs [&>p]:flex [&>p]:items-start [&>p]:justify-between [&>p]:gap-3 [&>p]:text-muted-foreground [&>p>strong]:text-right [&>p>strong]:font-semibold [&>p>strong]:text-foreground">
         <p>
-          <span>ส่วนลด</span>
+          <span>{translate("ส่วนลด", "Discount")}</span>
           <strong>
             {input.discountType === "FREE_SHIPPING"
               ? `ส่งฟรี ${cap}`
@@ -80,14 +81,14 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
           </strong>
         </p>
         <p>
-          <span>เงื่อนไข</span>
+          <span>{translate("เงื่อนไข", "Conditions")}</span>
           <strong>
             {minSpendLabel(input.minSpend)} · {scopeLabel({ ...input, ownerType: "PLATFORM" }, scopeNames)}
             {input.newBuyerOnly ? " · ผู้ซื้อใหม่" : ""}
           </strong>
         </p>
         <p>
-          <span>ระยะเวลา</span>
+          <span>{translate("ระยะเวลา", "Duration")}</span>
           <strong>{formatPeriod(input.startsAt, input.endsAt)}</strong>
         </p>
         <p>
@@ -118,6 +119,7 @@ function EditDialog({
   pending,
   onConfirm,
 }: PromotionSaveDialogProps & { existing: AdminPromotion }) {
+  useLanguage();
   const before = toPromotionInput(existing);
   const changed = changedPromotionFields(existing, input);
   const oldBudget = campaignBudget(before);
@@ -135,11 +137,9 @@ function EditDialog({
       actions={
         <>
           <Button variant="outline" disabled={pending} onClick={() => onOpenChange(false)}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button disabled={pending || changed.length === 0} onClick={onConfirm}>
-            บันทึก
-          </Button>
+            {translate("บันทึก", "Save")}</Button>
         </>
       }
     >
@@ -152,7 +152,7 @@ function EditDialog({
               <dt className="text-muted-foreground">{FIELD_LABEL[key]}</dt>
               <dd className="flex min-w-0 items-center gap-1.5 text-right">
                 <span className="text-muted-foreground">{formatFieldValue(key, before, scopeNames)}</span>
-                <ArrowRight aria-label="เป็น" className="size-3.5 shrink-0 text-muted-foreground" />
+                <ArrowRight aria-label={translate("เป็น", "to")} className="size-3.5 shrink-0 text-muted-foreground" />
                 <strong className="font-semibold text-primary">{formatFieldValue(key, input, scopeNames)}</strong>
               </dd>
             </div>

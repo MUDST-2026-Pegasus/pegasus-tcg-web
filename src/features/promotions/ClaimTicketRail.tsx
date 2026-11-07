@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ClaimTicket } from "./ClaimTicket";
 import { claimTicketState, type ClaimTicketState } from "./claim.format";
 import type { ClaimableCode, ClaimSource } from "./claim.types";
@@ -17,12 +18,13 @@ const ORDER: Record<ClaimTicketState, number> = { claimable: 0, claimed: 1, sold
  * scroll sideways. Claimable first, then collected, sold out last (H1).
  */
 export function ClaimTicketRail({ codes, source, ownerView = false }: ClaimTicketRailProps) {
+  useLanguage();
   const { claim, claimingId, openTerms, dialogs } = useClaimFlow(source, { ownerView });
   const ordered = [...codes].sort((a, b) => ORDER[claimTicketState(a)] - ORDER[claimTicketState(b)]);
 
   return (
     <>
-      <ul className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pt-2.5 pb-3" aria-label="โค้ดส่วนลด">
+      <ul className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pt-2.5 pb-3" aria-label={translate("โค้ดส่วนลด", "Discount code")}>
         {ordered.map((code) => (
           <li key={code.id} className="w-[292px] shrink-0 snap-start">
             <ClaimTicket

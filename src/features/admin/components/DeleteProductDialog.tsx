@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Trash2 } from "lucide-react";
 
 import {
@@ -39,6 +40,7 @@ export function DeleteProductDialog({
   error,
   onConfirm,
 }: DeleteProductDialogProps) {
+  useLanguage();
   const inUse = hasErrorCode(error, "PRODUCT_IN_USE");
 
   return (
@@ -48,7 +50,7 @@ export function DeleteProductDialog({
           <AlertDialogMedia className="text-destructive">
             <Trash2 />
           </AlertDialogMedia>
-          <AlertDialogTitle>ลบ {productTitle(product)}?</AlertDialogTitle>
+          <AlertDialogTitle>{translate("ลบ", "Delete") + " "}{productTitle(product)}?</AlertDialogTitle>
           <AlertDialogDescription>
             variant รูป และ Abilities &amp; Attacks ของสินค้านี้จะถูกลบไปด้วย
             กู้คืนไม่ได้ · ลบได้เฉพาะสินค้าที่ยังไม่มีประกาศขาย คำสั่งซื้อ
@@ -66,7 +68,7 @@ export function DeleteProductDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>
-            {inUse ? "ปิด" : "ยกเลิก"}
+            {inUse ? translate("ปิด", "Close") : translate("ยกเลิก", "Cancel")}
           </AlertDialogCancel>
           <Button
             variant="destructive"
@@ -74,8 +76,7 @@ export function DeleteProductDialog({
             onClick={onConfirm}
           >
             {isPending && <Spinner data-icon="inline-start" />}
-            ลบสินค้า
-          </Button>
+            {translate("ลบสินค้า", "Delete product")}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

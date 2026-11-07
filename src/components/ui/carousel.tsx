@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -175,6 +176,7 @@ function CarouselPrevious({
   size = "icon-sm",
   ...props
 }: React.ComponentProps<typeof Button>) {
+  useLanguage();
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -194,7 +196,7 @@ function CarouselPrevious({
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">{translate("สไลด์ก่อนหน้า", "Previous slide")}</span>
     </Button>
   )
 }
@@ -205,6 +207,7 @@ function CarouselNext({
   size = "icon-sm",
   ...props
 }: React.ComponentProps<typeof Button>) {
+  useLanguage();
   const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (
@@ -224,7 +227,7 @@ function CarouselNext({
       {...props}
     >
       <ChevronRightIcon />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">{translate("สไลด์ถัดไป", "Next slide")}</span>
     </Button>
   )
 }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { Card } from "@/components/ui/card";
@@ -42,6 +43,7 @@ export function SaleProductCard({
   upcoming = false,
   className,
 }: SaleProductCardProps) {
+  useLanguage();
   const sale = pricing?.sale ?? null;
   const flashSale = sale?.type === "FLASH_SALE";
   const soldOut = flashSale && sale.quotaLeft != null && sale.quotaLeft <= 0;
@@ -69,9 +71,9 @@ export function SaleProductCard({
             {image ? <img src={image} alt={imageAlt ?? title} className="size-full object-contain" loading="lazy" /> : null}
           </div>
           {soldOut ? (
-            <SaleBadge type="percent" label="หมดแล้ว" className="absolute top-2 left-7 bg-foreground" />
+            <SaleBadge type="percent" label={translate("หมดแล้ว", "Sold out")} className="absolute top-2 left-7 bg-foreground" />
           ) : upcoming ? (
-            <SaleBadge type="flash" label="⚡ เร็วๆ นี้" className="absolute top-2 left-7" />
+            <SaleBadge type="flash" label={translate("⚡ เร็วๆ นี้", "⚡ Coming soon")} className="absolute top-2 left-7" />
           ) : state === "flash" ? (
             <SaleBadge type="flash" className="absolute top-2 left-7" />
           ) : state === "sale" && shownPricing ? (
@@ -95,12 +97,12 @@ export function SaleProductCard({
               </div>
               <p className="text-[11px] font-medium text-[#c2410c]">
                 {soldOut
-                  ? "ราคา Flash หมดแล้ว"
+                  ? translate("ราคา Flash หมดแล้ว", "Flash price sold out")
                   : progress
-                    ? `ขายแล้ว ${progress.sold}/${progress.quota} · เหลือ ${progress.left} ชิ้น`
+                    ? translate(`ขายแล้ว ${progress.sold}/${progress.quota} · เหลือ ${progress.left} ชิ้น`, `${progress.sold}/${progress.quota} sold · ${progress.left} left`)
                     : sale.quotaLeft != null
-                      ? `เหลือ ${sale.quotaLeft} ชิ้น`
-                      : "จำนวนจำกัด"}
+                      ? translate(`เหลือ ${sale.quotaLeft} ชิ้น`, `${sale.quotaLeft} left`)
+                      : translate("จำนวนจำกัด", "Limited quantity")}
               </p>
             </div>
           ) : null}

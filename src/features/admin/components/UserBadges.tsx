@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ const STATUS_BADGE: Record<UserStatus, string> = {
 };
 
 export function RoleBadge({ role }: { role: RoleCode }) {
+  useLanguage();
   return (
     <Badge className={cn("rounded-[5px] px-2 text-[10px]", ROLE_BADGE[role])}>
       {ROLE_LABEL[role]}
@@ -35,6 +37,7 @@ export function RoleBadge({ role }: { role: RoleCode }) {
 
 /** บทบาทเรียงจากอำนาจมากไปน้อย */
 export function RoleBadges({ roles, className }: { roles: RoleCode[]; className?: string }) {
+  useLanguage();
   return (
     <div className={cn("flex flex-wrap gap-1", className)}>
       {sortedRoles(roles).map((role) => (
@@ -45,6 +48,7 @@ export function RoleBadges({ roles, className }: { roles: RoleCode[]; className?
 }
 
 export function StatusBadge({ status }: { status: UserStatus }) {
+  useLanguage();
   return (
     <Badge className={cn("rounded-full px-2 text-[11px]", STATUS_BADGE[status])}>
       {USER_STATUS_LABEL[status]}
@@ -57,6 +61,7 @@ export function StatusBadge({ status }: { status: UserStatus }) {
  * avatar 32px · ชื่อ + @username · อีเมล · บทบาทชิดขวา
  */
 export function UserSummary({ user }: { user: AdminUser }) {
+  useLanguage();
   return (
     <div className="flex items-center gap-2.5 rounded-[10px] bg-[#f6f8f9] px-3 py-2.5">
       <SellerAvatar

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const LABEL: Record<TimelineTone, string> = {
 
 /** การ์ด "ขั้นตอน" ข้างขวาของ S4 [TCG-634 · FE-8] */
 export function AuctionTimeline({ steps }: { steps: TimelineStep[] }) {
+  useLanguage();
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <p className="text-base font-semibold text-foreground">ขั้นตอน</p>

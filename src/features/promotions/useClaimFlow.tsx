@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/toast";
@@ -12,15 +13,16 @@ import type { ClaimResult, ClaimSource } from "./claim.types";
 type Claimable = ClaimTicketData & { id: number };
 
 export function useClaimToasts() {
+  useLanguage();
   const navigate = useNavigate();
   return {
     success: (result: ClaimResult) =>
       toast.add({
         type: "success",
         title: result.alreadyClaimed
-          ? `เก็บ ${result.claim.code} ไว้แล้ว · ใช้ได้ในตะกร้า`
-          : `เก็บ ${result.claim.code} แล้ว · ใช้ได้ในตะกร้า`,
-        actionProps: { children: "โค้ดของฉัน", onClick: () => navigate("/account/coupons") },
+          ? translate(`เก็บ ${result.claim.code} ไว้แล้ว · ใช้ได้ในตะกร้า`, `${result.claim.code} already saved · available in cart`)
+          : translate(`เก็บ ${result.claim.code} แล้ว · ใช้ได้ในตะกร้า`, `${result.claim.code} collected · available in cart`),
+        actionProps: { children: translate("โค้ดของฉัน", "My coupons"), onClick: () => navigate("/account/coupons") },
       }),
     error: (error: unknown) => toast.add({ type: "error", title: claimErrorMessage(error) }),
   };
@@ -31,6 +33,7 @@ export function useClaimToasts() {
  * sign-in modal, buyers claim straight away, and the ticket opens its terms.
  */
 export function useClaimFlow(source?: ClaimSource, options: { ownerView?: boolean } = {}) {
+  useLanguage();
   const { isAuthenticated } = useAuth();
   const claimMutation = useClaimPromotion();
   const toasts = useClaimToasts();

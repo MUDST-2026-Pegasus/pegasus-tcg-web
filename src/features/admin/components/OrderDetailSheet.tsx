@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
@@ -37,6 +38,7 @@ type OrderDetailSheetProps = {
 
 /** รายละเอียดคำสั่งซื้อหนึ่งใบ (ส่วนของผู้ขายหนึ่งคน) — อ่านอย่างเดียว */
 export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetProps) {
+  useLanguage();
   const detail = useAdminOrder(sellerOrderId);
 
   return (
@@ -63,6 +65,7 @@ export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetPro
 }
 
 function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
+  useLanguage();
   const { summary, order, payment } = detail;
   const address = parseShippingAddress(detail.shippingAddressSnapshot);
   const shipment = order.shipments.at(-1);
@@ -79,17 +82,17 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           <AuctionSourcePill order={summary} basePath="/admin/auctions" />
         </div>
         <SheetDescription>
-          คำสั่งซื้อ {summary.orderNumber} · สั่งเมื่อ{" "}
+          {translate("คำสั่งซื้อ", "Orders") + " "}{summary.orderNumber} · สั่งเมื่อ{" "}
           {formatThaiDateTime(summary.createdAt)}
         </SheetDescription>
       </SheetHeader>
 
       <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-6 text-sm">
         <Section title="ผู้ขายและผู้ซื้อ">
-          <Row label="ผู้ขาย">
+          <Row label={translate("ผู้ขาย", "Seller")}>
             {summary.seller.displayName} (@{summary.seller.username})
           </Row>
-          <Row label="ผู้ซื้อ">
+          <Row label={translate("ผู้ซื้อ", "Buyer")}>
             {summary.buyer.displayName} (@{summary.buyer.username})
           </Row>
           {summary.returnReasonCode ? (
@@ -98,11 +101,11 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
             </Row>
           ) : null}
           {summary.reviewRating !== null ? (
-            <Row label="รีวิว">{summary.reviewRating} ดาว</Row>
+            <Row label={translate("รีวิว", "Reviews")}>{summary.reviewRating} ดาว</Row>
           ) : null}
         </Section>
 
-        <Section title="รายการสินค้า">
+        <Section title={translate("รายการสินค้า", "Products")}>
           <ul className="flex flex-col gap-2">
             {order.items.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-3">
@@ -122,7 +125,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           </ul>
         </Section>
 
-        <Section title="ยอดเงินคำสั่งซื้อ">
+        <Section title={translate("ยอดเงินคำสั่งซื้อ", "Order amount")}>
           {hasPromotionDiscount ? (
             <PromotionOrderTable
               rows={[{
@@ -142,28 +145,28 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           ) : (
             <>
               <Row label="ค่าสินค้า">{formatBaht(order.itemsSubtotal)}</Row>
-              <Row label="ค่าส่ง">{formatBaht(order.shippingFee)}</Row>
-              {order.discountAmount > 0 ? <Row label="ส่วนลด">− {formatBaht(order.discountAmount)}</Row> : null}
-              <Row label="ยอดรวม" strong>{formatBaht(order.grandTotal)}</Row>
+              <Row label={translate("ค่าส่ง", "Shipping fee")}>{formatBaht(order.shippingFee)}</Row>
+              {order.discountAmount > 0 ? <Row label={translate("ส่วนลด", "Discount")}>− {formatBaht(order.discountAmount)}</Row> : null}
+              <Row label={translate("ยอดรวม", "Total")} strong>{formatBaht(order.grandTotal)}</Row>
               <Separator />
-              <Row label="ค่าคอมมิชชั่น">− {formatBaht(order.commissionAmount)}</Row>
-              <Row label="ผู้ขายได้รับ" strong>{formatBaht(order.sellerNetAmount)}</Row>
+              <Row label={translate("ค่าคอมมิชชั่น", "Commission")}>− {formatBaht(order.commissionAmount)}</Row>
+              <Row label={translate("ผู้ขายได้รับ", "Seller receives")} strong>{formatBaht(order.sellerNetAmount)}</Row>
             </>
           )}
           {/* ราคาลดสินค้า — ใครออกเงิน (TCG-683 · Figma SAL-B3 F) */}
           <SaleOrderBreakdown items={order.items} viewer="admin" />
         </Section>
 
-        <Section title="การชำระเงิน">
+        <Section title={translate("การชำระเงิน", "Payment")}>
           {payment ? (
             <>
-              <Row label="ช่องทาง">{PAYMENT_METHOD_LABEL[payment.method]}</Row>
-              <Row label="สถานะ">{PAYMENT_STATUS_LABEL[payment.status]}</Row>
+              <Row label={translate("ช่องทาง", "Method")}>{PAYMENT_METHOD_LABEL[payment.method]}</Row>
+              <Row label={translate("สถานะ", "Status")}>{PAYMENT_STATUS_LABEL[payment.status]}</Row>
               <Row label="จ่ายเมื่อ">
                 {payment.paidAt ? formatThaiDateTime(payment.paidAt) : NO_VALUE}
               </Row>
               {payment.failureReason ? (
-                <Row label="เหตุผล">{payment.failureReason}</Row>
+                <Row label={translate("เหตุผล", "Reason")}>{payment.failureReason}</Row>
               ) : null}
             </>
           ) : (
@@ -178,10 +181,10 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
                 {address.recipientName ?? NO_VALUE}
                 {address.phone ? ` · ${address.phone}` : ""}
               </Row>
-              <Row label="ที่อยู่">{formatAddressLine(address)}</Row>
+              <Row label={translate("ที่อยู่", "Address")}>{formatAddressLine(address)}</Row>
             </>
           ) : (
-            <Row label="ที่อยู่">{NO_VALUE}</Row>
+            <Row label={translate("ที่อยู่", "Address")}>{NO_VALUE}</Row>
           )}
           <Row label="ขนส่ง">
             {shipment
@@ -221,6 +224,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
 }
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
+  useLanguage();
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
@@ -238,6 +242,7 @@ function Row({
   strong?: boolean;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <div className="flex items-start justify-between gap-4">
       <span className="shrink-0 text-muted-foreground">{label}</span>
@@ -249,6 +254,7 @@ function Row({
 }
 
 function OrderDetailSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" className="flex flex-col gap-4 p-4">
       <Skeleton className="h-6 w-48" />

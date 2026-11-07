@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Plus, Users } from "lucide-react";
@@ -57,6 +58,7 @@ type OpenDialog =
  * ผ่าน `/admin/users` + `/users/{id}/roles`
  */
 export function AdminUsersContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, ...filters } = readFilters(searchParams);
   const detailUserId = readUserId(searchParams);
@@ -131,15 +133,13 @@ export function AdminUsersContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออก CSV
-              </Button>
+                {translate("ส่งออก CSV", "Export CSV")}</Button>
             </TooltipTrigger>
-            <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
+            <TooltipContent>{translate("ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้", "File export is currently unavailable")}</TooltipContent>
           </Tooltip>
           <Button className="rounded-md px-2.5" onClick={() => setDialog({ kind: "add-admin" })}>
             <Plus data-icon="inline-start" />
-            เพิ่มผู้ดูแล
-          </Button>
+            {translate("เพิ่มผู้ดูแล", "Add administrator")}</Button>
         </div>
       </div>
 
@@ -206,6 +206,7 @@ export function AdminUsersContent() {
 
 /** กรองแล้วไม่พบ → มีปุ่มล้าง · ยังไม่มีผู้ใช้เลย → ไม่มีปุ่ม */
 function UsersEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+  useLanguage();
   return (
     <div className="flex flex-col items-center gap-2 border-t border-muted px-5 py-11 text-center">
       <div className="grid size-11 place-items-center rounded-full bg-muted">

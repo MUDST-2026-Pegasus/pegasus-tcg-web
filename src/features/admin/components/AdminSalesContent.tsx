@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { BadgePercent, Info, Plus, Search } from "lucide-react";
@@ -28,6 +29,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * filter / แท็บสถานะ / หน้า อยู่ใน URL ทั้งหมด
  */
 export function AdminSalesContent() {
+  useLanguage();
   const [params, setParams] = useSearchParams();
   const status = params.get("status") as SaleStatus | null;
   const type = params.get("type") as SaleType | null;
@@ -98,7 +100,7 @@ export function AdminSalesContent() {
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
+          <h1 className="text-2xl font-black">{translate("โปรโมชั่น &amp; ลดราคา", "Promotions & discounts")}</h1>
           <p className="text-sm text-muted-foreground">
             ตั้งราคาลดให้สินค้าโดยตรง ผู้ซื้อเห็นราคาที่ลดแล้วทันทีโดยไม่ต้องใช้โค้ด · Flash Sale / ลดทั้งหมวด /
             ดูแลการลดราคาของร้าน
@@ -106,15 +108,14 @@ export function AdminSalesContent() {
         </div>
         <Button size="sm" className="px-3" render={<Link to="/admin/sales/new" />} nativeButton={false}>
           <Plus />
-          สร้างแคมเปญลดราคา
-        </Button>
+          {translate("สร้างแคมเปญลดราคา", "Create discount campaign")}</Button>
       </header>
 
       <PromotionPageTabs value="sales" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="กำลังลดราคา"
+          label={translate("กำลังลดราคา", "On sale")}
           value={((s?.activePlatformSales ?? 0) + (s?.activeSellerSales ?? 0)).toLocaleString("th-TH")}
           note={`Pegasus ${s?.activePlatformSales ?? 0} · ร้านค้า ${s?.activeSellerSales ?? 0}`}
         />
@@ -124,7 +125,7 @@ export function AdminSalesContent() {
           note="ทั้งแคมเปญ Pegasus และร้านลดเอง"
         />
         <KpiCard
-          label="ยอดขายจากราคาลด (30 วัน)"
+          label={translate("ยอดขายจากราคาลด (30 วัน)", "Discounted sales (30 days)")}
           value={formatBaht(s?.saleSales30d)}
           note="ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว"
         />
@@ -143,7 +144,7 @@ export function AdminSalesContent() {
               value={status ?? "ALL"}
               onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}
             >
-              <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
+              <TabsList aria-label={translate("กรองตามสถานะ", "Filter by status")} className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
                 {SALE_STATUS_TABS.map((tab) => {
                   const count =
                     tab.value == null
@@ -200,13 +201,12 @@ export function AdminSalesContent() {
           </form>
         </div>
 
-        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">กำลังโหลดแคมเปญ...</p> : null}
+        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">{translate("กำลังโหลดแคมเปญ...", "Loading campaign…")}</p> : null}
         {list.isError ? (
           <p role="alert" className="p-6 text-sm text-destructive">
-            โหลดแคมเปญไม่สำเร็จ{" "}
+            {translate("โหลดแคมเปญไม่สำเร็จ", "Unable to load campaign")}{" "}
             <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void list.refetch()}>
-              ลองอีกครั้ง
-            </Button>
+              {translate("ลองอีกครั้ง", "Try again")}</Button>
           </p>
         ) : null}
         {list.data && rows.length === 0 ? (
@@ -221,8 +221,7 @@ export function AdminSalesContent() {
             <EmptyContent>
               <Button size="sm" render={<Link to="/admin/sales/new" />} nativeButton={false}>
                 <Plus />
-                สร้างแคมเปญลดราคา
-              </Button>
+                {translate("สร้างแคมเปญลดราคา", "Create discount campaign")}</Button>
             </EmptyContent>
           </Empty>
         ) : null}
@@ -230,16 +229,15 @@ export function AdminSalesContent() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * SALE_PAGE_SIZE + 1 : 0}–{page * SALE_PAGE_SIZE + rows.length} จาก {totalItems}{" "}
-            แคมเปญ
-          </span>
+            {translate("แสดง", "Show") + " "}{rows.length ? page * SALE_PAGE_SIZE + 1 : 0}–{page * SALE_PAGE_SIZE + rows.length} {" " + translate("จาก", "of") + " "}{totalItems}{" "}
+            {translate("แคมเปญ", "Campaign")}</span>
           {totalPages > 1 ? (
             <nav aria-label="หน้ารายการแคมเปญลดราคา" className="flex items-center gap-2">
               <Button
                 size="icon-sm"
                 className="size-7 text-[13px] text-[#414755]"
                 variant="outline"
-                aria-label="หน้าก่อนหน้า"
+                aria-label={translate("หน้าก่อนหน้า", "Previous page")}
                 disabled={page === 0}
                 onClick={() => updateParams({ page: String(page - 1) }, false)}
               >
@@ -262,7 +260,7 @@ export function AdminSalesContent() {
                 size="icon-sm"
                 className="size-7 text-[13px] text-[#414755]"
                 variant="outline"
-                aria-label="หน้าถัดไป"
+                aria-label={translate("หน้าถัดไป", "Next page")}
                 disabled={page + 1 >= totalPages}
                 onClick={() => updateParams({ page: String(page + 1) }, false)}
               >
@@ -288,6 +286,7 @@ export function AdminSalesContent() {
 }
 
 function KpiCard({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "up" | "down" }) {
+  useLanguage();
   return (
     <Card className="min-w-0 gap-1.5 rounded-[12px] border border-border px-5 py-4 shadow-none ring-0">
       <p className="text-xs text-muted-foreground">{label}</p>

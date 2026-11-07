@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { toast } from "@/components/ui/toast";
@@ -23,6 +24,7 @@ type CardSetsSectionProps = {
  * หน้าต่างลบจึงนับการ์ดในชุดให้ดูก่อน และปิดปุ่มลบถ้ายังมีการ์ดอยู่
  */
 export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
+  useLanguage();
   const deleteCardSet = useDeleteCardSet(game.id);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -101,7 +103,7 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
               }
             />
             <SummaryRow
-              label="จำนวนการ์ดในชุด"
+              label={translate("จำนวนการ์ดในชุด", "Cards in set")}
               value={
                 deleteTarget.totalCards === null
                   ? "—"
@@ -109,7 +111,7 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
               }
             />
             <SummaryRow
-              label="วันวางจำหน่าย"
+              label={translate("วันวางจำหน่าย", "Release date")}
               value={formatReleaseDate(deleteTarget.releaseDate) ?? "—"}
             />
           </dl>
@@ -125,6 +127,7 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
+  useLanguage();
   return (
     <div className="flex items-center justify-between gap-4">
       <dt className="text-muted-foreground">{label}</dt>

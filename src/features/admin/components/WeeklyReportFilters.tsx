@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Check } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { format, parseISO } from "date-fns";
@@ -23,6 +24,7 @@ import {
 const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
 
 function FilterTrigger({ open, children, ...props }: { open: boolean; children: ReactNode; disabled?: boolean }) {
+  useLanguage();
   return (
     <PopoverTrigger
       render={<Button variant="outline" className="h-[41px] rounded-lg px-3.5 font-normal" {...props} />}
@@ -43,6 +45,7 @@ function OptionButton({
   onSelect: () => void;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <button
       type="button"
@@ -68,6 +71,7 @@ type WeekFilterProps = {
 
 /** เมนูเลือกสัปดาห์ — ปุ่มล่างสุดเปิดปฏิทิน เลือกวันไหนก็ได้สัปดาห์ของวันนั้น */
 export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
+  useLanguage();
   const [open, setOpen] = useState(false);
   const [picking, setPicking] = useState(false);
   const today = bangkokToday();
@@ -156,6 +160,7 @@ type GameFilterProps = {
 };
 
 export function GameFilter({ game, options, disabled, onChange }: GameFilterProps) {
+  useLanguage();
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.slug === game);
 
@@ -167,12 +172,11 @@ export function GameFilter({ game, options, disabled, onChange }: GameFilterProp
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <FilterTrigger open={open} disabled={disabled}>
-        {current?.name ?? (game ? game : "ทุกเกม")}
+        {current?.name ?? (game ? game : translate("ทุกเกม", "All games"))}
       </FilterTrigger>
       <PopoverContent align="start" className="w-[260px] gap-0 rounded-xl p-1.5">
         <OptionButton selected={game === null} onSelect={() => choose(null)}>
-          ทุกเกม
-        </OptionButton>
+          {translate("ทุกเกม", "All games")}</OptionButton>
         {options.map((option) => (
           <OptionButton
             key={option.slug}

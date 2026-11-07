@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
@@ -8,6 +9,7 @@ type CommissionRulesCardProps = AdminCommissionData["rules"];
  * การ์ด "กฎการเก็บค่าธรรมเนียม" — 4 สวิตช์ในการ์ดขาว
  */
 export function CommissionRulesCard({ title, items }: CommissionRulesCardProps) {
+  useLanguage();
   return (
     <Card className="gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <p className="text-[13px] font-semibold text-foreground">{title}</p>

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Ban, TriangleAlert } from "lucide-react";
 
@@ -23,6 +24,7 @@ type ConfirmBidDialogProps = {
 
 /** B3-A dialog ยืนยันการบิด (บิดแล้วถอนไม่ได้) [TCG-630 · FE-4] */
 export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: ConfirmBidDialogProps) {
+  useLanguage();
   const placeBid = usePlaceBid(auction.id);
   const [error, setError] = useState<AuctionErrorMessage | null>(null);
   const open = amount !== null;
@@ -53,7 +55,7 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="rounded-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">ยืนยันการบิด {formatBaht(value)}?</DialogTitle>
+          <DialogTitle className="text-xl font-bold">{translate("ยืนยันการบิด", "Confirm bid")}{formatBaht(value)}?</DialogTitle>
           <DialogDescription>
             {auction.item.card.productName} · {auction.item.condition} · {auction.seller.shopName}
           </DialogDescription>
@@ -61,10 +63,10 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
 
         <PriceSummary
           rows={[
-            ["ราคาบิดของคุณ", value],
-            ["ค่าจัดส่ง (ถ้าชนะ)", auction.shippingFee],
+            [translate("ราคาบิดของคุณ", "Your bid"), value],
+            [translate("ค่าจัดส่ง (ถ้าชนะ)", "Shipping (if you win)"), auction.shippingFee],
           ]}
-          totalLabel="ยอดที่ต้องชำระถ้าชนะ"
+          totalLabel={translate("ยอดที่ต้องชำระถ้าชนะ", "Total due if you win")}
           total={value + auction.shippingFee}
         />
 
@@ -74,16 +76,15 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
           <AuctionNotice
             tone="amber"
             icon={<TriangleAlert />}
-            title="บิดแล้วถอนไม่ได้"
-            detail="ถ้าชนะต้องชำระภายใน 24 ชม. ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ 3 ครั้งห้ามบิด 30 วัน)"
+            title={translate("บิดแล้วถอนไม่ได้", "Bids cannot be withdrawn")}
+            detail={translate("ถ้าชนะต้องชำระภายใน 24 ชม. ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ 3 ครั้งห้ามบิด 30 วัน)", "Winners must pay within 24 hours. Non-payment adds one strike (three strikes suspend bidding for 30 days).")}
           />
         )}
 
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>ยกเลิก</DialogClose>
+          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>{translate("ยกเลิก", "Cancel")}</DialogClose>
           <Button className="rounded-full px-5" disabled={placeBid.isPending} onClick={confirm}>
-            {placeBid.isPending && <Spinner />}
-            ยืนยันบิด {formatBaht(value)}
+            {placeBid.isPending && <Spinner />}{translate("ยืนยันบิด", "Place bid")}{formatBaht(value)}
           </Button>
         </DialogFooter>
       </DialogContent>

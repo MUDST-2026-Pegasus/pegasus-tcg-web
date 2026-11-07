@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -34,6 +35,7 @@ type WeeklyReportSettingsDialogProps = {
  * ตัวฟอร์มอยู่ใน `DialogContent` ที่ถูก unmount ตอนปิด ค่าที่แก้ค้างจึงรีเซ็ตเอง
  */
 export function WeeklyReportSettingsDialog({ open, onOpenChange }: WeeklyReportSettingsDialogProps) {
+  useLanguage();
   const thresholds = useWeeklyThresholds(open);
 
   return (
@@ -63,6 +65,7 @@ export function WeeklyReportSettingsDialog({ open, onOpenChange }: WeeklyReportS
 }
 
 function StatusBadge({ status, children }: { status: WeeklyStockStatus; children: string }) {
+  useLanguage();
   return (
     <Badge
       className={cn(
@@ -76,6 +79,7 @@ function StatusBadge({ status, children }: { status: WeeklyStockStatus; children
 }
 
 function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; onClose: () => void }) {
+  useLanguage();
   const save = useSaveWeeklyThresholds();
   const {
     register,
@@ -98,7 +102,7 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
       },
       {
         onSuccess: () => {
-          toast.add({ type: "success", title: "บันทึกการตั้งค่าแล้ว" });
+          toast.add({ type: "success", title: translate("บันทึกการตั้งค่าแล้ว", "Settings saved") });
           onClose();
         },
         onError: (error) => {
@@ -106,7 +110,7 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
             toast.add({
               type: "error",
               title: "บันทึกการตั้งค่าไม่สำเร็จ",
-              description: "กรุณาลองใหม่อีกครั้ง",
+              description: translate("กรุณาลองใหม่อีกครั้ง", "Please try again"),
             });
           }
         },
@@ -174,15 +178,13 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
           disabled={save.isPending}
           onClick={onClose}
         >
-          ยกเลิก
-        </Button>
+          {translate("ยกเลิก", "Cancel")}</Button>
         <Button type="submit" className="h-[41px] rounded-lg px-4" disabled={save.isPending}>
           {save.isPending ? (
             <>
-              <Spinner /> กำลังบันทึก...
-            </>
+              <Spinner /> {" " + translate("กำลังบันทึก...", "Saving…")}</>
           ) : (
-            "บันทึกการตั้งค่า"
+            translate("บันทึกการตั้งค่า", "Save settings")
           )}
         </Button>
       </DialogFooter>

@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Clock, Download } from "lucide-react";
@@ -117,10 +118,10 @@ async function exportQrCardPng(
     context.textAlign = "center";
     context.fillStyle = "#64748B";
     context.font = "600 20px 'Inter', system-ui, sans-serif";
-    context.fillText(`Order Ref: ${refText}`, width / 2, 545);
+    context.fillText(translate(`เลขคำสั่งซื้อ: ${refText}`, `Order Ref: ${refText}`), width / 2, 545);
 
     // Amount
-    const formattedAmount = Number(options.amount).toLocaleString("th-TH", {
+    const formattedAmount = Number(options.amount).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -140,7 +141,7 @@ async function exportQrCardPng(
     if (promptpayId) {
       context.fillStyle = "#64748B";
       context.font = "16px 'Inter', system-ui, sans-serif";
-      context.fillText(`PromptPay ID: ${promptpayId}`, width / 2, 672);
+      context.fillText(translate(`หมายเลขพร้อมเพย์: ${promptpayId}`, `PromptPay ID: ${promptpayId}`), width / 2, 672);
     }
   }
 
@@ -160,6 +161,7 @@ export function PaymentQrCard({
   account,
   isExpired = false,
 }: PaymentQrCardProps) {
+  useLanguage();
   const refSvg = useRef<SVGSVGElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -173,7 +175,7 @@ export function PaymentQrCard({
       // Invalid merchant configuration must never produce a misleading payment QR.
     }
   }
-  const amountText = `฿${amount.toLocaleString("th-TH", {
+  const amountText = `฿${amount.toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -209,8 +211,7 @@ export function PaymentQrCard({
       {payload ? (
         <>
           <p className="text-xs text-muted-foreground font-medium mb-3 text-center">
-            Scan with any banking app
-          </p>
+            {translate("สแกนด้วยแอปธนาคารใดก็ได้", "Scan with any banking app")}</p>
           <div className="relative w-full max-w-[240px] bg-[#F8FAFC] border border-muted/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs overflow-hidden">
             <QRCodeSVG
               ref={refSvg}
@@ -228,38 +229,34 @@ export function PaymentQrCard({
               }}
               className="w-40 h-40 md:w-44 md:h-44"
               role="img"
-              aria-label="PromptPay QR Code"
+              aria-label={translate("QR โค้ดพร้อมเพย์", "PromptPay QR Code")}
             />
             <span className="text-[11px] font-bold tracking-wider text-slate-800 mt-3 uppercase">
-              PAY VIA QR SCAN
-            </span>
+              {translate("ชำระเงินด้วย QR", "PAY VIA QR SCAN")}</span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
-              Scan to Pay | {amountText}
+              {translate("สแกนเพื่อชำระเงิน |", "Scan to Pay |")}{amountText}
             </span>
 
             {isExpired && (
               <div
                 role="alert"
-                aria-label="QR Code Expired"
+                aria-label={translate("QR โค้ดหมดอายุ", "QR Code Expired")}
                 className="absolute inset-0 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10 transition-all"
               >
                 <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2 shadow-xs">
                   <Clock className="size-6 text-destructive" />
                 </div>
                 <p className="text-sm font-bold text-destructive">
-                  QR หมดอายุแล้ว
-                </p>
+                  {translate("QR หมดอายุแล้ว", "QR code expired")}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  กรุณาเริ่มการชำระเงินใหม่
-                </p>
+                  {translate("กรุณาเริ่มการชำระเงินใหม่", "Start a new payment")}</p>
               </div>
             )}
           </div>
         </>
       ) : (
         <p className="text-sm text-muted-foreground text-center">
-          กรุณาโอนเงินผ่านบัญชีธนาคารด้านล่าง
-        </p>
+          {translate("กรุณาโอนเงินผ่านบัญชีธนาคารด้านล่าง", "Please transfer to the bank account below")}</p>
       )}
 
       {payload ? (
@@ -271,7 +268,7 @@ export function PaymentQrCard({
           )}
           {promptpayId && (
             <p className="text-xs text-muted-foreground">
-              PromptPay ID {promptpayId}
+              {translate("หมายเลขพร้อมเพย์", "PromptPay ID")}{promptpayId}
             </p>
           )}
         </div>
@@ -313,13 +310,12 @@ export function PaymentQrCard({
           className="mt-4 rounded-full px-5 py-2 text-xs font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 shadow-2xs disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="size-3.5" />
-          <span>{saving ? "Saving QR…" : "Save QR"}</span>
+          <span>{saving ? translate("กำลังบันทึก QR…", "Saving QR…") : translate("บันทึก QR", "Save QR")}</span>
         </Button>
       )}
       {saveError && (
         <p role="alert" className="mt-2 text-sm text-destructive">
-          บันทึก QR ไม่สำเร็จ กรุณาลองอีกครั้ง
-        </p>
+          {translate("บันทึก QR ไม่สำเร็จ กรุณาลองอีกครั้ง", "Could not save the QR code. Please try again")}</p>
       )}
     </div>
   );

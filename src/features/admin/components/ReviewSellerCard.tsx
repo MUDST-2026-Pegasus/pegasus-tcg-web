@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Info } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
@@ -22,6 +23,7 @@ export function ReviewSellerCard({
   profile: ReviewSellerProfile | null | undefined;
   summary: RatingSummary;
 }) {
+  useLanguage();
   const displayName = profile?.displayName?.trim();
   return (
     <section
@@ -56,7 +58,7 @@ export function ReviewSellerCard({
         <div className="flex flex-col gap-1">
           <ReviewStars rating={summary.average} starClassName="size-[15px]" />
           <p className="text-[11px] text-muted-foreground">
-            จาก {summary.count.toLocaleString("th-TH")} รีวิวที่แสดงอยู่
+            {translate("จาก", "of") + " "}{summary.count.toLocaleString("th-TH")} รีวิวที่แสดงอยู่
           </p>
         </div>
       </div>

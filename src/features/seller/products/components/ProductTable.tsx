@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 
 import { Ellipsis, ImageIcon, PackagePlus, Pencil, Trash2 } from "lucide-react";
@@ -37,6 +38,7 @@ const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-gray-500";
  * ทั้งคู่เป็น presigned URL อายุสั้น — โหลดไม่ขึ้น (หมดอายุ) ให้กลับไปใช้กรอบว่างแทนรูปแตก
  */
 export function ListingThumb({ listing }: { listing: SellerListingSummary }) {
+  useLanguage();
   const src = listing.primaryPhotoUrl ?? listing.card.officialImageUrl;
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
@@ -93,6 +95,7 @@ export function ProductTable({
   isFetching,
   footer,
 }: ProductTableProps) {
+  useLanguage();
   const allSelected = rows.length > 0 && selectedIds.length === rows.length;
 
   return (
@@ -111,17 +114,17 @@ export function ProductTable({
                 className="size-3.5"
               />
             </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-72")}>สินค้า</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>ราคาขาย</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-72")}>{translate("สินค้า", "Products")}</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-32")}>{translate("ราคาขาย", "Selling price")}</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-28")}>
               ต้นทุนเฉลี่ย
             </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-28")}>พร้อมขาย</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-28")}>{translate("พร้อมขาย", "Ready to sell")}</TableHead>
             <TableHead className={cn(HEAD_CLASS, "w-20")}>ติดจอง</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>สถานะ</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-32")}>{translate("สถานะ", "Status")}</TableHead>
             {/* คอลัมน์ปุ่มท้ายแถวไม่มีหัวตารางในดีไซน์ */}
             <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              <span className="sr-only">ตัวเลือกเพิ่มเติม</span>
+              <span className="sr-only">{translate("ตัวเลือกเพิ่มเติม", "More options")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -181,7 +184,7 @@ export function ProductTable({
                     >
                       {row.quantityAvailable}
                     </span>
-                    <span className="text-[10px] text-gray-400">ใบ</span>
+                    <span className="text-[10px] text-gray-400">{translate("ใบ", "cards")}</span>
                     {lowStock ? (
                       <span className="text-[10px] font-medium text-[#b45309]">
                         ใกล้หมด
@@ -241,8 +244,7 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <PackagePlus />
-                          เติมสต็อก
-                        </DropdownMenuItem>
+                          {translate("เติมสต็อก", "Restock")}</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           variant="destructive"
@@ -251,8 +253,7 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <Trash2 />
-                          ลบสินค้า
-                        </DropdownMenuItem>
+                          {translate("ลบสินค้า", "Delete product")}</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

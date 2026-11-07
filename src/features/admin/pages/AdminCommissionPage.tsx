@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PanelSkeleton } from "@/components/common/PageSkeletons";
@@ -24,6 +25,7 @@ const formatRate = (value: number) => Number.isInteger(value) ? value.toFixed(1)
 const examplePrice = 1290;
 
 export function AdminCommissionPage() {
+  useLanguage();
   const cache = useQueryClient();
   const rules = useQuery({ queryKey: ["finance", "commission-rules"], queryFn: afterSalesApi.commissionRules });
   const setting = useQuery({ queryKey: ["finance", "default-commission-rate"], queryFn: afterSalesApi.defaultCommissionRate });
@@ -45,7 +47,7 @@ export function AdminCommissionPage() {
       .filter((rule, index, all) => all.findIndex((item) => item.categoryId === rule.categoryId) === index)
       .map((rule) => { const category = categories.data?.find((item) => item.id === rule.categoryId); return {
         id: `CATEGORY:${rule.categoryId}`, name: category?.name ?? `หมวดหมู่ #${rule.categoryId}`,
-        description: category?.gameId ? games.data?.find((game) => game.id === category.gameId)?.name ?? "หมวดหมู่สินค้า" : "ทุกเกม",
+        description: category?.gameId ? games.data?.find((game) => game.id === category.gameId)?.name ?? "หมวดหมู่สินค้า" : translate("ทุกเกม", "All games"),
         scope: "CATEGORY" as const, targetId: rule.categoryId!,
       }; }),
   ];
@@ -122,8 +124,8 @@ export function AdminCommissionPage() {
     const useCustom = draft?.useCustom ?? !!rule?.active;
     return { id: row.id, name: row.name, description: row.description, useCustom,
       rate: useCustom ? draft?.rate ?? formatRate(Number(rule?.ratePercent ?? savedRate)) : formatRate(savedRate),
-      customLabel: "ตั้งค่าเฉพาะ",
-      defaultLabel: "ใช้ค่าเริ่มต้น" };
+      customLabel: translate("ตั้งค่าเฉพาะ", "Custom settings"),
+      defaultLabel: translate("ใช้ค่าเริ่มต้น", "Use default") };
   });
   const editRow = (id: string) => {
     const row = rows.find((item) => item.id === id);
@@ -139,10 +141,10 @@ export function AdminCommissionPage() {
   const ready = rules.isSuccess && setting.isSuccess && games.isSuccess && categories.isSuccess;
   return <div className="space-y-6">
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex flex-col gap-1"><h1 className="text-[26px] font-bold tracking-[-0.5px] text-foreground">ค่าคอมมิชชั่น</h1>
+      <div className="flex flex-col gap-1"><h1 className="text-[26px] font-bold tracking-[-0.5px] text-foreground">{translate("ค่าคอมมิชชั่น", "Commission")}</h1>
         <p className="text-[13px] text-muted-foreground">กำหนดอัตราค่าธรรมเนียมที่แพลตฟอร์มเก็บจากผู้ขายในแต่ละหมวดหมู่</p></div>
       <div className="flex gap-2"><Button variant="outline" className="rounded-md px-2.5" disabled title="ระบบยังไม่มี API ประวัติการแก้ไขค่าคอมมิชชั่น">ดูประวัติการแก้ไข</Button>
-        <Button className="rounded-md px-2.5" disabled={busy || !hasChanges} onClick={() => void saveSettings()}>บันทึกการตั้งค่า</Button></div>
+        <Button className="rounded-md px-2.5" disabled={busy || !hasChanges} onClick={() => void saveSettings()}>{translate("บันทึกการตั้งค่า", "Save settings")}</Button></div>
     </div>
     {(rules.isPending || setting.isPending || games.isPending || categories.isPending) && <div role="status" aria-busy="true" aria-label="กำลังโหลดการตั้งค่าค่าคอมมิชชั่น" className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-4"><PanelSkeleton rows={1} /><PanelSkeleton rows={4} /></div>
@@ -151,7 +153,7 @@ export function AdminCommissionPage() {
     {(rules.isError || setting.isError || games.isError || categories.isError) && <p role="alert" className="text-destructive">
       {isApiError(loadingError) && loadingError.status === 403
         ? "บัญชีนี้ไม่มีสิทธิ์ ADMIN สำหรับการตั้งค่าค่าคอมมิชชั่น" : "โหลดการตั้งค่าค่าคอมมิชชั่นไม่สำเร็จ"}
-      <Button variant="outline" onClick={() => { void rules.refetch(); void setting.refetch(); void games.refetch(); void categories.refetch(); }}>ลองอีกครั้ง</Button>
+      <Button variant="outline" onClick={() => { void rules.refetch(); void setting.refetch(); void games.refetch(); void categories.refetch(); }}>{translate("ลองอีกครั้ง", "Try again")}</Button>
     </p>}
     {ready && <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="space-y-4">
@@ -168,10 +170,10 @@ export function AdminCommissionPage() {
           onRateChange={(id, rate) => setCategoryDrafts((old) => ({ ...old, [id]: { rate, useCustom: (old[id] ?? savedCategoryRates[id])?.useCustom ?? true } }))} />
       </div>
       <div className="space-y-4">
-        <CommissionCalcCard title="ตัวอย่างการคำนวณ" rows={[
-          { id: "price", label: "ราคาขาย", value: `฿${examplePrice.toLocaleString("th-TH")}` },
+        <CommissionCalcCard title={translate("ตัวอย่างการคำนวณ", "Calculation example")} rows={[
+          { id: "price", label: translate("ราคาขาย", "Selling price"), value: `฿${examplePrice.toLocaleString("th-TH")}` },
           { id: "commission", label: `ค่าคอมมิชชั่น (${previewRate.toFixed(1)}%)`, value: `− ${money(preview.percentPart)}` },
-          { id: "fixed", label: "ค่าธรรมเนียมคงที่", value: `− ${money(preview.fixedFee)}` },
+          { id: "fixed", label: translate("ค่าธรรมเนียมคงที่", "Fixed fee"), value: `− ${money(preview.fixedFee)}` },
           ...(preview.clamped ? [{ id: "limit", label: "ปรับตามขั้นต่ำ/ขั้นสูง", value: money(preview.fee) }] : []),
         ]} totalLabel="ผู้ขายได้รับ" totalValue={money(preview.sellerNet)} />
         <CommissionRulesCard title="กฎการเก็บค่าธรรมเนียม" items={[

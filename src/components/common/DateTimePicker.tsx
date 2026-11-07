@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { CalendarIcon } from "lucide-react";
-import { th } from "react-day-picker/locale";
+import { useLanguage } from "@/lib/language";
+import { th, enUS } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,8 +13,6 @@ const pad = (value: number) => String(value).padStart(2, "0");
 const HOURS = Array.from({ length: 24 }, (_, hour) => ({ value: pad(hour), label: pad(hour) }));
 const MINUTES = Array.from({ length: 60 }, (_, minute) => ({ value: pad(minute), label: pad(minute) }));
 
-const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
-const dateLabel = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 
 type DateTimePickerProps = {
   /** แบบเดียวกับ `<input type="datetime-local">` (`YYYY-MM-DDTHH:mm`) หรือ `YYYY-MM-DD` เมื่อ `mode="date"` · ว่าง = ยังไม่เลือก */
@@ -62,10 +61,13 @@ export function DateTimePicker({
   invalid,
   min,
   defaultTime = "00:00",
-  placeholder = mode === "date" ? "เลือกวัน" : "เลือกวันและเวลา",
+  placeholder,
   suffix,
   className,
 }: DateTimePickerProps) {
+  const { language, text: localize } = useLanguage();
+  const monthCaption = new Intl.DateTimeFormat(language, { month: "long", year: "numeric" });
+  const dateLabel = new Intl.DateTimeFormat(language, { day: "numeric", month: "short", year: "numeric" });
   const [open, setOpen] = useState(false);
   const selected = parse(value);
   const minDate = parse(min ?? "");
@@ -116,7 +118,7 @@ export function DateTimePicker({
         }
       >
         <CalendarIcon className="text-muted-foreground" aria-hidden />
-        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder}</span>
+        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder ?? (mode === "date" ? localize("เลือกวัน", "Select date") : localize("เลือกวันและเวลา", "Select date and time"))}</span>
         {suffix}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-0">
@@ -124,7 +126,7 @@ export function DateTimePicker({
           mode="single"
           className="w-full p-4 [--cell-size:--spacing(9)]"
           classNames={{ root: "w-full", month: "w-full gap-3", week: "mt-1 flex w-full justify-around", weekdays: "flex justify-around", weekday: "flex-1 pb-1 text-center text-[0.8rem] font-normal text-muted-foreground" }}
-          locale={th}
+          locale={language === "th" ? th : enUS}
           selected={selected}
           defaultMonth={selected ?? minDay}
           disabled={minDay ? { before: minDay } : undefined}
@@ -133,9 +135,9 @@ export function DateTimePicker({
         />
         {mode === "datetime" ? (
           <div className="flex items-center justify-center gap-2 border-t px-4 py-3 text-sm">
-            <span className="text-muted-foreground">เวลา</span>
+            <span className="text-muted-foreground">{localize("เวลา", "Time")}</span>
             <TimeSelect
-              label="ชั่วโมง"
+              label={localize("ชั่วโมง", "Hour")}
               items={HOURS}
               value={selected ? pad(selected.getHours()) : null}
               disabled={!selected}
@@ -143,7 +145,7 @@ export function DateTimePicker({
             />
             <span aria-hidden>:</span>
             <TimeSelect
-              label="นาที"
+              label={localize("นาที", "Minute")}
               items={MINUTES}
               value={selected ? pad(selected.getMinutes()) : null}
               disabled={!selected}

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -26,6 +27,7 @@ import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 export function RegisterForm() {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const registerAccount = useRegister();
@@ -74,7 +76,7 @@ export function RegisterForm() {
   const formMessage = registerAccount.isError
     ? getErrorMessage(
         registerAccount.error,
-        "Could not create your account. Please try again.",
+        translate("สร้างบัญชีไม่สำเร็จ กรุณาลองอีกครั้ง", "Could not create your account. Please try again."),
       )
     : null;
 
@@ -88,11 +90,11 @@ export function RegisterForm() {
 
       <FieldGroup>
         <Field data-invalid={Boolean(errors.username) || undefined}>
-          <FieldLabel htmlFor="username">Username</FieldLabel>
+          <FieldLabel htmlFor="username">{translate("ชื่อผู้ใช้", "Username")}</FieldLabel>
           <Input
             id="username"
             autoComplete="username"
-            placeholder="Create your username"
+            placeholder={translate("ตั้งชื่อผู้ใช้ของคุณ", "Create your username")}
             aria-invalid={Boolean(errors.username)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("username")}
@@ -100,11 +102,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.username]} />
         </Field>
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
-          <FieldLabel htmlFor="displayName">Display name</FieldLabel>
+          <FieldLabel htmlFor="displayName">{translate("ชื่อที่แสดง", "Display name")}</FieldLabel>
           <Input
             id="displayName"
             autoComplete="name"
-            placeholder="Name other members will see"
+            placeholder={translate("ชื่อที่สมาชิกคนอื่นจะเห็น", "Name other members will see")}
             aria-invalid={Boolean(errors.displayName)}
             {...register("displayName")}
             className="h-12 rounded-lg border-border bg-background px-4"
@@ -112,12 +114,12 @@ export function RegisterForm() {
           <FieldError errors={[errors.displayName]} />
         </Field>
         <Field data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{translate("อีเมล", "Email")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="Enter your email"
+            placeholder={translate("กรอกอีเมลของคุณ", "Enter your email")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -125,11 +127,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">{translate("รหัสผ่าน", "Password")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="new-password"
-            placeholder="Create a password"
+            placeholder={translate("ตั้งรหัสผ่าน", "Create a password")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -137,15 +139,15 @@ export function RegisterForm() {
           {errors.password ? (
             <FieldError errors={[errors.password]} />
           ) : (
-            <FieldDescription>At least 8 characters</FieldDescription>
+            <FieldDescription>{translate("อย่างน้อย 8 ตัวอักษร", "At least 8 characters")}</FieldDescription>
           )}
         </Field>
         <Field data-invalid={Boolean(errors.confirmPassword) || undefined}>
-          <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
+          <FieldLabel htmlFor="confirmPassword">{translate("ยืนยันรหัสผ่าน", "Confirm password")}</FieldLabel>
           <PasswordInput
             id="confirmPassword"
             autoComplete="new-password"
-            placeholder="Confirm your password"
+            placeholder={translate("ยืนยันรหัสผ่านของคุณ", "Confirm your password")}
             aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("confirmPassword")}
@@ -170,15 +172,12 @@ export function RegisterForm() {
           />
           <span className="text-sm leading-snug">
             <FieldLabel htmlFor="terms" className="inline cursor-pointer font-normal">
-              I agree to the Pegasus
-            </FieldLabel>{" "}
+              {translate("ฉันยอมรับ", "I agree to the Pegasus")}</FieldLabel>{" "}
             <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
+              {translate("เงื่อนไขการใช้บริการ", "Terms of Service")}</Link>{" "}
+            {translate("และ", "and")}{" "}
             <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
+              {translate("นโยบายความเป็นส่วนตัว", "Privacy Policy")}</Link>
           </span>
         </Field>
         <FieldError errors={[errors.acceptTerms]} />
@@ -188,20 +187,16 @@ export function RegisterForm() {
           className="h-12 w-full rounded-lg text-base"
         >
           {isSubmitting && <Spinner />}
-          {isSubmitting ? "Creating account…" : "Sign up"}
+          {isSubmitting ? translate("กำลังสร้างบัญชี…", "Creating account…") : translate("สมัครสมาชิก", "Sign up")}
         </Button>
       </FieldGroup>
       <p className="text-center text-sm text-muted-foreground ">
-        Already have an account? &nbsp;
-        <Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">
-          Log in
-        </Link>
+        {translate("มีบัญชีอยู่แล้ว?", "Already have an account?  ")}<Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">
+          {translate("เข้าสู่ระบบ", "Log in")}</Link>
       </p>
       <BackHomeLink />
       <p className="pt-2 text-center text-xs tracking-[0.24px] text-muted-foreground">
-        We keep your information safe. We never use your information outside of
-        Pegasus TCG.
-      </p>
+        {translate("เราเก็บข้อมูลของคุณอย่างปลอดภัย และไม่นำไปใช้นอก Pegasus TCG", "We keep your information safe. We never use your information outside of Pegasus TCG.")}</p>
     </form>
   );
 }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { auctionOrderLabel } from "../auction.format";
@@ -19,7 +20,8 @@ type AuctionSourcePillProps = {
  * แสดงเฉพาะ `source = AUCTION`
  */
 export function AuctionSourcePill({ order, basePath = "/auctions", link = true, className }: AuctionSourcePillProps) {
-  if (order.source !== "AUCTION" || !order.auctionNumber) return null;
+  useLanguage();
+  if (order.source !== translate("ประมูล", "AUCTION") || !order.auctionNumber) return null;
   const pill = <AuctionStatusPill kind="Won" label={auctionOrderLabel(order.auctionNumber)} className={className} />;
   if (!link || !order.auctionId) return pill;
   return (

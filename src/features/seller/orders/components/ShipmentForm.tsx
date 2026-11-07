@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Truck } from "lucide-react";
@@ -37,6 +38,7 @@ type ShipmentFormProps = {
  * ยังไม่มีเลขพัสดุ = ยืนยันไม่ได้ ระบบส่งเลขให้ผู้ซื้อเองหลังยืนยัน
  */
 export function ShipmentForm({ orderId, orderNumber }: ShipmentFormProps) {
+  useLanguage();
   const ship = useShipOrder();
   const [trackingNumber, setTrackingNumber] = useState("");
   const [carrier, setCarrier] = useState(CARRIER_OPTIONS[0].value);
@@ -58,14 +60,14 @@ export function ShipmentForm({ orderId, orderNumber }: ShipmentFormProps) {
         onSuccess: () =>
           toast.add({
             type: "success",
-            title: "ยืนยันจัดส่งแล้ว",
+            title: translate("ยืนยันจัดส่งแล้ว", "Shipment confirmed"),
             description: `${orderNumber} · ${carrierLabel(carrier)} ${tracking}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "ยืนยันจัดส่งไม่สำเร็จ",
-            description: orderErrorMessage(error, "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง"),
+            title: translate("ยืนยันจัดส่งไม่สำเร็จ", "Unable to confirm shipment"),
+            description: orderErrorMessage(error, translate("ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง", "Check the tracking number and try again")),
           }),
       },
     );
@@ -117,8 +119,7 @@ export function ShipmentForm({ orderId, orderNumber }: ShipmentFormProps) {
         onClick={() => setConfirmOpen(true)}
       >
         {ship.isPending ? <Spinner /> : null}
-        ยืนยันจัดส่ง
-      </Button>
+        {translate("ยืนยันจัดส่ง", "Confirm shipment")}</Button>
 
       <ConfirmShipDialog
         open={confirmOpen}

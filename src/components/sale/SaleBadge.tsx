@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 export type SaleBadgeType = "percent" | "flash" | "pegasus" | "shop";
@@ -11,8 +12,8 @@ const STYLE: Record<SaleBadgeType, string> = {
 
 const DEFAULT_LABEL: Record<Exclude<SaleBadgeType, "percent">, string> = {
   flash: "⚡ FLASH SALE",
-  pegasus: "Pegasus ลดให้",
-  shop: "ร้านลดเอง",
+  get pegasus() { return translate("Pegasus ลดให้", "Funded by Pegasus"); },
+  get shop() { return translate("ร้านลดเอง", "Funded by shop"); },
 };
 
 /**
@@ -32,6 +33,7 @@ export function SaleBadge({
   label?: string;
   className?: string;
 }) {
+  useLanguage();
   const text = label ?? (type === "percent" ? `-${percent ?? 0}%` : DEFAULT_LABEL[type]);
   return (
     <span

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Layers, Pencil } from "lucide-react";
@@ -36,6 +37,7 @@ export function CatalogVariantList({
   product,
   variants,
 }: CatalogVariantListProps) {
+  useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CatalogVariant | undefined>();
 
@@ -62,7 +64,7 @@ export function CatalogVariantList({
       {variants.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="ยังไม่มี variant"
+          title={translate("ยังไม่มี variant", "No variants yet")}
           description="เพิ่มอย่างน้อยหนึ่ง variant ผู้ขายถึงจะเลือกการ์ดนี้ไปลงขายได้"
           className="min-h-60"
         />
@@ -73,10 +75,10 @@ export function CatalogVariantList({
               <TableRow>
                 <TableHead>Variant</TableHead>
                 <TableHead>SKU</TableHead>
-                <TableHead>บาร์โค้ด</TableHead>
-                <TableHead className="w-24">สถานะ</TableHead>
+                <TableHead>{translate("บาร์โค้ด", "Barcode")}</TableHead>
+                <TableHead className="w-24">{translate("สถานะ", "Status")}</TableHead>
                 <TableHead className="w-12">
-                  <span className="sr-only">แก้ไข</span>
+                  <span className="sr-only">{translate("แก้ไข", "Edit")}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -100,7 +102,7 @@ export function CatalogVariantList({
                       variant={variant.active ? "outline" : "secondary"}
                       className="rounded-full"
                     >
-                      {variant.active ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                      {variant.active ? translate("เปิดใช้งาน", "Enable") : translate("ปิดใช้งาน", "Disable")}
                     </Badge>
                   </TableCell>
                   <TableCell>

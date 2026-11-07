@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 
 import { SearchXIcon } from "lucide-react";
@@ -47,6 +48,7 @@ function parseAuctionId(value: string | undefined): number | null {
 
 /** `/seller/auctions/:auctionId` — รายละเอียดประมูลฝั่งผู้ขาย ตาม Figma S4 (2308:8540) [TCG-634 · FE-8] */
 export function SellerAuctionDetailPage() {
+  useLanguage();
   const { auctionId } = useParams();
   const id = parseAuctionId(auctionId);
   const auction = useSellerAuction(id);
@@ -64,20 +66,19 @@ export function SellerAuctionDetailPage() {
           <EmptyMedia variant="icon">
             <SearchXIcon />
           </EmptyMedia>
-          <EmptyTitle>ไม่พบการประมูลนี้</EmptyTitle>
-          <EmptyDescription>การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง</EmptyDescription>
+          <EmptyTitle>{translate("ไม่พบการประมูลนี้", "Auction not found")}</EmptyTitle>
+          <EmptyDescription>{translate("การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง", "This auction may have been removed, or the URL is incorrect")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to="/seller/auctions" />} nativeButton={false}>
-            การประมูลของฉัน
-          </Button>
+            {translate("การประมูลของฉัน", "My auctions")}</Button>
         </EmptyContent>
       </Empty>
     );
   }
 
   return (
-    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label="กำลังโหลดการประมูล" />} errorTitle="โหลดการประมูลไม่สำเร็จ">
+    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label={translate("กำลังโหลดการประมูล", "Loading auction")} />} errorTitle="โหลดการประมูลไม่สำเร็จ">
       {/* key ตาม id — สลับไปใบอื่นแล้วตัวจับบิดใหม่ต้องเริ่มนับใหม่ */}
       {(detail) => <SellerAuctionDetailContent key={detail.id} detail={detail} />}
     </QueryBoundary>
@@ -85,6 +86,7 @@ export function SellerAuctionDetailPage() {
 }
 
 export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDetail }) {
+  useLanguage();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   // เปิด dialog แก้ราคาใหม่ทุกครั้ง ให้เริ่มจากค่าล่าสุด
@@ -109,7 +111,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/seller/auctions" />}>การประมูลของฉัน</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/seller/auctions" />}>{translate("การประมูลของฉัน", "My auctions")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -136,8 +138,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
         <div className="flex flex-col items-end gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to={`/auctions/${detail.id}`} />} nativeButton={false}>
-              ดูหน้าประมูล
-            </Button>
+              {translate("ดูหน้าประมูล", "View auction")}</Button>
             {live ? (
               <Button
                 variant={detail.cancellable ? "outline" : "secondary"}
@@ -146,16 +147,14 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
                 disabled={!detail.cancellable}
                 onClick={() => setCancelOpen(true)}
               >
-                ยกเลิกประมูล
-              </Button>
+                {translate("ยกเลิกประมูล", "Cancel auction")}</Button>
             ) : null}
             {detail.status === "UNSOLD" ? (
               <Button size="sm" className="rounded-md px-2.5" render={<Link to={relistPath(detail.id)} />} nativeButton={false}>
-                ประมูลใหม่
-              </Button>
+                {translate("ประมูลใหม่", "Relist auction")}</Button>
             ) : null}
           </div>
-          {live && hasBids ? <p className="text-[11px] text-muted-foreground">ยกเลิกไม่ได้ — มีผู้บิดแล้ว</p> : null}
+          {live && hasBids ? <p className="text-[11px] text-muted-foreground">{translate("ยกเลิกไม่ได้ — มีผู้บิดแล้ว", "Cannot cancel — bids have already been placed")}</p> : null}
         </div>
       </div>
 
@@ -201,6 +200,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
 }
 
 function Kpi({ label, value, note, valueClass }: { label: string; value: string; note: string; valueClass?: string }) {
+  useLanguage();
   return (
     <Card className="gap-1 rounded-xl p-4 shadow-none">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -212,21 +212,22 @@ function Kpi({ label, value, note, valueClass }: { label: string; value: string;
 
 /** ตาราง "ประวัติการบิด" — ใหม่สุดก่อน ชื่อผู้บิดปิดบัง */
 function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
+  useLanguage();
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl p-0 shadow-none">
       <div className="flex items-center justify-between px-5 py-4">
         <p className="text-base font-semibold text-foreground">ประวัติการบิด</p>
-        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString("th-TH")} บิด</p>
+        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString("th-TH")} {" " + translate("บิด", "Bids")}</p>
       </div>
       {detail.bids.length === 0 ? (
-        <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">ยังไม่มีผู้บิด</p>
+        <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">{translate("ยังไม่มีผู้บิด", "No bids yet")}</p>
       ) : (
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="pl-5 text-xs font-normal text-muted-foreground">ผู้บิด</TableHead>
-              <TableHead className="text-xs font-normal text-muted-foreground">ราคา</TableHead>
-              <TableHead className="pr-5 text-xs font-normal text-muted-foreground">เวลา</TableHead>
+              <TableHead className="pl-5 text-xs font-normal text-muted-foreground">{translate("ผู้บิด", "Bidder")}</TableHead>
+              <TableHead className="text-xs font-normal text-muted-foreground">{translate("ราคา", "Price")}</TableHead>
+              <TableHead className="pr-5 text-xs font-normal text-muted-foreground">{translate("เวลา", "Time")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -237,7 +238,7 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
                   <TableCell className="py-3 pl-5">
                     <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                       {bid.bidderAlias}
-                      {top ? <AuctionStatusPill kind="Leading" label="สูงสุด" /> : null}
+                      {top ? <AuctionStatusPill kind="Leading" label={translate("สูงสุด", "Maximum")} /> : null}
                     </span>
                   </TableCell>
                   <TableCell className={cn("text-sm font-semibold tabular-nums", top ? "text-primary" : "text-foreground")}>
@@ -259,13 +260,14 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
 
 /** การ์ด "การตั้งค่าประมูล" — แก้ราคาซื้อทันทีได้จนกว่าจะมีบิดแรก */
 function SettingsCard({ detail, onEdit }: { detail: SellerAuctionDetail; onEdit: () => void }) {
+  useLanguage();
   const extended = detail.extensionCount > 0;
   const rows: { label: string; value: string }[] = [
-    { label: "ราคาเริ่มต้น", value: formatBaht(detail.startingPrice) },
-    { label: "บิดขั้นต่ำครั้งละ", value: `+${formatBaht(detail.bidIncrement)}` },
+    { label: translate("ราคาเริ่มต้น", "Starting price"), value: formatBaht(detail.startingPrice) },
+    { label: translate("บิดขั้นต่ำครั้งละ", "Minimum bid increment"), value: `+${formatBaht(detail.bidIncrement)}` },
     { label: "เปิดเมื่อ", value: formatAuctionShortDateTime(detail.startedAt) },
-    { label: extended ? "ปิด (เดิม)" : "ปิด", value: formatAuctionShortDateTime(extended ? detail.originalEndsAt : detail.endsAt) },
-    { label: "ซื้อทันที", value: buyNowSetting(detail) },
+    { label: extended ? translate("ปิด (เดิม)", "Closed (legacy)") : translate("ปิด", "Close"), value: formatAuctionShortDateTime(extended ? detail.originalEndsAt : detail.endsAt) },
+    { label: translate("ซื้อทันที", "Buy now"), value: buyNowSetting(detail) },
   ];
 
   return (
@@ -274,8 +276,7 @@ function SettingsCard({ detail, onEdit }: { detail: SellerAuctionDetail; onEdit:
         <p className="text-base font-semibold text-foreground">การตั้งค่าประมูล</p>
         {detail.editable ? (
           <Button variant="link" size="sm" className="h-auto px-0 text-xs" onClick={onEdit}>
-            แก้ไข
-          </Button>
+            {translate("แก้ไข", "Edit")}</Button>
         ) : null}
       </div>
       <dl className="flex flex-col gap-2">

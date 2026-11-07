@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { NavLink } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ const NAV_HOVER = "hover:bg-secondary hover:text-gray-700";
  * แยกจาก AppSidebar ของ admin ตรง ๆ เพื่อให้ปรับหน้าตาได้อิสระโดยไม่ต้องกังวลเรื่องผลกระทบข้ามฝั่ง
  */
 export function SellerSidebar() {
+  const { text } = useLanguage();
   const { isMobile } = useSidebar();
 
   return (
@@ -36,9 +38,9 @@ export function SellerSidebar() {
       <div className="sticky top-[var(--navbar-h,75px)] flex h-full max-h-[calc(100svh-var(--navbar-h,75px))] flex-col px-3 py-4">
         <SidebarHeader className="gap-0 px-0.5 pt-1 pb-4">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-bold text-primary">DASHBOARD</span>
+            <span className="text-base font-bold text-primary">{text("แดชบอร์ด", "DASHBOARD")}</span>
             <Badge className="h-5 rounded-[5px] bg-teal-600 px-2 py-0.5 text-[9px] leading-4 font-medium text-white">
-              SELLER
+              {text("ผู้ขาย", "SELLER")}
             </Badge>
           </div>
         </SidebarHeader>
@@ -49,17 +51,17 @@ export function SellerSidebar() {
           {sellerNav.map((group) => (
             <SidebarGroup key={group.label} className="gap-0.5 px-0 py-0">
               <SidebarGroupLabel className="h-auto px-2.5 pt-3 pb-1.5 text-[10px] font-semibold tracking-wide text-gray-400 uppercase">
-                {group.label}
+                {text(group.label, group.labelEn ?? group.label)}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0.5">
-                  {group.items.map(({ label, to, icon: Icon, end }) => (
+                  {group.items.map(({ label, labelEn, to, icon: Icon, end }) => (
                     <SidebarMenuItem key={to}>
                       <NavLink to={to} end={end}>
                         {({ isActive }) => (
                           <SidebarMenuButton
                             isActive={isActive}
-                            tooltip={label}
+                            tooltip={text(label, labelEn ?? label)}
                             render={<span />}
                             className={cn(
                               "h-auto gap-2.5 rounded-lg px-2.5 py-2 text-xs font-normal text-gray-700 [&_svg]:size-6",
@@ -68,7 +70,7 @@ export function SellerSidebar() {
                             )}
                           >
                             <Icon />
-                            <span>{label}</span>
+                            <span>{text(label, labelEn ?? label)}</span>
                           </SidebarMenuButton>
                         )}
                       </NavLink>

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
@@ -86,6 +87,7 @@ export function CatalogProductForm({
   onCancel,
   onDelete,
 }: CatalogProductFormProps) {
+  useLanguage();
   const isEdit = product !== undefined;
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -236,7 +238,7 @@ export function CatalogProductForm({
           <FieldGroup className="gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field data-invalid={Boolean(errors.gameId) || undefined}>
-                <FieldLabel htmlFor="gameId">เกม</FieldLabel>
+                <FieldLabel htmlFor="gameId">{translate("เกม", "Game")}</FieldLabel>
                 <Controller
                   control={control}
                   name="gameId"
@@ -312,7 +314,7 @@ export function CatalogProductForm({
               </Field>
 
               <Field data-invalid={Boolean(errors.categoryId) || undefined}>
-                <FieldLabel htmlFor="categoryId">หมวดหมู่</FieldLabel>
+                <FieldLabel htmlFor="categoryId">{translate("หมวดหมู่", "Category")}</FieldLabel>
                 <Controller
                   control={control}
                   name="categoryId"
@@ -335,7 +337,7 @@ export function CatalogProductForm({
                           placeholder={
                             categories.isPending
                               ? "กำลังโหลดหมวดหมู่…"
-                              : "เลือกหมวดหมู่"
+                              : translate("เลือกหมวดหมู่", "Select category")
                           }
                         />
                       </SelectTrigger>
@@ -423,7 +425,7 @@ export function CatalogProductForm({
               </Field>
 
               <Field data-invalid={Boolean(errors.cardNumber) || undefined}>
-                <FieldLabel htmlFor="cardNumber">เลขในชุด</FieldLabel>
+                <FieldLabel htmlFor="cardNumber">{translate("เลขในชุด", "Set number")}</FieldLabel>
                 <Input
                   id="cardNumber"
                   maxLength={32}
@@ -467,11 +469,11 @@ export function CatalogProductForm({
             </Field>
 
             <Field data-invalid={Boolean(errors.description) || undefined}>
-              <FieldLabel htmlFor="description">คำอธิบาย</FieldLabel>
+              <FieldLabel htmlFor="description">{translate("คำอธิบาย", "Description")}</FieldLabel>
               <Textarea
                 id="description"
                 rows={3}
-                placeholder="ไม่บังคับ"
+                placeholder={translate("ไม่บังคับ", "Optional")}
                 aria-invalid={Boolean(errors.description)}
                 {...register("description")}
               />
@@ -500,7 +502,7 @@ export function CatalogProductForm({
 
         <FieldSet>
           <FieldLegend variant="label">
-            คุณสมบัติการ์ด{game ? ` · ${game.name}` : ""}
+            {translate("คุณสมบัติการ์ด", "Card attributes")}{game ? ` · ${game.name}` : ""}
           </FieldLegend>
           <FieldDescription className="text-xs">
             ช่องเปลี่ยนตามเกมที่เลือก ตั้งค่าช่องได้ที่หน้า "คุณสมบัติการ์ด"
@@ -523,8 +525,7 @@ export function CatalogProductForm({
                   className="cursor-pointer font-medium underline underline-offset-2"
                   onClick={() => attributes.refetch()}
                 >
-                  ลองใหม่
-                </button>
+                  {translate("ลองใหม่", "Retry")}</button>
               </AlertDescription>
             </Alert>
           ) : attributes.data.length === 0 ? (
@@ -550,18 +551,17 @@ export function CatalogProductForm({
             onClick={onDelete}
           >
             <Trash2 data-icon="inline-start" />
-            ลบสินค้า
-          </Button>
+            {translate("ลบสินค้า", "Delete product")}</Button>
         ) : null}
         <Button type="button" variant="outline" onClick={onCancel}>
-          {isEdit ? "ปิด" : "ยกเลิก"}
+          {isEdit ? translate("ปิด", "Close") : translate("ยกเลิก", "Cancel")}
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !registryReady || (isEdit && !isDirty)}
         >
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {isEdit ? "บันทึกการแก้ไข" : "เพิ่มสินค้า"}
+          {isEdit ? translate("บันทึกการแก้ไข", "Save changes") : "เพิ่มสินค้า"}
         </Button>
       </div>
     </form>

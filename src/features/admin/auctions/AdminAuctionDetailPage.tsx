@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 
 import { ArrowRight, Flag, SearchXIcon } from "lucide-react";
@@ -36,6 +37,7 @@ function parseAuctionId(value: string | undefined): number | null {
 
 /** `/admin/auctions/:auctionId` — A3 รายละเอียดประมูล ตาม Figma 2309:8276 [TCG-635 · FE-9] */
 export function AdminAuctionDetailPage() {
+  useLanguage();
   const { auctionId } = useParams();
   const id = parseAuctionId(auctionId);
   const auction = useAdminAuction(id);
@@ -47,26 +49,26 @@ export function AdminAuctionDetailPage() {
           <EmptyMedia variant="icon">
             <SearchXIcon />
           </EmptyMedia>
-          <EmptyTitle>ไม่พบการประมูลนี้</EmptyTitle>
-          <EmptyDescription>การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง</EmptyDescription>
+          <EmptyTitle>{translate("ไม่พบการประมูลนี้", "Auction not found")}</EmptyTitle>
+          <EmptyDescription>{translate("การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง", "This auction may have been removed, or the URL is incorrect")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to="/admin/auctions" />} nativeButton={false}>
-            การประมูลทั้งหมด
-          </Button>
+            {translate("การประมูลทั้งหมด", "All auctions")}</Button>
         </EmptyContent>
       </Empty>
     );
   }
 
   return (
-    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label="กำลังโหลดการประมูล" />} errorTitle="โหลดการประมูลไม่สำเร็จ">
+    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label={translate("กำลังโหลดการประมูล", "Loading auction")} />} errorTitle="โหลดการประมูลไม่สำเร็จ">
       {(detail) => <AdminAuctionDetailContent key={detail.id} detail={detail} />}
     </QueryBoundary>
   );
 }
 
 export function AdminAuctionDetailContent({ detail }: { detail: AdminAuctionDetail }) {
+  useLanguage();
   const [suspendOpen, setSuspendOpen] = useState(false);
   const { card } = detail.item;
   const live = detail.status === "LIVE";
@@ -76,7 +78,7 @@ export function AdminAuctionDetailContent({ detail }: { detail: AdminAuctionDeta
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/admin/auctions" />}>การประมูลทั้งหมด</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/admin/auctions" />}>{translate("การประมูลทั้งหมด", "All auctions")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -93,21 +95,19 @@ export function AdminAuctionDetailContent({ detail }: { detail: AdminAuctionDeta
           <div className="flex min-w-0 flex-col gap-1.5">
             <h1 className="text-2xl font-bold text-foreground">{card.productName}</h1>
             <div className="flex flex-wrap items-center gap-2.5">
-              <AuctionStatusPill kind={pillForStatus(detail.status)} label={detail.status === "SOLD" ? "ขายแล้ว" : undefined} />
+              <AuctionStatusPill kind={pillForStatus(detail.status)} label={detail.status === "SOLD" ? translate("ขายแล้ว", "Sold") : undefined} />
               {live ? <AuctionCountdown target={detail.endsAt} serverTime={detail.serverTime} /> : null}
               {detailFlags(detail).map((flag) => (
                 <RiskFlag key={flag} label={flag} />
               ))}
               <span className="text-xs text-muted-foreground">
-                ผู้ขาย {detail.seller.shopName} · {detail.item.condition} · {formatBaht(detail.currentPrice)} · {detail.bidCount} บิด
-              </span>
+                {translate("ผู้ขาย", "Seller") + " "}{detail.seller.shopName} · {detail.item.condition} · {formatBaht(detail.currentPrice)} · {detail.bidCount} {" " + translate("บิด", "Bids")}</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to={`/auctions/${detail.id}`} />} nativeButton={false}>
-            ดูหน้าประมูล
-          </Button>
+            {translate("ดูหน้าประมูล", "View auction")}</Button>
           {canSuspend(detail.status) ? (
             <Button
               variant="destructive"
@@ -115,8 +115,7 @@ export function AdminAuctionDetailContent({ detail }: { detail: AdminAuctionDeta
               className="rounded-md bg-destructive px-2.5 text-white hover:bg-destructive/90"
               onClick={() => setSuspendOpen(true)}
             >
-              ระงับประมูล
-            </Button>
+              {translate("ระงับประมูล", "Suspend auction")}</Button>
           ) : null}
         </div>
       </div>
@@ -163,11 +162,12 @@ export function AdminAuctionDetailContent({ detail }: { detail: AdminAuctionDeta
 }
 
 function BidLogCard({ detail }: { detail: AdminAuctionDetail }) {
+  useLanguage();
   const head = "text-xs font-normal text-muted-foreground";
   if (detail.bids.length === 0) {
     return (
       <Card className="rounded-xl px-5 py-8 text-center shadow-none">
-        <p className="text-sm text-muted-foreground">ยังไม่มีผู้บิด</p>
+        <p className="text-sm text-muted-foreground">{translate("ยังไม่มีผู้บิด", "No bids yet")}</p>
       </Card>
     );
   }
@@ -176,9 +176,9 @@ function BidLogCard({ detail }: { detail: AdminAuctionDetail }) {
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={`pl-4 ${head}`}>ผู้บิด</TableHead>
-            <TableHead className={head}>ราคา</TableHead>
-            <TableHead className={head}>เวลา</TableHead>
+            <TableHead className={`pl-4 ${head}`}>{translate("ผู้บิด", "Bidder")}</TableHead>
+            <TableHead className={head}>{translate("ราคา", "Price")}</TableHead>
+            <TableHead className={head}>{translate("เวลา", "Time")}</TableHead>
             <TableHead className={`pr-4 text-right ${head}`}>สัญญาณ</TableHead>
           </TableRow>
         </TableHeader>
@@ -218,6 +218,7 @@ function BidLogCard({ detail }: { detail: AdminAuctionDetail }) {
 }
 
 function SideCard({ title, children }: { title: string; children: ReactNode }) {
+  useLanguage();
   return (
     <Card className="w-full gap-2.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <p className="text-base font-semibold text-foreground">{title}</p>
@@ -227,6 +228,7 @@ function SideCard({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Rows({ rows }: { rows: { label: string; value: string }[] }) {
+  useLanguage();
   return (
     <dl className="flex flex-col gap-2">
       {rows.map((item) => (
@@ -240,13 +242,14 @@ function Rows({ rows }: { rows: { label: string; value: string }[] }) {
 }
 
 function SellerCard({ detail }: { detail: AdminAuctionDetail }) {
+  useLanguage();
   const { seller } = detail;
   return (
-    <SideCard title="ผู้ขาย">
+    <SideCard title={translate("ผู้ขาย", "Seller")}>
       <Rows
         rows={[
           { label: "ร้าน", value: seller.shopName },
-          { label: "สถานะร้าน", value: seller.verified ? "ยืนยันแล้ว" : "ยังไม่ยืนยัน" },
+          { label: "สถานะร้าน", value: seller.verified ? translate("ยืนยันแล้ว", "Verified") : "ยังไม่ยืนยัน" },
           { label: "ประมูลทั้งหมด", value: seller.auctionCount.toLocaleString("th-TH") },
           { label: "เคยถูกระงับ", value: `${seller.suspensionCount} ครั้ง` },
         ]}
@@ -263,15 +266,16 @@ function SellerCard({ detail }: { detail: AdminAuctionDetail }) {
 }
 
 function SettingsCard({ detail }: { detail: AdminAuctionDetail }) {
+  useLanguage();
   return (
     <SideCard title="การตั้งค่า">
       <Rows
         rows={[
-          { label: "ราคาเริ่มต้น", value: formatBaht(detail.startingPrice) },
+          { label: translate("ราคาเริ่มต้น", "Starting price"), value: formatBaht(detail.startingPrice) },
           { label: "บิดขั้นต่ำ", value: `+${formatBaht(detail.bidIncrement)}` },
-          { label: "ปิด (เดิม)", value: formatAuctionShortDateTime(detail.originalEndsAt) },
+          { label: translate("ปิด (เดิม)", "Closed (legacy)"), value: formatAuctionShortDateTime(detail.originalEndsAt) },
           { label: "ต่อเวลาแล้ว", value: `${detail.extensionCount} ครั้ง` },
-          { label: "ซื้อทันที", value: detail.buyNowPrice !== null ? formatBaht(detail.buyNowPrice) : "ไม่ได้ตั้ง" },
+          { label: translate("ซื้อทันที", "Buy now"), value: detail.buyNowPrice !== null ? formatBaht(detail.buyNowPrice) : translate("ไม่ได้ตั้ง", "Not set") },
         ]}
       />
     </SideCard>
@@ -279,6 +283,7 @@ function SettingsCard({ detail }: { detail: AdminAuctionDetail }) {
 }
 
 function AdminLogCard({ detail }: { detail: AdminAuctionDetail }) {
+  useLanguage();
   return (
     <SideCard title="บันทึกของแอดมิน">
       {detail.actions.length === 0 ? (
@@ -288,7 +293,7 @@ function AdminLogCard({ detail }: { detail: AdminAuctionDetail }) {
           {detail.actions.map((action) => (
             <li key={`${action.action}-${action.at}`} className="flex flex-col gap-0.5 text-xs">
               <p className="font-semibold text-foreground">
-                {action.action === "SUSPEND" ? "ระงับประมูล" : action.action} · {action.adminName}
+                {action.action === "SUSPEND" ? translate("ระงับประมูล", "Suspend auction") : action.action} · {action.adminName}
               </p>
               {action.reason ? <p className="text-foreground">{action.reason}</p> : null}
               <p className="text-[11px] text-muted-foreground">{formatAuctionShortDateTime(action.at)}</p>

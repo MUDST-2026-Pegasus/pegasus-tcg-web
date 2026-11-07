@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import {
   api,
   ApiError,
@@ -89,7 +90,7 @@ export function putToStorage(
         new ApiError({
           status: xhr.status,
           code: STORAGE_REJECTED,
-          message: "อัปโหลดไฟล์ไม่สำเร็จ",
+          message: translate("อัปโหลดไฟล์ไม่สำเร็จ", "Unable to upload file"),
         }),
       );
     };
@@ -98,7 +99,7 @@ export function putToStorage(
         new ApiError({
           status: 0,
           code: CLIENT_ERROR_CODES.NETWORK_ERROR,
-          message: "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
+          message: translate("เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่", "Unable to connect to file storage. Check your connection and try again."),
         }),
       );
     xhr.onabort = () => settle(abortedError());
@@ -113,7 +114,7 @@ function abortedError(): ApiError {
   return new ApiError({
     status: 0,
     code: CLIENT_ERROR_CODES.ABORTED,
-    message: "ยกเลิกการอัปโหลดแล้ว",
+    message: translate("ยกเลิกการอัปโหลดแล้ว", "Upload cancelled"),
   });
 }
 

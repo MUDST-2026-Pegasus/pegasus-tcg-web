@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Sparkles } from "lucide-react";
 
 type TipCardProps = {
@@ -6,6 +7,7 @@ type TipCardProps = {
 };
 
 export function TipCard({ title, description }: TipCardProps) {
+  useLanguage();
   return (
     <div className="flex w-full flex-col gap-1.5 rounded-xl bg-[#e6f4f2] p-4">
       <div className="flex items-center gap-2">

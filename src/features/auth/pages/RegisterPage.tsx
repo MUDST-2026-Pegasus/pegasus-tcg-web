@@ -1,9 +1,11 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import registerBackground from "@/assets/auth/register-background.jpg";
 import registerHeader from "@/assets/auth/register-header.jpg";
 
 export function RegisterPage() {
+  useLanguage();
   return (
     <>
       <img
@@ -21,12 +23,9 @@ export function RegisterPage() {
           <div className="absolute inset-0 bg-linear-to-t from-white via-white/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 p-6">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              Sign up to continue
-            </h1>
+              {translate("สมัครสมาชิกเพื่อดำเนินการต่อ", "Sign up to continue")}</h1>
             <p className="text-sm text-foreground/80">
-              To like or purchase an item, or to chat with the seller, please
-              create your account.
-            </p>
+              {translate("สร้างบัญชีเพื่อถูกใจสินค้า ซื้อสินค้า หรือสนทนากับผู้ขาย", "To like or purchase an item, or to chat with the seller, please create your account.")}</p>
           </div>
         </div>
         <div className="flex flex-col gap-6 p-8">

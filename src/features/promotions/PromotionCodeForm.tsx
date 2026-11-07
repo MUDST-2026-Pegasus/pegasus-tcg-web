@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -17,8 +18,9 @@ interface PromotionCodeFormProps {
 
 export function PromotionCodeForm({
   id, label, value, onChange, onSubmit, error, loading = false,
-  placeholder = "กรอกโค้ดส่วนลด", showLabel = true,
+  placeholder = translate("กรอกโค้ดส่วนลด", "Enter a discount code"), showLabel = true,
 }: PromotionCodeFormProps) {
+  useLanguage();
   return (
     <form onSubmit={(event) => { event.preventDefault(); void onSubmit(); }}>
       <Field className="gap-1.5" data-invalid={!!error}>
@@ -30,7 +32,7 @@ export function PromotionCodeForm({
             className="h-10 rounded-sm uppercase text-[13px]" />
           <Button type="submit" disabled={!value.trim() || loading}
             className="h-10 shrink-0 rounded-sm text-[13px] font-semibold">
-            {loading ? <Spinner /> : "ใช้โค้ด"}
+            {loading ? <Spinner /> : translate("ใช้โค้ด", "Apply code")}
           </Button>
         </div>
         {error && <FieldError id={`${id}-error`} role="alert" className="text-xs">{error}</FieldError>}

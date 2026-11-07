@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,7 +65,7 @@ const STEPS: CreateStep[] = [
   { id: "card", label: "เลือกการ์ด" },
   { id: "condition-price", label: "สภาพและราคา" },
   { id: "photos", label: "รูปภาพ" },
-  { id: "review", label: "ตรวจสอบ" },
+  { id: "review", get label() { return translate("ตรวจสอบ", "Review"); } },
 ];
 const LAST_STEP = STEPS.length - 1;
 
@@ -91,6 +92,7 @@ function twinNote(listing: SellerListing): string | undefined {
  * ดู `useCreateListing` สำหรับกรณีที่สร้างแล้วแต่ขั้นหลังพลาด
  */
 export function ListingCreateContent() {
+  useLanguage();
   const navigate = useNavigate();
   const { canPublish, reason } = usePublishPermission();
   const createListing = useCreateListing();
@@ -171,7 +173,7 @@ export function ListingCreateContent() {
                 error.step === "units"
                   ? "สร้างประกาศแล้ว แต่ใส่การ์ดเข้าประกาศไม่สำเร็จ"
                   : "บันทึกเป็นฉบับร่างแล้ว แต่เปิดขายไม่สำเร็จ",
-              description: `${listingFormErrorMessage(error.cause, "ลองใหม่อีกครั้ง")} — แก้ต่อได้ที่หน้านี้ หรือเปิดขายจากหน้าจัดการสินค้า`,
+              description: `${listingFormErrorMessage(error.cause, translate("ลองใหม่อีกครั้ง", "Try again"))} — แก้ต่อได้ที่หน้านี้ หรือเปิดขายจากหน้าจัดการสินค้า`,
             });
             navigate(`${PRODUCTS_PATH}/${error.listing.id}/edit`);
             return;
@@ -288,8 +290,7 @@ export function ListingCreateContent() {
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link to={PRODUCTS_PATH} />}>
-              จัดการสินค้า
-            </BreadcrumbLink>
+              {translate("จัดการสินค้า", "Manage products")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -316,8 +317,7 @@ export function ListingCreateContent() {
             render={<Link to={PRODUCTS_PATH} />}
             nativeButton={false}
           >
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           {submitButtons}
         </div>
       </div>
@@ -390,8 +390,7 @@ export function ListingCreateContent() {
           <div className="flex items-center gap-1.5">
             <Eye aria-hidden="true" className="size-4 text-slate-500" />
             <p className="text-xs font-medium text-gray-500">
-              ตัวอย่างที่ผู้ซื้อจะเห็น
-            </p>
+              {translate("ตัวอย่างที่ผู้ซื้อจะเห็น", "Buyer preview")}</p>
           </div>
 
           <div className="flex justify-center">
@@ -421,8 +420,7 @@ export function ListingCreateContent() {
                 className="rounded-md px-2.5"
                 onClick={() => goTo(step - 1)}
               >
-                ย้อนกลับ
-              </Button>
+                {translate("ย้อนกลับ", "Back")}</Button>
             ) : null}
             {step < LAST_STEP ? (
               <Button
@@ -432,7 +430,7 @@ export function ListingCreateContent() {
                 disabled={step === 0 && card === null}
                 onClick={handleNext}
               >
-                ถัดไป: {STEPS[step + 1].label}
+                {translate("ถัดไป:", "Next:") + " "}{STEPS[step + 1].label}
               </Button>
             ) : (
               submitButtons

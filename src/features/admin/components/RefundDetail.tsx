@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { CheckCircle2, CreditCard } from "lucide-react";
 
@@ -50,12 +51,13 @@ export function RefundDetail({
   /** รายการเปลี่ยนสถานะแล้ว — ให้หน้าหลักสลับแท็บตามไป รายการจะได้ไม่หลุดจากจอ */
   onMoved: (status: RefundStatus) => void;
 }) {
+  useLanguage();
   const meta = REFUND_STATUS_META[refund.status];
   const source = refundSourceLabel(refund.resolution, refund.returnRequestId);
   const typeLabel = refund.resolution
     ? `${RESOLUTION_LABEL[refund.resolution] ?? source.label} (${refund.resolution})`
-    : source.label === "ยกเลิก"
-      ? "ยกเลิกคำสั่งซื้อ"
+    : source.label === translate("ยกเลิก", "Cancel")
+      ? translate("ยกเลิกคำสั่งซื้อ", "Cancel order")
       : source.label;
   const settled = refund.status === "PROCESSED";
   const refundedBefore =
@@ -101,7 +103,7 @@ export function RefundDetail({
           <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-secondary p-4">
             <span className="text-[11px] text-[#9aa5ad]">ยอดที่ต้องโอนคืน</span>
             <span className="text-[26px] leading-tight font-bold text-foreground">{formatBaht(refund.amount)}</span>
-            <AmountRow label="ประเภท" value={typeLabel} />
+            <AmountRow label={translate("ประเภท", "Type")} value={typeLabel} />
             {refund.escrowAmount !== null && (
               <AmountRow
                 label={`ยอดใน escrow ของ ${refund.sellerOrderNumber ?? "SO"}`}
@@ -125,9 +127,9 @@ export function RefundDetail({
             </div>
             {refund.accountNumber ? (
               <>
-                <InfoField label="ธนาคาร" value={refund.bankName ?? "—"} />
-                <InfoField label="ชื่อบัญชี" value={refund.accountName ?? "—"} />
-                <InfoField label="เลขบัญชี" value={formatAccountNumber(refund.accountNumber)} large />
+                <InfoField label={translate("ธนาคาร", "Bank")} value={refund.bankName ?? "—"} />
+                <InfoField label={translate("ชื่อบัญชี", "Account name")} value={refund.accountName ?? "—"} />
+                <InfoField label={translate("เลขบัญชี", "Account number")} value={formatAccountNumber(refund.accountNumber)} large />
               </>
             ) : refund.method === "BANK_TRANSFER" ? (
               <p className="text-[13px] text-muted-foreground">
@@ -140,7 +142,7 @@ export function RefundDetail({
             )}
             {refund.failedAttempts > 0 && refund.status === "APPROVED" && (
               <Badge className="h-auto self-start rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[11px] font-medium whitespace-normal text-[#b45309]">
-                โอนไม่สำเร็จ {refund.failedAttempts} ครั้ง — ตรวจว่าผู้ซื้อแก้บัญชีแล้วก่อนเริ่มโอนใหม่
+                {translate("โอนไม่สำเร็จ", "Transfer failed") + " "}{refund.failedAttempts} ครั้ง — ตรวจว่าผู้ซื้อแก้บัญชีแล้วก่อนเริ่มโอนใหม่
               </Badge>
             )}
           </div>
@@ -164,6 +166,7 @@ function StepHead({
   transition: string;
   state: "active" | "done" | "waiting";
 }) {
+  useLanguage();
   return (
     <div className="flex flex-wrap items-center gap-3">
       <span
@@ -203,6 +206,7 @@ function RefundSteps({
   refund: AdminRefund;
   onMoved: (status: RefundStatus) => void;
 }) {
+  useLanguage();
   const [accountNumber, setAccountNumber] = useState("");
   const [reference, setReference] = useState("");
   const [failOpen, setFailOpen] = useState(false);
@@ -247,8 +251,8 @@ function RefundSteps({
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "บันทึกไม่สำเร็จ",
-            description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: translate("บันทึกไม่สำเร็จ", "Unable to save"),
+            description: financeErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -285,8 +289,7 @@ function RefundSteps({
                 onClick={startTransfer}
               >
                 {start.isPending && <Spinner data-icon="inline-start" />}
-                เริ่มโอน
-              </Button>
+                {translate("เริ่มโอน", "Start transfer")}</Button>
             </div>
           )}
         </div>
@@ -308,7 +311,7 @@ function RefundSteps({
           ) : (
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
-                aria-label="เลขอ้างอิงการโอน"
+                aria-label={translate("เลขอ้างอิงการโอน", "Transfer reference")}
                 placeholder="เลขอ้างอิงการโอน (transferReference)"
                 value={reference}
                 disabled={!processing}
@@ -323,8 +326,7 @@ function RefundSteps({
                 disabled={!processing || busy}
                 onClick={() => setFailOpen(true)}
               >
-                โอนไม่สำเร็จ
-              </Button>
+                {translate("โอนไม่สำเร็จ", "Transfer failed")}</Button>
               <Button
                 size="sm"
                 className="h-9 rounded-md px-3"
@@ -348,22 +350,23 @@ function RefundSteps({
         confirmLabel="บันทึกว่าโอนไม่สำเร็จ"
         onConfirm={async (reason) => {
           await fail.mutateAsync({ id: refund.id, reason });
-          toast.add({ type: "success", title: "บันทึกว่าโอนไม่สำเร็จแล้ว" });
+          toast.add({ type: "success", title: translate("บันทึกว่าโอนไม่สำเร็จแล้ว", "Transfer failure recorded") });
           onMoved("APPROVED");
         }}
-        errorMessage={(error) => financeErrorMessage(error, "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")}
+        errorMessage={(error) => financeErrorMessage(error, translate("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง", "Unable to save. Please try again"))}
       />
     </Card>
   );
 }
 
 const ATTEMPT_BADGE: Record<string, { label: string; className: string }> = {
-  PROCESSING: { label: "กำลังโอน", className: "bg-[#e8f1fc] text-[#0058bc]" },
-  PROCESSED: { label: "สำเร็จ", className: "bg-[#e3f4ec] text-[#12805c]" },
+  PROCESSING: { get label() { return translate("กำลังโอน", "Transferring"); }, className: "bg-[#e8f1fc] text-[#0058bc]" },
+  PROCESSED: { get label() { return translate("สำเร็จ", "Completed"); }, className: "bg-[#e3f4ec] text-[#12805c]" },
   FAILED: { label: "ล้มเหลว", className: "bg-[#fbe9e8] text-[#d0342c]" },
 };
 
 function RefundHistory({ refundId }: { refundId: number }) {
+  useLanguage();
   const history = useRefundTransfers(refundId);
   const attempts = history.data ?? [];
 
@@ -371,16 +374,15 @@ function RefundHistory({ refundId }: { refundId: number }) {
     <Card className="gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold text-foreground">ประวัติการโอน</p>
-        <span className="text-xs text-[#9aa5ad]">{attempts.length} ครั้ง</span>
+        <span className="text-xs text-[#9aa5ad]">{attempts.length} {" " + translate("ครั้ง", "times")}</span>
       </div>
       {history.isPending ? (
         <Skeleton className="h-14 w-full rounded-[10px]" />
       ) : history.isError ? (
         <p role="alert" className="text-xs text-destructive">
-          โหลดประวัติไม่สำเร็จ{" "}
+          {translate("โหลดประวัติไม่สำเร็จ", "Unable to load history")}{" "}
           <button type="button" className="underline" onClick={() => void history.refetch()}>
-            ลองใหม่
-          </button>
+            {translate("ลองใหม่", "Retry")}</button>
         </p>
       ) : attempts.length === 0 ? (
         <p className="text-xs text-muted-foreground">ยังไม่เคยเริ่มโอน</p>

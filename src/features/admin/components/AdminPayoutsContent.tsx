@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Inbox } from "lucide-react";
 
@@ -35,11 +36,11 @@ const TAB_STATUSES: Record<PayoutTab, PayoutStatus[]> = {
 };
 
 const TAB_LABEL: Record<PayoutTab, string> = {
-  OPEN: "รอดำเนินการ",
-  REQUESTED: "คำขอใหม่",
-  APPROVED: "อนุมัติแล้ว",
-  PROCESSING: "กำลังโอน",
-  PAID: "จ่ายแล้ว",
+  get OPEN() { return translate("รอดำเนินการ", "Pending"); },
+  get REQUESTED() { return translate("คำขอใหม่", "New request"); },
+  get APPROVED() { return translate("อนุมัติแล้ว", "Approved"); },
+  get PROCESSING() { return translate("กำลังโอน", "Transferring"); },
+  get PAID() { return translate("จ่ายแล้ว", "Paid"); },
   CLOSED: "ปฏิเสธ / ล้มเหลว",
 };
 
@@ -54,6 +55,7 @@ const COUNTED_TABS = new Set<PayoutTab>(["OPEN", "REQUESTED", "APPROVED", "PROCE
  * อ้างจาก Figma node 1913:3144
  */
 export function AdminPayoutsContent() {
+  useLanguage();
   const [tab, setTab] = useState<PayoutTab>("OPEN");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -151,7 +153,7 @@ export function AdminPayoutsContent() {
             empty={
               <EmptyState
                 icon={Inbox}
-                title={search ? "ไม่พบรายการที่ค้นหา" : `ไม่มีรายการใน "${TAB_LABEL[tab]}"`}
+                title={search ? translate("ไม่พบรายการที่ค้นหา", "No matching results") : `ไม่มีรายการใน "${TAB_LABEL[tab]}"`}
                 description={search ? "ลองค้นด้วยเลข PO หรือชื่อร้าน" : "คำขอถอนเงินของผู้ขายจะขึ้นที่นี่"}
               />
             }
@@ -160,7 +162,7 @@ export function AdminPayoutsContent() {
               <>
                 <FinanceQueueHeader
                   title={`${TAB_LABEL[tab]} (${payouts.length})`}
-                  sortLabel={tab === "PAID" || tab === "CLOSED" ? "เรียงตาม: ใหม่สุด" : "เรียงตาม: เก่าสุด"}
+                  sortLabel={tab === "PAID" || tab === "CLOSED" ? translate("เรียงตาม: ใหม่สุด", "Sort: Newest first") : translate("เรียงตาม: เก่าสุด", "Sort: Oldest first")}
                 />
                 <ul className="flex flex-col gap-3">
                   {payouts.map((payout) => {

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
@@ -60,11 +61,12 @@ export function GameFormDialog({
   game,
   onSaved,
 }: GameFormDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{game ? `แก้ไขเกม ${game.name}` : "เพิ่มเกม"}</DialogTitle>
+          <DialogTitle>{game ? `แก้ไขเกม ${game.name}` : translate("เพิ่มเกม", "Add game")}</DialogTitle>
           <DialogDescription>
             {game
               ? "เปลี่ยนชื่อ รหัส หรือโลโก้ได้ตลอด slug ในลิงก์หน้าร้านตั้งได้ครั้งเดียวตอนสร้าง"
@@ -91,6 +93,7 @@ function GameForm({
   game?: Game;
   onSaved: (game: Game) => void;
 }) {
+  useLanguage();
   const saveGame = useSaveGame();
 
   const {
@@ -161,7 +164,7 @@ function GameForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.nameLocal) || undefined}>
-          <FieldLabel htmlFor="gameNameLocal">ชื่อภาษาไทย</FieldLabel>
+          <FieldLabel htmlFor="gameNameLocal">{translate("ชื่อภาษาไทย", "Thai name")}</FieldLabel>
           <Input
             id="gameNameLocal"
             maxLength={100}
@@ -195,14 +198,13 @@ function GameForm({
             <Input
               id="gameSlug"
               maxLength={100}
-              placeholder="เว้นว่าง = สร้างจากชื่อ"
+              placeholder={translate("เว้นว่าง = สร้างจากชื่อ", "Leave blank to generate from the name")}
               disabled={Boolean(game)}
               aria-invalid={Boolean(errors.slug)}
               {...register("slug")}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
-            </FieldDescription>
+              {translate("ตั้งได้ครั้งเดียวตอนสร้าง", "Can only be set when created")}</FieldDescription>
             <FieldError errors={[errors.slug]} />
           </Field>
         </div>
@@ -211,7 +213,7 @@ function GameForm({
           data-invalid={Boolean(errors.displayOrder) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="gameOrder">ลำดับการแสดง</FieldLabel>
+          <FieldLabel htmlFor="gameOrder">{translate("ลำดับการแสดง", "Display order")}</FieldLabel>
           <Input
             id="gameOrder"
             inputMode="numeric"
@@ -223,7 +225,7 @@ function GameForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-          <FieldLabel htmlFor="gameLogo">โลโก้</FieldLabel>
+          <FieldLabel htmlFor="gameLogo">{translate("โลโก้", "Logo")}</FieldLabel>
           <LogoUploadField
             upload={upload}
             id="gameLogo"
@@ -248,7 +250,7 @@ function GameForm({
             )}
           />
           <FieldContent>
-            <FieldLabel htmlFor="gameActive">แสดงบนหน้าร้าน</FieldLabel>
+            <FieldLabel htmlFor="gameActive">{translate("แสดงบนหน้าร้าน", "Show on storefront")}</FieldLabel>
             <FieldDescription className="text-xs">
               ปิดไว้ก่อนได้ถ้ายังเตรียมฟิลด์และชุดการ์ดไม่เสร็จ
             </FieldDescription>
@@ -258,13 +260,12 @@ function GameForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {game ? "บันทึก" : "เพิ่มเกม"}
+          {game ? translate("บันทึก", "Save") : translate("เพิ่มเกม", "Add game")}
         </Button>
       </DialogFooter>
     </form>

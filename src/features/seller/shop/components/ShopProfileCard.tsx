@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +23,7 @@ function toForm(user: AuthUser): ShopProfileValues {
   return { displayName: user.displayName ?? '', phone: user.phone ?? '', phonePublic: user.phonePublic ?? false };
 }
 function ShopAvatar({ name, url, small = false }: { name: string; url: string | null; small?: boolean }) {
+  useLanguage();
   return <Avatar className={small ? 'size-14' : 'size-16'}>
     {url && <AvatarImage src={url} alt={name}/>}
     <AvatarFallback className="bg-teal-600 text-white">{initialsOf(name || '?')}</AvatarFallback>
@@ -30,6 +32,7 @@ function ShopAvatar({ name, url, small = false }: { name: string; url: string | 
 export function ShopProfileCard({ user, handlingDays, verified, stats, verification }: {
   user: AuthUser; handlingDays: number | null; verified: boolean; stats: React.ReactNode; verification: React.ReactNode;
 }) {
+  useLanguage();
   "use no memo"; // RHF subscriptions must remain live after reset for subsequent edits.
   const update = useUpdateProfile();
   const upload = useFileUpload({ purpose: 'AVATAR_IMAGE' });
@@ -67,7 +70,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
       reset(saved);
       toast.add({ type: 'success', title: 'บันทึกข้อมูลหน้าร้านแล้ว' });
     } catch (error) {
-      toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') });
+      toast.add({ type: 'error', title: getErrorMessage(error, translate("บันทึกไม่สำเร็จ", "Unable to save")) });
     }
   });
   return <>
@@ -85,7 +88,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
                 <input aria-label="อัปโหลดรูปใหม่" type="file" accept={upload.accept} disabled={busy} className="sr-only"
                   onChange={(e) => { if (e.target.files?.length) { setCleared(false); upload.addFiles(e.target.files); } e.target.value = ''; }}/>
               </label>
-              <Button type="button" variant="ghost" size="sm" disabled={busy || !avatar} onClick={() => { upload.clear(); setCleared(true); }}>ลบรูป</Button>
+              <Button type="button" variant="ghost" size="sm" disabled={busy || !avatar} onClick={() => { upload.clear(); setCleared(true); }}>{translate("ลบรูป", "Delete image")}</Button>
             </div>
             <p className="text-[10px] text-muted-foreground">{upload.isUploading ? 'กำลังอัปโหลด…' : upload.hint}</p>
           </div>
@@ -111,11 +114,11 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
           <label htmlFor="shop-link" className="text-xs">ลิงก์หน้าร้าน</label>
           <div className="flex flex-wrap gap-2">
             <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-secondary px-3"><Input id="shop-link" readOnly value={url} className="min-w-0 border-0 bg-transparent px-0 text-xs shadow-none"/><Lock className="size-3 shrink-0 text-muted-foreground"/></div>
-            <Button type="button" variant="outline" size="sm" onClick={async () => { try { await navigator.clipboard.writeText(url); toast.add({ type: 'success', title: 'คัดลอกลิงก์แล้ว' }); } catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'คัดลอกไม่สำเร็จ') }); } }}>คัดลอกลิงก์</Button>
+            <Button type="button" variant="outline" size="sm" onClick={async () => { try { await navigator.clipboard.writeText(url); toast.add({ type: 'success', title: 'คัดลอกลิงก์แล้ว' }); } catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, translate("คัดลอกไม่สำเร็จ", "Unable to copy")) }); } }}>คัดลอกลิงก์</Button>
           </div>
           <p className="text-[10px] text-muted-foreground">แก้ไขไม่ได้ เพราะผูกกับ username ของบัญชี</p>
         </div>
-        <div className={shopFooter}><Button type="button" variant="ghost" size="sm" onClick={() => reset(user)} disabled={busy}>ยกเลิก</Button><Button type="submit" size="sm" disabled={!hasChanges || busy || item?.status === 'error'}>บันทึกข้อมูลหน้าร้าน</Button></div>
+        <div className={shopFooter}><Button type="button" variant="ghost" size="sm" onClick={() => reset(user)} disabled={busy}>{translate("ยกเลิก", "Cancel")}</Button><Button type="submit" size="sm" disabled={!hasChanges || busy || item?.status === 'error'}>บันทึกข้อมูลหน้าร้าน</Button></div>
       </form>
     </ShopCard>
     <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">

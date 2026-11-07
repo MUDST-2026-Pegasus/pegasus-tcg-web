@@ -1,3 +1,4 @@
+import { setLanguage } from "@/lib/language";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -64,6 +65,7 @@ const activeLabels = () =>
 
 describe("Navbar", () => {
   beforeEach(() => {
+    setLanguage("en");
     vi.clearAllMocks();
     getGames.mockResolvedValue([]);
     authState.isLoading = false;
@@ -106,7 +108,7 @@ describe("Navbar", () => {
   });
   it("submits a search and preserves the game filter while resetting page", () => {
     renderNavbar("/search?game=pokemon-tcg&page=3&q=old");
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getAllByRole("textbox", { name: "Search" })[0];
     expect(input).toHaveValue("old");
     fireEvent.change(input, { target: { value: "Pikachu" } });
     fireEvent.submit(input.closest("form")!);
@@ -116,7 +118,7 @@ describe("Navbar", () => {
   });
   it("focuses search with slash unless another field is active", () => {
     renderNavbar();
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getAllByRole("textbox", { name: "Search" })[0];
     fireEvent.keyDown(window, { key: "/" });
     expect(input).toHaveFocus();
     const other = document.createElement("input");
@@ -162,7 +164,7 @@ describe("Navbar", () => {
     renderNavbar();
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
     expect(
-      await screen.findByText("เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ"),
+      await screen.findByText("Log in to view your orders and collection"),
     ).toBeInTheDocument();
     expect(screen.queryByText("SELL")).not.toBeInTheDocument();
     expect(

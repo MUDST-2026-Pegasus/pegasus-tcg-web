@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
 
@@ -20,6 +21,7 @@ export function CommissionDefaultRateCard({
   max,
   onChange,
 }: CommissionDefaultRateCardProps & EditableProps) {
+  useLanguage();
   // ตำแหน่งของ handle เป็นเปอร์เซ็นต์ของความกว้างแถบ
   const percent = Math.min(100, (parseFloat(value) / max) * 100);
 

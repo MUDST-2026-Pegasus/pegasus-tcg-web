@@ -1,8 +1,10 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** ตารางการ์ดระหว่างโหลด — วางตรงกับ `CatalogProductGrid` (รูปจัตุรัส + ท้ายการ์ดสูง 146px) */
 export function CatalogGridSkeleton() {
+  useLanguage();
   return (
     <div
       aria-hidden="true"
@@ -29,6 +31,7 @@ export function CatalogGridSkeleton() {
 
 /** หน้าต่างแก้ไขสินค้าระหว่างโหลด — หัวเรื่อง แท็บ แล้วช่องกรอกสองคอลัมน์ */
 export function CatalogProductSheetSkeleton() {
+  useLanguage();
   return (
     <div aria-hidden="true" className="flex flex-col gap-6 p-6 pr-14">
       <div className="flex flex-col gap-2">
@@ -50,6 +53,7 @@ export function CatalogProductSheetSkeleton() {
 
 /** คอลัมน์ซ้ายระหว่างรอรายชื่อเกม — วางตรงกับ `CatalogFilterPanel` */
 export function CatalogFilterPanelSkeleton() {
+  useLanguage();
   return (
     <div
       aria-hidden="true"

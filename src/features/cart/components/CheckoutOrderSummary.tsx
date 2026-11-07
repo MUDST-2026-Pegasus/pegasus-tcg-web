@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { formatSaleBaht } from "@/components/sale";
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import { Spinner } from "@/components/ui/spinner";
@@ -53,25 +54,26 @@ export function CheckoutOrderSummary({
   onPurchase,
   onReturnToCart,
 }: CheckoutOrderSummaryProps) {
+  useLanguage();
   return (
     <Card className={CHECKOUT_CARD_CLASS}>
-      <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
+      <h2 className="text-[15px] font-semibold">{translate("สรุปคำสั่งซื้อ", "Order summary")}</h2>
 
       {saleTotals && saleTotals.saleDiscount > 0 && (
         <>
           <div className="flex items-center justify-between gap-3 text-[13px]">
-            <span className="text-muted-foreground">ราคาสินค้า (ก่อนลด)</span>
+            <span className="text-muted-foreground">{translate("ราคาสินค้า (ก่อนลด)", "Items before discount")}</span>
             <span>{checkoutMoney(saleTotals.listTotal)}</span>
           </div>
           <div className="flex items-center justify-between gap-3 text-[13px]">
-            <span className="text-muted-foreground">ส่วนลดราคาสินค้า</span>
+            <span className="text-muted-foreground">{translate("ส่วนลดราคาสินค้า", "Item discount")}</span>
             <span className="text-[#dc2626]">−{formatSaleBaht(saleTotals.saleDiscount)}</span>
           </div>
         </>
       )}
 
       <div className="flex items-center justify-between gap-3 text-[13px]">
-        <span className="text-muted-foreground">ยอดสินค้า ({itemCount} ใบ)</span>
+        <span className="text-muted-foreground">{translate("ยอดสินค้า (", "Items (")}{itemCount}  {translate("ใบ)", "cards)")}</span>
         <span>
           {previewReady ? checkoutMoney(preview!.itemsSubtotal) : checkoutMoney(subtotal)}
         </span>
@@ -81,7 +83,7 @@ export function CheckoutOrderSummary({
         className="flex items-center justify-between gap-3 text-[13px]"
         aria-live="polite"
       >
-        <span className="text-muted-foreground">ค่าจัดส่ง</span>
+        <span className="text-muted-foreground">{translate("ค่าจัดส่ง", "Shipping")}</span>
         <span>
           {previewReady && preview?.shippingTotal != null
             ? checkoutMoney(preview.shippingTotal)
@@ -110,7 +112,7 @@ export function CheckoutOrderSummary({
               className="flex items-start justify-between gap-3 text-xs"
             >
               <span className="min-w-0 text-muted-foreground">
-                {quote?.sellerName || items[0]?.sellerName || "ร้านค้า"}
+                {quote?.sellerName || items[0]?.sellerName || translate("ร้านค้า", "Shop")}
                 {option ? ` · ${option.name}` : ""}
               </span>
               <span
@@ -120,7 +122,7 @@ export function CheckoutOrderSummary({
               >
                 {shippingReady && option && authoritativeFee != null
                   ? authoritativeFee === 0
-                    ? "ส่งฟรี"
+                    ? translate("ส่งฟรี", "Free shipping")
                     : checkoutMoney(authoritativeFee)
                   : "—"}
               </span>
@@ -131,7 +133,7 @@ export function CheckoutOrderSummary({
 
       {!!preview?.sellerDiscountTotal && preview.sellerDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
-          <span className="text-foreground/75">ส่วนลดร้าน</span>
+          <span className="text-foreground/75">{translate("ส่วนลดร้าน", "Shop discount")}</span>
           <span className="font-medium text-teal-700 dark:text-teal-400">
             − {checkoutMoney(preview.sellerDiscountTotal)}
           </span>
@@ -162,8 +164,7 @@ export function CheckoutOrderSummary({
       {!!preview?.platformDiscountTotal && preview.platformDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
           <span className="text-foreground/75">
-            ส่วนลด Pegasus
-            {appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}
+            {translate("ส่วนลด Pegasus", "Pegasus discount")}{appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}
           </span>
           <span className="font-medium text-primary">
             − {checkoutMoney(preview.platformDiscountTotal)}
@@ -174,7 +175,7 @@ export function CheckoutOrderSummary({
       <Separator className="checkout-divider" />
 
       <div className="flex items-center justify-between gap-3 text-lg" aria-live="polite">
-        <span className="font-semibold">ยอดรวม</span>
+        <span className="font-semibold">{translate("ยอดรวม", "Total")}</span>
         <strong data-testid="checkout-grand-total">
           {previewReady ? checkoutMoney(preview!.grandTotal) : "—"}
         </strong>
@@ -182,7 +183,7 @@ export function CheckoutOrderSummary({
 
       {!!preview && preview.sellerDiscountTotal + preview.platformDiscountTotal > 0 && (
         <p className="text-right text-xs font-semibold text-teal-700 dark:text-teal-400">
-          ประหยัดไป{" "}
+          {translate("ประหยัดไป", "You saved")}{" "}
           {checkoutMoney(
             preview.sellerDiscountTotal + preview.platformDiscountTotal,
           )}
@@ -195,12 +196,11 @@ export function CheckoutOrderSummary({
         onClick={onPurchase}
       >
         {isSubmitting && <Spinner />}
-        {isSubmitting ? "กำลังสร้างคำสั่งซื้อ..." : "สั่งซื้อและไปชำระเงิน"}
+        {isSubmitting ? translate("กำลังสร้างคำสั่งซื้อ...", "Creating order…") : translate("สั่งซื้อและไปชำระเงิน", "Place order and pay")}
       </Button>
 
       <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-        ค่าส่งคิดจากตัวเลือกที่เลือกของแต่ละร้าน และยืนยันอีกครั้งตอนสร้างคำสั่งซื้อ
-      </p>
+        {translate("ค่าส่งคิดจากตัวเลือกที่เลือกของแต่ละร้าน และยืนยันอีกครั้งตอนสร้างคำสั่งซื้อ", "Shipping uses the selected option for each shop and is confirmed when the order is placed")}</p>
 
       {quotesSettledWithoutShipping && (
         <button
@@ -208,8 +208,7 @@ export function CheckoutOrderSummary({
           className="checkout-link text-center text-xs"
           onClick={onReturnToCart}
         >
-          กลับไปแก้ไขรายการที่เลือกในตะกร้า
-        </button>
+          {translate("กลับไปแก้ไขรายการที่เลือกในตะกร้า", "Edit selected items in your cart")}</button>
       )}
     </Card>
   );

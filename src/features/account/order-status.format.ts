@@ -1,15 +1,16 @@
+import { translate } from "@/lib/language";
 const labels: Record<string, string> = {
-  PENDING_PAYMENT: "รอชำระเงิน",
-  PAID: "ชำระเงินแล้ว",
-  PARTIALLY_COMPLETED: "เสร็จสิ้นบางรายการ",
-  PREPARING: "กำลังเตรียมสินค้า",
-  SHIPPED: "จัดส่งแล้ว",
-  DELIVERED: "จัดส่งถึงแล้ว",
-  COMPLETED: "เสร็จสิ้น",
-  CANCELLED: "ยกเลิกแล้ว",
-  RETURN_REQUESTED: "มีคำขอคืนสินค้า",
-  RETURNED: "คืนสินค้าแล้ว",
-  REFUNDED: "คืนเงินแล้ว",
+  get PENDING_PAYMENT() { return translate("รอชำระเงิน", "Awaiting payment"); },
+  get PAID() { return translate("ชำระเงินแล้ว", "Paid"); },
+  get PARTIALLY_COMPLETED() { return translate("เสร็จสิ้นบางรายการ", "Partially completed"); },
+  get PREPARING() { return translate("กำลังเตรียมสินค้า", "Preparing"); },
+  get SHIPPED() { return translate("จัดส่งแล้ว", "Shipped"); },
+  get DELIVERED() { return translate("จัดส่งถึงแล้ว", "Delivered"); },
+  get COMPLETED() { return translate("เสร็จสิ้น", "Completed"); },
+  get CANCELLED() { return translate("ยกเลิกแล้ว", "Cancelled"); },
+  get RETURN_REQUESTED() { return translate("มีคำขอคืนสินค้า", "Return requested"); },
+  get RETURNED() { return translate("คืนสินค้าแล้ว", "Returned"); },
+  get REFUNDED() { return translate("คืนเงินแล้ว", "Refunded"); },
 };
 
-export const orderStatusLabel = (status: string) => labels[status] ?? "สถานะอื่น";
+export const orderStatusLabel = (status: string) => labels[status] ?? translate("สถานะอื่น", "Other status");

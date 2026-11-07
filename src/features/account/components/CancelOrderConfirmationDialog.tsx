@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { AlertCircle, CircleCheck, CircleX, Loader2, TriangleAlert } from "lucide-react";
@@ -16,10 +17,10 @@ import { formatBaht } from "@/features/finance/after-sales.format";
 import type { OrderDetails } from "../orders.types";
 
 const cancelReasons = [
-  { value: "เปลี่ยนใจ / สั่งผิด", label: "เปลี่ยนใจ / สั่งผิด" },
-  { value: "สั่งซื้อซ้ำ", label: "สั่งซื้อซ้ำ" },
-  { value: "พบสินค้าจากร้านอื่น", label: "พบสินค้าจากร้านอื่น" },
-  { value: "อื่น ๆ", label: "อื่น ๆ" },
+  { get value() { return translate("เปลี่ยนใจ / สั่งผิด", "Changed my mind / ordered by mistake"); }, get label() { return translate("เปลี่ยนใจ / สั่งผิด", "Changed my mind / ordered by mistake"); } },
+  { get value() { return translate("สั่งซื้อซ้ำ", "Duplicate order"); }, get label() { return translate("สั่งซื้อซ้ำ", "Duplicate order"); } },
+  { get value() { return translate("พบสินค้าจากร้านอื่น", "Found an item from another shop"); }, get label() { return translate("พบสินค้าจากร้านอื่น", "Found an item from another shop"); } },
+  { get value() { return translate("อื่น ๆ", "Other"); }, get label() { return translate("อื่น ๆ", "Other"); } },
 ];
 
 export type CancelOrderConfirmationDialogProps = {
@@ -38,6 +39,7 @@ export function CancelOrderConfirmationDialog({
   onConfirm,
   isCancelling,
 }: CancelOrderConfirmationDialogProps) {
+  useLanguage();
   const [reason, setReason] = useState(cancelReasons[0].value);
   const promotions = order?.promotions ?? [];
   const hasPromotions = Boolean(order && (
@@ -57,9 +59,9 @@ export function CancelOrderConfirmationDialog({
     ? order.sellerOrders[0].sellerOrderNumber
     : order?.orderNumber;
   const sellerNames = [...new Set(order?.sellerOrders.map((seller) => seller.sellerName?.trim()).filter(Boolean) ?? [])];
-  const sellerLabel = sellerNames.length === 1 ? sellerNames[0] : sellerNames.length > 1 ? "ร้านค้าทั้งหมด" : "ร้านค้า";
-  const title = isPaid ? `ยกเลิกคำสั่งซื้อจาก ${sellerLabel}?` : "ยกเลิกคำสั่งซื้อนี้?";
-  const statusHint = isPaid ? "ชำระเงินแล้ว" : order?.status === "PENDING_PAYMENT" ? "ยังไม่ได้ชำระเงิน" : "ร้านยังไม่จัดส่ง";
+  const sellerLabel = sellerNames.length === 1 ? sellerNames[0] : sellerNames.length > 1 ? translate("ร้านค้าทั้งหมด", "All shops") : translate("ร้านค้า", "Shop");
+  const title = isPaid ? translate(`ยกเลิกคำสั่งซื้อจาก ${sellerLabel}?`, `Cancel the order from ${sellerLabel}?`) : translate("ยกเลิกคำสั่งซื้อนี้?", "Cancel this order?");
+  const statusHint = isPaid ? translate("ชำระเงินแล้ว", "Paid") : order?.status === "PENDING_PAYMENT" ? translate("ยังไม่ได้ชำระเงิน", "Unpaid") : translate("ร้านยังไม่จัดส่ง", "Not shipped yet");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -86,14 +88,14 @@ export function CancelOrderConfirmationDialog({
               {order.sellerOrders.map((seller) => (
                 <div key={seller.id} className="flex items-center justify-between gap-3">
                   <span className="text-muted-foreground">
-                    {order.sellerOrders.length === 1 ? "ยอดที่จ่ายให้ร้านนี้" : `ยอดที่จ่าย · ${seller.sellerName || seller.sellerOrderNumber}`}
+                    {order.sellerOrders.length === 1 ? translate("ยอดที่จ่ายให้ร้านนี้", "Amount paid to this shop") : translate(`ยอดที่จ่าย · ${seller.sellerName || seller.sellerOrderNumber}`, `Amount paid · ${seller.sellerName || seller.sellerOrderNumber}`)}
                   </span>
                   <span className="shrink-0 font-semibold tabular-nums">{formatBaht(seller.grandTotal)}</span>
                 </div>
               ))}
               {hasPromotions && (
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-muted-foreground">ส่วนลดที่ใช้</span>
+                  <span className="text-muted-foreground">{translate("ส่วนลดที่ใช้", "Applied discount")}</span>
                   <span className="flex max-w-[70%] flex-wrap justify-end gap-1.5 text-right">
                     {uniqueCodes.length ? uniqueCodes.map((promotion) => (
                       <span key={`${promotion.ownerType}-${promotion.code}`} className="inline-flex items-center gap-1">
@@ -106,7 +108,7 @@ export function CancelOrderConfirmationDialog({
               )}
               <div className="h-px bg-border" />
               <div className="flex items-center justify-between gap-3 text-[13px] font-semibold">
-                <span>เงินคืน</span>
+                <span>{translate("เงินคืน", "Refund")}</span>
                 <span className="shrink-0 text-lg font-black tabular-nums text-emerald-700">{formatBaht(order.grandTotal)}</span>
               </div>
             </div>
@@ -118,23 +120,23 @@ export function CancelOrderConfirmationDialog({
                 <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
                 <p>
                   {uniqueCodes.length
-                    ? `โค้ด ${uniqueCodes.map((promotion) => promotion.code).join(" และ ")} จะกลับเข้า “โค้ดของฉัน” ให้ใช้ใหม่ได้ (ถ้ายังไม่หมดอายุ)`
-                    : "โค้ดที่ใช้จะกลับเข้า “โค้ดของฉัน” ให้ใช้ใหม่ได้ (ถ้ายังไม่หมดอายุ)"}
+                    ? translate(`โค้ด ${uniqueCodes.map((promotion) => promotion.code).join(translate(" และ ", " and "))} จะกลับเข้า “โค้ดของฉัน” ให้ใช้ใหม่ได้ (ถ้ายังไม่หมดอายุ)`, `Coupons ${uniqueCodes.map((promotion) => promotion.code).join(translate(" และ ", " and "))} will return to “My coupons” for reuse if they have not expired`)
+                    : translate("โค้ดที่ใช้จะกลับเข้า “โค้ดของฉัน” ให้ใช้ใหม่ได้ (ถ้ายังไม่หมดอายุ)", "Your coupon will return to “My coupons” for reuse if it has not expired")}
                 </p>
               </div>
             ) : (
               <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
                 <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                <p>โค้ดที่ใช้กับคำสั่งซื้อนี้จะไม่ได้คืนสิทธิ์ เพราะชำระเงินแล้ว</p>
+                <p>{translate("โค้ดที่ใช้กับคำสั่งซื้อนี้จะไม่ได้คืนสิทธิ์ เพราะชำระเงินแล้ว", "Coupons used for this paid order will not be restored")}</p>
               </div>
             )
           )}
 
           {isPaid && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-foreground" htmlFor="buyer-cancel-reason">เหตุผล *</label>
+              <label className="text-xs font-medium text-foreground" htmlFor="buyer-cancel-reason">{translate("เหตุผล *", "Reason *")}</label>
               <Select items={cancelReasons} value={reason} onValueChange={(value) => setReason(value ?? cancelReasons[0].value)}>
-                <SelectTrigger id="buyer-cancel-reason" aria-label="เหตุผลการยกเลิก" className="w-full rounded-lg border-border bg-background">
+                <SelectTrigger id="buyer-cancel-reason" aria-label={translate("เหตุผลการยกเลิก", "Cancellation reason")} className="w-full rounded-lg border-border bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -148,10 +150,9 @@ export function CancelOrderConfirmationDialog({
         </div>
 
         <DialogFooter className="flex-row flex-wrap items-center justify-between gap-2 border-t border-muted bg-muted/30 px-6 py-3.5">
-          {isPaid && <p className="mr-auto text-[11px] text-muted-foreground">คืนเงินภายใน 3–5 วันทำการ</p>}
+          {isPaid && <p className="mr-auto text-[11px] text-muted-foreground">{translate("คืนเงินภายใน 3–5 วันทำการ", "Refund within 3–5 business days")}</p>}
           <Button type="button" variant="outline" size="sm" className="rounded-lg px-4" disabled={isCancelling} onClick={() => onOpenChange(false)}>
-            ไม่ยกเลิก
-          </Button>
+            {translate("ไม่ยกเลิก", "Keep order")}</Button>
           <Button
             type="button"
             variant="destructive"
@@ -163,9 +164,8 @@ export function CancelOrderConfirmationDialog({
             {isCancelling ? (
               <span className="flex items-center gap-1.5">
                 <Loader2 className="size-4 animate-spin" />
-                กำลังยกเลิก...
-              </span>
-            ) : "ยกเลิกคำสั่งซื้อ"}
+                {translate("กำลังยกเลิก...", "Cancelling…")}</span>
+            ) : translate("ยกเลิกคำสั่งซื้อ", "Cancel order")}
           </Button>
         </DialogFooter>
       </DialogContent>

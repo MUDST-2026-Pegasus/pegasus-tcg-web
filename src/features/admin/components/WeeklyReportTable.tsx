@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import {
@@ -20,6 +21,7 @@ const CELL = "px-4 py-3.5 text-sm text-foreground";
 
 /** แถวละเกมและประเภทสินค้าตาม `breakdownByGameAndType` แถวท้ายคือ `totals` ที่ backend รวมให้ */
 export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
+  useLanguage();
   const { breakdownByGameAndType: rows, totals } = report;
 
   return (
@@ -37,7 +39,7 @@ export function WeeklyReportTable({ report }: { report: WeeklyReport }) {
             <TableHead className={HEAD}>สต็อกคงเหลือ</TableHead>
             <TableHead className={HEAD}>ยอดขายรวม</TableHead>
             {/* ไม่ใส่ % ท้ายชื่อ: กำไรหักต้นทุนและค่าคอมจริงต่อออเดอร์ ไม่ใช่อัตราคงที่ */}
-            <TableHead className={HEAD}>กำไรสุทธิ</TableHead>
+            <TableHead className={HEAD}>{translate("กำไรสุทธิ", "Net profit")}</TableHead>
             <TableHead className={HEAD}>สถานะสต็อก</TableHead>
           </TableRow>
         </TableHeader>

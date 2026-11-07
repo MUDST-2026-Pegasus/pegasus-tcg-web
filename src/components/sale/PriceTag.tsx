@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 import { SaleBadge } from "./SaleBadge";
@@ -33,6 +34,7 @@ export function PriceTag({
   inline?: boolean;
   className?: string;
 }) {
+  useLanguage();
   const state = priceTagState(pricing);
   const sizes = SIZE[size];
 
@@ -57,7 +59,7 @@ export function PriceTag({
         <span className={cn("font-bold text-[#dc2626]", sizes.price)}>{formatSaleBaht(pricing.salePrice)}</span>
         {showBadge ? <SaleBadge type="percent" percent={pricing.discountPercent} /> : null}
       </span>
-      <s className={cn("text-muted-foreground", sizes.list)} aria-label={`ราคาปกติ ${formatSaleBaht(pricing.listPrice)}`}>
+      <s className={cn("text-muted-foreground", sizes.list)} aria-label={translate(`ราคาปกติ ${formatSaleBaht(pricing.listPrice)}`, `Regular price ${formatSaleBaht(pricing.listPrice)}`)}>
         {formatSaleBaht(pricing.listPrice)}
       </s>
     </span>

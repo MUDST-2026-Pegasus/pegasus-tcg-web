@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Controller, useFormState, type UseFormReturn } from "react-hook-form";
 
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -19,6 +20,7 @@ type BahtFieldProps = {
 
 /** ช่องเงินบาทมี "฿" นำหน้า + ข้อความใต้ช่อง (ใช้ในการ์ดราคาและซื้อทันที) */
 export function BahtField({ form, name, id, label, hint, required }: BahtFieldProps) {
+  useLanguage();
   const { errors } = useFormState({ control: form.control, name });
   const error = errors[name]?.message;
   return (

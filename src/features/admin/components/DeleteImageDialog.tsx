@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Trash2 } from "lucide-react";
 
 import {
@@ -38,6 +39,7 @@ export function DeleteImageDialog({
   error,
   onConfirm,
 }: DeleteImageDialogProps) {
+  useLanguage();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -61,15 +63,14 @@ export function DeleteImageDialog({
         ) : null}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>ยกเลิก</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
           <Button
             variant="destructive"
             disabled={isPending}
             onClick={onConfirm}
           >
             {isPending && <Spinner data-icon="inline-start" />}
-            ลบรูป
-          </Button>
+            {translate("ลบรูป", "Delete image")}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

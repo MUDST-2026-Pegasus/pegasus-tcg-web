@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ComponentProps } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,6 +7,7 @@ import { cn } from "@/lib/utils";
 const productTitleWidths = ["w-36", "w-40", "w-32", "w-36", "w-40"];
 
 function HomeSkeleton(props: Omit<ComponentProps<typeof Skeleton>, "tone">) {
+  useLanguage();
   return <Skeleton tone="contrast" {...props} />;
 }
 
@@ -16,6 +18,7 @@ function SkeletonSectionHeader({
   description?: boolean;
   showAction?: boolean;
 }) {
+  useLanguage();
   return (
     <div
       className={cn(
@@ -33,6 +36,7 @@ function SkeletonSectionHeader({
 }
 
 function ProductCardSkeleton({ className }: { className?: string }) {
+  useLanguage();
   return (
     <div
       className={cn(
@@ -53,6 +57,7 @@ export function ProductRailSkeleton({
 }: {
   description?: boolean;
 }) {
+  useLanguage();
   return (
     <section
       aria-hidden="true"
@@ -74,6 +79,7 @@ export function ProductRailSkeleton({
 }
 
 export function HeroSkeleton() {
+  useLanguage();
   return (
     <section aria-hidden="true" className="bg-background">
       <div className="flex flex-col lg:h-[360px] lg:flex-row">
@@ -104,6 +110,7 @@ export function HeroSkeleton() {
 }
 
 export function ProductGridSkeleton({ explore = false }: { explore?: boolean }) {
+  useLanguage();
   return (
     <section
       aria-hidden="true"
@@ -130,6 +137,7 @@ export function ProductGridSkeleton({ explore = false }: { explore?: boolean }) 
 }
 
 export function GamesSkeleton() {
+  useLanguage();
   return (
     <section
       aria-hidden="true"
@@ -154,6 +162,7 @@ export function GamesSkeleton() {
 }
 
 export function FeaturedSkeleton() {
+  useLanguage();
   return (
     <section
       aria-hidden="true"
@@ -185,15 +194,14 @@ export function FeaturedSkeleton() {
 }
 
 export function HomePageSkeleton() {
+  useLanguage();
   return (
     <main
       aria-busy="true"
-      aria-label="กำลังโหลดหน้าแรก"
+      aria-label={translate("กำลังโหลดหน้าแรก", "Loading home page")}
       className="bg-secondary font-sans"
     >
-      <span className="sr-only" role="status" aria-live="polite">
-        กำลังโหลดข้อมูลหน้าแรก
-      </span>
+      <span className="sr-only" role="status" aria-live="polite">{translate("กำลังโหลดข้อมูลหน้าแรก", "Loading home page content")}</span>
       <HeroSkeleton />
       <ProductGridSkeleton />
       <GamesSkeleton />

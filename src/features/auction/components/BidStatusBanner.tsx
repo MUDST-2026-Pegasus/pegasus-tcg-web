@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleCheck, Clock, Gavel, TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ type BidStatusBannerProps = {
 
 /** B3-D แบนเนอร์เหนือกล่องบิด: นำอยู่ / ถูกแซง / ต่อเวลาแล้ว / จบแล้วไม่ชนะ [TCG-630 · FE-4] */
 export function BidStatusBanner({ auction, lastBid, onBid }: BidStatusBannerProps) {
+  useLanguage();
   const live = auction.status === "LIVE";
   const remaining = useCountdown(live ? auction.endsAt : null, auction.serverTime) ?? 0;
   const viewerState = auction.viewer?.state ?? null;
@@ -26,8 +28,8 @@ export function BidStatusBanner({ auction, lastBid, onBid }: BidStatusBannerProp
       <AuctionNotice
         tone="slate"
         icon={<Gavel />}
-        title="ประมูลจบแล้ว — คุณไม่ชนะ"
-        detail={`ราคาปิด ${formatBaht(auction.currentPrice)} · ${formatBidCount(auction.bidCount)}`}
+        title={translate("ประมูลจบแล้ว — คุณไม่ชนะ", "Auction ended — you did not win")}
+        detail={translate(`ราคาปิด ${formatBaht(auction.currentPrice)} · ${formatBidCount(auction.bidCount)}`, `Closing price ${formatBaht(auction.currentPrice)} · ${formatBidCount(auction.bidCount)}`)}
       />
     );
   }
@@ -44,19 +46,18 @@ export function BidStatusBanner({ auction, lastBid, onBid }: BidStatusBannerProp
         <AuctionNotice
           tone="emerald"
           icon={<CircleCheck />}
-          title={`คุณนำอยู่ที่ ${formatBaht(freshBid?.amount ?? auction.viewer?.myHighestBid ?? auction.currentPrice)}`}
-          detail='ถ้ามีคนบิดแซง เราจะแจ้งในหน้า "การประมูลของฉัน"'
+          title={translate(`คุณนำอยู่ที่ ${formatBaht(freshBid?.amount ?? auction.viewer?.myHighestBid ?? auction.currentPrice)}`, `You are leading at ${formatBaht(freshBid?.amount ?? auction.viewer?.myHighestBid ?? auction.currentPrice)}`)}
+          detail={translate("ถ้ามีคนบิดแซง เราจะแจ้งในหน้า \"การประมูลของฉัน\"", "If someone outbids you, we will show it on the My auctions page")}
         />
       ) : null}
       {outbid ? (
         <AuctionNotice
           tone="amber"
           icon={<TriangleAlert />}
-          title="คุณถูกบิดแซงแล้ว"
-          detail={`ราคาตอนนี้ ${formatBaht(freshBid?.currentPrice ?? auction.currentPrice)}`}
+          title={translate("คุณถูกบิดแซงแล้ว", "You have been outbid")}
+          detail={translate(`ราคาตอนนี้ ${formatBaht(freshBid?.currentPrice ?? auction.currentPrice)}`, `Current price ${formatBaht(freshBid?.currentPrice ?? auction.currentPrice)}`)}
           action={
-            <Button className="rounded-full px-4" onClick={() => onBid(freshBid?.minNextBid ?? auction.minNextBid)}>
-              บิด {formatBaht(freshBid?.minNextBid ?? auction.minNextBid)}
+            <Button className="rounded-full px-4" onClick={() => onBid(freshBid?.minNextBid ?? auction.minNextBid)}>{translate("บิด", "Bid")}{formatBaht(freshBid?.minNextBid ?? auction.minNextBid)}
             </Button>
           }
         />
@@ -65,8 +66,8 @@ export function BidStatusBanner({ auction, lastBid, onBid }: BidStatusBannerProp
         <AuctionNotice
           tone="sky"
           icon={<Clock />}
-          title={`ต่อเวลาแล้ว — เหลือ ${formatRemaining(remaining)}`}
-          detail="มีคนบิดในช่วง 2 นาทีสุดท้าย เวลาจึงกลับเป็น 2 นาที"
+          title={translate(`ต่อเวลาแล้ว — เหลือ ${formatRemaining(remaining)}`, `Extended — ${formatRemaining(remaining)} remaining`)}
+          detail={translate("มีคนบิดในช่วง 2 นาทีสุดท้าย เวลาจึงกลับเป็น 2 นาที", "A bid in the final 2 minutes reset the timer to 2 minutes")}
         />
       ) : null}
     </>

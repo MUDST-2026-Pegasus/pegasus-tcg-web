@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type { GameDto } from "@/features/catalog/catalog.types";
 
 import type { AuctionFilter, AuctionListParams, AuctionSort } from "./auction.types";
@@ -12,19 +13,19 @@ export const AUCTION_PAGE_SIZE = 20;
 
 /** แท็บแคปซูล — `null` = "ทั้งหมด" */
 export const AUCTION_TABS: { value: AuctionFilter | null; label: string }[] = [
-  { value: null, label: "ทั้งหมด" },
-  { value: "ENDING_SOON", label: "ใกล้จบ" },
-  { value: "BUY_NOW", label: "ซื้อทันทีได้" },
-  { value: "NO_BIDS", label: "ยังไม่มีบิด" },
-  { value: "NEW", label: "เพิ่งเปิด" },
+  { value: null, get label() { return translate("ทั้งหมด", "All"); } },
+  { value: "ENDING_SOON", get label() { return translate("ใกล้จบ", "Ending soon"); } },
+  { value: "BUY_NOW", get label() { return translate("ซื้อทันทีได้", "Buy now available"); } },
+  { value: "NO_BIDS", get label() { return translate("ยังไม่มีบิด", "No bids yet"); } },
+  { value: "NEW", get label() { return translate("เพิ่งเปิด", "Recently opened"); } },
 ];
 
 export const AUCTION_SORTS: { value: AuctionSort; label: string }[] = [
-  { value: "ENDING_SOON", label: "เรียง: ใกล้จบก่อน" },
-  { value: "NEWEST", label: "เรียง: เพิ่งเปิด" },
-  { value: "PRICE_ASC", label: "เรียง: ราคาต่ำ → สูง" },
-  { value: "PRICE_DESC", label: "เรียง: ราคาสูง → ต่ำ" },
-  { value: "MOST_BIDS", label: "เรียง: บิดมากสุด" },
+  { value: "ENDING_SOON", get label() { return translate("เรียง: ใกล้จบก่อน", "Sort: Ending soon"); } },
+  { value: "NEWEST", get label() { return translate("เรียง: เพิ่งเปิด", "Sort: Newest"); } },
+  { value: "PRICE_ASC", get label() { return translate("เรียง: ราคาต่ำ → สูง", "Sort: Price low → high"); } },
+  { value: "PRICE_DESC", get label() { return translate("เรียง: ราคาสูง → ต่ำ", "Sort: Price high → low"); } },
+  { value: "MOST_BIDS", get label() { return translate("เรียง: บิดมากสุด", "Sort: Most bids"); } },
 ];
 
 const DEFAULT_SORT: AuctionSort = "ENDING_SOON";

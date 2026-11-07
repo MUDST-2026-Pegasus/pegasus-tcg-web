@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
 import { CommissionCalcCard } from "@/features/admin/components/CommissionCalcCard";
@@ -11,6 +12,7 @@ type AdminCommissionContentProps = {
 };
 
 export function AdminCommissionContent({ data }: AdminCommissionContentProps) {
+  useLanguage();
   return (
     <div className="flex flex-col gap-6">
       {/* หัวหน้า: ชื่อหน้า + ปุ่มการทำงาน */}

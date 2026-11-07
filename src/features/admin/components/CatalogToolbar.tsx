@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { SearchIcon } from "lucide-react";
@@ -52,6 +53,7 @@ export function CatalogToolbar({
   onSearchChange,
   selects,
 }: CatalogToolbarProps) {
+  useLanguage();
   const [text, setText] = useState(search);
   const [syncedSearch, setSyncedSearch] = useState(search);
   const timer = useRef<number | undefined>(undefined);

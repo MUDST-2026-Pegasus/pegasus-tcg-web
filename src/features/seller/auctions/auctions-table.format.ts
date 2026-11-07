@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import {
   AUCTION_STATUS_LABEL,
   formatAuctionDayMonth,
@@ -43,14 +44,14 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
       return hasBids
         ? {
             currentPrice: { text: formatBaht(row.currentPrice), tone: "primary" },
-            buyNow: { text: row.buyNowPrice !== null ? "ปิดแล้ว (มีบิด)" : "ไม่ได้ตั้ง", tone: "muted" },
+            buyNow: { text: row.buyNowPrice !== null ? "ปิดแล้ว (มีบิด)" : translate("ไม่ได้ตั้ง", "Not set"), tone: "muted" },
             time: { kind: "countdown" },
             pill: { kind: "Live" },
             action: "VIEW",
           }
         : {
             currentPrice: DASH,
-            buyNow: row.buyNowPrice !== null ? { text: formatBaht(row.buyNowPrice), tone: "amber" } : { text: "ไม่ได้ตั้ง", tone: "muted" },
+            buyNow: row.buyNowPrice !== null ? { text: formatBaht(row.buyNowPrice), tone: "amber" } : { text: translate("ไม่ได้ตั้ง", "Not set"), tone: "muted" },
             time: { kind: "countdown" },
             pill: { kind: "Live" },
             action: "CANCEL",
@@ -68,7 +69,7 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
         currentPrice: { text: formatBaht(row.currentPrice), tone: "bold" },
         buyNow: DASH,
         time: ended,
-        pill: { kind: "Won", label: "ขายแล้ว" },
+        pill: { kind: "Won", label: translate("ขายแล้ว", "Sold") },
         action: "VIEW_ORDER",
       };
     case "UNSOLD":
@@ -109,7 +110,7 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
 
 /** แท็บตามแบบ S1 — `null` = ทั้งหมด */
 export const SELLER_AUCTION_TABS: { status: AuctionStatus | null; label: string }[] = [
-  { status: null, label: "ทั้งหมด" },
+  { status: null, get label() { return translate("ทั้งหมด", "All"); } },
   { status: "LIVE", label: AUCTION_STATUS_LABEL.LIVE },
   { status: "AWAITING_PAYMENT", label: AUCTION_STATUS_LABEL.AWAITING_PAYMENT },
   { status: "SOLD", label: AUCTION_STATUS_LABEL.SOLD },

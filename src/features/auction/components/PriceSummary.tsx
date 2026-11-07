@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { formatBaht } from "../auction.format";
 
 type PriceSummaryProps = {
@@ -9,6 +10,7 @@ type PriceSummaryProps = {
 
 /** กล่องสรุปราคาสีเทาอ่อนใน dialog / กล่องชนะประมูล — บรรทัดสุดท้ายตัวหนาสี primary [TCG-630] */
 export function PriceSummary({ rows, totalLabel, total }: PriceSummaryProps) {
+  useLanguage();
   return (
     <dl className="flex flex-col gap-2 rounded-xl bg-slate-50 p-4 text-sm">
       {rows.map(([label, amount]) => (

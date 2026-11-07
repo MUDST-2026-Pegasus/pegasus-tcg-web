@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ type AuctionNoticeProps = {
 
 /** กล่องข้อความไอคอนซ้าย หัวข้อตัวหนา + รายละเอียด ในหน้าประมูล [TCG-630 · FE-4] */
 export function AuctionNotice({ tone, icon, title, detail, action, role = "status", className }: AuctionNoticeProps) {
+  useLanguage();
   return (
     <div role={role} className={cn("flex items-center gap-3 rounded-xl px-4 py-3", TONE[tone], className)}>
       <span aria-hidden className="shrink-0 [&_svg]:size-5">

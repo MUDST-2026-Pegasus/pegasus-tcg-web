@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { FolderTree, ImageIcon, Info, Pencil } from "lucide-react";
 
 import { EmptyState } from "@/components/common";
@@ -50,6 +51,7 @@ export function CategoryTable({
   onEdit,
   onToggleActive,
 }: CategoryTableProps) {
+  useLanguage();
   const rows = categoryTree(categories);
   const crossGame = categories.filter((category) => category.gameId === null).length;
   const ownGame = categories.length - crossGame;
@@ -67,8 +69,7 @@ export function CategoryTable({
         </div>
 
         <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
-          + เพิ่มหมวดหมู่
-        </Button>
+          {translate("+ เพิ่มหมวดหมู่", "+ Add category")}</Button>
       </div>
 
       <div className="flex items-center gap-2 bg-[#e8f1fc] px-5 py-2.5 text-[#0058bc]">
@@ -90,13 +91,13 @@ export function CategoryTable({
         <Table>
           <TableHeader>
             <TableRow className={HEAD_ROW_CLASS}>
-              <TableHead className={cn(HEAD_CLASS, "pl-5")}>หมวดหมู่</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>รหัส</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>ใช้กับ</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[60px]")}>ลำดับ</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[80px]")}>เปิดใช้งาน</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "pl-5")}>{translate("หมวดหมู่", "Category")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>{translate("รหัส", "Code")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>{translate("ใช้กับ", "Applies to")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[60px]")}>{translate("ลำดับ", "Display order")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[80px]")}>{translate("เปิดใช้งาน", "Enable")}</TableHead>
               <TableHead className={cn(HEAD_CLASS, "w-[56px] pr-5")}>
-                <span className="sr-only">จัดการ</span>
+                <span className="sr-only">{translate("จัดการ", "Manage")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -145,8 +146,7 @@ export function CategoryTable({
                   <TableCell className="py-2.5">
                     {category.gameId === null ? (
                       <Badge className="h-5 rounded-[5px] bg-[#e8f1fc] px-2 text-[10px] font-medium text-[#0058bc]">
-                        ทุกเกม
-                      </Badge>
+                        {translate("ทุกเกม", "All games")}</Badge>
                     ) : (
                       <Badge
                         variant="outline"

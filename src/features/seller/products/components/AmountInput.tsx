@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useLayoutEffect, useRef } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ export function AmountInput({
   allowDecimal = true,
   ...props
 }: AmountInputProps) {
+  useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const caretDigits = useRef<number | null>(null);
   const displayValue = groupThousands(value);

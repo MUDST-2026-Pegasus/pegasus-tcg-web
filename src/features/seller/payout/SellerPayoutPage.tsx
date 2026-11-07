@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const activeStatuses = new Set(["REQUESTED", "APPROVED", "PROCESSING"]);
 const PAGE_SIZE = 20;
 
 export function SellerPayoutPage() {
+  useLanguage();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [tab, setTab] = useState<"payouts" | "wallet">("payouts");
@@ -45,7 +47,7 @@ export function SellerPayoutPage() {
   const allPayouts = payouts.data ?? [];
   const active = allPayouts.filter((payout) => activeStatuses.has(payout.status));
   const withdrawable = Number(wallet.data?.withdrawable ?? 0);
-  const blockedReason = missingAccount ? "ยังไม่มีบัญชีรับเงิน — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้" : unverified ? "สถานะร้านยังไม่ใช่ 'ยืนยันแล้ว' — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้" : !wallet.data || !payouts.data ? "ยังโหลดข้อมูลการเงินไม่ครบ กรุณาลองอีกครั้ง" : withdrawable < PAYOUT_MINIMUM ? `ต้องมียอดถอนได้อย่างน้อย ${money(PAYOUT_MINIMUM)} จึงจะส่งคำขอได้` : null;
+  const blockedReason = missingAccount ? translate("ยังไม่มีบัญชีรับเงิน — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้", "No payout account — verify your identity and bank account before requesting a withdrawal") : unverified ? translate("สถานะร้านยังไม่ใช่ 'ยืนยันแล้ว' — ยืนยันตัวตนและบัญชีธนาคารให้ผ่านก่อน จึงจะขอถอนได้", "Your shop is not verified — verify your identity and bank account before requesting a withdrawal") : !wallet.data || !payouts.data ? translate("ยังโหลดข้อมูลการเงินไม่ครบ กรุณาลองอีกครั้ง", "Financial information has not fully loaded. Please try again") : withdrawable < PAYOUT_MINIMUM ? `ต้องมียอดถอนได้อย่างน้อย ${money(PAYOUT_MINIMUM)} จึงจะส่งคำขอได้` : null;
   const selectedCurrent = selected && (allPayouts.find((payout) => payout.id === selected.id) ?? selected);
 
   function openRequest(value = "") {
@@ -71,15 +73,15 @@ export function SellerPayoutPage() {
       } : current);
       queryClient.setQueryData<Payout[]>(["finance", "payouts"], (current) => current ? [created, ...current] : current);
       setShowRequest(false); setAmount("");
-      toast.add({ type: "success", title: `ส่งคำขอถอน #${created.id} แล้ว`, description: `${money(created.amount)} ถูกกันไว้ รอแอดมินตรวจสอบ` });
+      toast.add({ type: "success", title: translate(`ส่งคำขอถอน #${created.id} แล้ว`, `Withdrawal request #${created.id} submitted`), description: translate(`${money(created.amount)} ถูกกันไว้ รอแอดมินตรวจสอบ`, `${money(created.amount)} is reserved pending administrator review`) });
       await Promise.all([queryClient.invalidateQueries({ queryKey: ["finance", "wallet"] }), queryClient.invalidateQueries({ queryKey: ["finance", "payouts"] }), queryClient.invalidateQueries({ queryKey: dashboardKeys.all })]);
     } catch (error) {
       if (hasErrorCode(error, "INSUFFICIENT_BALANCE")) {
         const latest = await wallet.refetch();
         const latestAmount = Number(latest.data?.withdrawable ?? withdrawable);
-        setConflict(`ยอดถอนได้เปลี่ยนไปแล้ว กรุณาตรวจสอบจำนวนเงินอีกครั้ง · ยอดล่าสุดคือ ${money(latestAmount)}`);
+        setConflict(translate(`ยอดถอนได้เปลี่ยนไปแล้ว กรุณาตรวจสอบจำนวนเงินอีกครั้ง · ยอดล่าสุดคือ ${money(latestAmount)}`, `Your withdrawable balance changed. Check the amount again · Current balance: ${money(latestAmount)}`));
       } else {
-        toast.add({ type: "error", title: "ขอถอนเงินไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
+        toast.add({ type: "error", title: translate("ขอถอนเงินไม่สำเร็จ", "Unable to request withdrawal"), description: getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")) });
         if (["VALIDATION_FAILED", "PAYOUT_BELOW_MINIMUM", "SELLER_NOT_VERIFIED", "PAYOUT_ACCOUNT_NOT_FOUND"].some((code) => hasErrorCode(error, code))) {
           void Promise.all([wallet.refetch(), payouts.refetch(), account.refetch()]);
         }
@@ -90,10 +92,10 @@ export function SellerPayoutPage() {
   if (sellerNotFound) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">ถอนเงิน</h1>
+        <h1 className="text-2xl font-bold">{translate("ถอนเงิน", "Withdraw")}</h1>
         <Card className="p-6">
-          <h2 className="font-semibold">ยังไม่พร้อมถอนเงิน</h2>
-          <p className="text-sm text-muted-foreground">กรุณาสมัครและยืนยันตัวตนผู้ขายก่อน</p>
+          <h2 className="font-semibold">{translate("ยังไม่พร้อมถอนเงิน", "Withdrawals are not available yet")}</h2>
+          <p className="text-sm text-muted-foreground">{translate("กรุณาสมัครและยืนยันตัวตนผู้ขายก่อน", "Register and verify your seller identity first")}</p>
         </Card>
       </div>
     );
@@ -103,12 +105,12 @@ export function SellerPayoutPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">ถอนเงิน</h1>
-        <p className="text-sm text-muted-foreground">ขอถอนยอดเงินจากการขายเข้าบัญชีธนาคารที่ยืนยันแล้ว — แอดมินตรวจสอบและโอนให้ด้วยตนเอง</p>
+        <h1 className="text-2xl font-bold">{translate("ถอนเงิน", "Withdraw")}</h1>
+        <p className="text-sm text-muted-foreground">{translate("ขอถอนยอดเงินจากการขายเข้าบัญชีธนาคารที่ยืนยันแล้ว — แอดมินตรวจสอบและโอนให้ด้วยตนเอง", "Request a withdrawal of sales earnings to your verified bank account. An administrator reviews and transfers the funds manually")}</p>
       </header>
 
       {initialLoading && (
-        <div role="status" aria-label="กำลังโหลดข้อมูลการเงิน" className="space-y-6">
+        <div role="status" aria-label={translate("กำลังโหลดข้อมูลการเงิน", "Loading financial information")} className="space-y-6">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_320px]">
             <Skeleton className="h-64 rounded-xl" />
             <PanelSkeleton rows={3} />
@@ -118,8 +120,7 @@ export function SellerPayoutPage() {
       )}
       {otherError && (
         <p role="alert" className="flex items-center gap-3 text-sm text-destructive">
-          โหลดข้อมูลไม่สำเร็จ
-          <Button variant="outline" size="sm" onClick={() => { void wallet.refetch(); void payouts.refetch(); void account.refetch(); }}>ลองอีกครั้ง</Button>
+          {translate("โหลดข้อมูลไม่สำเร็จ", "Unable to load data")}<Button variant="outline" size="sm" onClick={() => { void wallet.refetch(); void payouts.refetch(); void account.refetch(); }}>{translate("ลองอีกครั้ง", "Try again")}</Button>
         </p>
       )}
 
@@ -133,13 +134,13 @@ export function SellerPayoutPage() {
           {payouts.data ? (
             <PayoutTracker payouts={active} onSelect={setSelected} />
           ) : (
-            <p role="alert" className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน</p>
+            <p role="alert" className="rounded-xl border bg-card p-5 text-sm text-muted-foreground">{translate("ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน", "Withdrawal requests could not be loaded. Try again after your seller account is verified")}</p>
           )}
 
           <Card className="gap-0 overflow-hidden rounded-xl py-0">
             <div className="flex gap-5 border-b px-5">
-              <button type="button" className={`py-4 text-sm ${tab === "payouts" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("payouts")}>คำขอถอนเงิน</button>
-              <button type="button" className={`py-4 text-sm ${tab === "wallet" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("wallet")}>รายการเคลื่อนไหวกระเป๋า</button>
+              <button type="button" className={`py-4 text-sm ${tab === "payouts" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("payouts")}>{translate("คำขอถอนเงิน", "Withdrawal requests")}</button>
+              <button type="button" className={`py-4 text-sm ${tab === "wallet" ? "border-b-2 border-teal-600 font-semibold" : "text-muted-foreground"}`} onClick={() => setTab("wallet")}>{translate("รายการเคลื่อนไหวกระเป๋า", "Wallet transactions")}</button>
             </div>
             {tab === "payouts" ? (
               <PayoutHistory payouts={payouts.data ?? null} filter={filter} onFilterChange={setFilter} onSelect={setSelected} />

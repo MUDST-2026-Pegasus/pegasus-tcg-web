@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { ImageIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ export function CatalogCardSummary({
   card,
   onChange,
 }: CatalogCardSummaryProps) {
+  useLanguage();
   const tags = [card.variantLabel, ...card.tags, card.sku];
 
   return (
@@ -33,8 +35,7 @@ export function CatalogCardSummary({
             className="rounded-md px-2.5"
             onClick={onChange}
           >
-            เปลี่ยนการ์ด
-          </Button>
+            {translate("เปลี่ยนการ์ด", "Change card")}</Button>
         ) : null}
       </div>
 

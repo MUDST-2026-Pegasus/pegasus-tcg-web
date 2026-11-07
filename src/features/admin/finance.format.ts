@@ -1,5 +1,6 @@
+import { getLanguage, translate } from "@/lib/language";
 import { differenceInMinutes, format, formatDistanceToNowStrict } from "date-fns";
-import { th } from "date-fns/locale";
+import { enUS, th } from "date-fns/locale";
 
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
@@ -19,17 +20,17 @@ export function formatBahtShort(value: number): string {
 /** "14 ต.ค. 2569 00:05" — date-fns ยังพิมพ์ ค.ศ. ต้องบวก 543 เอง */
 export function formatThaiDateTime(value: string): string {
   const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${date.getFullYear() + 543} ${format(date, "HH:mm")}`;
+  return `${format(date, "d MMM", { locale: getLanguage() === "th" ? th : enUS })} ${date.getFullYear() + (getLanguage() === "th" ? 543 : 0)} ${format(date, "HH:mm")}`;
 }
 
 /** "14 ต.ค. 00:01" — ใต้ขั้นของ timeline ที่ปีไม่จำเป็น */
 export function formatThaiShortDateTime(value: string): string {
-  return format(new Date(value), "d MMM HH:mm", { locale: th });
+  return format(new Date(value), "d MMM HH:mm", { locale: getLanguage() === "th" ? th : enUS });
 }
 
 /** "3 นาทีที่แล้ว" */
 export function formatAgo(value: string): string {
-  return `${formatDistanceToNowStrict(new Date(value), { locale: th })}ที่แล้ว`;
+  return formatDistanceToNowStrict(new Date(value), { locale: getLanguage() === "th" ? th : enUS, addSuffix: true });
 }
 
 /** เหลือเวลาไม่ถึง 15 นาทีก่อนหมดเวลาชำระ — ขึ้นป้ายเตือนบนการ์ดคิว */
@@ -74,20 +75,20 @@ const RED = "bg-[#fbe9e8] text-[#d0342c]";
 const PURPLE = "bg-[#f3e8ff] text-[#7e22ce]";
 
 export const REFUND_STATUS_META: Record<RefundStatus, StatusMeta> = {
-  PENDING: { label: "รอดำเนินการ", badgeClass: NEUTRAL_BADGE },
-  APPROVED: { label: "พร้อมโอน", badgeClass: AMBER },
-  PROCESSING: { label: "กำลังโอน", badgeClass: BLUE },
-  PROCESSED: { label: "โอนแล้ว", badgeClass: GREEN },
-  REJECTED: { label: "ปฏิเสธ", badgeClass: RED },
+  PENDING: { get label() { return translate("รอดำเนินการ", "Pending"); }, badgeClass: NEUTRAL_BADGE },
+  APPROVED: { get label() { return translate("พร้อมโอน", "Ready to transfer"); }, badgeClass: AMBER },
+  PROCESSING: { get label() { return translate("กำลังโอน", "Transferring"); }, badgeClass: BLUE },
+  PROCESSED: { get label() { return translate("โอนแล้ว", "Transferred"); }, badgeClass: GREEN },
+  REJECTED: { get label() { return translate("ปฏิเสธ", "Reject"); }, badgeClass: RED },
 };
 
 export const PAYOUT_STATUS_META: Record<PayoutStatus, StatusMeta> = {
-  REQUESTED: { label: "คำขอใหม่", badgeClass: AMBER },
-  APPROVED: { label: "อนุมัติแล้ว · รอโอน", badgeClass: PURPLE },
-  PROCESSING: { label: "กำลังโอน", badgeClass: BLUE },
-  PAID: { label: "จ่ายแล้ว", badgeClass: GREEN },
-  REJECTED: { label: "ปฏิเสธ", badgeClass: RED },
-  FAILED: { label: "โอนไม่สำเร็จ", badgeClass: RED },
+  REQUESTED: { get label() { return translate("คำขอใหม่", "New request"); }, badgeClass: AMBER },
+  APPROVED: { get label() { return translate("อนุมัติแล้ว · รอโอน", "Approved · Awaiting transfer"); }, badgeClass: PURPLE },
+  PROCESSING: { get label() { return translate("กำลังโอน", "Transferring"); }, badgeClass: BLUE },
+  PAID: { get label() { return translate("จ่ายแล้ว", "Paid"); }, badgeClass: GREEN },
+  REJECTED: { get label() { return translate("ปฏิเสธ", "Reject"); }, badgeClass: RED },
+  FAILED: { get label() { return translate("โอนไม่สำเร็จ", "Transfer failed"); }, badgeClass: RED },
 };
 
 /** ที่มาของรายการคืนเงิน — ดูจาก resolution ของคำขอคืนสินค้า หรือการยกเลิก */
@@ -96,32 +97,32 @@ export function refundSourceLabel(resolution: string | null, returnRequestId: nu
   badgeClass: string;
 } {
   if (returnRequestId === null) {
-    return { label: "ยกเลิก", badgeClass: BLUE };
+    return { label: translate("ยกเลิก", "Cancel"), badgeClass: BLUE };
   }
   if (resolution === "PARTIAL_REFUND") {
-    return { label: "คืนบางส่วน", badgeClass: PURPLE };
+    return { label: translate("คืนบางส่วน", "Partial refund"), badgeClass: PURPLE };
   }
-  return { label: "คืนเต็มจำนวน", badgeClass: PURPLE };
+  return { label: translate("คืนเต็มจำนวน", "Full refund"), badgeClass: PURPLE };
 }
 
 export const RESOLUTION_LABEL: Record<string, string> = {
-  PARTIAL_REFUND: "คืนบางส่วน",
-  FULL_REFUND: "คืนเต็มจำนวน",
+  get PARTIAL_REFUND() { return translate("คืนบางส่วน", "Partial refund"); },
+  get FULL_REFUND() { return translate("คืนเต็มจำนวน", "Full refund"); },
 };
 
 /** ข้อความ error ของปุ่มการเงิน — ใช้ code จาก backend ก่อน ไม่งั้นเอาข้อความกลาง */
 export function financeErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "REFUND_DESTINATION_CHANGED")) {
-    return "ผู้ซื้อแก้เลขบัญชีระหว่างนี้ ตรวจเลขบัญชีใหม่แล้วกรอกอีกครั้ง";
+    return translate("ผู้ซื้อแก้เลขบัญชีระหว่างนี้ ตรวจเลขบัญชีใหม่แล้วกรอกอีกครั้ง", "The buyer changed their account number. Check the new account details and enter them again");
   }
   if (hasErrorCode(error, "REFUND_DESTINATION_REQUIRED")) {
-    return "ผู้ซื้อยังไม่ได้ระบุบัญชีรับเงินคืน";
+    return translate("ผู้ซื้อยังไม่ได้ระบุบัญชีรับเงินคืน", "The buyer has not provided a refund account");
   }
   if (hasErrorCode(error, "PAYMENT_AMOUNT_MISMATCH")) {
-    return "ยอดในรายการไม่ตรงกับยอดค้างชำระของคำสั่งซื้อแล้ว";
+    return translate("ยอดในรายการไม่ตรงกับยอดค้างชำระของคำสั่งซื้อแล้ว", "This amount no longer matches the order's outstanding balance");
   }
   if (hasErrorCode(error, "PAYMENT_STATE") || hasErrorCode(error, "PAYOUT_STATE")) {
-    return "รายการนี้ถูกจัดการไปแล้ว ลองรีเฟรชคิว";
+    return translate("รายการนี้ถูกจัดการไปแล้ว ลองรีเฟรชคิว", "This item has already been processed. Refresh the queue");
   }
   return getErrorMessage(error, fallback);
 }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Clock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -36,11 +37,12 @@ type AuctionCountdownProps = {
 export function AuctionCountdown({
   target,
   serverTime,
-  prefix = "เหลือ",
+  prefix = translate("เหลือ", "Remaining"),
   tone,
-  endedLabel = "หมดเวลา",
+  endedLabel = translate("หมดเวลา", "Time is up"),
   className,
 }: AuctionCountdownProps) {
+  useLanguage();
   const remaining = useCountdown(target, serverTime) ?? 0;
   const resolved: CountdownTone = tone ?? (remaining < URGENT_THRESHOLD_MS ? "urgent" : "normal");
 

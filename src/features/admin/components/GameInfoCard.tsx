@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export function GameInfoCard({
   onToggleActive,
   isToggling,
 }: GameInfoCardProps) {
+  useLanguage();
   const meta = [`รหัส ${game.code}`, `/${game.slug}`, game.nameLocal]
     .filter(Boolean)
     .join("  ·  ");
@@ -52,21 +54,20 @@ export function GameInfoCard({
                 game.active ? "bg-[#16a34a]" : "bg-[#9aa5ad]",
               )}
             />
-            {game.active ? "เปิดขายอยู่" : "ซ่อนจากหน้าร้าน"}
+            {game.active ? "เปิดขายอยู่" : translate("ซ่อนจากหน้าร้าน", "Hide from storefront")}
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">{meta}</p>
       </div>
 
       <dl className="flex gap-6 border-border pr-2 sm:border-l sm:pl-4">
-        <Stat label="สินค้าในแคตตาล็อก" value={productCount} />
-        <Stat label="ชุดการ์ด" value={cardSetCount} />
+        <Stat label={translate("สินค้าในแคตตาล็อก", "Catalogue products")} value={productCount} />
+        <Stat label={translate("ชุดการ์ด", "Card set")} value={cardSetCount} />
       </dl>
 
       <div className="flex items-center gap-3 border-border sm:border-l sm:pl-4">
         <label className="flex items-center gap-2 text-xs text-[#414755]">
-          แสดงบนหน้าร้าน
-          <Switch
+          {translate("แสดงบนหน้าร้าน", "Show on storefront")}<Switch
             checked={game.active}
             disabled={isToggling}
             onCheckedChange={(checked) => onToggleActive(checked)}
@@ -81,6 +82,7 @@ export function GameInfoCard({
 }
 
 function Stat({ label, value }: { label: string; value: number | undefined }) {
+  useLanguage();
   return (
     <div className="flex flex-col gap-0.5">
       <dt className="order-2 text-[11px] text-muted-foreground">{label}</dt>

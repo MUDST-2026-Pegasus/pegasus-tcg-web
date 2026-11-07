@@ -1,8 +1,9 @@
+import { getLanguage, translate } from "@/lib/language";
 import { formatSaleBaht, isOnSale, type ListingPricing } from "@/components/sale";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode, isApiError } from "@/lib/api";
 
-const clock = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const clock = () => new Intl.DateTimeFormat(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
 /**
  * toast หลังเพิ่มลงตะกร้า (Figma SAL-M1 Buyer)
@@ -21,8 +22,8 @@ export function notifyAddedAtSalePrice(
   (options?.manager ?? toast).add({
     ...(options ? { timeout: 4000, data: { quickCart: true, imageUrl: options.imageUrl },
       actionProps: { children: options.viewCartLabel, onClick: options.onViewCart } } : {}),
-    title: "เพิ่มลงตะกร้าที่ราคา Flash",
-    description: `เพิ่ม ${name} ราคา ${formatSaleBaht(pricing.salePrice)} แล้ว · ราคานี้ถึง ${clock.format(new Date(pricing.sale.endsAt))} ต้องชำระก่อนหมดเวลาจองสต็อก`,
+    title: translate("เพิ่มลงตะกร้าที่ราคา Flash", "Added to cart at the flash price"),
+    description: translate(`เพิ่ม ${name} ราคา ${formatSaleBaht(pricing.salePrice)} แล้ว · ราคานี้ถึง ${clock().format(new Date(pricing.sale.endsAt))} ต้องชำระก่อนหมดเวลาจองสต็อก`, `Added ${name} at ${formatSaleBaht(pricing.salePrice)} · Price valid until ${clock().format(new Date(pricing.sale.endsAt))}. Pay before the stock reservation expires.`),
     type: "success",
   });
   if (limit != null && quantity > limit) notifyBuyerLimit(limit, pricing.listPrice);
@@ -33,7 +34,7 @@ export function notifyAddedAtSalePrice(
 export function notifyBuyerLimit(limit: number, listPrice: number) {
   toast.add({
     title: "SALE_BUYER_LIMIT_REACHED",
-    description: `ราคา Flash จำกัดคนละ ${limit} ชิ้น · ชิ้นที่ ${limit + 1} คิดราคาปกติ ${formatSaleBaht(listPrice)}`,
+    description: translate(`ราคา Flash จำกัดคนละ ${limit} ชิ้น · ชิ้นที่ ${limit + 1} คิดราคาปกติ ${formatSaleBaht(listPrice)}`, `The flash price is limited to ${limit} per buyer · Item ${limit + 1} uses the regular price ${formatSaleBaht(listPrice)}`),
     type: "warning",
   });
 }

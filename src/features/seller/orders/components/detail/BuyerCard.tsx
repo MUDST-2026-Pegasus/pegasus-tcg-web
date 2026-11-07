@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,9 +17,10 @@ type BuyerCardProps = {
 
 /** ยังไม่มีแชท — ลิงก์ไปหน้าคอลเลกชันสาธารณะของผู้ซื้อแทน */
 export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-xs font-medium text-gray-500">ผู้ซื้อ</p>
+      <p className="text-xs font-medium text-gray-500">{translate("ผู้ซื้อ", "Buyer")}</p>
 
       <div className="flex items-center gap-2.5">
         <Avatar className="size-9">

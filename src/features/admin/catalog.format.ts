@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type { ProductCardData } from "@/components/common";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
@@ -27,14 +28,14 @@ export const PRODUCT_TYPES: ProductType[] = [
 ];
 
 export const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
-  SINGLE_CARD: "การ์ดเดี่ยว",
+  get SINGLE_CARD() { return translate("การ์ดเดี่ยว", "Single card"); },
   BOOSTER_PACK: "ซองสุ่ม",
   BOOSTER_BOX: "กล่องสุ่ม",
   ELITE_TRAINER_BOX: "Elite Trainer Box",
   STARTER_DECK: "เด็คเริ่มต้น",
   BUNDLE: "ชุดรวม",
   ACCESSORY: "อุปกรณ์เสริม",
-  OTHER: "อื่น ๆ",
+  get OTHER() { return translate("อื่น ๆ", "Other"); },
 };
 
 export const PRODUCT_SORTS: ProductSort[] = [
@@ -49,7 +50,7 @@ export const PRODUCT_SORTS: ProductSort[] = [
 export const PRODUCT_SORT_LABEL: Record<ProductSort, string> = {
   newest: "เพิ่มล่าสุด",
   name: "ชื่อ A-Z",
-  cardNumber: "เลขในชุด",
+  get cardNumber() { return translate("เลขในชุด", "Set number"); },
   popular: "ยอดนิยม",
   price_asc: "ราคาต่ำ-สูง",
   price_desc: "ราคาสูง-ต่ำ",

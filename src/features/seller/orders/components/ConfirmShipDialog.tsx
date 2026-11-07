@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -34,11 +35,12 @@ export function ConfirmShipDialog({
   trackingNumber,
   onConfirm,
 }: ConfirmShipDialogProps) {
+  useLanguage();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>ยืนยันจัดส่ง {orderNumber}?</AlertDialogTitle>
+          <AlertDialogTitle>{translate("ยืนยันจัดส่ง", "Confirm shipment") + " "}{orderNumber}?</AlertDialogTitle>
           <AlertDialogDescription>
             ระบบจะส่งเลขพัสดุนี้ให้ผู้ซื้อทันที หลังยืนยันแล้วยกเลิกคำสั่งซื้อไม่ได้
             และแก้ขนส่งหรือเลขพัสดุไม่ได้
@@ -47,11 +49,11 @@ export function ConfirmShipDialog({
 
         <dl className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-gray-500">บริษัทขนส่ง</dt>
+            <dt className="text-gray-500">{translate("บริษัทขนส่ง", "Carrier")}</dt>
             <dd className="font-medium text-foreground">{carrierName}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-gray-500">เลขพัสดุ</dt>
+            <dt className="text-gray-500">{translate("เลขพัสดุ", "Tracking number")}</dt>
             <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
           </div>
         </dl>
@@ -64,8 +66,7 @@ export function ConfirmShipDialog({
               onConfirm();
             }}
           >
-            ยืนยันจัดส่ง
-          </Button>
+            {translate("ยืนยันจัดส่ง", "Confirm shipment")}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

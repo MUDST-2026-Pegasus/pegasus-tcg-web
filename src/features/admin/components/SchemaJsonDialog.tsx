@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function SchemaJsonDialog({
   game,
   attributes,
 }: SchemaJsonDialogProps) {
+  useLanguage();
   const json = JSON.stringify(
     {
       game: { id: game.id, code: game.code, name: game.name, slug: game.slug },
@@ -73,12 +75,10 @@ export function SchemaJsonDialog({
 
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>
-            ปิด
-          </DialogClose>
+            {translate("ปิด", "Close")}</DialogClose>
           <Button type="button" onClick={copy}>
             <Copy data-icon="inline-start" />
-            คัดลอก
-          </Button>
+            {translate("คัดลอก", "Copy")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

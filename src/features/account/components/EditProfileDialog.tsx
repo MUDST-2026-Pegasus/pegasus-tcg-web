@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -49,14 +50,14 @@ export function EditProfileDialog({
   onOpenChange,
   user,
 }: EditProfileDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{translate("แก้ไขโปรไฟล์", "Edit Profile")}</DialogTitle>
           <DialogDescription>
-            Update your personal information and profile display.
-          </DialogDescription>
+            {translate("แก้ไขข้อมูลส่วนตัวและรูปโปรไฟล์", "Update your personal information and profile display.")}</DialogDescription>
         </DialogHeader>
         <EditProfileForm
           key={user.id}
@@ -75,6 +76,7 @@ function EditProfileForm({
   user: AuthUser;
   onSaved: () => void;
 }) {
+  useLanguage();
   const updateProfile = useUpdateProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAvatarCleared, setIsAvatarCleared] = useState(false);
@@ -122,8 +124,8 @@ function EditProfileForm({
       await updateProfile.mutateAsync(payload);
       toast.add({
         type: "success",
-        title: "Profile updated",
-        description: "Your profile changes have been saved successfully.",
+        title: translate("อัปเดตโปรไฟล์แล้ว", "Profile updated"),
+        description: translate("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว", "Your profile changes have been saved successfully."),
       });
       onSaved();
     } catch (error) {
@@ -136,7 +138,7 @@ function EditProfileForm({
       {updateProfile.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(updateProfile.error, "Could not save profile changes.")}
+            {getErrorMessage(updateProfile.error, translate("บันทึกการเปลี่ยนแปลงโปรไฟล์ไม่สำเร็จ", "Could not save profile changes."))}
           </AlertDescription>
         </Alert>
       )}
@@ -171,10 +173,9 @@ function EditProfileForm({
             {isUploading ? (
               <>
                 <Spinner data-icon="inline-start" />
-                Uploading...
-              </>
+                {translate("กำลังอัปโหลด…", "Uploading...")}</>
             ) : (
-              "Change photo"
+              translate("เปลี่ยนรูป", "Change photo")
             )}
           </Button>
 
@@ -189,8 +190,7 @@ function EditProfileForm({
                 avatarUpload.clear();
               }}
             >
-              Remove
-            </Button>
+              {translate("นำออก", "Remove")}</Button>
           )}
         </div>
 
@@ -201,7 +201,7 @@ function EditProfileForm({
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
-          <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
+          <FieldLabel htmlFor="displayName">{translate("ชื่อที่แสดง", "Display Name")}</FieldLabel>
           <Input
             id="displayName"
             autoComplete="name"
@@ -212,7 +212,7 @@ function EditProfileForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{translate("อีเมล", "Email")}</FieldLabel>
           <Input
             id="email"
             value={user.email}
@@ -222,7 +222,7 @@ function EditProfileForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.phone) || undefined}>
-          <FieldLabel htmlFor="phone">Phone number</FieldLabel>
+          <FieldLabel htmlFor="phone">{translate("หมายเลขโทรศัพท์", "Phone number")}</FieldLabel>
           <Input
             id="phone"
             inputMode="tel"
@@ -235,7 +235,7 @@ function EditProfileForm({
         </Field>
 
         <Field className="hidden">
-          <FieldLabel htmlFor="avatarUrl">Avatar URL</FieldLabel>
+          <FieldLabel htmlFor="avatarUrl">{translate("URL รูปโปรไฟล์", "Avatar URL")}</FieldLabel>
           <Input
             id="avatarUrl"
             type="text"
@@ -245,10 +245,10 @@ function EditProfileForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.bio) || undefined}>
-          <FieldLabel htmlFor="bio">Bio</FieldLabel>
+          <FieldLabel htmlFor="bio">{translate("ประวัติย่อ", "Bio")}</FieldLabel>
           <Textarea
             id="bio"
-            placeholder="Tell other collectors about yourself..."
+            placeholder={translate("แนะนำตัวให้ผู้สะสมคนอื่นรู้จัก…", "Tell other collectors about yourself...")}
             rows={3}
             aria-invalid={Boolean(errors.bio)}
             {...register("bio")}
@@ -259,15 +259,13 @@ function EditProfileForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          Cancel
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button
           type="submit"
           disabled={isSubmitting || isUploading || hasUploadError || !hasChanges}
         >
           {(isSubmitting || isUploading) && <Spinner data-icon="inline-start" />}
-          Save changes
-        </Button>
+          {translate("บันทึกการเปลี่ยนแปลง", "Save changes")}</Button>
       </DialogFooter>
     </form>
   );

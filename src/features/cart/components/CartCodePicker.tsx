@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -21,6 +22,7 @@ export interface CartCodePickerProps {
 
 /** C2-A/B/C/D: the shared picker wired to the cart, with collecting and typed codes. */
 export function CartCodePicker({ promotions, sellerName, sellerUsername, isGuest }: CartCodePickerProps) {
+  useLanguage();
   const navigate = useNavigate();
   const claim = useClaimPromotion();
   const claimByCode = useClaimByCode();
@@ -41,7 +43,7 @@ export function CartCodePicker({ promotions, sellerName, sellerUsername, isGuest
           promotions.setCode(owner, promotion.code);
           promotions.setPicker(null);
         }
-        toast.add({ type: "success", title: `เก็บ ${promotion.code} แล้ว · ใช้ได้ในตะกร้า` });
+        toast.add({ type: "success", title: translate(`เก็บ ${promotion.code} แล้ว · ใช้ได้ในตะกร้า`, `${promotion.code} collected · available in cart`) });
       },
       onError: (error) => toast.add({ type: "error", title: claimErrorMessage(error) }),
     });
@@ -50,7 +52,7 @@ export function CartCodePicker({ promotions, sellerName, sellerUsername, isGuest
   const saveTyped = (code: string, thenApply: boolean) => {
     claimByCode.mutate(code, {
       onSuccess: () => {
-        toast.add({ type: "success", title: `เก็บ ${code} แล้ว · ใช้ได้ในตะกร้า` });
+        toast.add({ type: "success", title: translate(`เก็บ ${code} แล้ว · ใช้ได้ในตะกร้า`, `${code} collected · available in cart`) });
         if (thenApply && owner !== null) promotions.tryCode(owner, code);
       },
       onError: (error) => toast.add({ type: "error", title: claimErrorMessage(error) }),
@@ -64,12 +66,12 @@ export function CartCodePicker({ promotions, sellerName, sellerUsername, isGuest
   const inputFooter = applied ? (
     <div role="status" className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3 py-2">
       <span className="text-xs text-emerald-800">
-        ใช้โค้ด {applied.code} แล้ว{applied.discount ? ` ลด ${checkoutMoney(applied.discount)}` : ""}
+        {translate("ใช้โค้ด", "Apply code")}{applied.code}  {translate("แล้ว", "applied")}{applied.discount ? translate(` ลด ${checkoutMoney(applied.discount)}`, ` Discount ${checkoutMoney(applied.discount)}`) : ""}
       </span>
       {!isGuest && !promotions.claimedCodes.has(applied.code) && (
         <Button type="button" size="xs" variant="outline" className="rounded-full bg-background"
           disabled={claimByCode.isPending} onClick={() => saveTyped(applied.code, false)}>
-          {claimByCode.isPending ? <Spinner /> : "เก็บไว้ใช้ครั้งหน้า"}
+          {claimByCode.isPending ? <Spinner /> : translate("เก็บไว้ใช้ครั้งหน้า", "Save for next time")}
         </Button>
       )}
     </div>
@@ -77,7 +79,7 @@ export function CartCodePicker({ promotions, sellerName, sellerUsername, isGuest
     <div className="mt-2 flex justify-end">
       <Button type="button" size="xs" className="rounded-full" disabled={claimByCode.isPending}
         onClick={() => (isGuest ? toLogin() : saveTyped(notClaimedCode, true))}>
-        {claimByCode.isPending ? <Spinner /> : isGuest ? "เข้าสู่ระบบเพื่อเก็บโค้ด" : "เก็บแล้วใช้เลย"}
+        {claimByCode.isPending ? <Spinner /> : isGuest ? translate("เข้าสู่ระบบเพื่อเก็บโค้ด", "Log in to collect this coupon") : translate("เก็บแล้วใช้เลย", "Collect and apply")}
       </Button>
     </div>
   ) : null;

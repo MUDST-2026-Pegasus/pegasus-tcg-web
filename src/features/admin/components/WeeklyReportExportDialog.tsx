@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ export function WeeklyReportExportDialog({
   gameLabel,
   report,
 }: WeeklyReportExportDialogProps) {
+  useLanguage();
   const [format, setFormat] = useState<WeeklyReportExportFormat>("csv");
   const [datasets, setDatasets] = useState<WeeklyReportExportDataset[]>(["kpi", "breakdown"]);
   const exportReport = useExportWeeklyReport();
@@ -74,7 +76,7 @@ export function WeeklyReportExportDialog({
           toast.add({
             type: "error",
             title: "ส่งออกรายงานไม่สำเร็จ",
-            description: "กรุณาลองใหม่อีกครั้ง",
+            description: translate("กรุณาลองใหม่อีกครั้ง", "Please try again"),
           });
         },
       },
@@ -82,8 +84,8 @@ export function WeeklyReportExportDialog({
   };
 
   const summaryRows = [
-    { label: "ช่วงเวลา", value: `สัปดาห์ที่ ${weekRangeLabel(filters.weekStart)}` },
-    { label: "หมวดหมู่", value: gameLabel },
+    { label: translate("ช่วงเวลา", "Period"), value: `สัปดาห์ที่ ${weekRangeLabel(filters.weekStart)}` },
+    { label: translate("หมวดหมู่", "Category"), value: gameLabel },
     {
       label: "จำนวนรายการ",
       value: `${formatCount(report.breakdownByGameAndType.length)} หมวดหมู่ (ยอดขายรวม ${formatReportBaht(report.totals.gmv)})`,
@@ -176,8 +178,7 @@ export function WeeklyReportExportDialog({
             disabled={exportReport.isPending}
             onClick={() => onOpenChange(false)}
           >
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             className="h-[41px] rounded-lg px-4"
             disabled={exportReport.isPending || datasets.length === 0}

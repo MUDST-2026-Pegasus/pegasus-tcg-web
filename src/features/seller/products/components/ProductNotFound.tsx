@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { SearchXIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -13,6 +14,7 @@ import {
 
 /** หน้าย่อยของสินค้า (เติมสต็อก / แก้ไข) เปิดด้วยรหัสสินค้าที่ไม่มีอยู่ */
 export function ProductNotFound() {
+  useLanguage();
   return (
     <Empty className="rounded-xl border border-border bg-card">
       <EmptyHeader>

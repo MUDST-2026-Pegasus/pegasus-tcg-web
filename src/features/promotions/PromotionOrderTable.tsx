@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   Table,
   TableBody,
@@ -29,18 +30,19 @@ type PromotionOrderTableProps = {
 
 /** Per-shop promotion totals for admin order details. */
 export function PromotionOrderTable({ rows, formatAmount }: PromotionOrderTableProps) {
+  useLanguage();
   return (
-    <Table className="min-w-[850px] text-xs" aria-label="ยอดเงินตามร้าน">
+    <Table className="min-w-[850px] text-xs" aria-label={translate("ยอดเงินตามร้าน", "Amounts by shop")}>
       <TableHeader>
         <TableRow className="bg-muted/50 hover:bg-muted/50">
-          <TableHead className="h-9">ร้าน</TableHead>
-          <TableHead className="h-9 text-right">สินค้า</TableHead>
-          <TableHead className="h-9 text-right">โค้ดร้าน</TableHead>
+          <TableHead className="h-9">{translate("ร้าน", "Shop")}</TableHead>
+          <TableHead className="h-9 text-right">{translate("สินค้า", "Products")}</TableHead>
+          <TableHead className="h-9 text-right">{translate("โค้ดร้าน", "Shop coupon")}</TableHead>
           <TableHead className="h-9 text-right">Pegasus</TableHead>
-          <TableHead className="h-9 text-right">ค่าส่ง</TableHead>
-          <TableHead className="h-9 text-right">ลูกค้าจ่าย</TableHead>
-          <TableHead className="h-9 text-right">คอมฯ</TableHead>
-          <TableHead className="h-9 text-right">ร้านได้</TableHead>
+          <TableHead className="h-9 text-right">{translate("ค่าส่ง", "Shipping")}</TableHead>
+          <TableHead className="h-9 text-right">{translate("ลูกค้าจ่าย", "Customer pays")}</TableHead>
+          <TableHead className="h-9 text-right">{translate("คอมฯ", "Commission")}</TableHead>
+          <TableHead className="h-9 text-right">{translate("ร้านได้", "Shop receives")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -68,7 +70,7 @@ export function PromotionOrderTable({ rows, formatAmount }: PromotionOrderTableP
       </TableBody>
       <TableFooter>
         <TableRow>
-          <TableCell>รวม</TableCell>
+          <TableCell>{translate("รวม", "Total")}</TableCell>
           <TableCell className="text-right tabular-nums">{formatAmount(rows.reduce((sum, row) => sum + row.itemsSubtotal, 0))}</TableCell>
           <TableCell className="text-right tabular-nums">{formatAmount(rows.reduce((sum, row) => sum + row.sellerDiscount, 0))}</TableCell>
           <TableCell className="text-right tabular-nums">{formatAmount(rows.reduce((sum, row) => sum + row.platformDiscount, 0))}</TableCell>
@@ -93,6 +95,7 @@ function CodeAmount({
   formatAmount: (amount: number) => string;
   tone: "seller" | "platform";
 }) {
+  useLanguage();
   if (amount <= 0) return <span className="text-muted-foreground">—</span>;
   return (
     <span className={`inline-flex flex-col items-end ${tone === "seller" ? "text-orange-700" : "text-primary"}`}>

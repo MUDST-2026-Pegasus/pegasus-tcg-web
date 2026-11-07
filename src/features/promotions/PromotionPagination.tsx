@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
@@ -12,20 +13,21 @@ export function PromotionPagination({
   label: string;
   className?: string;
 }) {
+  useLanguage();
   if (totalPages <= 1) return null;
   return (
     <Pagination aria-label={label} className={cn("justify-end", className)}>
       <PaginationContent>
         <PaginationItem>
           <Button variant="outline" size="sm" disabled={page === 0}
-            onClick={() => onPageChange(page - 1)}>ก่อนหน้า</Button>
+            onClick={() => onPageChange(page - 1)}>{translate("ก่อนหน้า", "Previous")}</Button>
         </PaginationItem>
         <PaginationItem className="px-2 text-xs text-muted-foreground">
-          หน้า {page + 1} / {totalPages}
+          {translate("หน้า", "Page")}{page + 1} / {totalPages}
         </PaginationItem>
         <PaginationItem>
           <Button variant="outline" size="sm" disabled={page + 1 >= totalPages}
-            onClick={() => onPageChange(page + 1)}>ถัดไป</Button>
+            onClick={() => onPageChange(page + 1)}>{translate("ถัดไป", "Next")}</Button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,6 +50,7 @@ export function RestockHistoryCard({
   draft,
   result,
 }: RestockHistoryCardProps) {
+  useLanguage();
   const pendingLot: RestockLot | null = result.isValid
     ? {
         id: "pending",
@@ -119,8 +121,7 @@ export function RestockHistoryCard({
                     className="rounded-md px-2.5"
                     onClick={() => void stockIns.refetch()}
                   >
-                    ลองอีกครั้ง
-                  </Button>
+                    {translate("ลองอีกครั้ง", "Try again")}</Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -198,6 +199,7 @@ export function RestockHistoryCard({
 }
 
 function HistorySkeletonRows() {
+  useLanguage();
   return (
     <>
       {[0, 1, 2].map((row) => (

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +22,7 @@ import { ShopCard, ShopLoading, ShopError, shopFooter } from './ShopCard';
 
 const blank: ShippingOptionPayload = { name: '', carrierCode: '', baseFee: 0, perItemFee: 0, freeThreshold: null, estDaysMin: null, estDaysMax: null, active: true, displayOrder: 0 };
 export function ShippingOptionsCard({ canPublish }: { canPublish: boolean }) {
+  useLanguage();
   const query = useShippingOptions();
   const client = useQueryClient();
   const [editing, setEditing] = useState<ShippingOption | 'new' | null>(null);
@@ -49,9 +51,9 @@ export function ShippingOptionsCard({ canPublish }: { canPublish: boolean }) {
     mutation.mutate({ type: 'reorder', options: ordered, changed });
   }
   return <ShopCard title="ตัวเลือกการจัดส่ง" subtitle="ผู้ซื้อเลือกได้ตอนชำระเงิน · ลำดับที่แสดงเรียงตามที่ตั้งค่า · ปิดใช้งานแล้วไม่แสดงต่อผู้ซื้อ" action={<Button size="sm" disabled={!canPublish || mutation.isPending} onClick={() => setEditing('new')}><Plus className="size-3"/>เพิ่มตัวเลือก</Button>}>
-    {query.isPending ? <ShopLoading/> : query.isError ? <ShopError error={query.error} retry={() => void query.refetch()}/> : !options.length ? <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground"><Truck className="size-8"/><p className="text-sm">ยังไม่มีตัวเลือกการจัดส่ง</p></div> : <div className="max-w-full overflow-x-auto rounded-lg"><table className="w-full min-w-[800px] text-left text-xs"><thead className="bg-[#fafbfb] text-[11px] text-muted-foreground"><tr>{['ลำดับ', 'ชื่อ / ผู้ให้บริการ', 'ค่าส่ง', 'ส่งฟรีเมื่อยอดถึง', 'ระยะเวลา', 'เปิดใช้งาน', 'จัดการ'].map((h) => <th key={h} className="px-3 py-2 font-normal">{h}</th>)}</tr></thead><tbody>{options.map((option, index) => <tr key={option.id} className={`border-b border-muted last:border-0 ${option.active ? '' : 'text-muted-foreground'}`}>
+    {query.isPending ? <ShopLoading/> : query.isError ? <ShopError error={query.error} retry={() => void query.refetch()}/> : !options.length ? <div className="flex flex-col items-center gap-2 py-10 text-muted-foreground"><Truck className="size-8"/><p className="text-sm">ยังไม่มีตัวเลือกการจัดส่ง</p></div> : <div className="max-w-full overflow-x-auto rounded-lg"><table className="w-full min-w-[800px] text-left text-xs"><thead className="bg-[#fafbfb] text-[11px] text-muted-foreground"><tr>{[translate("ลำดับ", "Display order"), 'ชื่อ / ผู้ให้บริการ', translate("ค่าส่ง", "Shipping fee"), 'ส่งฟรีเมื่อยอดถึง', translate("ระยะเวลา", "Duration"), translate("เปิดใช้งาน", "Enable"), translate("จัดการ", "Manage")].map((h) => <th key={h} className="px-3 py-2 font-normal">{h}</th>)}</tr></thead><tbody>{options.map((option, index) => <tr key={option.id} className={`border-b border-muted last:border-0 ${option.active ? '' : 'text-muted-foreground'}`}>
       <td className="px-1 py-3"><div className="flex"><Button aria-label={`เลื่อน ${option.name} ขึ้น`} variant="ghost" size="icon-sm" disabled={index === 0 || mutation.isPending} onClick={() => move(index, -1)}><ArrowUp className="size-3"/></Button><Button aria-label={`เลื่อน ${option.name} ลง`} variant="ghost" size="icon-sm" disabled={index === options.length - 1 || mutation.isPending} onClick={() => move(index, 1)}><ArrowDown className="size-3"/></Button></div></td>
-      <td className="px-3 py-4"><p className="font-semibold">{option.name} {!option.active && <span className="ml-1 rounded bg-muted px-1 py-0.5 text-[10px] font-normal">ปิดใช้งาน</span>}</p><p className="mt-1 text-[10px] text-muted-foreground">{option.carrierCode || '—'}</p></td>
+      <td className="px-3 py-4"><p className="font-semibold">{option.name} {!option.active && <span className="ml-1 rounded bg-muted px-1 py-0.5 text-[10px] font-normal">{translate("ปิดใช้งาน", "Disable")}</span>}</p><p className="mt-1 text-[10px] text-muted-foreground">{option.carrierCode || '—'}</p></td>
       <td className="px-3 py-4"><p className="font-semibold">{formatBaht(option.baseFee)}</p><p className="mt-1 text-[10px] text-muted-foreground">{extraFeeLabel(option.perItemFee)}</p></td><td className={`px-3 py-4 ${option.active && option.freeThreshold !== null ? 'font-medium text-emerald-700' : ''}`}>{option.freeThreshold === null ? '—' : formatBaht(option.freeThreshold)}</td><td className="px-3 py-4">{shippingDays(option.estDaysMin, option.estDaysMax)}</td>
       <td className="px-3 py-4"><Switch aria-label={`เปิดใช้งาน ${option.name}`} checked={option.active} disabled={mutation.isPending} onCheckedChange={() => mutation.mutate({ type: 'toggle', option })}/></td><td className="px-3 py-4"><div className="flex"><Button aria-label={`แก้ไข ${option.name}`} variant="ghost" size="icon-sm" disabled={mutation.isPending} onClick={() => setEditing(option)}><Pencil className="size-3.5"/></Button><Button aria-label={`ปิดใช้งาน ${option.name}`} variant="ghost" size="icon-sm" disabled={!option.active || mutation.isPending} onClick={() => mutation.mutate({ type: 'toggle', option })}><EyeOff className="size-3.5"/></Button></div></td>
     </tr>)}</tbody></table></div>}
@@ -60,16 +62,17 @@ export function ShippingOptionsCard({ canPublish }: { canPublish: boolean }) {
   </ShopCard>;
 }
 function ShippingForm({ option, id, onClose }: { option: ShippingOptionPayload; id?: number; onClose: () => void }) {
+  useLanguage();
   const client = useQueryClient();
   const form = useForm<ShippingOptionPayload>({ resolver: zodResolver(shippingSchema), defaultValues: option });
   const save = form.handleSubmit(async (values) => {
     try { if (id === undefined) await shopApi.create(values); else await shopApi.update(id, values); await client.invalidateQueries({ queryKey: shopKeys.shipping }); toast.add({ type: 'success', title: 'บันทึกตัวเลือกการจัดส่งแล้ว' }); onClose(); }
-    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') }); }
+    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, translate("บันทึกไม่สำเร็จ", "Unable to save")) }); }
   });
   const numbers = [{ key: 'baseFee', label: 'ค่าส่งเริ่มต้น (บาท)', nullable: false }, { key: 'perItemFee', label: 'ต่อใบถัดไป (บาท)', nullable: false }, { key: 'freeThreshold', label: 'ส่งฟรีเมื่อยอดถึง (บาท)', nullable: true }, { key: 'estDaysMin', label: 'ระยะเวลาต่ำสุด (วัน)', nullable: true }, { key: 'estDaysMax', label: 'ระยะเวลาสูงสุด (วัน)', nullable: true }] as const;
   return <form className="space-y-4" onSubmit={save} noValidate><fieldset disabled={form.formState.isSubmitting} className="space-y-4"><div><label htmlFor="shipping-name" className="text-xs">ชื่อตัวเลือก *</label><Input id="shipping-name" maxLength={100} {...form.register('name')}/></div><div><label htmlFor="carrier" className="text-xs">ผู้ให้บริการ</label><Controller name="carrierCode" control={form.control} render={({ field }) => {
         const carriers = [
-          { value: '', label: 'ไม่ระบุ' },
+          { value: '', label: translate("ไม่ระบุ", "Not specified") },
           ...(option.carrierCode && !CARRIER_OPTIONS.some((c) => c.value === option.carrierCode)
             ? [{ value: option.carrierCode, label: option.carrierCode }] : []),
           ...CARRIER_OPTIONS,
@@ -82,5 +85,5 @@ function ShippingForm({ option, id, onClose }: { option: ShippingOptionPayload; 
             <SelectGroup>{carriers.map((carrier) => <SelectItem key={carrier.value} value={carrier.value}>{carrier.label}</SelectItem>)}</SelectGroup>
           </SelectContent>
         </Select>;
-      }}/></div><div className="grid grid-cols-2 gap-4">{numbers.map(({ key, label, nullable }) => <div key={key}><label htmlFor={key} className="text-xs">{label}</label><Input id={key} type="number" min={key === 'freeThreshold' ? 0.01 : 0} step={key.startsWith('estDays') ? 1 : 0.01} {...form.register(key, { setValueAs: (v: string) => nullable && (v === '' || v == null) ? null : v === '' ? NaN : Number(v) })}/></div>)}</div>{Object.entries(form.formState.errors).map(([key, error]) => <p key={key} role="alert" className="text-xs text-destructive">{error.message}</p>)}</fieldset><div className={shopFooter}><Button variant="ghost" type="button" disabled={form.formState.isSubmitting} onClick={onClose}>ยกเลิก</Button><Button type="submit" disabled={form.formState.isSubmitting}>บันทึกตัวเลือก</Button></div></form>;
+      }}/></div><div className="grid grid-cols-2 gap-4">{numbers.map(({ key, label, nullable }) => <div key={key}><label htmlFor={key} className="text-xs">{label}</label><Input id={key} type="number" min={key === 'freeThreshold' ? 0.01 : 0} step={key.startsWith('estDays') ? 1 : 0.01} {...form.register(key, { setValueAs: (v: string) => nullable && (v === '' || v == null) ? null : v === '' ? NaN : Number(v) })}/></div>)}</div>{Object.entries(form.formState.errors).map(([key, error]) => <p key={key} role="alert" className="text-xs text-destructive">{error.message}</p>)}</fieldset><div className={shopFooter}><Button variant="ghost" type="button" disabled={form.formState.isSubmitting} onClick={onClose}>{translate("ยกเลิก", "Cancel")}</Button><Button type="submit" disabled={form.formState.isSubmitting}>บันทึกตัวเลือก</Button></div></form>;
 }

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import {
   SELLER_ORDER_STATUS_LABEL,
   TO_PACK_STATUSES,
@@ -52,11 +53,11 @@ export const RETURNS_PATH = "/seller/returns";
 /** เรียงตามลำดับงานของร้าน แต่ละสถานะจริงอยู่ในแท็บเดียวเท่านั้น */
 export const ORDER_TABS: OrderTabMeta[] = [
   { id: "awaiting_pack", label: "รอแพ็ค", statuses: TO_PACK_STATUSES, sort: "PAID_OLDEST" },
-  { id: "awaiting_payment", label: "รอชำระ", statuses: ["PENDING_PAYMENT"], sort: "OLDEST" },
-  { id: "shipped", label: "กำลังจัดส่ง", statuses: ["SHIPPED", "DELIVERED"], sort: "SHIPPED_NEWEST" },
-  { id: "completed", label: "สำเร็จ", statuses: ["COMPLETED"], sort: "COMPLETED_NEWEST" },
+  { id: "awaiting_payment", get label() { return translate("รอชำระ", "Awaiting payment"); }, statuses: ["PENDING_PAYMENT"], sort: "OLDEST" },
+  { id: "shipped", get label() { return translate("กำลังจัดส่ง", "Shipping"); }, statuses: ["SHIPPED", "DELIVERED"], sort: "SHIPPED_NEWEST" },
+  { id: "completed", get label() { return translate("สำเร็จ", "Completed"); }, statuses: ["COMPLETED"], sort: "COMPLETED_NEWEST" },
   { id: "returns", label: "คืนสินค้า", statuses: RETURN_STATUSES, sort: "NEWEST" },
-  { id: "cancelled", label: "ยกเลิก", statuses: ["CANCELLED"], sort: "NEWEST" },
+  { id: "cancelled", get label() { return translate("ยกเลิก", "Cancel"); }, statuses: ["CANCELLED"], sort: "NEWEST" },
 ];
 
 /** ค่าใน URL ที่ไม่รู้จัก (หรือไม่มี) กลับไปแท็บแรก */
@@ -245,26 +246,26 @@ export function paymentStateOf(status: SellerOrderStatus, paidAt: string | null)
 }
 
 export const PAYMENT_STATE_LABEL: Record<PaymentState, string> = {
-  paid: "ชำระแล้ว",
-  pending: "รอชำระ",
+  get paid() { return translate("ชำระแล้ว", "Paid"); },
+  get pending() { return translate("รอชำระ", "Awaiting payment"); },
   refunded: "ยกเลิก / คืนเงิน",
-  cancelled: "ยกเลิก",
+  get cancelled() { return translate("ยกเลิก", "Cancel"); },
 };
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
-  BANK_TRANSFER: "โอนผ่านธนาคาร",
-  MOCK_GATEWAY: "ช่องทางทดสอบ",
-  WALLET: "กระเป๋าเงิน",
-  CASH_ON_DELIVERY: "เก็บเงินปลายทาง",
+  get BANK_TRANSFER() { return translate("โอนผ่านธนาคาร", "Bank transfer"); },
+  get MOCK_GATEWAY() { return translate("ช่องทางทดสอบ", "Test payment method"); },
+  get WALLET() { return translate("กระเป๋าเงิน", "Wallet"); },
+  get CASH_ON_DELIVERY() { return translate("เก็บเงินปลายทาง", "Cash on delivery"); },
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentRecordStatus, string> = {
-  PENDING: "รอชำระ",
+  get PENDING() { return translate("รอชำระ", "Awaiting payment"); },
   AWAITING_VERIFICATION: "รอแอดมินตรวจสลิป",
-  SUCCEEDED: "ชำระสำเร็จ",
-  FAILED: "ไม่สำเร็จ",
-  CANCELLED: "ยกเลิก",
-  EXPIRED: "หมดเวลา",
+  get SUCCEEDED() { return translate("ชำระสำเร็จ", "Payment completed"); },
+  get FAILED() { return translate("ไม่สำเร็จ", "Failed"); },
+  get CANCELLED() { return translate("ยกเลิก", "Cancel"); },
+  get EXPIRED() { return translate("หมดเวลา", "Timed out"); },
 };
 
 /**
@@ -280,12 +281,12 @@ const PAYMENT_AMOUNT_LABEL: Partial<Record<PaymentRecordStatus, string>> = {
 
 export function paymentRows(payment: OrderPayment | null): { id: string; label: string; value: string }[] {
   if (!payment) {
-    return [{ id: "status", label: "สถานะ", value: "ผู้ซื้อยังไม่ได้ชำระ" }];
+    return [{ id: "status", label: translate("สถานะ", "Status"), value: "ผู้ซื้อยังไม่ได้ชำระ" }];
   }
   const amountLabel = PAYMENT_AMOUNT_LABEL[payment.status];
   return [
-    { id: "method", label: "ช่องทาง", value: PAYMENT_METHOD_LABEL[payment.method] ?? payment.method },
-    { id: "status", label: "สถานะ", value: PAYMENT_STATUS_LABEL[payment.status] ?? payment.status },
+    { id: "method", label: translate("ช่องทาง", "Method"), value: PAYMENT_METHOD_LABEL[payment.method] ?? payment.method },
+    { id: "status", label: translate("สถานะ", "Status"), value: PAYMENT_STATUS_LABEL[payment.status] ?? payment.status },
     ...(amountLabel ? [{ id: "amount", label: amountLabel, value: formatBaht(payment.amount) }] : []),
     ...(payment.paidAt
       ? [{ id: "paid-at", label: "เวลาที่ชำระ", value: formatDateTime(payment.paidAt) }]
@@ -386,7 +387,7 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
         .map((step) => ({ id: step.id, label: step.label, detail: formatDateTime(step.at!), done: true })),
       {
         id: "cancelled",
-        label: order.cancelReason ? `ยกเลิกคำสั่งซื้อ · ${order.cancelReason}` : "ยกเลิกคำสั่งซื้อ",
+        label: order.cancelReason ? `ยกเลิกคำสั่งซื้อ · ${order.cancelReason}` : translate("ยกเลิกคำสั่งซื้อ", "Cancel order"),
         detail: formatDateTime(order.cancelledAt),
         done: true,
       },
@@ -401,7 +402,7 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
       ? formatDateTime(step.at)
       : index === currentIndex
         ? "กำลังดำเนินการ"
-        : "รอดำเนินการ",
+        : translate("รอดำเนินการ", "Pending"),
     done: Boolean(step.at),
   }));
 }
@@ -427,7 +428,7 @@ export function profitSummary(detail: SellerOrderDetail): ProfitSummary | null {
       ...(hasPromotionDiscount
         ? []
         : [
-            { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
+            { id: "sales", label: translate("ยอดขาย (รวมค่าส่ง)", "Sales (including shipping)"), value: formatBaht(order.grandTotal) },
             { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
           ]),
       { id: "cost", label: "− ต้นทุนสินค้า", value: formatBaht(roundMoney(detail.costTotal)) },
@@ -470,11 +471,11 @@ export function monthlySummary(month: DashboardMonthSummary): MonthlySummary {
     title: "ผลประกอบการเดือนนี้",
     rows: [
       // แดชบอร์ดแสดงยอดเดือนเดียวกันแบบไม่รวมค่าส่ง ป้ายจึงต้องบอกว่ายอดนี้รวม
-      { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(month.revenue), tone: "default" },
+      { id: "sales", label: translate("ยอดขาย (รวมค่าส่ง)", "Sales (including shipping)"), value: formatBaht(month.revenue), tone: "default" },
       { id: "cost", label: "ต้นทุนสินค้า", value: `− ${formatBaht(roundMoney(month.cost))}`, tone: "muted" },
-      { id: "commission", label: "ค่าคอมมิชชั่น", value: `− ${formatBaht(month.commission)}`, tone: "muted" },
+      { id: "commission", label: translate("ค่าคอมมิชชั่น", "Commission"), value: `− ${formatBaht(month.commission)}`, tone: "muted" },
     ],
-    netLabel: "กำไรสุทธิ",
+    netLabel: translate("กำไรสุทธิ", "Net profit"),
     netValue: formatBaht(roundMoney(month.net)),
   };
 }
@@ -507,7 +508,7 @@ export function orderErrorMessage(error: unknown, fallback: string): string {
     return "สลิปของออเดอร์นี้กำลังรอแอดมินตรวจ ยกเลิกได้หลังตรวจเสร็จ";
   }
   if (hasErrorCode(error, "ORDER_NOT_FOUND")) {
-    return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
+    return translate("ไม่พบคำสั่งซื้อนี้ในร้านของคุณ", "This order was not found in your shop");
   }
   return getErrorMessage(error, fallback);
 }
@@ -523,7 +524,7 @@ export function orderSummaryDownloadErrorMessage(error: unknown): string {
       case 403:
         return "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารของร้าน";
       case 404:
-        return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
+        return translate("ไม่พบคำสั่งซื้อนี้ในร้านของคุณ", "This order was not found in your shop");
       default:
         if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
     }

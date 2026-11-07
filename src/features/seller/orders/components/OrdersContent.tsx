@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { useEffect } from "react";
 
 import { EmptyState, QueryBoundary } from "@/components/common";
@@ -45,6 +46,7 @@ export function OrdersContent({
   onSortChange,
   onPageChange,
 }: OrdersContentProps) {
+  useLanguage();
   const counts = useSellerOrderCounts();
   const dashboard = useSellerDashboard();
   const orders = useSellerOrders({
@@ -79,7 +81,7 @@ export function OrdersContent({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">จัดการคำสั่งซื้อ</h1>
+        <h1 className="text-2xl font-bold text-foreground">{translate("จัดการคำสั่งซื้อ", "Manage orders")}</h1>
         <p className="text-xs text-gray-500">{ordersSubtitle(counts.data)}</p>
       </div>
 

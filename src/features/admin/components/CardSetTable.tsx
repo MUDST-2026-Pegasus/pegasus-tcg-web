@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { ImageIcon, Layers, Pencil, Search, Trash2 } from "lucide-react";
@@ -44,6 +45,7 @@ export function CardSetTable({
   onEdit,
   onDelete,
 }: CardSetTableProps) {
+  useLanguage();
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
   const visible = needle
@@ -105,16 +107,15 @@ export function CardSetTable({
         <Table>
           <TableHeader>
             <TableRow className={HEAD_ROW_CLASS}>
-              <TableHead className={cn(HEAD_CLASS, "pl-5")}>ชุดการ์ด</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>รหัส</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "pl-5")}>{translate("ชุดการ์ด", "Card set")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>{translate("รหัส", "Code")}</TableHead>
               <TableHead className={cn(HEAD_CLASS, "w-[140px]")}>
-                วันวางจำหน่าย
-              </TableHead>
+                {translate("วันวางจำหน่าย", "Release date")}</TableHead>
               <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>
                 จำนวนการ์ด
               </TableHead>
               <TableHead className={cn(HEAD_CLASS, "w-[88px] pr-5")}>
-                <span className="sr-only">จัดการ</span>
+                <span className="sr-only">{translate("จัดการ", "Manage")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>

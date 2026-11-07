@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
@@ -96,11 +97,11 @@ export function formatBahtWithSatang(amount: number): string {
 /** ชื่อสถานะประกาศ — ใช้ทั้งชิปตัวกรอง badge ในตาราง และเมนูเปลี่ยนสถานะ */
 export const LISTING_STATUS_LABEL: Record<ListingStatus, string> = {
   DRAFT: "ฉบับร่าง",
-  ACTIVE: "พร้อมขาย",
-  PAUSED: "พักการขาย",
+  get ACTIVE() { return translate("พร้อมขาย", "Ready to sell"); },
+  get PAUSED() { return translate("พักการขาย", "Pause selling"); },
   SOLD_OUT: "หมดสต็อก",
   DELISTED: "ปิดการขายแล้ว",
-  BLOCKED: "ถูกระงับ",
+  get BLOCKED() { return translate("ถูกระงับ", "Suspended"); },
 };
 
 /** ตัวเลือกการเรียงในแถบตัวกรอง — ตัวแรกคือค่าเริ่มต้นของ backend */

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ type DashboardContentProps = {
 };
 
 export function DashboardContent({ data }: DashboardContentProps) {
+  useLanguage();
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">

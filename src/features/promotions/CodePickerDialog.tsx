@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 import { Ticket, TicketPercent } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ export function CodePickerDialog({
   onNavigateHome,
   onNavigateToStore,
 }: CodePickerDialogProps) {
+  useLanguage();
   const [draftCode, setDraftCode] = useState<string | null>(selectedCode ?? null);
   const [typed, setTyped] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -101,23 +103,23 @@ export function CodePickerDialog({
 
   const groups = [
     {
-      title: "เก็บไว้ใช้ได้",
+      title: translate("เก็บไว้ใช้ได้", "Saved and available"),
       items: relevant.filter(
         (promotion) => promotion.source === "CLAIMED" && promotion.applicable,
       ),
     },
     {
-      title: "เก็บไว้แต่ยังใช้ไม่ได้",
+      title: translate("เก็บไว้แต่ยังใช้ไม่ได้", "Saved but unavailable"),
       items: relevant.filter(
         (promotion) => promotion.source === "CLAIMED" && !promotion.applicable,
       ),
     },
     {
-      title: "ยังไม่ได้เก็บ",
+      title: translate("ยังไม่ได้เก็บ", "Not collected"),
       items: relevant.filter((promotion) => promotion.source === "CLAIMABLE"),
     },
     {
-      title: "โค้ดทั่วไป",
+      title: translate("โค้ดทั่วไป", "Public coupon"),
       items: relevant.filter((promotion) => promotion.source === "PUBLIC"),
     },
   ];
@@ -146,12 +148,12 @@ export function CodePickerDialog({
 
   const title =
     owner === "PLATFORM"
-      ? "เลือกโค้ดส่วนลด Pegasus"
-      : `โค้ดร้าน ${sellerName || ""}`;
+      ? translate("เลือกโค้ดส่วนลด Pegasus", "Select a Pegasus coupon")
+      : translate(`โค้ดร้าน ${sellerName || ""}`, `Shop coupon ${sellerName || ""}`);
   const onNavigateToPromotions =
     owner === "PLATFORM" ? onNavigateHome : onNavigateToStore;
   const navigateLabel =
-    owner === "PLATFORM" ? "ไปหน้าแรกเพื่อเก็บโค้ด" : "ไปร้านค้าเพื่อเก็บโค้ด";
+    owner === "PLATFORM" ? translate("ไปหน้าแรกเพื่อเก็บโค้ด", "Collect coupons on the home page") : translate("ไปร้านค้าเพื่อเก็บโค้ด", "Collect coupons at the shop");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,7 +164,7 @@ export function CodePickerDialog({
 
         {/* Input box at top as specified by Figma B2/C2 */}
         <div className="border-b px-6 pb-4">
-          <PromotionCodeForm id="promo-code-input" label="กรอกโค้ดอื่น"
+          <PromotionCodeForm id="promo-code-input" label={translate("กรอกโค้ดอื่น", "Enter another code")}
             value={typed} onChange={setTyped} onSubmit={() => handleTrySubmit()}
             error={resolvedError} loading={loading || submitting} />
           {inputFooter}
@@ -172,17 +174,15 @@ export function CodePickerDialog({
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
           {isGuest && (
             <div className="rounded-xl border border-dashed border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
-              <p>เข้าสู่ระบบเพื่อดูโค้ดส่วนลดที่คุณเก็บไว้</p>
+              <p>{translate("เข้าสู่ระบบเพื่อดูโค้ดส่วนลดที่คุณเก็บไว้", "Log in to view your saved coupons")}</p>
               <div className="mt-2 flex justify-center gap-2">
                 {onLogin && (
                   <Button size="sm" variant="outline" onClick={onLogin}>
-                    เข้าสู่ระบบ
-                  </Button>
+                    {translate("เข้าสู่ระบบ", "Log in")}</Button>
                 )}
                 {onRegister && (
                   <Button size="sm" variant="ghost" onClick={onRegister}>
-                    สมัครสมาชิก
-                  </Button>
+                    {translate("สมัครสมาชิก", "Sign up")}</Button>
                 )}
               </div>
             </div>
@@ -260,8 +260,8 @@ export function CodePickerDialog({
           {!relevant.length && (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 py-8 text-center">
               <TicketPercent className="size-8 text-muted-foreground/60" />
-              <p className="text-sm font-medium text-foreground">ยังไม่มีโค้ดที่เก็บไว้</p>
-              <p className="text-xs text-muted-foreground">เก็บโค้ดได้ที่หน้าแรกและหน้าร้าน</p>
+              <p className="text-sm font-medium text-foreground">{translate("ยังไม่มีโค้ดที่เก็บไว้", "No saved coupons yet")}</p>
+              <p className="text-xs text-muted-foreground">{translate("เก็บโค้ดได้ที่หน้าแรกและหน้าร้าน", "Collect coupons on the home and shop pages")}</p>
               {onNavigateToPromotions && (
                 <Button
                   size="sm"
@@ -286,8 +286,7 @@ export function CodePickerDialog({
             className="rounded-lg bg-background"
             onClick={handleClear}
           >
-            ไม่ใช้โค้ด
-          </Button>
+            {translate("ไม่ใช้โค้ด", "No coupon")}</Button>
           <Button
             type="button"
             size="sm"
@@ -295,8 +294,7 @@ export function CodePickerDialog({
             disabled={!draftCode}
             onClick={handleConfirm}
           >
-            ใช้โค้ดนี้
-          </Button>
+            {translate("ใช้โค้ดนี้", "Use this coupon")}</Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
@@ -30,23 +31,24 @@ export function ProductBulkBar({
   onActivate,
   onPause,
 }: ProductBulkBarProps) {
+  useLanguage();
   const disabled = readOnly || isPending;
   const actions = [
     {
       id: "reprice",
-      label: "แก้ไขราคาพร้อมกัน",
+      label: translate("แก้ไขราคาพร้อมกัน", "Bulk price update"),
       count: eligible.reprice,
       onClick: onReprice,
     },
     {
       id: "activate",
-      label: "เปิดขาย",
+      label: translate("เปิดขาย", "List for sale"),
       count: eligible.activate,
       onClick: onActivate,
     },
     {
       id: "pause",
-      label: "พักการขาย",
+      label: translate("พักการขาย", "Pause selling"),
       count: eligible.pause,
       onClick: onPause,
     },
@@ -61,8 +63,7 @@ export function ProductBulkBar({
         onCheckedChange={onClear}
       />
       <p className="text-xs font-medium text-teal-600">
-        เลือกแล้ว {selectedCount} รายการ
-      </p>
+        เลือกแล้ว {selectedCount} {" " + translate("รายการ", "Items")}</p>
       {isPending ? (
         <span className="flex items-center gap-1.5 text-xs text-teal-700">
           <Spinner className="size-3.5" />

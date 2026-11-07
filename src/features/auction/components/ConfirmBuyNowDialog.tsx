@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Ban } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +22,7 @@ type ConfirmBuyNowDialogProps = {
 
 /** B3-C dialog ยืนยันซื้อทันที — สำเร็จแล้วไป checkout โหมดประมูล [TCG-630 · FE-4] */
 export function ConfirmBuyNowDialog({ auction, open, onOpenChange }: ConfirmBuyNowDialogProps) {
+  useLanguage();
   const navigate = useNavigate();
   const buyNow = useBuyNow(auction.id);
   const [error, setError] = useState<AuctionErrorMessage | null>(null);
@@ -47,27 +49,25 @@ export function ConfirmBuyNowDialog({ auction, open, onOpenChange }: ConfirmBuyN
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="rounded-xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">ซื้อทันทีในราคา {formatBaht(price)}?</DialogTitle>
-          <DialogDescription>ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม.</DialogDescription>
+          <DialogTitle className="text-xl font-bold">{translate("ซื้อทันทีในราคา", "Buy now for")}{formatBaht(price)}?</DialogTitle>
+          <DialogDescription>{translate("ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม.", "The auction ends immediately and an order is created for you — pay within 24 hours")}</DialogDescription>
         </DialogHeader>
 
         <PriceSummary
           rows={[
-            ["ราคาซื้อทันที", price],
-            ["ค่าจัดส่ง", auction.shippingFee],
+            [translate("ราคาซื้อทันที", "Buy now price"), price],
+            [translate("ค่าจัดส่ง", "Shipping"), auction.shippingFee],
           ]}
-          totalLabel="ยอดชำระ"
+          totalLabel={translate("ยอดชำระ", "Total payment")}
           total={price + auction.shippingFee}
         />
 
         {error ? <AuctionNotice tone="red" role="alert" icon={<Ban />} title={error.title} detail={error.detail} /> : null}
 
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>ยกเลิก</DialogClose>
+          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>{translate("ยกเลิก", "Cancel")}</DialogClose>
           <Button className="rounded-full px-5" disabled={buyNow.isPending} onClick={confirm}>
-            {buyNow.isPending && <Spinner />}
-            ซื้อทันที
-          </Button>
+            {buyNow.isPending && <Spinner />}{translate("ซื้อทันที", "Buy now")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

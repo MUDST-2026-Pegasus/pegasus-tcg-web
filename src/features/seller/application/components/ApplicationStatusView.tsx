@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Info } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -28,6 +29,7 @@ export function ApplicationStatusView({
   isRefreshing,
   onRefresh,
 }: ApplicationStatusViewProps) {
+  useLanguage();
   const handleViewStatus = () => {
     // ดึงสถานะล่าสุดแล้วเลื่อนไปที่การ์ดสถานะ
     onRefresh();

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { orderStage } from "./order-stage";
 import type { OrderDetails } from "./orders.types";
 
@@ -16,13 +17,13 @@ export type FilterTabMeta = {
 };
 
 export const ORDER_FILTER_TABS: FilterTabMeta[] = [
-  { key: "ALL", label: "ทั้งหมด (All)" },
-  { key: "PENDING", label: "รอชำระเงิน (Pending / To Pay)" },
-  { key: "PREPARING", label: "กำลังเตรียมพัสดุ (Preparing / Prepared)" },
-  { key: "IN_TRANSIT", label: "กำลังจัดส่ง (In Transit / Shipped)" },
-  { key: "COMPLETED", label: "สำเร็จแล้ว (Completed / Delivered)" },
-  { key: "RETURN_REFUND", label: "ขอคืนเงิน/คืนสินค้า (Return Requested / Refunded)" },
-  { key: "CANCELLED", label: "ยกเลิกแล้ว (Cancelled)" },
+  { key: "ALL", get label() { return translate("ทั้งหมด (All)", "All"); } },
+  { key: "PENDING", get label() { return translate("รอชำระเงิน (Pending / To Pay)", "To pay"); } },
+  { key: "PREPARING", get label() { return translate("กำลังเตรียมพัสดุ (Preparing / Prepared)", "Preparing"); } },
+  { key: "IN_TRANSIT", get label() { return translate("กำลังจัดส่ง (In Transit / Shipped)", "In transit"); } },
+  { key: "COMPLETED", get label() { return translate("สำเร็จแล้ว (Completed / Delivered)", "Completed"); } },
+  { key: "RETURN_REFUND", get label() { return translate("ขอคืนเงิน/คืนสินค้า (Return Requested / Refunded)", "Returns and refunds"); } },
+  { key: "CANCELLED", get label() { return translate("ยกเลิกแล้ว (Cancelled)", "Cancelled"); } },
 ];
 
 export function matchesOrderFilter(order: OrderDetails, filter: OrderFilterTab): boolean {

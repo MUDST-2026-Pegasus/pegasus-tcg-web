@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Check } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,7 @@ type CreateStepperProps = {
 
 /** แถบขั้นตอนการลงขาย: ขั้นที่ผ่านแล้วขึ้นเครื่องหมายถูก ขั้นปัจจุบันตัวหนา ขั้นถัดไปเป็นสีเทา */
 export function CreateStepper({ steps, currentStepIndex }: CreateStepperProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-0 rounded-xl border border-border px-5 py-4 shadow-none ring-0">
       <ol className="flex items-center">

@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 
 import {
@@ -42,6 +43,7 @@ export function GameAttributeFields({
   errors,
   disabled,
 }: GameAttributeFieldsProps) {
+  useLanguage();
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {registry.map((attribute) => {
@@ -69,7 +71,7 @@ export function GameAttributeFields({
                 if (options) {
                   const items = attribute.required
                     ? options
-                    : [{ value: UNSET, label: "ไม่ระบุ" }, ...options];
+                    : [{ value: UNSET, label: translate("ไม่ระบุ", "Not specified") }, ...options];
                   return (
                     <Select
                       items={items}

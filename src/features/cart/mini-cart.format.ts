@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { isOnSale } from "@/components/sale";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
 import type { CartItemResponse } from "./cart.types";
@@ -17,7 +18,7 @@ export function groupMiniCart(items: CartItemResponse[]) {
     if (!groups.has(key))
       groups.set(key, {
         key,
-        name: item.sellerName || item.sellerUsername || "ร้านค้า",
+        name: item.sellerName || item.sellerUsername || translate("ร้านค้า", "Shop"),
         items: [],
       });
     groups.get(key)!.items.push(item);

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useSearchParams } from "react-router-dom";
 
 import { OrdersContent } from "./components/OrdersContent";
@@ -8,6 +9,7 @@ import { sortOf, tabOf, type OrderTab, type SortChoice } from "./orders.format";
  * ลิงก์กลับมาที่แท็บเดิมได้ กด back แล้วยังอยู่ที่เดิม และแชร์ลิงก์ให้คนในร้านได้
  */
 export function SellerOrdersPage() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const tab = tabOf(searchParams.get("status"));

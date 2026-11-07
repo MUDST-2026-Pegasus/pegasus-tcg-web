@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -77,12 +78,13 @@ export function CategoryFormDialog({
   category,
   imageUrl,
 }: CategoryFormDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {category ? `แก้ไขหมวด ${category.name}` : "เพิ่มหมวดหมู่"}
+            {category ? `แก้ไขหมวด ${category.name}` : translate("เพิ่มหมวดหมู่", "Add category")}
           </DialogTitle>
           <DialogDescription>
             {category?.gameId === null
@@ -116,6 +118,7 @@ function CategoryForm({
   imageUrl?: string;
   onSaved: () => void;
 }) {
+  useLanguage();
   const saveCategory = useSaveCategory();
 
   const {
@@ -145,7 +148,7 @@ function CategoryForm({
     : false;
   const scopeItems = [
     { value: String(game.id), label: `เฉพาะ ${game.name}` },
-    { value: ALL_GAMES, label: "ทุกเกม" },
+    { value: ALL_GAMES, label: translate("ทุกเกม", "All games") },
   ];
   // หมวดแม่ได้เฉพาะระดับบนสุด ที่เป็นหมวดข้ามเกมหรือเกมเดียวกับหมวดนี้
   const parentItems = [
@@ -238,14 +241,13 @@ function CategoryForm({
             <Input
               id="categorySlug"
               maxLength={120}
-              placeholder="เว้นว่าง = สร้างจากชื่อ"
+              placeholder={translate("เว้นว่าง = สร้างจากชื่อ", "Leave blank to generate from the name")}
               disabled={Boolean(category)}
               aria-invalid={Boolean(errors.slug)}
               {...register("slug")}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
-            </FieldDescription>
+              {translate("ตั้งได้ครั้งเดียวตอนสร้าง", "Can only be set when created")}</FieldDescription>
             <FieldError errors={[errors.slug]} />
           </Field>
         </div>
@@ -293,8 +295,7 @@ function CategoryForm({
               )}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
-            </FieldDescription>
+              {translate("ตั้งได้ครั้งเดียวตอนสร้าง", "Can only be set when created")}</FieldDescription>
           </Field>
 
           <Field>
@@ -342,7 +343,7 @@ function CategoryForm({
           data-invalid={Boolean(errors.displayOrder) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="categoryOrder">ลำดับการแสดง</FieldLabel>
+          <FieldLabel htmlFor="categoryOrder">{translate("ลำดับการแสดง", "Display order")}</FieldLabel>
           <Input
             id="categoryOrder"
             inputMode="numeric"
@@ -373,8 +374,7 @@ function CategoryForm({
                 onClick={() => setValue("imageKey", "", { shouldDirty: true })}
               >
                 <Trash2 data-icon="inline-start" />
-                เอารูปออก
-              </Button>
+                {translate("เอารูปออก", "Remove image")}</Button>
             </div>
           ) : (
             <FileUpload
@@ -383,7 +383,7 @@ function CategoryForm({
               title={
                 imageKey !== "" && upload.items.length === 0
                   ? "หมวดนี้มีรูปอยู่แล้ว (หมวดที่ปิดอยู่ดูตัวอย่างไม่ได้) — เลือกไฟล์ใหม่เพื่อเปลี่ยน"
-                  : "ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป"
+                  : translate("ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป", "Drop an image here, or click to choose one")
               }
             />
           )}
@@ -403,7 +403,7 @@ function CategoryForm({
             )}
           />
           <FieldContent>
-            <FieldLabel htmlFor="categoryActive">เปิดใช้งาน</FieldLabel>
+            <FieldLabel htmlFor="categoryActive">{translate("เปิดใช้งาน", "Enable")}</FieldLabel>
             <FieldDescription className="text-xs">
               ปิดแล้วเลือกหมวดนี้ให้การ์ดใหม่ไม่ได้ การ์ดเดิมยังอยู่ในหมวดนี้
             </FieldDescription>
@@ -413,13 +413,12 @@ function CategoryForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {category ? "บันทึก" : "เพิ่มหมวดหมู่"}
+          {category ? translate("บันทึก", "Save") : translate("เพิ่มหมวดหมู่", "Add category")}
         </Button>
       </DialogFooter>
     </form>

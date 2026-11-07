@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -34,17 +35,17 @@ export function ProductPagination({
   disabled,
   onPageChange,
 }: ProductPaginationProps) {
+  useLanguage();
   const from = rowsOnPage === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = (page - 1) * pageSize + rowsOnPage;
 
   return (
     <div className="flex items-center justify-between gap-4 border-t border-muted px-5 py-3.5">
       <p className="text-xs text-gray-500">
-        แสดง {from}–{to} จาก {totalItems} รายการ
-      </p>
+        {translate("แสดง", "Show") + " "}{from}–{to} {" " + translate("จาก", "of") + " "}{totalItems} {" " + translate("รายการ", "Items")}</p>
 
       {totalPages > 1 ? (
-        <nav aria-label="เปลี่ยนหน้า" className="flex items-center gap-1.5">
+        <nav aria-label={translate("เปลี่ยนหน้า", "Change page")} className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -52,8 +53,7 @@ export function ProductPagination({
             disabled={disabled || page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
-          </Button>
+            {translate("ก่อนหน้า", "Previous")}</Button>
 
           {pageWindow(page, totalPages).map((number) => (
             <button
@@ -80,8 +80,7 @@ export function ProductPagination({
             disabled={disabled || page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
-          </Button>
+            {translate("ถัดไป", "Next")}</Button>
         </nav>
       ) : null}
     </div>

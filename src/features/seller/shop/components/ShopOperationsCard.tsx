@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,13 +14,14 @@ import { useShopSettings } from '../shop.queries';
 import { ShopCard, shopFooter } from './ShopCard';
 
 export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
+  useLanguage();
   const mutation = useShopSettings();
   const [confirm, setConfirm] = useState(false);
   const form = useForm<ShopSettings>({ resolver: zodResolver(shopSettingsSchema), defaultValues: settings });
   const values = useWatch({ control: form.control });
   const save = form.handleSubmit(async (data) => {
-    try { const saved = await mutation.mutateAsync(data); form.reset({ handlingDays: saved.handlingDays, vacationMode: saved.vacationMode, autoAcceptOrders: saved.autoAcceptOrders }); toast.add({ type: 'success', title: 'บันทึกการตั้งค่าแล้ว' }); }
-    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') }); }
+    try { const saved = await mutation.mutateAsync(data); form.reset({ handlingDays: saved.handlingDays, vacationMode: saved.vacationMode, autoAcceptOrders: saved.autoAcceptOrders }); toast.add({ type: 'success', title: translate("บันทึกการตั้งค่าแล้ว", "Settings saved") }); }
+    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, translate("บันทึกไม่สำเร็จ", "Unable to save")) }); }
   });
   const row = 'flex items-center justify-between gap-4 rounded-[9px] border border-muted bg-[#fafbfb] px-[14px] py-3';
   return <ShopCard title="การทำงานของร้าน" subtitle="กำหนดการเปิด-ปิดร้านและระยะเวลาจัดส่ง"><form className="space-y-4" onSubmit={save}>
@@ -27,6 +29,6 @@ export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
     <div className={row}><label htmlFor="handling" className="text-xs font-medium">เวลาเตรียมของ (วันทำการ)</label><Input id="handling" className="w-20" type="number" min={0} max={30} disabled={mutation.isPending} {...form.register('handlingDays', { valueAsNumber: true })}/></div>
     {form.formState.errors.handlingDays && <p role="alert" className="text-xs text-destructive">ระบุจำนวนเต็ม 0–30 วัน</p>}
     <div className={row}><label htmlFor="auto-accept" className="text-xs font-medium">รับออเดอร์อัตโนมัติ</label><Switch id="auto-accept" checked={values.autoAcceptOrders} disabled={mutation.isPending} onCheckedChange={(v) => form.setValue('autoAcceptOrders', v, { shouldDirty: true })}/></div>
-    <div className={shopFooter}><Button type="button" variant="ghost" size="sm" disabled={mutation.isPending} onClick={() => form.reset(settings)}>ยกเลิก</Button><Button type="submit" size="sm" disabled={!form.formState.isDirty || mutation.isPending}>บันทึกการตั้งค่า</Button></div>
-  </form><AlertDialog open={confirm} onOpenChange={setConfirm}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>ปิดร้านชั่วคราว?</AlertDialogTitle><AlertDialogDescription>สินค้าทั้งร้านจะถูกซ่อนเมื่อบันทึกการตั้งค่า คำสั่งซื้อที่ชำระเงินแล้วยังต้องจัดส่งตามปกติ</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>ยกเลิก</AlertDialogCancel><AlertDialogAction onClick={() => { form.setValue('vacationMode', true, { shouldDirty: true }); setConfirm(false); }}>ยืนยันปิดร้าน</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></ShopCard>;
+    <div className={shopFooter}><Button type="button" variant="ghost" size="sm" disabled={mutation.isPending} onClick={() => form.reset(settings)}>{translate("ยกเลิก", "Cancel")}</Button><Button type="submit" size="sm" disabled={!form.formState.isDirty || mutation.isPending}>{translate("บันทึกการตั้งค่า", "Save settings")}</Button></div>
+  </form><AlertDialog open={confirm} onOpenChange={setConfirm}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>ปิดร้านชั่วคราว?</AlertDialogTitle><AlertDialogDescription>สินค้าทั้งร้านจะถูกซ่อนเมื่อบันทึกการตั้งค่า คำสั่งซื้อที่ชำระเงินแล้วยังต้องจัดส่งตามปกติ</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel><AlertDialogAction onClick={() => { form.setValue('vacationMode', true, { shouldDirty: true }); setConfirm(false); }}>ยืนยันปิดร้าน</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></ShopCard>;
 }

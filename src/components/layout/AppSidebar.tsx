@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavGroup } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/language";
 
 const DASHBOARD_BLUE_TEXT = "text-[#0058bc]";
 const DASHBOARD_BLUE_BG = "bg-[#0058bc]";
@@ -30,6 +31,7 @@ type AppSidebarProps = {
 
 export function AppSidebar({ role, groups }: AppSidebarProps) {
   const { isMobile } = useSidebar();
+  const { text } = useLanguage();
 
   return (
     <Sidebar
@@ -45,7 +47,7 @@ export function AppSidebar({ role, groups }: AppSidebarProps) {
                 DASHBOARD_BLUE_TEXT,
               )}
             >
-              DASHBOARD
+              {text("แดชบอร์ด", "DASHBOARD")}
             </span>
             <Badge
               className={cn(
@@ -62,17 +64,17 @@ export function AppSidebar({ role, groups }: AppSidebarProps) {
           {groups.map((group) => (
             <SidebarGroup key={group.label} className="gap-0.5 px-0 py-0">
               <SidebarGroupLabel className="h-auto px-2.5 pt-3 pb-1.5 text-[10px] font-semibold tracking-[0.6px] text-[#9aa5ad] uppercase">
-                {group.label}
+                {text(group.label, group.labelEn ?? group.label)}
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0.5">
-                  {group.items.map(({ label, to, icon: Icon, end }) => (
+                  {group.items.map(({ label, labelEn, to, icon: Icon, end }) => (
                     <SidebarMenuItem key={to}>
                       <NavLink to={to} end={end}>
                         {({ isActive }) => (
                           <SidebarMenuButton
                             isActive={isActive}
-                            tooltip={label}
+                            tooltip={text(label, labelEn ?? label)}
                             render={<span />}
                             className={cn(
                               "h-auto gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-normal text-[#414755]",
@@ -81,7 +83,7 @@ export function AppSidebar({ role, groups }: AppSidebarProps) {
                             )}
                           >
                             <Icon />
-                            <span>{label}</span>
+                            <span>{text(label, labelEn ?? label)}</span>
                           </SidebarMenuButton>
                         )}
                       </NavLink>

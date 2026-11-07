@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 
@@ -20,6 +21,7 @@ export function ChoiceCard({
   hint: string;
   disabled?: boolean;
 }) {
+  useLanguage();
   return (
     <FieldLabel className="has-[>[data-slot=field]]:rounded-md has-data-checked:border-primary has-data-checked:bg-[#f0f7fc]">
       <Field orientation="horizontal" data-disabled={disabled || undefined} className="gap-2.5 p-3!">
@@ -49,6 +51,7 @@ export function ToggleRow({
   disabled?: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  useLanguage();
   return (
     <Field
       orientation="horizontal"
@@ -80,6 +83,7 @@ export function CheckRow({
   onChange: (checked: boolean) => void;
   tone?: "muted" | "danger";
 }) {
+  useLanguage();
   return (
     <Field
       orientation="horizontal"
@@ -119,6 +123,7 @@ export function FormField({
   children: ReactNode;
   className?: string;
 }) {
+  useLanguage();
   return (
     <Field data-field={field} data-invalid={error ? true : undefined} className={cn("scroll-mt-24 gap-1.5", className)}>
       <FieldLabel htmlFor={htmlFor} className="gap-1 text-[13px]">
@@ -158,6 +163,7 @@ export function NumberInput({
   locked?: boolean;
   invalid?: boolean;
 }) {
+  useLanguage();
   return (
     <InputGroup data-disabled={disabled || locked || undefined}>
       {prefix ? (
@@ -184,11 +190,12 @@ export function NumberInput({
 
 /** ท้ายช่อง: หน่วย และแม่กุญแจเมื่อแก้ไม่ได้ */
 export function LockedSuffix({ suffix, locked }: { suffix?: string; locked?: boolean }) {
+  useLanguage();
   if (!suffix && !locked) return null;
   return (
     <InputGroupAddon align="inline-end">
       {suffix ? <InputGroupText>{suffix}</InputGroupText> : null}
-      {locked ? <Lock aria-label="ล็อก" /> : null}
+      {locked ? <Lock aria-label={translate("ล็อก", "Locked")} /> : null}
     </InputGroupAddon>
   );
 }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { toast } from "@/components/ui/toast";
@@ -31,6 +32,7 @@ export function CardAttributesSection({
   attributes,
   productCount,
 }: CardAttributesSectionProps) {
+  useLanguage();
   const saveAttribute = useSaveAttribute(game.id);
   const reorder = useReorderAttributes(game.id);
   const deleteAttribute = useDeleteAttribute(game.id);
@@ -58,7 +60,7 @@ export function CardAttributesSection({
           toast.add({
             type: "error",
             title: `บันทึก ${attribute.label} ไม่สำเร็จ`,
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            description: taxonomyErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -77,7 +79,7 @@ export function CardAttributesSection({
         toast.add({
           type: "error",
           title: "เรียงลำดับไม่สำเร็จ",
-          description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          description: taxonomyErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   };

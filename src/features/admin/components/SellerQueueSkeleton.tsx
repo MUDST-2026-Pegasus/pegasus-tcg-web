@@ -1,7 +1,9 @@
+import { useLanguage } from "@/lib/language";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** โครงรอโหลดของคิว — วางตรงกับการ์ดจริงเพื่อให้ภาพไม่กระโดดตอนข้อมูลมาถึง */
 export function SellerQueueSkeleton() {
+  useLanguage();
   return (
     <div className="flex w-full flex-col gap-3 lg:w-[420px] lg:shrink-0">
       <div className="flex items-center justify-between gap-2">

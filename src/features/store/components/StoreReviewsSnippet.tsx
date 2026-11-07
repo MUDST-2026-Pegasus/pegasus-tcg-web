@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ArrowRight, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +18,7 @@ export function StoreReviewsSnippet({
   reviews,
   onViewAll,
 }: StoreReviewsSnippetProps) {
+  useLanguage();
   if (!summary || summary.ratingCount === 0) {
     return null;
   }
@@ -34,24 +36,21 @@ export function StoreReviewsSnippet({
 
   return (
     <section
-      aria-label="ผู้ซื้อพูดถึงร้านนี้"
+      aria-label={translate("ผู้ซื้อพูดถึงร้านนี้", "What buyers say about this store")}
       className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-2xs"
     >
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
         <div>
-          <h3 className="text-lg font-bold text-foreground">ผู้ซื้อพูดถึงร้านนี้</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            รีวิวจากคำสั่งซื้อที่เสร็จสมบูรณ์แล้วเท่านั้น
-          </p>
+          <h3 className="text-lg font-bold text-foreground">{translate("ผู้ซื้อพูดถึงร้านนี้", "What buyers say about this store")}</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">{translate("รีวิวจากคำสั่งซื้อที่เสร็จสมบูรณ์แล้วเท่านั้น", "Reviews from completed orders only")}</p>
         </div>
         <Button
           variant="ghost"
           size="sm"
           className="text-primary hover:text-primary gap-1 font-medium"
           onClick={onViewAll}
-        >
-          ดูรีวิวทั้งหมด ({ratingCount}) <ArrowRight className="size-4" />
+        >{translate("ดูรีวิวทั้งหมด (", "View all reviews (")}{ratingCount}) <ArrowRight className="size-4" />
         </Button>
       </div>
 
@@ -65,9 +64,7 @@ export function StoreReviewsSnippet({
             </span>
             <div className="flex flex-col">
               <ReviewStars rating={ratingAvg} />
-              <span className="text-xs text-muted-foreground mt-0.5">
-                จาก {ratingCount} รีวิว
-              </span>
+              <span className="text-xs text-muted-foreground mt-0.5">{translate("จาก", "from")}{ratingCount}{translate("รีวิว", "reviews")}</span>
             </div>
           </div>
 

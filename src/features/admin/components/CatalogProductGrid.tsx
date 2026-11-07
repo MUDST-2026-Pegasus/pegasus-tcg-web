@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { ProductCard } from "@/components/common";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ export function CatalogProductGrid({
   isFetching,
   onSelect,
 }: CatalogProductGridProps) {
+  useLanguage();
   return (
     <ul
       aria-busy={isFetching || undefined}
@@ -44,8 +46,7 @@ export function CatalogProductGrid({
           {/* ไม่มี variant = ผู้ขายยังลงขายการ์ดใบนี้ไม่ได้ เตือนให้เห็นจากตาราง */}
           {product.variantCount === 0 ? (
             <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
-              ยังไม่มี variant
-            </span>
+              {translate("ยังไม่มี variant", "No variants yet")}</span>
           ) : null}
         </li>
       ))}

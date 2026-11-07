@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { conditionDescription } from "@/lib/condition-description";
 import {
   ConditionGuide,
@@ -86,6 +87,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export function ListingDetailPage() {
+  useLanguage();
   const { listingId } = useParams<{ listingId: string }>();
   const id = Number(listingId);
   const query = useListingDetail(id);
@@ -132,6 +134,7 @@ function ListingDetailContent({
   data: PublicListingDetailDto;
   refresh: () => void;
 }) {
+  useLanguage();
   const { listing } = data;
   const productQuery = useProductDetail(listing.card.productSlug);
   const offersQuery = useProductListings(listing.card.productId);
@@ -637,6 +640,7 @@ function ListingDetailContent({
 }
 
 function RelatedListing({ listing }: { listing: PublicListingDto }) {
+  useLanguage();
   const addCart = useAddCartItem();
   const navigate = useNavigate();
   const relatedProduct = useProductDetail(listing.card.productSlug);

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
 import type {
@@ -32,10 +33,10 @@ export const ATTRIBUTE_TYPE_BADGE: Record<AttributeDataType, string> = {
 
 export const ATTRIBUTE_TYPE_LABEL: Record<AttributeDataType, string> = {
   STRING: "ข้อความสั้น",
-  NUMBER: "ตัวเลข",
+  get NUMBER() { return translate("ตัวเลข", "Number"); },
   ENUM: "ตัวเลือก",
   BOOLEAN: "ใช่/ไม่ใช่",
-  DATE: "วันที่",
+  get DATE() { return translate("วันที่", "Date"); },
 };
 
 /** คอลัมน์ "ค่าที่รับ" — ENUM โชว์ตัวเลือกจริง ชนิดอื่นบอกรูปแบบค่า */
@@ -44,11 +45,11 @@ export function acceptedValues(attribute: GameAttribute): string {
     case "ENUM":
       return attribute.options.join(", ");
     case "BOOLEAN":
-      return "ใช่ / ไม่ใช่";
+      return translate("ใช่ / ไม่ใช่", "Yes / No");
     case "DATE":
       return "วันที่ (ปปปป-ดด-วว)";
     case "NUMBER":
-      return "ตัวเลข";
+      return translate("ตัวเลข", "Number");
     case "STRING":
       return "ข้อความ";
   }

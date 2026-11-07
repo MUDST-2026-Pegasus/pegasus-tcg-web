@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CartItemResponse } from "./cart.types";
 import { useCheckoutPromotionList, useCheckoutPromotionPreview } from "./cart.queries";
@@ -56,6 +57,7 @@ interface CartPromotionsOptions {
  * notice (C2-E). The selection is stored for CheckoutPage.
  */
 export function useCartPromotions({ items, enabled, userId, cartId, onAutoPicked }: CartPromotionsOptions) {
+  useLanguage();
   const [manual, setManual] = useState(readPromotionManual);
   const [selection, setSelection] = useState<PromotionSelection>(readPromotionSelection);
   const [debounced, setDebounced] = useState(selection);
@@ -168,7 +170,7 @@ export function useCartPromotions({ items, enabled, userId, cartId, onAutoPicked
         if (typed && code.code === typed.code) continue;
         const reason = formatPromotionError(code.status, { sellerName: code.sellerName, shortfall: code.shortfall });
         nextNotices[String(ownerOf(code))] =
-          `นำ ${code.code} ออกแล้ว: ${reason}${claimedCodes.has(code.code) ? " (ยังอยู่ในกระเป๋าโค้ด)" : ""}`;
+          translate(`นำ ${code.code} ออกแล้ว: ${reason}${claimedCodes.has(code.code) ? translate(" (ยังอยู่ในกระเป๋าโค้ด)", " (still in your coupon wallet)") : ""}`, `${code.code} removed: ${reason}${claimedCodes.has(code.code) ? translate(" (ยังอยู่ในกระเป๋าโค้ด)", " (still in your coupon wallet)") : ""}`);
       }
       setNotices((previous) => ({ ...previous, ...nextNotices }));
       setSelection((previous) => dropped.reduce((next, code) => withCode(next, ownerOf(code)!, null), previous));

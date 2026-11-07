@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { hasErrorCode } from "@/lib/api";
 
 import { formatBaht, formatPeriod } from "./promotions.format";
@@ -14,25 +15,25 @@ export const SAMPLE_LIST_PRICE = 4200;
 export const SAMPLE_COMMISSION_RATE = 0.05;
 
 export const SALE_STATUS_TABS: Array<{ value: SaleStatus | null; label: string }> = [
-  { value: null, label: "ทั้งหมด" },
-  { value: "ACTIVE", label: "กำลังลด" },
-  { value: "SCHEDULED", label: "ตั้งเวลาไว้" },
-  { value: "PAUSED", label: "หยุดชั่วคราว" },
-  { value: "ENDED", label: "จบแล้ว" },
+  { value: null, get label() { return translate("ทั้งหมด", "All"); } },
+  { value: "ACTIVE", get label() { return translate("กำลังลด", "On sale"); } },
+  { value: "SCHEDULED", get label() { return translate("ตั้งเวลาไว้", "Scheduled"); } },
+  { value: "PAUSED", get label() { return translate("หยุดชั่วคราว", "Paused"); } },
+  { value: "ENDED", get label() { return translate("จบแล้ว", "Ended"); } },
 ];
 
 export const SALE_TYPE_FILTERS: Array<{ value: SaleType | null; label: string }> = [
   { value: null, label: "ทุกประเภท" },
   { value: "FLASH_SALE", label: "Flash Sale" },
-  { value: "CATEGORY_SALE", label: "ลดทั้งหมวด" },
-  { value: "SHOP_SALE", label: "ร้านค้า" },
+  { value: "CATEGORY_SALE", get label() { return translate("ลดทั้งหมวด", "Category discount"); } },
+  { value: "SHOP_SALE", get label() { return translate("ร้านค้า", "Shop"); } },
 ];
 
 export const SALE_STATUS_LABEL: Record<SaleStatus, string> = {
-  ACTIVE: "กำลังลด",
-  SCHEDULED: "ตั้งเวลาไว้",
-  PAUSED: "หยุดชั่วคราว",
-  ENDED: "จบแล้ว",
+  get ACTIVE() { return translate("กำลังลด", "On sale"); },
+  get SCHEDULED() { return translate("ตั้งเวลาไว้", "Scheduled"); },
+  get PAUSED() { return translate("หยุดชั่วคราว", "Paused"); },
+  get ENDED() { return translate("จบแล้ว", "Ended"); },
   SOLD_OUT: "ขายหมด",
   BUDGET_EXHAUSTED: "หมดงบ",
 };
@@ -52,7 +53,7 @@ export function isFinished(status: SaleStatus): boolean {
 }
 
 export function ownerLabel(owner: SaleOwnerType): string {
-  return owner === "PLATFORM" ? "Pegasus" : "ร้านค้า";
+  return owner === "PLATFORM" ? "Pegasus" : translate("ร้านค้า", "Shop");
 }
 
 const dayMonthYear = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short", year: "numeric" });
@@ -126,9 +127,9 @@ export function salePeriodHint(sale: AdminSale, now: number): string {
     case "SOLD_OUT":
       return clock ?? "ขายครบโควตาแล้ว";
     case "BUDGET_EXHAUSTED":
-      return "จบก่อนกำหนด";
+      return translate("จบก่อนกำหนด", "End early");
     case "ENDED":
-      return sale.endedAt && Date.parse(sale.endedAt) < end.getTime() ? "จบก่อนกำหนด" : "สิ้นสุดแล้ว";
+      return sale.endedAt && Date.parse(sale.endedAt) < end.getTime() ? translate("จบก่อนกำหนด", "End early") : translate("สิ้นสุดแล้ว", "Ended");
   }
 }
 
@@ -149,12 +150,12 @@ export function isPausedByAdmin(sale: Pick<AdminSale, "ownerType" | "pauseReason
 export function saleDiscountLabel(sale: Pick<AdminSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
   if (sale.discountType === "FIXED_OFF") return `ลด ${formatBaht(sale.discountValue)}/ชิ้น`;
-  return "ราคาใหม่รายชิ้น";
+  return translate("ราคาใหม่รายชิ้น", "New price per item");
 }
 
 export function saleDiscountDetail(sale: AdminSale): string {
-  if (sale.discountType === "FIXED_PRICE") return "ตั้งรายแถว";
-  if (sale.ownerType === "SELLER") return "ร้านออกเงิน";
+  if (sale.discountType === "FIXED_PRICE") return translate("ตั้งรายแถว", "Set per row");
+  if (sale.ownerType === "SELLER") return translate("ร้านออกเงิน", "Shop funded");
   if (sale.discountType === "PERCENT" && sale.maxDiscountPerUnit != null) {
     return `สูงสุด ${formatBaht(sale.maxDiscountPerUnit)}/ชิ้น`;
   }
@@ -181,13 +182,13 @@ export function saleScopeLabel(
 ): string {
   switch (sale.scopeType) {
     case "ALL":
-      return "ทุกเกม";
+      return translate("ทุกเกม", "All games");
     case "SHOP":
-      return "ทุกสินค้าในร้าน";
+      return translate("ทุกสินค้าในร้าน", "All products in the shop");
     case "LISTINGS":
-      return "เลือก listing";
+      return translate("เลือก listing", "Select listing");
     default: {
-      const prefix = sale.scopeType === "GAME" ? "เกม" : sale.scopeType === "CATEGORY" ? "หมวด" : "ชุด";
+      const prefix = sale.scopeType === "GAME" ? translate("เกม", "Game") : sale.scopeType === "CATEGORY" ? translate("หมวด", "Category") : "ชุด";
       const known = namesFor(sale, names);
       if (known.length === 0) return `${prefix} ${sale.scopeIds.length} รายการ`;
       const shown = known.slice(0, 2).join(", ");
@@ -230,7 +231,7 @@ export function saleScopeDetail(sale: AdminSale): string {
 /** บรรทัดรองของคอลัมน์แคมเปญ */
 export function saleSubtitle(sale: AdminSale): string {
   if (sale.ownerType === "SELLER") {
-    return `${sale.owner?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString("th-TH")} listing`;
+    return `${sale.owner?.username ?? translate("ร้านค้า", "Shop")} · ${sale.listingCount.toLocaleString("th-TH")} listing`;
   }
   const link = sale.slug ? `/sale/${sale.slug}` : "ไม่มีหน้าแคมเปญ";
   return sale.featuredOnHome ? `${link} · หน้าแรก` : link;
@@ -249,7 +250,7 @@ export function saleTypeBadge(sale: Pick<AdminSale, "saleType" | "scopeType">): 
 } {
   if (sale.saleType === "FLASH_SALE") return { type: "flash" };
   if (sale.saleType === "SHOP_SALE") return { type: "shop" };
-  return { type: "percent", label: sale.scopeType === "CARD_SET" ? "ลดทั้งชุดการ์ด" : "ลดทั้งหมวด" };
+  return { type: "percent", label: sale.scopeType === "CARD_SET" ? "ลดทั้งชุดการ์ด" : translate("ลดทั้งหมวด", "Category discount") };
 }
 
 /**
@@ -290,8 +291,8 @@ export function saleErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "SALE_INVALID")) {
     return "ข้อมูลแคมเปญไม่ผ่านเงื่อนไข (SALE_INVALID) — หลังมีออเดอร์แก้ได้เฉพาะชื่อ วันจบ งบ (เพิ่ม) โควตา (เพิ่ม)";
   }
-  if (hasErrorCode(error, "GAME_NOT_FOUND")) return "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
-  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
+  if (hasErrorCode(error, "GAME_NOT_FOUND")) return translate("เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่", "The selected game was deleted. Choose another");
+  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return translate("หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่", "The selected category was deleted. Choose another");
   if (hasErrorCode(error, "CARD_SET_NOT_FOUND")) return "ชุดการ์ดที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
   return fallback;
 }

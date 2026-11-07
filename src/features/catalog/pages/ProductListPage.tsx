@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -10,7 +11,8 @@ import { formatPrice, productHref } from "../catalog.mappers";
 import { useGameList, useProductSearch } from "../catalog.queries";
 
 /** A catalog entry point whose cards link to the live product detail. */
-export function ProductListPage({ gameCode, title = "สินค้าทั้งหมด" }: { gameCode?: string; title?: string }) {
+export function ProductListPage({ gameCode, title = translate("สินค้าทั้งหมด", "All products") }: { gameCode?: string; title?: string }) {
+  useLanguage();
   const [page, setPage] = useState(0);
   const games = useGameList();
   const gameId = games.data?.find((game) => game.code === gameCode)?.id;
@@ -25,15 +27,15 @@ export function ProductListPage({ gameCode, title = "สินค้าทั้
       {gameCode && games.isError ? (
         <ErrorState error={games.error} onRetry={() => void games.refetch()} />
       ) : gameCode && games.isSuccess && !gameId ? (
-        <EmptyState title="ยังไม่มีสินค้าหมวดนี้" />
+        <EmptyState title={translate("ยังไม่มีสินค้าหมวดนี้", "No products in this category yet")} />
       ) : products.isPending ? (
-        <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า">
+        <div role="status" aria-busy="true" aria-label={translate("กำลังโหลดสินค้า", "Loading products")}>
           <ItemGridSkeleton count={8} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4" imageClassName="aspect-auto h-52" />
         </div>
       ) : products.isError ? (
         <ErrorState error={products.error} onRetry={() => void products.refetch()} />
       ) : products.data.items.length === 0 ? (
-        <EmptyState title="ยังไม่มีสินค้า" description="กลับมาดูสินค้าใหม่ภายหลัง" />
+        <EmptyState title={translate("ยังไม่มีสินค้า", "No products yet")} description="กลับมาดูสินค้าใหม่ภายหลัง" />
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -44,7 +46,7 @@ export function ProductListPage({ gameCode, title = "สินค้าทั้
                     <div className="mb-4 flex h-52 items-center justify-center rounded-lg bg-muted/50">
                       {product.primaryImageUrl ? (
                         <img src={product.primaryImageUrl} alt={product.name} loading="lazy" className="h-full w-full object-contain" />
-                      ) : <span className="text-sm text-muted-foreground">ยังไม่มีรูปสินค้า</span>}
+                      ) : <span className="text-sm text-muted-foreground">{translate("ยังไม่มีรูปสินค้า", "No product image yet")}</span>}
                     </div>
                     <h2 className="font-semibold">{product.name}</h2>
                     {product.cardNumber && <p className="text-sm text-muted-foreground">{product.cardNumber}</p>}
@@ -55,10 +57,10 @@ export function ProductListPage({ gameCode, title = "สินค้าทั้
             ))}
           </div>
           {products.data.totalPages > 1 && (
-            <nav aria-label="หน้ารายการสินค้า" className="flex items-center justify-center gap-4">
-              <Button variant="outline" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>ก่อนหน้า</Button>
+            <nav aria-label={translate("หน้ารายการสินค้า", "Product pages")} className="flex items-center justify-center gap-4">
+              <Button variant="outline" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>{translate("ก่อนหน้า", "Previous")}</Button>
               <span>{page + 1} / {products.data.totalPages}</span>
-              <Button variant="outline" disabled={page + 1 >= products.data.totalPages} onClick={() => setPage((value) => value + 1)}>ถัดไป</Button>
+              <Button variant="outline" disabled={page + 1 >= products.data.totalPages} onClick={() => setPage((value) => value + 1)}>{translate("ถัดไป", "Next")}</Button>
             </nav>
           )}
         </>

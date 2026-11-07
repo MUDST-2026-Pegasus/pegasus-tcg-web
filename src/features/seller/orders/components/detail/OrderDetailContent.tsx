@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Link } from "react-router-dom";
@@ -91,6 +92,7 @@ function nextStepNote(detail: SellerOrderDetail): string {
 }
 
 export function OrderDetailContent({ detail }: OrderDetailContentProps) {
+  useLanguage();
   const { summary } = detail;
   const { order } = summary;
   const tab = tabOfStatus(order.status);
@@ -118,12 +120,12 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
 
   function handleAccept() {
     accept.mutate(order.id, {
-      onSuccess: () => toast.add({ type: "success", title: "รับออเดอร์แล้ว" }),
+      onSuccess: () => toast.add({ type: "success", title: translate("รับออเดอร์แล้ว", "Order accepted") }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "รับออเดอร์ไม่สำเร็จ",
-          description: orderErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: translate("รับออเดอร์ไม่สำเร็จ", "Unable to accept order"),
+          description: orderErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   }
@@ -138,14 +140,14 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
         onSuccess: () =>
           toast.add({
             type: "success",
-            title: "ยืนยันจัดส่งแล้ว",
+            title: translate("ยืนยันจัดส่งแล้ว", "Shipment confirmed"),
             description: `${carrierLabel(carrier)} ${tracking}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "ยืนยันจัดส่งไม่สำเร็จ",
-            description: orderErrorMessage(error, "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง"),
+            title: translate("ยืนยันจัดส่งไม่สำเร็จ", "Unable to confirm shipment"),
+            description: orderErrorMessage(error, translate("ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง", "Check the tracking number and try again")),
           }),
       },
     );
@@ -175,7 +177,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/seller/orders" />}>จัดการคำสั่งซื้อ</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/seller/orders" />}>{translate("จัดการคำสั่งซื้อ", "Manage orders")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -221,7 +223,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               render={<Link to={RETURNS_PATH} />}
               nativeButton={false}
             >
-              {order.status === "RETURN_REQUESTED" ? "ตอบคำขอคืนสินค้า" : "ดูคำขอคืนสินค้า"}
+              {order.status === "RETURN_REQUESTED" ? translate("ตอบคำขอคืนสินค้า", "Respond to return request") : "ดูคำขอคืนสินค้า"}
             </Button>
           ) : null}
           {canCancel(order.status) ? (
@@ -232,8 +234,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               disabled={busy}
               onClick={() => setCancelOpen(true)}
             >
-              ยกเลิกคำสั่งซื้อ
-            </Button>
+              {translate("ยกเลิกคำสั่งซื้อ", "Cancel order")}</Button>
           ) : null}
           {canAccept(order.status) ? (
             <Button
@@ -244,8 +245,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               onClick={handleAccept}
             >
               {accept.isPending ? <Spinner /> : null}
-              รับออเดอร์
-            </Button>
+              {translate("รับออเดอร์", "Accept order")}</Button>
           ) : null}
           {shippable ? (
             // ยังไม่ได้กรอกเลขพัสดุในการ์ดข้อมูลการจัดส่ง = ยืนยันไม่ได้
@@ -256,8 +256,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               onClick={() => setShipConfirmOpen(true)}
             >
               {ship.isPending ? <Spinner /> : null}
-              ยืนยันจัดส่ง
-            </Button>
+              {translate("ยืนยันจัดส่ง", "Confirm shipment")}</Button>
           ) : null}
           <Button
             variant="outline"
@@ -265,11 +264,11 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             className="rounded-md px-2.5"
             disabled={busy}
             aria-busy={downloadSummary.isPending}
-            aria-label={downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            aria-label={downloadSummary.isPending ? translate("กำลังสร้าง PDF...", "Generating PDF…") : "Download Order Summary (PDF)"}
             onClick={handleDownloadSummary}
           >
             {downloadSummary.isPending ? <Spinner /> : null}
-            {downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            {downloadSummary.isPending ? translate("กำลังสร้าง PDF...", "Generating PDF…") : "Download Order Summary (PDF)"}
           </Button>
         </div>
       </div>
@@ -277,7 +276,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
       <div className="flex flex-col items-start gap-5 lg:flex-row">
         <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
           <PackingListCard
-            title={shippable ? "รายการที่ต้องแพ็ค" : "รายการสินค้า"}
+            title={shippable ? "รายการที่ต้องแพ็ค" : translate("รายการสินค้า", "Products")}
             countLabel={`${pieceCount(order.items)} ใบ · ${order.items.length} รายการ`}
             items={order.items}
             packable={shippable}

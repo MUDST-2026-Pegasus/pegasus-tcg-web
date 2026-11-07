@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ export function SellerQueueList({
   viewingLabel,
   sortLabel,
 }: SellerQueueListProps) {
+  useLanguage();
   const title = VERIFICATION_STATUS_META[status].label;
 
   return (

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { UseQueryResult } from "@tanstack/react-query";
 import {
   OctagonX,
@@ -35,6 +36,7 @@ type BannerProps = {
 };
 
 function Banner({ tone, icon: Icon, title, children, action }: BannerProps) {
+  useLanguage();
   return (
     <Alert className={cn("rounded-xl", TONE_CLASS[tone])}>
       <Icon aria-hidden />
@@ -59,6 +61,7 @@ type SellerStatusBannerProps = {
  * ร้านปกติไม่มีแถบอะไรเลย
  */
 export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
+  useLanguage();
   const { data, isError, error, refetch, isRefetching } = profile;
   const banners: ReactNode[] = [];
 
@@ -77,8 +80,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
             disabled={isRefetching}
             onClick={() => void refetch()}
           >
-            ลองใหม่
-          </Button>
+            {translate("ลองใหม่", "Retry")}</Button>
         }
       >
         {getErrorMessage(error, "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง")}
@@ -94,7 +96,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         icon={OctagonX}
         title="ร้านของคุณถูกระงับ"
       >
-        {data.suspendedReason ? <>เหตุผล: {data.suspendedReason} · </> : null}
+        {data.suspendedReason ? <>{translate("เหตุผล:", "Reason:") + " "}{data.suspendedReason} · </> : null}
         ประกาศทั้งหมดถูกซ่อนจากผู้ซื้อ
         และลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ
       </Banner>,

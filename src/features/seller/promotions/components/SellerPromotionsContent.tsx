@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { useState } from "react";
 import { Info, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export function SellerPromotionsContent({
   onStatusChange: (status: PromotionStatus | "ALL") => void;
   onPageChange: (page: number) => void;
 }) {
+  useLanguage();
   const profile = useSellerProfile();
   const verified = profile.data?.status === "VERIFIED";
   const list = useSellerPromotions(status, page);
@@ -44,7 +46,7 @@ export function SellerPromotionsContent({
     <main className="grid w-full min-w-0 content-start gap-5 text-foreground">
       <header className="flex flex-wrap items-end justify-between gap-4 [&_h1]:text-2xl [&_h1]:font-extrabold [&_p]:mt-1 [&_p]:text-xs [&_p]:text-muted-foreground">
         <div>
-          <h1>โปรโมชั่นของร้าน</h1>
+          <h1>{translate("โปรโมชั่นของร้าน", "Shop promotions")}</h1>
           <p>สร้างโค้ดลดราคาสินค้าในร้านคุณ ร้านเป็นผู้ออกส่วนลดเอง</p>
         </div>
         <Button disabled={!verified} onClick={() => setEditing("new")}>

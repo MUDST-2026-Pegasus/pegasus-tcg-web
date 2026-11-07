@@ -1,7 +1,9 @@
+import { useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 /** จุดโทษไม่ชำระ — จุดแดงตามจำนวนครั้ง ที่เหลือสีเทา + "{n}/3" [TCG-635 · FE-9] */
 export function StrikeDots({ count, limit }: { count: number; limit: number }) {
+  useLanguage();
   const filled = Math.min(Math.max(count, 0), limit);
   return (
     <span className="inline-flex items-center gap-1.5" aria-label={`ไม่ชำระ ${filled} จาก ${limit} ครั้ง`}>

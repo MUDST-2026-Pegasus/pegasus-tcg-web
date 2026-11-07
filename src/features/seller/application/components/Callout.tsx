@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -16,6 +17,7 @@ type CalloutProps = {
 
 /** แถบข้อความสั้น ๆ มีไอคอนนำหน้า — ใช้เตือนหรือให้ข้อมูลประกอบฟอร์ม */
 export function Callout({ tone, icon: Icon, children }: CalloutProps) {
+  useLanguage();
   return (
     <div
       className={cn(

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 import { AlertTriangle, CirclePause, CirclePlay, ShieldAlert, Trash2 } from "lucide-react";
 
@@ -26,6 +27,7 @@ export function SellerPromotionActionDialog({
   onClose: () => void;
   onAction: (action: PromotionAction) => void;
 }) {
+  useLanguage();
   if (!action) return null;
   return (
     <ActionDialog key={`${action.kind}-${action.code.id}`} action={action} onClose={onClose} onAction={onAction} />
@@ -41,6 +43,7 @@ function ActionDialog({
   onClose: () => void;
   onAction: (action: PromotionAction) => void;
 }) {
+  useLanguage();
   const pause = usePauseSellerPromotion();
   const resume = useResumeSellerPromotion();
   const remove = useDeleteSellerPromotion();
@@ -57,17 +60,17 @@ function ActionDialog({
       if (kind === "pause") await pause.mutateAsync(code.id);
       if (kind === "resume") await resume.mutateAsync(code.id);
       if (kind === "delete") await remove.mutateAsync(code.id);
-      const verb = kind === "pause" ? "หยุด" : kind === "resume" ? "เปิดใช้" : "ลบ";
+      const verb = kind === "pause" ? "หยุด" : kind === "resume" ? "เปิดใช้" : translate("ลบ", "Delete");
       toast.add({ title: `${verb}โค้ด ${code.code} แล้ว`, type: "success" });
       onClose();
     } catch (error) {
       if (hasErrorCode(error, "PROMO_IN_USE")) return setServerBlocked(true);
       if (hasErrorCode(error, "PROMO_PAUSED")) return setResumeBlocked(true);
       toast.add({
-        title: "ทำรายการไม่สำเร็จ",
+        title: translate("ทำรายการไม่สำเร็จ", "Action failed"),
         description: hasErrorCode(error, "SELLER_NOT_VERIFIED")
           ? "กรุณายืนยันตัวตนผู้ขายก่อนทำรายการ"
-          : getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+          : getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")),
         type: "error",
       });
     }
@@ -94,8 +97,7 @@ function ActionDialog({
         actions={
           <>
             <Button variant="outline" onClick={onClose}>
-              ปิด
-            </Button>
+              {translate("ปิด", "Close")}</Button>
             {canPauseInstead ? (
               <Button onClick={() => onAction({ kind: "pause", code })}>หยุดชั่วคราวแทน</Button>
             ) : null}
@@ -112,8 +114,7 @@ function ActionDialog({
   const confirm = (label: string, danger: boolean) => (
     <>
       <Button variant="outline" onClick={onClose}>
-        ยกเลิก
-      </Button>
+        {translate("ยกเลิก", "Cancel")}</Button>
       <Button disabled={busy} className={danger ? PROMOTION_DANGER_BUTTON : undefined} onClick={() => void perform()}>
         {label}
       </Button>
@@ -129,13 +130,13 @@ function ActionDialog({
         icon={<CirclePause />}
         title={`หยุดโค้ด ${code.code} ชั่วคราว?`}
         description="ลูกค้าจะเก็บหรือใช้โค้ดนี้ไม่ได้จนกว่าคุณจะเปิดอีกครั้ง"
-        actions={confirm("หยุดโค้ด", true)}
+        actions={confirm(translate("หยุดโค้ด", "Pause code"), true)}
       >
         <SummaryBox
           rows={[
             ["ลูกค้าที่เก็บไว้", `${code.claimedCount} คน`],
             [
-              "ออเดอร์รอชำระที่ใช้โค้ดนี้",
+              translate("ออเดอร์รอชำระที่ใช้โค้ดนี้", "Unpaid orders using this code"),
               code.pendingOrderCount == null ? "—" : `${code.pendingOrderCount} รายการ`,
             ],
           ]}
@@ -150,7 +151,7 @@ function ActionDialog({
 
   if (kind === "resume") {
     const remaining =
-      code.usageLimitTotal == null ? "ไม่จำกัด" : limitLabel(Math.max(0, code.usageLimitTotal - code.usedCount));
+      code.usageLimitTotal == null ? translate("ไม่จำกัด", "Unlimited") : limitLabel(Math.max(0, code.usageLimitTotal - code.usedCount));
     return (
       <PromotionDialog
         open
@@ -163,12 +164,12 @@ function ActionDialog({
             ? `ลูกค้าที่เก็บไว้ ${code.claimedCount} คนใช้ได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน`
             : "ลูกค้าใช้โค้ดได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน"
         }
-        actions={confirm("เปิดใช้โค้ด", false)}
+        actions={confirm(translate("เปิดใช้โค้ด", "Enable code"), false)}
       >
         <SummaryBox
           rows={[
-            ["สิทธิ์คงเหลือ", remaining],
-            ["หมดอายุ", thaiDate(code.endsAt)],
+            [translate("สิทธิ์คงเหลือ", "Remaining redemptions"), remaining],
+            [translate("หมดอายุ", "Expired"), thaiDate(code.endsAt)],
           ]}
         />
       </PromotionDialog>
@@ -183,13 +184,14 @@ function ActionDialog({
       icon={<Trash2 />}
       title={`ลบโค้ด ${code.code}?`}
       description="ยังไม่มีลูกค้าเก็บหรือใช้โค้ดนี้ ลบแล้วกู้คืนไม่ได้"
-      actions={confirm("ลบโค้ด", true)}
+      actions={confirm(translate("ลบโค้ด", "Delete code"), true)}
     />
   );
 }
 
 /** INFO — โค้ดที่ทีมงานหยุด ร้านเปิดใช้เองไม่ได้ */
 function StaffPausedDialog({ code, onClose }: { code: SellerPromotion; onClose: () => void }) {
+  useLanguage();
   const reference = `PRM-${code.id}`;
   return (
     <PromotionDialog
@@ -205,21 +207,19 @@ function StaffPausedDialog({ code, onClose }: { code: SellerPromotion; onClose: 
       actions={
         <>
           <Button variant="outline" onClick={onClose}>
-            ปิด
-          </Button>
+            {translate("ปิด", "Close")}</Button>
           <Button
             nativeButton={false}
             render={
               <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`โค้ด ${code.code} (#${reference})`)}`} />
             }
           >
-            ติดต่อทีมงาน
-          </Button>
+            {translate("ติดต่อทีมงาน", "Contact support")}</Button>
         </>
       }
     >
       <p className="rounded-[10px] bg-red-50 px-3 py-2.5 text-xs text-red-700">
-        เหตุผล: {code.pauseReason || "โปรดติดต่อทีมงานเพื่อสอบถามรายละเอียด"}
+        {translate("เหตุผล:", "Reason:") + " "}{code.pauseReason || "โปรดติดต่อทีมงานเพื่อสอบถามรายละเอียด"}
       </p>
       <div className="grid gap-1.5 text-xs">
         <strong className="font-semibold">สิ่งที่ทำได้</strong>
@@ -233,6 +233,7 @@ function StaffPausedDialog({ code, onClose }: { code: SellerPromotion; onClose: 
 }
 
 function SummaryBox({ rows }: { rows: Array<[string, ReactNode]> }) {
+  useLanguage();
   return (
     <dl className="grid gap-2 rounded-[10px] bg-muted px-3.5 py-3 text-xs">
       {rows.map(([label, value]) => (

@@ -32,30 +32,34 @@ import { useCart } from "@/features/cart/cart.queries";
 import { useGameList } from "@/features/catalog/catalog.queries";
 import { useSales } from "@/features/sale/sale.queries";
 import { cn } from "@/lib/utils";
+import { setLanguage, useLanguage } from "@/lib/language";
 
 export function LanguageSwitch() {
+  const { language, text } = useLanguage();
   return (
     <button
       type="button"
-      disabled
-      aria-label="Switch language"
-      className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"
+      onClick={() => setLanguage(language === "th" ? "en" : "th")}
+      aria-label={text("เปลี่ยนภาษาเป็นอังกฤษ", "Switch to Thai")}
+      aria-pressed={language === "en"}
+      className="flex min-h-10 items-center gap-2 rounded-md px-1 text-xs font-semibold text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring"
     >
-      <span className="text-primary">TH</span>
+      <span className={language === "th" ? "text-primary" : undefined}>TH</span>
       <span className="flex h-[22px] w-10 items-center rounded-full bg-primary p-[3px]">
-        <span className="size-4 rounded-full bg-background" />
+        <span className={cn("size-4 rounded-full bg-background transition-transform", language === "en" && "translate-x-[18px]")} />
       </span>
-      <span>EN</span>
+      <span className={language === "en" ? "text-primary" : undefined}>EN</span>
     </button>
   );
 }
 
 function Logo({ onClick }: { onClick?: () => void }) {
+  const { text } = useLanguage();
   return (
     <Link
       to="/"
       onClick={onClick}
-      aria-label="Pegasus TCG — กลับหน้าแรก"
+      aria-label={text("Pegasus TCG — กลับหน้าแรก", "Pegasus TCG — Home")}
       className="flex shrink-0 items-center gap-2"
     >
       <img
@@ -71,6 +75,7 @@ function Logo({ onClick }: { onClick?: () => void }) {
 }
 
 export function Navbar() {
+  const { text } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -103,9 +108,9 @@ export function Navbar() {
   const onePieceSlug =
     games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
   const navLinks = [
-    { label: "Home", to: "/", active: location.pathname === "/" },
+    { label: text("หน้าแรก", "Home"), to: "/", active: location.pathname === "/" },
     {
-      label: "All products",
+      label: text("สินค้าทั้งหมด", "All products"),
       to: "/search",
       active: isSearch && !currentGame && !newest,
     },
@@ -120,14 +125,14 @@ export function Navbar() {
       active: isSearch && currentGame === onePieceSlug,
     },
     {
-      label: "New arrivals",
+      label: text("สินค้ามาใหม่", "New arrivals"),
       to: "/search?sort=newest",
       active: isSearch && !currentGame && newest,
       icon: SparklesIcon,
     },
     // ระบบประมูล [TCG-636]
     {
-      label: "Auction",
+      label: text("ประมูล", "Auction"),
       to: "/auctions",
       active: location.pathname.startsWith("/auctions"),
       icon: GavelIcon,
@@ -136,7 +141,7 @@ export function Navbar() {
     ...(sales && sales.length > 0
       ? [
           {
-            label: "Sale",
+            label: text("ลดราคา", "Sale"),
             to: "/sale",
             active: location.pathname.startsWith("/sale"),
             icon: PercentIcon,
@@ -189,7 +194,7 @@ export function Navbar() {
       variant="ghost"
       size="icon"
       aria-label={
-        cart ? `ตะกร้าสินค้า มีสินค้า ${quantity} ชิ้น` : "ตะกร้าสินค้า"
+        cart ? text(`ตะกร้าสินค้า มีสินค้า ${quantity} ชิ้น`, `Cart with ${quantity} items`) : text("ตะกร้าสินค้า", "Cart")
       }
       className="relative size-10 shrink-0 overflow-visible md:order-first"
       nativeButton={false}
@@ -234,7 +239,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Open menu"
+                aria-label={text("เปิดเมนู", "Open menu")}
                 className="size-10 shrink-0 md:hidden"
               />
             }
@@ -253,7 +258,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Close menu"
+                aria-label={text("ปิดเมนู", "Close menu")}
                 onClick={() => setDrawerOpen(false)}
               >
                 <XIcon className="size-5" />
@@ -283,7 +288,7 @@ export function Navbar() {
               ) : (
                 <>
                   <p className="mb-2 text-xs text-muted-foreground">
-                    เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ
+                    {text("เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ", "Log in to view your orders and collection")}
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -296,7 +301,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      Log in
+                      {text("เข้าสู่ระบบ", "Log in")}
                     </Button>
                     <Button
                       variant="outline"
@@ -309,7 +314,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      Sign up
+                      {text("สมัครสมาชิก", "Sign up")}
                     </Button>
                   </div>
                 </>
@@ -317,7 +322,7 @@ export function Navbar() {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
               <div className="px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                SHOP
+                {text("เลือกซื้อ", "SHOP")}
               </div>
               {navLinks.map(({ label, to, active, icon: Icon }) => (
                 <Link
@@ -339,7 +344,7 @@ export function Navbar() {
               {!isLoading && isAuthenticated && (
                 <>
                   <div className="mt-6 px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                    ACCOUNT
+                    {text("บัญชี", "ACCOUNT")}
                   </div>
                   {links.map(({ label, to }) => (
                     <Link
@@ -367,7 +372,7 @@ export function Navbar() {
                   }}
                 >
                   <LogOutIcon className="size-4" />
-                  Log out
+                  {text("ออกจากระบบ", "Log out")}
                 </Button>
               </div>
             )}
@@ -382,11 +387,11 @@ export function Navbar() {
           <SearchIcon className="size-[18px] shrink-0 text-muted-foreground" />
           <input
             ref={searchRef}
-            aria-label="ค้นหา"
+            aria-label={text("ค้นหา", "Search")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={blurSearch}
-            placeholder="ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…"
+            placeholder={text("ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…", "Search cards, sets or shops…")}
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           <kbd className="rounded border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground group-focus-within:hidden">
@@ -394,6 +399,7 @@ export function Navbar() {
           </kbd>
         </form>
         <div className="ml-auto flex items-center gap-1">
+          <LanguageSwitch />
           <AccountMenu />
           {cartButton}
         </div>
@@ -406,16 +412,16 @@ export function Navbar() {
         <SearchIcon className="size-[18px] text-muted-foreground" />
         <input
           ref={mobileSearchRef}
-          aria-label="ค้นหา"
+          aria-label={text("ค้นหา", "Search")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={blurSearch}
-          placeholder="ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…"
+          placeholder={text("ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…", "Search cards, sets or shops…")}
           className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
         />
       </form>
       <nav
-        aria-label="Shop categories"
+        aria-label={text("หมวดหมู่สินค้า", "Shop categories")}
         className="h-11 overflow-x-auto border-t border-border [scrollbar-width:none] md:h-11"
       >
         <div className="mx-auto flex h-full min-w-max max-w-[1440px] items-center gap-1 px-3 md:px-6 lg:px-8">
@@ -428,7 +434,7 @@ export function Navbar() {
               <StoreIcon className="size-4" />
               {sellerLink.to === "/seller"
                 ? sellerLink.label
-                : "Become a seller"}
+                : text("สมัครเป็นผู้ขาย", "Become a seller")}
             </Link>
           )}
         </div>

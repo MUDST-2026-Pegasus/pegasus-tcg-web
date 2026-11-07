@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { SearchIcon, X } from "lucide-react";
@@ -41,7 +42,7 @@ const ROLE_ITEMS: Record<string, string> = {
 };
 
 const STATUS_ITEMS: Record<string, string> = {
-  [ALL]: "สถานะ: ทั้งหมด",
+  get [ALL]() { return translate("สถานะ: ทั้งหมด", "Status: All"); },
   ...USER_STATUS_LABEL,
 };
 
@@ -50,6 +51,7 @@ const STATUS_ITEMS: Record<string, string> = {
  * ค่าทั้งหมดเก็บใน URL (หน้าเจ้าของเป็นคนอ่าน/เขียน) reload แล้วยังอยู่ที่เดิม
  */
 export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) {
+  useLanguage();
   const [text, setText] = useState(filters.q);
   const [syncedQ, setSyncedQ] = useState(filters.q);
   const timer = useRef<number | undefined>(undefined);
@@ -135,7 +137,7 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
         >
           <SelectTrigger
             size="sm"
-            aria-label="กรองตามสถานะ"
+            aria-label={translate("กรองตามสถานะ", "Filter by status")}
             className="w-full rounded-lg border-input bg-background text-sm sm:w-[200px]"
           >
             <SelectValue />

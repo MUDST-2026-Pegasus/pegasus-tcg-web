@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import {
   ChevronRight,
   Clock,
@@ -38,6 +39,7 @@ const ICON_COLOR: Record<TodoAccent, string> = {
 };
 
 function TodoRow({ item }: { item: TodoItem }) {
+  useLanguage();
   const Icon = ICONS[item.id];
   const body = (
     <>
@@ -82,6 +84,7 @@ function TodoRow({ item }: { item: TodoItem }) {
 }
 
 export function TodoCard({ title, description, count, items, emptyLabel }: TodoList) {
+  useLanguage();
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl border border-border p-0 shadow-none ring-0 lg:w-96">
       <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-3">

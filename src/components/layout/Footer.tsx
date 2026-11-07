@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 const FOOTER_LINKS = [
@@ -15,6 +16,8 @@ const FOOTER_LINKS = [
 ] as const;
 
 export function Footer() {
+  const { text } = useLanguage();
+  const labels: Record<string, string> = { "Terms of Service": "เงื่อนไขการใช้บริการ", "Privacy Policy": "นโยบายความเป็นส่วนตัว", "Shipping Info": "ข้อมูลการจัดส่ง", "Authenticity Guarantee": "การรับประกันสินค้าแท้", "Contact Us": "ติดต่อเรา" };
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-[1440px] px-12 py-8">
@@ -24,18 +27,18 @@ export function Footer() {
             <div key={idx} className="flex flex-col gap-4">
               {column.map((link) => (
                 <Link
-                  key={link.label}
+                  key={text(labels[link.label], link.label)}
                   to={link.href}
                   className="text-sm text-foreground transition-colors hover:text-primary"
                 >
-                  {link.label}
+                  {text(labels[link.label], link.label)}
                 </Link>
               ))}
             </div>
           ))}
         </div>
         <div className="mt-8 border-t border-border pt-6 text-center text-[10px] font-semibold text-foreground">
-          &copy; 2026 PEGASUS TCG. ALL RIGHTS RESERVED.
+          &copy; 2026 PEGASUS TCG. {text("สงวนลิขสิทธิ์", "ALL RIGHTS RESERVED.")}
         </div>
       </div>
     </footer>

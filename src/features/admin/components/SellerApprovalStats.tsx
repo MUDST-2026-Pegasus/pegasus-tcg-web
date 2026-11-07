@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export function SellerApprovalStats({
   onSelect,
   isLoading,
 }: SellerApprovalStatsProps) {
+  useLanguage();
   return (
     <div
       role="tablist"

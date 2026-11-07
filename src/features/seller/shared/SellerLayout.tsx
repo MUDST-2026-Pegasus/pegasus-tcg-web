@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Outlet, useLocation } from "react-router-dom";
 
 import { PageTransition } from "@/components/common/PageTransition";
@@ -21,6 +22,7 @@ import { useSellerProfile } from "./seller.queries";
  * สถานะร้านมาจาก `/sellers/me`
  */
 export function SellerLayout() {
+  useLanguage();
   const profile = useSellerProfile();
   const pathname = useLocation().pathname;
   const isShop = pathname === "/seller/shop";

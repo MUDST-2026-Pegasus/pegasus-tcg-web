@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { RefreshCw, Zap } from "lucide-react";
 
 import { formatSaleBaht } from "@/components/sale";
@@ -27,22 +28,19 @@ export function SaleQuotaDialog({
   onBuyAtListPrice: () => void;
   onClose: () => void;
 }) {
+  useLanguage();
   return (
     <PromotionDialog
       open={open}
       onOpenChange={(next) => !next && onClose()}
       tone="warning"
       icon={<Zap />}
-      title="ราคา Flash Sale เต็มแล้ว"
-      description={`โควตาราคา${salePrice != null ? ` ${formatSaleBaht(salePrice)}` : ""} ของ ${productName} ถูกซื้อครบแล้ว · ซื้อต่อได้ที่ราคาปกติ${listPrice != null ? ` ${formatSaleBaht(listPrice)}` : ""}`}
+      title={translate("ราคา Flash Sale เต็มแล้ว", "Flash sale quota reached")}
+      description={translate(`โควตาราคา${salePrice != null ? ` ${formatSaleBaht(salePrice)}` : ""} ของ ${productName} ถูกซื้อครบแล้ว · ซื้อต่อได้ที่ราคาปกติ${listPrice != null ? ` ${formatSaleBaht(listPrice)}` : ""}`, `The discounted quota${salePrice != null ? ` at ${formatSaleBaht(salePrice)}` : ""} for ${productName} has sold out · You can buy at the regular price${listPrice != null ? ` ${formatSaleBaht(listPrice)}` : ""}`)}
       actions={
         <>
-          <Button variant="outline" disabled={pending} onClick={onRemove}>
-            นำออก
-          </Button>
-          <Button disabled={pending} onClick={onBuyAtListPrice}>
-            ซื้อราคาปกติ
-          </Button>
+          <Button variant="outline" disabled={pending} onClick={onRemove}>{translate("นำออก", "Remove")}</Button>
+          <Button disabled={pending} onClick={onBuyAtListPrice}>{translate("ซื้อราคาปกติ", "Buy at regular price")}</Button>
         </>
       }
     />
@@ -70,22 +68,19 @@ export function CartPriceChangedDialog({
   onAccept: () => void;
   onClose: () => void;
 }) {
+  useLanguage();
   return (
     <PromotionDialog
       open={open}
       onOpenChange={(next) => !next && onClose()}
       tone="warning"
       icon={<RefreshCw />}
-      title="ราคาสินค้าบางรายการเปลี่ยน"
-      description="ราคาลดจบแล้วระหว่างที่สินค้าอยู่ในตะกร้า"
+      title={translate("ราคาสินค้าบางรายการเปลี่ยน", "Some item prices have changed")}
+      description={translate("ราคาลดจบแล้วระหว่างที่สินค้าอยู่ในตะกร้า", "The sale ended while the item was in your cart")}
       actions={
         <>
-          <Button variant="outline" disabled={pending} onClick={onRemove}>
-            นำออกจากตะกร้า
-          </Button>
-          <Button disabled={pending} onClick={onAccept}>
-            ยืนยันราคาใหม่
-          </Button>
+          <Button variant="outline" disabled={pending} onClick={onRemove}>{translate("นำออกจากตะกร้า", "Remove from cart")}</Button>
+          <Button disabled={pending} onClick={onAccept}>{translate("ยืนยันราคาใหม่", "Confirm new prices")}</Button>
         </>
       }
     >
@@ -94,12 +89,12 @@ export function CartPriceChangedDialog({
           <div key={item.id}>
             <dt className="truncate">{item.name}</dt>
             <dd>
-              {formatSaleBaht(item.from)} → {item.to == null ? "ไม่พร้อมจำหน่าย" : formatSaleBaht(item.to)}
+              {formatSaleBaht(item.from)} → {item.to == null ? translate("ไม่พร้อมจำหน่าย", "Unavailable") : formatSaleBaht(item.to)}
             </dd>
           </div>
         ))}
         <div className="border-t pt-1.5">
-          <dt>ยอดรวมใหม่</dt>
+          <dt>{translate("ยอดรวมใหม่", "New total")}</dt>
           <dd>{formatSaleBaht(newTotal)}</dd>
         </div>
       </dl>

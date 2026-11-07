@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,10 +19,11 @@ type PaymentCardProps = {
 
 /** สลิปอยู่กับแอดมินที่เป็นคนตรวจ ร้านเห็นแค่ผลการชำระ */
 export function PaymentCard({ state, rows }: PaymentCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-foreground">การชำระเงิน</p>
+        <p className="text-xs font-semibold text-foreground">{translate("การชำระเงิน", "Payment")}</p>
         <Badge className={cn("h-5 rounded-full px-2 text-xs", STATUS_BADGE[state])}>
           {PAYMENT_STATE_LABEL[state]}
         </Badge>

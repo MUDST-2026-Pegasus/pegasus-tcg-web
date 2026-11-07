@@ -1,9 +1,11 @@
+import { useLanguage } from "@/lib/language";
 import { Flag } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 /** ชิป amber ไอคอน Flag เช่น "บิดผิดปกติ", "ถูกรายงาน 3" [TCG-635 · FE-9] */
 export function RiskFlag({ label, className }: { label: string; className?: string }) {
+  useLanguage();
   return (
     <span
       className={cn(

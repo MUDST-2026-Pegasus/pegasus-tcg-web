@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { PAYMENT_PAGE_FIXTURE } from "@/features/payment/Payment.fixture";
 
@@ -8,6 +9,7 @@ function ProductThumbnail({
   imageUrl?: string | null;
   productName: string;
 }) {
+  useLanguage();
   const [hasError, setHasError] = useState(false);
 
   if (!imageUrl || hasError) {
@@ -59,6 +61,7 @@ export function PaymentOrderSummary({
   grandTotal,
   saleDiscount,
 }: PaymentOrderSummaryProps) {
+  useLanguage();
   const hasRealItems = Boolean(items && items.length > 0);
 
   const displayItems = hasRealItems
@@ -77,23 +80,22 @@ export function PaymentOrderSummary({
       ];
 
   const formattedSubtotal = hasRealItems && subtotal !== undefined
-    ? `THB ${Number(subtotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(subtotal).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.subtotal;
 
   const formattedShipping = hasRealItems && shippingTotal !== undefined
-    ? `THB ${Number(shippingTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(shippingTotal).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.shipping;
 
   const formattedTotal = hasRealItems && grandTotal !== undefined
-    ? `THB ${Number(grandTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(grandTotal).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.total;
 
   return (
     <div className="bg-card rounded-2xl border border-muted shadow-sm p-6 space-y-4">
       {/* Title */}
       <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-        Order Summary
-      </h2>
+        {translate("สรุปคำสั่งซื้อ", "Order Summary")}</h2>
 
       <div className="h-px bg-secondary" />
 
@@ -123,7 +125,7 @@ export function PaymentOrderSummary({
                   </p>
                 )}
                 <p className="text-sm font-normal text-slate-900 mt-1.5">
-                  THB {Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString("th-TH")}
+                  {translate("บาท", "THB")}{Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}
                   {item.quantity > 1 && (
                     <span className="text-xs text-slate-500 font-normal ml-1">
                       × {item.quantity}
@@ -143,26 +145,26 @@ export function PaymentOrderSummary({
         {hasRealItems && saleDiscount ? (
           <>
             <div className="flex justify-between items-center">
-              <span className="font-normal text-slate-600">ราคาสินค้า (ก่อนลด)</span>
-              <span className="font-normal text-slate-900">THB {Number((subtotal ?? 0) + saleDiscount).toLocaleString("th-TH")}</span>
+              <span className="font-normal text-slate-600">{translate("ราคาสินค้า (ก่อนลด)", "Items before discount")}</span>
+              <span className="font-normal text-slate-900">{translate("บาท", "THB")} {Number((subtotal ?? 0) + saleDiscount).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="font-normal text-slate-600">ส่วนลดราคาสินค้า</span>
-              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString("th-TH")}</span>
+              <span className="font-normal text-slate-600">{translate("ส่วนลดราคาสินค้า", "Item discount")}</span>
+              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")}</span>
             </div>
           </>
         ) : null}
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">{saleDiscount ? "Subtotal (หลังลดราคา)" : "Subtotal"}</span>
+          <span className="font-normal text-slate-600">{saleDiscount ? translate("Subtotal (หลังลดราคา)", "ยอดสินค้า (หลังลดราคา)") : translate("ยอดรวมสินค้า", "Subtotal")}</span>
           <span className="font-normal text-slate-900">{formattedSubtotal}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Shipping</span>
+          <span className="font-normal text-slate-600">{translate("ค่าจัดส่ง", "Shipping")}</span>
           <span className="font-normal text-slate-900">{formattedShipping}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Tax</span>
-          <span className="font-normal text-slate-600">Included</span>
+          <span className="font-normal text-slate-600">{translate("ภาษี", "Tax")}</span>
+          <span className="font-normal text-slate-600">{translate("รวมแล้ว", "Included")}</span>
         </div>
       </div>
 
@@ -170,7 +172,7 @@ export function PaymentOrderSummary({
 
       {/* Total Row */}
       <div className="flex justify-between items-center pt-1">
-        <span className="text-base font-bold text-slate-900">Total</span>
+        <span className="text-base font-bold text-slate-900">{translate("ยอดรวม", "Total")}</span>
         <span className="text-2xl font-black text-slate-900 tracking-tight">
           {formattedTotal}
         </span>

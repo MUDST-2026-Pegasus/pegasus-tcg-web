@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { CircleX, RotateCw, UserX } from "lucide-react";
@@ -40,7 +41,7 @@ function actionCopy(user: AdminUser, action: UserStatusAction): ActionCopy {
         title: `ระงับบัญชี ${name}?`,
         description:
           "ผู้ใช้จะถูกออกจากระบบทุกอุปกรณ์ภายในไม่กี่นาที และเข้าสู่ระบบไม่ได้จนกว่าจะเปิดใช้งานอีกครั้ง",
-        confirm: "ระงับบัญชี",
+        confirm: translate("ระงับบัญชี", "Suspend account"),
         saving: "กำลังระงับ…",
         effects: [
           "เพิกถอน refresh token ทั้งหมดของบัญชีนี้ทันที",
@@ -55,7 +56,7 @@ function actionCopy(user: AdminUser, action: UserStatusAction): ActionCopy {
         title: `ปิดบัญชี ${name}?`,
         description:
           "ผู้ใช้จะถูกออกจากระบบและเข้าใช้ไม่ได้อีก ใช้กับบัญชีที่ขอปิดหรือไม่ใช้งานแล้ว เปิดกลับได้ภายหลัง",
-        confirm: "ปิดบัญชี",
+        confirm: translate("ปิดบัญชี", "Close account"),
         saving: "กำลังปิดบัญชี…",
       };
     case "restore":
@@ -64,7 +65,7 @@ function actionCopy(user: AdminUser, action: UserStatusAction): ActionCopy {
         icon: <RotateCw />,
         title: `เปิดใช้งาน ${name} อีกครั้ง?`,
         description: "ผู้ใช้จะเข้าสู่ระบบและใช้งานได้ตามปกติ",
-        confirm: "เปิดใช้งาน",
+        confirm: translate("เปิดใช้งาน", "Enable"),
         saving: "กำลังเปิดใช้งาน…",
       };
   }
@@ -78,6 +79,7 @@ type UserStatusDialogProps = {
 
 /** ยืนยันการเปลี่ยนสถานะ — ชุดเดียวกันทั้งจากเมนู ⋯ และปุ่มท้าย Sidebar */
 export function UserStatusDialog({ user, action, onClose }: UserStatusDialogProps) {
+  useLanguage();
   const updateStatus = useUpdateUserStatus();
   const copy = actionCopy(user, action);
   const saving = updateStatus.isPending;
@@ -97,8 +99,8 @@ export function UserStatusDialog({ user, action, onClose }: UserStatusDialogProp
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "ทำรายการไม่สำเร็จ",
-            description: userErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: translate("ทำรายการไม่สำเร็จ", "Action failed"),
+            description: userErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -116,8 +118,7 @@ export function UserStatusDialog({ user, action, onClose }: UserStatusDialogProp
       actions={
         <>
           <Button variant="outline" size="sm" disabled={saving} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             size="sm"
             className={copy.tone === "danger" ? USER_DANGER_BUTTON : undefined}

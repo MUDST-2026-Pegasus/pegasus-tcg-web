@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ImageIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ export function PackingListCard({
   packedIds,
   onTogglePacked,
 }: PackingListCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-5 pt-4 pb-3.5">

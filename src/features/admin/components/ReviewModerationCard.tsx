@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { EyeOff, MessageSquareReply } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ export function ReviewModerationCard({
   pending: boolean;
   onVisibleChange: (visible: boolean) => void;
 }) {
+  useLanguage();
   const hidden = !review.visible;
   const switchId = `review-visible-${review.id}`;
   return (
@@ -52,10 +54,10 @@ export function ReviewModerationCard({
           </p>
         </div>
         {hidden ? (
-          <Badge className="rounded-[5px] bg-[#fbe9e8] text-[10px] text-[#d0342c]">ซ่อนอยู่</Badge>
+          <Badge className="rounded-[5px] bg-[#fbe9e8] text-[10px] text-[#d0342c]">{translate("ซ่อนอยู่", "Hidden")}</Badge>
         ) : (
           review.replyComment == null && (
-            <Badge className="bg-[#fdf0dd] text-[11px] text-[#b45309]">ยังไม่ตอบกลับ</Badge>
+            <Badge className="bg-[#fdf0dd] text-[11px] text-[#b45309]">{translate("ยังไม่ตอบกลับ", "Not yet replied")}</Badge>
           )
         )}
         <div className="flex items-center gap-2">

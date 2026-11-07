@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { TriangleAlert } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,10 +10,11 @@ import { ClaimTicketPreview } from "./ClaimTicketPreview";
 
 /** คอลัมน์ขวาของ Figma PRM-A2 — ตั๋วตัวอย่าง การคำนวณ และงบสูงสุด อัปเดตตามฟอร์มทันที */
 export function PromotionFormAside({ form }: { form: AdminPromotionInput }) {
+  useLanguage();
   const sample = sampleCalculation(form);
   const discountRow =
     form.discountType === "PERCENT"
-      ? `ส่วนลด ${form.discountValue ?? 0}% (สูงสุด ${form.maxDiscount == null ? "ไม่จำกัด" : formatBaht(form.maxDiscount)})`
+      ? `ส่วนลด ${form.discountValue ?? 0}% (สูงสุด ${form.maxDiscount == null ? translate("ไม่จำกัด", "Unlimited") : formatBaht(form.maxDiscount)})`
       : form.discountType === "FIXED"
         ? `ส่วนลด ${formatBaht(form.discountValue)}`
         : "ส่วนลดค่าจัดส่ง";
@@ -28,7 +30,7 @@ export function PromotionFormAside({ form }: { form: AdminPromotionInput }) {
         <h2 className="text-[13px] font-semibold">ตัวอย่างการคำนวณ (ตะกร้า {formatBaht(sample.subtotal)})</h2>
         <dl className="mt-2.5 grid gap-2.5 border-b border-background/20 pb-2.5 text-xs [&>div]:flex [&>div]:justify-between [&>div]:gap-3 [&_dt]:opacity-70 [&_dd]:font-medium">
           <div>
-            <dt>ยอดสินค้า</dt>
+            <dt>{translate("ยอดสินค้า", "Items subtotal")}</dt>
             <dd>{formatBaht(sample.subtotal)}</dd>
           </div>
           <div>

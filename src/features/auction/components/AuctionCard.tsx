@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ type AuctionCardProps = {
  * รูป + ตัวนับมุมซ้ายบน → ชื่อ → สภาพ · ร้าน → ราคา + จำนวนบิด → แถบซื้อทันที (ถ้ายังซื้อได้)
  */
 export function AuctionCard({ auction, serverTime, className, preview = false }: AuctionCardProps) {
+  useLanguage();
   const body = <AuctionCardBody auction={auction} serverTime={serverTime} />;
   const frame = "flex w-full flex-col gap-2.5 rounded-2xl border border-border bg-card p-3";
   if (preview) return <div className={cn(frame, className)}>{body}</div>;
@@ -34,6 +36,7 @@ export function AuctionCard({ auction, serverTime, className, preview = false }:
 }
 
 function AuctionCardBody({ auction, serverTime }: { auction: AuctionSummary; serverTime?: string }) {
+  useLanguage();
   const { item } = auction;
   return (
     <>
@@ -72,7 +75,7 @@ function AuctionCardBody({ auction, serverTime }: { auction: AuctionSummary; ser
 
       {auction.buyNowPrice !== null ? (
         <div className="flex items-center gap-1.5 rounded-[10px] bg-amber-50 px-2.5 py-1.5 text-xs leading-[15px] text-amber-800">
-          <span className="font-semibold">ซื้อทันที</span>
+          <span className="font-semibold">{translate("ซื้อทันที", "Buy now")}</span>
           <span className="font-bold tabular-nums">{formatBaht(auction.buyNowPrice)}</span>
         </div>
       ) : null}

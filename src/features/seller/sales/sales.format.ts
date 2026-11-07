@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { formatSaleBaht } from "@/components/sale";
 import { SALE_STATUS_LABEL, SALE_STATUS_STYLE, salePeriod } from "@/features/admin/sales.format";
 import { hasErrorCode, isApiError } from "@/lib/api";
@@ -13,7 +14,7 @@ const DAY_MS = 86_400_000;
 
 /** "ทุกสินค้าในร้าน" / "2 หมวด" / "เลือก 6 listing" — API ไม่ส่งชื่อหมวดมา */
 export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeIds" | "items">): string {
-  if (sale.scopeType === "SHOP") return "ทุกสินค้าในร้าน";
+  if (sale.scopeType === "SHOP") return translate("ทุกสินค้าในร้าน", "All products in the shop");
   if (sale.scopeType === "LISTINGS") return `เลือก ${sale.items.length.toLocaleString("th-TH")} listing`;
   return `${sale.scopeIds.length.toLocaleString("th-TH")} หมวด`;
 }
@@ -22,16 +23,16 @@ export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeIds"
 export function sellerDiscountLabel(sale: Pick<SellerSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
   if (sale.discountType === "FIXED_OFF") return `ลด ${formatSaleBaht(sale.discountValue ?? 0)}/ชิ้น`;
-  return "ราคาใหม่รายชิ้น";
+  return translate("ราคาใหม่รายชิ้น", "New price per item");
 }
 
 export function sellerDiscountDetail(sale: SellerSale): string {
-  if (sale.discountType !== "FIXED_PRICE") return "ร้านออกเงิน";
+  if (sale.discountType !== "FIXED_PRICE") return translate("ร้านออกเงิน", "Shop funded");
   // ช่วง % คิดจากราคารายแถว (item ที่ยังขายอยู่)
   const percents = sale.items
     .filter((item) => item.salePrice != null && item.listPrice > 0)
     .map((item) => Math.round((100 * (item.listPrice - (item.salePrice ?? item.listPrice))) / item.listPrice));
-  if (percents.length === 0) return "ตั้งรายแถว";
+  if (percents.length === 0) return translate("ตั้งรายแถว", "Set per row");
   const min = Math.min(...percents);
   const max = Math.max(...percents);
   return min === max ? `ลด ${min}%` : `ลด ${min}–${max}%`;
@@ -48,7 +49,7 @@ export function sellerPeriodHint(sale: SellerSale, now: number): string {
     case "PAUSED":
       return sale.pausedByPegasus ? "ทีมงานหยุด" : "หยุดไว้";
     default:
-      return "สิ้นสุดแล้ว";
+      return translate("สิ้นสุดแล้ว", "Ended");
   }
 }
 

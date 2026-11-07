@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { ImagePlus } from "lucide-react";
@@ -60,6 +61,7 @@ export function CatalogImageManager({
   images,
   onRefresh,
 }: CatalogImageManagerProps) {
+  useLanguage();
   const upload = useFileUpload({
     purpose: "CATALOG_IMAGE",
     multiple: true,
@@ -140,7 +142,7 @@ export function CatalogImageManager({
         toast.add({
           type: "error",
           title: "ตั้งรูปหลักไม่สำเร็จ",
-          description: catalogErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          description: catalogErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   }
@@ -205,7 +207,7 @@ export function CatalogImageManager({
 
         <div className="flex flex-wrap items-end justify-between gap-3">
           <Field className="w-full sm:w-72">
-            <FieldLabel htmlFor="imageScope">ใช้กับ</FieldLabel>
+            <FieldLabel htmlFor="imageScope">{translate("ใช้กับ", "Applies to")}</FieldLabel>
             <Select
               items={scopeItems}
               value={scope}

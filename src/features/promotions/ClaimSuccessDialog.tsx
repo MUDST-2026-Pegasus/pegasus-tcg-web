@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export interface ClaimSuccessDialogProps {
 
 /** M3 SUCCESS: a code typed into "โค้ดของฉัน" was collected. */
 export function ClaimSuccessDialog({ code, onOpenChange }: ClaimSuccessDialogProps) {
+  useLanguage();
   const terms = usePromotionTerms(code).data;
   const shopHref = terms?.ownerType === "SELLER" && terms.shop
     ? `/u/${encodeURIComponent(terms.shop.username)}`
@@ -34,10 +36,9 @@ export function ClaimSuccessDialog({ code, onOpenChange }: ClaimSuccessDialogPro
             <CircleCheck className="size-5" aria-hidden />
           </span>
           <DialogHeader className="gap-1">
-            <DialogTitle className="text-lg font-bold">เก็บ {code} แล้ว</DialogTitle>
+            <DialogTitle className="text-lg font-bold">{translate("เก็บ", "Collect")} {code}  {translate("แล้ว", "applied")}</DialogTitle>
             <DialogDescription className="text-xs">
-              อยู่ใน “โค้ดของฉัน”{terms ? ` ใช้ได้ถึง ${formatPromotionDate(terms.endsAt)}` : ""} · เลือกใช้ได้ตอนอยู่ในตะกร้า
-            </DialogDescription>
+              {translate("อยู่ใน “โค้ดของฉัน”", "is in “My coupons”")}{terms ? translate(` ใช้ได้ถึง ${formatPromotionDate(terms.endsAt)}`, ` Valid until ${formatPromotionDate(terms.endsAt)}`) : ""} {translate("· เลือกใช้ได้ตอนอยู่ในตะกร้า", "· apply it in your cart")}</DialogDescription>
           </DialogHeader>
           {terms ? (
             <ClaimTicket promotion={{ ...terms, claimed: true }} />
@@ -46,9 +47,9 @@ export function ClaimSuccessDialog({ code, onOpenChange }: ClaimSuccessDialogPro
           )}
         </div>
         <DialogFooter className="m-0 flex-row justify-end gap-2 rounded-none border-t bg-muted/30 px-6 py-3">
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>ปิด</Button>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>{translate("ปิด", "Close")}</Button>
           <Button size="sm" nativeButton={false} render={<Link to={shopHref} />}>
-            {terms?.ownerType === "SELLER" ? "ไปที่ร้าน" : "ไปช้อปเลย"}
+            {terms?.ownerType === "SELLER" ? translate("ไปที่ร้าน", "Visit shop") : translate("ไปช้อปเลย", "Shop now")}
           </Button>
         </DialogFooter>
       </DialogContent>

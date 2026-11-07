@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -109,6 +110,7 @@ function CarouselPagination({
   onSelect: (index: number) => void;
   className?: string;
 }) {
+  useLanguage();
   return (
     <div
       className={cn(
@@ -146,10 +148,11 @@ type SectionHeaderProps = {
 
 function SectionHeader({
   title,
-  actionLabel = "View All",
+  actionLabel = translate("ดูทั้งหมด", "View All"),
   actionHref,
   description,
 }: SectionHeaderProps) {
+  useLanguage();
   return (
     <div
       className={cn(
@@ -189,6 +192,7 @@ function HomeProductCard({
   product: HomeProduct;
   rank?: number;
 }) {
+  useLanguage();
   const onSale = isOnSale(product.pricing);
   const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.price);
 
@@ -196,7 +200,7 @@ function HomeProductCard({
     <div className="relative h-[260px] min-w-0">
       <Link
         to={product.href}
-        aria-label={`${product.name} ราคา ${price}`}
+        aria-label={translate(`${product.name} ราคา ${price}`, `${product.name}, price ${price}`)}
         className="block h-full w-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ItemCard
@@ -232,6 +236,7 @@ function CompactFeature({
   slide: HeroSlide;
   isPrimaryHeading: boolean;
 }) {
+  useLanguage();
   return (
     <article className="flex flex-col overflow-hidden bg-background lg:h-[360px] lg:flex-row">
       <div className="order-2 flex min-h-[320px] flex-col justify-center gap-[14px] px-6 py-10 sm:px-12 lg:order-1 lg:h-full lg:min-h-0 lg:w-[500px] lg:shrink-0">
@@ -286,13 +291,14 @@ function CompactFeature({
 }
 
 function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+  useLanguage();
   const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
     slides.length,
     HERO_CAROUSEL_INTERVAL_MS,
   );
 
   return (
-    <section aria-label="โปรโมชั่นแนะนำ" className="overflow-hidden bg-background">
+    <section aria-label={translate("โปรโมชั่นแนะนำ", "Featured promotions")} className="overflow-hidden bg-background">
       <Carousel
         setApi={setApi}
         opts={{ align: "start", loop: slides.length > 1, slidesToScroll: 1 }}
@@ -318,8 +324,8 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         <CarouselPagination
           ids={slides.map((slide) => slide.id)}
           current={current}
-          label="เลือกโปรโมชั่น"
-          itemLabel="ไปยังโปรโมชั่น"
+          label={translate("เลือกโปรโมชั่น", "Select promotion")}
+          itemLabel={translate("ไปยังโปรโมชั่น", "Go to promotion")}
           onSelect={scrollTo}
           className="my-2.5"
         />
@@ -329,6 +335,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 }
 
 function NewReleases({ products }: { products: HomeProduct[] }) {
+  useLanguage();
   return (
     <section
       className="bg-secondary px-4 py-7 sm:px-6 lg:h-[642px] lg:px-8"
@@ -336,7 +343,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="new-releases-title">
-          <SectionHeader title="New Releases" actionHref="/search?sort=newest" />
+          <SectionHeader title={translate("สินค้าออกใหม่", "New Releases")} actionHref="/search?sort=newest" />
         </div>
         <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
           {products.map((product) => (
@@ -349,6 +356,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
 }
 
 function BrowseByGame({ games }: { games: GameCategory[] }) {
+  useLanguage();
   return (
     <section
       className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8"
@@ -356,7 +364,7 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title="Shop by Game" actionHref="/search" />
+          <SectionHeader title={translate("เลือกซื้อตามเกม", "Shop by Game")} actionHref="/search" />
         </div>
         <div className="-mx-1 mt-[14px] -mb-1 flex gap-4 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
@@ -405,6 +413,7 @@ function ProductRail({
   actionLabel?: string;
   actionHref?: string;
 }) {
+  useLanguage();
   return (
     <section
       className={cn(
@@ -448,6 +457,7 @@ function FeaturedCategories({
 }: {
   categories: ProductCategory[];
 }) {
+  useLanguage();
   const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
     categories.length,
   );
@@ -459,7 +469,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title="Featured" />
+          <SectionHeader title={translate("แนะนำ", "Featured")} />
         </div>
         <Carousel
           setApi={setApi}
@@ -510,8 +520,8 @@ function FeaturedCategories({
         <CarouselPagination
           ids={categories.map((category) => category.id)}
           current={current}
-          label="เลือกหมวดหมู่สินค้า"
-          itemLabel="ไปยังหมวดหมู่"
+          label={translate("เลือกหมวดหมู่สินค้า", "Select product category")}
+          itemLabel={translate("ไปยังหมวดหมู่", "Go to category")}
           onSelect={scrollTo}
           className="mt-2.5"
         />
@@ -521,6 +531,7 @@ function FeaturedCategories({
 }
 
 function ExploreGrid({ products }: { products: HomeProduct[] }) {
+  useLanguage();
   return (
     <section
       className="bg-secondary px-4 py-7 sm:px-6 lg:h-[638px] lg:px-8"
@@ -529,8 +540,8 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
           <SectionHeader
-            title="More to Explore"
-            actionLabel="more"
+            title={translate("สำรวจเพิ่มเติม", "More to Explore")}
+            actionLabel={translate("เพิ่มเติม", "more")}
             actionHref="/search"
           />
         </div>
@@ -555,6 +566,7 @@ function SectionError({
   title: string;
   query: { error: unknown; refetch: () => unknown };
 }) {
+  useLanguage();
   return (
     <section
       aria-label={title}
@@ -563,7 +575,7 @@ function SectionError({
       <div className="mx-auto max-w-[1216px]">
         <ErrorState
           error={query.error}
-          title={`โหลด ${title} ไม่สำเร็จ`}
+          title={translate(`โหลด ${title} ไม่สำเร็จ`, `Unable to load ${title}`)}
           onRetry={() => query.refetch()}
           className="min-h-0 bg-background py-10"
         />
@@ -576,6 +588,7 @@ function SectionError({
 
 /** โหลดไม่ขึ้นหรือยังไม่มีสไลด์ ก็ยังมีสไลด์ตั้งต้น หน้าแรกจะไม่เริ่มด้วยช่องว่าง */
 function HeroSection() {
+  useLanguage();
   const { data, isPending } = useHeroSlides();
 
   if (isPending) {
@@ -586,6 +599,7 @@ function HeroSection() {
 
 /** H1 "โค้ดส่วนลด" — ไม่มีโค้ดหรือโหลดไม่ขึ้นก็ซ่อนทั้ง section ไม่ให้กินที่หน้าแรก */
 function PromotionsSection() {
+  useLanguage();
   const query = useFeaturedPromotions();
 
   if (!query.data?.length) return null;
@@ -597,9 +611,9 @@ function PromotionsSection() {
       <div className="mx-auto max-w-[1216px]">
         <div id="home-promotions-title">
           <SectionHeader
-            title="โค้ดส่วนลด"
-            description="กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้"
-            actionLabel="ดูโค้ดของฉัน"
+            title={translate("โค้ดส่วนลด", "Discount codes")}
+            description={translate("กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้", "Save a code now and apply it in your cart · Can be combined with store codes")}
+            actionLabel={translate("ดูโค้ดของฉัน", "View my codes")}
             actionHref="/account/coupons"
           />
         </div>
@@ -610,52 +624,57 @@ function PromotionsSection() {
 }
 
 function NewReleasesSection() {
+  useLanguage();
   const query = useNewReleases();
 
   if (query.isPending) return <ProductGridSkeleton />;
-  if (query.isError) return <SectionError title="New Releases" query={query} />;
+  if (query.isError) return <SectionError title={translate("สินค้าออกใหม่", "New Releases")} query={query} />;
   if (query.data.length === 0) return null;
   return <NewReleases products={query.data} />;
 }
 
 function GamesSection() {
+  useLanguage();
   const query = useGames();
 
   if (query.isPending) return <GamesSkeleton />;
-  if (query.isError) return <SectionError title="Shop by Game" query={query} />;
+  if (query.isError) return <SectionError title={translate("เลือกซื้อตามเกม", "Shop by Game")} query={query} />;
   if (query.data.length === 0) return null;
   return <BrowseByGame games={query.data} />;
 }
 
 function TrendingSection() {
+  useLanguage();
   const query = useTrending();
 
   if (query.isPending) return <ProductRailSkeleton />;
-  if (query.isError) return <SectionError title="Trending Now" query={query} />;
+  if (query.isError) return <SectionError title={translate("กำลังเป็นที่นิยม", "Trending Now")} query={query} />;
   if (query.data.length === 0) return null;
   return (
-    <ProductRail title="Trending Now" actionHref="/search" products={query.data} />
+    <ProductRail title={translate("กำลังเป็นที่นิยม", "Trending Now")} actionHref="/search" products={query.data} />
   );
 }
 
 function FeaturedSection() {
+  useLanguage();
   const query = useFeaturedCategories();
 
   if (query.isPending) return <FeaturedSkeleton />;
-  if (query.isError) return <SectionError title="Featured" query={query} />;
+  if (query.isError) return <SectionError title={translate("แนะนำ", "Featured")} query={query} />;
   if (query.data.length === 0) return null;
   return <FeaturedCategories categories={query.data} />;
 }
 
 function PegasusPicksSection() {
+  useLanguage();
   const query = usePegasusPicks();
 
   if (query.isPending) return <ProductRailSkeleton description />;
-  if (query.isError) return <SectionError title="Pegasus Picks" query={query} />;
+  if (query.isError) return <SectionError title={translate("Pegasus คัดสรร", "Pegasus Picks")} query={query} />;
   if (query.data.length === 0) return null;
   return (
     <ProductRail
-      title="Pegasus Picks"
+      title={translate("Pegasus คัดสรร", "Pegasus Picks")}
       description="Curated, verified, and shipped by Pegasus."
       actionLabel="Shop Pegasus"
       actionHref={`/u/${encodeURIComponent(env.pegasusStoreUsername)}`}
@@ -665,15 +684,17 @@ function PegasusPicksSection() {
 }
 
 function ExploreSection() {
+  useLanguage();
   const query = useExploreMore();
 
   if (query.isPending) return <ProductGridSkeleton explore />;
-  if (query.isError) return <SectionError title="More to Explore" query={query} />;
+  if (query.isError) return <SectionError title={translate("สำรวจเพิ่มเติม", "More to Explore")} query={query} />;
   if (query.data.length === 0) return null;
   return <ExploreGrid products={query.data} />;
 }
 
 export function HomeContent() {
+  useLanguage();
   return (
     <div className="bg-secondary font-sans">
       <HeroSection />

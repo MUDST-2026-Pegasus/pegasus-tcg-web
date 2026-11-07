@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleCheck, CloudUpload, RotateCw } from "lucide-react";
 
 import { FileDropzone } from "@/components/common";
@@ -24,6 +25,7 @@ type BankBookUploadProps = {
  * จึงมีแค่ object key ที่ต้องส่งไปกับคำขอ
  */
 export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
+  useLanguage();
   const item = upload.items[0];
   const message = item?.error ?? error;
   const percent = Math.round((item?.progress ?? 0) * 100);
@@ -106,8 +108,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                     }}
                   >
                     <RotateCw data-icon="inline-start" />
-                    ลองใหม่
-                  </Button>
+                    {translate("ลองใหม่", "Retry")}</Button>
                 )}
                 <Button
                   type="button"
@@ -119,7 +120,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                     upload.remove(item.id);
                   }}
                 >
-                  {item.status === "uploading" ? "ยกเลิก" : "ลบไฟล์"}
+                  {item.status === "uploading" ? translate("ยกเลิก", "Cancel") : "ลบไฟล์"}
                 </Button>
               </div>
             </>

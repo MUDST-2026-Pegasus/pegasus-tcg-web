@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, GripVertical, Plus, X } from "lucide-react";
 
@@ -22,8 +23,8 @@ function homeStatus(promotion: AdminPromotion): { label: string; className: stri
   if (promotion.status === "SCHEDULED") {
     return { label: `เริ่ม ${formatPromoDate(promotion.startsAt).replace(/ \d{4}$/, "")}`, className: "text-[#0058bc]" };
   }
-  if (promotion.status === "ACTIVE") return { label: "ใช้งานอยู่", className: "text-[#007a4a]" };
-  return { label: promotion.status === "PAUSED" ? "หยุดชั่วคราว" : "สิทธิ์เต็ม", className: "text-[#b45309]" };
+  if (promotion.status === "ACTIVE") return { label: translate("ใช้งานอยู่", "Active"), className: "text-[#007a4a]" };
+  return { label: promotion.status === "PAUSED" ? translate("หยุดชั่วคราว", "Paused") : translate("สิทธิ์เต็ม", "Fully redeemed"), className: "text-[#b45309]" };
 }
 
 type PromotionHomeOrderDialogProps = {
@@ -34,11 +35,13 @@ type PromotionHomeOrderDialogProps = {
 };
 
 export function PromotionHomeOrderDialog({ open, onOpenChange, promotions }: PromotionHomeOrderDialogProps) {
+  useLanguage();
   // ล้างการแก้ทุกครั้งที่เปิดใหม่
   return open ? <HomeOrderEditor promotions={promotions} onClose={() => onOpenChange(false)} /> : null;
 }
 
 function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]; onClose: () => void }) {
+  useLanguage();
   const save = useSetHomeOrder();
   const [ids, setIds] = useState(() => currentHomeIds(promotions));
   const [adding, setAdding] = useState(false);
@@ -68,7 +71,7 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
         onClose();
       },
       onError: (error) =>
-        toast.add({ title: "บันทึกลำดับไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
+        toast.add({ title: "บันทึกลำดับไม่สำเร็จ", description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" }),
     });
 
   return (
@@ -83,8 +86,7 @@ function HomeOrderEditor({ promotions, onClose }: { promotions: AdminPromotion[]
       actions={
         <>
           <Button variant="outline" disabled={save.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button disabled={save.isPending} onClick={submit}>
             บันทึกลำดับ
           </Button>

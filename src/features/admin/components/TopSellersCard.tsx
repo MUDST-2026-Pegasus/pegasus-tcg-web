@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import type { TopSellerBar } from "../metrics.format";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ export function TopSellersCard({
   description,
   items,
 }: TopSellersCardProps) {
+  useLanguage();
   return (
     <Card className="min-w-0 flex-1 gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-0.5">

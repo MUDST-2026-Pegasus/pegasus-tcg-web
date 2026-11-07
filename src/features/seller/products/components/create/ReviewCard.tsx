@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { useWatch, type UseFormReturn } from "react-hook-form";
@@ -25,6 +26,7 @@ const money = (text: string) => {
 
 /** ขั้นสุดท้าย — สรุปทุกอย่างก่อนกดลงขายหรือบันทึกฉบับร่าง */
 export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
+  useLanguage();
   const values = useWatch({ control: form.control });
   const condition = CONDITION_OPTIONS.find(
     (option) => option.value === values.condition,
@@ -42,7 +44,7 @@ export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
       </div>
 
       <dl className="flex flex-col divide-y divide-muted rounded-lg border border-muted">
-        <Row label="การ์ด" step={0} onEditStep={onEditStep}>
+        <Row label={translate("การ์ด", "Cards")} step={0} onEditStep={onEditStep}>
           {card ? (
             <>
               {card.productName}
@@ -54,10 +56,10 @@ export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
             "—"
           )}
         </Row>
-        <Row label="สภาพ" step={1} onEditStep={onEditStep}>
+        <Row label={translate("สภาพ", "Condition")} step={1} onEditStep={onEditStep}>
           {condition?.label ?? "—"}
         </Row>
-        <Row label="ราคา" step={1} onEditStep={onEditStep}>
+        <Row label={translate("ราคา", "Price")} step={1} onEditStep={onEditStep}>
           {isAuto ? (
             <>
               ตามราคาตลาด ส่วนต่าง {values.autoPriceOffsetPercent || "0"}%
@@ -70,7 +72,7 @@ export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
             money(values.price ?? "")
           )}
         </Row>
-        <Row label="จำนวน" step={1} onEditStep={onEditStep}>
+        <Row label={translate("จำนวน", "Quantity")} step={1} onEditStep={onEditStep}>
           {values.quantity || "—"} ใบ · ต้นทุน {money(values.unitCost ?? "")} / ใบ
         </Row>
         <Row label="เกรด" step={1} onEditStep={onEditStep}>
@@ -81,7 +83,7 @@ export function ReviewCard({ form, card, onEditStep }: ReviewCardProps) {
         <Row label="ป้ายล็อต" step={1} onEditStep={onEditStep}>
           {values.lotLabel?.trim() || "—"}
         </Row>
-        <Row label="คำอธิบาย" step={1} onEditStep={onEditStep}>
+        <Row label={translate("คำอธิบาย", "Description")} step={1} onEditStep={onEditStep}>
           <span className="whitespace-pre-line">
             {values.publicNote?.trim() || "—"}
           </span>
@@ -107,6 +109,7 @@ function Row({
   onEditStep: (step: number) => void;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <div className="flex items-start gap-3 px-3.5 py-2.5">
       <dt className="w-20 shrink-0 text-xs text-gray-500">{label}</dt>

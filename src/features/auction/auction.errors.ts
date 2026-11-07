@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { ApiError } from "@/lib/api/errors";
 
 import { formatAuctionDate, formatBaht } from "./auction.format";
@@ -21,7 +22,7 @@ const str = (value: unknown): string | null => (typeof value === "string" && val
  */
 export function auctionErrorMessage(error: unknown, context: ErrorContext): AuctionErrorMessage {
   if (!(error instanceof ApiError)) {
-    return { title: "บิดไม่สำเร็จ", detail: "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง" };
+    return { title: translate("บิดไม่สำเร็จ", "Unable to bid"), detail: translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Please check your connection and try again") };
   }
   const details = error.details;
   switch (error.code) {
@@ -29,30 +30,30 @@ export function auctionErrorMessage(error: unknown, context: ErrorContext): Auct
       const currentPrice = num(details.currentPrice);
       const minNextBid = num(details.minNextBid) ?? context.minNextBid;
       if (currentPrice !== null && currentPrice > context.currentPrice) {
-        return { title: "มีคนบิดก่อนคุณ", detail: `ราคาเปลี่ยนเป็น ${formatBaht(currentPrice)} — ตรวจราคาแล้วบิดใหม่` };
+        return { title: translate("มีคนบิดก่อนคุณ", "Another bidder got there first"), detail: translate(`ราคาเปลี่ยนเป็น ${formatBaht(currentPrice)} — ตรวจราคาแล้วบิดใหม่`, `The price changed to ${formatBaht(currentPrice)} — check the price and bid again`) };
       }
       return {
-        title: "ราคาต่ำกว่าขั้นต่ำ",
-        detail: `ต้องบิดอย่างน้อย ${formatBaht(minNextBid)} (ราคาปัจจุบัน + ${formatBaht(context.bidIncrement)})`,
+        title: translate("ราคาต่ำกว่าขั้นต่ำ", "Bid is below the minimum"),
+        detail: translate(`ต้องบิดอย่างน้อย ${formatBaht(minNextBid)} (ราคาปัจจุบัน + ${formatBaht(context.bidIncrement)})`, `Bid at least ${formatBaht(minNextBid)} (current price + ${formatBaht(context.bidIncrement)})`),
       };
     }
     case "NO_SHIPPING_ADDRESS":
-      return { title: "ยังไม่มีที่อยู่จัดส่ง", detail: "เพิ่มที่อยู่อย่างน้อย 1 ที่ก่อนบิด" };
+      return { title: translate("ยังไม่มีที่อยู่จัดส่ง", "No shipping address"), detail: translate("เพิ่มที่อยู่อย่างน้อย 1 ที่ก่อนบิด", "Add at least one shipping address before bidding") };
     case "EMAIL_NOT_VERIFIED":
-      return { title: "ยังไม่ได้ยืนยันอีเมล", detail: "ยืนยันอีเมลก่อนจึงจะบิดได้" };
+      return { title: translate("ยังไม่ได้ยืนยันอีเมล", "Email not verified"), detail: translate("ยืนยันอีเมลก่อนจึงจะบิดได้", "Verify your email before bidding") };
     case "BIDDING_BANNED": {
       const until = str(details.bannedUntil);
-      return { title: until ? `ถูกห้ามบิดถึง ${formatAuctionDate(until)}` : "ถูกห้ามบิด", detail: "ไม่ชำระเงินหลังชนะครบ 3 ครั้ง" };
+      return { title: until ? translate(`ถูกห้ามบิดถึง ${formatAuctionDate(until)}`, `Bidding suspended until ${formatAuctionDate(until)}`) : translate("ถูกห้ามบิด", "Bidding suspended"), detail: translate("ไม่ชำระเงินหลังชนะครบ 3 ครั้ง", "Three unpaid auction wins") };
     }
     case "OWN_AUCTION":
-      return { title: "บิดประมูลของตัวเองไม่ได้", detail: "ประมูลนี้เปิดโดยร้านของคุณ" };
+      return { title: translate("บิดประมูลของตัวเองไม่ได้", "You cannot bid on your own auction"), detail: translate("ประมูลนี้เปิดโดยร้านของคุณ", "This auction belongs to your store") };
     default:
-      return { title: "บิดไม่สำเร็จ", detail: error.message };
+      return { title: translate("บิดไม่สำเร็จ", "Unable to bid"), detail: error.message };
   }
 }
 
 /** ข้อความตอน "ยังไม่ได้ยืนยันอีเมล" ในกล่องบิด (B4-B) — ใช้ข้อความเดียวกับ B3-E */
 export const EMAIL_NOT_VERIFIED_MESSAGE: AuctionErrorMessage = {
-  title: "ยังไม่ได้ยืนยันอีเมล",
-  detail: "ยืนยันอีเมลก่อนจึงจะบิดได้",
+  get title() { return translate("ยังไม่ได้ยืนยันอีเมล", "Email not verified"); },
+  get detail() { return translate("ยืนยันอีเมลก่อนจึงจะบิดได้", "Verify your email before bidding"); },
 };

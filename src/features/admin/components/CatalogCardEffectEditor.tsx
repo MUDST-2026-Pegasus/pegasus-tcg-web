@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowDown, ArrowUp, Sparkles, Trash2 } from "lucide-react";
 import {
@@ -69,6 +70,7 @@ export function CatalogCardEffectEditor({
   productId,
   onClose,
 }: CatalogCardEffectEditorProps) {
+  useLanguage();
   const effects = useCardEffects(productId);
 
   return (
@@ -94,6 +96,7 @@ function EffectForm({
   saved: CardEffect[];
   onClose: () => void;
 }) {
+  useLanguage();
   const saveEffects = useSaveCardEffects(productId);
 
   const {
@@ -200,12 +203,10 @@ function EffectForm({
 
       <div className="flex items-center justify-end gap-2 border-t border-border px-6 py-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          ปิด
-        </Button>
+          {translate("ปิด", "Close")}</Button>
         <Button type="submit" disabled={isSubmitting || !isDirty}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          บันทึก
-        </Button>
+          {translate("บันทึก", "Save")}</Button>
       </div>
     </form>
   );
@@ -228,6 +229,7 @@ function EffectRow({
   onMove: (to: number) => void;
   onRemove: () => void;
 }) {
+  useLanguage();
   const effectType = useWatch({ control, name: `effects.${index}.effectType` });
   const fieldErrors = errors.effects?.[index];
   const id = (name: string) => `effects-${index}-${name}`;
@@ -347,7 +349,7 @@ function EffectRow({
         )}
 
         <Field data-invalid={Boolean(fieldErrors?.effectText) || undefined}>
-          <FieldLabel htmlFor={id("effectText")}>คำอธิบาย</FieldLabel>
+          <FieldLabel htmlFor={id("effectText")}>{translate("คำอธิบาย", "Description")}</FieldLabel>
           <Textarea
             id={id("effectText")}
             rows={3}
@@ -374,6 +376,7 @@ function EffectRow({
 }
 
 function EffectEditorSkeleton() {
+  useLanguage();
   return (
     <div className="flex flex-col gap-3 px-6 pb-6">
       <Skeleton className="h-8 w-40 self-end" />

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 import { House, MoreVertical } from "lucide-react";
 
@@ -41,11 +42,11 @@ type PromotionTableProps = {
 
 const HEADERS: Array<{ label: string; width: string }> = [
   { label: "โค้ด / แคมเปญ", width: "w-[22%]" },
-  { label: "ส่วนลด", width: "w-[15%]" },
-  { label: "เงื่อนไข", width: "w-[16%]" },
-  { label: "ใช้ไปแล้ว", width: "w-[15%]" },
-  { label: "ระยะเวลา", width: "w-[18%]" },
-  { label: "สถานะ", width: "w-[14%]" },
+  { get label() { return translate("ส่วนลด", "Discount"); }, width: "w-[15%]" },
+  { get label() { return translate("เงื่อนไข", "Conditions"); }, width: "w-[16%]" },
+  { get label() { return translate("ใช้ไปแล้ว", "Redeemed"); }, width: "w-[15%]" },
+  { get label() { return translate("ระยะเวลา", "Duration"); }, width: "w-[18%]" },
+  { get label() { return translate("สถานะ", "Status"); }, width: "w-[14%]" },
 ];
 
 const HEAD_CLASS = "h-10 px-3 text-xs font-medium text-muted-foreground";
@@ -56,6 +57,7 @@ const MENU_CLASS = "sticky right-0 w-[52px] bg-card px-2 text-right";
 
 /** ตาราง Figma PRM-A1 — 900px พอดีการ์ดที่จอ 1280 แคบกว่านั้นเลื่อนตาราง */
 export function PromotionTable({ promotions, scopeNames, now, onAction }: PromotionTableProps) {
+  useLanguage();
   return (
     <Table className="min-w-[900px] table-fixed">
       <TableHeader>
@@ -66,7 +68,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
             </TableHead>
           ))}
           <TableHead className={cn(HEAD_CLASS, MENU_CLASS, "bg-muted")}>
-            <span className="sr-only">จัดการ</span>
+            <span className="sr-only">{translate("จัดการ", "Manage")}</span>
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -96,6 +98,7 @@ function PromotionRow({
   now: number;
   onAction: PromotionTableProps["onAction"];
 }) {
+  useLanguage();
   const isPlatform = promotion.ownerType === "PLATFORM";
   const paused = promotion.status === "PAUSED";
   const full = isUsageFull(promotion);
@@ -107,7 +110,7 @@ function PromotionRow({
           <strong className="truncate text-sm tracking-wide">{promotion.code}</strong>
           <PromotionOwnerTag owner={promotion.ownerType} />
           {promotion.featuredOnHome ? (
-            <House className="size-3.5 shrink-0 text-primary" aria-label="แสดงบนหน้าแรก" />
+            <House className="size-3.5 shrink-0 text-primary" aria-label={translate("แสดงบนหน้าแรก", "Show on home page")} />
           ) : null}
         </div>
         <span className={SUB_CLASS} title={promotionSubtitle(promotion)}>
@@ -136,7 +139,7 @@ function PromotionRow({
         />
         {promotion.claimable ? (
           <span className={SUB_CLASS}>
-            เก็บแล้ว {promotion.claimedCount.toLocaleString("th-TH")} / {limitLabel(promotion.claimLimit)}
+            {translate("เก็บแล้ว", "Claimed") + " "}{promotion.claimedCount.toLocaleString("th-TH")} / {limitLabel(promotion.claimLimit)}
           </span>
         ) : null}
       </TableCell>
@@ -161,20 +164,19 @@ function PromotionRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={4} className="w-40 min-w-40">
             {isPlatform ? (
-              <DropdownMenuItem render={<Link to={`/admin/promotions/${promotion.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+              <DropdownMenuItem render={<Link to={`/admin/promotions/${promotion.id}/edit`} />}>{translate("แก้ไข", "Edit")}</DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem onClick={() => onAction("redemptions", promotion)}>ดูการใช้โค้ด</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction("copy", promotion)}>คัดลอกโค้ด</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAction("redemptions", promotion)}>{translate("ดูการใช้โค้ด", "View redemptions")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAction("copy", promotion)}>{translate("คัดลอกโค้ด", "Copy code")}</DropdownMenuItem>
             <DropdownMenuItem
               className={paused ? undefined : "text-[#b45309] data-highlighted:text-[#b45309]"}
               onClick={() => onAction(paused ? "resume" : "pause", promotion)}
             >
-              {paused ? "เปิดใช้อีกครั้ง" : "หยุดชั่วคราว"}
+              {paused ? translate("เปิดใช้อีกครั้ง", "Enable again") : translate("หยุดชั่วคราว", "Paused")}
             </DropdownMenuItem>
             {isPlatform ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction("delete", promotion)}>
-                ลบ
-              </DropdownMenuItem>
+                {translate("ลบ", "Delete")}</DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>

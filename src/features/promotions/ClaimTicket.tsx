@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import type { MouseEvent } from "react";
 import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -44,18 +45,19 @@ export function ClaimTicket({
   hideAction = false,
   className,
 }: ClaimTicketProps) {
+  useLanguage();
   const state = claimTicketState(promotion);
   const platform = promotion.ownerType === "PLATFORM";
   const soldOut = state === "soldOut";
 
   const stubNote = promotion.maxDiscount
-    ? `สูงสุด ${checkoutMoney(promotion.maxDiscount)}`
-    : platform ? null : promotion.shop?.name ?? "โค้ดร้าน";
-  const conditions = `${promotion.minSpend > 0 ? `ขั้นต่ำ ${checkoutMoney(promotion.minSpend)}` : "ไม่มีขั้นต่ำ"}${platform ? "" : " จากร้านนี้"}`;
+    ? translate(`สูงสุด ${checkoutMoney(promotion.maxDiscount)}`, `Up to ${checkoutMoney(promotion.maxDiscount)}`)
+    : platform ? null : promotion.shop?.name ?? translate("โค้ดร้าน", "Shop coupon");
+  const conditions = translate(`${promotion.minSpend > 0 ? `ขั้นต่ำ ${checkoutMoney(promotion.minSpend)}` : translate("ไม่มีขั้นต่ำ", "No minimum spend")}${platform ? "" : translate(" จากร้านนี้", " from this shop")}`, `${promotion.minSpend > 0 ? `Minimum spend ${checkoutMoney(promotion.minSpend)}` : translate("ไม่มีขั้นต่ำ", "No minimum spend")}${platform ? "" : translate(" จากร้านนี้", " from this shop")}`);
   const footnote = state === "claimed"
-    ? "ใช้ได้ในตะกร้า"
-    : soldOut ? "ถูกเก็บครบแล้ว"
-      : promotion.remainingClaims == null ? "ไม่จำกัดจำนวน" : `เหลือ ${promotion.remainingClaims.toLocaleString("th-TH")} สิทธิ์`;
+    ? translate("ใช้ได้ในตะกร้า", "Available in cart")
+    : soldOut ? translate("ถูกเก็บครบแล้ว", "Fully claimed")
+      : promotion.remainingClaims == null ? translate("ไม่จำกัดจำนวน", "Unlimited claims") : translate(`เหลือ ${promotion.remainingClaims.toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US")} สิทธิ์`, `${promotion.remainingClaims.toLocaleString("en-US")} claims left`);
 
   const stop = (handler?: () => void) => (event: MouseEvent) => {
     event.stopPropagation();
@@ -94,13 +96,13 @@ export function ClaimTicket({
                 : platform ? "bg-primary/10 text-primary" : "bg-teal-50 text-teal-700",
             )}
           >
-            {platform ? "Pegasus" : "โค้ดร้าน"}
+            {platform ? "Pegasus" : translate("โค้ดร้าน", "Shop coupon")}
           </Badge>
           <button
             type="button"
             onClick={stop(onOpenTerms)}
             disabled={!onOpenTerms}
-            aria-label={`เงื่อนไขโค้ด ${promotion.code}`}
+            aria-label={translate(`เงื่อนไขโค้ด ${promotion.code}`, `Terms for coupon ${promotion.code}`)}
             className={cn(
               "truncate text-left text-sm font-semibold disabled:cursor-default",
               soldOut ? "text-muted-foreground" : "text-foreground",
@@ -130,25 +132,23 @@ export function ClaimTicket({
                   aria-disabled
                   className="h-7 shrink-0 cursor-default gap-1 rounded-md px-3 text-xs text-emerald-700 hover:bg-transparent hover:text-emerald-700"
                 >
-                  <Check className="size-3.5" /> เก็บแล้ว
-                </Button>
+                  <Check className="size-3.5" /> {translate("เก็บแล้ว", "Collected")}</Button>
               ) : soldOut ? (
                 <Button type="button" size="xs" variant="secondary" disabled className="h-7 shrink-0 rounded-md px-3 text-xs">
-                  หมดแล้ว
-                </Button>
+                  {translate("หมดแล้ว", "Fully claimed")}</Button>
               ) : (
                 <Button
                   type="button"
                   size="xs"
                   onClick={stop(onClaim)}
                   disabled={claiming || !onClaim}
-                  aria-label={`เก็บโค้ด ${promotion.code}`}
+                  aria-label={translate(`เก็บโค้ด ${promotion.code}`, `Collect coupon ${promotion.code}`)}
                   className={cn(
                     "h-7 shrink-0 rounded-md px-3 text-xs font-semibold",
                     !platform && "bg-teal-600 hover:bg-teal-700",
                   )}
                 >
-                  {claiming ? <Spinner /> : "เก็บโค้ด"}
+                  {claiming ? <Spinner /> : translate("เก็บโค้ด", "Collect coupon")}
                 </Button>
               )
             )}

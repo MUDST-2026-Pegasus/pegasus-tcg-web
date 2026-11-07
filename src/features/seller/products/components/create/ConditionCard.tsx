@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { FieldError, FieldLabel } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,10 +22,11 @@ export function ConditionCard({
   disabled = false,
   error,
 }: ConditionCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-foreground">สภาพการ์ด</h2>
+        <h2 className="text-base font-semibold text-foreground">{translate("สภาพการ์ด", "Card condition")}</h2>
         <p className="text-xs text-gray-500">
           {disabled
             ? "สภาพเปลี่ยนไม่ได้หลังลงประกาศ ถ้าเลือกผิดให้ลงประกาศใหม่ แล้วปิดประกาศนี้"
@@ -33,7 +35,7 @@ export function ConditionCard({
       </div>
 
       <RadioGroup
-        aria-label="สภาพการ์ด"
+        aria-label={translate("สภาพการ์ด", "Card condition")}
         aria-invalid={Boolean(error) || undefined}
         value={value}
         disabled={disabled}

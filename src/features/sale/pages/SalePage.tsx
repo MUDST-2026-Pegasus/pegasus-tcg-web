@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ChevronDown, Info, Tag } from "lucide-react";
@@ -29,16 +30,16 @@ import { SALE_GRID_PAGE_SIZE, useSaleListings, useSales } from "../sale.queries"
 import type { PublicSale, SaleListingQuery, SaleSort } from "../sale.types";
 
 const SORTS: Array<{ value: SaleSort; label: string }> = [
-  { value: "discount_desc", label: "ลดมากสุด" },
-  { value: "price_asc", label: "ราคาต่ำสุด" },
-  { value: "ending_soon", label: "ใกล้หมดเวลา" },
+  { value: "discount_desc", get label() { return translate("ลดมากสุด", "Largest discount"); } },
+  { value: "price_asc", get label() { return translate("ราคาต่ำสุด", "Lowest price"); } },
+  { value: "ending_soon", get label() { return translate("ใกล้หมดเวลา", "Ending soon"); } },
 ];
 
 const CONDITIONS = Object.keys(CONDITION_LABELS) as CardCondition[];
 /** ค่าแทน "ไม่กรอง" ใน Select — URL ไม่เก็บค่านี้ */
 const ALL = "ALL";
 const CONDITION_ITEMS = [
-  { value: ALL, label: "ทุกสภาพ" },
+  { value: ALL, get label() { return translate("ทุกสภาพ", "All conditions"); } },
   ...CONDITIONS.map((code) => ({ value: code, label: CONDITION_LABELS[code] })),
 ];
 const FILTER_TRIGGER = "h-8 rounded-full border-border bg-card text-[13px]";
@@ -51,6 +52,7 @@ const CHIP =
  * filter / sort อยู่ใน URL · ราคาทุกใบมาจาก `pricing` ของ API
  */
 export function SalePage() {
+  useLanguage();
   const { slug = null } = useParams<{ slug: string }>();
   const [params, setParams] = useSearchParams();
   const query = useMemo<SaleListingQuery>(
@@ -74,7 +76,7 @@ export function SalePage() {
   const sale = pages[0]?.sale ?? null;
   const allCount = (sales.data ?? []).reduce((sum, item) => sum + item.listingCount, 0);
   const gameItems = useMemo(
-    () => [{ value: ALL, label: "ทุกเกม" }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: game.name }))],
+    () => [{ value: ALL, label: translate("ทุกเกม", "All games") }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: game.name }))],
     [games.data],
   );
 
@@ -90,11 +92,11 @@ export function SalePage() {
       <Breadcrumb>
         <BreadcrumbList className="text-xs">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/" />}>หน้าแรก</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/" />}>{translate("หน้าแรก", "Home")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            {slug ? <BreadcrumbLink render={<Link to="/sale" />}>SALE</BreadcrumbLink> : <BreadcrumbPage>SALE</BreadcrumbPage>}
+            {slug ? <BreadcrumbLink render={<Link to="/sale" />}>{translate("ลดราคา", "SALE")}</BreadcrumbLink> : <BreadcrumbPage>{translate("ลดราคา", "SALE")}</BreadcrumbPage>}
           </BreadcrumbItem>
           {slug ? (
             <>
@@ -108,13 +110,12 @@ export function SalePage() {
       </Breadcrumb>
 
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h1 className="text-3xl font-black text-[#dc2626]">SALE</h1>
-        <p className="text-sm text-muted-foreground">ราคาลดแล้วทั้งหมด ไม่ต้องใช้โค้ด</p>
+        <h1 className="text-3xl font-black text-[#dc2626]">{translate("ลดราคา", "SALE")}</h1>
+        <p className="text-sm text-muted-foreground">{translate("ราคาลดแล้วทั้งหมด ไม่ต้องใช้โค้ด", "Discounted prices, no code needed")}</p>
       </header>
 
-      <nav aria-label="แคมเปญลดราคา" className="flex flex-wrap gap-2">
-        <TabLink to="/sale" active={!slug}>
-          ทั้งหมด {allCount ? allCount.toLocaleString("th-TH") : ""}
+      <nav aria-label={translate("แคมเปญลดราคา", "Sale campaigns")} className="flex flex-wrap gap-2">
+        <TabLink to="/sale" active={!slug}>{translate("ทั้งหมด", "All")}{allCount ? allCount.toLocaleString("th-TH") : ""}
         </TabLink>
         {(sales.data ?? [])
           .filter((item) => item.slug)
@@ -122,7 +123,7 @@ export function SalePage() {
             <TabLink key={item.id} to={`/sale/${item.slug}`} active={slug === item.slug}>
               {item.type === "FLASH_SALE" ? "⚡ " : ""}
               {item.name}
-              {item.status === "SCHEDULED" ? " · เร็วๆ นี้" : ""}
+              {item.status === "SCHEDULED" ? translate(" · เร็วๆ นี้", " · Coming soon") : ""}
             </TabLink>
           ))}
       </nav>
@@ -131,13 +132,13 @@ export function SalePage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <FilterSelect
-          label="เกม"
+          label={translate("เกม", "Game")}
           items={gameItems}
           value={params.get("game") ?? ALL}
           onChange={(value) => setParam("game", value === ALL ? null : value)}
         />
         <FilterSelect
-          label="สภาพ"
+          label={translate("สภาพ", "Condition")}
           items={CONDITION_ITEMS}
           value={params.get("condition") ?? ALL}
           onChange={(value) => setParam("condition", value === ALL ? null : value)}
@@ -150,8 +151,7 @@ export function SalePage() {
             className={CHIP}
             pressed={query.minDiscount === value}
             onPressedChange={(pressed) => setParam("minDiscount", pressed ? String(value) : null)}
-          >
-            ลด ≥ {value}%
+          >{translate("ลด ≥", "Discount ≥")}{value}%
           </Toggle>
         ))}
         <PriceFilter
@@ -170,13 +170,13 @@ export function SalePage() {
           }}
         />
         <div className="ml-auto flex items-center gap-2 text-[13px] text-muted-foreground">
-          <span aria-hidden>เรียง:</span>
+          <span aria-hidden>{translate("เรียง:", "Sort:")}</span>
           <Select
             items={SORTS}
             value={query.sort}
             onValueChange={(value) => setParam("sort", !value || value === "discount_desc" ? null : value)}
           >
-            <SelectTrigger aria-label="เรียงตาม" size="sm" className="min-w-36 rounded-md border-border bg-card text-[13px] text-foreground">
+            <SelectTrigger aria-label={translate("เรียงตาม", "Sort by")} size="sm" className="min-w-36 rounded-md border-border bg-card text-[13px] text-foreground">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -201,14 +201,14 @@ export function SalePage() {
       ) : listings.isError ? (
         <ErrorState
           error={listings.error}
-          title="โหลดสินค้าลดราคาไม่สำเร็จ"
+          title={translate("โหลดสินค้าลดราคาไม่สำเร็จ", "Unable to load sale products")}
           onRetry={() => void listings.refetch()}
           className="min-h-60"
         />
       ) : items.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title={sale && sale.status !== "ACTIVE" ? "แคมเปญนี้ยังไม่มีสินค้าที่ลดราคา" : "ไม่มีสินค้าที่ตรงกับตัวกรอง"}
+          title={sale && sale.status !== "ACTIVE" ? translate("แคมเปญนี้ยังไม่มีสินค้าที่ลดราคา", "This campaign has no discounted products yet") : translate("ไม่มีสินค้าที่ตรงกับตัวกรอง", "No products match the filters")}
           className="min-h-60 border-dashed"
         />
       ) : (
@@ -220,8 +220,7 @@ export function SalePage() {
       )}
 
       {items.length > 0 ? (
-        <p className="text-center text-[13px] text-primary">
-          แสดง 1–{items.length.toLocaleString("th-TH")} จาก {total.toLocaleString("th-TH")}
+        <p className="text-center text-[13px] text-primary">{translate("แสดง 1–", "Showing 1–")}{items.length.toLocaleString("th-TH")}{translate("จาก", "from")}{total.toLocaleString("th-TH")}
           {listings.hasNextPage ? (
             <>
               {" · "}
@@ -232,7 +231,7 @@ export function SalePage() {
                 disabled={listings.isFetchingNextPage}
                 onClick={() => void listings.fetchNextPage()}
               >
-                {listings.isFetchingNextPage ? "กำลังโหลด…" : "โหลดเพิ่ม"}
+                {listings.isFetchingNextPage ? translate("กำลังโหลด…", "Loading…") : translate("โหลดเพิ่ม", "Load more")}
               </Button>
             </>
           ) : null}
@@ -243,6 +242,7 @@ export function SalePage() {
 }
 
 function TabLink({ to, active, children }: { to: string; active: boolean; children: React.ReactNode }) {
+  useLanguage();
   return (
     <Button
       variant={active ? "default" : "outline"}
@@ -271,6 +271,7 @@ function FilterSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  useLanguage();
   return (
     <Select items={items} value={value} onValueChange={(next) => onChange(next ?? ALL)}>
       <SelectTrigger aria-label={label} size="sm" className={cn(FILTER_TRIGGER, "min-w-32")}>
@@ -291,6 +292,7 @@ function FilterSelect({
 
 /** Hero แคมเปญ (Figma SAL-B2) — นับถอยหลังถึงจบ · จบระหว่างเปิดหน้า → แถบแจ้ง + ลิงก์ /sale */
 function CampaignHero({ sale }: { sale: PublicSale }) {
+  useLanguage();
   const upcoming = sale.status === "SCHEDULED";
   const [endedLive, setEndedLive] = useState(false);
   const notified = useRef(false);
@@ -302,7 +304,7 @@ function CampaignHero({ sale }: { sale: PublicSale }) {
   useEffect(() => {
     if (!endedLive || notified.current) return;
     notified.current = true;
-    toast.add({ title: `${sale.name} จบแล้ว`, description: "ดูสินค้าลดราคาอื่นได้ที่หน้า SALE", type: "info" });
+    toast.add({ title: translate(`${sale.name} จบแล้ว`, `${sale.name} has ended`), description: translate("ดูสินค้าลดราคาอื่นได้ที่หน้า SALE", "View other discounted products on the SALE page"), type: "info" });
   }, [endedLive, sale.name]);
 
   return (
@@ -310,10 +312,7 @@ function CampaignHero({ sale }: { sale: PublicSale }) {
       {ended ? (
         <div role="status" className="flex flex-wrap items-center gap-2 rounded-xl border border-[#cfe0f7] bg-[#e8f1fc] px-4 py-3 text-sm text-[#0058bc]">
           <Info className="size-4 shrink-0" aria-hidden />
-          {sale.name} จบแล้ว · ราคากลับเป็นราคาปกติ
-          <Link to="/sale" className="ml-auto font-semibold underline">
-            ดูสินค้าลดราคาอื่นที่หน้า SALE
-          </Link>
+          {sale.name}{translate("จบแล้ว · ราคากลับเป็นราคาปกติ", "Ended · Regular prices apply")}<Link to="/sale" className="ml-auto font-semibold underline">{translate("ดูสินค้าลดราคาอื่นที่หน้า SALE", "View other discounts on the SALE page")}</Link>
         </div>
       ) : null}
       <section
@@ -326,16 +325,16 @@ function CampaignHero({ sale }: { sale: PublicSale }) {
       >
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold tracking-wide uppercase opacity-80">
-            {sale.name} · {sale.type === "SHOP_SALE" ? "ร้านค้า" : "แคมเปญ Pegasus"}
+            {sale.name} · {sale.type === "SHOP_SALE" ? translate("ร้านค้า", "Store") : translate("แคมเปญ Pegasus", "Pegasus campaign")}
           </p>
           <h2 className="mt-1 text-2xl font-black sm:text-3xl">{saleHeadline(sale)}</h2>
           <p className="mt-1 text-xs opacity-85">{saleTerms(sale)}</p>
         </div>
         <div className="text-right">
-          <p className="text-xs opacity-80">{ended ? "สถานะ" : upcoming ? "เริ่มในอีก" : "เหลืออีก"}</p>
-          <p className="text-2xl font-black tabular-nums">{ended ? "จบแล้ว" : formatCountdown(left)}</p>
+          <p className="text-xs opacity-80">{ended ? translate("สถานะ", "Status") : upcoming ? translate("เริ่มในอีก", "Starts in") : translate("เหลืออีก", "Time left")}</p>
+          <p className="text-2xl font-black tabular-nums">{ended ? translate("จบแล้ว", "Ended") : formatCountdown(left)}</p>
           <p className="text-xs opacity-80">
-            {sale.listingCount.toLocaleString("th-TH")} listing{sale.shop ? ` · ร้าน ${sale.shop.displayName ?? sale.shop.username}` : ""}
+            {sale.listingCount.toLocaleString("th-TH")}{translate("ประกาศขาย", "listing")}{sale.shop ? translate(` · ร้าน ${sale.shop.displayName ?? sale.shop.username}`, ` · Store ${sale.shop.displayName ?? sale.shop.username}`) : ""}
           </p>
         </div>
       </section>
@@ -352,20 +351,20 @@ function PriceFilter({
   max?: number;
   onApply: (min: number | null, max: number | null) => void;
 }) {
+  useLanguage();
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState(min ? String(min) : "");
   const [to, setTo] = useState(max ? String(max) : "");
   const active = min != null || max != null;
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={<Button variant="outline" size="sm" className={CHIP} aria-pressed={active} />}>
-        ราคา{active ? `: ${min ?? 0}–${max ?? "∞"}` : ""}
+      <PopoverTrigger render={<Button variant="outline" size="sm" className={CHIP} aria-pressed={active} />}>{translate("ราคา", "Price")}{active ? `: ${min ?? 0}–${max ?? "∞"}` : ""}
         <ChevronDown data-icon="inline-end" />
       </PopoverTrigger>
       <PopoverContent align="start" className="grid w-64 gap-3 p-3">
         <div className="grid grid-cols-2 gap-2">
-          <Input aria-label="ราคาต่ำสุด" type="number" min={0} placeholder="ต่ำสุด" value={from} onChange={(event) => setFrom(event.target.value)} />
-          <Input aria-label="ราคาสูงสุด" type="number" min={0} placeholder="สูงสุด" value={to} onChange={(event) => setTo(event.target.value)} />
+          <Input aria-label={translate("ราคาต่ำสุด", "Minimum price")} type="number" min={0} placeholder={translate("ต่ำสุด", "Minimum")} value={from} onChange={(event) => setFrom(event.target.value)} />
+          <Input aria-label={translate("ราคาสูงสุด", "Maximum price")} type="number" min={0} placeholder={translate("สูงสุด", "Maximum")} value={to} onChange={(event) => setTo(event.target.value)} />
         </div>
         <div className="flex justify-end gap-2">
           <Button
@@ -377,18 +376,14 @@ function PriceFilter({
               onApply(null, null);
               setOpen(false);
             }}
-          >
-            ล้าง
-          </Button>
+          >{translate("ล้าง", "Clear")}</Button>
           <Button
             size="sm"
             onClick={() => {
               onApply(Number(from) || null, Number(to) || null);
               setOpen(false);
             }}
-          >
-            ใช้
-          </Button>
+          >{translate("ใช้", "Apply")}</Button>
         </div>
       </PopoverContent>
     </Popover>

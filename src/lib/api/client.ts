@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { ApiError } from "./errors";
 import { buildUrl, type QueryParams } from "./config";
 import {
@@ -121,13 +122,13 @@ async function fetchFile(
       throw new ApiError({
         status: 0,
         code: CLIENT_ERROR_CODES.ABORTED,
-        message: "Request was cancelled",
+        message: translate("ยกเลิกคำขอแล้ว", "Request was cancelled"),
       });
     }
     throw new ApiError({
       status: 0,
       code: CLIENT_ERROR_CODES.NETWORK_ERROR,
-      message: "Cannot reach the server. Please check your connection and try again.",
+      message: translate("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่", "Cannot reach the server. Please check your connection and try again."),
     });
   }
 }
@@ -199,13 +200,13 @@ async function fetchJson(
       throw new ApiError({
         status: 0,
         code: CLIENT_ERROR_CODES.ABORTED,
-        message: "Request was cancelled",
+        message: translate("ยกเลิกคำขอแล้ว", "Request was cancelled"),
       });
     }
     throw new ApiError({
       status: 0,
       code: CLIENT_ERROR_CODES.NETWORK_ERROR,
-      message: "Cannot reach the server. Please check your connection and try again.",
+      message: translate("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่", "Cannot reach the server. Please check your connection and try again."),
     });
   }
 
@@ -249,7 +250,7 @@ function unwrap<T>(response: RawResponse, path: string): T {
     throw new ApiError({
       status,
       code: CLIENT_ERROR_CODES.MALFORMED_RESPONSE,
-      message: `Unexpected response from the server (HTTP ${status})`,
+      message: translate(`ได้รับคำตอบที่ไม่คาดคิดจากเซิร์ฟเวอร์ (HTTP ${status})`, `Unexpected response from the server (HTTP ${status})`),
       path,
     });
   }
@@ -259,7 +260,7 @@ function unwrap<T>(response: RawResponse, path: string): T {
     throw new ApiError({
       status,
       code: detail?.code ?? `HTTP_${status}`,
-      message: envelope.message || `Request failed (HTTP ${status})`,
+      message: envelope.message || translate(`คำขอไม่สำเร็จ (HTTP ${status})`, `Request failed (HTTP ${status})`),
       violations: detail?.violations ?? [],
       details: detail?.details,
       path: detail?.path ?? path,

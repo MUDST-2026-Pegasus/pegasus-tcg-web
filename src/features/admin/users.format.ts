@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -9,8 +10,8 @@ import type { AdminUser, RoleCode, UserStatus } from "./users.types";
 /** ตัวช่วยแปลงข้อมูลผู้ใช้จาก `/admin/users` → ข้อความบนตาราง ไม่มีการ log PII */
 
 export const ROLE_LABEL: Record<RoleCode, string> = {
-  BUYER: "ผู้ซื้อ",
-  SELLER: "ผู้ขาย",
+  get BUYER() { return translate("ผู้ซื้อ", "Buyer"); },
+  get SELLER() { return translate("ผู้ขาย", "Seller"); },
   ADMIN: "ผู้ดูแล",
   SUPPORT: "ทีมซัพพอร์ต",
 };
@@ -24,8 +25,8 @@ export function sortedRoles(roles: RoleCode[]): RoleCode[] {
 
 export const USER_STATUS_LABEL: Record<UserStatus, string> = {
   ACTIVE: "ใช้งานปกติ",
-  SUSPENDED: "ถูกระงับ",
-  DEACTIVATED: "ปิดบัญชี",
+  get SUSPENDED() { return translate("ถูกระงับ", "Suspended"); },
+  get DEACTIVATED() { return translate("ปิดบัญชี", "Close account"); },
 };
 
 /** ตัวย่อจากชื่อที่แสดง (ไม่มีก็ใช้ username) เช่น "Ton Deckbuilder" → "TD" */

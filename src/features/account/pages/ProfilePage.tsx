@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import {
   ArrowRight,
@@ -45,6 +46,7 @@ function ProfileAvatar({
   avatarUrl?: string | null;
   name: string;
 }) {
+  useLanguage();
   return (
     <Avatar className="size-28">
       {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
@@ -57,6 +59,7 @@ function ProfileAvatar({
 }
 
 function ProfileSummary({ user }: { user: AuthUser }) {
+  useLanguage();
   const initials = initialsOf(user.displayName);
 
   return (
@@ -83,6 +86,7 @@ function ProfileSummary({ user }: { user: AuthUser }) {
 }
 
 function OrderStatus() {
+  useLanguage();
   const orders = useBuyerOrders(0, 1);
   const latestOrder = orders.data?.[0];
   const stage = latestOrder ? orderStage(latestOrder) : null;
@@ -90,10 +94,10 @@ function OrderStatus() {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">Latest Order Status</CardTitle>
+        <CardTitle className="text-xl font-semibold">{translate("สถานะคำสั่งซื้อล่าสุด", "Latest Order Status")}</CardTitle>
         <CardAction>
           <Button variant="link" nativeButton={false} render={<Link to="/account/orders" />}>
-            View All <ArrowRight data-icon="inline-end" />
+            {translate("ดูทั้งหมด", "View All")}<ArrowRight data-icon="inline-end" />
           </Button>
         </CardAction>
       </CardHeader>
@@ -106,16 +110,15 @@ function OrderStatus() {
           </div>
         ) : orders.isError ? (
           <div className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
-            <p className="text-sm text-destructive">Could not load your latest order.</p>
+            <p className="text-sm text-destructive">{translate("โหลดคำสั่งซื้อล่าสุดไม่สำเร็จ", "Could not load your latest order.")}</p>
             <Button variant="outline" onClick={() => void orders.refetch()}>
-              <RotateCw data-icon="inline-start" /> Try again
-            </Button>
+              <RotateCw data-icon="inline-start" /> {translate("ลองอีกครั้ง", "Try again")}</Button>
           </div>
         ) : latestOrder && stage ? (
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-semibold">Order #{latestOrder.orderNumber}</p>
+                <p className="font-semibold">{translate("คำสั่งซื้อ #", "Order #")}{latestOrder.orderNumber}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatOrderDateTime(latestOrder.placedAt)}
                 </p>
@@ -123,19 +126,19 @@ function OrderStatus() {
               <Badge className={stage.badgeClassName}>{stage.label}</Badge>
             </div>
             <div className="flex items-center justify-between gap-3 border-t pt-4">
-              <span className="text-sm text-muted-foreground">Order total</span>
+              <span className="text-sm text-muted-foreground">{translate("ยอดคำสั่งซื้อ", "Order total")}</span>
               <span className="font-semibold">฿{latestOrder.grandTotal.toLocaleString()}</span>
             </div>
             <Button variant="outline" nativeButton={false} className="w-full" render={<Link to={`/account/orders?orderId=${latestOrder.id}`} />}>
-              View Order Details <ArrowRight data-icon="inline-end" />
+              {translate("ดูรายละเอียดคำสั่งซื้อ", "View Order Details")}<ArrowRight data-icon="inline-end" />
             </Button>
           </div>
         ) : (
           <div className="flex min-h-52 items-center justify-center">
             <EmptyState
               icon={Package}
-              title="No recent orders"
-              description="Your latest order tracking will appear here once you make a purchase."
+              title={translate("ยังไม่มีคำสั่งซื้อล่าสุด", "No recent orders")}
+              description={translate("การติดตามคำสั่งซื้อล่าสุดจะแสดงที่นี่เมื่อคุณซื้อสินค้า", "Your latest order tracking will appear here once you make a purchase.")}
             />
           </div>
         )}
@@ -159,6 +162,7 @@ function PrimaryAddressCard({
   error,
   onRetry,
 }: PrimaryAddressCardProps) {
+  useLanguage();
   // 1. Loading state
   if (isLoading) {
     return (
@@ -184,15 +188,13 @@ function PrimaryAddressCard({
       <Card className="rounded-xl shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-            <MapPin className="text-primary" /> Primary Address
-          </CardTitle>
+            <MapPin className="text-primary" /> {translate("ที่อยู่หลัก", "Primary Address")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-muted-foreground">
           <p className="text-sm font-medium text-destructive">
-            Could not load your address
-          </p>
+            {translate("โหลดที่อยู่ไม่สำเร็จ", "Could not load your address")}</p>
           <p className="text-sm">
-            {getErrorMessage(error, "Please check your connection and try again.")}
+            {getErrorMessage(error, translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Please check your connection and try again."))}
           </p>
         </CardContent>
         {onRetry && (
@@ -202,8 +204,7 @@ function PrimaryAddressCard({
               className="w-full"
               onClick={onRetry}
             >
-              <RotateCw data-icon="inline-start" /> Try again
-            </Button>
+              <RotateCw data-icon="inline-start" /> {translate("ลองอีกครั้ง", "Try again")}</Button>
           </CardFooter>
         )}
       </Card>
@@ -219,21 +220,18 @@ function PrimaryAddressCard({
       <Card className="rounded-xl shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-            <MapPin className="text-primary" /> Primary Address
-          </CardTitle>
+            <MapPin className="text-primary" /> {translate("ที่อยู่หลัก", "Primary Address")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-muted-foreground">
           <p className="text-sm">
-            No shipping address saved yet. Save a primary destination for faster checkout.
-          </p>
+            {translate("ยังไม่มีที่อยู่จัดส่ง บันทึกที่อยู่หลักเพื่อชำระเงินได้เร็วขึ้น", "No shipping address saved yet. Save a primary destination for faster checkout.")}</p>
         </CardContent>
         <CardFooter>
           <Button
             className="w-full"
             render={<Link to="/account/addresses" />}
           >
-            <Plus data-icon="inline-start" /> Add New Address
-          </Button>
+            <Plus data-icon="inline-start" /> {translate("เพิ่มที่อยู่ใหม่", "Add New Address")}</Button>
         </CardFooter>
       </Card>
     );
@@ -246,13 +244,12 @@ function PrimaryAddressCard({
     <Card className="rounded-xl shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-          <MapPin className="text-primary" /> Primary Address
-        </CardTitle>
+          <MapPin className="text-primary" /> {translate("ที่อยู่หลัก", "Primary Address")}</CardTitle>
         <CardAction>
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Edit address"
+            aria-label={translate("แก้ไขที่อยู่", "Edit address")}
             render={<Link to="/account/addresses" />}
           >
             <Pencil />
@@ -261,7 +258,7 @@ function PrimaryAddressCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-3 leading-7">
         <Badge className="w-fit">
-          {primary.label ?? (primary.defaultShipping ? "Default" : "Primary")}
+          {primary.label ?? (primary.defaultShipping ? translate("ค่าเริ่มต้น", "Default") : translate("หลัก", "Primary"))}
         </Badge>
         <address className="not-italic">
           {primary.recipientName} | {primary.phone}
@@ -280,14 +277,14 @@ function PrimaryAddressCard({
           className="w-full"
           render={<Link to="/account/addresses" />}
         >
-          <Plus data-icon="inline-start" /> Manage Addresses
-        </Button>
+          <Plus data-icon="inline-start" /> {translate("จัดการที่อยู่", "Manage Addresses")}</Button>
       </CardFooter>
     </Card>
   );
 }
 
 function ProfileSkeleton() {
+  useLanguage();
   return (
     <div className="flex min-w-0 flex-col gap-8" aria-busy="true">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -324,6 +321,7 @@ function ProfileSkeleton() {
 }
 
 export function ProfilePage() {
+  useLanguage();
   const { user, isLoading } = useAuth();
   const addressesQuery = useAddresses();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -339,17 +337,15 @@ export function ProfilePage() {
           <div className="flex min-w-0 flex-col gap-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-3xl font-semibold">My Profile</h1>
+                <h1 className="text-3xl font-semibold">{translate("โปรไฟล์ของฉัน", "My Profile")}</h1>
                 <p className="mt-1 text-muted-foreground">
-                  Manage your personal information, order history, and addresses.
-                </p>
+                  {translate("จัดการข้อมูลส่วนตัว ประวัติคำสั่งซื้อ และที่อยู่", "Manage your personal information, order history, and addresses.")}</p>
               </div>
               <Button
                 className="sm:self-start"
                 onClick={() => setIsEditingProfile(true)}
               >
-                <Pencil data-icon="inline-start" /> Edit Profile
-              </Button>
+                <Pencil data-icon="inline-start" /> {translate("แก้ไขโปรไฟล์", "Edit Profile")}</Button>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-[352px_1fr]">

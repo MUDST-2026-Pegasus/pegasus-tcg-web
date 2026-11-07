@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Loader2, RotateCw, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,7 @@ export function OrderDetailsModal({
   onConfirmReceived,
   isConfirming = false,
 }: OrderDetailsModalProps) {
+  useLanguage();
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
 
   // Parse address snapshot if JSON
@@ -78,10 +80,9 @@ export function OrderDetailsModal({
         <div className="sticky top-0 z-20 flex items-start justify-between border-b bg-card px-6 py-4 shrink-0">
           <DialogHeader className="gap-0.5">
             <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
-              Order Details
-            </DialogTitle>
+              {translate("รายละเอียดคำสั่งซื้อ", "Order Details")}</DialogTitle>
             <p className="text-sm text-muted-foreground">
-              Order #{order.orderNumber}
+              {translate("คำสั่งซื้อ #", "Order #")}{order.orderNumber}
             </p>
           </DialogHeader>
 
@@ -99,7 +100,7 @@ export function OrderDetailsModal({
                   variant="ghost"
                   size="icon"
                   className="size-8 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
-                  aria-label="Close"
+                  aria-label={translate("ปิด", "Close")}
                 />
               }
             >
@@ -112,22 +113,22 @@ export function OrderDetailsModal({
         <div className="overflow-y-auto px-6 py-5 flex flex-col gap-6 flex-1">
           {/* Shipping Address */}
           <div className="bg-muted/40 p-4 rounded-xl border text-sm">
-            <p className="font-semibold text-foreground mb-1">Shipping Destination</p>
+            <p className="font-semibold text-foreground mb-1">{translate("ที่อยู่จัดส่ง", "Shipping Destination")}</p>
             <p className="text-muted-foreground leading-relaxed">{addressText}</p>
           </div>
 
           {/* Sub-Orders by Seller */}
           <div className="flex flex-col gap-6">
-            <h3 className="font-bold text-base text-foreground">Items by Seller</h3>
+            <h3 className="font-bold text-base text-foreground">{translate("สินค้าแยกตามร้าน", "Items by Seller")}</h3>
             {sellerOrders.map((so) => (
               <div key={so.id} className="border rounded-xl p-4 flex flex-col gap-3">
                 <div className="flex justify-between items-center text-sm border-b pb-2">
                   <div className="flex flex-col">
                     <span className="font-semibold text-foreground">
-                      Seller: {so.sellerName || "Pegasus Seller"}
+                      {translate("ผู้ขาย:", "Seller:")}{so.sellerName || translate("ผู้ขาย Pegasus", "Pegasus Seller")}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      Order #{so.sellerOrderNumber}
+                      {translate("คำสั่งซื้อ #", "Order #")}{so.sellerOrderNumber}
                     </span>
                   </div>
                   <div className="text-right">
@@ -135,11 +136,11 @@ export function OrderDetailsModal({
                       variant={getOrderStatusBadge(so.status).variant}
                       className={cn("text-xs font-medium", getOrderStatusBadge(so.status).className)}
                     >
-                      Package Status: {formatOrderStatus(so.status)}
+                      {translate("สถานะพัสดุ:", "Package Status:")}{formatOrderStatus(so.status)}
                     </Badge>
                     {so.autoCompleteAt && ["SHIPPED", "DELIVERED"].includes(so.status) && (
                       <p className="mt-1 text-[11px] text-muted-foreground">
-                        Auto-confirms {formatOrderDateTime(so.autoCompleteAt)}
+                        {translate("ยืนยันรับอัตโนมัติ", "Auto-confirms")}{formatOrderDateTime(so.autoCompleteAt)}
                       </p>
                     )}
                   </div>
@@ -157,7 +158,7 @@ export function OrderDetailsModal({
                             className="w-full h-full object-contain"
                           />
                         ) : (
-                          <span className="text-[10px] text-muted-foreground">Art</span>
+                          <span className="text-[10px] text-muted-foreground">{translate("รูปการ์ด", "Art")}</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -168,7 +169,7 @@ export function OrderDetailsModal({
                           {[item.variantLabel, item.condition]
                             .filter(Boolean)
                             .join(" • ")}{" "}
-                          • Qty: {item.quantity}
+                          {translate("• จำนวน:", "• Qty:")}{item.quantity}
                         </p>
                       </div>
                       <div className="text-sm font-bold text-foreground">
@@ -179,7 +180,7 @@ export function OrderDetailsModal({
                 </div>
 
                 {so.cancelReason && (
-                  <p className="text-xs text-muted-foreground">Cancel reason: {so.cancelReason}</p>
+                  <p className="text-xs text-muted-foreground">{translate("เหตุผลที่ยกเลิก:", "Cancel reason:")} {so.cancelReason}</p>
                 )}
 
                 {/* Shipments info if any */}
@@ -188,10 +189,10 @@ export function OrderDetailsModal({
                     {so.shipments.map((ship) => (
                       <div key={ship.id} className="flex justify-between">
                         <span className="font-medium text-foreground">
-                          Carrier: {ship.carrierName || ship.carrierCode}
+                          {translate("ผู้ขนส่ง:", "Carrier:")}{ship.carrierName || ship.carrierCode}
                         </span>
                         <span className="text-muted-foreground">
-                          Tracking: {ship.trackingNumber || "Pending"}
+                          {translate("หมายเลขติดตาม:", "Tracking:")}{ship.trackingNumber || translate("รอดำเนินการ", "Pending")}
                         </span>
                       </div>
                     ))}
@@ -208,7 +209,7 @@ export function OrderDetailsModal({
                       className="flex flex-col gap-2"
                     />
                     <div className="flex items-center justify-between gap-3 text-sm font-semibold">
-                      <span>ลูกค้าจ่ายร้านนี้</span>
+                      <span>{translate("ลูกค้าจ่ายร้านนี้", "Amount paid to this shop")}</span>
                       <span className="shrink-0 tabular-nums">{formatPrice(so.grandTotal)}</span>
                     </div>
                   </div>
@@ -226,25 +227,25 @@ export function OrderDetailsModal({
             {order.saleDiscountTotal ? (
               <>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>ราคาสินค้า (ก่อนลด)</span>
+                  <span>{translate("ราคาสินค้า (ก่อนลด)", "Items before discount")}</span>
                   <span className="font-medium text-foreground">
                     {formatPrice(order.itemsSubtotal + order.saleDiscountTotal)}
                   </span>
                 </div>
                 <div className="flex justify-between text-[#dc2626]">
-                  <span>ส่วนลดราคาสินค้า</span>
+                  <span>{translate("ส่วนลดราคาสินค้า", "Item discount")}</span>
                   <span>-{formatPrice(order.saleDiscountTotal)}</span>
                 </div>
               </>
             ) : null}
             <div className="flex justify-between text-muted-foreground">
-              <span>Items Subtotal</span>
+              <span>{translate("ยอดรวมสินค้า", "Items Subtotal")}</span>
               <span className="font-medium text-foreground">
                 {formatPrice(order.itemsSubtotal)}
               </span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Shipping Total</span>
+              <span>{translate("ค่าจัดส่งรวม", "Shipping Total")}</span>
               <span className="font-medium text-foreground">
                 {formatPrice(order.shippingTotal)}
               </span>
@@ -258,13 +259,13 @@ export function OrderDetailsModal({
             />
             {order.discountTotal > 0 && order.sellerDiscountTotal == null && order.platformDiscountTotal == null && (
               <div className="flex justify-between text-emerald-600">
-                <span>{order.saleDiscountTotal ? "โค้ดส่วนลด" : "Discount"}</span>
+                <span>{order.saleDiscountTotal ? translate("โค้ดส่วนลด", "Discount code") : translate("ส่วนลด", "Discount")}</span>
                 <span>-{formatPrice(order.discountTotal)}</span>
               </div>
             )}
             <Separator className="my-1" />
             <div className="flex justify-between text-base font-bold text-foreground">
-              <span>Grand Total</span>
+              <span>{translate("ยอดรวมสุทธิ", "Grand Total")}</span>
               <span className="text-lg text-primary">
                 {formatPrice(order.grandTotal)}
               </span>
@@ -279,8 +280,7 @@ export function OrderDetailsModal({
                 className="bg-[#006699] hover:bg-[#005580] text-white rounded-full px-4 py-2 font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <RotateCw className="size-3.5" />
-                Reorder
-              </Button>
+                {translate("สั่งซื้ออีกครั้ง", "Reorder")}</Button>
             </div>
           )}
 
@@ -288,7 +288,7 @@ export function OrderDetailsModal({
             <div className="flex justify-end pt-2 border-t">
               <Button type="button" onClick={onConfirmReceived} disabled={isConfirming}>
                 {isConfirming ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
-                {isConfirming ? "Confirming..." : "Confirm receipt"}
+                {isConfirming ? translate("กำลังยืนยัน…", "Confirming...") : translate("ยืนยันรับสินค้า", "Confirm receipt")}
               </Button>
             </div>
           )}

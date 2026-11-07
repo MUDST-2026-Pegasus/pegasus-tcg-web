@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 import { useGameList } from "@/features/catalog/catalog.queries";
@@ -6,6 +7,7 @@ import { useGameList } from "@/features/catalog/catalog.queries";
  * เส้นทางเดิม /products พาไปหน้าค้นหาแบบไม่ใส่ตัวกรอง
  */
 export function LegacyProductsRedirect() {
+  useLanguage();
   const [searchParams] = useSearchParams();
   const search = searchParams.toString();
   return <Navigate replace to={search ? `/search?${search}` : "/search"} />;
@@ -21,6 +23,7 @@ export function LegacyGameRedirect({
   gameCode: string;
   fallbackSlug: string;
 }) {
+  useLanguage();
   const { data: games, isLoading } = useGameList();
   const [searchParams] = useSearchParams();
   if (isLoading) {

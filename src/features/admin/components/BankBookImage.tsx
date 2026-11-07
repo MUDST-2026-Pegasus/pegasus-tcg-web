@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ImageOff, Maximize2, RefreshCw } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
@@ -31,6 +32,7 @@ type BankBookImageProps = {
  * ไม่วนขอใหม่ไม่รู้จบตอนไฟล์หายจริง
  */
 export function BankBookImage({ url, onExpired }: BankBookImageProps) {
+  useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [retriedUrl, setRetriedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
@@ -82,8 +84,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
     return (
       <Placeholder>
         <ImageOff className="size-5" aria-hidden />
-        โหลดรูปไม่สำเร็จ
-        <Button
+        {translate("โหลดรูปไม่สำเร็จ", "Unable to load image")}<Button
           type="button"
           variant="outline"
           size="sm"
@@ -91,8 +92,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
           onClick={() => refresh(url)}
         >
           <RefreshCw data-icon="inline-start" />
-          ลองอีกครั้ง
-        </Button>
+          {translate("ลองอีกครั้ง", "Try again")}</Button>
       </Placeholder>
     );
   }
@@ -139,6 +139,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
 }
 
 function Placeholder({ children }: { children: ReactNode }) {
+  useLanguage();
   return (
     <div className="flex h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
       {children}

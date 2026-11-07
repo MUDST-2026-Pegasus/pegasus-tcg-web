@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 
 import { Search } from "lucide-react";
@@ -8,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 /** การ์ดตัวเลขบนหัวหน้า A1 / A4 */
 export function AdminKpi({ label, value, valueClass }: { label: string; value: number; valueClass?: string }) {
+  useLanguage();
   return (
     <Card className="gap-1 rounded-xl p-4 shadow-none">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -26,6 +28,7 @@ type AdminTabsProps<T extends string> = {
 
 /** แท็บแบบแคปซูลเทา (เหมือน S1) */
 export function AdminTabs<T extends string>({ label, tabs, active, counts, onChange }: AdminTabsProps<T>) {
+  useLanguage();
   return (
     <div role="tablist" aria-label={label} className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
       {tabs.map((tab) => {
@@ -53,6 +56,7 @@ export function AdminTabs<T extends string>({ label, tabs, active, counts, onCha
 
 /** ช่องค้นหา — ส่งค่าเมื่อหยุดพิมพ์ 300ms (เหมือน S1) */
 export function AdminSearchBox({ value, placeholder, onChange }: { value: string; placeholder: string; onChange: (q: string) => void }) {
+  useLanguage();
   const [text, setText] = useState(value);
   const [synced, setSynced] = useState(value);
   // URL เปลี่ยนจากที่อื่น (กด back) → ตามค่าใหม่

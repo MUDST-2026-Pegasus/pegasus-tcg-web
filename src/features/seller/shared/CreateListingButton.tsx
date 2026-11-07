@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useId } from "react";
 import { Link } from "react-router-dom";
 
@@ -20,6 +21,7 @@ type CreateListingButtonProps = {
  * ปุ่มที่ disabled ไม่รับ hover/focus จึงให้ span ที่ห่อไว้เป็นตัวเปิด tooltip แทน
  */
 export function CreateListingButton({ label }: CreateListingButtonProps) {
+  useLanguage();
   const { canPublish, reason } = usePublishPermission();
   const reasonId = useId();
 

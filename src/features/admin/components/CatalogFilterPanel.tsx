@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { QueryLike } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -37,6 +38,7 @@ export function CatalogFilterPanel({
   activeSetId,
   onSetChange,
 }: CatalogFilterPanelProps) {
+  useLanguage();
   const activeGames = games.filter((game) => game.active).length;
   const retiredGames = games.length - activeGames;
 
@@ -130,8 +132,7 @@ export function CatalogFilterPanel({
               onClick={() => cardSets.refetch()}
               className="cursor-pointer font-medium text-[#0058bc] underline-offset-2 hover:underline"
             >
-              ลองใหม่
-            </button>
+              {translate("ลองใหม่", "Retry")}</button>
           </p>
         ) : cardSets.data.length === 0 ? (
           <p className="text-xs text-muted-foreground">เกมนี้ยังไม่มีชุดการ์ด</p>
@@ -162,7 +163,7 @@ export function CatalogFilterPanel({
 
       {/* ตัวเลขสรุป */}
       <div className="flex flex-col gap-1.5 rounded-xl bg-[#e8f1fc] p-4 text-[#0058bc]">
-        <p className="text-[11px] font-medium">สินค้าในแคตตาล็อก</p>
+        <p className="text-[11px] font-medium">{translate("สินค้าในแคตตาล็อก", "Catalogue products")}</p>
         <p className="text-2xl font-bold tracking-[-0.5px]">
           {counts.total === undefined ? "…" : formatCount(counts.total)}
         </p>
@@ -183,6 +184,7 @@ function SetOption({
   label: string;
   hint?: string;
 }) {
+  useLanguage();
   return (
     <Field orientation="horizontal" className="gap-2">
       <RadioGroupItem id={id} value={value} />

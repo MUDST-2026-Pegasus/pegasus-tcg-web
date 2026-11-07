@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Info } from "lucide-react";
@@ -34,6 +35,7 @@ type RestockContentProps = {
 };
 
 export function RestockContent({ data }: RestockContentProps) {
+  useLanguage();
   const navigate = useNavigate();
   const restock = useRestockListing();
   const [draft, setDraft] = useState<RestockDraft>(data.initialDraft);

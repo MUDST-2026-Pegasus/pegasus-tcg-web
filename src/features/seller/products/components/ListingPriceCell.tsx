@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId, useState, type FormEvent } from "react";
 
 import { Pencil } from "lucide-react";
@@ -45,6 +46,7 @@ type ListingPriceCellProps = {
  * ถ้าส่ง MANUAL ไปจะเปลี่ยนวิธีตั้งราคาทิ้งโดยไม่ตั้งใจ จึงให้ไปแก้ที่หน้าแก้ไขประกาศแทน
  */
 export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
+  useLanguage();
   const changePrice = useChangeListingPrice();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -177,16 +179,14 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
               className="rounded-md px-2.5"
               onClick={() => setOpen(false)}
             >
-              ยกเลิก
-            </Button>
+              {translate("ยกเลิก", "Cancel")}</Button>
             <Button
               type="submit"
               size="sm"
               className="rounded-md px-2.5"
               disabled={invalid}
             >
-              บันทึก
-            </Button>
+              {translate("บันทึก", "Save")}</Button>
           </div>
         </form>
       </PopoverContent>

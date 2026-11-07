@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { Trash2 } from "lucide-react";
@@ -48,6 +49,7 @@ export function ConfirmDeleteDialog({
   errorFallback,
   onConfirm,
 }: ConfirmDeleteDialogProps) {
+  useLanguage();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -70,7 +72,7 @@ export function ConfirmDeleteDialog({
         ) : null}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>ยกเลิก</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
           <Button
             variant="destructive"
             disabled={isPending || confirmDisabled}

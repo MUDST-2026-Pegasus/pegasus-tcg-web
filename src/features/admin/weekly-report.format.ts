@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 
 import { formatCount } from "./catalog.format";
@@ -162,7 +163,7 @@ export function weeklyStatCards(
     },
     {
       id: "commission",
-      label: "ค่าคอมมิชชั่นที่เก็บได้",
+      label: translate("ค่าคอมมิชชั่นที่เก็บได้", "Commission collected"),
       value: formatReportBaht(summary.commission),
       delta: delta(summary.commission, previous?.summary.commission),
       footnote: `${hasData ? "คิดเป็น" : "เฉลี่ย"} ${commissionShare.toFixed(1)}% ของยอดขายรวมรายสัปดาห์`,

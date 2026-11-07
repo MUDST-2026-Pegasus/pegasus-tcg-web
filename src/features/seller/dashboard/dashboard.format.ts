@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import {
   SELLER_ORDER_STATUS_LABEL,
   TO_PACK_STATUSES,
@@ -64,7 +65,7 @@ export function thaiMonthLong(value: string): string {
  */
 export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
-    return value === 0 ? null : { label: "ใหม่", trend: "new" };
+    return value === 0 ? null : { label: translate("ใหม่", "New"), trend: "new" };
   }
   const rounded = Math.round(((value - previous) / previous) * 1000) / 10;
   if (rounded === 0) {
@@ -138,7 +139,7 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "returns",
         accent: "red",
-        title: "ตอบคำขอคืนสินค้า",
+        title: translate("ตอบคำขอคืนสินค้า", "Respond to return request"),
         description: `${count.format(returns)} คำขอรอการตัดสินใจ`,
         to: "/seller/returns",
       },
@@ -231,13 +232,13 @@ export function statCards(dashboard: SellerDashboard): StatCardData[] {
 export function recentOrders(dashboard: SellerDashboard): RecentOrders {
   return {
     title: "คำสั่งซื้อล่าสุด",
-    actionLabel: "ดูทั้งหมด",
+    actionLabel: translate("ดูทั้งหมด", "View all"),
     emptyLabel: "ยังไม่มีคำสั่งซื้อ",
     items: dashboard.recentOrders.map((order) => ({
       id: order.sellerOrderId,
       number: order.sellerOrderNumber,
       buyer: order.buyerUsername,
-      item: `${order.firstItemName ?? "สินค้า"} · ${count.format(order.itemCount)} ชิ้น`,
+      item: `${order.firstItemName ?? translate("สินค้า", "Products")} · ${count.format(order.itemCount)} ชิ้น`,
       price: formatBaht(order.grandTotal),
       status: order.status,
       statusLabel: SELLER_ORDER_STATUS_LABEL[order.status],
@@ -281,7 +282,7 @@ export function toDashboardData(
     greeting: `สวัสดี, ${seller.displayName} 👋`,
     subtitle: `สรุปภาพรวมร้านของคุณ · ${todayFormat.format(now)}`,
     actions: {
-      viewShopLabel: "ดูหน้าร้าน",
+      viewShopLabel: translate("ดูหน้าร้าน", "View storefront"),
       viewShopTo: seller.username ? `/u/${seller.username}` : null,
       createListingLabel: "+ ลงขายสินค้า",
     },

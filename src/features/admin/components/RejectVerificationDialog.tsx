@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -47,6 +48,7 @@ export function RejectVerificationDialog({
   verification,
   onRejected,
 }: RejectVerificationDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -79,6 +81,7 @@ function RejectForm({
   onRejected: (updated: Verification) => void;
   onClose: () => void;
 }) {
+  useLanguage();
   const rejectVerification = useRejectVerification();
 
   const {
@@ -97,7 +100,7 @@ function RejectForm({
         id: verification.id,
         payload: { reason: values.reason },
       });
-      toast.add({ type: "success", title: "ปฏิเสธคำขอแล้ว" });
+      toast.add({ type: "success", title: translate("ปฏิเสธคำขอแล้ว", "Request rejected") });
       onRejected(updated);
       onClose();
     } catch (error) {
@@ -121,7 +124,7 @@ function RejectForm({
       )}
 
       <Field data-invalid={Boolean(errors.reason) || undefined}>
-        <FieldLabel htmlFor="reason">เหตุผลที่ปฏิเสธ</FieldLabel>
+        <FieldLabel htmlFor="reason">{translate("เหตุผลที่ปฏิเสธ", "Rejection reason")}</FieldLabel>
         <Textarea
           id="reason"
           rows={4}
@@ -135,12 +138,10 @@ function RejectForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" variant="destructive" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          ยืนยันการปฏิเสธ
-        </Button>
+          {translate("ยืนยันการปฏิเสธ", "Confirm rejection")}</Button>
       </DialogFooter>
     </form>
   );

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { hasErrorCode } from "@/lib/api";
@@ -98,6 +99,7 @@ export function useFileUpload({
   maxFiles,
   onChange,
 }: UseFileUploadOptions): FileUploadState {
+  useLanguage();
   const rule = UPLOAD_RULES[purpose];
   const [items, setItems] = useState<UploadItem[]>([]);
 
@@ -213,7 +215,7 @@ export function useFileUpload({
         const error =
           invalid ??
           (overLimit
-            ? `เลือกได้สูงสุด ${maxFiles} ไฟล์ "${file.name}" จึงไม่ถูกเพิ่ม`
+            ? translate(`เลือกได้สูงสุด ${maxFiles} ไฟล์ "${file.name}" จึงไม่ถูกเพิ่ม`, `Select up to ${maxFiles} files. "${file.name}" was not added.`)
             : null);
 
         return {

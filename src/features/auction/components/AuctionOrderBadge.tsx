@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Gavel } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -6,6 +7,7 @@ import { auctionOrderLabel } from "../auction.format";
 
 /** ป้าย "จากการประมูล #AUC-…" ในหน้า checkout / ชำระเงิน / ชำระสำเร็จ [TCG-631 · FE-5] */
 export function AuctionOrderBadge({ auctionNumber, className }: { auctionNumber: string; className?: string }) {
+  useLanguage();
   return (
     <span
       className={cn(

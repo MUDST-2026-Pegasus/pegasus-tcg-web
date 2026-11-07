@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
@@ -42,7 +43,7 @@ function groupBySeller(items: CartItemResponse[]): SellerGroup[] {
     const key = String(item.sellerProfileId ?? "none");
     const group = groups.get(key) ?? {
       sellerId: item.sellerProfileId,
-      name: item.sellerName || item.sellerUsername || "Pegasus Seller",
+      name: item.sellerName || item.sellerUsername || translate("ผู้ขาย Pegasus", "Pegasus Seller"),
       username: item.sellerUsername ?? null,
       items: [],
     };
@@ -53,6 +54,7 @@ function groupBySeller(items: CartItemResponse[]): SellerGroup[] {
 }
 
 export function CartPage() {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const reorderListingIds = (location.state as { reorderListingIds?: number[] } | undefined)?.reorderListingIds;
@@ -123,16 +125,16 @@ export function CartPage() {
         onError: (err) => {
           if (err instanceof ApiError && (err.status === 409 || err.code === "INSUFFICIENT_STOCK")) {
             toast.add({
-              title: "สินค้าเหลือไม่พอ",
-              description: err.message || "จำนวนที่เลือกเกินกว่าสินค้าที่มี",
+              title: translate("สินค้าเหลือไม่พอ", "Not enough stock"),
+              description: err.message || translate("จำนวนที่เลือกเกินกว่าสินค้าที่มี", "The selected quantity exceeds available stock"),
               type: "error",
             });
           } else if (err instanceof ApiError && err.code === "CANNOT_BUY_OWN_LISTING") {
-            toast.add({ title: "ไม่สามารถซื้อสินค้าของตัวเองได้", type: "error" });
+            toast.add({ title: translate("ไม่สามารถซื้อสินค้าของตัวเองได้", "You cannot buy your own items"), type: "error" });
           } else {
             toast.add({
-              title: "ปรับจำนวนไม่สำเร็จ",
-              description: err instanceof ApiError ? err.message : "กรุณาลองอีกครั้ง",
+              title: translate("ปรับจำนวนไม่สำเร็จ", "Could not update quantity"),
+              description: err instanceof ApiError ? err.message : translate("กรุณาลองอีกครั้ง", "Please try again"),
               type: "error",
             });
           }
@@ -145,12 +147,12 @@ export function CartPage() {
     removeItemMutation.mutate(itemId, {
       onSuccess: () => {
         setChecked([itemId], false);
-        toast.add({ title: "นำสินค้าออกจากตะกร้าแล้ว", type: "info" });
+        toast.add({ title: translate("นำสินค้าออกจากตะกร้าแล้ว", "Item removed from cart"), type: "info" });
       },
       onError: (err) => {
         toast.add({
-          title: "นำสินค้าออกไม่สำเร็จ",
-          description: err instanceof ApiError ? err.message : "เครือข่ายขัดข้อง",
+          title: translate("นำสินค้าออกไม่สำเร็จ", "Could not remove item"),
+          description: err instanceof ApiError ? err.message : translate("เครือข่ายขัดข้อง", "Network error"),
           type: "error",
         });
       },
@@ -167,7 +169,7 @@ export function CartPage() {
       }
     }
     setChecked(ids, false);
-    toast.add({ title: "ลบสินค้าที่เลือกแล้ว", type: "info" });
+    toast.add({ title: translate("ลบสินค้าที่เลือกแล้ว", "Selected items removed"), type: "info" });
   };
 
   const checkedItems = useMemo(
@@ -197,12 +199,12 @@ export function CartPage() {
     acceptPricesMutation.mutate(changedItems.map((item) => item.id), {
       onSuccess: () => {
         setDismissedChange(changedKey);
-        toast.add({ title: "ยอมรับราคาใหม่แล้ว", type: "success" });
+        toast.add({ title: translate("ยอมรับราคาใหม่แล้ว", "New prices accepted"), type: "success" });
       },
       onError: (error) => {
         toast.add({
-          title: "ยอมรับราคาใหม่ไม่สำเร็จ",
-          description: error instanceof ApiError ? error.message : "กรุณาลองอีกครั้ง",
+          title: translate("ยอมรับราคาใหม่ไม่สำเร็จ", "Could not accept new prices"),
+          description: error instanceof ApiError ? error.message : translate("กรุณาลองอีกครั้ง", "Please try again"),
           type: "error",
         });
       },
@@ -214,8 +216,8 @@ export function CartPage() {
   const handleAutoPicked = useCallback((saving: number) => {
     toast.add({
       type: "info",
-      title: `เลือกโค้ดที่ลดมากที่สุดให้แล้ว${saving > 0 ? ` (– ${checkoutMoney(saving)})` : ""}`,
-      actionProps: { children: "เปลี่ยน", onClick: () => openPickerRef.current("PLATFORM") },
+      title: translate(`เลือกโค้ดที่ลดมากที่สุดให้แล้ว${saving > 0 ? ` (– ${checkoutMoney(saving)})` : ""}`, `The best discount code has been selected${saving > 0 ? ` (– ${checkoutMoney(saving)})` : ""}`),
+      actionProps: { children: translate("เปลี่ยน", "Change"), onClick: () => openPickerRef.current("PLATFORM") },
     });
   }, []);
 
@@ -289,21 +291,19 @@ export function CartPage() {
     <div className="bg-muted flex-1 font-sans min-h-screen">
       <main className="mx-auto flex w-full max-w-[1072px] flex-col gap-6 px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] font-bold text-foreground">ตะกร้าสินค้า</h1>
+          <h1 className="text-[28px] font-bold text-foreground">{translate("ตะกร้าสินค้า", "Shopping cart")}</h1>
           <p className="text-sm text-muted-foreground">
-            เลือกสินค้าและโค้ดส่วนลด แล้วไปเลือกการจัดส่งในหน้าถัดไป
-          </p>
+            {translate("เลือกสินค้าและโค้ดส่วนลด แล้วไปเลือกการจัดส่งในหน้าถัดไป", "Select items and discount codes, then choose shipping on the next page")}</p>
         </div>
 
         {error && (
           <div className="flex items-center gap-3 p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div className="flex-1 text-sm font-medium">
-              {error instanceof ApiError ? error.message : "โหลดตะกร้าไม่สำเร็จ"}
+              {error instanceof ApiError ? error.message : translate("โหลดตะกร้าไม่สำเร็จ", "Could not load cart")}
             </div>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
-              ลองใหม่
-            </Button>
+              {translate("ลองใหม่", "Try again")}</Button>
           </div>
         )}
 
@@ -311,11 +311,11 @@ export function CartPage() {
           <div role="alert" className="flex flex-wrap items-center gap-3 p-4 bg-amber-50 text-amber-900 border border-amber-200 rounded-xl">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold">ราคาสินค้าบางรายการเปลี่ยนแปลง</p>
-              <p className="text-sm">ตรวจสอบราคาเดิม → ราคาใหม่ แล้วกดยอมรับราคาใหม่ หรือยกเลิกเลือกรายการนั้นก่อนสั่งซื้อ</p>
+              <p className="font-semibold">{translate("ราคาสินค้าบางรายการเปลี่ยนแปลง", "Some item prices have changed")}</p>
+              <p className="text-sm">{translate("ตรวจสอบราคาเดิม → ราคาใหม่ แล้วกดยอมรับราคาใหม่ หรือยกเลิกเลือกรายการนั้นก่อนสั่งซื้อ", "Review the old and new prices, then accept the new price or deselect the item before ordering")}</p>
             </div>
             <Button variant="outline" disabled={acceptPricesMutation.isPending} onClick={handleAcceptPrices}>
-              {acceptPricesMutation.isPending ? "กำลังยอมรับราคาใหม่..." : "ยอมรับราคาใหม่"}
+              {acceptPricesMutation.isPending ? translate("กำลังยอมรับราคาใหม่...", "Accepting new prices…") : translate("ยอมรับราคาใหม่", "Accept new prices")}
             </Button>
           </div>
         )}
@@ -329,28 +329,25 @@ export function CartPage() {
                   onCheckedChange={() => setSelectedItemIds(allChecked ? new Set() : new Set(items.map((item) => item.id)))}
                   disabled={items.length === 0}
                 />
-                เลือกทั้งหมด ({items.length} รายการ)
-              </label>
+                {translate("เลือกทั้งหมด (", "Select all (")}{items.length} {translate("รายการ)", "items)")}</label>
               <button
                 type="button"
                 className="text-sm font-medium text-destructive hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={handleRemoveSelected}
                 disabled={checkedItems.length === 0 || removeItemMutation.isPending}
               >
-                ลบที่เลือก
-              </button>
+                {translate("ลบที่เลือก", "Remove selected")}</button>
             </Card>
 
             {isLoading ? (
-              <div role="status" aria-busy="true" aria-label="กำลังโหลดตะกร้า">
+              <div role="status" aria-busy="true" aria-label={translate("กำลังโหลดตะกร้า", "Loading cart")}>
                 <ProductRowsSkeleton />
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-col items-center gap-4 rounded-xl border bg-card py-16 text-center text-muted-foreground">
-                <p className="text-lg">ยังไม่มีสินค้าในตะกร้า</p>
+                <p className="text-lg">{translate("ยังไม่มีสินค้าในตะกร้า", "Your cart is empty")}</p>
                 <Button variant="outline" onClick={() => navigate("/products")}>
-                  เลือกซื้อสินค้า
-                </Button>
+                  {translate("เลือกซื้อสินค้า", "Browse products")}</Button>
               </div>
             ) : (
               groups.map((group) => {
@@ -371,7 +368,7 @@ export function CartPage() {
                     quantityBusy={updateQuantityMutation.isPending}
                     removeBusy={removeItemMutation.isPending}
                     codeSlot={group.sellerId != null && checked.length > 0 && !checkoutBlocked
-                      ? codeRow(group.sellerId, "โค้ดร้าน")
+                      ? codeRow(group.sellerId, translate("โค้ดร้าน", "Shop coupon"))
                       : null}
                     subtotal={Math.max(0, sellerSubtotal - discount)}
                   />
@@ -383,27 +380,27 @@ export function CartPage() {
           <div className="flex flex-col gap-4 lg:sticky lg:top-28">
             <Card className="gap-3 rounded-xl p-5 shadow-none">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-foreground">โค้ดส่วนลด Pegasus</h2>
+                <h2 className="text-sm font-semibold text-foreground">{translate("โค้ดส่วนลด Pegasus", "Pegasus coupons")}</h2>
                 {!isGuest && (
                   <Link to="/account/coupons" className="text-xs font-medium text-primary hover:underline">
-                    โค้ดของฉัน{claimedCount ? ` (${claimedCount})` : ""}
+                    {translate("โค้ดของฉัน", "My coupons")}{claimedCount ? ` (${claimedCount})` : ""}
                   </Link>
                 )}
               </div>
               {isGuest && (
                 <div className="flex items-center justify-between gap-2 rounded-lg bg-primary/5 px-3 py-2.5 text-xs">
-                  <span className="text-foreground/80">เข้าสู่ระบบเพื่อใช้โค้ดที่เก็บไว้</span>
-                  <Link to="/login?next=%2Fcart" className="shrink-0 font-semibold text-primary hover:underline">เข้าสู่ระบบ</Link>
+                  <span className="text-foreground/80">{translate("เข้าสู่ระบบเพื่อใช้โค้ดที่เก็บไว้", "Log in to use your saved coupons")}</span>
+                  <Link to="/login?next=%2Fcart" className="shrink-0 font-semibold text-primary hover:underline">{translate("เข้าสู่ระบบ", "Log in")}</Link>
                 </div>
               )}
               {checkedItems.length === 0 || checkoutBlocked ? (
-                <p className="text-xs text-muted-foreground">เลือกสินค้าก่อน แล้วจึงเลือกโค้ด</p>
+                <p className="text-xs text-muted-foreground">{translate("เลือกสินค้าก่อน แล้วจึงเลือกโค้ด", "Select items before choosing a coupon")}</p>
               ) : isGuest && !platformApplied && !promotions.notices.PLATFORM ? (
                 <>
                   <PromotionCodeForm
                     id="cart-guest-code"
-                    label="กรอกโค้ดอื่นที่ไม่ได้เก็บไว้"
-                    placeholder="กรอกโค้ดอื่นที่ไม่ได้เก็บไว้"
+                    label={translate("กรอกโค้ดอื่นที่ไม่ได้เก็บไว้", "Enter another unsaved code")}
+                    placeholder={translate("กรอกโค้ดอื่นที่ไม่ได้เก็บไว้", "Enter another unsaved code")}
                     showLabel={false}
                     value={guestDraft}
                     onChange={setGuestDraft}
@@ -412,40 +409,39 @@ export function CartPage() {
                     loading={promotions.checking}
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    พิมพ์โค้ดเพื่อดูส่วนลดได้ แต่ต้องเข้าสู่ระบบตอนไปชำระเงิน
-                  </p>
+                    {translate("พิมพ์โค้ดเพื่อดูส่วนลดได้ แต่ต้องเข้าสู่ระบบตอนไปชำระเงิน", "Enter a code to preview the discount. Sign in when you are ready to pay")}</p>
                 </>
               ) : (
                 <>
-                  {codeRow("PLATFORM", "เลือกโค้ดส่วนลด")}
+                  {codeRow("PLATFORM", translate("เลือกโค้ดส่วนลด", "Select a discount code"))}
                   {promotions.autoPicked && platformApplied && <AutoPickedNote />}
                 </>
               )}
             </Card>
 
             <Card className="gap-0 rounded-xl p-5 shadow-none">
-              <h2 className="mb-4 text-base font-bold text-foreground">สรุปคำสั่งซื้อ</h2>
+              <h2 className="mb-4 text-base font-bold text-foreground">{translate("สรุปคำสั่งซื้อ", "Order summary")}</h2>
               <dl className="grid gap-2.5 text-sm">
                 {saleTotals.saleDiscount > 0 && (
                   <>
                     <div className="flex justify-between">
-                      <dt>ราคาสินค้า (ก่อนลด)</dt>
+                      <dt>{translate("ราคาสินค้า (ก่อนลด)", "Items before discount")}</dt>
                       <dd>{formatSaleBaht(saleTotals.listTotal)}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt>ส่วนลดราคาสินค้า</dt>
+                      <dt>{translate("ส่วนลดราคาสินค้า", "Item discount")}</dt>
                       <dd className="text-[#dc2626]">−{formatSaleBaht(saleTotals.saleDiscount)}</dd>
                     </div>
                   </>
                 )}
                 <div className="flex justify-between">
-                  <dt>ยอดสินค้า ({checkedQuantity} ใบ)</dt>
+                  <dt>{translate("ยอดสินค้า (", "Items (")}{checkedQuantity}  {translate("ใบ)", "cards)")}</dt>
                   <dd>{checkoutMoney(itemsSubtotal)}</dd>
                 </div>
                 {sellerDiscountTotal > 0 && (
                   <>
                     <div className="flex justify-between">
-                      <dt>ส่วนลดร้าน</dt>
+                      <dt>{translate("ส่วนลดร้าน", "Shop discount")}</dt>
                       <dd className="text-emerald-700">– {checkoutMoney(sellerDiscountTotal)}</dd>
                     </div>
                     {preview?.sellers.filter((seller) => seller.sellerDiscount > 0).map((seller) => (
@@ -458,24 +454,24 @@ export function CartPage() {
                 )}
                 {platformDiscountTotal > 0 && (
                   <div className="flex justify-between">
-                    <dt>ส่วนลด Pegasus{platformApplied ? ` · ${platformApplied.code}` : ""}</dt>
+                    <dt>{translate("ส่วนลด Pegasus", "Pegasus discount")}{platformApplied ? ` · ${platformApplied.code}` : ""}</dt>
                     <dd className="text-primary">– {checkoutMoney(platformDiscountTotal)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <dt>ค่าจัดส่ง</dt>
-                  <dd className="text-muted-foreground">คิดในหน้าถัดไป</dd>
+                  <dt>{translate("ค่าจัดส่ง", "Shipping")}</dt>
+                  <dd className="text-muted-foreground">{translate("คิดในหน้าถัดไป", "Calculated on the next page")}</dd>
                 </div>
               </dl>
 
               <Separator className="my-4" />
 
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">ยอดรวม (ยังไม่รวมค่าส่ง)</span>
-                <strong className="text-2xl font-black text-foreground" aria-label="ยอดรวม">{checkoutMoney(total)}</strong>
+                <span className="text-sm font-semibold text-foreground">{translate("ยอดรวม (ยังไม่รวมค่าส่ง)", "Total excluding shipping")}</span>
+                <strong className="text-2xl font-black text-foreground" aria-label={translate("ยอดรวม", "Total")}>{checkoutMoney(total)}</strong>
               </div>
               {saving > 0 && (
-                <p className="mt-1 text-right text-xs font-semibold text-emerald-700">ประหยัดไป {checkoutMoney(saving)}</p>
+                <p className="mt-1 text-right text-xs font-semibold text-emerald-700">{translate("ประหยัดไป", "You saved")} {checkoutMoney(saving)}</p>
               )}
 
               <Button
@@ -484,19 +480,18 @@ export function CartPage() {
                 aria-describedby={checkoutBlocked ? "checkout-blocked-reason" : undefined}
                 onClick={handleProceedToCheckout}
               >
-                ไปชำระเงิน ({checkedQuantity})
+                {translate("ไปชำระเงิน (", "Checkout (")}{checkedQuantity})
               </Button>
 
               {checkoutBlocked && (
                 <div id="checkout-blocked-reason" className="mt-3 text-sm text-destructive" role="status">
-                  {hasSelectedPriceChanges && <p>กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ</p>}
-                  {hasSelectedUnavailableItems && <p>กรุณานำสินค้าที่ไม่พร้อมจำหน่ายออก หรือยกเลิกเลือกก่อนสั่งซื้อ</p>}
+                  {hasSelectedPriceChanges && <p>{translate("กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ", "Accept the new prices or deselect the affected items before ordering")}</p>}
+                  {hasSelectedUnavailableItems && <p>{translate("กรุณานำสินค้าที่ไม่พร้อมจำหน่ายออก หรือยกเลิกเลือกก่อนสั่งซื้อ", "Remove or deselect unavailable items before ordering")}</p>}
                 </div>
               )}
 
               <p className="mt-3 text-[11px] text-muted-foreground">
-                ส่วนลดคิดจากสินค้าที่เลือก ยืนยันอีกครั้งหลังเลือกการจัดส่ง
-              </p>
+                {translate("ส่วนลดคิดจากสินค้าที่เลือก ยืนยันอีกครั้งหลังเลือกการจัดส่ง", "Discounts apply to selected items and are confirmed after shipping is selected")}</p>
             </Card>
           </div>
         </div>
@@ -506,7 +501,7 @@ export function CartPage() {
         open={priceDialogOpen}
         items={saleEndedItems.map((item) => ({
           id: item.id,
-          name: item.productName || `Listing #${item.listingId}`,
+          name: item.productName || translate(`ประกาศ #${item.listingId}`, `Listing #${item.listingId}`),
           from: item.unitPriceAtAdd,
           to: item.currentPrice,
         }))}

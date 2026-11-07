@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 
@@ -35,13 +36,13 @@ import { PromotionOwnerTag } from "./PromotionBadges";
 export type SaleRowAction = "pause" | "resume" | "end" | "delete";
 
 const HEADERS: Array<{ label: string; width: string }> = [
-  { label: "แคมเปญ", width: "w-[21%]" },
-  { label: "ประเภท", width: "w-[11%]" },
-  { label: "ส่วนลด", width: "w-[12%]" },
-  { label: "ขอบเขต", width: "w-[15%]" },
+  { get label() { return translate("แคมเปญ", "Campaign"); }, width: "w-[21%]" },
+  { get label() { return translate("ประเภท", "Type"); }, width: "w-[11%]" },
+  { get label() { return translate("ส่วนลด", "Discount"); }, width: "w-[12%]" },
+  { get label() { return translate("ขอบเขต", "Scope"); }, width: "w-[15%]" },
   { label: "งบ / ขายแล้ว", width: "w-[14%]" },
-  { label: "ระยะเวลา", width: "w-[13%]" },
-  { label: "สถานะ", width: "w-[10%]" },
+  { get label() { return translate("ระยะเวลา", "Duration"); }, width: "w-[13%]" },
+  { get label() { return translate("สถานะ", "Status"); }, width: "w-[10%]" },
 ];
 
 const HEAD_CLASS = "h-10 px-3 text-xs font-medium text-muted-foreground";
@@ -52,6 +53,7 @@ const MENU_CLASS = "sticky right-0 w-[48px] bg-card px-2 text-right";
 
 /** Figma "PRM / Status Pill" ของแคมเปญลดราคา */
 export function SaleStatusPill({ status }: { status: SaleStatus }) {
+  useLanguage();
   return (
     <Badge className={cn("h-5 gap-1.5 rounded-full px-2 text-xs font-medium", SALE_STATUS_STYLE[status])}>
       <span className="size-1.5 rounded-full bg-current" aria-hidden />
@@ -72,6 +74,7 @@ export function SaleTable({
   now: number;
   onAction: (action: SaleRowAction, sale: AdminSale) => void;
 }) {
+  useLanguage();
   return (
     <Table className="min-w-[940px] table-fixed">
       <TableHeader>
@@ -82,7 +85,7 @@ export function SaleTable({
             </TableHead>
           ))}
           <TableHead className={cn(HEAD_CLASS, MENU_CLASS, "bg-muted")}>
-            <span className="sr-only">จัดการ</span>
+            <span className="sr-only">{translate("จัดการ", "Manage")}</span>
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -106,6 +109,7 @@ function SaleRow({
   now: number;
   onAction: (action: SaleRowAction, sale: AdminSale) => void;
 }) {
+  useLanguage();
   const isPlatform = sale.ownerType === "PLATFORM";
   const badge = saleTypeBadge(sale);
   const percent = budgetPercent(sale);
@@ -181,7 +185,7 @@ function SaleRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={4} className="w-44 min-w-44">
             {isPlatform && !finished ? (
-              <DropdownMenuItem render={<Link to={`/admin/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+              <DropdownMenuItem render={<Link to={`/admin/sales/${sale.id}/edit`} />}>{translate("แก้ไข", "Edit")}</DropdownMenuItem>
             ) : null}
             {isPlatform && sale.slug ? (
               <DropdownMenuItem render={<Link to={`/sale/${sale.slug}`} target="_blank" rel="noreferrer" />}>
@@ -193,7 +197,7 @@ function SaleRow({
                 className={paused ? undefined : "text-[#b45309] data-highlighted:text-[#b45309]"}
                 onClick={() => onAction(paused ? "resume" : "pause", sale)}
               >
-                {paused ? "เปิดอีกครั้ง" : isPlatform ? "หยุดชั่วคราว" : "หยุดการลดราคาของร้าน"}
+                {paused ? translate("เปิดอีกครั้ง", "Reopen") : isPlatform ? translate("หยุดชั่วคราว", "Paused") : "หยุดการลดราคาของร้าน"}
               </DropdownMenuItem>
             ) : null}
             {!finished && sale.status !== "SCHEDULED" ? (
@@ -201,8 +205,7 @@ function SaleRow({
             ) : null}
             {isPlatform ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction("delete", sale)}>
-                ลบ
-              </DropdownMenuItem>
+                {translate("ลบ", "Delete")}</DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>

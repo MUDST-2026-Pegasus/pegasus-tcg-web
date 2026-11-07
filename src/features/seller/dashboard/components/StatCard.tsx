@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Clock, Gavel, type LucideIcon, ShoppingBag, Star, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -30,6 +31,7 @@ const ICON_COLOR: Record<StatAccent, string> = {
 };
 
 export function StatCard({ id, accent, label, value, footnote, to }: StatCardData) {
+  useLanguage();
   const Icon = ICONS[id];
 
   const card = (

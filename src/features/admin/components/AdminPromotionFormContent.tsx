@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
@@ -57,9 +58,9 @@ import {
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
 
 const SCOPE_OPTIONS: Array<{ value: AdminPromotionInput["scopeType"]; label: string }> = [
-  { value: "ALL", label: "ทุกเกม" },
-  { value: "GAME", label: "เลือกเกม" },
-  { value: "CATEGORY", label: "เลือกหมวดหมู่" },
+  { value: "ALL", get label() { return translate("ทุกเกม", "All games"); } },
+  { value: "GAME", get label() { return translate("เลือกเกม", "Select game"); } },
+  { value: "CATEGORY", get label() { return translate("เลือกหมวดหมู่", "Select category"); } },
 ];
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
@@ -142,13 +143,14 @@ function fromLocalInput(value: string): string {
 
 /** หน้า /admin/promotions/new และ /:id/edit (Figma PRM-A2) */
 export function AdminPromotionFormContent({ id }: { id: number }) {
+  useLanguage();
   const existing = usePromotion(id);
   if (id > 0 && existing.isPending) return <FormPageSkeleton label="กำลังโหลดโค้ด" />;
   if (id > 0 && existing.isError) {
     return (
       <ErrorState
-        title="โหลดโค้ดไม่สำเร็จ"
-        fallbackMessage={promotionErrorMessage(existing.error, "กรุณาลองอีกครั้ง")}
+        title={translate("โหลดโค้ดไม่สำเร็จ", "Unable to load codes")}
+        fallbackMessage={promotionErrorMessage(existing.error, translate("กรุณาลองอีกครั้ง", "Please try again"))}
         onRetry={() => void existing.refetch()}
       />
     );
@@ -166,6 +168,7 @@ export function AdminPromotionFormContent({ id }: { id: number }) {
 }
 
 function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
+  useLanguage();
   const navigate = useNavigate();
   const save = useSavePromotion();
   const games = useAdminGames();
@@ -239,7 +242,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           // ปลด blocker ก่อน navigate ไม่งั้นถาม "ออกจากหน้านี้?" ซ้ำ
           flushSync(() => setSaved(true));
           toast.add({
-            title: existing ? "บันทึกการเปลี่ยนแปลงแล้ว" : `เปิดใช้ ${payload.code} แล้ว`,
+            title: existing ? translate("บันทึกการเปลี่ยนแปลงแล้ว", "Changes saved") : `เปิดใช้ ${payload.code} แล้ว`,
             type: "success",
           });
           navigate("/admin/promotions");
@@ -252,8 +255,8 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             return;
           }
           toast.add({
-            title: existing ? "บันทึกไม่สำเร็จ" : "สร้างโค้ดไม่สำเร็จ",
-            description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            title: existing ? translate("บันทึกไม่สำเร็จ", "Unable to save") : "สร้างโค้ดไม่สำเร็จ",
+            description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")),
             type: "error",
           });
         },
@@ -273,21 +276,20 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{existing ? `แก้ไข ${existing.code}` : "สร้างโค้ด Pegasus"}</BreadcrumbPage>
+              <BreadcrumbPage>{existing ? `แก้ไข ${existing.code}` : translate("สร้างโค้ด Pegasus", "Create Pegasus code")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black">{existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}</h1>
+            <h1 className="text-2xl font-black">{existing ? "แก้ไขโค้ด Pegasus" : translate("สร้างโค้ด Pegasus", "Create Pegasus code")}</h1>
             <p className="text-sm text-muted-foreground">Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="px-2.5" onClick={() => navigate("/admin/promotions")}>
-              ยกเลิก
-            </Button>
+              {translate("ยกเลิก", "Cancel")}</Button>
             <Button size="sm" className="px-2.5" onClick={requestSave}>
-              {existing ? "บันทึก" : "บันทึกและเปิดใช้"}
+              {existing ? translate("บันทึก", "Save") : "บันทึกและเปิดใช้"}
             </Button>
           </div>
         </header>
@@ -300,7 +302,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             {locks.used ? (
               <>
                 โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString("th-TH")} ครั้ง — ฟิลด์ที่มี{" "}
-                <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
+                <Lock className="inline size-3" aria-label={translate("แม่กุญแจ", "Padlock")} /> แก้ไม่ได้
               </>
             ) : (
               <>
@@ -319,7 +321,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               <FormField
                 field="code"
                 htmlFor="promotion-code"
-                label="รหัสโค้ด"
+                label={translate("รหัสโค้ด", "Code")}
                 required
                 hint="A–Z และ 0–9 ยาว 4–20 ตัว · ระบบเก็บเป็นตัวพิมพ์ใหญ่ และห้ามซ้ำกับโค้ดร้าน"
                 error={errors.code}
@@ -327,7 +329,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 <InputGroup data-disabled={locked("code") || undefined}>
                   <InputGroupInput
                     id="promotion-code"
-                    aria-label="รหัสโค้ด"
+                    aria-label={translate("รหัสโค้ด", "Code")}
                     aria-invalid={!!errors.code || undefined}
                     value={form.code}
                     maxLength={20}
@@ -363,7 +365,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               >
                 <Input
                   id="promotion-name"
-                  aria-label="ชื่อแคมเปญ"
+                  aria-label={translate("ชื่อแคมเปญ", "Campaign name")}
                   aria-invalid={!!errors.name || undefined}
                   value={form.name}
                   maxLength={60}
@@ -372,22 +374,22 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 />
               </FormField>
             </div>
-            <FormField field="visibility" label="การมองเห็น">
+            <FormField field="visibility" label={translate("การมองเห็น", "Visibility")}>
               <RadioGroup
-                aria-label="การมองเห็น"
+                aria-label={translate("การมองเห็น", "Visibility")}
                 value={form.visibility}
                 onValueChange={(value) => change("visibility", value as AdminPromotionInput["visibility"])}
                 className="grid gap-4 sm:grid-cols-2"
               >
                 <ChoiceCard
                   value="PUBLIC"
-                  title="สาธารณะ"
+                  title={translate("สาธารณะ", "Public")}
                   hint="แสดงในตัวเลือกโค้ดตอนชำระเงิน"
                   disabled={locked("visibility")}
                 />
                 <ChoiceCard
                   value="PRIVATE"
-                  title="ส่วนตัว"
+                  title={translate("ส่วนตัว", "Private")}
                   hint="ผู้ซื้อต้องพิมพ์โค้ดเอง (แจกผ่านโซเชียล)"
                   disabled={locked("visibility")}
                 />
@@ -400,7 +402,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             >
               <summary className="cursor-pointer">คำอธิบายเพิ่มเติม (ไม่บังคับ)</summary>
               <Input
-                aria-label="คำอธิบาย"
+                aria-label={translate("คำอธิบาย", "Description")}
                 className="mt-2"
                 value={form.description ?? ""}
                 maxLength={500}
@@ -412,29 +414,29 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
 
           <Section title="2. ประเภทส่วนลด">
             <RadioGroup
-              aria-label="ประเภทส่วนลด"
+              aria-label={translate("ประเภทส่วนลด", "Discount type")}
               data-field="discountType"
               value={form.discountType}
               onValueChange={(value) => change("discountType", value as AdminPromotionInput["discountType"])}
               className="grid gap-4 sm:grid-cols-3"
             >
-              <ChoiceCard value="PERCENT" title="เปอร์เซ็นต์" hint="ลด x% ของยอดสินค้า" disabled={locked("discountType")} />
-              <ChoiceCard value="FIXED" title="จำนวนเงิน" hint="ลดเป็นบาท" disabled={locked("discountType")} />
-              <ChoiceCard value="FREE_SHIPPING" title="ส่งฟรี" hint="ลดค่าส่งทุกร้าน" disabled={locked("discountType")} />
+              <ChoiceCard value="PERCENT" title={translate("เปอร์เซ็นต์", "Percentage")} hint="ลด x% ของยอดสินค้า" disabled={locked("discountType")} />
+              <ChoiceCard value="FIXED" title={translate("จำนวนเงิน", "Amount")} hint="ลดเป็นบาท" disabled={locked("discountType")} />
+              <ChoiceCard value="FREE_SHIPPING" title={translate("ส่งฟรี", "Free shipping")} hint="ลดค่าส่งทุกร้าน" disabled={locked("discountType")} />
             </RadioGroup>
             <div className="grid gap-4 sm:grid-cols-2">
               {form.discountType !== "FREE_SHIPPING" ? (
                 <FormField
                   field="discountValue"
                   htmlFor="promotion-discountValue"
-                  label="มูลค่าส่วนลด"
+                  label={translate("มูลค่าส่วนลด", "Discount value")}
                   required
-                  hint={form.discountType === "PERCENT" ? "1–90%" : "ต้องมากกว่า ฿0"}
+                  hint={form.discountType === "PERCENT" ? "1–90%" : translate("ต้องมากกว่า ฿0", "Must be greater than ฿0")}
                   error={errors.discountValue}
                 >
                   <NumberInput
                     id="promotion-discountValue"
-                    label="มูลค่าส่วนลด"
+                    label={translate("มูลค่าส่วนลด", "Discount value")}
                     value={form.discountValue}
                     onChange={(value) => change("discountValue", value as number)}
                     suffix={form.discountType === "PERCENT" ? "%" : "บาท"}
@@ -449,7 +451,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 <FormField
                   field="maxDiscount"
                   htmlFor="promotion-maxDiscount"
-                  label={form.discountType === "FREE_SHIPPING" ? "ลดค่าส่งสูงสุดต่อร้าน" : "ส่วนลดสูงสุด"}
+                  label={form.discountType === "FREE_SHIPPING" ? "ลดค่าส่งสูงสุดต่อร้าน" : translate("ส่วนลดสูงสุด", "Maximum discount")}
                   hint={
                     form.discountType === "FREE_SHIPPING"
                       ? "เว้นว่าง = ส่งฟรีเต็มจำนวน (งบประเมินจาก ฿60 / ร้าน)"
@@ -459,7 +461,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 >
                   <NumberInput
                     id="promotion-maxDiscount"
-                    label="ส่วนลดสูงสุด"
+                    label={translate("ส่วนลดสูงสุด", "Maximum discount")}
                     value={form.maxDiscount}
                     onChange={(value) => change("maxDiscount", value)}
                     prefix="฿"
@@ -473,10 +475,10 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
 
           <Section title="3. เงื่อนไข" description="ยอดขั้นต่ำคิดจากสินค้าที่เข้าเงื่อนไขหลังหักโค้ดร้าน ไม่รวมค่าส่ง">
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField field="minSpend" htmlFor="promotion-minSpend" label="ยอดสั่งซื้อขั้นต่ำ" error={errors.minSpend}>
+              <FormField field="minSpend" htmlFor="promotion-minSpend" label={translate("ยอดสั่งซื้อขั้นต่ำ", "Minimum order amount")} error={errors.minSpend}>
                 <NumberInput
                   id="promotion-minSpend"
-                  label="ยอดสั่งซื้อขั้นต่ำ"
+                  label={translate("ยอดสั่งซื้อขั้นต่ำ", "Minimum order amount")}
                   value={form.minSpend}
                   onChange={(value) => change("minSpend", value as number)}
                   prefix="฿"
@@ -484,9 +486,9 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                   invalid={!!errors.minSpend}
                 />
               </FormField>
-              <FormField field="scopeType" label="ใช้กับสินค้า">
+              <FormField field="scopeType" label={translate("ใช้กับสินค้า", "Apply to products")}>
                 <ToggleGroup
-                  aria-label="ใช้กับสินค้า"
+                  aria-label={translate("ใช้กับสินค้า", "Apply to products")}
                   size="sm"
                   variant="outline"
                   spacing={1.5}
@@ -517,7 +519,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 className="max-h-48 scroll-mt-24 gap-2 overflow-y-auto rounded-lg border p-3"
               >
                 <FieldLegend variant="label" className="mb-1 text-xs text-muted-foreground">
-                  {form.scopeType === "GAME" ? "เลือกเกม" : "เลือกหมวดหมู่"} (เลือกได้หลายรายการ)
+                  {form.scopeType === "GAME" ? translate("เลือกเกม", "Select game") : translate("เลือกหมวดหมู่", "Select category")} (เลือกได้หลายรายการ)
                 </FieldLegend>
                 {scopeOptions.data?.map((item) => {
                   const id = `promotion-scope-${item.id}`;
@@ -544,8 +546,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 {scopeOptions.isPending ? (
                   <span role="status" className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Spinner className="size-3.5" />
-                    กำลังโหลดรายการ...
-                  </span>
+                    {translate("กำลังโหลดรายการ...", "Loading items…")}</span>
                 ) : null}
                 {scopeOptions.isError ? (
                   <FieldError className="text-[11px]">โหลดรายการไม่สำเร็จ</FieldError>
@@ -556,7 +557,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             <div data-field="newBuyerOnly" className="scroll-mt-24">
               <ToggleRow
                 id="promotion-new-buyer"
-                title="เฉพาะผู้ซื้อใหม่"
+                title={translate("เฉพาะผู้ซื้อใหม่", "New buyers only")}
                 hint="ใช้ได้เฉพาะบัญชีที่ยังไม่เคยมีคำสั่งซื้อที่ชำระเงินแล้ว"
                 checked={form.newBuyerOnly}
                 disabled={locked("newBuyerOnly")}
@@ -567,28 +568,28 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
 
           <Section title="4. ระยะเวลาและจำนวนสิทธิ์">
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField field="startsAt" htmlFor="promotion-startsAt" label="เริ่มใช้ได้" required error={errors.startsAt}>
+              <FormField field="startsAt" htmlFor="promotion-startsAt" label={translate("เริ่มใช้ได้", "Available from")} required error={errors.startsAt}>
                 <DateTimePicker
                   id="promotion-startsAt"
-                  aria-label="เริ่มใช้ได้"
+                  aria-label={translate("เริ่มใช้ได้", "Available from")}
                   value={toLocalInput(form.startsAt)}
                   disabled={locked("startsAt")}
                   invalid={!!errors.startsAt}
-                  suffix={locked("startsAt") ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+                  suffix={locked("startsAt") ? <Lock aria-label={translate("ล็อก", "Locked")} className="text-muted-foreground" /> : null}
                   onChange={(value) => change("startsAt", fromLocalInput(value))}
                 />
               </FormField>
               <FormField
                 field="endsAt"
                 htmlFor="promotion-endsAt"
-                label={locks.used ? "สิ้นสุด (ยืดได้เท่านั้น)" : "สิ้นสุด"}
+                label={locks.used ? "สิ้นสุด (ยืดได้เท่านั้น)" : translate("สิ้นสุด", "Ended")}
                 required
                 hint="ต้องหลังวันเริ่มใช้"
                 error={errors.endsAt}
               >
                 <DateTimePicker
                   id="promotion-endsAt"
-                  aria-label="สิ้นสุด"
+                  aria-label={translate("สิ้นสุด", "Ended")}
                   invalid={!!errors.endsAt}
                   defaultTime="23:59"
                   value={toLocalInput(form.endsAt)}
@@ -604,14 +605,14 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 label={
                   locks.used
                     ? `จำนวนสิทธิ์ทั้งหมด (เพิ่มได้เท่านั้น ≥ ${usedLimitFloor.toLocaleString("th-TH")})`
-                    : "จำนวนสิทธิ์ทั้งหมด"
+                    : translate("จำนวนสิทธิ์ทั้งหมด", "Total redemptions available")
                 }
                 hint="เว้นว่าง = ไม่จำกัด"
                 error={errors.usageLimitTotal}
               >
                 <NumberInput
                   id="promotion-usageLimitTotal"
-                  label="จำนวนสิทธิ์ทั้งหมด"
+                  label={translate("จำนวนสิทธิ์ทั้งหมด", "Total redemptions available")}
                   value={form.usageLimitTotal}
                   onChange={(value) => change("usageLimitTotal", value)}
                   suffix="สิทธิ์"
@@ -622,13 +623,13 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               <FormField
                 field="usageLimitPerUser"
                 htmlFor="promotion-usageLimitPerUser"
-                label="สิทธิ์ต่อผู้ซื้อ 1 คน"
+                label={translate("สิทธิ์ต่อผู้ซื้อ 1 คน", "Redemptions per buyer")}
                 required
                 error={errors.usageLimitPerUser}
               >
                 <NumberInput
                   id="promotion-usageLimitPerUser"
-                  label="สิทธิ์ต่อผู้ซื้อ 1 คน"
+                  label={translate("สิทธิ์ต่อผู้ซื้อ 1 คน", "Redemptions per buyer")}
                   value={form.usageLimitPerUser}
                   onChange={(value) => change("usageLimitPerUser", value as number)}
                   suffix="ครั้ง"
@@ -642,7 +643,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
 
           <Section
             title="5. การแจกโค้ด (กดเก็บ)"
-            badge={<Badge className="h-4 rounded bg-[#e8f1fc] px-1.5 text-[9px] text-[#0058bc]">ใหม่</Badge>}
+            badge={<Badge className="h-4 rounded bg-[#e8f1fc] px-1.5 text-[9px] text-[#0058bc]">{translate("ใหม่", "New")}</Badge>}
           >
             <div data-field="claimable" className="scroll-mt-24">
               <ToggleRow
@@ -657,7 +658,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             <div data-field="featuredOnHome" className="grid scroll-mt-24 gap-1.5">
               <ToggleRow
                 id="promotion-featured"
-                title="แสดงบนหน้าแรก"
+                title={translate("แสดงบนหน้าแรก", "Show on home page")}
                 hint={`อยู่ในแถบ “โค้ดส่วนลดจาก Pegasus” ใต้ Hero · สูงสุด ${HOME_STRIP_MAX} ใบ`}
                 checked={form.featuredOnHome}
                 disabled={!form.claimable || form.visibility !== "PUBLIC"}
@@ -675,7 +676,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               >
                 <NumberInput
                   id="promotion-claimLimit"
-                  label="จำนวนที่แจก"
+                  label={translate("จำนวนที่แจก", "Number issued")}
                   value={form.claimLimit}
                   onChange={(value) => change("claimLimit", value)}
                   suffix="ใบ"
@@ -687,13 +688,13 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
               <FormField
                 field="homeSort"
                 htmlFor="promotion-homeSort"
-                label="ลำดับบนหน้าแรก"
+                label={translate("ลำดับบนหน้าแรก", "Home page display order")}
                 hint="เลขน้อยแสดงก่อน"
                 error={errors.homeSort}
               >
                 <Input
                   id="promotion-homeSort"
-                  aria-label="ลำดับบนหน้าแรก"
+                  aria-label={translate("ลำดับบนหน้าแรก", "Home page display order")}
                   type="number"
                   min={1}
                   max={HOME_STRIP_MAX}
@@ -708,7 +709,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             <div data-field="claimRequired" className="grid scroll-mt-24 gap-1.5">
               <ToggleRow
                 id="promotion-claim-required"
-                title="ต้องเก็บก่อนใช้"
+                title={translate("ต้องเก็บก่อนใช้", "Must be claimed before use")}
                 hint="เปิด = พิมพ์โค้ดเองใช้ไม่ได้ถ้ายังไม่ได้เก็บ (PROMO_NOT_CLAIMED) เหมาะกับแคมเปญแจกจำนวนจำกัด"
                 checked={form.claimRequired}
                 disabled={locked("claimRequired") || !form.claimable}
@@ -740,8 +741,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
         actions={
           <>
             <Button variant="outline" onClick={() => blocker.reset?.()}>
-              อยู่ต่อ
-            </Button>
+              {translate("อยู่ต่อ", "Stay")}</Button>
             <Button className={PROMOTION_DANGER_BUTTON} onClick={() => blocker.proceed?.()}>
               ออกโดยไม่บันทึก
             </Button>
@@ -764,6 +764,7 @@ function Section({
   badge?: ReactNode;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <Card className="gap-4 rounded-[12px] border border-border p-5 shadow-none ring-0">
       <CardHeader className="gap-0.5 px-0">

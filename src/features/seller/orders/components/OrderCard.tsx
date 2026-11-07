@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import {
@@ -66,6 +67,7 @@ type OrderCardProps = {
  * ฟอร์มเลขพัสดุอยู่ใน panel ที่ไม่ถูก unmount ตอนพับ ค่าที่กรอกจึงไม่หาย
  */
 export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
+  useLanguage();
   const { order, buyer } = summary;
   const accept = useAcceptOrder();
   const [now] = useState(() => new Date());
@@ -84,14 +86,14 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
       onSuccess: () =>
         toast.add({
           type: "success",
-          title: "รับออเดอร์แล้ว",
+          title: translate("รับออเดอร์แล้ว", "Order accepted"),
           description: `${order.sellerOrderNumber} · แพ็คแล้วกรอกเลขพัสดุได้เลย`,
         }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "รับออเดอร์ไม่สำเร็จ",
-          description: orderErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: translate("รับออเดอร์ไม่สำเร็จ", "Unable to accept order"),
+          description: orderErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   }
@@ -121,8 +123,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
               ) : null}
               {order.status === "PREPARING" ? (
                 <Badge className="h-5 rounded-full bg-[#e6f4f2] px-2 text-xs text-teal-600">
-                  กำลังแพ็ค
-                </Badge>
+                  {translate("กำลังแพ็ค", "Packing")}</Badge>
               ) : null}
             </div>
             <div className="flex min-w-0 items-center gap-1.5 text-xs">
@@ -186,7 +187,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                 </div>
                 <p className="flex-1 text-xs font-medium text-foreground">ค่าจัดส่ง</p>
                 <p className="shrink-0 text-xs font-medium text-gray-700">
-                  {order.shippingFee > 0 ? formatBaht(order.shippingFee) : "ส่งฟรี"}
+                  {order.shippingFee > 0 ? formatBaht(order.shippingFee) : translate("ส่งฟรี", "Free shipping")}
                 </p>
               </li>
             </ul>
@@ -220,8 +221,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                       onClick={handleAccept}
                     >
                       {accept.isPending ? <Spinner /> : null}
-                      รับออเดอร์
-                    </Button>
+                      {translate("รับออเดอร์", "Accept order")}</Button>
                   ) : null}
                   <ShipmentForm orderId={order.id} orderNumber={order.sellerOrderNumber} />
                 </div>
@@ -231,7 +231,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             {shipment ? (
               <div className="flex items-center gap-1.5 text-xs">
                 <Truck aria-hidden="true" className="size-4 text-slate-500" />
-                <span className="font-semibold text-gray-700">เลขพัสดุ</span>
+                <span className="font-semibold text-gray-700">{translate("เลขพัสดุ", "Tracking number")}</span>
                 <span className="text-gray-500">
                   {shipment.carrierName} · {shipment.trackingNumber}
                 </span>

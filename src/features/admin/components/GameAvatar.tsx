@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 import type { Game } from "../catalog.types";
@@ -12,6 +13,7 @@ type GameAvatarProps = {
 
 /** โลโก้เกมถ้ามี ไม่งั้นเป็นตัวย่อชื่อเกมบนพื้นสี */
 export function GameAvatar({ game, size, highlighted }: GameAvatarProps) {
+  useLanguage();
   const logo = game.logoImageUrl;
   const initials = gameInitials(game);
 

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -6,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * แก้ตารางจริงเมื่อไหร่ ให้แก้ตัวนี้ตามด้วย
  */
 export function ProductTableSkeleton({ rows = 6 }: { rows?: number }) {
+  useLanguage();
   return (
     <Card
       aria-busy="true"

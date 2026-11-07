@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -12,12 +13,13 @@ type SubmittedDetailsCardProps = {
 export function SubmittedDetailsCard({
   verification,
 }: SubmittedDetailsCardProps) {
+  useLanguage();
   const rows = [
     {
       label: "ชื่อ-นามสกุลจริง",
       value: `${verification.legalFirstName} ${verification.legalLastName}`,
     },
-    { label: "ธนาคาร", value: verification.bankName },
+    { label: translate("ธนาคาร", "Bank"), value: verification.bankName },
     {
       label: "เลขที่บัญชี",
       value: maskAccountNumber(verification.bankAccountNumber),

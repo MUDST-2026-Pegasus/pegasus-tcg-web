@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { DisabledActionHint } from "@/components/common/DisabledActionHint";
 import { Progress } from "@/components/ui/progress";
 import { useState, type ReactNode } from "react";
@@ -50,6 +51,7 @@ export function SaleBuyBox({
   ownerActions?: ReactNode;
   delivery?: ReactNode;
 }) {
+  useLanguage();
   const auth = useAuth();
   const navigate = useNavigate();
   const state = buyBoxState(listing, auth.user?.username);
@@ -118,7 +120,7 @@ export function SaleBuyBox({
     >
       {flash && (
         <div className="flex items-center justify-between gap-2 bg-linear-to-r from-orange-500 to-red-600 px-6 py-3 text-[13px] font-bold text-white">
-          <span>⚡ FLASH SALE</span>
+          <span>{translate("⚡ แฟลชเซล", "⚡ FLASH SALE")}</span>
           <span role="timer" className="tabular-nums">
             {t.endsIn(formatCountdown(left))}
           </span>

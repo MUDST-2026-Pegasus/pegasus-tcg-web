@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Inbox, Info } from "lucide-react";
 
@@ -30,9 +31,9 @@ type RefundTab = Extract<RefundStatus, "APPROVED" | "PROCESSING" | "PROCESSED"> 
 
 const QUEUE_TITLE: Record<RefundTab, string> = {
   APPROVED: "คิวพร้อมโอน",
-  PROCESSING: "กำลังโอน",
-  PROCESSED: "โอนแล้ว",
-  ALL: "ทั้งหมด",
+  get PROCESSING() { return translate("กำลังโอน", "Transferring"); },
+  get PROCESSED() { return translate("โอนแล้ว", "Transferred"); },
+  get ALL() { return translate("ทั้งหมด", "All"); },
 };
 
 /**
@@ -41,6 +42,7 @@ const QUEUE_TITLE: Record<RefundTab, string> = {
  * อ้างจาก Figma node 1913:2813
  */
 export function AdminRefundsContent() {
+  useLanguage();
   const [tab, setTab] = useState<RefundTab>("APPROVED");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -109,12 +111,12 @@ export function AdminRefundsContent() {
       ? refund.resolution === "PARTIAL_REFUND"
         ? "คืนสินค้าบางส่วน"
         : "คืนสินค้าเต็มจำนวน"
-      : "ยกเลิกคำสั่งซื้อ";
+      : translate("ยกเลิกคำสั่งซื้อ", "Cancel order");
 
   return (
     <div className="flex flex-col gap-6">
       <FinancePageHeader
-        title="คืนเงินผู้ซื้อ"
+        title={translate("คืนเงินผู้ซื้อ", "Buyer refund")}
         description="รายการคืนเงินที่ระบบสร้างจากการยกเลิกคำสั่งซื้อและการคืนสินค้า · admin โอนคืนเข้าบัญชีที่ผู้ซื้อระบุ"
         onExport={exportCsv}
         exportDisabled={refunds.length === 0}
@@ -132,8 +134,8 @@ export function AdminRefundsContent() {
         isLoading={summary.isPending}
         isError={summary.isError}
         stats={[
-          { label: "พร้อมโอน", value: String(counts?.ready ?? 0), dotClass: "bg-[#b45309]", emphasized: true },
-          { label: "กำลังโอน", value: String(counts?.processing ?? 0), dotClass: "bg-[#12805c]" },
+          { label: translate("พร้อมโอน", "Ready to transfer"), value: String(counts?.ready ?? 0), dotClass: "bg-[#b45309]", emphasized: true },
+          { label: translate("กำลังโอน", "Transferring"), value: String(counts?.processing ?? 0), dotClass: "bg-[#12805c]" },
           {
             label: "โอนไม่สำเร็จ · รอผู้ซื้อแก้บัญชี",
             value: String(counts?.failedAwaitingBuyer ?? 0),
@@ -151,8 +153,8 @@ export function AdminRefundsContent() {
         tabs={[
           { value: "APPROVED", label: `พร้อมโอน (${counts?.ready ?? 0})` },
           { value: "PROCESSING", label: `กำลังโอน (${counts?.processing ?? 0})` },
-          { value: "PROCESSED", label: "โอนแล้ว" },
-          { value: "ALL", label: "ทั้งหมด" },
+          { value: "PROCESSED", label: translate("โอนแล้ว", "Transferred") },
+          { value: "ALL", label: translate("ทั้งหมด", "All") },
         ]}
         active={tab}
         onChange={changeTab}
@@ -172,7 +174,7 @@ export function AdminRefundsContent() {
             empty={
               <EmptyState
                 icon={Inbox}
-                title={search ? "ไม่พบรายการที่ค้นหา" : `ไม่มีรายการใน "${QUEUE_TITLE[tab]}"`}
+                title={search ? translate("ไม่พบรายการที่ค้นหา", "No matching results") : `ไม่มีรายการใน "${QUEUE_TITLE[tab]}"`}
                 description={search ? "ลองค้นด้วยเลข RF, เลขคำสั่งซื้อ หรือชื่อผู้ซื้อ" : "รายการคืนเงินจะขึ้นที่นี่เมื่อระบบสร้างให้"}
               />
             }
@@ -181,7 +183,7 @@ export function AdminRefundsContent() {
               <>
                 <FinanceQueueHeader
                   title={`${QUEUE_TITLE[tab]} (${refunds.length})`}
-                  sortLabel={tab === "ALL" ? "เรียงตาม: ใหม่สุด" : "เรียงตาม: เก่าสุด"}
+                  sortLabel={tab === "ALL" ? translate("เรียงตาม: ใหม่สุด", "Sort: Newest first") : translate("เรียงตาม: เก่าสุด", "Sort: Oldest first")}
                 />
                 <ul className="flex flex-col gap-3">
                   {refunds.map((refund) => (

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect } from "react";
 
 import { PackageSearch } from "lucide-react";
@@ -70,6 +71,7 @@ type OpenProduct = (
  * หน้าต่างเพิ่ม/แก้สินค้าก็เปิดจาก URL (`?product=new`, `?product=<id>`)
  */
 export function AdminCatalogContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = readFilters(searchParams);
   const target = readProductTarget(searchParams);
@@ -103,8 +105,7 @@ export function AdminCatalogContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                นำเข้า CSV
-              </Button>
+                {translate("นำเข้า CSV", "Import CSV")}</Button>
             </TooltipTrigger>
             <TooltipContent>ยังนำเข้าจากไฟล์ไม่ได้ในตอนนี้</TooltipContent>
           </Tooltip>
@@ -113,8 +114,7 @@ export function AdminCatalogContent() {
             disabled={!games.data?.length}
             onClick={() => openProduct("new")}
           >
-            + เพิ่มการ์ดใหม่
-          </Button>
+            {translate("+ เพิ่มการ์ดใหม่", "+ Add card")}</Button>
         </div>
       </div>
 
@@ -132,7 +132,7 @@ export function AdminCatalogContent() {
         isEmpty={(list) => list.length === 0}
         empty={
           <EmptyState
-            title="ยังไม่มีเกมในระบบ"
+            title={translate("ยังไม่มีเกมในระบบ", "No games yet")}
             description="แคตตาล็อกแบ่งตามเกม ต้องมีเกมก่อนถึงจะเพิ่มการ์ดได้"
           />
         }
@@ -167,6 +167,7 @@ function CatalogWorkspace({
   tab: ProductTab;
   onOpenProduct: OpenProduct;
 }) {
+  useLanguage();
   // URL ไม่ได้ระบุเกม หรือระบุเกมที่ไม่มีอยู่ → เกมแรกตามลำดับที่ backend เรียงมา
   const gameId = games.some((game) => game.id === filters.gameId)
     ? (filters.gameId as number)
@@ -190,7 +191,7 @@ function CatalogWorkspace({
   const selects: CatalogToolbarSelect[] = [
     {
       id: "category",
-      label: "หมวดหมู่",
+      label: translate("หมวดหมู่", "Category"),
       value: filters.categoryId === null ? ALL : String(filters.categoryId),
       options: [
         { value: ALL, label: "หมวดหมู่: ทั้งหมด" },
@@ -222,10 +223,10 @@ function CatalogWorkspace({
     },
     {
       id: "status",
-      label: "สถานะ",
+      label: translate("สถานะ", "Status"),
       value: filters.activeOnly ? "active" : ALL,
       options: [
-        { value: ALL, label: "สถานะ: ทั้งหมด" },
+        { value: ALL, label: translate("สถานะ: ทั้งหมด", "Status: All") },
         { value: "active", label: "เฉพาะที่เปิดใช้งาน" },
       ],
       onValueChange: (value) =>
@@ -303,8 +304,7 @@ function CatalogWorkspace({
                   className="rounded-md px-2.5"
                   onClick={() => onOpenProduct("new")}
                 >
-                  + เพิ่มการ์ดใหม่
-                </Button>
+                  {translate("+ เพิ่มการ์ดใหม่", "+ Add card")}</Button>
               </EmptyState>
             )
           }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleX, Ellipsis, RotateCw, Shield, User, UserX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -72,19 +73,20 @@ export function UsersTable({
   onPageChange,
   onAction,
 }: UsersTableProps) {
+  useLanguage();
   return (
     <>
       <Table className={cn(disabled && "opacity-60")}>
         <TableHeader>
           <TableRow className="border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]">
-            <TableHead className={cn(HEAD_CLASS, "w-[320px] pl-5")}>ผู้ใช้</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[200px]")}>บทบาท</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>สมัครเมื่อ</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[140px]")}>เข้าใช้ล่าสุด</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>สถานะ</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-[320px] pl-5")}>{translate("ผู้ใช้", "User")}</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-[200px]")}>{translate("บทบาท", "Role")}</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>{translate("สมัครเมื่อ", "Registered on")}</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-[140px]")}>{translate("เข้าใช้ล่าสุด", "Last active")}</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>{translate("สถานะ", "Status")}</TableHead>
             {/* คอลัมน์สุดท้ายไม่มีหัวตารางในดีไซน์ และกินพื้นที่ที่เหลือแทน spacer */}
             <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              <span className="sr-only">ตัวเลือกเพิ่มเติม</span>
+              <span className="sr-only">{translate("ตัวเลือกเพิ่มเติม", "More options")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -121,8 +123,7 @@ export function UsersTable({
                         </span>
                         {isSelf ? (
                           <span className="ml-1.5 text-[10px] font-normal text-primary">
-                            (คุณ)
-                          </span>
+                            {translate("(คุณ)", "(you)")}</span>
                         ) : null}
                       </button>
                       <span className="truncate text-[10px] text-[#9aa5ad]">
@@ -167,8 +168,7 @@ export function UsersTable({
             disabled={disabled || page <= 0}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
-          </Button>
+            {translate("ก่อนหน้า", "Previous")}</Button>
           {pageNumbers(page, totalPages).map((value, index) =>
             value === null ? (
               <span key={`gap-${index}`} aria-hidden="true" className="text-xs text-[#9aa5ad]">
@@ -196,8 +196,7 @@ export function UsersTable({
             disabled={disabled || page + 1 >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
-          </Button>
+            {translate("ถัดไป", "Next")}</Button>
         </nav>
       </div>
     </>
@@ -215,6 +214,7 @@ type UserRowMenuProps = {
  * แถวของตัวเองเปิดได้ แต่ใช้ได้แค่ "ดูรายละเอียด" พร้อมบอกเหตุผล
  */
 function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
+  useLanguage();
   const locked = isSelf;
   return (
     <DropdownMenu>
@@ -241,8 +241,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
           onClick={() => onAction(user, "roles")}
         >
           <Shield />
-          จัดการบทบาท…
-        </DropdownMenuItem>
+          {translate("จัดการบทบาท…", "Manage roles…")}</DropdownMenuItem>
         <DropdownMenuSeparator className="my-1 bg-muted" />
         {user.status === "ACTIVE" ? (
           <DropdownMenuItem
@@ -252,8 +251,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "suspend")}
           >
             <CircleX />
-            ระงับบัญชี
-          </DropdownMenuItem>
+            {translate("ระงับบัญชี", "Suspend account")}</DropdownMenuItem>
         ) : (
           <DropdownMenuItem
             className={MENU_ITEM_CLASS}
@@ -261,8 +259,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "restore")}
           >
             <RotateCw />
-            เปิดใช้งานอีกครั้ง
-          </DropdownMenuItem>
+            {translate("เปิดใช้งานอีกครั้ง", "Enable again")}</DropdownMenuItem>
         )}
         {user.status !== "DEACTIVATED" ? (
           <DropdownMenuItem
@@ -272,8 +269,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "deactivate")}
           >
             <UserX />
-            ปิดบัญชี
-          </DropdownMenuItem>
+            {translate("ปิดบัญชี", "Close account")}</DropdownMenuItem>
         ) : null}
         {locked ? (
           <p className="px-2.5 py-1.5 text-[10px] leading-[14px] text-[#9aa5ad]">
@@ -287,6 +283,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
 
 /** skeleton โหลดครั้งแรก — รูปทรงเดียวกับแถวจริง */
 export function UsersTableSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" aria-label="กำลังโหลดรายชื่อผู้ใช้" className="border-t border-muted">
       {Array.from({ length: 8 }, (_, index) => (

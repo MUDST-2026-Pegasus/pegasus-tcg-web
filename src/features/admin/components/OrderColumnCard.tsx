@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Store, User } from "lucide-react";
 
 import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
@@ -31,6 +32,7 @@ export function OrderColumnCard({
   tone,
   onSelect,
 }: OrderColumnCardProps) {
+  useLanguage();
   return (
     <button
       type="button"

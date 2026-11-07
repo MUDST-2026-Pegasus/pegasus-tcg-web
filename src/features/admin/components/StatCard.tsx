@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ export function StatCard({
   bars,
   accent,
 }: StatCardModel) {
+  useLanguage();
   return (
     <Card className="flex-1 gap-2.5 rounded-xl border border-border p-[18px] shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">

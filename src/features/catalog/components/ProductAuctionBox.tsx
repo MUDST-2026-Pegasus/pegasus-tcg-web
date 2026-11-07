@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ArrowRight, Gavel } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -10,6 +11,7 @@ import { useCountdown } from "@/features/auction/useCountdown";
  * @param variantIds รุ่นที่เลือก หรือทุกรุ่นของสินค้าถ้าเลือก "All variants"
  */
 export function ProductAuctionBox({ variantIds, productName }: { variantIds: number[]; productName: string }) {
+  useLanguage();
   const { auctions, total, serverTime } = useVariantAuctions(variantIds);
   const summary = summarizeAuctions(auctions, total);
   if (!summary) return null;
@@ -21,20 +23,18 @@ export function ProductAuctionBox({ variantIds, productName }: { variantIds: num
     <div role="status" className="flex items-center gap-3 rounded-xl bg-sky-50 px-4 py-3 text-sky-800">
       <Gavel aria-hidden className="size-5 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p className="text-sm font-bold">มีประมูลการ์ดนี้อยู่ {summary.count} รายการ</p>
-        <p className="text-xs">
-          ราคาบิดต่ำสุดตอนนี้ {formatBaht(summary.lowest)} · ใกล้จบใน <Remaining target={summary.soonest.endsAt} serverTime={serverTime} />
+        <p className="text-sm font-bold">{translate("มีประมูลการ์ดนี้อยู่", "Live auctions for this card")}{summary.count}{translate("รายการ", "listings")}</p>
+        <p className="text-xs">{translate("ราคาบิดต่ำสุดตอนนี้", "Current minimum bid")}{formatBaht(summary.lowest)}{translate("· ใกล้จบใน", "· Ending in")}<Remaining target={summary.soonest.endsAt} serverTime={serverTime} />
         </p>
       </div>
-      <Link to={href} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:underline">
-        ดูประมูล
-        <ArrowRight aria-hidden className="size-4" />
+      <Link to={href} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:underline">{translate("ดูประมูล", "View auction")}<ArrowRight aria-hidden className="size-4" />
       </Link>
     </div>
   );
 }
 
 function Remaining({ target, serverTime }: { target: string; serverTime?: string }) {
+  useLanguage();
   const remaining = useCountdown(target, serverTime) ?? 0;
   return <span className="tabular-nums">{formatRemaining(remaining)}</span>;
 }

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useId, useState } from "react";
 
 import { th } from "react-day-picker/locale";
@@ -68,6 +69,7 @@ export function RestockFormCard({
   quantityError,
   onFieldChange,
 }: RestockFormCardProps) {
+  useLanguage();
   const quantityId = useId();
   const totalCostId = useId();
   const receivedAtId = useId();

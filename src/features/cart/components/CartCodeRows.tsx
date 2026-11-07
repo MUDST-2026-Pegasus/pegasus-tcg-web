@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ChevronRight, Sparkles, TicketPercent } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,7 @@ import type { AvailablePromotion } from "../promotions.types";
 
 /** C2-E: a code that stopped working, shown in place of its code row. */
 export function DroppedCodeNotice({ message }: { message: string }) {
+  useLanguage();
   return (
     <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
       {message}
@@ -26,17 +28,18 @@ type AppliedCodeBoxProps = {
 
 /** C1: the chosen code — blue dashed for Pegasus, green for a shop. */
 export function AppliedCodeBox({ owner, code, promotion, discount, pendingShipping, claimed, onChange }: AppliedCodeBoxProps) {
+  useLanguage();
   const platform = owner === "PLATFORM";
   const detail = [
     promotion ? formatPromotionRuleSummary(promotion) : null,
-    claimed ? "จากโค้ดที่เก็บไว้" : "โค้ดที่กรอก",
+    claimed ? translate("จากโค้ดที่เก็บไว้", "From saved coupons") : translate("โค้ดที่กรอก", "Entered code"),
   ].filter(Boolean).join(" · ");
 
   return (
     <button
       type="button"
       onClick={onChange}
-      aria-label={`${platform ? "โค้ด Pegasus" : "โค้ดร้าน"} ${code} — เปลี่ยนโค้ด`}
+      aria-label={translate(`${platform ? translate("โค้ด Pegasus", "Pegasus coupon") : translate("โค้ดร้าน", "Shop coupon")} ${code} — เปลี่ยนโค้ด`, `${platform ? translate("โค้ด Pegasus", "Pegasus coupon") : translate("โค้ดร้าน", "Shop coupon")} ${code} — change code`)}
       className={cn(
         "flex w-full items-center gap-3 rounded-lg border border-dashed px-3 py-2.5 text-left transition-colors",
         platform ? "border-primary bg-primary/5 hover:bg-primary/10" : "border-teal-500 bg-teal-50/70 hover:bg-teal-50",
@@ -45,17 +48,17 @@ export function AppliedCodeBox({ owner, code, promotion, discount, pendingShippi
       <TicketPercent className={cn("size-4 shrink-0", platform ? "text-primary" : "text-teal-700")} aria-hidden />
       <span className="min-w-0 flex-1">
         <strong className={cn("block truncate text-sm", platform ? "text-primary" : "text-teal-700")}>
-          {platform ? code : `โค้ดร้าน · ${code}`}
+          {platform ? code : translate(`โค้ดร้าน · ${code}`, `Shop coupon · ${code}`)}
         </strong>
         <span className="block truncate text-[11px] text-muted-foreground">{detail}</span>
       </span>
       <strong className={cn("shrink-0 text-sm", platform ? "text-primary" : "text-teal-700")}>
-        {pendingShipping ? "ลดค่าส่ง" : `– ${checkoutMoney(discount ?? 0)}`}
+        {pendingShipping ? translate("ลดค่าส่ง", "Shipping discount") : `– ${checkoutMoney(discount ?? 0)}`}
       </strong>
       {platform ? (
         <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       ) : (
-        <span className="shrink-0 text-xs font-medium text-primary">เปลี่ยน</span>
+        <span className="shrink-0 text-xs font-medium text-primary">{translate("เปลี่ยน", "Change")}</span>
       )}
     </button>
   );
@@ -70,6 +73,7 @@ type PickCodeRowProps = {
 
 /** C1: no code chosen yet — opens the picker. */
 export function PickCodeRow({ label, hint, onOpen }: PickCodeRowProps) {
+  useLanguage();
   return (
     <button
       type="button"
@@ -83,16 +87,16 @@ export function PickCodeRow({ label, hint, onOpen }: PickCodeRowProps) {
           {hint}
         </Badge>
       )}
-      <span className="ml-auto text-xs text-muted-foreground">เลือกหรือกรอกโค้ด</span>
+      <span className="ml-auto text-xs text-muted-foreground">{translate("เลือกหรือกรอกโค้ด", "Select or enter a code")}</span>
       <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
     </button>
   );
 }
 
 export function AutoPickedNote() {
+  useLanguage();
   return (
     <p className="flex items-center gap-1.5 text-[11px] text-emerald-700">
-      <Sparkles className="size-3" aria-hidden /> เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว
-    </p>
+      <Sparkles className="size-3" aria-hidden /> {translate("เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว", "The best discount code has been selected")}</p>
   );
 }

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { z } from "zod";
 
 import type { AuthUser } from "@/features/auth/auth.types";
@@ -8,20 +9,20 @@ export const editProfileSchema = z.object({
   displayName: z
     .string()
     .trim()
-    .min(1, "Name must not be blank")
-    .max(100, "Name must be at most 100 characters"),
+    .min(1, { error: () => translate("กรุณากรอกชื่อ", "Name must not be blank") })
+    .max(100, { error: () => translate("ชื่อต้องไม่เกิน 100 ตัวอักษร", "Name must be at most 100 characters") }),
   phone: z
     .string()
     .trim()
-    .max(20, "Phone number must be at most 20 characters")
+    .max(20, { error: () => translate("หมายเลขโทรศัพท์ต้องไม่เกิน 20 ตัวอักษร", "Phone number must be at most 20 characters") })
     .refine(
       (val) => !val || /^(\+?\d[\d()\-\s]*)?$/.test(val),
-      "Enter a valid phone number",
+      { error: () => translate("กรุณากรอกหมายเลขโทรศัพท์ที่ถูกต้อง", "Enter a valid phone number") },
     ),
   bio: z
     .string()
     .trim()
-    .max(1000, "Bio must be at most 1000 characters"),
+    .max(1000, { error: () => translate("ประวัติย่อต้องไม่เกิน 1000 ตัวอักษร", "Bio must be at most 1000 characters") }),
   avatarUrl: z.string().trim().optional(),
 });
 

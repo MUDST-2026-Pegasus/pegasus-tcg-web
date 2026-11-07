@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { clockOffset } from "@/features/auction/auction.format";
 import { useSellerAuctions } from "@/features/auction/auction.queries";
 import { hoursUntil } from "@/features/seller/auctions/auctions-table.format";
@@ -9,6 +10,7 @@ import { StatCard } from "./StatCard";
  * ระหว่างโหลดหรือโหลดไม่สำเร็จไม่แสดง — แดชบอร์ดเดิมยังใช้ได้ตามปกติ
  */
 export function AuctionStatCards() {
+  useLanguage();
   const query = useSellerAuctions();
   if (!query.data) return null;
   const { kpis, serverTime } = query.data;
@@ -19,7 +21,7 @@ export function AuctionStatCards() {
       <StatCard
         id="auctionsLive"
         accent="primary"
-        label="กำลังประมูล"
+        label={translate("กำลังประมูล", "Live auction")}
         value={kpis.liveCount.toLocaleString("th-TH")}
         footnote={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`}
         to="/seller/auctions"
@@ -27,7 +29,7 @@ export function AuctionStatCards() {
       <StatCard
         id="auctionsAwaiting"
         accent="amber"
-        label="รอผู้ชนะชำระ"
+        label={translate("รอผู้ชนะชำระ", "Awaiting winner's payment")}
         value={kpis.awaitingPaymentCount.toLocaleString("th-TH")}
         footnote={kpis.nextPaymentDueAt ? `ครบกำหนดใน ${hoursUntil(kpis.nextPaymentDueAt, offset)} ชม.` : "—"}
         to="/seller/auctions"

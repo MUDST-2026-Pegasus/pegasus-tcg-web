@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useEffect } from "react";
 
 import { useParams } from "react-router-dom";
@@ -13,6 +14,7 @@ import { useMyListing } from "./products.queries";
 import { getRestockData } from "./restock.api";
 
 export function SellerProductRestockPage() {
+  useLanguage();
   const { productId } = useParams();
   const listingId = parseListingId(productId);
 
@@ -27,6 +29,7 @@ export function SellerProductRestockPage() {
 }
 
 function ListingRestockLoader({ listingId }: { listingId: number }) {
+  useLanguage();
   const listing = useMyListing(listingId);
 
   if (hasErrorCode(listing.error, "LISTING_NOT_FOUND")) {

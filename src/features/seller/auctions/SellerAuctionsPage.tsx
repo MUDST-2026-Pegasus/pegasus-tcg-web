@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 import { Gavel, Info, Search } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -34,6 +35,7 @@ function readPage(value: string | null): number {
  * สถานะ คำค้น และเลขหน้าอยู่ใน URL (`?status=LIVE&q=charizard&page=2`)
  */
 export function SellerAuctionsPage() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const status = readStatus(searchParams.get("status"));
   const search = searchParams.get("q")?.trim() ?? "";
@@ -77,7 +79,7 @@ export function SellerAuctionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">การประมูลของฉัน</h1>
+          <h1 className="text-2xl font-bold text-foreground">{translate("การประมูลของฉัน", "My auctions")}</h1>
           <p className="text-xs text-muted-foreground">เปิดประมูลการ์ดจากสต็อกของคุณ ผู้ซื้อที่บิดสูงสุดเมื่อหมดเวลาได้การ์ดไป</p>
         </div>
         <NewAuctionButton />
@@ -97,7 +99,7 @@ export function SellerAuctionsPage() {
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div role="tablist" aria-label="สถานะการประมูล" className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
+            <div role="tablist" aria-label={translate("สถานะการประมูล", "Auction status")} className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
               {SELLER_AUCTION_TABS.map((tab) => {
                 const active = (status ?? null) === tab.status;
                 const count = data ? (tab.status ? data.statusCounts[tab.status] : totalAuctionCount(data.statusCounts)) : null;
@@ -155,6 +157,7 @@ export function SellerAuctionsPage() {
 }
 
 function NewAuctionButton() {
+  useLanguage();
   return (
     <Button className="rounded-lg px-4" nativeButton={false} render={<Link to="/seller/auctions/new" />}>
       + เปิดประมูลใหม่
@@ -164,6 +167,7 @@ function NewAuctionButton() {
 
 /** 4 การ์ดตัวเลขบนหัวหน้า S1 */
 function KpiCards({ data }: { data: SellerAuctionPage }) {
+  useLanguage();
   const { kpis } = data;
   const offset = clockOffset(data.serverTime);
   const percentTone =
@@ -171,7 +175,7 @@ function KpiCards({ data }: { data: SellerAuctionPage }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Kpi label="กำลังประมูล" value={kpis.liveCount.toLocaleString("th-TH")} note={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`} />
+      <Kpi label={translate("กำลังประมูล", "Live auction")} value={kpis.liveCount.toLocaleString("th-TH")} note={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`} />
       <Kpi
         label="รอผู้ชนะชำระเงิน"
         value={kpis.awaitingPaymentCount.toLocaleString("th-TH")}
@@ -185,6 +189,7 @@ function KpiCards({ data }: { data: SellerAuctionPage }) {
 }
 
 function Kpi({ label, value, note, valueClass }: { label: string; value: string; note: string | null; valueClass?: string }) {
+  useLanguage();
   return (
     <Card className="gap-1 rounded-xl p-4 shadow-none">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -196,6 +201,7 @@ function Kpi({ label, value, note, valueClass }: { label: string; value: string;
 
 /** ช่องค้นหา — ส่งค่าเมื่อหยุดพิมพ์ 300ms */
 function SearchBox({ value, onChange }: { value: string; onChange: (q: string) => void }) {
+  useLanguage();
   const [text, setText] = useState(value);
   const [synced, setSynced] = useState(value);
   // URL เปลี่ยนจากที่อื่น (กด back) → ตามค่าใหม่

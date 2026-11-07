@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Check } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -33,17 +34,17 @@ function buildSteps(verification: Verification): ProgressStep[] {
     },
     approved
       ? {
-          title: "ตรวจสอบชื่อและบัญชีธนาคาร",
+          title: translate("ตรวจสอบชื่อและบัญชีธนาคาร", "Verify name and bank account"),
           description: verification.reviewedAt
             ? `ผ่านการตรวจสอบ ${formatThaiDateTime(verification.reviewedAt)}`
             : "ผ่านการตรวจสอบ",
           state: "done",
         }
       : {
-          title: "ตรวจสอบชื่อและบัญชีธนาคาร",
+          title: translate("ตรวจสอบชื่อและบัญชีธนาคาร", "Verify name and bank account"),
           description: "ปกติใช้เวลาไม่เกิน 1 วันทำการ",
           state: "current",
-          badge: "กำลังตรวจสอบ",
+          badge: translate("กำลังตรวจสอบ", "Under review"),
         },
     {
       title: "เปิดร้านและลงขายได้ทันที",
@@ -65,12 +66,13 @@ export function ApplicationProgressCard({
   id,
   verification,
 }: ApplicationProgressCardProps) {
+  useLanguage();
   return (
     <Card
       id={id}
       className="gap-4 rounded-xl border border-border p-5 shadow-none ring-0"
     >
-      <h2 className="text-sm font-semibold text-foreground">สถานะคำขอ</h2>
+      <h2 className="text-sm font-semibold text-foreground">{translate("สถานะคำขอ", "Request status")}</h2>
 
       <ol className="flex flex-col gap-4">
         {buildSteps(verification).map((step, index) => (

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { MapPin, Pencil, Phone, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,7 @@ export function AddressCard({
   onSetDefault,
   isSettingDefault = false,
 }: AddressCardProps) {
+  useLanguage();
   return (
     <Card
       data-default={address.defaultShipping}
@@ -44,7 +46,7 @@ export function AddressCard({
         </CardTitle>
         {address.defaultShipping && (
           <CardAction>
-            <Badge>DEFAULT</Badge>
+            <Badge>{translate("ค่าเริ่มต้น", "DEFAULT")}</Badge>
           </CardAction>
         )}
       </CardHeader>
@@ -67,16 +69,14 @@ export function AddressCard({
       <CardFooter className="justify-between gap-3">
         <div className="flex gap-1">
           <Button variant="link" size="sm" onClick={() => onEdit(address)}>
-            <Pencil data-icon="inline-start" /> Edit
-          </Button>
+            <Pencil data-icon="inline-start" /> {translate("แก้ไข", "Edit")}</Button>
           <Separator orientation="vertical" />
           <Button
             variant="destructive"
             size="sm"
             onClick={() => onDelete(address)}
           >
-            <Trash2 data-icon="inline-start" /> Delete
-          </Button>
+            <Trash2 data-icon="inline-start" /> {translate("ลบ", "Delete")}</Button>
         </div>
         {!address.defaultShipping && (
           <Button
@@ -86,8 +86,7 @@ export function AddressCard({
             onClick={() => onSetDefault(address)}
           >
             {isSettingDefault && <Spinner data-icon="inline-start" />}
-            Set as Default
-          </Button>
+            {translate("ตั้งเป็นค่าเริ่มต้น", "Set as Default")}</Button>
         )}
       </CardFooter>
     </Card>

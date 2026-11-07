@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Check } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -18,6 +19,7 @@ type SubmissionSummaryCardProps = {
 export function SubmissionSummaryCard({
   verification,
 }: SubmissionSummaryCardProps) {
+  useLanguage();
   const approved = verification.status === "APPROVED";
 
   const meta = [

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
@@ -26,11 +27,12 @@ export function RequireAuth({
   fallback,
   children,
 }: RequireAuthProps) {
+  useLanguage();
   const location = useLocation();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
 
   if (isLoading) {
-    return fallback ?? <FormPageSkeleton label="กำลังตรวจสอบการเข้าสู่ระบบ" />;
+    return fallback ?? <FormPageSkeleton label={translate("กำลังตรวจสอบการเข้าสู่ระบบ", "Checking your session")} />;
   }
 
   if (!isAuthenticated) {

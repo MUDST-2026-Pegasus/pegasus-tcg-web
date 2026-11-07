@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import { useRef, useState } from "react";
 import {
   CloudUpload,
@@ -26,12 +27,13 @@ export function PaymentSteps({
   onReferenceCodeChange,
   disabled = false,
 }: PaymentStepsProps) {
+  useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   const formattedAmount =
     amount !== undefined
-      ? Number(amount).toLocaleString("th-TH", {
+      ? Number(amount).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })
@@ -87,10 +89,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="pb-4">
-          <h3 className="font-semibold text-sm text-foreground">Scan &amp; pay</h3>
+          <h3 className="font-semibold text-sm text-foreground">{translate("สแกนและชำระเงิน", "Scan & pay")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            Pay exactly THB {formattedAmount}, then save the slip from your banking app.
-          </p>
+            {translate("ชำระเงินให้ตรงยอด", "Pay exactly THB")}{formattedAmount}{translate("แล้วบันทึกสลิปจากแอปธนาคาร", ", then save the slip from your banking app.")}</p>
         </div>
       </div>
 
@@ -109,10 +110,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="flex-1 pb-4">
-          <h3 className="font-semibold text-sm text-foreground">Upload your slip</h3>
+          <h3 className="font-semibold text-sm text-foreground">{translate("อัปโหลดสลิป", "Upload your slip")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            We use it to verify your transfer.
-          </p>
+            {translate("เราใช้สลิปเพื่อตรวจสอบการโอนเงิน", "We use it to verify your transfer.")}</p>
 
           {/* Dropzone Container */}
           {!uploadedItem ? (
@@ -160,19 +160,17 @@ export function PaymentSteps({
               <div className="min-w-0">
                 <p className="text-xs">
                   {disabled ? (
-                    <span className="text-slate-500 font-medium">Payment submitted</span>
+                    <span className="text-slate-500 font-medium">{translate("ส่งข้อมูลชำระเงินแล้ว", "Payment submitted")}</span>
                   ) : (
                     <>
                       <span className="text-primary font-semibold hover:underline">
-                        Click to upload
-                      </span>{" "}
-                      <span className="text-slate-500 font-normal">or drag &amp; drop</span>
+                        {translate("คลิกเพื่ออัปโหลด", "Click to upload")}</span>{" "}
+                      <span className="text-slate-500 font-normal">{translate("หรือลากไฟล์มาวาง", "or drag & drop")}</span>
                     </>
                   )}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  JPG, PNG or PDF · up to 5 MB
-                </p>
+                  {translate("JPG, PNG หรือ PDF · ไม่เกิน 5 MB", "JPG, PNG or PDF · up to 5 MB")}</p>
               </div>
             </div>
           ) : (
@@ -182,7 +180,7 @@ export function PaymentSteps({
                 {uploadedItem.previewUrl ? (
                   <img
                     src={uploadedItem.previewUrl}
-                    alt="Slip preview"
+                    alt={translate("ตัวอย่างสลิป", "Slip preview")}
                     className="w-10 h-10 rounded-lg object-cover border border-muted shrink-0"
                   />
                 ) : (
@@ -200,18 +198,15 @@ export function PaymentSteps({
                     </span>
                     {uploadedItem.status === "uploading" && (
                       <span className="text-[11px] text-primary flex items-center gap-1 font-medium">
-                        <Loader2 className="size-3 animate-spin" /> Uploading...
-                      </span>
+                        <Loader2 className="size-3 animate-spin" /> {translate("กำลังอัปโหลด…", "Uploading...")}</span>
                     )}
                     {uploadedItem.status === "done" && (
                       <span className="text-[11px] text-emerald-600 flex items-center gap-1 font-medium">
-                        <FileCheck2 className="size-3" /> Ready
-                      </span>
+                        <FileCheck2 className="size-3" /> {translate("พร้อม", "Ready")}</span>
                     )}
                     {uploadedItem.status === "error" && (
                       <span className="text-[11px] text-destructive font-medium">
-                        Failed
-                      </span>
+                        {translate("ไม่สำเร็จ", "Failed")}</span>
                     )}
                   </div>
                 </div>
@@ -226,7 +221,7 @@ export function PaymentSteps({
                       size="icon"
                       className="size-8 text-slate-500 hover:text-slate-800"
                       onClick={() => slip.retry(uploadedItem.id)}
-                      title="Retry upload"
+                      title={translate("ลองอัปโหลดอีกครั้ง", "Retry upload")}
                     >
                       <RefreshCw className="size-3.5" />
                     </Button>
@@ -240,7 +235,7 @@ export function PaymentSteps({
                       slip.remove(uploadedItem.id);
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
-                    title="Remove file"
+                    title={translate("นำไฟล์ออก", "Remove file")}
                   >
                     <Trash2 className="size-3.5" />
                   </Button>
@@ -271,14 +266,13 @@ export function PaymentSteps({
           </div>
         </div>
         <div className="flex-1 pb-2">
-          <h3 className="font-semibold text-sm text-foreground">Enter reference no.</h3>
+          <h3 className="font-semibold text-sm text-foreground">{translate("กรอกเลขอ้างอิง", "Enter reference no.")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Find it on your slip as &quot;Ref. No.&quot;
-          </p>
+            {translate("ดู “Ref. No.” บนสลิปของคุณ", "Find it on your slip as \"Ref. No.\"")}</p>
 
           <Input
-            aria-label="เลขอ้างอิงการโอน"
-            placeholder="e.g. 2026101400051234"
+            aria-label={translate("เลขอ้างอิงการโอน", "Transfer reference number")}
+            placeholder={translate("เช่น 2026101400051234", "e.g. 2026101400051234")}
             value={referenceCode}
             disabled={disabled}
             onChange={(e) => onReferenceCodeChange(e.target.value)}

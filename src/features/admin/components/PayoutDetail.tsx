@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 import { Check, CreditCard, XCircle } from "lucide-react";
 
@@ -40,6 +41,7 @@ type PayoutDetailProps = {
  * ผู้เรียกใส่ `key={payout.id}` ให้ฟอร์มยืนยันการจ่ายล้างเองเมื่อเปลี่ยนรายการ
  */
 export function PayoutDetail({ payout, onMoved }: PayoutDetailProps) {
+  useLanguage();
   const meta = PAYOUT_STATUS_META[payout.status];
   const open = ["REQUESTED", "APPROVED", "PROCESSING"].includes(payout.status);
   const canWithdrawMore = payout.wallet.available - payout.wallet.reserved;
@@ -101,9 +103,9 @@ export function PayoutDetail({ payout, onMoved }: PayoutDetailProps) {
             </div>
             {payout.account ? (
               <>
-                <InfoField label="ธนาคาร" value={payout.account.bankName ?? "—"} />
-                <InfoField label="ชื่อบัญชี" value={payout.account.accountName ?? "—"} />
-                <InfoField label="เลขบัญชี" value={formatAccountNumber(payout.account.accountNumber)} large />
+                <InfoField label={translate("ธนาคาร", "Bank")} value={payout.account.bankName ?? "—"} />
+                <InfoField label={translate("ชื่อบัญชี", "Account name")} value={payout.account.accountName ?? "—"} />
+                <InfoField label={translate("เลขบัญชี", "Account number")} value={formatAccountNumber(payout.account.accountNumber)} large />
                 {payout.account.verifiedAt && (
                   <Badge className="h-5 self-start rounded-full bg-[#e3f4ec] px-2 text-[10px] font-medium text-[#12805c]">
                     ยืนยันบัญชีแล้ว · สร้างตอนอนุมัติ KYC
@@ -150,9 +152,9 @@ export function PayoutDetail({ payout, onMoved }: PayoutDetailProps) {
 
 const STEPS = [
   { key: "REQUESTED", label: "ขอถอน" },
-  { key: "APPROVED", label: "อนุมัติ" },
-  { key: "PROCESSING", label: "กำลังโอน" },
-  { key: "PAID", label: "จ่ายแล้ว" },
+  { key: "APPROVED", get label() { return translate("อนุมัติ", "Approve"); } },
+  { key: "PROCESSING", get label() { return translate("กำลังโอน", "Transferring"); } },
+  { key: "PAID", get label() { return translate("จ่ายแล้ว", "Paid"); } },
 ] as const;
 
 /** ลำดับขั้นที่ถึงแล้ว — REJECTED จบที่ขั้นแรก, FAILED จบที่ขั้นกำลังโอน */
@@ -172,6 +174,7 @@ function reachedStep(status: PayoutStatus): number {
 }
 
 function PayoutTimeline({ payout }: { payout: AdminPayout }) {
+  useLanguage();
   const reached = reachedStep(payout.status);
   const stopped = payout.status === "REJECTED" || payout.status === "FAILED";
   const captions = [
@@ -179,8 +182,8 @@ function PayoutTimeline({ payout }: { payout: AdminPayout }) {
     payout.approvedAt
       ? `${formatThaiShortDateTime(payout.approvedAt)}${payout.approvedBy ? ` · ${payout.approvedBy}` : ""}`
       : "",
-    reached >= 2 ? (payout.status === "FAILED" ? "โอนไม่สำเร็จ" : "") : "",
-    payout.paidAt ? formatThaiShortDateTime(payout.paidAt) : "รอยืนยัน",
+    reached >= 2 ? (payout.status === "FAILED" ? translate("โอนไม่สำเร็จ", "Transfer failed") : "") : "",
+    payout.paidAt ? formatThaiShortDateTime(payout.paidAt) : translate("รอยืนยัน", "Awaiting confirmation"),
   ];
 
   return (
@@ -214,10 +217,10 @@ function PayoutTimeline({ payout }: { payout: AdminPayout }) {
                   done || current ? "text-foreground" : "text-[#9aa5ad]",
                 )}
               >
-                {failed ? (payout.status === "REJECTED" ? "ปฏิเสธ" : "โอนไม่สำเร็จ") : step.label}
+                {failed ? (payout.status === "REJECTED" ? translate("ปฏิเสธ", "Reject") : translate("โอนไม่สำเร็จ", "Transfer failed")) : step.label}
               </span>
               <span className="truncate pr-2 text-[11px] text-[#9aa5ad]">
-                {index <= reached ? captions[index] : index === 3 ? "รอยืนยัน" : ""}
+                {index <= reached ? captions[index] : index === 3 ? translate("รอยืนยัน", "Awaiting confirmation") : ""}
               </span>
             </li>
           );
@@ -225,7 +228,7 @@ function PayoutTimeline({ payout }: { payout: AdminPayout }) {
       </ol>
       {stopped && payout.rejectionReason && (
         <p className="rounded-[10px] bg-[#fbe9e8] px-3 py-2 text-xs text-[#d0342c]">
-          เหตุผล: {payout.rejectionReason}
+          {translate("เหตุผล:", "Reason:") + " "}{payout.rejectionReason}
         </p>
       )}
     </div>
@@ -245,10 +248,11 @@ const SUCCESS_TITLE: Record<PayoutAction["kind"], string> = {
   start: "เริ่มดำเนินการโอนแล้ว",
   paid: "บันทึกการจ่ายเงินแล้ว",
   reject: "ปฏิเสธคำขอถอนแล้ว",
-  fail: "บันทึกว่าโอนไม่สำเร็จแล้ว",
+  get fail() { return translate("บันทึกว่าโอนไม่สำเร็จแล้ว", "Transfer failure recorded"); },
 };
 
 function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
+  useLanguage();
   const action = usePayoutAction();
   const slip = useFileUpload({ purpose: "PAYOUT_SLIP" });
   const [reference, setReference] = useState("");
@@ -266,7 +270,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
       toast.add({
         type: "error",
         title: "ดำเนินการไม่สำเร็จ",
-        description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+        description: financeErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
       }),
     );
 
@@ -287,8 +291,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
             disabled={action.isPending}
             onClick={() => setReasonFor("reject")}
           >
-            ปฏิเสธ
-          </Button>
+            {translate("ปฏิเสธ", "Reject")}</Button>
           <Button
             size="sm"
             className="rounded-md px-2.5"
@@ -296,8 +299,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
             onClick={() => void runWithToast({ kind: "approve", id: payout.id })}
           >
             {busyKind === "approve" && <Spinner data-icon="inline-start" />}
-            อนุมัติ
-          </Button>
+            {translate("อนุมัติ", "Approve")}</Button>
         </ActionRow>
       );
       break;
@@ -314,8 +316,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
             onClick={() => void runWithToast({ kind: "start", id: payout.id })}
           >
             {busyKind === "start" && <Spinner data-icon="inline-start" />}
-            เริ่มโอน
-          </Button>
+            {translate("เริ่มโอน", "Start transfer")}</Button>
         </ActionRow>
       );
       break;
@@ -331,7 +332,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <Field>
-              <FieldLabel htmlFor="payout-reference">เลขอ้างอิงการโอน</FieldLabel>
+              <FieldLabel htmlFor="payout-reference">{translate("เลขอ้างอิงการโอน", "Transfer reference")}</FieldLabel>
               <Input
                 id="payout-reference"
                 placeholder="เช่น 20261014KBANK0012345"
@@ -354,8 +355,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
               disabled={action.isPending}
               onClick={() => setReasonFor("fail")}
             >
-              โอนไม่สำเร็จ
-            </Button>
+              {translate("โอนไม่สำเร็จ", "Transfer failed")}</Button>
             <Button
               size="sm"
               className="rounded-md px-2.5"
@@ -381,7 +381,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
       body = (
         <p className="flex items-center gap-2 text-[13px] font-medium text-[#12805c]">
           <Check className="size-4" />
-          จ่ายแล้ว{payout.paidAt ? `เมื่อ ${formatThaiDateTime(payout.paidAt)}` : ""} · เลขอ้างอิง{" "}
+          {translate("จ่ายแล้ว", "Paid")}{payout.paidAt ? `เมื่อ ${formatThaiDateTime(payout.paidAt)}` : ""} · เลขอ้างอิง{" "}
           {payout.transferReference ?? "—"}
         </p>
       );
@@ -390,7 +390,7 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
     case "FAILED":
       body = (
         <p className="text-[13px] font-medium text-[#d0342c]">
-          {payout.status === "REJECTED" ? "ปฏิเสธคำขอแล้ว" : "โอนไม่สำเร็จ"} — ยอดที่จองไว้กลับให้ผู้ขายถอนใหม่ได้
+          {payout.status === "REJECTED" ? translate("ปฏิเสธคำขอแล้ว", "Request rejected") : translate("โอนไม่สำเร็จ", "Transfer failed")} — ยอดที่จองไว้กลับให้ผู้ขายถอนใหม่ได้
         </p>
       );
       break;
@@ -407,9 +407,9 @@ function PayoutActions({ payout, onMoved }: PayoutDetailProps) {
         placeholder={
           reasonFor === "fail" ? "เช่น บัญชีปลายทางถูกระงับ ธนาคารตีกลับ" : "เช่น บัญชีอยู่ระหว่างตรวจสอบ"
         }
-        confirmLabel={reasonFor === "fail" ? "บันทึกว่าโอนไม่สำเร็จ" : "ยืนยันการปฏิเสธ"}
+        confirmLabel={reasonFor === "fail" ? translate("บันทึกว่าโอนไม่สำเร็จ", "Record failed transfer") : translate("ยืนยันการปฏิเสธ", "Confirm rejection")}
         onConfirm={(reason) => run({ kind: reasonFor ?? "reject", id: payout.id, reason })}
-        errorMessage={(error) => financeErrorMessage(error, "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")}
+        errorMessage={(error) => financeErrorMessage(error, translate("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง", "Unable to save. Please try again"))}
       />
     </Card>
   );
@@ -424,6 +424,7 @@ function ActionRow({
   description: string;
   children: ReactNode;
 }) {
+  useLanguage();
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div className="flex min-w-0 flex-1 flex-col gap-[3px]">

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 import { Lock, TicketPercent } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,6 +33,7 @@ function paymentUrl(orderId: number, auctionNumber: string) {
  * นับเวลาชำระจากกำหนดที่ได้ตอนปิดประมูล · สร้างคำสั่งซื้อผ่าน `POST /auctions/:id/checkout`
  */
 export function AuctionCheckout({ auctionId }: { auctionId: number }) {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -65,7 +67,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
   if (isAuthLoading || toPay.isLoading) {
     return (
       <div className="checkout-page">
-        <FormPageSkeleton label="กำลังเตรียมคำสั่งซื้อ" />
+        <FormPageSkeleton label={translate("กำลังเตรียมคำสั่งซื้อ", "Preparing order")} />
       </div>
     );
   }
@@ -74,10 +76,8 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
     return (
       <div className="checkout-page">
         <div className="checkout-container">
-          <h1 className="text-xl font-bold">ไม่พบสินค้าที่เลือกสั่งซื้อ</h1>
-          <Button onClick={() => navigate("/account/auctions")} className="mt-4">
-            การประมูลของฉัน
-          </Button>
+          <h1 className="text-xl font-bold">{translate("ไม่พบสินค้าที่เลือกสั่งซื้อ", "The selected item was not found")}</h1>
+          <Button onClick={() => navigate("/account/auctions")} className="mt-4">{translate("การประมูลของฉัน", "My auctions")}</Button>
         </div>
       </div>
     );
@@ -98,7 +98,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
       },
       {
         onSuccess: (response) => {
-          toast.add({ title: "สร้างคำสั่งซื้อสำเร็จ", description: `คำสั่งซื้อ ${response.orderNumber}`, type: "success" });
+          toast.add({ title: translate("สร้างคำสั่งซื้อสำเร็จ", "Order created"), description: translate(`คำสั่งซื้อ ${response.orderNumber}`, `Order ${response.orderNumber}`), type: "success" });
           navigate(paymentUrl(response.orderId, auction.auctionNumber), {
             state: { orderId: response.orderId, order: response },
           });
@@ -110,7 +110,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
 
   const handleError = (error: Error) => {
     if (!(error instanceof ApiError)) {
-      toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", type: "error" });
+      toast.add({ title: translate("สั่งซื้อไม่สำเร็จ", "Unable to place order"), description: translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Please check your connection and try again"), type: "error" });
       return;
     }
     if (error.status > 0 && error.status < 500) attempt.current = null;
@@ -118,19 +118,19 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
       setSelectedAddressId(null);
       void queryClient.invalidateQueries({ queryKey: addressKeys.all });
       setAddressPickerOpen(true);
-      toast.add({ title: "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง", description: "ที่อยู่เดิมไม่พร้อมใช้งาน", type: "warning" });
+      toast.add({ title: translate("กรุณาเลือกที่อยู่จัดส่งอีกครั้ง", "Please select a shipping address again"), description: translate("ที่อยู่เดิมไม่พร้อมใช้งาน", "The previous address is unavailable"), type: "warning" });
       return;
     }
     if (error.code === "AUCTION_CLOSED") {
       // เลยกำหนดชำระแล้ว — กลับไปดูสถานะในหน้าการประมูลของฉัน
-      toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: error.message, type: "error" });
+      toast.add({ title: translate("สั่งซื้อไม่สำเร็จ", "Unable to place order"), description: error.message, type: "error" });
       navigate("/account/auctions", { replace: true });
       return;
     }
     if (error.code === "CART_PRICE_CHANGED" || error.code === "PRICE_CHANGED") {
       void toPay.refetch();
     }
-    toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: error.message, type: "error" });
+    toast.add({ title: translate("สั่งซื้อไม่สำเร็จ", "Unable to place order"), description: error.message, type: "error" });
   };
 
   const { item } = auction;
@@ -139,7 +139,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
     <div className="checkout-page">
       <div className="checkout-container">
         <header className="mb-6">
-          <h1 className="text-[26px] leading-tight font-bold">ตรวจสอบและสั่งซื้อ</h1>
+          <h1 className="text-[26px] leading-tight font-bold">{translate("ตรวจสอบและสั่งซื้อ", "Review and place order")}</h1>
         </header>
 
         <div className="checkout-columns">
@@ -169,7 +169,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
             </Card>
           </div>
 
-          <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
+          <aside className="flex min-w-0 flex-col gap-4" aria-label={translate("สรุปคำสั่งซื้อ", "Order summary")}>
             <CheckoutAddressSummary
               address={activeAddress}
               loading={isAddressLoading}
@@ -181,42 +181,40 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
 
             <Card className={`${CHECKOUT_CARD_CLASS} text-[13px]`}>
               <div className="flex items-center justify-between gap-3">
-                <h2 className="font-semibold">วิธีชำระเงิน</h2>
-                <span className="text-muted-foreground">โอนผ่าน PromptPay</span>
+                <h2 className="font-semibold">{translate("วิธีชำระเงิน", "Payment method")}</h2>
+                <span className="text-muted-foreground">{translate("โอนผ่าน PromptPay", "Pay via PromptPay")}</span>
               </div>
             </Card>
 
             <Card className={`${CHECKOUT_CARD_CLASS} text-[13px]`}>
               <p className="flex items-center gap-2 text-muted-foreground">
-                <TicketPercent aria-hidden className="size-4 shrink-0" />
-                โค้ดส่วนลดใช้กับของประมูลไม่ได้
-              </p>
+                <TicketPercent aria-hidden className="size-4 shrink-0" />{translate("โค้ดส่วนลดใช้กับของประมูลไม่ได้", "Discount codes cannot be used for auction items")}</p>
             </Card>
 
             <Card className={CHECKOUT_CARD_CLASS}>
-              <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
+              <h2 className="text-[15px] font-semibold">{translate("สรุปคำสั่งซื้อ", "Order summary")}</h2>
               <div className="flex flex-wrap items-center gap-2">
                 <AuctionOrderBadge auctionNumber={auction.auctionNumber} />
                 {auction.deadline ? (
                   <AuctionCountdown
                     target={auction.deadline}
                     serverTime={toPay.data?.serverTime}
-                    prefix="ชำระภายใน"
+                    prefix={translate("ชำระภายใน", "Pay within")}
                     tone="urgent"
                   />
                 ) : null}
               </div>
               <div className="flex items-center justify-between gap-3 text-[13px]">
-                <span className="text-muted-foreground">ยอดสินค้า (1 ใบ)</span>
+                <span className="text-muted-foreground">{translate("ยอดสินค้า (1 ใบ)", "Item subtotal (1 card)")}</span>
                 <span>{checkoutMoney(auction.currentPrice)}</span>
               </div>
               <div className="flex items-center justify-between gap-3 text-[13px]">
-                <span className="text-muted-foreground">ค่าจัดส่ง</span>
+                <span className="text-muted-foreground">{translate("ค่าจัดส่ง", "Shipping")}</span>
                 <span>{checkoutMoney(auction.shippingFee)}</span>
               </div>
               <Separator className="checkout-divider" />
               <div className="flex items-center justify-between gap-3 text-lg">
-                <span className="font-semibold">ยอดรวม</span>
+                <span className="font-semibold">{translate("ยอดรวม", "Total")}</span>
                 <strong data-testid="checkout-grand-total">{checkoutMoney(total)}</strong>
               </div>
               <Button
@@ -225,7 +223,7 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
                 onClick={handlePurchase}
               >
                 {checkout.isPending && <Spinner />}
-                {checkout.isPending ? "กำลังสร้างคำสั่งซื้อ..." : "สั่งซื้อและไปชำระเงิน"}
+                {checkout.isPending ? translate("กำลังสร้างคำสั่งซื้อ...", "Creating order...") : translate("สั่งซื้อและไปชำระเงิน", "Place order and pay")}
               </Button>
             </Card>
           </aside>

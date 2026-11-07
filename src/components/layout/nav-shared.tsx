@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- shared navbar hook and avatar are intentionally colocated */
+import { useLanguage } from "@/lib/language";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/toast";
 import { useAuth, useLogout } from "@/features/auth/auth.queries";
@@ -10,26 +11,27 @@ export const guestLinks = [
 ];
 
 export function useAccountLinks() {
+  const { text } = useLanguage();
   const auth = useAuth();
   const logout = useLogout();
   const navigate = useNavigate();
   const sellerLink = auth.hasRole("SELLER")
-    ? { label: "Seller Dashboard", to: "/seller" }
-    : { label: "Become a Seller", to: "/become-a-seller" };
+    ? { label: text("แดชบอร์ดผู้ขาย", "Seller Dashboard"), to: "/seller" }
+    : { label: text("สมัครเป็นผู้ขาย", "Become a Seller"), to: "/become-a-seller" };
   const links = auth.isAuthenticated
     ? [
-        { label: "My Account", to: "/account/profile" },
-        { label: "My Collection", to: "/account/collection" },
+        { label: text("บัญชีของฉัน", "My Account"), to: "/account/profile" },
+        { label: text("คอลเลกชันของฉัน", "My Collection"), to: "/account/collection" },
         sellerLink,
         ...(auth.hasRole("ADMIN")
-          ? [{ label: "Admin Dashboard", to: "/admin" }]
+          ? [{ label: text("แดชบอร์ดผู้ดูแล", "Admin Dashboard"), to: "/admin" }]
           : []),
       ]
-    : guestLinks;
+    : guestLinks.map((link) => ({ ...link, label: link.to === "/login" ? text("เข้าสู่ระบบ", "Log in") : text("สมัครสมาชิก", "Sign up") }));
   const handleLogout = async () => {
     await logout.mutateAsync();
     navigate("/login", { replace: true });
-    toast.add({ type: "success", title: "ออกจากระบบเรียบร้อยแล้ว" });
+    toast.add({ type: "success", title: text("ออกจากระบบเรียบร้อยแล้ว", "You have been logged out") });
   };
   return {
     ...auth,

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId } from "react";
 
 import { Info } from "lucide-react";
@@ -94,6 +95,7 @@ export function PricingCard({
   stock,
   autoFocusPrice = false,
 }: PricingCardProps) {
+  useLanguage();
   const ids = {
     price: useId(),
     cost: useId(),
@@ -224,7 +226,7 @@ export function PricingCard({
                 )}
               />
               <FieldDescription className={HELPER_CLASS}>
-                สูงสุด {MAX_UNITS_PER_STOCK_IN} ใบต่อครั้ง · ระบบตัดสต็อกเองเมื่อขายได้
+                {translate("สูงสุด", "Maximum") + " "}{MAX_UNITS_PER_STOCK_IN} ใบต่อครั้ง · ระบบตัดสต็อกเองเมื่อขายได้
               </FieldDescription>
               <FieldError errors={[errors.quantity]} />
             </Field>
@@ -246,8 +248,7 @@ export function PricingCard({
                 to={stock.restockTo}
                 className="font-medium text-teal-600 no-underline hover:underline"
               >
-                เติมสต็อก
-              </Link>
+                {translate("เติมสต็อก", "Restock")}</Link>
             </FieldDescription>
           </Field>
         ) : null}
@@ -258,7 +259,7 @@ export function PricingCard({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-y-3 rounded-[10px] border border-muted bg-neutral-50 p-4">
-        <SummaryItem label="ราคาขาย" value={formatBaht(price ?? 0)} strong />
+        <SummaryItem label={translate("ราคาขาย", "Selling price")} value={formatBaht(price ?? 0)} strong />
         <SummaryItem
           label={`− ค่าคอมมิชชั่น ~${ESTIMATED_COMMISSION_PERCENT}%`}
           value={formatBaht(commission)}
@@ -273,8 +274,7 @@ export function PricingCard({
         />
         <div className="flex flex-col items-end gap-[5px]">
           <p className="text-xs text-gray-500">
-            {cost !== null ? "กำไรรวมถ้าขายหมด" : "รวมถ้าขายหมด"} {quantity} ใบ
-          </p>
+            {cost !== null ? "กำไรรวมถ้าขายหมด" : "รวมถ้าขายหมด"} {quantity} {" " + translate("ใบ", "cards")}</p>
           <p
             className={cn(
               "text-lg font-bold",
@@ -311,6 +311,7 @@ function MoneyField({
   helper?: string;
   autoFocus?: boolean;
 }) {
+  useLanguage();
   const { errors } = useFormState({ control: form.control, name });
   const error = errors[name];
   return (
@@ -352,6 +353,7 @@ function AutoPricingFields({
   ids: { offset: string; floor: string; ceiling: string };
   market: MarketState;
 }) {
+  useLanguage();
   const { control } = form;
   const formState = useFormState({ control, name: "autoPriceOffsetPercent" });
   const [offsetText, floorText, ceilingText] = useWatch({
@@ -475,6 +477,7 @@ function SummaryItem({
   strong?: boolean;
   tone?: "positive" | "negative";
 }) {
+  useLanguage();
   return (
     <div className="flex min-w-28 flex-1 flex-col gap-[5px]">
       <p className="text-xs text-gray-500">{label}</p>
@@ -505,6 +508,7 @@ export function MarketComparison({
   market: MarketState;
   price: number | null;
 }) {
+  useLanguage();
   if (!market.enabled) {
     return null;
   }
@@ -578,7 +582,7 @@ export function MarketComparison({
           ค่ากลาง {formatBaht(snapshot.median)}
         </p>
         <p className="text-[10px] text-gray-400">
-          สูงสุด {formatBaht(snapshot.high)}
+          {translate("สูงสุด", "Maximum") + " "}{formatBaht(snapshot.high)}
         </p>
       </div>
     </div>

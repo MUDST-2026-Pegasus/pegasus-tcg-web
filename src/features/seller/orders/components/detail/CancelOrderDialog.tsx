@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -46,11 +47,12 @@ export function CancelOrderDialog({
   orderNumber,
   paid,
 }: CancelOrderDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>ยกเลิกคำสั่งซื้อ {orderNumber}</DialogTitle>
+          <DialogTitle>{translate("ยกเลิกคำสั่งซื้อ", "Cancel order") + " "}{orderNumber}</DialogTitle>
           <DialogDescription>
             การ์ดในออเดอร์นี้จะกลับไปวางขายทันที
             {paid ? " และระบบจะคืนเงินให้ผู้ซื้อ" : ""} — ทำย้อนกลับไม่ได้
@@ -64,6 +66,7 @@ export function CancelOrderDialog({
 }
 
 function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void }) {
+  useLanguage();
   const cancel = useCancelOrder();
 
   const {
@@ -112,8 +115,7 @@ function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ไม่ยกเลิก
-        </DialogClose>
+          {translate("ไม่ยกเลิก", "Keep auction")}</DialogClose>
         <Button type="submit" variant="destructive" disabled={isSubmitting}>
           {isSubmitting ? <Spinner /> : null}
           ยืนยันยกเลิก

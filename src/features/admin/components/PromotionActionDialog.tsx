@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { CirclePlay, Pause, ShieldAlert, Trash2, TriangleAlert } from "lucide-react";
 
@@ -47,6 +48,7 @@ type PromotionActionDialogProps = {
 
 /** หยุด / เปิดใช้อีกครั้ง / ลบ / ลบไม่ได้ ตามบอร์ด Figma PRM-M1 */
 export function PromotionActionDialog({ action, homeIds, now, onChange }: PromotionActionDialogProps) {
+  useLanguage();
   const close = () => onChange(null);
   if (!action) return null;
   // key ล้างช่องกรอกทุกครั้งที่เปิดโค้ดใหม่หรือเปลี่ยนแบบ
@@ -91,6 +93,7 @@ function PausePlatformDialog({
   homeIds: number[];
   onClose: () => void;
 }) {
+  useLanguage();
   const pause = usePausePromotion();
   const setHomeOrder = useSetHomeOrder();
   const onHome = homeIds.includes(promotion.id);
@@ -104,7 +107,7 @@ function PausePlatformDialog({
       toast.add({ title: `หยุดโค้ด ${promotion.code} แล้ว`, type: "success" });
       onClose();
     } catch (error) {
-      toast.add({ title: "หยุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" });
+      toast.add({ title: translate("หยุดโค้ดไม่สำเร็จ", "Unable to pause code"), description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" });
     }
   };
 
@@ -119,11 +122,9 @@ function PausePlatformDialog({
       actions={
         <>
           <Button variant="outline" disabled={pending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={pending} onClick={() => void submit()}>
-            หยุดโค้ด
-          </Button>
+            {translate("หยุดโค้ด", "Pause code")}</Button>
         </>
       }
     >
@@ -133,8 +134,8 @@ function PausePlatformDialog({
           <strong>{promotion.claimedCount.toLocaleString("th-TH")} คน</strong>
         </p>
         <p className={SUMMARY_ROW}>
-          <span>ออเดอร์รอชำระที่ใช้โค้ดนี้</span>
-          <strong>{promotion.reservedOrders.toLocaleString("th-TH")} รายการ</strong>
+          <span>{translate("ออเดอร์รอชำระที่ใช้โค้ดนี้", "Unpaid orders using this code")}</span>
+          <strong>{promotion.reservedOrders.toLocaleString("th-TH")} {" " + translate("รายการ", "Items")}</strong>
         </p>
       </div>
       <p className="text-[11px] leading-4 text-muted-foreground">
@@ -153,11 +154,12 @@ function PausePlatformDialog({
 }
 
 function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; onClose: () => void }) {
+  useLanguage();
   const pause = usePausePromotion();
   const [category, setCategory] = useState("");
   const [detail, setDetail] = useState("");
   const [notifySeller, setNotifySeller] = useState(true);
-  const shop = promotion.owner?.username ?? "ร้านค้า";
+  const shop = promotion.owner?.username ?? translate("ร้านค้า", "Shop");
   const valid = category !== "" && detail.trim() !== "";
 
   const submit = () =>
@@ -172,7 +174,7 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
           onClose();
         },
         onError: (error) =>
-          toast.add({ title: "หยุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
+          toast.add({ title: translate("หยุดโค้ดไม่สำเร็จ", "Unable to pause code"), description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" }),
       },
     );
 
@@ -188,8 +190,7 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
       actions={
         <>
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={!valid || pause.isPending} onClick={submit}>
             หยุดโค้ดร้าน
           </Button>
@@ -244,12 +245,13 @@ function PauseSellerDialog({ promotion, onClose }: { promotion: AdminPromotion; 
 }
 
 function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClose: () => void }) {
+  useLanguage();
   const resume = useResumePromotion();
   const isSeller = promotion.ownerType === "SELLER";
   const [notifySeller, setNotifySeller] = useState(true);
   const remaining =
     promotion.usageLimitTotal == null
-      ? "ไม่จำกัด"
+      ? translate("ไม่จำกัด", "Unlimited")
       : `${Math.max(0, promotion.usageLimitTotal - promotion.usedCount).toLocaleString("th-TH")} / ${limitLabel(promotion.usageLimitTotal)}`;
 
   const submit = () =>
@@ -261,7 +263,7 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
           onClose();
         },
         onError: (error) =>
-          toast.add({ title: "เปิดใช้โค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
+          toast.add({ title: "เปิดใช้โค้ดไม่สำเร็จ", description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" }),
       },
     );
 
@@ -277,29 +279,27 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
           ? `หยุด${promotion.pausedBy ? `โดย ${maskBuyer(promotion.pausedBy)} ` : ""}เมื่อ ${formatPromoDateTime(promotion.pausedAt)}`
           : undefined
       }
-      footerNote={isSeller ? "บันทึกใน Activity Log" : undefined}
+      footerNote={isSeller ? translate("บันทึกใน Activity Log", "Recorded in the Activity Log") : undefined}
       actions={
         <>
           <Button variant="outline" disabled={resume.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button disabled={resume.isPending} onClick={submit}>
-            เปิดใช้โค้ด
-          </Button>
+            {translate("เปิดใช้โค้ด", "Enable code")}</Button>
         </>
       }
     >
       <div className="grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-[11px] text-muted-foreground [&>strong]:text-xs [&>strong]:font-medium [&>strong]:text-foreground">
-        <span>เหตุผลที่หยุด</span>
-        <strong>{promotion.pauseReason || "ไม่ได้ระบุเหตุผล"}</strong>
+        <span>{translate("เหตุผลที่หยุด", "Reason for pausing")}</span>
+        <strong>{promotion.pauseReason || translate("ไม่ได้ระบุเหตุผล", "No reason provided")}</strong>
       </div>
       <div className={SUMMARY_BOX}>
         <p className={SUMMARY_ROW}>
-          <span>สิทธิ์คงเหลือ</span>
+          <span>{translate("สิทธิ์คงเหลือ", "Remaining redemptions")}</span>
           <strong>{remaining}</strong>
         </p>
         <p className={SUMMARY_ROW}>
-          <span>หมดอายุ</span>
+          <span>{translate("หมดอายุ", "Expired")}</span>
           <strong>{formatPromoDate(promotion.endsAt)}</strong>
         </p>
       </div>
@@ -324,6 +324,7 @@ function DeleteDialog({
   onClose: () => void;
   onBlocked: () => void;
 }) {
+  useLanguage();
   const remove = useDeletePromotion();
   const [typed, setTyped] = useState("");
   const confirmed = typed.trim().toUpperCase() === promotion.code;
@@ -337,7 +338,7 @@ function DeleteDialog({
       onError: (error) => {
         // มีคนเก็บหรือใช้ระหว่างที่เปิดหน้าไว้
         if (hasErrorCode(error, "PROMO_IN_USE")) onBlocked();
-        else toast.add({ title: "ลบไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" });
+        else toast.add({ title: translate("ลบไม่สำเร็จ", "Unable to delete"), description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" });
       },
     });
 
@@ -352,17 +353,15 @@ function DeleteDialog({
       actions={
         <>
           <Button variant="outline" disabled={remove.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={!confirmed || remove.isPending} onClick={submit}>
-            ลบโค้ด
-          </Button>
+            {translate("ลบโค้ด", "Delete code")}</Button>
         </>
       }
     >
       <Field className="gap-1.5">
         <FieldLabel htmlFor="promotion-delete-confirm" className="text-xs">
-          พิมพ์ {promotion.code} เพื่อยืนยัน
+          {translate("พิมพ์", "Type") + " "}{promotion.code} เพื่อยืนยัน
         </FieldLabel>
         <Input
           id="promotion-delete-confirm"
@@ -388,6 +387,7 @@ function DeleteBlockedDialog({
   onClose: () => void;
   onPause: () => void;
 }) {
+  useLanguage();
   const end = useEndPromotion();
   // โค้ดที่ยังไม่เริ่มไม่มีอะไรให้สิ้นสุด — ลบไม่ได้ก็หยุดไว้แทน
   const canEndToday = Date.parse(promotion.startsAt) < now;
@@ -399,7 +399,7 @@ function DeleteBlockedDialog({
         onClose();
       },
       onError: (error) =>
-        toast.add({ title: "สิ้นสุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" }),
+        toast.add({ title: "สิ้นสุดโค้ดไม่สำเร็จ", description: promotionErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" }),
     });
 
   return (
@@ -413,16 +413,14 @@ function DeleteBlockedDialog({
       actions={
         <>
           <Button variant="outline" disabled={end.isPending} onClick={onClose}>
-            ปิด
-          </Button>
+            {translate("ปิด", "Close")}</Button>
           {canEndToday ? (
             <Button variant="outline" disabled={end.isPending} onClick={endToday}>
               สิ้นสุดวันนี้
             </Button>
           ) : null}
           <Button disabled={end.isPending} onClick={onPause}>
-            หยุดชั่วคราว
-          </Button>
+            {translate("หยุดชั่วคราว", "Paused")}</Button>
         </>
       }
     >

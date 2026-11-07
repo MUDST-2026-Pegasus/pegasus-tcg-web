@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { Search } from "lucide-react";
 
@@ -27,6 +28,7 @@ export function FinancePageHeader({
   onExport: () => void;
   exportDisabled?: boolean;
 }) {
+  useLanguage();
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
@@ -42,8 +44,7 @@ export function FinancePageHeader({
         disabled={exportDisabled}
         onClick={onExport}
       >
-        ส่งออก CSV
-      </Button>
+        {translate("ส่งออก CSV", "Export CSV")}</Button>
     </div>
   );
 }
@@ -70,6 +71,7 @@ export function FinanceStatStrip({
   isLoading?: boolean;
   isError?: boolean;
 }) {
+  useLanguage();
   return (
     <div className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-muted xl:grid-cols-4">
       {stats.map((stat) => (
@@ -121,6 +123,7 @@ export function FinanceTabs<T extends string>({
   onSearchChange: (value: string) => void;
   searchPlaceholder: string;
 }) {
+  useLanguage();
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div role="tablist" aria-label="กรองรายการ" className="flex flex-wrap items-center gap-1">
@@ -161,6 +164,7 @@ export function FinanceTabs<T extends string>({
 }
 
 export function PartyAvatar({ party, className }: { party: FinanceParty; className?: string }) {
+  useLanguage();
   return (
     <SellerAvatar
       initials={initialsOf(party.username)}
@@ -191,6 +195,7 @@ export function FinanceQueueCard({
   active: boolean;
   onSelect: () => void;
 }) {
+  useLanguage();
   return (
     <button
       type="button"
@@ -227,6 +232,7 @@ export function FinanceQueueCard({
 
 /** หัวคอลัมน์คิว — "คิวพร้อมโอน (8)" + คำอธิบายการเรียง */
 export function FinanceQueueHeader({ title, sortLabel }: { title: string; sortLabel: string }) {
+  useLanguage();
   return (
     <div className="flex items-center justify-between gap-2">
       <p className="text-sm font-semibold text-foreground">{title}</p>
@@ -237,6 +243,7 @@ export function FinanceQueueHeader({ title, sortLabel }: { title: string; sortLa
 
 /** ช่องว่างทางขวาตอนยังไม่เลือกรายการ */
 export function FinanceDetailPlaceholder({ children }: { children: ReactNode }) {
+  useLanguage();
   return (
     <div className="flex w-full min-w-0 flex-1 items-center justify-center rounded-xl border border-dashed border-border p-10 text-center">
       <p className="text-[13px] text-muted-foreground">{children}</p>
@@ -254,6 +261,7 @@ export function AmountRow({
   value: string;
   strong?: boolean;
 }) {
+  useLanguage();
   return (
     <div className="flex items-center justify-between gap-3 text-[13px]">
       <span className="text-muted-foreground">{label}</span>
@@ -264,6 +272,7 @@ export function AmountRow({
 
 /** ฟิลด์ label เล็กสีเทา + ค่า */
 export function InfoField({ label, value, large }: { label: string; value: ReactNode; large?: boolean }) {
+  useLanguage();
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <span className="text-[11px] text-[#9aa5ad]">{label}</span>

@@ -1,3 +1,4 @@
+import { setLanguage } from "@/lib/language";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -37,6 +38,7 @@ function renderNavbar() {
 
 describe("Navbar cart badge", () => {
   beforeEach(() => {
+    setLanguage("th");
     vi.clearAllMocks();
     getCart.mockResolvedValue(emptyCart);
   });

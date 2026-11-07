@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import appliedTicket from "@/assets/promotions/applied-ticket.svg";
 import { Button } from "@/components/ui/button";
@@ -33,13 +34,14 @@ export function CheckoutPlatformPromotionCard({
   onRemoveCode,
   onOpenPicker,
 }: CheckoutPlatformPromotionCardProps) {
+  useLanguage();
   return (
     <Card className={CHECKOUT_CARD_CLASS}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">โค้ดส่วนลด Pegasus</h2>
+        <h2 className="text-sm font-semibold">{translate("โค้ดส่วนลด Pegasus", "Pegasus coupons")}</h2>
         <Button type="button" variant="link" className="h-auto p-0 text-[13px]"
           onClick={onOpenPicker}>
-          ดูโค้ดทั้งหมด ({availableCount})
+          {translate("ดูโค้ดทั้งหมด (", "View all coupons (")}{availableCount})
         </Button>
       </div>
 
@@ -65,7 +67,7 @@ export function CheckoutPlatformPromotionCard({
             <Button
               type="button"
               variant="ghost"
-              aria-label="นำโค้ด Pegasus ออก"
+              aria-label={translate("นำโค้ด Pegasus ออก", "Remove Pegasus coupon")}
               className="size-5 rounded-full p-0 text-muted-foreground"
               onClick={onRemoveCode}
             >
@@ -75,10 +77,10 @@ export function CheckoutPlatformPromotionCard({
         </div>
       )}
 
-      <PromotionCodeForm id="pegasus-code" label="กรอกโค้ด Pegasus"
+      <PromotionCodeForm id="pegasus-code" label={translate("กรอกโค้ด Pegasus", "Enter a Pegasus code")}
         showLabel={false} value={typedCode} onChange={onTypedCodeChange}
         onSubmit={onApplyTypedCode} error={error} loading={loading}
-        placeholder="กรอกโค้ดอื่น" />
+        placeholder={translate("กรอกโค้ดอื่น", "Enter another code")} />
     </Card>
   );
 }

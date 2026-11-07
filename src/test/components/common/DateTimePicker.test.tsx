@@ -1,3 +1,5 @@
+import { beforeEach } from "vitest";
+import { setLanguage } from "@/lib/language";
 import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -69,3 +71,5 @@ describe("DateTimePicker", () => {
     expect(screen.queryByRole("combobox", { name: "ชั่วโมง" })).not.toBeInTheDocument();
   });
 });
+
+beforeEach(() => setLanguage("th"));

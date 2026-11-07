@@ -1,11 +1,13 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** โครงเดียวกับ board จริง: 5 คอลัมน์ คอลัมน์ละ 3 การ์ด ภาพไม่กระโดดตอนข้อมูลมา */
 export function OrderBoardSkeleton() {
+  useLanguage();
   return (
     <div
       aria-busy="true"
-      aria-label="กำลังโหลดคำสั่งซื้อ"
+      aria-label={translate("กำลังโหลดคำสั่งซื้อ", "Loading orders")}
       className="grid grid-cols-1 items-start gap-[14.8px] sm:grid-cols-2 xl:grid-cols-5"
     >
       {Array.from({ length: 5 }, (_, column) => (

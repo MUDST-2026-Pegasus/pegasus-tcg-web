@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { format } from "date-fns";
 
 import { QueryBoundary } from "@/components/common";
@@ -28,6 +29,7 @@ import { TopSellersCard } from "./TopSellersCard";
 
 /** หน้าแรกของหลังบ้าน — ตัวเลขเดือนปัจจุบันจาก `/admin/metrics/overview` */
 export function AdminOverviewContent() {
+  useLanguage();
   const overview = useOverviewMetrics();
 
   return (
@@ -50,16 +52,14 @@ export function AdminOverviewContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออกรายงาน
-              </Button>
+                {translate("ส่งออกรายงาน", "Export report")}</Button>
             </TooltipTrigger>
             <TooltipContent>ยังส่งออกรายงานไม่ได้ในตอนนี้</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button className="rounded-md px-2.5" disabled>
-                ตั้งค่าระบบ
-              </Button>
+                {translate("ตั้งค่าระบบ", "System settings")}</Button>
             </TooltipTrigger>
             <TooltipContent>ยังไม่มีหน้าตั้งค่าระบบ</TooltipContent>
           </Tooltip>
@@ -86,7 +86,7 @@ export function AdminOverviewContent() {
 
               <div className="flex flex-col items-start gap-4 lg:flex-row">
                 <MonthlySalesChart
-                  title="ยอดขายรายเดือน"
+                  title={translate("ยอดขายรายเดือน", "Monthly sales")}
                   description={salesTrendDescription(trend)}
                   points={salesPoints(trend)}
                 />
@@ -116,6 +116,7 @@ export function AdminOverviewContent() {
 }
 
 function OverviewSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-4">

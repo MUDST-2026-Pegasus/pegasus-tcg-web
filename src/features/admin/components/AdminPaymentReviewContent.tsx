@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useMemo, useState } from "react";
 import { Inbox } from "lucide-react";
 
@@ -31,6 +32,7 @@ import { SlipModeCard } from "./SlipModeCard";
  * อ้างจาก Figma node 1913:2482
  */
 export function AdminPaymentReviewContent() {
+  useLanguage();
   const queue = usePaymentQueue();
   const summary = usePaymentSummary();
   const verify = useVerifyPayment();
@@ -68,8 +70,8 @@ export function AdminPaymentReviewContent() {
         onError: (error) =>
           toast.add({
             type: "error",
-            title: approved ? "อนุมัติไม่สำเร็จ" : "ปฏิเสธไม่สำเร็จ",
-            description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: approved ? translate("อนุมัติไม่สำเร็จ", "Unable to approve") : "ปฏิเสธไม่สำเร็จ",
+            description: financeErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -101,7 +103,7 @@ export function AdminPaymentReviewContent() {
       });
     }
     if (payment.id === selected?.id) {
-      badges.push({ label: "กำลังดู", className: "rounded-full bg-[#e8f1fc] text-[11px] text-[#0058bc]" });
+      badges.push({ label: translate("กำลังดู", "Viewing"), className: "rounded-full bg-[#e8f1fc] text-[11px] text-[#0058bc]" });
     } else if (isNearDeadline(payment.expiresAt)) {
       badges.push({
         label: "ใกล้หมดเวลาชำระ",
@@ -127,7 +129,7 @@ export function AdminPaymentReviewContent() {
         isError={summary.isError}
         stats={[
           {
-            label: "รอตรวจสลิป",
+            label: translate("รอตรวจสลิป", "Awaiting payment slip review"),
             value: String(counts?.awaitingVerification ?? 0),
             dotClass: "bg-[#b45309]",
             emphasized: true,

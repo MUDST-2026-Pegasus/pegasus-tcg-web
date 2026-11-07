@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useSearchParams } from "react-router-dom";
 import { SellerSalesContent } from "@/features/seller/sales/components/SellerSalesContent";
 
@@ -8,11 +9,13 @@ const validStatuses = new Set(["ACTIVE", "SCHEDULED", "PAUSED", "EXPIRED", "USED
 
 /** `/seller/promotions` — แท็บ "โค้ดส่วนลดร้าน" และ "ลดราคาสินค้า" (`?tab=sales`, TCG-682) */
 export function SellerPromotionsPage() {
+  useLanguage();
   const [params] = useSearchParams();
   return params.get("tab") === "sales" ? <SellerSalesContent /> : <SellerCodesTab />;
 }
 
 function SellerCodesTab() {
+  useLanguage();
   const [params, setParams] = useSearchParams();
   const rawStatus = params.get("status") ?? "ALL";
   const status: PromotionStatus | "ALL" = validStatuses.has(rawStatus)

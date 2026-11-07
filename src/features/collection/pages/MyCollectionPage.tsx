@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
@@ -17,6 +18,7 @@ import { AddCardsDialog } from "../components/AddCardsDialog";
 import { EditCardDialog } from "../components/EditCardDialog";
 
 export function MyCollectionPage() {
+  useLanguage();
   const { user } = useAuth();
   const collection = useCollection();
   const update = useUpdateCollectionItem();
@@ -34,7 +36,7 @@ export function MyCollectionPage() {
       await update.mutateAsync({ id: item.id, payload: payloadOf(item, { publicItem }) });
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not change visibility."));
+      setError(getErrorMessage(cause, translate("เปลี่ยนการมองเห็นไม่สำเร็จ", "Could not change visibility.")));
     }
   };
 
@@ -45,7 +47,7 @@ export function MyCollectionPage() {
       setRemoving(null);
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not remove this card."));
+      setError(getErrorMessage(cause, translate("นำการ์ดออกไม่สำเร็จ", "Could not remove this card.")));
     }
   };
 
@@ -54,16 +56,16 @@ export function MyCollectionPage() {
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1440px]">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 className="text-3xl font-bold">My Collection</h1><p className="mt-1 text-muted-foreground">{total} cards in your collection.</p></div>
+        <div><h1 className="text-3xl font-bold">{translate("คอลเลกชันของฉัน", "My Collection")}</h1><p className="mt-1 text-muted-foreground">{total}{translate("ใบในคอลเลกชันของคุณ", "cards in your collection.")}</p></div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>View public profile</Button>
-          <Button variant="outline" render={<Link to="/account/profile" />}>My Account</Button>
-          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> Add Card</Button>
+          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>{translate("ดูโปรไฟล์สาธารณะ", "View public profile")}</Button>
+          <Button variant="outline" render={<Link to="/account/profile" />}>{translate("บัญชีของฉัน", "My Account")}</Button>
+          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" />{translate("เพิ่มการ์ด", "Add Card")}</Button>
         </div>
       </div>
       {error ? <p role="alert" className="mb-4 text-sm text-destructive">{error}</p> : null}
-      <QueryBoundary query={collection} errorTitle="Could not load your collection" errorRetryLabel="Try again"
-        loading={<div role="status" aria-busy="true" aria-label="Loading your collection"><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
+      <QueryBoundary query={collection} errorTitle="Could not load your collection" errorRetryLabel={translate("ลองใหม่", "Try again")}
+        loading={<div role="status" aria-busy="true" aria-label={translate("กำลังโหลดคอลเลกชันของคุณ", "Loading your collection")}><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
         {() => <>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
@@ -72,12 +74,12 @@ export function MyCollectionPage() {
               footer={<div className="flex w-full items-center justify-between gap-2">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={item.publicItem} disabled={update.isPending}
                   onCheckedChange={(checked) => void togglePublic(item, checked)} aria-label={`Make ${item.card.productName} public`} />
-                  {item.publicItem ? "Public" : "Private"}</label>
+                  {item.publicItem ? translate("สาธารณะ", "Public") : translate("ส่วนตัว", "Private")}</label>
                 <div className="flex"><Button variant="ghost" size="icon" aria-label={`Edit ${item.card.productName}`} onClick={() => setEditing(item)}><Pencil /></Button>
                   <Button variant="ghost" size="icon" aria-label={`Remove ${item.card.productName}`} onClick={() => setRemoving(item)}><Trash2 /></Button></div>
               </div>} />)}
-          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No cards yet. Add your first card from the catalogue.</p>}
-          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>Load more</Button></div> : null}
+          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{translate("ยังไม่มีการ์ด เพิ่มการ์ดใบแรกจากแค็ตตาล็อก", "No cards yet. Add your first card from the catalogue.")}</p>}
+          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>{translate("โหลดเพิ่มเติม", "Load more")}</Button></div> : null}
         </>}
       </QueryBoundary>
     </div>
@@ -87,10 +89,10 @@ export function MyCollectionPage() {
     <EditCardDialog item={editing} onClose={() => setEditing(null)} />
 
     <AlertDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}>
-      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Remove card?</AlertDialogTitle>
-        <AlertDialogDescription>Remove this card from your collection?</AlertDialogDescription></AlertDialogHeader>
-        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button variant="destructive" disabled={remove.isPending} onClick={() => void deleteCard()}>Remove Card</Button></AlertDialogFooter>
+      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{translate("นำการ์ดออก?", "Remove card?")}</AlertDialogTitle>
+        <AlertDialogDescription>{translate("นำการ์ดใบนี้ออกจากคอลเลกชันของคุณหรือไม่?", "Remove this card from your collection?")}</AlertDialogDescription></AlertDialogHeader>
+        <AlertDialogFooter><AlertDialogCancel>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
+          <Button variant="destructive" disabled={remove.isPending} onClick={() => void deleteCard()}>{translate("นำการ์ดออก", "Remove Card")}</Button></AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   </main>;

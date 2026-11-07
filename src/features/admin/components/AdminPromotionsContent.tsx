@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Info, Plus, Search, TicketPercent } from "lucide-react";
@@ -41,7 +42,7 @@ import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
 const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> = [
   { value: null, label: "ทุกเจ้าของ" },
   { value: "PLATFORM", label: "Pegasus" },
-  { value: "SELLER", label: "ร้านค้า" },
+  { value: "SELLER", get label() { return translate("ร้านค้า", "Shop"); } },
 ];
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -51,6 +52,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * แท็บ "ลดราคาสินค้า" (`?tab=sales`) อยู่ที่ `AdminSalesContent`
  */
 export function AdminPromotionsContent() {
+  useLanguage();
   const [params, setParams] = useSearchParams();
   const owner = params.get("owner") as PromotionOwnerType | null;
   const status = params.get("status") as PromotionStatus | null;
@@ -133,7 +135,7 @@ export function AdminPromotionsContent() {
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
+          <h1 className="text-2xl font-black">{translate("โปรโมชั่น &amp; ลดราคา", "Promotions & discounts")}</h1>
           <p className="text-sm text-muted-foreground">สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง</p>
         </div>
         <div className="flex gap-2">
@@ -142,8 +144,7 @@ export function AdminPromotionsContent() {
           </Button>
           <Button size="sm" className="px-2.5" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
             <Plus />
-            สร้างโค้ด Pegasus
-          </Button>
+            {translate("สร้างโค้ด Pegasus", "Create Pegasus code")}</Button>
         </div>
       </header>
 
@@ -151,7 +152,7 @@ export function AdminPromotionsContent() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="โค้ดที่ใช้งานอยู่"
+          label={translate("โค้ดที่ใช้งานอยู่", "Active codes")}
           value={((summary.data?.activePlatformCodes ?? 0) + (summary.data?.activeSellerCodes ?? 0)).toLocaleString("th-TH")}
           note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
         />
@@ -164,19 +165,19 @@ export function AdminPromotionsContent() {
         <KpiCard
           label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          note={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={costShare ? `${costShare} ของ GMV` : translate("ยังไม่มียอดขายใน 30 วัน", "No sales in the last 30 days")}
         />
         <KpiCard
-          label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
+          label={translate("ยอดขายจากออเดอร์ที่ใช้โค้ด", "Sales from orders using codes")}
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          note={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : translate("ยังไม่มียอดขายใน 30 วัน", "No sales in the last 30 days")}
         />
       </div>
 
       <Card className="gap-0 overflow-hidden rounded-[12px] border border-border p-0 shadow-none ring-0">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
-            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]">
+            <TabsList aria-label={translate("กรองตามสถานะ", "Filter by status")} className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]">
               {STATUS_TABS.map((tab) => {
                 const count =
                   tab.value == null
@@ -247,7 +248,7 @@ export function AdminPromotionsContent() {
         {list.isError && !list.data ? (
           <ErrorState
             error={list.error}
-            title="โหลดโค้ดไม่สำเร็จ"
+            title={translate("โหลดโค้ดไม่สำเร็จ", "Unable to load codes")}
             onRetry={() => void list.refetch()}
             className="m-5 min-h-48"
           />
@@ -264,8 +265,7 @@ export function AdminPromotionsContent() {
             <EmptyContent>
               <Button size="sm" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
                 <Plus />
-                สร้างโค้ด Pegasus
-              </Button>
+                {translate("สร้างโค้ด Pegasus", "Create Pegasus code")}</Button>
             </EmptyContent>
           </Empty>
         ) : null}
@@ -275,7 +275,7 @@ export function AdminPromotionsContent() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
+            {translate("แสดง", "Show") + " "}{rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} {" " + translate("จาก", "of")}{" "}
             {totalItems} โค้ด
           </span>
           <Pagination aria-label="หน้ารายการโปรโมชั่น" className="mx-0 w-auto">
@@ -285,7 +285,7 @@ export function AdminPromotionsContent() {
                   size="icon-sm"
                   className="size-7 text-[13px] text-[#414755]"
                   variant="outline"
-                  aria-label="หน้าก่อนหน้า"
+                  aria-label={translate("หน้าก่อนหน้า", "Previous page")}
                   disabled={page === 0}
                   onClick={() => updateParams({ page: String(page - 1) }, false)}
                 >
@@ -311,7 +311,7 @@ export function AdminPromotionsContent() {
                   size="icon-sm"
                   className="size-7 text-[13px] text-[#414755]"
                   variant="outline"
-                  aria-label="หน้าถัดไป"
+                  aria-label={translate("หน้าถัดไป", "Next page")}
                   disabled={page + 1 >= totalPages}
                   onClick={() => updateParams({ page: String(page + 1) }, false)}
                 >
@@ -345,6 +345,7 @@ export function AdminPromotionsContent() {
 
 /** การ์ดตัวเลขบนหัวหน้า (Figma PRM-A1 KPIs) — ป้ายเทา ตัวเลขหนา และบรรทัดเล็กใต้ตัวเลข */
 function KpiCard({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "up" | "down" }) {
+  useLanguage();
   return (
     <Card className="min-w-0 gap-1.5 rounded-[12px] border border-border px-5 py-4 shadow-none ring-0">
       <p className="text-xs text-muted-foreground">{label}</p>

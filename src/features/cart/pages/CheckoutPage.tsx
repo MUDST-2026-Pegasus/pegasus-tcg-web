@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -37,6 +38,7 @@ interface CheckoutLocationState {
  * ไม่มี = checkout จากตะกร้าแบบเดิม ทั้งสองแบบแยก component กันเพื่อให้ flow ตะกร้าไม่เปลี่ยน
  */
 export function CheckoutPage() {
+  useLanguage();
   const [searchParams] = useSearchParams();
   const auctionId = Number(searchParams.get("auction"));
   if (searchParams.has("auction") && Number.isSafeInteger(auctionId) && auctionId > 0) {
@@ -46,6 +48,7 @@ export function CheckoutPage() {
 }
 
 function CartCheckout() {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -287,12 +290,12 @@ function CartCheckout() {
       toast.add({
         title:
           hasPriceChanges || quotePriceChanged
-            ? "ราคาสินค้ามีการเปลี่ยนแปลง"
-            : "สินค้าบางรายการไม่พร้อมจำหน่าย",
+            ? translate("ราคาสินค้ามีการเปลี่ยนแปลง", "Item prices have changed")
+            : translate("สินค้าบางรายการไม่พร้อมจำหน่าย", "Some items are unavailable"),
         description:
           hasPriceChanges || quotePriceChanged
-            ? "กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ"
-            : "กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ",
+            ? translate("กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ", "Review and accept the new prices in your cart before ordering")
+            : translate("กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ", "Remove or deselect the items in your cart before ordering"),
         type: "warning",
       });
       navigate("/cart", { replace: true });
@@ -332,8 +335,8 @@ function CartCheckout() {
     ) {
       hasRedirected.current = true;
       toast.add({
-        title: "ไม่พบสินค้าที่เลือกสั่งซื้อ",
-        description: "กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า",
+        title: translate("ไม่พบสินค้าที่เลือกสั่งซื้อ", "No items selected for checkout"),
+        description: translate("กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า", "Select the items you want to order in your cart"),
         type: "warning",
       });
       navigate("/cart", { replace: true });
@@ -372,8 +375,8 @@ function CartCheckout() {
       completed.current = true;
       clearPromotionSelection();
       toast.add({
-        title: "สร้างคำสั่งซื้อสำเร็จ",
-        description: `คำสั่งซื้อ ${response.orderNumber}`,
+        title: translate("สร้างคำสั่งซื้อสำเร็จ", "Order placed successfully"),
+        description: translate(`คำสั่งซื้อ ${response.orderNumber}`, `Order ${response.orderNumber}`),
         type: "success",
       });
       navigate(`/payment?orderId=${response.orderId}`, {
@@ -393,13 +396,13 @@ function CartCheckout() {
           const sellerNames = changedSeller
             ? changedSeller.quote?.sellerName ||
               changedSeller.items[0]?.sellerName ||
-              "ร้านค้า"
+              translate("ร้านค้า", "Shop")
             : sellerGroups
                 .map(
                   (group) =>
                     group.quote?.sellerName ||
                     group.items[0]?.sellerName ||
-                    "ร้านค้า",
+                    translate("ร้านค้า", "Shop"),
                 )
                 .join(", ");
           setShippingNotice(
@@ -437,8 +440,8 @@ function CartCheckout() {
           await queryClient.invalidateQueries({ queryKey: addressKeys.all });
           setAddressPickerOpen(true);
           toast.add({
-            title: "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง",
-            description: "ที่อยู่เดิมไม่พร้อมใช้งาน",
+            title: translate("กรุณาเลือกที่อยู่จัดส่งอีกครั้ง", "Select your shipping address again"),
+            description: translate("ที่อยู่เดิมไม่พร้อมใช้งาน", "The previous address is unavailable"),
             type: "warning",
           });
         } else if (error.code === "SALE_QUOTA_REACHED") {
@@ -463,8 +466,8 @@ function CartCheckout() {
           void queryClient.invalidateQueries({ queryKey: cartKeys.all });
           hasRedirected.current = true;
           toast.add({
-            title: "ราคาสินค้ามีการเปลี่ยนแปลง",
-            description: "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง",
+            title: translate("ราคาสินค้ามีการเปลี่ยนแปลง", "Item prices have changed"),
+            description: translate("กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง", "Review and accept the new prices in your cart again"),
             type: "warning",
           });
           navigate("/cart");
@@ -472,16 +475,16 @@ function CartCheckout() {
           toast.add({
             title:
               error.code === "INSUFFICIENT_STOCK"
-                ? "สินค้าไม่เพียงพอ"
-                : "สั่งซื้อไม่สำเร็จ",
+                ? translate("สินค้าไม่เพียงพอ", "Not enough stock")
+                : translate("สั่งซื้อไม่สำเร็จ", "Could not place order"),
             description: error.message,
             type: "error",
           });
         }
       } else {
         toast.add({
-          title: "สั่งซื้อไม่สำเร็จ",
-          description: "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง",
+          title: translate("สั่งซื้อไม่สำเร็จ", "Could not place order"),
+          description: translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Check your connection and try again"),
           type: "error",
         });
       }
@@ -494,7 +497,7 @@ function CartCheckout() {
   if (isAuthLoading || isCartLoading) {
     return (
       <div className="checkout-page">
-        <FormPageSkeleton label="กำลังเตรียมคำสั่งซื้อ" />
+        <FormPageSkeleton label={translate("กำลังเตรียมคำสั่งซื้อ", "Preparing your order")} />
       </div>
     );
   }
@@ -505,13 +508,12 @@ function CartCheckout() {
     return (
       <div className="checkout-page">
         <div role="alert" className="checkout-container checkout-alert checkout-alert-error">
-          <p>โหลดตะกร้าไม่สำเร็จ</p>
+          <p>{translate("โหลดตะกร้าไม่สำเร็จ", "Could not load cart")}</p>
           <Button
             variant="outline"
             onClick={() => void queryClient.invalidateQueries({ queryKey: cartKeys.all })}
           >
-            ลองอีกครั้ง
-          </Button>
+            {translate("ลองอีกครั้ง", "Try again")}</Button>
         </div>
       </div>
     );
@@ -520,10 +522,9 @@ function CartCheckout() {
     return (
       <div className="checkout-page">
         <div className="checkout-container">
-          <h1 className="text-xl font-bold">ไม่พบสินค้าที่เลือกสั่งซื้อ</h1>
+          <h1 className="text-xl font-bold">{translate("ไม่พบสินค้าที่เลือกสั่งซื้อ", "No items selected for checkout")}</h1>
           <Button onClick={() => navigate("/cart")} className="mt-4">
-            กลับไปยังตะกร้า
-          </Button>
+            {translate("กลับไปยังตะกร้า", "Back to cart")}</Button>
         </div>
       </div>
     );
@@ -533,10 +534,9 @@ function CartCheckout() {
     <div className="checkout-page">
       <div className="checkout-container">
         <header className="mb-6">
-          <h1 className="text-[26px] font-bold leading-tight">ตรวจสอบและสั่งซื้อ</h1>
+          <h1 className="text-[26px] font-bold leading-tight">{translate("ตรวจสอบและสั่งซื้อ", "Review and place order")}</h1>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            เลือกวิธีจัดส่งและโค้ดส่วนลดของแต่ละร้าน
-          </p>
+            {translate("เลือกวิธีจัดส่งและโค้ดส่วนลดของแต่ละร้าน", "Select shipping and discount codes for each shop")}</p>
         </header>
 
         <div className="checkout-columns">
@@ -544,52 +544,48 @@ function CartCheckout() {
             {shippingNotice && (
               <div role="alert" className="checkout-alert checkout-alert-warning">
                 <p className="font-semibold">
-                  ตัวเลือกการจัดส่งของ {shippingNotice} มีการเปลี่ยนแปลง
-                </p>
-                <p>เราเลือกวิธีจัดส่งให้ใหม่แล้ว โปรดตรวจสอบค่าส่งและยอดรวมอีกครั้ง</p>
+                  {translate("ตัวเลือกการจัดส่งของ", "Shipping options for")}{shippingNotice} {translate("มีการเปลี่ยนแปลง", "have changed")}</p>
+                <p>{translate("เราเลือกวิธีจัดส่งให้ใหม่แล้ว โปรดตรวจสอบค่าส่งและยอดรวมอีกครั้ง", "A new shipping method has been selected. Review the shipping cost and total")}</p>
               </div>
             )}
 
             {quotes.isError && (
               <div role="alert" className="checkout-alert checkout-alert-error">
-                <p className="font-semibold">โหลดตัวเลือกจัดส่งไม่สำเร็จ</p>
+                <p className="font-semibold">{translate("โหลดตัวเลือกจัดส่งไม่สำเร็จ", "Could not load shipping options")}</p>
                 <p>
                   {quotes.error instanceof ApiError
                     ? quotes.error.message
-                    : "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"}
+                    : translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Check your connection and try again")}
                 </p>
                 <button
                   type="button"
                   className="checkout-link justify-self-start"
                   onClick={() => void quotes.refetch()}
                 >
-                  ลองอีกครั้ง
-                </button>
+                  {translate("ลองอีกครั้ง", "Try again")}</button>
                 <button
                   type="button"
                   className="checkout-link justify-self-start"
                   onClick={() => navigate("/cart")}
                 >
-                  กลับไปตรวจสอบตะกร้า
-                </button>
+                  {translate("กลับไปตรวจสอบตะกร้า", "Review your cart")}</button>
               </div>
             )}
 
             {promoPreview.isError && (
               <div role="alert" className="checkout-alert checkout-alert-error">
-                <p className="font-semibold">คำนวณส่วนลดและยอดรวมไม่สำเร็จ</p>
+                <p className="font-semibold">{translate("คำนวณส่วนลดและยอดรวมไม่สำเร็จ", "Could not calculate discounts and total")}</p>
                 <p>
                   {promoPreview.error instanceof ApiError
                     ? promoPreview.error.message
-                    : "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"}
+                    : translate("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง", "Check your connection and try again")}
                 </p>
                 <button
                   type="button"
                   className="checkout-link justify-self-start"
                   onClick={() => void promoPreview.refetch()}
                 >
-                  ลองอีกครั้ง
-                </button>
+                  {translate("ลองอีกครั้ง", "Try again")}</button>
               </div>
             )}
 
@@ -609,7 +605,7 @@ function CartCheckout() {
                 <CheckoutSellerCard
                   key={sellerId ?? "unknown"}
                   sellerId={sellerId}
-                  sellerName={quote?.sellerName || items[0]?.sellerName || "ร้านค้า"}
+                  sellerName={quote?.sellerName || items[0]?.sellerName || translate("ร้านค้า", "Shop")}
                   items={items}
                   quote={quote}
                   selected={selectedOptions[index]}
@@ -644,7 +640,7 @@ function CartCheckout() {
             })}
           </div>
 
-          <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
+          <aside className="flex min-w-0 flex-col gap-4" aria-label={translate("สรุปคำสั่งซื้อ", "Order summary")}>
             <CheckoutAddressSummary
               address={activeAddress}
               loading={isAddressLoading}
@@ -656,8 +652,8 @@ function CartCheckout() {
 
             <Card className={`${CHECKOUT_CARD_CLASS} text-[13px]`}>
               <div className="flex items-center justify-between gap-3">
-                <h2 className="font-semibold">วิธีชำระเงิน</h2>
-                <span className="text-muted-foreground">โอนผ่าน PromptPay</span>
+                <h2 className="font-semibold">{translate("วิธีชำระเงิน", "Payment method")}</h2>
+                <span className="text-muted-foreground">{translate("โอนผ่าน PromptPay", "PromptPay bank transfer")}</span>
               </div>
             </Card>
 
@@ -712,7 +708,7 @@ function CartCheckout() {
           </aside>
           <SaleQuotaDialog
             open={quotaItem !== null}
-            productName={quotaItem?.productName || "สินค้านี้"}
+            productName={quotaItem?.productName || translate("สินค้านี้", "this item")}
             salePrice={quotaItem?.pricing?.salePrice ?? null}
             listPrice={quotaItem?.pricing?.listPrice ?? null}
             pending={removeCartItem.isPending || acceptPrices.isPending}

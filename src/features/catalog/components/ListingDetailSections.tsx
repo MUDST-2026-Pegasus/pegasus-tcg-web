@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   CARD_FINISH_LABEL,
   CARD_EDITION_LABEL,
@@ -59,6 +60,7 @@ export function ListingGallery({
   grade?: string;
   cert?: string | null;
 }) {
+  useLanguage();
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const selected = Math.min(index, Math.max(0, photos.length - 1));
@@ -201,6 +203,7 @@ export function ListingMarketHint({
   market: MarketStatDto | null | undefined;
   price: number;
 }) {
+  useLanguage();
   const hint = marketHint(market, price);
   const labels = {
     none: t.noMarket,
@@ -232,7 +235,7 @@ export function ListingMarketHint({
       </span>
       {market?.medianPrice != null && (
         <span className="text-muted-foreground">
-          {t.median} {condition} 30 วัน {formatSaleBaht(market.medianPrice)}
+          {t.median} {condition}{translate("30 วัน", "30 days")}{formatSaleBaht(market.medianPrice)}
         </span>
       )}
     </div>
@@ -247,6 +250,7 @@ export function InformationGroup({
   title: string;
   rows: Row[];
 }) {
+  useLanguage();
   const visible = rows.flatMap(([label, value]) => {
     const text = displayValue(value);
     return text == null ? [] : [[label, text]];
@@ -299,6 +303,7 @@ export function ListingCardInformation({
   cert: string | null;
   errorAction?: ReactNode;
 }) {
+  useLanguage();
   const product = data.product;
   const attr = product.attributes ?? {};
   const pokemon = gameCode?.toUpperCase() === "POKEMON";
@@ -498,6 +503,7 @@ export function ListingCardInformation({
 }
 
 export function ListingInformationSkeleton() {
+  useLanguage();
   return (
     <section
       aria-label={t.loadingInfo}
@@ -519,6 +525,7 @@ export function ListingInformationSkeleton() {
 }
 
 export function ListingDetailSkeleton() {
+  useLanguage();
   return (
     <main
       className="mx-auto max-w-[1280px] space-y-7 px-5 py-7 lg:px-20"

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,7 @@ import type { MonthlySummary } from "../orders.format";
 type MonthlySummaryCardProps = MonthlySummary;
 
 export function MonthlySummaryCard({ title, rows, netLabel, netValue }: MonthlySummaryCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <p className="text-xs font-semibold text-foreground">{title}</p>

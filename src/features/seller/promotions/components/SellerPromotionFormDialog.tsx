@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch, type Control, type FieldErrors } from "react-hook-form";
@@ -88,6 +89,7 @@ export function SellerPromotionForm({
   verified: boolean;
   onClose: () => void;
 }) {
+  useLanguage();
   const [confirmClose, setConfirmClose] = useState(false);
   const create = useCreateSellerPromotion();
   const update = useUpdateSellerPromotion();
@@ -112,7 +114,7 @@ export function SellerPromotionForm({
         actionProps: existing
           ? undefined
           : {
-              children: "คัดลอกโค้ด",
+              children: translate("คัดลอกโค้ด", "Copy code"),
               onClick: () => void navigator.clipboard?.writeText(payload.code),
             },
       });
@@ -123,12 +125,12 @@ export function SellerPromotionForm({
       }
       if (applyApiErrors(error, setError)) return;
       toast.add({
-        title: "บันทึกไม่สำเร็จ",
+        title: translate("บันทึกไม่สำเร็จ", "Unable to save"),
         description: hasErrorCode(error, "SELLER_NOT_VERIFIED")
           ? "กรุณายืนยันตัวตนผู้ขายก่อนสร้างโค้ด"
           : hasErrorCode(error, "PROMO_IN_USE")
             ? "โค้ดนี้มีลูกค้าใช้หรือเก็บแล้ว แก้ได้เฉพาะชื่อ วันสิ้นสุดที่ยาวขึ้น และจำนวนสิทธิ์ที่เพิ่มขึ้น"
-            : getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            : getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")),
         type: "error",
       });
     }
@@ -140,7 +142,7 @@ export function SellerPromotionForm({
       onOpenChange={setConfirmClose}
       tone="warning"
       icon={<LogOut />}
-      title="ทิ้งการแก้ไข?"
+      title={translate("ทิ้งการแก้ไข?", "Discard changes?")}
       description="ข้อมูลที่กรอกในฟอร์มยังไม่ได้บันทึก ถ้าปิดตอนนี้จะหายทั้งหมด"
       actions={
         <>
@@ -154,8 +156,7 @@ export function SellerPromotionForm({
               onClose();
             }}
           >
-            ทิ้งการแก้ไข
-          </Button>
+            {translate("ทิ้งการแก้ไข", "Discard changes")}</Button>
         </>
       }
     />
@@ -177,18 +178,16 @@ export function SellerPromotionForm({
           actions={
             <>
               <Button variant="outline" onClick={requestClose}>
-                ยกเลิก
-              </Button>
+                {translate("ยกเลิก", "Cancel")}</Button>
               <Button disabled={busy || !verified} onClick={() => void save()}>
-                บันทึก
-              </Button>
+                {translate("บันทึก", "Save")}</Button>
             </>
           }
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <LockedText label="รหัสโค้ด" value={existing.code} />
-            <LockedText label="ส่วนลด" value={discountLabel(existing)} />
-            <LockedText label="ยอดขั้นต่ำ" value={existing.minSpend > 0 ? money(existing.minSpend) : "ไม่มีขั้นต่ำ"} />
+            <LockedText label={translate("รหัสโค้ด", "Code")} value={existing.code} />
+            <LockedText label={translate("ส่วนลด", "Discount")} value={discountLabel(existing)} />
+            <LockedText label={translate("ยอดขั้นต่ำ", "Minimum amount")} value={existing.minSpend > 0 ? money(existing.minSpend) : translate("ไม่มีขั้นต่ำ", "No minimum")} />
             <TextField control={control} errors={errors} name="name" label="ชื่อที่ลูกค้าเห็น" />
             <DateField
               control={control}
@@ -201,7 +200,7 @@ export function SellerPromotionForm({
               control={control}
               errors={errors}
               name="usageLimitPerUser"
-              label="สิทธิ์ต่อคน"
+              label={translate("สิทธิ์ต่อคน", "Redemptions per person")}
               unit="ครั้ง"
               locked
             />
@@ -262,7 +261,7 @@ export function SellerPromotionForm({
                   control={control}
                   errors={errors}
                   name="code"
-                  label="รหัสโค้ด"
+                  label={translate("รหัสโค้ด", "Code")}
                   required
                   hint="A–Z 0–9 · 4–20 ตัว"
                   upper
@@ -272,23 +271,23 @@ export function SellerPromotionForm({
               <Segmented
                 control={control}
                 name="discountType"
-                label="ประเภทส่วนลด"
+                label={translate("ประเภทส่วนลด", "Discount type")}
                 options={[
-                  ["FIXED", "ลดเป็นบาท"],
-                  ["PERCENT", "ลดเป็น %"],
+                  ["FIXED", translate("ลดเป็นบาท", "Fixed discount")],
+                  ["PERCENT", translate("ลดเป็น %", "Percentage discount")],
                 ]}
               />
               <DiscountFields control={control} errors={errors} />
               <Row>
-                <DateField control={control} errors={errors} name="startsAt" label="เริ่ม" required />
-                <DateField control={control} errors={errors} name="endsAt" label="สิ้นสุด" />
+                <DateField control={control} errors={errors} name="startsAt" label={translate("เริ่ม", "Start")} required />
+                <DateField control={control} errors={errors} name="endsAt" label={translate("สิ้นสุด", "Ended")} />
               </Row>
               <Row>
                 <NumberField
                   control={control}
                   errors={errors}
                   name="usageLimitTotal"
-                  label="จำนวนสิทธิ์ทั้งหมด"
+                  label={translate("จำนวนสิทธิ์ทั้งหมด", "Total redemptions available")}
                   unit="สิทธิ์"
                   hint="เว้นว่าง = ไม่จำกัด"
                 />
@@ -303,23 +302,22 @@ export function SellerPromotionForm({
               <Segmented
                 control={control}
                 name="visibility"
-                label="การมองเห็น"
+                label={translate("การมองเห็น", "Visibility")}
                 disabled={claimFixed}
                 onPick={(value) => {
                   if (value === "PRIVATE") setValue("claimable", false, { shouldDirty: true });
                 }}
                 options={[
-                  ["PUBLIC", "สาธารณะ"],
+                  ["PUBLIC", translate("สาธารณะ", "Public")],
                   ["PRIVATE", "ส่วนตัว (พิมพ์เอง)"],
                 ]}
               />
               <ClaimFields control={control} errors={errors} claimFixed={claimFixed} />
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="outline" onClick={requestClose}>
-                  ยกเลิก
-                </Button>
+                  {translate("ยกเลิก", "Cancel")}</Button>
                 <Button type="submit" disabled={busy || !verified}>
-                  {existing ? "บันทึก" : "สร้างโค้ด"}
+                  {existing ? translate("บันทึก", "Save") : "สร้างโค้ด"}
                 </Button>
               </div>
             </form>
@@ -335,6 +333,7 @@ export function SellerPromotionForm({
 type FieldProps = { control: Control<SellerPromotionInput>; errors: FieldErrors<SellerPromotionInput> };
 
 function Row({ children }: { children: ReactNode }) {
+  useLanguage();
   return <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">{children}</div>;
 }
 
@@ -348,6 +347,7 @@ function FieldBox({
   locked,
   ...input
 }: ComponentProps<typeof InputGroupInput> & { prefix?: string; suffix?: string; locked?: boolean }) {
+  useLanguage();
   return (
     <InputGroup className="h-9 rounded-lg border-border bg-card has-[input:disabled]:bg-muted">
       {prefix ? (
@@ -363,7 +363,7 @@ function FieldBox({
       {suffix || locked ? (
         <InputGroupAddon align="inline-end" className="gap-1.5">
           {suffix ? <InputGroupText className="text-[13px] text-muted-foreground/70">{suffix}</InputGroupText> : null}
-          {locked ? <Lock aria-label="ล็อก" className="size-3.5 text-muted-foreground/70" /> : null}
+          {locked ? <Lock aria-label={translate("ล็อก", "Locked")} className="size-3.5 text-muted-foreground/70" /> : null}
         </InputGroupAddon>
       ) : null}
     </InputGroup>
@@ -379,6 +379,7 @@ function TextField({
   hint,
   upper,
 }: FieldProps & { name: "code" | "name"; label: string; required?: boolean; hint?: string; upper?: boolean }) {
+  useLanguage();
   return (
     <FormField field={name} label={label} required={required} hint={hint} error={errors[name]?.message}>
       <Controller
@@ -400,6 +401,7 @@ function TextField({
 }
 
 function LockedText({ label, value }: { label: string; value: string }) {
+  useLanguage();
   return (
     <FormField field={label} label={label}>
       <FieldBox aria-label={label} value={value} readOnly locked />
@@ -417,6 +419,7 @@ function NumberField({
   required,
   locked,
 }: FieldProps & { name: NumberKey; label: string; unit: string; hint?: string; required?: boolean; locked?: boolean }) {
+  useLanguage();
   return (
     <FormField field={name} label={label} required={required} hint={hint} error={errors[name]?.message}>
       <Controller
@@ -452,6 +455,7 @@ function DateField({
   required,
   min,
 }: FieldProps & { name: "startsAt" | "endsAt"; label: string; required?: boolean; min?: string }) {
+  useLanguage();
   return (
     <FormField field={name} label={label} required={required} error={errors[name]?.message}>
       <Controller
@@ -492,6 +496,7 @@ function Segmented<K extends "discountType" | "visibility">({
   disabled?: boolean;
   onPick?: (value: SellerPromotionInput[K]) => void;
 }) {
+  useLanguage();
   return (
     <FormField field={name} label={label}>
       <Controller
@@ -528,12 +533,13 @@ function Segmented<K extends "discountType" | "visibility">({
 }
 
 function DiscountFields({ control, errors }: FieldProps) {
+  useLanguage();
   const discountType = useWatch({ control, name: "discountType" });
   const fixed = discountType === "FIXED";
   return (
     <>
       <Row>
-        <NumberField control={control} errors={errors} name="discountValue" label="ลด" unit={fixed ? "฿" : "%"} required />
+        <NumberField control={control} errors={errors} name="discountValue" label={translate("ลด", "Discount")} unit={fixed ? "฿" : "%"} required />
         <NumberField
           control={control}
           errors={errors}
@@ -558,6 +564,7 @@ function DiscountFields({ control, errors }: FieldProps) {
 }
 
 function ClaimFields({ control, errors, claimFixed }: FieldProps & { claimFixed: boolean }) {
+  useLanguage();
   const visibility = useWatch({ control, name: "visibility" });
   const claimable = useWatch({ control, name: "claimable" });
   return (
@@ -590,7 +597,7 @@ function ClaimFields({ control, errors, claimFixed }: FieldProps & { claimFixed:
           control={control}
           errors={errors}
           name="claimLimit"
-          label="จำนวนที่แจก"
+          label={translate("จำนวนที่แจก", "Number issued")}
           unit="ใบ"
           hint="เว้นว่าง = ไม่จำกัด"
         />
@@ -600,6 +607,7 @@ function ClaimFields({ control, errors, claimFixed }: FieldProps & { claimFixed:
 }
 
 function PreviewAside({ control }: { control: Control<SellerPromotionInput> }) {
+  useLanguage();
   const form = useWatch({ control }) as SellerPromotionInput;
   const subtotal = Math.max(SAMPLE_SUBTOTAL, form.minSpend || 0);
   const discount = Math.min(
@@ -618,7 +626,7 @@ function PreviewAside({ control }: { control: Control<SellerPromotionInput> }) {
       <CouponTicket promotion={form} preview />
       <dl className="grid gap-2.5 text-xs">
         <strong className="text-xs font-semibold">ถ้าลูกค้าซื้อ {money(subtotal)} จากร้านคุณ</strong>
-        <PreviewRow label="ยอดสินค้า" value={money(subtotal)} />
+        <PreviewRow label={translate("ยอดสินค้า", "Items subtotal")} value={money(subtotal)} />
         <PreviewRow label="โค้ดร้าน (ร้านออก)" value={`− ${money(discount)}`} className="text-amber-700" />
         <PreviewRow
           label={`คอมมิชชั่น ${SAMPLE_COMMISSION_RATE * 100}% ของ ${money(afterShopCode)}`}
@@ -649,6 +657,7 @@ function PreviewRow({
   className?: string;
   total?: boolean;
 }) {
+  useLanguage();
   return (
     <div className={total ? "flex justify-between gap-2 border-t border-border pt-2.5" : "flex justify-between gap-2"}>
       <dt className="text-muted-foreground">{label}</dt>

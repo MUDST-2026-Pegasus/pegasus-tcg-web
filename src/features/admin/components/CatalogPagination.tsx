@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 
 import { formatCount } from "../catalog.format";
@@ -17,30 +18,29 @@ export function CatalogPagination({
   disabled,
   onPageChange,
 }: CatalogPaginationProps) {
+  useLanguage();
   const lastPage = Math.max(totalPages, 1);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
       <p className="text-xs text-muted-foreground">
-        หน้า {formatCount(page)} จาก {formatCount(lastPage)}
+        {translate("หน้า", "Page") + " "}{formatCount(page)} {" " + translate("จาก", "of") + " "}{formatCount(lastPage)}
       </p>
-      <nav aria-label="เปลี่ยนหน้า" className="flex items-center gap-2">
+      <nav aria-label={translate("เปลี่ยนหน้า", "Change page")} className="flex items-center gap-2">
         <Button
           variant="outline"
           className="rounded-md px-2.5"
           disabled={disabled || page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          ก่อนหน้า
-        </Button>
+          {translate("ก่อนหน้า", "Previous")}</Button>
         <Button
           variant="outline"
           className="rounded-md px-2.5"
           disabled={disabled || page >= lastPage}
           onClick={() => onPageChange(page + 1)}
         >
-          ถัดไป
-        </Button>
+          {translate("ถัดไป", "Next")}</Button>
       </nav>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -18,6 +19,7 @@ export function RecentOrdersCard({
   emptyLabel,
   items,
 }: RecentOrders) {
+  useLanguage();
   return (
     <Card className="w-full flex-1 gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-5 pt-4 pb-3.5">

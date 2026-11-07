@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ChangeEvent } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,6 +81,7 @@ export function AttributeFormDialog({
   attribute,
   nextDisplayOrder,
 }: AttributeFormDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -117,6 +119,7 @@ function AttributeForm({
   displayOrder: number;
   onSaved: () => void;
 }) {
+  useLanguage();
   const saveAttribute = useSaveAttribute(game.id);
 
   const {
@@ -272,24 +275,23 @@ function AttributeForm({
         <FlagField
           control={control}
           name="filterable"
-          title="ใช้กรอง"
+          title={translate("ใช้กรอง", "Filterable")}
           description="แสดงเป็นตัวกรองในหน้าร้านของเกมนี้"
         />
         <FlagField
           control={control}
           name="required"
-          title="จำเป็น"
+          title={translate("จำเป็น", "Required")}
           description="ต้องกรอกทุกครั้งที่เพิ่มหรือแก้การ์ดของเกมนี้"
         />
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {attribute ? "บันทึก" : "เพิ่มฟิลด์"}
+          {attribute ? translate("บันทึก", "Save") : "เพิ่มฟิลด์"}
         </Button>
       </DialogFooter>
     </form>
@@ -307,6 +309,7 @@ function FlagField({
   title: string;
   description: string;
 }) {
+  useLanguage();
   const id = `attr-${name}`;
   return (
     <Field orientation="horizontal">

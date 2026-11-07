@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ type SellerDetailPanelProps = {
  * ที่เปลี่ยนใบ
  */
 export function SellerDetailPanel(props: SellerDetailPanelProps) {
+  useLanguage();
   const { verification, currentAdminId, onImageExpired } = props;
   const meta = VERIFICATION_STATUS_META[verification.status];
 
@@ -51,7 +53,7 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
   const details: { label: string; value: string }[] = [
     { label: "ชื่อ-นามสกุล (ตามบัญชี)", value: legalName(verification) },
     {
-      label: "ธนาคาร",
+      label: translate("ธนาคาร", "Bank"),
       value: `${verification.bankName} · ${verification.bankCode}`,
     },
     {
@@ -159,6 +161,7 @@ function DecisionArea({
   onApprove,
   onRejectClick,
 }: SellerDetailPanelProps) {
+  useLanguage();
   // ใบที่คนอื่นจองไว้ ซ่อนปุ่มไว้ก่อน แต่ยังให้ "ตัดสินแทน" ได้ — backend ไม่มีทางปล่อย
   // ใบที่จองแล้ว ถ้าคนจองหายไป ใบนั้นจะค้างตลอดถ้าไม่มีทางนี้
   const [takingOver, setTakingOver] = useState(false);
@@ -169,7 +172,7 @@ function DecisionArea({
       if (startReview.isError) {
         return (
           <Alert variant="destructive" className="border-0 p-0">
-            <AlertTitle>รับคำขอมาตรวจไม่สำเร็จ</AlertTitle>
+            <AlertTitle>{translate("รับคำขอมาตรวจไม่สำเร็จ", "Unable to take request for review")}</AlertTitle>
             <AlertDescription>
               {verificationErrorMessage(
                 startReview.error,
@@ -219,8 +222,7 @@ function DecisionArea({
         <>
           <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
             <p className="text-[13px] font-semibold text-foreground">
-              ผลการตรวจสอบ
-            </p>
+              {translate("ผลการตรวจสอบ", "Review result")}</p>
             <p className="text-[11px] text-muted-foreground">
               ตรวจชื่อบัญชีให้ตรงกับชื่อจริงก่อนกดอนุมัติ — การอนุมัติจะให้สิทธิ์ผู้ขายทันที
             </p>
@@ -257,10 +259,9 @@ function DecisionArea({
       return (
         <div className="flex w-full flex-col gap-1.5">
           <p className="text-[13px] font-semibold text-[#d0342c]">
-            ปฏิเสธคำขอแล้ว
-          </p>
+            {translate("ปฏิเสธคำขอแล้ว", "Request rejected")}</p>
           <p className="text-[12px] text-muted-foreground">
-            เหตุผล: {verification.rejectionReason ?? "—"}
+            {translate("เหตุผล:", "Reason:") + " "}{verification.rejectionReason ?? "—"}
           </p>
         </div>
       );

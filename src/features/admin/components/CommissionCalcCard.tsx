@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
 
 type CommissionCalcCardProps = AdminCommissionData["calculation"];
@@ -12,6 +13,7 @@ export function CommissionCalcCard({
   totalLabel,
   totalValue,
 }: CommissionCalcCardProps) {
+  useLanguage();
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-foreground px-5 py-5 text-background">
       <p className="text-[13px] font-semibold">{title}</p>

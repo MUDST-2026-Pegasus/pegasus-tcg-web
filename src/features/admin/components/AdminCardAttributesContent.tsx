@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Gamepad2, Info } from "lucide-react";
@@ -49,6 +50,7 @@ type GameDialog = { open: boolean; game?: Game };
  * cache ใช้ก้อนเดียวกับหน้าแคตตาล็อก ฟอร์มเพิ่มการ์ดจึงเห็นค่าใหม่ทันที
  */
 export function AdminCardAttributesContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const games = useAdminGames();
   const [gameDialog, setGameDialog] = useState<GameDialog>({ open: false });
@@ -109,12 +111,11 @@ export function AdminCardAttributesContent() {
         empty={
           <EmptyState
             icon={Gamepad2}
-            title="ยังไม่มีเกมในระบบ"
+            title={translate("ยังไม่มีเกมในระบบ", "No games yet")}
             description="เพิ่มเกมแรกก่อน แล้วค่อยกำหนดฟิลด์ ชุดการ์ด และหมวดหมู่ของเกมนั้น"
           >
             <Button onClick={() => setGameDialog({ open: true })}>
-              + เพิ่มเกม
-            </Button>
+              {translate("+ เพิ่มเกม", "+ Add game")}</Button>
           </EmptyState>
         }
       >
@@ -168,6 +169,7 @@ function TaxonomyWorkspace({
   jsonOpen: boolean;
   onJsonOpenChange: (open: boolean) => void;
 }) {
+  useLanguage();
   // URL ไม่ได้ระบุเกม หรือระบุเกมที่ไม่มีอยู่ → เกมแรกตามลำดับที่ backend เรียงมา
   const game = games.find((item) => item.id === requestedGameId) ?? games[0];
   const gameIds = games.map((item) => item.id);
@@ -194,7 +196,7 @@ function TaxonomyWorkspace({
           toast.add({
             type: "error",
             title: "เปลี่ยนสถานะเกมไม่สำเร็จ",
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            description: taxonomyErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -231,14 +233,13 @@ function TaxonomyWorkspace({
             className="w-full justify-start border-b border-border"
           >
             <TabsTrigger value="fields" className="flex-none">
-              คุณสมบัติการ์ด
-              {attributes.data ? ` (${attributes.data.length})` : ""}
+              {translate("คุณสมบัติการ์ด", "Card attributes")}{attributes.data ? ` (${attributes.data.length})` : ""}
             </TabsTrigger>
             <TabsTrigger value="sets" className="flex-none">
-              ชุดการ์ด{cardSets.data ? ` (${cardSets.data.length})` : ""}
+              {translate("ชุดการ์ด", "Card set")}{cardSets.data ? ` (${cardSets.data.length})` : ""}
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex-none">
-              หมวดหมู่{categories.data ? ` (${categories.data.length})` : ""}
+              {translate("หมวดหมู่", "Category")}{categories.data ? ` (${categories.data.length})` : ""}
             </TabsTrigger>
           </TabsList>
 
@@ -292,6 +293,7 @@ function TaxonomyWorkspace({
 
 /** ระหว่างโหลดรายชื่อเกม — วางตรงกับคอลัมน์ซ้าย 224px + การ์ดเกม + ตาราง */
 function TaxonomySkeleton() {
+  useLanguage();
   return (
     <div aria-hidden="true" className="flex flex-col items-start gap-6 lg:flex-row">
       <Card className="w-full gap-2 rounded-xl border border-border p-4 shadow-none ring-0 lg:w-[224px]">
@@ -309,6 +311,7 @@ function TaxonomySkeleton() {
 }
 
 function TableSkeleton() {
+  useLanguage();
   return (
     <Card
       aria-hidden="true"

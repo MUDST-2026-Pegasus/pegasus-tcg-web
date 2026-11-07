@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 
 import { PackageSearch } from "lucide-react";
@@ -73,6 +74,7 @@ function readPage(value: string | null): number {
  * และทุกอย่างค้น/กรอง/เรียง/แบ่งหน้าที่ backend
  */
 export function ProductsContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const status = readStatus(searchParams.get("status"));
   const search = searchParams.get("q")?.trim() ?? "";
@@ -174,7 +176,7 @@ export function ProductsContent() {
         toast.add({
           type: "error",
           title: "ลบประกาศไม่สำเร็จ",
-          description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          description: listingErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   }
@@ -193,7 +195,7 @@ export function ProductsContent() {
           toast.add({
             type: "error",
             title: "พักการขายไม่สำเร็จ",
-            description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            description: listingErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -212,7 +214,7 @@ export function ProductsContent() {
         if (skipped > 0) parts.push(`ข้าม ${skipped} รายการที่ทำไม่ได้`);
         if (failed.length > 0) {
           parts.push(
-            `ไม่สำเร็จ ${failed.length} รายการ: ${listingErrorMessage(failed[0].error, "ลองใหม่อีกครั้ง")}`,
+            `ไม่สำเร็จ ${failed.length} รายการ: ${listingErrorMessage(failed[0].error, translate("ลองใหม่อีกครั้ง", "Try again"))}`,
           );
         }
         toast.add({
@@ -229,7 +231,7 @@ export function ProductsContent() {
       target === "ACTIVE" ? canActivate(row) : canMoveTo(row, target),
     );
     runBulk(
-      target === "ACTIVE" ? "เปิดขาย" : "พักการขาย",
+      target === "ACTIVE" ? translate("เปิดขาย", "List for sale") : translate("พักการขาย", "Pause selling"),
       eligible.map((row) => ({ id: row.id, status: target })),
     );
   }
@@ -237,7 +239,7 @@ export function ProductsContent() {
   function handleBulkPrice(percent: number) {
     setIsBulkPriceOpen(false);
     runBulk(
-      "ปรับราคา",
+      translate("ปรับราคา", "Adjust price"),
       selectedRows
         .filter(canBulkReprice)
         .map((row) => ({ id: row.id, price: adjustPrice(row.price, percent) })),
@@ -262,7 +264,7 @@ export function ProductsContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">จัดการสินค้า</h1>
+          <h1 className="text-2xl font-bold text-foreground">{translate("จัดการสินค้า", "Manage products")}</h1>
           <p className="text-xs text-gray-500">
             {counts.isPending
               ? "กำลังนับประกาศ…"
@@ -272,8 +274,7 @@ export function ProductsContent() {
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            นำเข้า CSV
-          </Button>
+            {translate("นำเข้า CSV", "Import CSV")}</Button>
           <CreateListingButton label="+ ลงขายสินค้าใหม่" />
         </div>
       </div>
@@ -353,8 +354,7 @@ export function ProductsContent() {
                 className="rounded-md px-2.5"
                 onClick={() => updateParams({ status: null })}
               >
-                ดูทั้งหมด
-              </Button>
+                {translate("ดูทั้งหมด", "View all")}</Button>
             </EmptyState>
           ) : (
             <EmptyState

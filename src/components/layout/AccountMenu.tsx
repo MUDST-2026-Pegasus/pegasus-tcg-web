@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ChevronDownIcon, LogOutIcon, UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
 import { AccountAvatar, useAccountLinks } from "./nav-shared";
 
 export function AccountMenu() {
+  const { text } = useLanguage();
   const {
     user,
     isAuthenticated,
@@ -25,7 +27,7 @@ export function AccountMenu() {
   if (isLoading)
     return (
       <div
-        aria-label="Loading account"
+        aria-label={text("กำลังโหลดบัญชี", "Loading account")}
         className="flex h-10 w-10 items-center rounded-full border border-border p-1 lg:w-[130px] lg:pr-3"
       >
         <Skeleton className="size-8 shrink-0 rounded-full" />
@@ -38,7 +40,7 @@ export function AccountMenu() {
         render={
           <Button
             variant="ghost"
-            aria-label="Account"
+            aria-label={text("บัญชี", "Account")}
             className={
               isAuthenticated && user
                 ? "h-10 size-10 rounded-full border border-border p-1 data-popup-open:bg-muted data-popup-open:ring-2 data-popup-open:ring-ring/40 lg:size-auto lg:max-w-48 lg:pr-3"
@@ -94,7 +96,7 @@ export function AccountMenu() {
               onClick={handleLogout}
             >
               <LogOutIcon className="size-4" />
-              {logoutPending ? "Logging out…" : "Log out"}
+              {logoutPending ? text("กำลังออกจากระบบ…", "Logging out…") : text("ออกจากระบบ", "Log out")}
             </DropdownMenuItem>
           </>
         )}

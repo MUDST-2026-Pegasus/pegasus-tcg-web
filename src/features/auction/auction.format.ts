@@ -1,3 +1,4 @@
+import { getLanguage, translate } from "@/lib/language";
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
@@ -35,7 +36,7 @@ export function formatRemaining(ms: number): string {
   const hours = Math.floor((safe % DAY) / HOUR);
   const minutes = Math.floor((safe % HOUR) / MINUTE);
   const seconds = Math.floor((safe % MINUTE) / SECOND);
-  if (days > 0) return `${days} วัน ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  if (days > 0) return translate(`${days} วัน ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`, `${days} days ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
   if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   return `${pad(minutes)}:${pad(seconds)}`;
 }
@@ -55,7 +56,7 @@ export function remainingMs(target: string, offsetMs: number, now: number = Date
   return Date.parse(target) - (now + offsetMs);
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
+const dateTimeFormatter = () => new Intl.DateTimeFormat(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
   weekday: "short",
   day: "numeric",
   month: "short",
@@ -66,10 +67,10 @@ const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
 
 /** "จ. 2 พ.ย. 21:00" — เวลาประเทศไทยเสมอ */
 export function formatAuctionDateTime(iso: string): string {
-  return dateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+  return dateTimeFormatter().format(new Date(iso)).replace(" เวลา", "");
 }
 
-const shortDateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
+const shortDateTimeFormatter = () => new Intl.DateTimeFormat(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
   day: "numeric",
   month: "short",
   hour: "2-digit",
@@ -79,10 +80,10 @@ const shortDateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
 
 /** "31 ต.ค. 21:06" — ไม่มีวันในสัปดาห์ (หัวแถวในหน้าการประมูลของฉัน) */
 export function formatAuctionShortDateTime(iso: string): string {
-  return shortDateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+  return shortDateTimeFormatter().format(new Date(iso)).replace(" เวลา", "");
 }
 
-const dayMonthFormatter = new Intl.DateTimeFormat("th-TH", {
+const dayMonthFormatter = () => new Intl.DateTimeFormat(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
   day: "numeric",
   month: "short",
   timeZone: "Asia/Bangkok",
@@ -90,10 +91,10 @@ const dayMonthFormatter = new Intl.DateTimeFormat("th-TH", {
 
 /** "27 ต.ค." — วันที่จบในตารางผู้ขาย */
 export function formatAuctionDayMonth(iso: string): string {
-  return dayMonthFormatter.format(new Date(iso));
+  return dayMonthFormatter().format(new Date(iso));
 }
 
-const dateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+const dateFormatter = () => new Intl.DateTimeFormat(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-GB", {
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -102,15 +103,15 @@ const dateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
 
 /** "29 พ.ย. 2026" — ปี ค.ศ. ตาม Figma (วันที่หมดโทษห้ามบิด) */
 export function formatAuctionDate(iso: string): string {
-  return dateFormatter.format(new Date(iso));
+  return dateFormatter().format(new Date(iso));
 }
 
 /** "2 นาทีที่แล้ว", "1 ชม.ที่แล้ว", "เมื่อวาน 22:14" สำหรับประวัติบิด */
 export function formatBidTime(iso: string, now: number = Date.now()): string {
   const diff = now - Date.parse(iso);
-  if (diff < MINUTE) return "เมื่อสักครู่";
-  if (diff < HOUR) return `${Math.floor(diff / MINUTE)} นาทีที่แล้ว`;
-  if (diff < DAY) return `${Math.floor(diff / HOUR)} ชม.ที่แล้ว`;
+  if (diff < MINUTE) return translate("เมื่อสักครู่", "Just now");
+  if (diff < HOUR) return translate(`${Math.floor(diff / MINUTE)} นาทีที่แล้ว`, `${Math.floor(diff / MINUTE)} minutes ago`);
+  if (diff < DAY) return translate(`${Math.floor(diff / HOUR)} ชม.ที่แล้ว`, `${Math.floor(diff / HOUR)} hours ago`);
   return formatAuctionDateTime(iso);
 }
 
@@ -130,16 +131,16 @@ export type AuctionPillKind =
   | "Suspended";
 
 export const AUCTION_PILL_LABEL: Record<AuctionPillKind, string> = {
-  Live: "กำลังประมูล",
-  EndingSoon: "ใกล้จบ",
-  Leading: "คุณนำอยู่",
-  Outbid: "ถูกบิดแซง",
-  Won: "ชนะประมูล",
-  AwaitingPayment: "รอชำระเงิน",
-  Lost: "ไม่ชนะ",
-  Ended: "จบแล้ว",
-  Unsold: "ไม่มีผู้บิด",
-  Suspended: "ถูกระงับ",
+  get Live() { return translate("กำลังประมูล", "Live auction"); },
+  get EndingSoon() { return translate("ใกล้จบ", "Ending soon"); },
+  get Leading() { return translate("คุณนำอยู่", "You are leading"); },
+  get Outbid() { return translate("ถูกบิดแซง", "Outbid"); },
+  get Won() { return translate("ชนะประมูล", "Auction won"); },
+  get AwaitingPayment() { return translate("รอชำระเงิน", "Awaiting payment"); },
+  get Lost() { return translate("ไม่ชนะ", "Not won"); },
+  get Ended() { return translate("จบแล้ว", "Ended"); },
+  get Unsold() { return translate("ไม่มีผู้บิด", "No bids"); },
+  get Suspended() { return translate("ถูกระงับ", "Suspended"); },
 };
 
 /** ป้ายของประมูลตามสถานะ (มุมผู้ขาย / แอดมิน / คนทั่วไป) — LIVE ที่เหลือ < 2 นาทีเป็น "ใกล้จบ" */
@@ -177,12 +178,12 @@ export function pillForViewer(state: AuctionViewerState): AuctionPillKind {
 
 /** ข้อความแท็บ/ตัวกรองตามสถานะ (หน้าผู้ขาย S1) */
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
-  LIVE: "กำลังประมูล",
-  AWAITING_PAYMENT: "รอชำระ",
-  SOLD: "ขายแล้ว",
-  UNSOLD: "ไม่มีผู้บิด",
-  CANCELLED: "ยกเลิก",
-  SUSPENDED: "ถูกระงับ",
+  get LIVE() { return translate("กำลังประมูล", "Live auction"); },
+  get AWAITING_PAYMENT() { return translate("รอชำระ", "Awaiting payment"); },
+  get SOLD() { return translate("ขายแล้ว", "Sold"); },
+  get UNSOLD() { return translate("ไม่มีผู้บิด", "No bids"); },
+  get CANCELLED() { return translate("ยกเลิก", "Cancelled"); },
+  get SUSPENDED() { return translate("ถูกระงับ", "Suspended"); },
 };
 
 // ---------- กล่องบิด (B2) ----------
@@ -198,11 +199,11 @@ export function canSubmitBid(amount: number, minNextBid: number, live: boolean):
 // ---------- การประมูลของฉัน (W1) ----------
 
 export const MY_AUCTION_TABS: { key: MyAuctionTab; label: string }[] = [
-  { key: "ALL", label: "ทั้งหมด" },
-  { key: "BIDDING", label: "กำลังบิด" },
-  { key: "TO_PAY", label: "ต้องชำระ" },
-  { key: "WON", label: "ชนะแล้ว" },
-  { key: "LOST", label: "ไม่ชนะ" },
+  { key: "ALL", get label() { return translate("ทั้งหมด", "All"); } },
+  { key: "BIDDING", get label() { return translate("กำลังบิด", "Bidding"); } },
+  { key: "TO_PAY", get label() { return translate("ต้องชำระ", "Payment due"); } },
+  { key: "WON", get label() { return translate("ชนะแล้ว", "Won"); } },
+  { key: "LOST", get label() { return translate("ไม่ชนะ", "Not won"); } },
 ];
 
 /** แถวนี้อยู่ในแท็บไหน — ใช้ทั้ง mock และหน้า */
@@ -264,7 +265,7 @@ export function isBiddingBanned(bannedUntil: string | null, now: number = Date.n
 
 /** "จากการประมูล #AUC-2026-0142" — ป้ายในหน้า checkout / ชำระเงิน */
 export function auctionOrderLabel(auctionNumber: string): string {
-  return `จากการประมูล #${auctionNumber.replace(/^#/, "")}`;
+  return translate(`จากการประมูล #${auctionNumber.replace(/^#/, "")}`, `From auction #${auctionNumber.replace(/^#/, "")}`);
 }
 
 /** เลขประมูลจาก query `?auction=` — ค่าแปลก ๆ ไม่แสดงป้าย */
@@ -281,12 +282,12 @@ export function conditionAndShop(condition: CardCondition, shopName: string): st
 
 /** ป้ายราคาบนการ์ด: ยังไม่มีบิดใช้ "ราคาเริ่มต้น" */
 export function priceLabel(bidCount: number): string {
-  return bidCount === 0 ? "ราคาเริ่มต้น" : "ราคาปัจจุบัน";
+  return bidCount === 0 ? translate("ราคาเริ่มต้น", "Starting price") : translate("ราคาปัจจุบัน", "Current price");
 }
 
 /** "12 บิด" */
 export function formatBidCount(count: number): string {
-  return `${count.toLocaleString("th-TH")} บิด`;
+  return translate(`${count.toLocaleString("th-TH")} บิด`, `${count.toLocaleString("en-GB")} bids`);
 }
 
 // ---------- แอดมิน [TCG-635] ----------

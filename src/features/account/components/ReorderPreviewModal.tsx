@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, Info, Layers, RotateCw, X } from "lucide-react";
@@ -59,6 +60,7 @@ function ReorderCardImage({
   productName: string;
   rarity?: string;
 }) {
+  useLanguage();
   const [imageError, setImageError] = useState(false);
 
   return (
@@ -92,6 +94,7 @@ export function ReorderPreviewModal({
   orderId,
   order,
 }: ReorderPreviewModalProps) {
+  useLanguage();
   const titleId = useId();
   const navigate = useNavigate();
   const isModalOpen = Boolean(isOpen ?? open ?? false);
@@ -157,16 +160,15 @@ export function ReorderPreviewModal({
             <DialogHeader className="gap-0 text-left">
               <DialogTitle
                 id={titleId}
-                aria-label="สั่งซื้อสินค้าอีกครั้ง (Reorder Items) - Reorder Items (สั่งซื้อสินค้าอีกครั้ง)"
+                aria-label={translate("สั่งซื้อสินค้าอีกครั้ง (Reorder Items) - Reorder Items (สั่งซื้อสินค้าอีกครั้ง)", "Reorder items")}
                 className="text-lg font-bold text-slate-900 leading-snug"
               >
-                สั่งซื้อสินค้าอีกครั้ง{" "}
+                {translate("สั่งซื้อสินค้าอีกครั้ง", "Reorder items")}{" "}
                 <span className="font-normal text-slate-500 text-sm">
-                  (Reorder Items)
-                </span>
+                  {translate("(สั่งซื้ออีกครั้ง)", "(Reorder Items)")}</span>
               </DialogTitle>
               <p className="text-xs sm:text-[13px] text-slate-500 mt-1">
-                เลือกการ์ดที่ต้องการเพื่อไปยังหน้ารายละเอียดสินค้า • คำสั่งซื้อ{" "}
+                {translate("เลือกการ์ดที่ต้องการเพื่อไปยังหน้ารายละเอียดสินค้า • คำสั่งซื้อ", "Select a card to view its product details • Order")}{" "}
                 <span className="font-mono">#{displayOrderNumber}</span>
               </p>
             </DialogHeader>
@@ -176,7 +178,7 @@ export function ReorderPreviewModal({
             type="button"
             onClick={handleClose}
             className="size-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer transition-colors"
-            aria-label="Close"
+            aria-label={translate("ปิด", "Close")}
           >
             <X className="size-4" />
           </button>
@@ -187,7 +189,7 @@ export function ReorderPreviewModal({
           {isLoading ? (
             <div
               data-testid="reorder-skeleton"
-              aria-label="Loading reorder preview"
+              aria-label={translate("กำลังโหลดรายการสั่งซื้อซ้ำ", "Loading reorder preview")}
               className="flex flex-col gap-3 animate-pulse"
             >
               <div className="h-24 bg-slate-100 rounded-xl" />
@@ -199,11 +201,9 @@ export function ReorderPreviewModal({
               <AlertCircle className="size-10 text-rose-500" />
               <div>
                 <p className="text-sm font-semibold text-slate-900">
-                  ไม่สามารถโหลดข้อมูลรายการสั่งซื้อซ้ำได้
-                </p>
+                  {translate("ไม่สามารถโหลดข้อมูลรายการสั่งซื้อซ้ำได้", "Could not load reorder items")}</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  เกิดข้อผิดพลาดในการดึงข้อมูลจากเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง
-                </p>
+                  {translate("เกิดข้อผิดพลาดในการดึงข้อมูลจากเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง", "Could not retrieve data from the server. Please try again")}</p>
               </div>
               <Button
                 variant="outline"
@@ -211,13 +211,11 @@ export function ReorderPreviewModal({
                 onClick={() => void refetch()}
                 className="rounded-lg"
               >
-                ลองใหม่
-              </Button>
+                {translate("ลองใหม่", "Try again")}</Button>
             </div>
           ) : uniqueItems.length === 0 ? (
             <div className="border border-slate-200 rounded-xl p-8 text-center text-sm text-slate-500">
-              ไม่พบรายการสินค้าในคำสั่งซื้อนี้
-            </div>
+              {translate("ไม่พบรายการสินค้าในคำสั่งซื้อนี้", "No items in this order")}</div>
           ) : (
             uniqueItems.map((item) => (
               <div
@@ -239,7 +237,7 @@ export function ReorderPreviewModal({
                     </span>
                     {item.originalCondition && (
                       <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-md font-medium whitespace-nowrap">
-                        สภาพเดิม: {item.originalCondition}
+                        {translate("สภาพเดิม:", "Original condition:")}{item.originalCondition}
                       </span>
                     )}
                   </div>
@@ -250,8 +248,7 @@ export function ReorderPreviewModal({
 
                   <div className="mt-1.5">
                     <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md inline-block font-normal">
-                      ราคาเดิมที่เคยซื้อ: ฿{item.originalPrice.toLocaleString()} • จำนวน {item.originalQuantity} ใบ
-                    </span>
+                      {translate("ราคาเดิมที่เคยซื้อ: ฿", "Previously paid: ฿")}{item.originalPrice.toLocaleString()}  {translate("• จำนวน", "• Quantity")} {item.originalQuantity} {translate("ใบ", "cards")}</span>
                   </div>
                 </div>
 
@@ -262,8 +259,7 @@ export function ReorderPreviewModal({
                   onClick={() => handleReorderClick(item)}
                   className="bg-[#006699] hover:bg-[#005580] text-white rounded-lg px-4 py-2 font-medium text-xs sm:text-sm shrink-0 flex items-center gap-1 transition-colors shadow-none cursor-pointer"
                 >
-                  สั่งซื้ออีกครั้ง →
-                </Button>
+                  {translate("สั่งซื้ออีกครั้ง →", "Reorder →")}</Button>
               </div>
             ))
           )}
@@ -273,7 +269,7 @@ export function ReorderPreviewModal({
         <div className="sticky bottom-0 z-20 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4 shrink-0">
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
             <Info className="size-4 shrink-0 text-slate-400" />
-            <span>คลิกเพื่อไปดูสต็อกและราคาปัจจุบันในหน้ารายละเอียดสินค้า</span>
+            <span>{translate("คลิกเพื่อไปดูสต็อกและราคาปัจจุบันในหน้ารายละเอียดสินค้า", "View current stock and prices on the product details page")}</span>
           </div>
 
           <Button
@@ -282,8 +278,7 @@ export function ReorderPreviewModal({
             onClick={handleClose}
             className="border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg px-5 py-2 text-sm font-medium h-auto cursor-pointer"
           >
-            ปิด
-          </Button>
+            {translate("ปิด", "Close")}</Button>
         </div>
       </DialogContent>
     </Dialog>

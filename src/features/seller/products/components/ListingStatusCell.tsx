@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Ban, ChevronDown, Pause, Play, type LucideIcon } from "lucide-react";
@@ -42,8 +43,8 @@ const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 const TARGET_ACTION: Partial<
   Record<ListingStatus, { label: string; icon: LucideIcon }>
 > = {
-  ACTIVE: { label: "เปิดขาย", icon: Play },
-  PAUSED: { label: "พักการขาย", icon: Pause },
+  ACTIVE: { get label() { return translate("เปิดขาย", "List for sale"); }, icon: Play },
+  PAUSED: { get label() { return translate("พักการขาย", "Pause selling"); }, icon: Pause },
   DELISTED: { label: "ปิดการขายถาวร…", icon: Ban },
 };
 
@@ -64,6 +65,7 @@ export function ListingStatusCell({
   listing,
   readOnly,
 }: ListingStatusCellProps) {
+  useLanguage();
   const changeStatus = useChangeListingStatus();
   const [confirmDelist, setConfirmDelist] = useState(false);
 
@@ -93,7 +95,7 @@ export function ListingStatusCell({
           toast.add({
             type: "error",
             title: "เปลี่ยนสถานะไม่สำเร็จ",
-            description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            description: listingErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           }),
       },
     );
@@ -163,7 +165,7 @@ export function ListingStatusCell({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
             <Button
               variant="destructive"
               onClick={() => {

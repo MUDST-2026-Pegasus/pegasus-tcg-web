@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { formatBaht } from "@/features/auction/auction.format";
@@ -11,6 +12,7 @@ import { StatCard } from "./StatCard";
  * ระหว่างโหลดหรือโหลดไม่สำเร็จไม่แสดง — ตัวเลขเดิมของหน้ายังใช้ได้ตามปกติ
  */
 export function AuctionOverviewCards() {
+  useLanguage();
   const query = useAdminAuctions();
   if (!query.data) return null;
   const { kpis } = query.data;
@@ -21,7 +23,7 @@ export function AuctionOverviewCards() {
       <Link to="/admin/auctions" className={link}>
         <StatCard
           id="auctions-live"
-          label="กำลังประมูล"
+          label={translate("กำลังประมูล", "Live auction")}
           value={formatCount(kpis.live)}
           delta={null}
           footnote={`จบภายใน 1 ชม. ${formatCount(kpis.endingWithinHour)}`}

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, TriangleAlert } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -51,6 +52,7 @@ function FieldHint({
   error?: { message?: string };
   children: ReactNode;
 }) {
+  useLanguage();
   if (error) {
     return <FieldError errors={[error]} className="text-xs" />;
   }
@@ -76,6 +78,7 @@ export function SellerApplicationForm({
   mode = "application",
   returnTo,
 }: SellerApplicationFormProps) {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const submitVerification = useSubmitVerification();
@@ -256,7 +259,7 @@ export function SellerApplicationForm({
 
       <StepCard
         step={2}
-        title="บัญชีรับเงิน"
+        title={translate("บัญชีรับเงิน", "Payout account")}
         hint="ใช้โอนยอดขายให้คุณ"
         className="gap-4.5"
       >
@@ -375,8 +378,7 @@ export function SellerApplicationForm({
           onClick={handleBack}
           className="h-8.5 rounded-sm px-2.5"
         >
-          ย้อนกลับ
-        </Button>
+          {translate("ย้อนกลับ", "Back")}</Button>
         <p className="ml-auto text-[11px] text-muted-foreground/75">
           ระบบบันทึกฉบับร่างให้อัตโนมัติ
         </p>
@@ -387,10 +389,10 @@ export function SellerApplicationForm({
         >
           {(isSubmitting || bankBook.isUploading) && <Spinner />}
           {isSubmitting
-            ? "กำลังส่งคำขอ…"
+            ? translate("กำลังส่งคำขอ…", "Submitting request…")
             : bankBook.isUploading
               ? "กำลังอัปโหลดรูป…"
-              : mode === "payout-account" ? "ส่งยืนยันบัญชีใหม่" : "ส่งคำขอสมัคร"}
+              : mode === "payout-account" ? translate("ส่งยืนยันบัญชีใหม่", "Resubmit bank account verification") : "ส่งคำขอสมัคร"}
         </Button>
       </div>
 

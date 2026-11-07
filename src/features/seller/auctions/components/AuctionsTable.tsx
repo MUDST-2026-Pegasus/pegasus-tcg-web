@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { Clock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,21 +35,22 @@ type AuctionsTableProps = {
 
 /** ตารางประมูลของร้าน (S1) — ค่าแต่ละคอลัมน์มาจาก `sellerAuctionRowView` [TCG-632 · FE-6] */
 export function AuctionsTable({ rows, serverTime, onCancel, isFetching, footer }: AuctionsTableProps) {
+  useLanguage();
   const navigate = useNavigate();
   return (
     <Card className="gap-0 overflow-hidden rounded-xl py-0 shadow-none">
       <Table className={cn(isFetching && "opacity-60")}>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={cn(HEAD_CLASS, "pl-4")}>การ์ด</TableHead>
-            <TableHead className={HEAD_CLASS}>ราคาเริ่มต้น</TableHead>
-            <TableHead className={HEAD_CLASS}>ราคาปัจจุบัน</TableHead>
-            <TableHead className={HEAD_CLASS}>บิด</TableHead>
-            <TableHead className={HEAD_CLASS}>ซื้อทันที</TableHead>
-            <TableHead className={HEAD_CLASS}>เวลา</TableHead>
-            <TableHead className={HEAD_CLASS}>สถานะ</TableHead>
+            <TableHead className={cn(HEAD_CLASS, "pl-4")}>{translate("การ์ด", "Cards")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("ราคาเริ่มต้น", "Starting price")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("ราคาปัจจุบัน", "Current price")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("บิด", "Bids")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("ซื้อทันที", "Buy now")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("เวลา", "Time")}</TableHead>
+            <TableHead className={HEAD_CLASS}>{translate("สถานะ", "Status")}</TableHead>
             <TableHead className={HEAD_CLASS}>
-              <span className="sr-only">การกระทำ</span>
+              <span className="sr-only">{translate("การกระทำ", "Action")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -106,29 +108,29 @@ export function AuctionsTable({ rows, serverTime, onCancel, isFetching, footer }
 
 /** "ชำระใน 18:22" เดินทุกวินาที */
 function PaymentDue({ deadline, serverTime }: { deadline: string; serverTime?: string }) {
+  useLanguage();
   const remaining = useCountdown(deadline, serverTime) ?? 0;
   return (
     <span className="inline-flex items-center gap-1 text-muted-foreground tabular-nums">
       <Clock aria-hidden className="size-3.5" />
-      ชำระใน {formatHoursMinutes(remaining)}
+      {translate("ชำระใน", "Pay within") + " "}{formatHoursMinutes(remaining)}
     </span>
   );
 }
 
 function RowActionButton({ action, row, onCancel }: { action: RowAction; row: SellerAuctionRow; onCancel: (row: SellerAuctionRow) => void }) {
+  useLanguage();
   const link = "text-sm font-semibold text-primary hover:underline";
   switch (action) {
     case "VIEW":
       return (
         <Link to={`/seller/auctions/${row.id}`} className={link}>
-          ดู
-        </Link>
+          {translate("ดู", "View")}</Link>
       );
     case "CANCEL":
       return (
         <button type="button" className="cursor-pointer text-sm font-semibold text-destructive hover:underline" onClick={() => onCancel(row)}>
-          ยกเลิก
-        </button>
+          {translate("ยกเลิก", "Cancel")}</button>
       );
     case "VIEW_ORDER":
       return (
@@ -140,8 +142,7 @@ function RowActionButton({ action, row, onCancel }: { action: RowAction; row: Se
       // ฟอร์มเปิดประมูล (FE-7) อ่าน `?from=` ไปเติมข้อมูลเดิม
       return (
         <Link to={`/seller/auctions/new?from=${row.id}`} className={link}>
-          ประมูลใหม่
-        </Link>
+          {translate("ประมูลใหม่", "Relist auction")}</Link>
       );
   }
 }

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Trash2, TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export function DeleteProductDialog({
   onConfirm,
   isPending,
 }: DeleteProductDialogProps) {
+  useLanguage();
   const blockedReason = listing ? deleteBlockedReason(listing) : null;
 
   return (
@@ -76,9 +78,8 @@ export function DeleteProductDialog({
                   {listingMeta(listing)}
                 </p>
                 <p className="text-xs text-gray-500">
-                  พร้อมขาย {listing.quantityAvailable} ใบ · ติดจอง{" "}
-                  {listing.quantityReserved} ใบ
-                </p>
+                  {translate("พร้อมขาย", "Ready to sell") + " "}{listing.quantityAvailable} ใบ · ติดจอง{" "}
+                  {listing.quantityReserved} {" " + translate("ใบ", "cards")}</p>
               </div>
             </div>
           ) : null}

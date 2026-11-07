@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { QueryBoundary } from "@/components/common";
@@ -50,6 +51,7 @@ export function CatalogProductSheet({
   onCreated,
   onClose,
 }: CatalogProductSheetProps) {
+  useLanguage();
   // จำตัวล่าสุดไว้ระหว่างเลื่อนปิด ไม่งั้นเนื้อหาหายไปก่อนหน้าต่างจะออกพ้นจอ
   const [shown, setShown] = useState(target);
   if (target !== null && target !== shown) {
@@ -110,6 +112,7 @@ function EditProductPanel({
   games: Game[];
   onClose: () => void;
 }) {
+  useLanguage();
   const detail = useAdminProduct(productId);
   const deleteProduct = useDeleteProduct();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -144,8 +147,7 @@ function EditProductPanel({
                 {productTitle(product)}
                 {!product.active ? (
                   <Badge variant="secondary" className="rounded-full">
-                    ปิดใช้งาน
-                  </Badge>
+                    {translate("ปิดใช้งาน", "Disable")}</Badge>
                 ) : null}
               </SheetTitle>
               <SheetDescription>

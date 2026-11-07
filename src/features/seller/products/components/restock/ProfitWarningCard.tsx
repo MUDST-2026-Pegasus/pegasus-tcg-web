@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { TriangleAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -22,6 +23,7 @@ export function ProfitWarningCard({
   averageCost,
   result,
 }: ProfitWarningCardProps) {
+  useLanguage();
   return (
     <div role="status" className="flex w-full flex-col gap-2 rounded-xl bg-orange-100 p-4">
       <div className="flex items-center gap-2">
@@ -30,7 +32,7 @@ export function ProfitWarningCard({
       </div>
 
       <p className="text-xs leading-4 text-amber-700">
-        ต้นทุนเฉลี่ยขึ้นจาก {formatBaht(averageCost)} เป็น{" "}
+        ต้นทุนเฉลี่ยขึ้นจาก {formatBaht(averageCost)} {" " + translate("เป็น", "to")}{" "}
         {formatBaht(result.newAverageCost)} ทำให้กำไรต่อใบลดจาก{" "}
         {formatSignedBaht(result.previousProfit)} เหลือ{" "}
         {formatSignedBaht(result.newProfit)} พิจารณาปรับราคาขายเป็น{" "}

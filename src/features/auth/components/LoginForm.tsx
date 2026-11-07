@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 export function LoginForm() {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const login = useLogin();
@@ -45,7 +47,7 @@ export function LoginForm() {
   });
 
   const formMessage = login.isError
-    ? getErrorMessage(login.error, "Could not sign you in. Please try again.")
+    ? getErrorMessage(login.error, translate("เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง", "Could not sign you in. Please try again."))
     : null;
 
   return (
@@ -58,12 +60,12 @@ export function LoginForm() {
 
       <FieldGroup className="gap-5">
         <Field className="gap-2" data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{translate("อีเมล", "Email")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="Enter your email"
+            placeholder={translate("กรอกอีเมลของคุณ", "Enter your email")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -71,11 +73,11 @@ export function LoginForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field className="gap-2" data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">{translate("รหัสผ่าน", "Password")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="current-password"
-            placeholder="Enter your password"
+            placeholder={translate("กรอกรหัสผ่านของคุณ", "Enter your password")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -90,16 +92,15 @@ export function LoginForm() {
         className="h-12 w-full rounded-lg text-base"
       >
         {isSubmitting && <Spinner />}
-        {isSubmitting ? "Signing in…" : "Log in"}
+        {isSubmitting ? translate("กำลังเข้าสู่ระบบ…", "Signing in…") : translate("เข้าสู่ระบบ", "Log in")}
       </Button>
 
       <div className="flex flex-col gap-2 pt-2">
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {translate("ยังไม่มีบัญชี?", "Don't have an account?")}{" "}
           <Link to={{ pathname: "/register", search: location.search }} className="font-medium text-primary">
-            Sign up
-          </Link>
+            {translate("สมัครสมาชิก", "Sign up")}</Link>
         </p>
       </div>
       <BackHomeLink />

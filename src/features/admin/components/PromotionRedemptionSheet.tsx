@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Link } from "react-router-dom";
 
 import { EmptyState, ErrorState } from "@/components/common";
@@ -29,6 +30,7 @@ type PromotionRedemptionSheetProps = {
 
 /** Sheet การใช้โค้ด (Figma PRM-A3 D) — เปิดจาก `?promo=ID` reload แล้วยังอยู่ */
 export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onClose }: PromotionRedemptionSheetProps) {
+  useLanguage();
   const promotion = usePromotion(promotionId);
   const redemptions = useRedemptions(promotionId, page);
   const data = promotion.data;
@@ -55,12 +57,12 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
         {data ? (
           <div className="grid grid-cols-1 gap-3 px-6 pt-4 sm:grid-cols-3">
             <Metric
-              label="ใช้ไปแล้ว"
+              label={translate("ใช้ไปแล้ว", "Redeemed")}
               value={`${data.usedCount.toLocaleString("th-TH")} / ${limitLabel(data.usageLimitTotal)}`}
               caption={data.claimable ? `เก็บแล้ว ${data.claimedCount.toLocaleString("th-TH")} / ${limitLabel(data.claimLimit)}` : undefined}
             />
             <Metric
-              label={data.ownerType === "PLATFORM" ? "ส่วนลดที่ Pegasus ออก" : "ส่วนลดที่ร้านออก"}
+              label={data.ownerType === "PLATFORM" ? "ส่วนลดที่ Pegasus ออก" : translate("ส่วนลดที่ร้านออก", "Shop-funded discount")}
               value={formatBaht(data.discountTotal)}
               caption={data.reservedOrders ? `รอชำระอีก ${data.reservedOrders.toLocaleString("th-TH")} ออเดอร์` : undefined}
             />
@@ -79,16 +81,16 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
             />
           ) : null}
           {redemptions.data?.items.length === 0 ? (
-            <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
+            <EmptyState title={translate("ยังไม่มีการใช้โค้ด", "No code redemptions yet")} className="min-h-40" />
           ) : null}
           {redemptions.data && redemptions.data.items.length > 0 ? (
             <Table className="text-xs">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-9 px-0 text-muted-foreground">คำสั่งซื้อ</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">ผู้ซื้อ</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">ส่วนลด</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">สถานะ</TableHead>
+                  <TableHead className="h-9 px-0 text-muted-foreground">{translate("คำสั่งซื้อ", "Orders")}</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">{translate("ผู้ซื้อ", "Buyer")}</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">{translate("ส่วนลด", "Discount")}</TableHead>
+                  <TableHead className="h-9 text-muted-foreground">{translate("สถานะ", "Status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -129,6 +131,7 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
 }
 
 function Metric({ label, value, caption }: { label: string; value: string; caption?: string }) {
+  useLanguage();
   return (
     <div className="min-w-0 rounded-lg bg-muted px-3 py-2.5">
       <span className="block text-[11px] text-muted-foreground">{label}</span>

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type {
   AdminOrderSort,
   AdminOrderSummary,
@@ -26,25 +27,25 @@ export type OrderColumnMeta = {
 };
 
 export const ORDER_COLUMN_META: Record<OrderBoardColumnKey, OrderColumnMeta> = {
-  PENDING_PAYMENT: { title: "รอชำระเงิน", tone: "pending", sort: "OLDEST" },
+  PENDING_PAYMENT: { get title() { return translate("รอชำระเงิน", "Awaiting payment"); }, tone: "pending", sort: "OLDEST" },
   AWAITING_SHIPMENT: {
     title: "ชำระแล้ว · รอส่ง",
     tone: "packing",
     sort: "PAID_OLDEST",
   },
-  IN_TRANSIT: { title: "กำลังจัดส่ง", tone: "shipping", sort: "SHIPPED_NEWEST" },
-  COMPLETED: { title: "สำเร็จ", tone: "success", sort: "COMPLETED_NEWEST" },
+  IN_TRANSIT: { get title() { return translate("กำลังจัดส่ง", "Shipping"); }, tone: "shipping", sort: "SHIPPED_NEWEST" },
+  COMPLETED: { get title() { return translate("สำเร็จ", "Completed"); }, tone: "success", sort: "COMPLETED_NEWEST" },
   DISPUTED: { title: "ข้อพิพาท", tone: "dispute", sort: "OLDEST" },
 };
 
 export const ORDER_STATUS_LABEL: Record<SellerOrderStatus, string> = {
-  PENDING_PAYMENT: "รอชำระเงิน",
-  PAID: "ชำระแล้ว",
-  PREPARING: "กำลังแพ็ค",
+  get PENDING_PAYMENT() { return translate("รอชำระเงิน", "Awaiting payment"); },
+  get PAID() { return translate("ชำระแล้ว", "Paid"); },
+  get PREPARING() { return translate("กำลังแพ็ค", "Packing"); },
   SHIPPED: "จัดส่งแล้ว",
   DELIVERED: "ถึงผู้ซื้อแล้ว",
-  COMPLETED: "สำเร็จ",
-  CANCELLED: "ยกเลิก",
+  get COMPLETED() { return translate("สำเร็จ", "Completed"); },
+  get CANCELLED() { return translate("ยกเลิก", "Cancel"); },
   RETURN_REQUESTED: "ขอคืนสินค้า",
   RETURNED: "คืนสินค้าแล้ว",
   REFUNDED: "คืนเงินแล้ว",
@@ -56,23 +57,23 @@ export const RETURN_REASON_LABEL: Record<ReturnReasonCode, string> = {
   WRONG_ITEM: "ได้รับสินค้าผิด",
   NOT_RECEIVED: "ไม่ได้รับสินค้า",
   COUNTERFEIT: "สงสัยของปลอม",
-  OTHER: "เหตุผลอื่น",
+  get OTHER() { return translate("เหตุผลอื่น", "Other reason"); },
 };
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
-  BANK_TRANSFER: "โอนผ่านธนาคาร",
-  MOCK_GATEWAY: "ช่องทางทดสอบ",
-  WALLET: "กระเป๋าเงิน",
-  CASH_ON_DELIVERY: "เก็บเงินปลายทาง",
+  get BANK_TRANSFER() { return translate("โอนผ่านธนาคาร", "Bank transfer"); },
+  get MOCK_GATEWAY() { return translate("ช่องทางทดสอบ", "Test payment method"); },
+  get WALLET() { return translate("กระเป๋าเงิน", "Wallet"); },
+  get CASH_ON_DELIVERY() { return translate("เก็บเงินปลายทาง", "Cash on delivery"); },
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
-  PENDING: "รอชำระ",
-  AWAITING_VERIFICATION: "รอตรวจสลิป",
-  SUCCEEDED: "ชำระสำเร็จ",
-  FAILED: "ไม่สำเร็จ",
-  CANCELLED: "ยกเลิก",
-  EXPIRED: "หมดเวลา",
+  get PENDING() { return translate("รอชำระ", "Awaiting payment"); },
+  get AWAITING_VERIFICATION() { return translate("รอตรวจสลิป", "Awaiting payment slip review"); },
+  get SUCCEEDED() { return translate("ชำระสำเร็จ", "Payment completed"); },
+  get FAILED() { return translate("ไม่สำเร็จ", "Failed"); },
+  get CANCELLED() { return translate("ยกเลิก", "Cancel"); },
+  get EXPIRED() { return translate("หมดเวลา", "Timed out"); },
 };
 
 /** ใช้แทนค่าที่ยังไม่มี — ไม่เดาข้อความขึ้นมาเอง */

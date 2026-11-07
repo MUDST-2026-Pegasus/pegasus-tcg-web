@@ -1,3 +1,5 @@
+import { beforeEach } from "vitest";
+import { setLanguage } from "@/lib/language";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -139,3 +141,5 @@ describe("FileUpload", () => {
     expect(retryMock).toHaveBeenCalledWith("item1");
   });
 });
+
+beforeEach(() => setLanguage("th"));

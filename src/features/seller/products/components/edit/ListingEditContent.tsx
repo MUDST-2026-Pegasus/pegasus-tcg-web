@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye } from "lucide-react";
@@ -75,6 +76,7 @@ export function ListingEditContent({
   listing,
   focusPrice,
 }: ListingEditContentProps) {
+  useLanguage();
   const { canPublish, reason } = usePublishPermission();
   const [priceLocked, setPriceLocked] = useState<{ price: number | null; details: SalePriceLockedDetails } | null>(null);
   const updateListing = useUpdateListing(listing.id);
@@ -132,7 +134,7 @@ export function ListingEditContent({
       // รูปใหม่กลายเป็นรูปของประกาศแล้ว ไม่ต้องค้างในรายการอัปโหลด
       upload.clear();
       if (latest) reset(toListingForm(latest));
-      toast.add({ type: "success", title: "บันทึกการเปลี่ยนแปลงแล้ว" });
+      toast.add({ type: "success", title: translate("บันทึกการเปลี่ยนแปลงแล้ว", "Changes saved") });
     } catch (error) {
       if (hasErrorCode(error, "SALE_PRICE_LOCKED")) {
         setPriceLocked({ price: toNumber(submitted.price), details: priceLockedDetails(error) });
@@ -142,7 +144,7 @@ export function ListingEditContent({
         setError("root.server", {
           message: listingFormErrorMessage(
             error,
-            "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง",
+            translate("บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง", "Unable to save. Please try again"),
           ),
         });
       }
@@ -169,8 +171,7 @@ export function ListingEditContent({
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link to={PRODUCTS_PATH} />}>
-              จัดการสินค้า
-            </BreadcrumbLink>
+              {translate("จัดการสินค้า", "Manage products")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>{listing.card.productName}</BreadcrumbItem>
@@ -204,8 +205,7 @@ export function ListingEditContent({
             render={<Link to={PRODUCTS_PATH} />}
             nativeButton={false}
           >
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             type="submit"
             size="sm"
@@ -289,8 +289,7 @@ export function ListingEditContent({
           <div className="flex items-center gap-1.5">
             <Eye aria-hidden="true" className="size-4 text-slate-500" />
             <p className="text-xs font-medium text-gray-500">
-              ตัวอย่างที่ผู้ซื้อจะเห็น
-            </p>
+              {translate("ตัวอย่างที่ผู้ซื้อจะเห็น", "Buyer preview")}</p>
           </div>
 
           <div className="flex justify-center">

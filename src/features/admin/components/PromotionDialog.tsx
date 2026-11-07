@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import {
@@ -51,6 +52,7 @@ export function PromotionDialog({
   actions,
   className,
 }: PromotionDialogProps) {
+  useLanguage();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent

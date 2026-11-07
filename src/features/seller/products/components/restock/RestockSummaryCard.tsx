@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export function RestockSummaryCard({
   product,
   result,
 }: RestockSummaryCardProps) {
+  useLanguage();
   const rows = [
     {
       id: "stock",

@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { useId, useState } from "react";
 
 import { CheckIcon, CopyIcon, TriangleAlert, UserIcon } from "lucide-react";
@@ -55,6 +56,7 @@ export function ShippingInfoCard({
   trackingNumber,
   onTrackingNumberChange,
 }: ShippingInfoCardProps) {
+  useLanguage();
   const [copied, setCopied] = useState(false);
   const carrierId = useId();
   const trackingId = useId();
@@ -89,7 +91,7 @@ export function ShippingInfoCard({
             className="h-auto gap-1.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-teal-600 hover:bg-[#e6f4f2] hover:text-teal-600"
           >
             {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
-            <span aria-live="polite">{copied ? "คัดลอกแล้ว" : "คัดลอก"}</span>
+            <span aria-live="polite">{copied ? "คัดลอกแล้ว" : translate("คัดลอก", "Copy")}</span>
           </Button>
         </div>
 
@@ -160,8 +162,7 @@ export function ShippingInfoCard({
         <div className="flex flex-col gap-3.5 sm:flex-row">
           <div className="flex flex-1 flex-col gap-1.5">
             <Label htmlFor={carrierId} className={LABEL_CLASS}>
-              บริษัทขนส่ง
-            </Label>
+              {translate("บริษัทขนส่ง", "Carrier")}</Label>
             <Input
               id={carrierId}
               readOnly

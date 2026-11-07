@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { ImageIcon, ScanBarcode, SearchIcon } from "lucide-react";
@@ -50,6 +51,7 @@ type CardPickerProps = {
  * มีสองทาง: ค้นจากชื่อ/เลขการ์ด หรือกรอก SKU / สแกนบาร์โค้ด (`/catalog/variants/by-code`)
  */
 export function CardPicker({ onSelect, error }: CardPickerProps) {
+  useLanguage();
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [openProductId, setOpenProductId] = useState<number | null>(null);
@@ -118,8 +120,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
               className="cursor-pointer font-medium underline underline-offset-2"
               onClick={() => search.refetch()}
             >
-              ลองใหม่
-            </button>
+              {translate("ลองใหม่", "Retry")}</button>
           </AlertDescription>
         </Alert>
       ) : items.length === 0 ? (
@@ -165,6 +166,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
 }
 
 function SearchSkeleton() {
+  useLanguage();
   return (
     <div aria-hidden="true" className="flex flex-col gap-2">
       {Array.from({ length: 3 }, (_, index) => (
@@ -191,6 +193,7 @@ function SearchResultRow({
   onToggle: () => void;
   onSelect: (card: SelectedCard) => void;
 }) {
+  useLanguage();
   const meta = searchItemMeta(item);
 
   return (
@@ -221,9 +224,9 @@ function SearchResultRow({
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-0.5 text-[11px] text-gray-500">
-          <span>{item.variantCount} พิมพ์</span>
+          <span>{item.variantCount} {" " + translate("พิมพ์", "Type")}</span>
           {item.lowestPrice !== null ? (
-            <span>เริ่ม {formatBaht(item.lowestPrice)}</span>
+            <span>{translate("เริ่ม", "Start") + " "}{formatBaht(item.lowestPrice)}</span>
           ) : null}
         </span>
       </button>
@@ -243,6 +246,7 @@ function VariantChooser({
   item: CatalogSearchItem;
   onSelect: (card: SelectedCard) => void;
 }) {
+  useLanguage();
   const detail = useCatalogProduct(item.id);
 
   if (detail.isPending) {
@@ -305,6 +309,7 @@ function VariantChooser({
 
 /** กรอก SKU ที่คนอื่นบอกต่อ หรือสแกนบาร์โค้ด (เครื่องสแกนพิมพ์แล้วกด Enter ให้เอง) */
 function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
+  useLanguage();
   const [code, setCode] = useState("");
   const [submitted, setSubmitted] = useState<string | null>(null);
 

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { Check, Search } from "lucide-react";
@@ -44,6 +45,7 @@ export function AddCardsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
@@ -55,6 +57,7 @@ export function AddCardsDialog({
 }
 
 function AddCardsForm({ onClose }: { onClose: () => void }) {
+  useLanguage();
   const [step, setStep] = useState<1 | 2>(1);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -165,7 +168,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     const failed: Record<number, string> = {};
     outcomes.forEach((outcome, index) => {
       if (outcome.status === "rejected") {
-        failed[rows[index].card.productId] = getErrorMessage(outcome.reason, "Could not add this card.");
+        failed[rows[index].card.productId] = getErrorMessage(outcome.reason, translate("เพิ่มการ์ดใบนี้ไม่สำเร็จ", "Could not add this card."));
       }
     });
 
@@ -173,7 +176,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     if (addedCount > 0) {
       toast.add({
         title: addedCount === 1 ? "1 card added" : `${addedCount} cards added`,
-        description: "They are now in your collection.",
+        description: translate("เพิ่มการ์ดลงในคอลเลกชันแล้ว", "They are now in your collection."),
         type: "success",
       });
     }
@@ -193,9 +196,9 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     return (
       <>
         <DialogHeader>
-          <p className="text-xs text-muted-foreground">Step 1 of 2</p>
-          <DialogTitle>Choose cards</DialogTitle>
-          <DialogDescription>Pick the cards you own from the catalogue.</DialogDescription>
+          <p className="text-xs text-muted-foreground">{translate("ขั้นตอนที่ 1 จาก 2", "Step 1 of 2")}</p>
+          <DialogTitle>{translate("เลือกการ์ด", "Choose cards")}</DialogTitle>
+          <DialogDescription>{translate("เลือกการ์ดที่คุณมีจากแค็ตตาล็อก", "Pick the cards you own from the catalogue.")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -203,8 +206,8 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                aria-label="Search card name or number"
-                placeholder="Search card name or number..."
+                aria-label={translate("ค้นหาชื่อหรือเลขการ์ด", "Search card name or number")}
+                placeholder={translate("ค้นหาชื่อหรือเลขการ์ด...", "Search card name or number...")}
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
@@ -214,10 +217,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               />
             </div>
             <OptionSelect
-              label="Game"
+              label={translate("เกม", "Game")}
               value={gameId}
               options={(games.data ?? []).map((game) => ({ value: game.id, label: game.name }))}
-              placeholder="All games"
+              placeholder={translate("ทุกเกม", "All games")}
               clearable
               onChange={(next) => {
                 setGameId(next);
@@ -229,7 +232,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               label="Set"
               value={cardSetId}
               options={(cardSets.data ?? []).map((set) => ({ value: set.id, label: set.name }))}
-              placeholder={gameId === null ? "Choose a game first" : "All sets"}
+              placeholder={gameId === null ? translate("เลือกเกมก่อน", "Choose a game first") : translate("ทุกชุดการ์ด", "All sets")}
               clearable
               disabled={gameId === null}
               onChange={(next) => {
@@ -240,18 +243,14 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
           </div>
 
           {results.isPending ? (
-            <p role="status" className="py-10 text-center text-sm text-muted-foreground">
-              Loading cards...
-            </p>
+            <p role="status" className="py-10 text-center text-sm text-muted-foreground">{translate("กำลังโหลดการ์ด...", "Loading cards...")}</p>
           ) : results.isError ? (
             <div role="alert" className="flex flex-col items-center gap-3 py-10 text-sm">
-              <p className="text-destructive">Could not load the catalogue.</p>
-              <Button variant="outline" size="sm" onClick={() => void results.refetch()}>
-                Try again
-              </Button>
+              <p className="text-destructive">{translate("โหลดแค็ตตาล็อกไม่สำเร็จ", "Could not load the catalogue.")}</p>
+              <Button variant="outline" size="sm" onClick={() => void results.refetch()}>{translate("ลองใหม่", "Try again")}</Button>
             </div>
           ) : results.data.items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">No matching cards.</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">{translate("ไม่พบการ์ดที่ตรงกัน", "No matching cards.")}</p>
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
@@ -274,21 +273,16 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
                 ))}
               </ul>
               {totalPages > 1 && (
-                <nav aria-label="Catalogue pages" className="flex items-center justify-center gap-3">
-                  <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                    Previous
-                  </Button>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    Page {page + 1} of {totalPages}
+                <nav aria-label={translate("หน้าแค็ตตาล็อก", "Catalogue pages")} className="flex items-center justify-center gap-3">
+                  <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>{translate("ก่อนหน้า", "Previous")}</Button>
+                  <span className="text-xs text-muted-foreground tabular-nums">{translate("หน้า", "Page")}{page + 1}{translate("จาก", "of")}{totalPages}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={page + 1 >= totalPages}
                     onClick={() => setPage(page + 1)}
-                  >
-                    Next
-                  </Button>
+                  >{translate("ถัดไป", "Next")}</Button>
                 </nav>
               )}
             </>
@@ -300,12 +294,8 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
             {pickedLabel}
           </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button disabled={picked.length === 0} onClick={() => setStep(2)}>
-              Next
-            </Button>
+            <Button variant="outline" onClick={onClose}>{translate("ยกเลิก", "Cancel")}</Button>
+            <Button disabled={picked.length === 0} onClick={() => setStep(2)}>{translate("ถัดไป", "Next")}</Button>
           </div>
         </DialogFooter>
       </>
@@ -315,17 +305,13 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <DialogHeader>
-        <p className="text-xs text-muted-foreground">Step 2 of 2</p>
-        <DialogTitle>Add details</DialogTitle>
-        <DialogDescription>
-          Choose the printing and condition of each card. A photo of your own card is optional.
-        </DialogDescription>
+        <p className="text-xs text-muted-foreground">{translate("ขั้นตอนที่ 2 จาก 2", "Step 2 of 2")}</p>
+        <DialogTitle>{translate("เพิ่มรายละเอียด", "Add details")}</DialogTitle>
+        <DialogDescription>{translate("เลือกรุ่นพิมพ์และสภาพของการ์ดแต่ละใบ คุณสามารถเพิ่มรูปการ์ดของคุณได้", "Choose the printing and condition of each card. A photo of your own card is optional.")}</DialogDescription>
       </DialogHeader>
 
       {rows.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">
-          No cards selected. Go back to choose some.
-        </p>
+        <p className="py-10 text-center text-sm text-muted-foreground">{translate("ยังไม่ได้เลือกการ์ด ย้อนกลับไปเลือกก่อน", "No cards selected. Go back to choose some.")}</p>
       ) : (
         <ul className="flex flex-col divide-y">
           {rows.map((row) => (
@@ -353,16 +339,12 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
 
       <DialogFooter className="sm:items-center sm:justify-between">
         <label className="flex items-center gap-2 text-sm">
-          <Switch checked={publicItem} disabled={add.isPending} onCheckedChange={setPublicItem} />
-          Show on my public profile
-        </label>
+          <Switch checked={publicItem} disabled={add.isPending} onCheckedChange={setPublicItem} />{translate("แสดงบนโปรไฟล์สาธารณะของฉัน", "Show on my public profile")}</label>
         <div className="flex flex-col-reverse gap-2 sm:flex-row">
-          <Button variant="outline" disabled={add.isPending} onClick={() => setStep(1)}>
-            Back
-          </Button>
+          <Button variant="outline" disabled={add.isPending} onClick={() => setStep(1)}>{translate("ย้อนกลับ", "Back")}</Button>
           <Button disabled={!ready || add.isPending} onClick={() => void submit()}>
             {add.isPending ? <Spinner data-icon="inline-start" /> : null}
-            {rows.length === 1 ? "Add 1 card" : `Add ${rows.length} cards`}
+            {rows.length === 1 ? translate("เพิ่มการ์ด 1 ใบ", "Add 1 card") : `Add ${rows.length} cards`}
           </Button>
         </div>
       </DialogFooter>
@@ -379,6 +361,7 @@ function CatalogueTile({
   selected: boolean;
   onToggle: () => void;
 }) {
+  useLanguage();
   const meta = metaOf(product);
 
   return (

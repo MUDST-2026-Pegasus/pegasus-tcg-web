@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CirclePause, CirclePlay, Pause, Square, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function SellerSaleActionDialog({
   action: SellerSaleActionState | null;
   onChange: (action: SellerSaleActionState | null) => void;
 }) {
+  useLanguage();
   const mutation = useSellerSaleAction();
   if (!action) return null;
   const { kind, sale } = action;
@@ -47,7 +49,7 @@ export function SellerSaleActionDialog({
             toast.add({ title: "มีออเดอร์แล้ว ลบไม่ได้ — จบก่อนกำหนดแทน", type: "info" });
             return;
           }
-          toast.add({ title: failure, description: sellerSaleErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" });
+          toast.add({ title: failure, description: sellerSaleErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" });
         },
       },
     );
@@ -55,8 +57,7 @@ export function SellerSaleActionDialog({
   const pending = mutation.isPending;
   const cancel = (
     <Button variant="outline" disabled={pending} onClick={close}>
-      ยกเลิก
-    </Button>
+      {translate("ยกเลิก", "Cancel")}</Button>
   );
 
   switch (kind) {
@@ -91,15 +92,13 @@ export function SellerSaleActionDialog({
           tone="info"
           icon={<CirclePause />}
           title={`ทีมงานหยุด “${sale.name}”`}
-          description={`เหตุผล: ${sale.pauseReason || "ไม่ได้ระบุ"} · แก้ราคาแล้วขอให้ทีมงานเปิดอีกครั้ง`}
+          description={`เหตุผล: ${sale.pauseReason || translate("ไม่ได้ระบุ", "Not provided")} · แก้ราคาแล้วขอให้ทีมงานเปิดอีกครั้ง`}
           actions={
             <>
               <Button variant="outline" onClick={close}>
-                ปิด
-              </Button>
+                {translate("ปิด", "Close")}</Button>
               <Button render={<a href={SUPPORT_HREF} />} nativeButton={false}>
-                ติดต่อทีมงาน
-              </Button>
+                {translate("ติดต่อทีมงาน", "Contact support")}</Button>
             </>
           }
         />
@@ -115,7 +114,7 @@ export function SellerSaleActionDialog({
           description={
             sale.status === "SCHEDULED"
               ? "ยังไม่เริ่มและยังไม่มีออเดอร์ ลบแล้วกู้คืนไม่ได้"
-              : "ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้"
+              : translate("ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้", "No orders have used this price. Deletion cannot be undone")
           }
           actions={
             <>
@@ -123,10 +122,9 @@ export function SellerSaleActionDialog({
               <Button
                 className={PROMOTION_DANGER_BUTTON}
                 disabled={pending}
-                onClick={() => run("delete", `ลบ “${sale.name}” แล้ว`, "ลบไม่สำเร็จ")}
+                onClick={() => run("delete", `ลบ “${sale.name}” แล้ว`, translate("ลบไม่สำเร็จ", "Unable to delete"))}
               >
-                ลบ
-              </Button>
+                {translate("ลบ", "Delete")}</Button>
             </>
           }
         />
@@ -144,8 +142,7 @@ export function SellerSaleActionDialog({
             <>
               {cancel}
               <Button disabled={pending} onClick={() => run("pause", `หยุด “${sale.name}” แล้ว`, "หยุดไม่สำเร็จ")}>
-                หยุดชั่วคราว
-              </Button>
+                {translate("หยุดชั่วคราว", "Paused")}</Button>
             </>
           }
         />
@@ -163,8 +160,7 @@ export function SellerSaleActionDialog({
             <>
               {cancel}
               <Button disabled={pending} onClick={() => run("resume", `เปิด “${sale.name}” แล้ว`, "เปิดไม่สำเร็จ")}>
-                เปิดอีกครั้ง
-              </Button>
+                {translate("เปิดอีกครั้ง", "Reopen")}</Button>
             </>
           }
         />

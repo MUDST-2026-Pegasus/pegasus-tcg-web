@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ArrowRight, TrendingUp } from "lucide-react";
 
 import { formatBaht } from "@/features/seller/shared/seller.format";
@@ -23,6 +24,7 @@ export function WeightedCostCard({
   product,
   result,
 }: WeightedCostCardProps) {
+  useLanguage();
   const { unit } = product;
 
   const columns = [

@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
@@ -18,6 +19,7 @@ type LiftBanDialogProps = {
 
 /** A2 ยกเลิกโทษห้ามบิด + รายการประมูลที่ไม่ชำระ [TCG-635 · FE-9] */
 export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialogProps) {
+  useLanguage();
   const lift = useLiftBiddingBan();
   const lifting = mode === "lift";
 
@@ -62,12 +64,11 @@ export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialo
           ) : null}
         </div>
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ปิด</DialogClose>
+          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>{translate("ปิด", "Close")}</DialogClose>
           {lifting ? (
             <Button size="sm" className="rounded-md px-2.5" disabled={lift.isPending} onClick={confirm}>
               {lift.isPending && <Spinner />}
-              ยกเลิกโทษ
-            </Button>
+              {translate("ยกเลิกโทษ", "Lift ban")}</Button>
           ) : null}
         </DialogFooter>
       </DialogContent>

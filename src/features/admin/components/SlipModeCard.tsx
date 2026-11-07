@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { ShieldCheck, UserCheck, Zap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { useSetSlipAutoApprove, useSlipAutoApprove } from "../finance.queries";
  * มีผลกับสลิปที่แนบหลังเปลี่ยนเท่านั้น สลิปที่อยู่ในคิวแล้วยังต้องตรวจเอง
  */
 export function SlipModeCard({ queueCount }: { queueCount: number }) {
+  useLanguage();
   const autoApprove = useSlipAutoApprove();
   const setAutoApprove = useSetSlipAutoApprove();
   const enabled = autoApprove.data ?? false;
@@ -32,7 +34,7 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
         toast.add({
           type: "error",
           title: "เปลี่ยนโหมดไม่สำเร็จ",
-          description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          description: financeErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
         }),
     });
   };

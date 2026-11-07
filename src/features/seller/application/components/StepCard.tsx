@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import { Card } from "@/components/ui/card";
@@ -19,6 +20,7 @@ export function StepCard({
   className,
   children,
 }: StepCardProps) {
+  useLanguage();
   return (
     <Card
       className={cn(

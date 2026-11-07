@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Ban } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ type CancelAuctionDialogProps = {
 
 /** S3-B ยืนยันยกเลิกประมูล (ได้เฉพาะตอนยังไม่มีบิด) [TCG-632 · FE-6] */
 export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDialogProps) {
+  useLanguage();
   const cancel = useCancelAuction(row?.id ?? 0);
 
   const confirm = () => {
@@ -27,7 +29,7 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
         toast.add({
           type: "error",
           // ข้อความ AUCTION_HAS_BIDS ตาม Figma S3-E
-          title: error instanceof ApiError && error.code === "AUCTION_HAS_BIDS" ? "ยกเลิกไม่ได้ — มีผู้บิดแล้ว" : "ยกเลิกประมูลไม่สำเร็จ",
+          title: error instanceof ApiError && error.code === "AUCTION_HAS_BIDS" ? translate("ยกเลิกไม่ได้ — มีผู้บิดแล้ว", "Cannot cancel — bids have already been placed") : "ยกเลิกประมูลไม่สำเร็จ",
           description: error instanceof ApiError ? error.message : undefined,
         }),
     });
@@ -48,7 +50,7 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
           </div>
         </div>
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ไม่ยกเลิก</DialogClose>
+          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>{translate("ไม่ยกเลิก", "Keep auction")}</DialogClose>
           <Button
             variant="destructive"
             size="sm"
@@ -57,8 +59,7 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
             onClick={confirm}
           >
             {cancel.isPending && <Spinner />}
-            ยกเลิกประมูล
-          </Button>
+            {translate("ยกเลิกประมูล", "Cancel auction")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

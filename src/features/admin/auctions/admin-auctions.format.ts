@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type {
   AdminAuctionDetail,
   AdminAuctionRow,
@@ -19,16 +20,16 @@ const DAY = 24 * HOUR;
 const BANGKOK_OFFSET_MS = 7 * HOUR;
 
 export const ADMIN_AUCTION_TABS: { key: AdminAuctionTab; label: string }[] = [
-  { key: "ALL", label: "ทั้งหมด" },
-  { key: "LIVE", label: "กำลังประมูล" },
-  { key: "FLAGGED", label: "ถูกรายงาน" },
-  { key: "AWAITING_PAYMENT", label: "รอชำระ" },
-  { key: "ENDED", label: "จบแล้ว" },
-  { key: "SUSPENDED", label: "ถูกระงับ" },
+  { key: "ALL", get label() { return translate("ทั้งหมด", "All"); } },
+  { key: "LIVE", get label() { return translate("กำลังประมูล", "Live auction"); } },
+  { key: "FLAGGED", get label() { return translate("ถูกรายงาน", "Reported"); } },
+  { key: "AWAITING_PAYMENT", get label() { return translate("รอชำระ", "Awaiting payment"); } },
+  { key: "ENDED", get label() { return translate("จบแล้ว", "Ended"); } },
+  { key: "SUSPENDED", get label() { return translate("ถูกระงับ", "Suspended"); } },
 ];
 
 export const BAN_TABS: { key: BanTab; label: string }[] = [
-  { key: "BANNED", label: "ห้ามบิดอยู่" },
+  { key: "BANNED", get label() { return translate("ห้ามบิดอยู่", "Bidding banned"); } },
   { key: "AT_RISK", label: "ใกล้ถูกห้าม" },
   { key: "HISTORY", label: "ประวัติ" },
 ];
@@ -51,7 +52,7 @@ export function canSuspend(status: AuctionStatus): boolean {
 export const BID_SIGNAL_LABEL: Record<AuctionSignal, string> = {
   NEW_ACCOUNT_RAPID_BIDS: "บัญชีใหม่บิดถี่",
   SHARED_ADDRESS_WITH_SELLER: "ที่อยู่ตรงผู้ขาย",
-  REPORTED: "ถูกรายงาน",
+  get REPORTED() { return translate("ถูกรายงาน", "Reported"); },
 };
 
 /** ชิปข้างชื่อการ์ด (A1, หัว A3) — สัญญาณเรื่องการบิดรวมเป็น "บิดผิดปกติ" */

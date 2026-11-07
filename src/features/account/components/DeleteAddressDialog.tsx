@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Trash2 } from "lucide-react";
 
 import {
@@ -30,6 +31,7 @@ export function DeleteAddressDialog({
   onOpenChange,
   address,
 }: DeleteAddressDialogProps) {
+  useLanguage();
   const deleteAddress = useDeleteAddress();
 
   // hook อยู่ในตัวนอกที่ไม่ถูก unmount ตอนปิด ต้องล้าง error เอง
@@ -60,12 +62,11 @@ export function DeleteAddressDialog({
           <AlertDialogMedia className="text-destructive">
             <Trash2 />
           </AlertDialogMedia>
-          <AlertDialogTitle>Delete this address?</AlertDialogTitle>
+          <AlertDialogTitle>{translate("ลบที่อยู่นี้?", "Delete this address?")}</AlertDialogTitle>
           <AlertDialogDescription>
             {address?.recipientName} · {address?.line1}
             <br />
-            Past orders keep their own copy, so they stay unchanged.
-          </AlertDialogDescription>
+            {translate("ที่อยู่ในคำสั่งซื้อเดิมจะไม่เปลี่ยนแปลง เพราะระบบเก็บสำเนาแยกไว้", "Past orders keep their own copy, so they stay unchanged.")}</AlertDialogDescription>
         </AlertDialogHeader>
 
         {deleteAddress.isError && (
@@ -73,7 +74,7 @@ export function DeleteAddressDialog({
             <AlertDescription>
               {getErrorMessage(
                 deleteAddress.error,
-                "Could not delete this address.",
+                translate("ลบที่อยู่นี้ไม่สำเร็จ", "Could not delete this address."),
               )}
             </AlertDescription>
           </Alert>
@@ -81,16 +82,14 @@ export function DeleteAddressDialog({
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteAddress.isPending}>
-            Cancel
-          </AlertDialogCancel>
+            {translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
           <Button
             variant="destructive"
             disabled={deleteAddress.isPending}
             onClick={onConfirm}
           >
             {deleteAddress.isPending && <Spinner data-icon="inline-start" />}
-            Delete
-          </Button>
+            {translate("ลบ", "Delete")}</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

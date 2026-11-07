@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ type SuspendAuctionDialogProps = {
  * หน้าที่เรียกใส่ key ตามใบ เปิดใบใหม่แล้วช่องเหตุผลเริ่มว่าง
  */
 export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuctionDialogProps) {
+  useLanguage();
   const suspend = useSuspendAuction(target?.id ?? 0);
   const [reason, setReason] = useState("");
   const trimmed = reason.trim();
@@ -65,7 +67,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
           </div>
         </div>
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ยกเลิก</DialogClose>
+          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>{translate("ยกเลิก", "Cancel")}</DialogClose>
           <Button
             variant="destructive"
             size="sm"
@@ -74,8 +76,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
             onClick={confirm}
           >
             {suspend.isPending && <Spinner />}
-            ระงับประมูล
-          </Button>
+            {translate("ระงับประมูล", "Suspend auction")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

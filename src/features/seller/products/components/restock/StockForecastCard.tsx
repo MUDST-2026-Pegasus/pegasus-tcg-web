@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ function forecastDate(value: string) {
 }
 
 export function StockForecastCard({ listingId }: { listingId: number }) {
+  useLanguage();
   const forecast = useQuery({
     queryKey: stockForecastKeys.detail(listingId),
     queryFn: () => api.get<Forecast>(`/sellers/me/listings/${listingId}/stock-forecast`),
@@ -43,7 +45,7 @@ export function StockForecastCard({ listingId }: { listingId: number }) {
       ) : forecast.isError ? (
         <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span>โหลดข้อมูลคาดการณ์ไม่สำเร็จ</span>
-          <Button size="sm" variant="outline" onClick={() => void forecast.refetch()}>ลองใหม่</Button>
+          <Button size="sm" variant="outline" onClick={() => void forecast.refetch()}>{translate("ลองใหม่", "Retry")}</Button>
         </div>
       ) : !forecast.data ? (
         <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลคาดการณ์</p>
@@ -53,8 +55,8 @@ export function StockForecastCard({ listingId }: { listingId: number }) {
             {forecast.data.listingName} · คำนวณ ณ {forecastDate(forecast.data.updatedAt.slice(0, 10))}
           </p>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div><p className="text-xs text-muted-foreground">พร้อมขาย</p><p className="mt-1 text-lg font-bold">{forecast.data.availableStock} ชิ้น</p></div>
-            <div><p className="text-xs text-muted-foreground">ขายสำเร็จ 30 วัน</p><p className="mt-1 text-lg font-bold">{forecast.data.completedSales30Days} ชิ้น</p></div>
+            <div><p className="text-xs text-muted-foreground">{translate("พร้อมขาย", "Ready to sell")}</p><p className="mt-1 text-lg font-bold">{forecast.data.availableStock} {" " + translate("ชิ้น", "items")}</p></div>
+            <div><p className="text-xs text-muted-foreground">ขายสำเร็จ 30 วัน</p><p className="mt-1 text-lg font-bold">{forecast.data.completedSales30Days} {" " + translate("ชิ้น", "items")}</p></div>
             <div><p className="text-xs text-muted-foreground">คงเหลือโดยประมาณ</p><p className="mt-1 text-lg font-bold">{forecast.data.status === "FORECAST_AVAILABLE" && forecast.data.daysRemaining != null ? `~${forecast.data.daysRemaining} วัน` : "—"}</p></div>
             <div><p className="text-xs text-muted-foreground">คาดว่าจะหมด</p><p className="mt-1 text-lg font-bold">{forecast.data.status === "FORECAST_AVAILABLE" && forecast.data.estimatedStockoutDate ? forecastDate(forecast.data.estimatedStockoutDate) : "—"}</p></div>
           </div>

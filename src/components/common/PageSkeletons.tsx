@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -289,7 +290,7 @@ function PageStatus({
 }
 
 /** หน้าฝั่งผู้ซื้อทั่วไป: หัวข้อ + ตารางการ์ดสินค้า */
-export function CatalogPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function CatalogPageSkeleton({ label = translate("กำลังโหลดหน้า", "Loading page") }: { label?: string }) {
   return (
     <PageStatus
       label={label}
@@ -302,7 +303,7 @@ export function CatalogPageSkeleton({ label = "กำลังโหลดหน
 }
 
 /** หน้ารายละเอียดสินค้า / ประกาศขาย */
-export function DetailPageSkeleton({ label = "กำลังโหลดรายละเอียด" }: { label?: string }) {
+export function DetailPageSkeleton({ label = translate("กำลังโหลดรายละเอียด", "Loading details") }: { label?: string }) {
   return (
     <PageStatus
       label={label}
@@ -316,7 +317,7 @@ export function DetailPageSkeleton({ label = "กำลังโหลดรา�
 }
 
 /** หน้าโปรไฟล์ร้าน / นักสะสม: ปุ่มกลับ + หัวโปรไฟล์ + ตารางการ์ด */
-export function ProfilePageSkeleton({ label = "กำลังโหลดโปรไฟล์" }: { label?: string }) {
+export function ProfilePageSkeleton({ label = translate("กำลังโหลดโปรไฟล์", "Loading profile") }: { label?: string }) {
   return (
     <PageStatus
       label={label}
@@ -333,7 +334,7 @@ export function ProfilePageSkeleton({ label = "กำลังโหลดโป
 }
 
 /** หน้าฟอร์ม / checkout: เนื้อหาซ้าย + สรุปขวา */
-export function FormPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function FormPageSkeleton({ label = translate("กำลังโหลดหน้า", "Loading page") }: { label?: string }) {
   return (
     <PageStatus
       label={label}
@@ -345,7 +346,7 @@ export function FormPageSkeleton({ label = "กำลังโหลดหน้
 }
 
 /** หน้าบทความ (About / ข้อตกลง / นโยบาย) */
-export function ArticlePageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function ArticlePageSkeleton({ label = translate("กำลังโหลดหน้า", "Loading page") }: { label?: string }) {
   return (
     <PageStatus
       label={label}
@@ -368,7 +369,7 @@ export const AUTH_CARD_CONTAINER_CLASS = CARD_CONTAINER_CLASS;
 
 /** หน้า login — การ์ดขนาด max-w-2xl พร้อม banner สูง 220px และ 2 ช่องกรอก */
 export function LoginPageSkeleton({
-  label = "กำลังโหลดหน้าเข้าสู่ระบบ...",
+  label = translate("กำลังโหลดหน้าเข้าสู่ระบบ...", "Loading login page…"),
   className,
 }: {
   label?: string;
@@ -428,7 +429,7 @@ export function LoginPageSkeleton({
 
 /** หน้า register — การ์ดขนาด max-w-2xl พร้อม banner สูง 256px (h-64) และ 5 ช่องกรอก */
 export function RegisterPageSkeleton({
-  label = "กำลังโหลดหน้าลงทะเบียน...",
+  label = translate("กำลังโหลดหน้าลงทะเบียน...", "Loading registration page…"),
   className,
 }: {
   label?: string;
@@ -529,24 +530,25 @@ export function AuthPageSkeleton({
   label,
   className,
 }: AuthPageSkeletonProps = {}) {
+  useLanguage();
   if (variant === "register") {
     return (
       <RegisterPageSkeleton
-        label={label ?? "กำลังโหลดหน้าลงทะเบียน..."}
+        label={label ?? translate("กำลังโหลดหน้าลงทะเบียน...", "Loading registration page…")}
         className={className}
       />
     );
   }
   return (
     <LoginPageSkeleton
-      label={label ?? "กำลังโหลดหน้าเข้าสู่ระบบ..."}
+      label={label ?? translate("กำลังโหลดหน้าเข้าสู่ระบบ...", "Loading login page…")}
       className={className}
     />
   );
 }
 
 /** หน้าหลังบ้าน (admin / seller): หัวข้อ + การ์ดตัวเลข + ตาราง */
-export function DashboardPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function DashboardPageSkeleton({ label = translate("กำลังโหลดหน้า", "Loading page") }: { label?: string }) {
   return (
     <PageStatus label={label} className="flex flex-col gap-6">
       <HeadingSkeleton />
@@ -557,7 +559,7 @@ export function DashboardPageSkeleton({ label = "กำลังโหลดห�
 }
 
 /** หน้าบัญชีผู้ใช้: เมนูซ้าย (AccountSidebar) + เนื้อหาขวา */
-export function AccountPageSkeleton({ label = "กำลังโหลดบัญชี" }: { label?: string }) {
+export function AccountPageSkeleton({ label = translate("กำลังโหลดบัญชี", "Loading account") }: { label?: string }) {
   return (
     <PageStatus label={label} className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
       <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">

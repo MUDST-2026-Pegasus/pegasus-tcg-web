@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Layers, Package, Phone, Star, ThumbsUp } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,12 +26,13 @@ export function StoreHero({
   positivePercent = null,
   isNonSeller = false,
 }: StoreHeroProps) {
+  useLanguage();
   const displayName = profile.displayName || profile.username;
   const initials = getInitials(displayName);
 
   return (
     <section
-      aria-label="Store profile"
+      aria-label={translate("โปรไฟล์ร้านค้า", "Store profile")}
       className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xs sm:rounded-3xl"
     >
       {/* Section 1: Cover Gradient Banner */}
@@ -66,9 +68,7 @@ export function StoreHero({
                 <Badge
                   variant="secondary"
                   className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary hover:bg-primary/15"
-                >
-                  ผู้ขาย
-                </Badge>
+                >{translate("ผู้ขาย", "Seller")}</Badge>
               )}
             </div>
 
@@ -79,7 +79,7 @@ export function StoreHero({
                   <span className="text-muted-foreground/60">•</span>
                   <span className="inline-flex items-center gap-1.5">
                     <Phone className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                    <span className="sr-only">Phone number : </span>
+                    <span className="sr-only">{translate("หมายเลขโทรศัพท์ :", "Phone number :")}</span>
                     <a
                       href={`tel:${profile.phone.replace(/[^+\d]/g, "")}`}
                       className="font-medium text-foreground hover:underline"
@@ -110,7 +110,7 @@ export function StoreHero({
               <Star className="size-5 fill-[#F59E0B] text-[#F59E0B]" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-muted-foreground">คะแนนร้านค้า</p>
+              <p className="text-xs font-medium text-muted-foreground">{translate("คะแนนร้านค้า", "Store rating")}</p>
               {ratingCount > 0 ? (
                 <p className="text-xl font-bold text-foreground sm:text-2xl">
                   {ratingAvg.toFixed(1)}{" "}
@@ -120,7 +120,7 @@ export function StoreHero({
                 <p className="text-xl font-bold text-foreground sm:text-2xl">—</p>
               )}
               <p className="truncate text-xs text-muted-foreground">
-                {ratingCount > 0 ? `จาก ${ratingCount} รีวิวของผู้ซื้อ` : "ยังไม่มีรีวิว"}
+                {ratingCount > 0 ? translate(`จาก ${ratingCount} รีวิวของผู้ซื้อ`, `From ${ratingCount} buyer reviews`) : translate("ยังไม่มีรีวิว", "No reviews yet")}
               </p>
             </div>
           </div>
@@ -137,12 +137,12 @@ export function StoreHero({
             <Package className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">สินค้าที่วางขาย</p>
+            <p className="text-xs font-medium text-muted-foreground">{translate("สินค้าที่วางขาย", "Items for sale")}</p>
             <p className="text-xl font-bold text-foreground sm:text-2xl">
               {listingsTotal ?? "—"}{" "}
-              <span className="text-sm font-normal text-muted-foreground">รายการ</span>
+              <span className="text-sm font-normal text-muted-foreground">{translate("รายการ", "listings")}</span>
             </p>
-            <p className="truncate text-xs text-muted-foreground">ประกาศที่เปิดขายอยู่ตอนนี้</p>
+            <p className="truncate text-xs text-muted-foreground">{translate("ประกาศที่เปิดขายอยู่ตอนนี้", "Currently active listings")}</p>
           </div>
         </div>
 
@@ -153,7 +153,7 @@ export function StoreHero({
               <ThumbsUp className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-muted-foreground">รีวิวเชิงบวก</p>
+              <p className="text-xs font-medium text-muted-foreground">{translate("รีวิวเชิงบวก", "Positive reviews")}</p>
               {positivePercent !== null ? (
                 <p className="text-xl font-bold text-foreground sm:text-2xl">
                   {positivePercent}%
@@ -162,7 +162,7 @@ export function StoreHero({
                 <p className="text-xl font-bold text-foreground sm:text-2xl">—</p>
               )}
               <p className="truncate text-xs text-muted-foreground">
-                {positivePercent !== null ? "ให้ 4–5 ดาว" : "ยังไม่มีรีวิว"}
+                {positivePercent !== null ? translate("ให้ 4–5 ดาว", "gave 4–5 stars") : translate("ยังไม่มีรีวิว", "No reviews yet")}
               </p>
             </div>
           </div>
@@ -179,12 +179,12 @@ export function StoreHero({
             <Layers className="size-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">คอลเลกชันสาธารณะ</p>
+            <p className="text-xs font-medium text-muted-foreground">{translate("คอลเลกชันสาธารณะ", "Public collection")}</p>
             <p className="text-xl font-bold text-foreground sm:text-2xl">
               {collectionTotal ?? "—"}{" "}
-              <span className="text-sm font-normal text-muted-foreground">ใบ</span>
+              <span className="text-sm font-normal text-muted-foreground">{translate("ใบ", "cards")}</span>
             </p>
-            <p className="truncate text-xs text-muted-foreground">ไม่จำเป็นต้องวางขาย</p>
+            <p className="truncate text-xs text-muted-foreground">{translate("ไม่จำเป็นต้องวางขาย", "Not necessarily for sale")}</p>
           </div>
         </div>
       </div>

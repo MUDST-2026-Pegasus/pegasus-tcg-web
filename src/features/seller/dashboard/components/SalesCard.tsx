@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export function SalesCard({
   rangeStart,
   rangeEnd,
 }: SalesSummary) {
+  useLanguage();
   const heights = barPercents(bars.map((bar) => bar.amount));
 
   return (
@@ -43,7 +45,7 @@ export function SalesCard({
         <p className="text-xs text-teal-100">{description}</p>
       </div>
 
-      <ol className="flex h-16 items-end gap-1.5" aria-label="ยอดขายรายเดือน">
+      <ol className="flex h-16 items-end gap-1.5" aria-label={translate("ยอดขายรายเดือน", "Monthly sales")}>
         {bars.map((bar, index) => (
           <li
             key={bar.month}

@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ function transferAccount(raw: string | undefined): Record<string, string> {
 }
 
 function usePaymentCountdown(expiresAt: string | undefined, defaultTime = "14:59") {
+  useLanguage();
   const [timeLeft, setTimeLeft] = useState(defaultTime);
 
   useEffect(() => {
@@ -56,6 +58,7 @@ function usePaymentCountdown(expiresAt: string | undefined, defaultTime = "14:59
 }
 
 export function PaymentPage() {
+  useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -141,14 +144,14 @@ export function PaymentPage() {
       queryClient.setQueryData(["finance", "payment-status", payment.id], updated);
       toast.add({
         type: "success",
-        title: "ส่งหลักฐานแล้ว",
-        description: "รอผู้ดูแลตรวจสอบการชำระเงิน",
+        title: translate("ส่งหลักฐานแล้ว", "Payment proof submitted"),
+        description: translate("รอผู้ดูแลตรวจสอบการชำระเงิน", "Waiting for an administrator to verify your payment"),
       });
     } catch (error) {
       toast.add({
         type: "error",
-        title: "ส่งหลักฐานไม่สำเร็จ",
-        description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+        title: translate("ส่งหลักฐานไม่สำเร็จ", "Could not submit payment proof"),
+        description: getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")),
       });
     } finally {
       setIsSubmitting(false);
@@ -175,27 +178,25 @@ export function PaymentPage() {
   if (!validOrderId) {
     return (
       <div className="container mx-auto max-w-xl p-8 text-center">
-        <p className="text-muted-foreground">ไม่พบหมายเลขคำสั่งซื้อ</p>
+        <p className="text-muted-foreground">{translate("ไม่พบหมายเลขคำสั่งซื้อ", "Order number not found")}</p>
         <Button className="mt-4" onClick={() => navigate("/account/orders")}>
-          กลับไปประวัติคำสั่งซื้อ
-        </Button>
+          {translate("กลับไปประวัติคำสั่งซื้อ", "Back to order history")}</Button>
       </div>
     );
   }
 
   if (paymentQuery.isPending) {
-    return <FormPageSkeleton label="กำลังเตรียมข้อมูลการชำระเงิน" />;
+    return <FormPageSkeleton label={translate("กำลังเตรียมข้อมูลการชำระเงิน", "Preparing payment details")} />;
   }
 
   if (paymentQuery.isError) {
     return (
       <div className="container mx-auto max-w-xl p-8 text-center">
         <p role="alert" className="text-destructive font-medium">
-          {getErrorMessage(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}
+          {getErrorMessage(paymentQuery.error, translate("ไม่สามารถเริ่มการชำระเงินได้", "Could not start payment"))}
         </p>
         <Button className="mt-4" onClick={() => navigate("/account/orders")}>
-          กลับไปประวัติคำสั่งซื้อ
-        </Button>
+          {translate("กลับไปประวัติคำสั่งซื้อ", "Back to order history")}</Button>
       </div>
     );
   }
@@ -204,7 +205,7 @@ export function PaymentPage() {
 
   const orderNumber =
     order?.orderNumber ?? (orderId ? `ORD-${orderId}` : "ORD-10241");
-  const formattedAmount = Number(payment.amount).toLocaleString("th-TH", {
+  const formattedAmount = Number(payment.amount).toLocaleString(getLanguage() === "th" ? "th-TH" : "en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -228,11 +229,9 @@ export function PaymentPage() {
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            Secure Checkout
-          </h1>
+            {translate("ชำระเงินอย่างปลอดภัย", "Secure Checkout")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Pay with PromptPay, then upload your slip so we can confirm your order.
-          </p>
+            {translate("ชำระผ่านพร้อมเพย์ แล้วอัปโหลดสลิปเพื่อให้เรายืนยันคำสั่งซื้อ", "Pay with PromptPay, then upload your slip so we can confirm your order.")}</p>
         </div>
 
         {/* Two-Column Grid */}
@@ -247,14 +246,12 @@ export function PaymentPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                    AMOUNT DUE
-                  </span>
+                    {translate("ยอดที่ต้องชำระ", "AMOUNT DUE")}</span>
                   <p className="text-3xl font-extrabold text-foreground tracking-tight mt-0.5">
-                    THB {formattedAmount}
+                    {translate("บาท", "THB")}{formattedAmount}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Order #{orderNumber} · Pay exactly this amount
-                  </p>
+                    {translate("คำสั่งซื้อ #", "Order #")}{orderNumber} {translate("· กรุณาชำระเงินให้ตรงยอด", "· Pay exactly this amount")}</p>
                   {auctionNumber && <AuctionOrderBadge auctionNumber={auctionNumber} className="mt-2" />}
                 </div>
 
@@ -277,14 +274,14 @@ export function PaymentPage() {
                         isExpired ? "text-red-600" : "text-amber-600"
                       }`}
                     >
-                      {isExpired ? "Status" : "Expires in"}
+                      {isExpired ? translate("สถานะ", "Status") : translate("หมดอายุใน", "Expires in")}
                     </span>
                     <span
                       className={`text-sm font-bold leading-tight ${
                         isExpired ? "text-red-700" : "text-amber-900"
                       }`}
                     >
-                      {isExpired ? "Expired (00:00)" : timeLeft}
+                      {isExpired ? translate("หมดอายุ (00:00)", "Expired (00:00)") : timeLeft}
                     </span>
                   </div>
                 </div>
@@ -332,15 +329,12 @@ export function PaymentPage() {
                     <div className="flex-1 text-center sm:text-left space-y-1">
                       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         <h4 className="text-sm font-bold text-sky-950">
-                          ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ
-                        </h4>
+                          {translate("ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ", "Payment proof submitted · awaiting verification")}</h4>
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-200/80 text-sky-900">
-                          Payment Under Review
-                        </span>
+                          {translate("กำลังตรวจสอบการชำระเงิน", "Payment Under Review")}</span>
                       </div>
                       <p className="text-xs text-sky-800/90 leading-relaxed">
-                        เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ
-                      </p>
+                        {translate("เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ", "We received your payment slip. You can leave this page while we verify it. The status will update automatically once approved")}</p>
                     </div>
                   </div>
 
@@ -352,7 +346,7 @@ export function PaymentPage() {
                       className="w-full h-11 rounded-xl bg-primary hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <FileText className="size-4" />
-                      <span>ดูประวัติคำสั่งซื้อ</span>
+                      <span>{translate("ดูประวัติคำสั่งซื้อ", "View order history")}</span>
                     </Button>
 
                     <Button
@@ -362,7 +356,7 @@ export function PaymentPage() {
                       className="w-full h-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <ShoppingBag className="size-4" />
-                      <span>เลือกซื้อสินค้าต่อ</span>
+                      <span>{translate("เลือกซื้อสินค้าต่อ", "Continue shopping")}</span>
                     </Button>
                   </div>
                 </div>
@@ -381,19 +375,19 @@ export function PaymentPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        <span>Submitting payment...</span>
+                        <span>{translate("กำลังส่งข้อมูลชำระเงิน…", "Submitting payment...")}</span>
                       </>
                     ) : (
                       <>
                         <Lock className="size-4" />
-                        <span>Submit payment for verification</span>
+                        <span>{translate("ส่งข้อมูลเพื่อตรวจสอบการชำระเงิน", "Submit payment for verification")}</span>
                       </>
                     )}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
                     <Shield className="size-3.5 text-muted-foreground" />
-                    <span>Upload your slip and reference no. to continue.</span>
+                    <span>{translate("อัปโหลดสลิปและกรอกเลขอ้างอิงเพื่อดำเนินการต่อ", "Upload your slip and reference no. to continue.")}</span>
                   </p>
                 </div>
               )}
@@ -407,8 +401,8 @@ export function PaymentPage() {
                   <p role="alert" className="text-sm font-medium text-destructive">
                     {payment.failureReason ||
                       (isExpired
-                        ? "การชำระเงินหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง"
-                        : `การชำระเงินสถานะ: ${payment.status}`)}
+                        ? translate("การชำระเงินหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง", "This payment has expired. Please try again")
+                        : translate(`การชำระเงินสถานะ: ${payment.status}`, `Payment status: ${payment.status}`))}
                   </p>
                   <Button
                     variant="outline"
@@ -417,8 +411,7 @@ export function PaymentPage() {
                       setAttemptKey(crypto.randomUUID());
                     }}
                   >
-                    เริ่มการชำระเงินใหม่
-                  </Button>
+                    {translate("เริ่มการชำระเงินใหม่", "Start a new payment")}</Button>
                 </div>
               )}
             </div>

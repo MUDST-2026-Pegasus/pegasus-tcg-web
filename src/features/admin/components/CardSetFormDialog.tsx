@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
@@ -56,6 +57,7 @@ export function CardSetFormDialog({
   game,
   cardSet,
 }: CardSetFormDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -87,6 +89,7 @@ function CardSetForm({
   cardSet?: CardSet;
   onSaved: () => void;
 }) {
+  useLanguage();
   const saveCardSet = useSaveCardSet(game.id);
 
   const {
@@ -163,7 +166,7 @@ function CardSetForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.releaseDate) || undefined}>
-            <FieldLabel htmlFor="setRelease">วันวางจำหน่าย</FieldLabel>
+            <FieldLabel htmlFor="setRelease">{translate("วันวางจำหน่าย", "Release date")}</FieldLabel>
             <Controller
               control={control}
               name="releaseDate"
@@ -200,11 +203,11 @@ function CardSetForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.nameLocal) || undefined}>
-          <FieldLabel htmlFor="setNameLocal">ชื่อภาษาไทย</FieldLabel>
+          <FieldLabel htmlFor="setNameLocal">{translate("ชื่อภาษาไทย", "Thai name")}</FieldLabel>
           <Input
             id="setNameLocal"
             maxLength={150}
-            placeholder="ไม่บังคับ"
+            placeholder={translate("ไม่บังคับ", "Optional")}
             aria-invalid={Boolean(errors.nameLocal)}
             {...register("nameLocal")}
           />
@@ -215,7 +218,7 @@ function CardSetForm({
           data-invalid={Boolean(errors.totalCards) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="setTotal">จำนวนการ์ดในชุด</FieldLabel>
+          <FieldLabel htmlFor="setTotal">{translate("จำนวนการ์ดในชุด", "Cards in set")}</FieldLabel>
           <Input
             id="setTotal"
             inputMode="numeric"
@@ -227,7 +230,7 @@ function CardSetForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-          <FieldLabel htmlFor="setLogo">โลโก้</FieldLabel>
+          <FieldLabel htmlFor="setLogo">{translate("โลโก้", "Logo")}</FieldLabel>
           <LogoUploadField
             upload={upload}
             id="setLogo"
@@ -241,13 +244,12 @@ function CardSetForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {cardSet ? "บันทึก" : "เพิ่มชุดการ์ด"}
+          {cardSet ? translate("บันทึก", "Save") : "เพิ่มชุดการ์ด"}
         </Button>
       </DialogFooter>
     </form>

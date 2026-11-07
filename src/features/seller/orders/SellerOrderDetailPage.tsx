@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useEffect } from "react";
 
 import { SearchXIcon } from "lucide-react";
@@ -25,6 +26,7 @@ function parseOrderId(value: string | undefined): number | null {
 }
 
 export function SellerOrderDetailPage() {
+  useLanguage();
   const { orderId } = useParams();
   const id = parseOrderId(orderId);
   const order = useSellerOrder(id);

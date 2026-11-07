@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { AuctionCard } from "@/features/auction/components/AuctionCard";
 import type { AuctionSummary, EligibleUnit } from "@/features/auction/auction.types";
 import { toNumber } from "@/features/seller/products/products.format";
@@ -17,6 +18,7 @@ type AuctionPreviewCardProps = {
 
 /** "ตัวอย่างที่ผู้ซื้อจะเห็น" — การ์ดประมูลใบเดียวกับหน้ารวม อัปเดตตามที่กรอก [TCG-633 · FE-7] */
 export function AuctionPreviewCard({ unit, values, now }: AuctionPreviewCardProps) {
+  useLanguage();
   if (!unit) {
     return (
       <div className="flex aspect-[3/4] w-56 items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 text-center text-xs text-muted-foreground">

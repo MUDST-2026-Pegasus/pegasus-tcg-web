@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 
 import {
@@ -54,6 +55,7 @@ export function UserDialog({
   actions,
   wide = false,
 }: UserDialogProps) {
+  useLanguage();
   return (
     <AlertDialog
       open={open}
@@ -104,6 +106,7 @@ export function UserDialog({
 
 /** กล่องรายการผลที่จะเกิด (bullet) — เหลืองสำหรับคำเตือน ฟ้าสำหรับข้อแนะนำ */
 export function EffectList({ tone, items }: { tone: "warning" | "info"; items: string[] }) {
+  useLanguage();
   return (
     <ul
       className={cn(

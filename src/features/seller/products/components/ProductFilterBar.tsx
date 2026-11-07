@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { SearchIcon } from "lucide-react";
@@ -61,6 +62,7 @@ export function ProductFilterBar({
   sort,
   onSortChange,
 }: ProductFilterBarProps) {
+  useLanguage();
   const [text, setText] = useState(search);
   const [syncedSearch, setSyncedSearch] = useState(search);
   const timer = useRef<number | undefined>(undefined);
@@ -95,7 +97,7 @@ export function ProductFilterBar({
     label: string;
     count: number;
   }[] = [
-    { status: undefined, label: "ทั้งหมด", count: counts.total },
+    { status: undefined, label: translate("ทั้งหมด", "All"), count: counts.total },
     ...LISTING_STATUSES.filter(
       (status) =>
         status !== "BLOCKED" ||
@@ -158,7 +160,7 @@ export function ProductFilterBar({
           }}
         >
           <SelectTrigger
-            aria-label="เรียงลำดับ"
+            aria-label={translate("เรียงลำดับ", "Sort")}
             className="h-8 w-52 rounded-lg border border-input bg-background text-sm"
           >
             <SelectValue />

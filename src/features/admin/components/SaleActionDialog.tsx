@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 import { CirclePlay, Info, Pause, Square, Trash2 } from "lucide-react";
 
@@ -29,6 +30,7 @@ export function SaleActionDialog({
   action: SaleActionState | null;
   onChange: (action: SaleActionState | null) => void;
 }) {
+  useLanguage();
   const close = () => onChange(null);
   if (!action) return null;
   const key = `${action.kind}-${action.sale.id}`;
@@ -65,10 +67,11 @@ export function SaleActionDialog({
 }
 
 function errorToast(title: string, error: unknown) {
-  toast.add({ title, description: saleErrorMessage(error, "กรุณาลองอีกครั้ง"), type: "error" });
+  toast.add({ title, description: saleErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")), type: "error" });
 }
 
 function PausePlatformSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void }) {
+  useLanguage();
   const pause = usePauseSale();
   const submit = () =>
     pause.mutate(
@@ -92,8 +95,7 @@ function PausePlatformSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: 
       actions={
         <>
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={pause.isPending} onClick={submit}>
             หยุดแคมเปญ
           </Button>
@@ -105,10 +107,11 @@ function PausePlatformSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: 
 
 /** Figma SAL-M1 "การลดราคาของร้าน → หยุด" — เหตุผลบังคับ (ร้านเห็น) + แจ้งร้าน */
 function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void }) {
+  useLanguage();
   const pause = usePauseSale();
   const [reason, setReason] = useState("");
   const [notifySeller, setNotifySeller] = useState(true);
-  const shop = sale.owner?.username ?? "ร้านค้า";
+  const shop = sale.owner?.username ?? translate("ร้านค้า", "Shop");
 
   const submit = () =>
     pause.mutate(
@@ -134,8 +137,7 @@ function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: ()
       actions={
         <>
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button
             className={PROMOTION_DANGER_BUTTON}
             disabled={!reason.trim() || pause.isPending}
@@ -166,6 +168,7 @@ function PauseSellerSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: ()
 }
 
 function ResumeSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void }) {
+  useLanguage();
   const resume = useResumeSale();
   const submit = () =>
     resume.mutate(sale.id, {
@@ -186,21 +189,19 @@ function ResumeSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => v
       actions={
         <>
           <Button variant="outline" disabled={resume.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button disabled={resume.isPending} onClick={submit}>
-            เปิดอีกครั้ง
-          </Button>
+            {translate("เปิดอีกครั้ง", "Reopen")}</Button>
         </>
       }
     >
       <div className={SUMMARY_BOX}>
         <p className={SUMMARY_ROW}>
-          <span>เหตุผลที่หยุด</span>
-          <strong>{sale.pauseReason || "ไม่ได้ระบุ"}</strong>
+          <span>{translate("เหตุผลที่หยุด", "Reason for pausing")}</span>
+          <strong>{sale.pauseReason || translate("ไม่ได้ระบุ", "Not provided")}</strong>
         </p>
         <p className={SUMMARY_ROW}>
-          <span>ช่วงเวลา</span>
+          <span>{translate("ช่วงเวลา", "Period")}</span>
           <strong>{salePeriod(sale)}</strong>
         </p>
       </div>
@@ -210,6 +211,7 @@ function ResumeSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => v
 
 /** Figma SAL-M1 "แคมเปญที่กำลังลด → จบทันที" */
 function EndSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void }) {
+  useLanguage();
   const end = useEndSale();
   const submit = () =>
     end.mutate(sale.id, {
@@ -230,8 +232,7 @@ function EndSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void
       actions={
         <>
           <Button variant="outline" disabled={end.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={end.isPending} onClick={submit}>
             จบแคมเปญ
           </Button>
@@ -241,13 +242,13 @@ function EndSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void
       <div className={SUMMARY_BOX}>
         <p className={SUMMARY_ROW}>
           <span>ขายไปแล้ว</span>
-          <strong>{sale.soldUnits.toLocaleString("th-TH")} ชิ้น</strong>
+          <strong>{sale.soldUnits.toLocaleString("th-TH")} {" " + translate("ชิ้น", "items")}</strong>
         </p>
         {sale.ownerType === "PLATFORM" ? (
           <p className={SUMMARY_ROW}>
             <span>อุดหนุนแล้ว</span>
             <strong>
-              {formatBaht(sale.subsidyReserved)} / {sale.budgetCap == null ? "ไม่จำกัด" : formatBaht(sale.budgetCap)}
+              {formatBaht(sale.subsidyReserved)} / {sale.budgetCap == null ? translate("ไม่จำกัด", "Unlimited") : formatBaht(sale.budgetCap)}
             </strong>
           </p>
         ) : null}
@@ -265,6 +266,7 @@ function DeleteSaleDialog({
   onClose: () => void;
   onBlocked: () => void;
 }) {
+  useLanguage();
   const remove = useDeleteSale();
   const submit = () =>
     remove.mutate(sale.id, {
@@ -275,7 +277,7 @@ function DeleteSaleDialog({
       onError: (error) => {
         // มีออเดอร์เข้ามาระหว่างที่เปิดหน้าไว้
         if (hasErrorCode(error, "SALE_IN_USE")) onBlocked();
-        else errorToast("ลบไม่สำเร็จ", error);
+        else errorToast(translate("ลบไม่สำเร็จ", "Unable to delete"), error);
       },
     });
   return (
@@ -285,15 +287,13 @@ function DeleteSaleDialog({
       tone="danger"
       icon={<Trash2 />}
       title={`ลบ “${sale.name}”?`}
-      description="ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้"
+      description={translate("ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้", "No orders have used this price. Deletion cannot be undone")}
       actions={
         <>
           <Button variant="outline" disabled={remove.isPending} onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button className={PROMOTION_DANGER_BUTTON} disabled={remove.isPending} onClick={submit}>
-            ลบ
-          </Button>
+            {translate("ลบ", "Delete")}</Button>
         </>
       }
     />
@@ -302,6 +302,7 @@ function DeleteSaleDialog({
 
 /** Figma SAL-M1 "ลบแคมเปญที่มีออเดอร์แล้ว → SALE_IN_USE" */
 function DeleteBlockedSaleDialog({ sale, onClose, onEnd }: { sale: AdminSale; onClose: () => void; onEnd: () => void }) {
+  useLanguage();
   const canEnd = sale.status === "ACTIVE" || sale.status === "PAUSED";
   return (
     <PromotionDialog
@@ -314,8 +315,7 @@ function DeleteBlockedSaleDialog({ sale, onClose, onEnd }: { sale: AdminSale; on
       actions={
         <>
           <Button variant="outline" onClick={onClose}>
-            ปิด
-          </Button>
+            {translate("ปิด", "Close")}</Button>
           {canEnd ? <Button onClick={onEnd}>จบแคมเปญแทน</Button> : null}
         </>
       }

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { SellerAvatarAccent } from "@/features/admin/admin.types";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ export function SellerAvatar({
   src,
   className,
 }: SellerAvatarProps) {
+  useLanguage();
   return (
     <Avatar className={cn("shrink-0 after:border-0", className)}>
       {src && <AvatarImage src={src} alt="" />}

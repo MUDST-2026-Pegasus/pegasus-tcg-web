@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useRef } from "react";
 import { ImageOff, Trash2, Upload } from "lucide-react";
 
@@ -26,6 +27,7 @@ const CONDITION_OPTIONS = (Object.keys(CONDITION_LABELS) as CardCondition[]).map
 }));
 
 export function CardThumb({ src, className }: { src: string | null; className?: string }) {
+  useLanguage();
   return (
     <span
       className={cn(
@@ -62,6 +64,7 @@ export function OptionSelect<T extends string | number>({
   invalid?: boolean;
   onChange: (value: T | null) => void;
 }) {
+  useLanguage();
   return (
     <Select
       items={[{ value: null, label: placeholder }, ...options]}
@@ -131,6 +134,7 @@ export function CardDetailsRow({
   /** Left out where the row cannot be taken away, as when editing one card. */
   onRemove?: () => void;
 }) {
+  useLanguage();
   const fileInput = useRef<HTMLInputElement>(null);
   const meta = metaOf(card);
   const pickPhoto = () => fileInput.current?.click();
@@ -155,21 +159,17 @@ export function CardDetailsRow({
         </div>
 
         {variantsPending ? (
-          <p role="status" className="text-xs text-muted-foreground">
-            Loading printings...
-          </p>
+          <p role="status" className="text-xs text-muted-foreground">{translate("กำลังโหลดรุ่นพิมพ์...", "Loading printings...")}</p>
         ) : variantsFailed ? (
-          <Button variant="outline" size="sm" onClick={onRetryVariants}>
-            Retry printings
-          </Button>
+          <Button variant="outline" size="sm" onClick={onRetryVariants}>{translate("โหลดรุ่นพิมพ์อีกครั้ง", "Retry printings")}</Button>
         ) : variants.length === 0 ? (
-          <p className="text-xs text-destructive">No printing available for this card.</p>
+          <p className="text-xs text-destructive">{translate("ยังไม่มีรุ่นพิมพ์สำหรับการ์ดใบนี้", "No printing available for this card.")}</p>
         ) : (
           <OptionSelect
             label={`Printing of ${card.name}`}
             value={variantId}
             options={variants.map((variant) => ({ value: variant.id, label: variantLabelOf(variant) }))}
-            placeholder="Choose printing"
+            placeholder={translate("เลือกรุ่นพิมพ์", "Choose printing")}
             disabled={disabled}
             invalid={variantId === null}
             onChange={(next) => onChange({ variantId: next })}
@@ -180,7 +180,7 @@ export function CardDetailsRow({
           label={`Condition of ${card.name}`}
           value={draft.condition}
           options={CONDITION_OPTIONS}
-          placeholder="Condition"
+          placeholder={translate("สภาพ", "Condition")}
           disabled={disabled}
           onChange={(next) => onChange({ condition: next ?? draft.condition })}
         />
@@ -229,11 +229,9 @@ export function CardDetailsRow({
         {photo?.status === "uploading" ? (
           <>
             <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
-              <Spinner /> Uploading {Math.round(photo.progress * 100)}%
+              <Spinner />{translate("กำลังอัปโหลด", "Uploading")}{Math.round(photo.progress * 100)}%
             </p>
-            <Button variant="ghost" size="sm" onClick={onDropPhoto}>
-              Cancel
-            </Button>
+            <Button variant="ghost" size="sm" onClick={onDropPhoto}>{translate("ยกเลิก", "Cancel")}</Button>
           </>
         ) : photo?.status === "error" ? (
           <>
@@ -241,33 +239,26 @@ export function CardDetailsRow({
               {photo.error}
             </p>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Choose another
-            </Button>
-            <Button variant="ghost" size="sm" disabled={disabled} onClick={onDropPhoto}>
-              Dismiss
-            </Button>
+              <Upload data-icon="inline-start" />{translate("เลือกใหม่", "Choose another")}</Button>
+            <Button variant="ghost" size="sm" disabled={disabled} onClick={onDropPhoto}>{translate("ปิด", "Dismiss")}</Button>
           </>
         ) : previewUrl ? (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Replace photo
-            </Button>
+              <Upload data-icon="inline-start" />{translate("เปลี่ยนรูป", "Replace photo")}</Button>
             <Button
               variant="ghost"
               size="sm"
               disabled={disabled}
               aria-label={`Remove photo of ${card.name}`}
               onClick={onDropPhoto}
-            >
-              Remove
-            </Button>
+            >{translate("นำออก", "Remove")}</Button>
           </>
         ) : (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Add photo
-            </Button>
-            <p className="text-xs text-muted-foreground">Optional. Without one, the official card image is shown.</p>
+              <Upload data-icon="inline-start" />{translate("เพิ่มรูป", "Add photo")}</Button>
+            <p className="text-xs text-muted-foreground">{translate("ไม่จำเป็นต้องเพิ่มรูป หากไม่มีรูป ระบบจะแสดงรูปการ์ดทางการ", "Optional. Without one, the official card image is shown.")}</p>
           </>
         )}
       </div>

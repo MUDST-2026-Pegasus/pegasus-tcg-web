@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Star } from "lucide-react";
@@ -35,6 +36,7 @@ const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"]
  * อ้างจาก Figma "V2 · Admin / จัดการรีวิว" node 1931:2926
  */
 export function AdminReviewsContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const username = searchParams.get("seller")?.trim() ?? "";
   const [draft, setDraft] = useState(username);
@@ -73,15 +75,15 @@ export function AdminReviewsContent() {
           toast.add({
             type: "error",
             title: "เปลี่ยนการแสดงรีวิวไม่สำเร็จ",
-            description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            description: getErrorMessage(error, translate("กรุณาลองอีกครั้ง", "Please try again")),
           }),
       },
     );
 
   const stats: FinanceStat[] = [
     { label: "ยังไม่ได้ตอบกลับ", value: String(counts?.unreplied ?? 0), dotClass: "bg-[#f59e0a]", emphasized: true },
-    { label: "แสดงอยู่", value: String(counts?.visible ?? 0), dotClass: "bg-[#12805c]" },
-    { label: "ซ่อนอยู่", value: String(counts?.hidden ?? 0), dotClass: "bg-[#d0342c]" },
+    { label: translate("แสดงอยู่", "Visible"), value: String(counts?.visible ?? 0), dotClass: "bg-[#12805c]" },
+    { label: translate("ซ่อนอยู่", "Hidden"), value: String(counts?.hidden ?? 0), dotClass: "bg-[#d0342c]" },
     { label: "รีวิวทั้งหมด", value: String(counts?.total ?? 0), dotClass: "bg-[#9aa5ad]" },
   ];
 
@@ -102,12 +104,10 @@ export function AdminReviewsContent() {
             render={<Link to={`/u/${encodeURIComponent(username)}`} target="_blank" rel="noreferrer" />}
             nativeButton={false}
           >
-            ดูหน้าโปรไฟล์สาธารณะ
-          </Button>
+            {translate("ดูหน้าโปรไฟล์สาธารณะ", "View public profile")}</Button>
         ) : (
           <Button variant="outline" size="sm" className="rounded-md px-2.5" disabled>
-            ดูหน้าโปรไฟล์สาธารณะ
-          </Button>
+            {translate("ดูหน้าโปรไฟล์สาธารณะ", "View public profile")}</Button>
         )}
       </div>
 
@@ -122,8 +122,8 @@ export function AdminReviewsContent() {
           <div className="relative w-full sm:w-[260px]">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              aria-label="ชื่อผู้ใช้ผู้ขาย"
-              placeholder="ชื่อผู้ใช้ผู้ขาย"
+              aria-label={translate("ชื่อผู้ใช้ผู้ขาย", "Seller username")}
+              placeholder={translate("ชื่อผู้ใช้ผู้ขาย", "Seller username")}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               className="h-8 rounded-lg bg-background pl-8"
@@ -214,6 +214,7 @@ export function AdminReviewsContent() {
 }
 
 function ReviewsSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" aria-label="กำลังโหลดรีวิว" className="flex flex-col items-start gap-6 lg:flex-row">
       <Skeleton className="h-[340px] w-full rounded-xl lg:w-[340px]" />

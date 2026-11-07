@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   CircleAlert,
   CloudUpload,
@@ -43,6 +44,7 @@ export function ListingPhotosCard({
   upload,
   existing = [],
 }: ListingPhotosCardProps) {
+  useLanguage();
   const imageKeys = useWatch({ control: form.control, name: "imageKeys" });
   const { errors, isSubmitted } = useFormState({ control: form.control });
   const error = errors.imageKeys;
@@ -109,8 +111,7 @@ export function ListingPhotosCard({
                   )}
                   {isPrimary ? (
                     <Badge className="absolute top-1.5 left-1.5 rounded-full">
-                      รูปหลัก
-                    </Badge>
+                      {translate("รูปหลัก", "Primary image")}</Badge>
                   ) : null}
                 </div>
                 <div className="flex items-center justify-between gap-1 p-1">
@@ -123,7 +124,7 @@ export function ListingPhotosCard({
                     onClick={() => makePrimary(key)}
                   >
                     <Star data-icon="inline-start" />
-                    {isPrimary ? "รูปหลัก" : "ตั้งเป็นหลัก"}
+                    {isPrimary ? translate("รูปหลัก", "Primary image") : "ตั้งเป็นหลัก"}
                   </Button>
                   <Button
                     type="button"
@@ -185,8 +186,7 @@ export function ListingPhotosCard({
                     onClick={() => upload.retry(item.id)}
                   >
                     <RotateCw data-icon="inline-start" />
-                    ลองใหม่
-                  </Button>
+                    {translate("ลองใหม่", "Retry")}</Button>
                 ) : null}
                 <Button
                   type="button"

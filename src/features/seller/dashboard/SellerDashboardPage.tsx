@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { QueryBoundary } from "@/components/common";
 import { useAuth } from "@/features/auth/auth.queries";
 import { toSellerIdentity } from "@/features/seller/shared/seller.format";
@@ -8,6 +9,7 @@ import { toDashboardData } from "./dashboard.format";
 import { useSellerDashboard } from "./dashboard.queries";
 
 export function SellerDashboardPage() {
+  useLanguage();
   const { user } = useAuth();
   const seller = toSellerIdentity(user);
   const dashboard = useSellerDashboard();

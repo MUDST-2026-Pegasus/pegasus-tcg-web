@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type {
   CardCondition,
   CategoryDto,
@@ -17,12 +18,12 @@ import type {
 export const SEARCH_PAGE_SIZE = 20;
 
 export const SEARCH_SORTS = [
-  { value: "relevance", label: "Most relevant" },
-  { value: "featured", label: "Featured" },
-  { value: "newest", label: "Newest" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "name", label: "Name: A to Z" },
+  { value: "relevance", get label() { return translate("ใกล้เคียงที่สุด", "Most relevant"); } },
+  { value: "featured", get label() { return translate("แนะนำ", "Featured"); } },
+  { value: "newest", get label() { return translate("ใหม่ล่าสุด", "Newest"); } },
+  { value: "price_asc", get label() { return translate("ราคา: ต่ำไปสูง", "Price: Low to High"); } },
+  { value: "price_desc", get label() { return translate("ราคา: สูงไปต่ำ", "Price: High to Low"); } },
+  { value: "name", get label() { return translate("ชื่อ: A ถึง Z", "Name: A to Z"); } },
 ] as const;
 
 export type SearchSort = (typeof SEARCH_SORTS)[number]["value"];

@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -77,15 +78,15 @@ export function filterLabel(filter: ReviewFilter, counts: ReviewCounts | null): 
   const withCount = (label: string, value: number) => (counts ? `${label} (${value})` : label);
   switch (filter) {
     case "VISIBLE":
-      return "แสดงอยู่";
+      return translate("แสดงอยู่", "Visible");
     case "HIDDEN":
-      return withCount("ซ่อนอยู่", counts?.hidden ?? 0);
+      return withCount(translate("ซ่อนอยู่", "Hidden"), counts?.hidden ?? 0);
     case "UNREPLIED":
-      return withCount("ยังไม่ตอบกลับ", counts?.unreplied ?? 0);
+      return withCount(translate("ยังไม่ตอบกลับ", "Not yet replied"), counts?.unreplied ?? 0);
     case "LOW":
       return "1–2 ดาว";
     default:
-      return withCount("ทั้งหมด", counts?.total ?? 0);
+      return withCount(translate("ทั้งหมด", "All"), counts?.total ?? 0);
   }
 }
 

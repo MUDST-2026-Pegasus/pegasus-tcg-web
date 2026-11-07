@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -37,6 +38,7 @@ export const authKeys = {
 };
 
 export function useHasSession(): boolean {
+  useLanguage();
   return useSyncExternalStore(
     subscribeSession,
     () => getSession() !== null,
@@ -45,6 +47,7 @@ export function useHasSession(): boolean {
 }
 
 export function useCurrentUser() {
+  useLanguage();
   const hasSession = useHasSession();
 
   const query = useQuery({
@@ -77,6 +80,7 @@ export type AuthState = {
 };
 
 export function useAuth(): AuthState {
+  useLanguage();
   const bootstrapping = useSyncExternalStore(subscribeSession, isSessionBootstrapping, () => true);
   const hasSession = useHasSession();
   const { data: user, isPending } = useCurrentUser();
@@ -99,6 +103,7 @@ export function useAuth(): AuthState {
  * ถ้าล้างตอนนั้น query สาธารณะที่กำลังโหลด (เช่น games) จะหายกลางทางแล้วค้าง loading
  */
 export function useAuthSessionSync(): void {
+  useLanguage();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -122,8 +127,8 @@ async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClien
     } catch {
       // Keep the session key so a transient failure does not orphan the guest cart.
       toast.add({
-        title: "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ",
-        description: "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
+        title: translate("เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ", "You are signed in, but your guest cart could not be merged"),
+        description: translate("รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่", "Your guest items are saved. Please sign out and sign in again"),
         type: "error",
       });
     } finally {
@@ -135,6 +140,7 @@ async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClien
 function useSessionMutation<TPayload>(
   mutationFn: (payload: TPayload) => Promise<AuthSession>,
 ) {
+  useLanguage();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -148,18 +154,22 @@ function useSessionMutation<TPayload>(
 }
 
 export function useLogin() {
+  useLanguage();
   return useSessionMutation<LoginPayload>(authApi.login);
 }
 
 export function useRegister() {
+  useLanguage();
   return useSessionMutation<RegisterPayload>(authApi.register);
 }
 
 export function useChangePassword() {
+  useLanguage();
   return useSessionMutation<ChangePasswordPayload>(authApi.changePassword);
 }
 
 export function useLogout() {
+  useLanguage();
   return useMutation({
     mutationFn: async () => {
       await authApi.logout().catch(() => undefined);
@@ -169,6 +179,7 @@ export function useLogout() {
 }
 
 export function useLogoutAll() {
+  useLanguage();
   return useMutation({
     mutationFn: authApi.logoutAll,
     onSettled: () => clearSession(),
@@ -176,12 +187,14 @@ export function useLogoutAll() {
 }
 
 export function useForgotPassword() {
+  useLanguage();
   return useMutation({
     mutationFn: (payload: ForgotPasswordPayload) => authApi.forgotPassword(payload),
   });
 }
 
 export function useResetPassword() {
+  useLanguage();
   return useMutation({
     mutationFn: (payload: ResetPasswordPayload) => authApi.resetPassword(payload),
   });

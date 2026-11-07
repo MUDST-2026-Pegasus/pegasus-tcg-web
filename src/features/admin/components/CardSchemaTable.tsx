@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   ArrowDown,
   ArrowUp,
@@ -76,6 +77,7 @@ export function CardSchemaTable({
   onToggle,
   onMove,
 }: CardSchemaTableProps) {
+  useLanguage();
   return (
     <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3.5">
@@ -108,16 +110,15 @@ export function CardSchemaTable({
           <TableHeader>
             <TableRow className={HEAD_ROW_CLASS}>
               <TableHead className={cn(HEAD_CLASS, "w-[260px] pl-5")}>
-                ชื่อฟิลด์
-              </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>ประเภท</TableHead>
+                {translate("ชื่อฟิลด์", "Field name")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>{translate("ประเภท", "Type")}</TableHead>
               <TableHead className={cn(HEAD_CLASS, "w-[280px]")}>
                 ค่าที่รับ
               </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>จำเป็น</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>ใช้กรอง</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>{translate("จำเป็น", "Required")}</TableHead>
+              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>{translate("ใช้กรอง", "Filterable")}</TableHead>
               <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-                <span className="sr-only">จัดการ</span>
+                <span className="sr-only">{translate("จัดการ", "Manage")}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -189,8 +190,7 @@ export function CardSchemaTable({
                       <DropdownMenuContent align="end" className="w-44">
                         <DropdownMenuItem onClick={() => onEdit(attribute)}>
                           <Pencil />
-                          แก้ไข
-                        </DropdownMenuItem>
+                          {translate("แก้ไข", "Edit")}</DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={isReordering || index === 0}
                           onClick={() => onMove(attribute, -1)}
@@ -213,8 +213,7 @@ export function CardSchemaTable({
                           onClick={() => onDelete(attribute)}
                         >
                           <Trash2 />
-                          ลบฟิลด์
-                        </DropdownMenuItem>
+                          {translate("ลบฟิลด์", "Delete field")}</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

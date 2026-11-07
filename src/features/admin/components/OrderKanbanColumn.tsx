@@ -1,3 +1,4 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export function OrderKanbanColumn({
   onSelect,
   onShowMore,
 }: OrderKanbanColumnProps) {
+  useLanguage();
   const meta = ORDER_COLUMN_META[column.key];
   const hasMore = column.count > column.items.length;
 
@@ -45,8 +47,7 @@ export function OrderKanbanColumn({
 
       {column.items.length === 0 ? (
         <p className="rounded-[10px] border border-dashed border-border px-3 py-6 text-center text-[11px] text-muted-foreground">
-          ยังไม่มีคำสั่งซื้อในสถานะนี้
-        </p>
+          {translate("ยังไม่มีคำสั่งซื้อในสถานะนี้", "No orders with this status")}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {column.items.map((order) => (

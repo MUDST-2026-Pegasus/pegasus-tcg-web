@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { formatBaht, formatCount } from "./catalog.format";
 import type {
   AdminOverview,
@@ -58,7 +59,7 @@ export type Delta = { label: string; trend: Trend };
  */
 export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
-    return value === 0 ? null : { label: "ใหม่", trend: "new" };
+    return value === 0 ? null : { label: translate("ใหม่", "New"), trend: "new" };
   }
   return percentDelta(((value - previous) / previous) * 100);
 }
@@ -140,7 +141,7 @@ export function statCards(overview: AdminOverview): StatCardModel[] {
     },
     {
       id: "commission",
-      label: "ค่าคอมมิชชั่นที่เก็บได้",
+      label: translate("ค่าคอมมิชชั่นที่เก็บได้", "Commission collected"),
       value: formatBaht(commission.value),
       delta: formatDelta(commission.value, commission.previous),
       // ต้นทุนโค้ด Pegasus ไม่หักจากค่าคอม แต่แสดงคู่กันให้เห็นว่าเดือนนี้จ่ายชดเชยร้านไปเท่าไร
@@ -195,7 +196,7 @@ export type GameSlice = { id: string; name: string; value: number };
 export function gameSlices(shares: GameShare[]): GameSlice[] {
   return shares.map((share) => ({
     id: share.others ? "others" : `game-${share.gameId}`,
-    name: share.others ? "อื่น ๆ" : (share.gameName ?? "ไม่ระบุเกม"),
+    name: share.others ? translate("อื่น ๆ", "Other") : (share.gameName ?? translate("ไม่ระบุเกม", "No game specified")),
     value: share.percent,
   }));
 }
@@ -209,5 +210,5 @@ export function gameShareHeadline(shares: GameShare[]): string | null {
   const percent = Number.isInteger(leader.percent)
     ? leader.percent.toString()
     : leader.percent.toFixed(1);
-  return `${leader.gameName ?? "ไม่ระบุเกม"} ครองส่วนแบ่ง ${percent}%`;
+  return `${leader.gameName ?? translate("ไม่ระบุเกม", "No game specified")} ครองส่วนแบ่ง ${percent}%`;
 }

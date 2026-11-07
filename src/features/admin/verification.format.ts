@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -38,26 +39,26 @@ export const VERIFICATION_STATUS_META: Record<
   VerificationStatusMeta
 > = {
   SUBMITTED: {
-    label: "รอตรวจสอบ",
-    shortLabel: "รอตรวจสอบ",
+    get label() { return translate("รอตรวจสอบ", "Pending review"); },
+    get shortLabel() { return translate("รอตรวจสอบ", "Pending review"); },
     dotClass: "bg-[#b45309]",
     badgeClass: "bg-[#fdf0dd] text-[#b45309]",
   },
   UNDER_REVIEW: {
-    label: "กำลังตรวจ",
-    shortLabel: "กำลังตรวจ",
+    get label() { return translate("กำลังตรวจ", "Under review"); },
+    get shortLabel() { return translate("กำลังตรวจ", "Under review"); },
     dotClass: "bg-[#0058bc]",
     badgeClass: "bg-[#e8f1fc] text-[#0058bc]",
   },
   APPROVED: {
-    label: "อนุมัติแล้ว",
-    shortLabel: "อนุมัติแล้ว",
+    get label() { return translate("อนุมัติแล้ว", "Approved"); },
+    get shortLabel() { return translate("อนุมัติแล้ว", "Approved"); },
     dotClass: "bg-[#12805c]",
     badgeClass: "bg-[#e3f4ec] text-[#12805c]",
   },
   REJECTED: {
-    label: "ปฏิเสธ",
-    shortLabel: "ปฏิเสธ",
+    get label() { return translate("ปฏิเสธ", "Reject"); },
+    get shortLabel() { return translate("ปฏิเสธ", "Reject"); },
     dotClass: "bg-[#d0342c]",
     badgeClass: "bg-[#fbe9e8] text-[#d0342c]",
   },

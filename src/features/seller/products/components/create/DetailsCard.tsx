@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useId } from "react";
 
 import { useFormState, type UseFormReturn } from "react-hook-form";
@@ -27,6 +28,7 @@ type DetailsCardProps = {
  * ป้ายล็อตเป็นของผู้ขายเอง ผู้ซื้อไม่เห็น (`PublicListingResponse` ไม่มีฟิลด์นี้)
  */
 export function DetailsCard({ form }: DetailsCardProps) {
+  useLanguage();
   const ids = {
     company: useId(),
     grade: useId(),

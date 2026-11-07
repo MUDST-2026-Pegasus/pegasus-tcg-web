@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,6 +21,7 @@ type ReadinessCardProps = {
 
 /** "พร้อมลงขายหรือยัง" — คำนวณจากค่าในฟอร์ม ติ๊กเองไม่ได้ */
 export function ReadinessCard({ items, title = "พร้อมลงขายหรือยัง" }: ReadinessCardProps) {
+  useLanguage();
   const required = items.filter((item) => !item.optional);
   const doneCount = required.filter((item) => item.done).length;
   const isAllDone = doneCount === required.length;

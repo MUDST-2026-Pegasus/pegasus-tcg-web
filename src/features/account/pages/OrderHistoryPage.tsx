@@ -1,3 +1,4 @@
+import { getLanguage, translate, useLanguage } from "@/lib/language";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -71,6 +72,7 @@ import {
 export { OrderDetailsModal };
 
 export function OrderHistoryPage() {
+  useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const linkedOrderId = Number(searchParams.get("orderId"));
@@ -134,10 +136,10 @@ export function OrderHistoryPage() {
         .map((promotion) => promotion.code)
         .filter(Boolean);
       toast.add({
-        title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
+        title: translate(`คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`, `Order ${order.orderNumber} payment deadline passed`),
         description: order.promotionsRestoredOnCancel && codeNames.length
-          ? `คืนสิทธิ์ ${codeNames.join(", ")} แล้ว`
-          : "คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+          ? translate(`คืนสิทธิ์ ${codeNames.join(", ")} แล้ว`, `${codeNames.join(", ")} coupon eligibility restored`)
+          : translate("คำสั่งซื้อถูกยกเลิกอัตโนมัติ", "Order cancelled automatically"),
         type: "warning",
       });
     }
@@ -217,8 +219,8 @@ export function OrderHistoryPage() {
     try {
       await ordersApi.cancelOrder(orderId, reason ?? "Buyer requested cancellation");
       toast.add({
-        title: "Order Cancelled",
-        description: "Your order has been cancelled successfully.",
+        title: translate("ยกเลิกคำสั่งซื้อแล้ว", "Order Cancelled"),
+        description: translate("ยกเลิกคำสั่งซื้อของคุณเรียบร้อยแล้ว", "Your order has been cancelled successfully."),
         type: "success",
       });
       setIsCancelModalOpen(false);
@@ -228,7 +230,7 @@ export function OrderHistoryPage() {
       queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     } catch (err) {
       toast.add({
-        title: "Cancellation Failed",
+        title: translate("ยกเลิกไม่สำเร็จ", "Cancellation Failed"),
         description:
           err instanceof ApiError
             ? err.message
@@ -246,11 +248,11 @@ export function OrderHistoryPage() {
       const updated = await ordersApi.confirmReceived(orderId);
       setSelectedOrderForDetails((current) => (current && current.id === orderId ? updated : current));
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.add({ title: "Receipt confirmed", description: "Your order has been updated.", type: "success" });
+      toast.add({ title: translate("ยืนยันรับสินค้าแล้ว", "Receipt confirmed"), description: translate("อัปเดตคำสั่งซื้อของคุณแล้ว", "Your order has been updated."), type: "success" });
     } catch (err) {
       toast.add({
-        title: "Could not confirm receipt",
-        description: err instanceof ApiError ? err.message : "Please try again.",
+        title: translate("ยืนยันรับสินค้าไม่สำเร็จ", "Could not confirm receipt"),
+        description: err instanceof ApiError ? err.message : translate("กรุณาลองอีกครั้ง", "Please try again."),
         type: "error",
       });
     } finally {
@@ -266,21 +268,20 @@ export function OrderHistoryPage() {
         <div className="flex min-w-0 flex-col gap-4">
           {refunds.isError && (
             <p role="alert" className="rounded-xl border bg-card p-3 text-sm text-destructive">
-              โหลดข้อมูลการคืนเงินไม่สำเร็จ{" "}
-              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>ลองใหม่</Button>
+              {translate("โหลดข้อมูลการคืนเงินไม่สำเร็จ", "Could not load refund details")}{" "}
+              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>{translate("ลองใหม่", "Try again")}</Button>
             </p>
           )}
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Order History</h1>
+            <h1 className="text-2xl font-bold text-foreground">{translate("ประวัติคำสั่งซื้อ", "Order History")}</h1>
             <p className="text-sm text-muted-foreground">
-              {orders.length} order{orders.length !== 1 ? "s" : ""} placed
-            </p>
+              {orders.length}  {translate("คำสั่งซื้อ", "order")}{orders.length !== 1 ? "s" : ""} {translate("รายการ", "placed")}</p>
           </div>
 
           {/* Status Filter Tab Bar */}
           <div
             role="tablist"
-            aria-label="Order status filter"
+            aria-label={translate("กรองสถานะคำสั่งซื้อ", "Order status filter")}
             className="flex flex-wrap items-center gap-2 pb-1"
           >
             {ORDER_FILTER_TABS.map((tab) => {
@@ -317,17 +318,15 @@ export function OrderHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div role="status" aria-busy="true" aria-label="Loading orders">
+            <div role="status" aria-busy="true" aria-label={translate("กำลังโหลดคำสั่งซื้อ", "Loading orders")}>
               <ProductRowsSkeleton />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 p-6">
               <p className="text-sm text-destructive font-medium">
-                Failed to load orders.
-              </p>
+                {translate("โหลดคำสั่งซื้อไม่สำเร็จ", "Failed to load orders.")}</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try Again
-              </Button>
+                {translate("ลองอีกครั้ง", "Try Again")}</Button>
             </div>
           ) : orders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-card rounded-xl border gap-4 text-center p-6">
@@ -335,12 +334,11 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground">No orders yet</p>
+                <p className="text-lg font-semibold text-foreground">{translate("ยังไม่มีคำสั่งซื้อ", "No orders yet")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Once you purchase cards, your orders will appear here.
-                </p>
+                  {translate("คำสั่งซื้อจะแสดงที่นี่หลังจากคุณซื้อสินค้า", "Once you purchase cards, your orders will appear here.")}</p>
               </div>
-              <Button onClick={() => navigate("/products")}>Start Shopping</Button>
+              <Button onClick={() => navigate("/products")}>{translate("เริ่มเลือกซื้อ", "Start Shopping")}</Button>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 text-center p-6">
@@ -348,14 +346,12 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-base font-semibold text-foreground">No orders found</p>
+                <p className="text-base font-semibold text-foreground">{translate("ไม่พบคำสั่งซื้อ", "No orders found")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  There are no orders matching the selected status.
-                </p>
+                  {translate("ไม่มีคำสั่งซื้อที่ตรงกับสถานะที่เลือก", "There are no orders matching the selected status.")}</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setActiveFilter("ALL")}>
-                View all orders
-              </Button>
+                {translate("ดูคำสั่งซื้อทั้งหมด", "View all orders")}</Button>
             </div>
           ) : (
             filteredOrders.map((order) => (
@@ -416,13 +412,12 @@ export function OrderHistoryPage() {
       <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
+            <AlertDialogTitle>{translate("ยืนยันรับสินค้า?", "Confirm receipt?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.
-            </AlertDialogDescription>
+              {translate("ยืนยันว่าคุณได้รับสินค้าที่จัดส่งแล้ว ระบบจะปิดคำสั่งซื้อของร้านเหล่านั้น เพิ่มการ์ดในคอลเลกชัน และปล่อยเงินให้ผู้ขาย", "Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="border-t pt-4">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{translate("ยกเลิก", "Cancel")}</AlertDialogCancel>
             <Button
               type="button"
               onClick={() => {
@@ -431,8 +426,7 @@ export function OrderHistoryPage() {
                 if (target) void handleConfirmReceived(target.id);
               }}
             >
-              Confirm receipt
-            </Button>
+              {translate("ยืนยันรับสินค้า", "Confirm receipt")}</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -459,6 +453,7 @@ function OrderCardItem({
   isCancelling: boolean;
   isConfirming: boolean;
 }) {
+  useLanguage();
   const [expanded, setExpanded] = useState(false);
 
   const { stage, label, badgeClassName } = orderStage(order);
@@ -486,7 +481,7 @@ function OrderCardItem({
   const otherItems = allItems.slice(1);
 
   const placedDate = order.placedAt
-    ? new Date(order.placedAt).toLocaleDateString("en-US", {
+    ? new Date(order.placedAt).toLocaleDateString(getLanguage() === "th" ? "th-TH-u-ca-gregory" : "en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -506,13 +501,13 @@ function OrderCardItem({
       <CardHeader className="rounded-none border-b bg-[#faf9fe] px-4 py-3">
         <div className="flex gap-6 items-center">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">ORDER ID</p>
+            <p className="text-xs text-muted-foreground font-medium">{translate("เลขคำสั่งซื้อ", "ORDER ID")}</p>
             <p className="font-semibold text-sm">{order.orderNumber}</p>
             {/* มาจากการประมูล [TCG-636] */}
             <AuctionSourcePill order={order} className="mt-1" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground font-medium">DATE</p>
+            <p className="text-xs text-muted-foreground font-medium">{translate("วันที่", "DATE")}</p>
             <p className="font-medium text-sm">{placedDate}</p>
           </div>
         </div>
@@ -539,24 +534,23 @@ function OrderCardItem({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-              Card Art
-            </div>
+              {translate("รูปการ์ด", "Card Art")}</div>
           )}
         </div>
 
         <div className="min-w-0">
           <CardTitle className="text-lg font-semibold truncate">
-            {firstItem?.productName || "Pegasus TCG Card"}
+            {firstItem?.productName || translate("การ์ด Pegasus TCG", "Pegasus TCG Card")}
           </CardTitle>
           <p className="mt-1 text-sm text-muted-foreground truncate">
             {[firstItem?.variantLabel, firstItem?.condition]
               .filter(Boolean)
               .join(" • ")}
-            {firstItem && ` • Qty: ${firstItem.quantity}`}
+            {firstItem && translate(` • จำนวน: ${firstItem.quantity}`, ` • Qty: ${firstItem.quantity}`)}
           </p>
           {order.sellerOrders?.[0]?.sellerName && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              Seller:{" "}
+              {translate("ผู้ขาย:", "Seller:")}{" "}
               <span className="text-foreground font-medium">
                 {order.sellerOrders[0].sellerName}
               </span>
@@ -569,7 +563,7 @@ function OrderCardItem({
               onClick={() => setExpanded(!expanded)}
               className="mt-2 flex items-center gap-1 text-sm text-primary font-medium hover:underline cursor-pointer"
             >
-              <span>+ {otherItems.length} other item{otherItems.length > 1 ? "s" : ""}</span>
+              <span>+ {otherItems.length}  {translate("รายการอื่น", "other item")}{otherItems.length > 1 ? "s" : ""}</span>
               {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
             </button>
           )}
@@ -585,7 +579,7 @@ function OrderCardItem({
         </div>
 
         <div className="sm:text-right">
-          <p className="text-xs font-medium text-muted-foreground">Order Total</p>
+          <p className="text-xs font-medium text-muted-foreground">{translate("ยอดคำสั่งซื้อ", "Order Total")}</p>
           <p className="text-2xl font-bold font-heading text-foreground">
             {formatPrice(order.grandTotal)}
           </p>
@@ -605,13 +599,13 @@ function OrderCardItem({
                     className="w-full h-full object-contain"
                   />
                 ) : (
-                  <span className="text-[10px] text-muted-foreground">Card</span>
+                  <span className="text-[10px] text-muted-foreground">{translate("การ์ด", "Card")}</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{item.productName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")} • Qty: {item.quantity}
+                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")}  {translate("• จำนวน:", "• Qty:")} {item.quantity}
                 </p>
               </div>
               <div className="text-sm font-semibold">
@@ -628,7 +622,7 @@ function OrderCardItem({
         <div>
           {stage === "COMPLETED" && (
             <Button type="button" variant="link" size="sm" className="px-0">
-              Download Invoice <Download data-icon="inline-end" />
+              {translate("ดาวน์โหลดใบแจ้งหนี้", "Download Invoice")}<Download data-icon="inline-end" />
             </Button>
           )}
           {canCancel && (
@@ -639,15 +633,14 @@ function OrderCardItem({
               onClick={onCancelOrder}
               disabled={isCancelling}
             >
-              {isCancelling ? "Cancelling..." : "Cancel Order"}
+              {isCancelling ? translate("กำลังยกเลิก…", "Cancelling...") : translate("ยกเลิกคำสั่งซื้อ", "Cancel Order")}
             </Button>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
-            View Details
-          </Button>
+            {translate("ดูรายละเอียด", "View Details")}</Button>
           {stage === "COMPLETED" && (
             <Button
               type="button"
@@ -656,23 +649,20 @@ function OrderCardItem({
               className="bg-[#006699] hover:bg-[#005580] text-white px-4 py-2 rounded-full font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <RotateCw className="size-3.5" />
-              Reorder
-            </Button>
+              {translate("สั่งซื้ออีกครั้ง", "Reorder")}</Button>
           )}
           {stage === "AWAITING_PAYMENT" && (
             <Button type="button" size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
-              Pay Now
-            </Button>
+              {translate("ชำระเงิน", "Pay Now")}</Button>
           )}
           {stage === "IN_TRANSIT" && (
             <Button type="button" size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
-              {isConfirming ? "Confirming..." : "Confirm Received"}
+              {isConfirming ? translate("กำลังยืนยัน…", "Confirming...") : translate("ยืนยันรับสินค้า", "Confirm Received")}
             </Button>
           )}
           {canReview && (
             <Button type="button" size="sm" onClick={onViewDetails} className="rounded-full">
-              Write a Review
-            </Button>
+              {translate("เขียนรีวิว", "Write a Review")}</Button>
           )}
         </div>
       </CardFooter>
@@ -696,25 +686,23 @@ function StageHint({
   tracking: { carrier: string; trackingNumber: string } | null;
   cancelReason: string | null;
 }) {
+  useLanguage();
   const base = "mt-2 flex items-center gap-1 text-xs font-semibold";
   switch (stage) {
     case "AWAITING_PAYMENT":
       return (
         <p className={cn(base, "text-[#ff9500]")}>
-          <TriangleAlert className="size-3.5" /> Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically
-        </p>
+          <TriangleAlert className="size-3.5" /> {translate("โอนเงินผ่านธนาคารแล้วอัปโหลดสลิป คำสั่งซื้อที่ยังไม่ชำระจะถูกยกเลิกอัตโนมัติ", "Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically")}</p>
       );
     case "PAYMENT_REVIEW":
       return (
         <p className={cn(base, "text-amber-700")}>
-          <Clock className="size-3.5" /> Slip received — we are verifying your payment
-        </p>
+          <Clock className="size-3.5" /> {translate("ได้รับสลิปแล้ว กำลังตรวจสอบการชำระเงิน", "Slip received — we are verifying your payment")}</p>
       );
     case "PREPARING":
       return (
         <p className={cn(base, "text-muted-foreground")}>
-          <Package className="size-3.5" /> Seller is preparing your order
-          {canCancel && cancellableUntil && ` • Cancel before ${formatOrderDateTime(cancellableUntil)}`}
+          <Package className="size-3.5" /> {translate("ผู้ขายกำลังเตรียมคำสั่งซื้อ", "Seller is preparing your order")}{canCancel && cancellableUntil && translate(` • ยกเลิกได้ก่อน ${formatOrderDateTime(cancellableUntil)}`, ` • Cancel before ${formatOrderDateTime(cancellableUntil)}`)}
         </p>
       );
     case "IN_TRANSIT":
@@ -726,37 +714,33 @@ function StageHint({
               className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1"
             />
             <span className="text-[10px] font-medium text-muted-foreground">
-              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : "In Transit"}
+              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : translate("กำลังจัดส่ง", "In Transit")}
             </span>
           </div>
           {autoCompleteAt && (
             <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Truck className="size-3" /> Auto-confirms on {formatOrderDateTime(autoCompleteAt)} unless you request a return
-            </p>
+              <Truck className="size-3" />  {translate("ยืนยันรับอัตโนมัติวันที่", "Auto-confirms on")} {formatOrderDateTime(autoCompleteAt)} {translate("หากคุณไม่ขอคืนสินค้า", "unless you request a return")}</p>
           )}
         </div>
       );
     case "RETURN_IN_PROGRESS":
       return (
         <p className={cn(base, "text-orange-700")}>
-          <RotateCcw className="size-3.5" /> Return in progress — payment to the seller is on hold until it is settled
-        </p>
+          <RotateCcw className="size-3.5" /> {translate("กำลังดำเนินการคืนสินค้า โดยพักการจ่ายเงินให้ผู้ขายจนกว่าเรื่องจะยุติ", "Return in progress — payment to the seller is on hold until it is settled")}</p>
       );
     case "COMPLETED":
       return (
         <p className={cn(base, "text-emerald-700")}>
-          <CircleCheck className="size-3.5" /> Delivered — cards added to your collection
-        </p>
+          <CircleCheck className="size-3.5" /> {translate("จัดส่งถึงแล้ว เพิ่มการ์ดในคอลเลกชันเรียบร้อย", "Delivered — cards added to your collection")}</p>
       );
     case "CANCELLED":
       return cancelReason ? (
-        <p className={cn(base, "text-muted-foreground")}>Cancelled: {cancelReason}</p>
+        <p className={cn(base, "text-muted-foreground")}>{translate("ยกเลิก:", "Cancelled:")} {cancelReason}</p>
       ) : null;
     case "REFUNDED":
       return (
         <p className={cn(base, "text-violet-700")}>
-          <RotateCcw className="size-3.5" /> Refund issued — track the transfer in the refund panel below
-        </p>
+          <RotateCcw className="size-3.5" /> {translate("คืนเงินแล้ว ติดตามการโอนในส่วนข้อมูลคืนเงินด้านล่าง", "Refund issued — track the transfer in the refund panel below")}</p>
       );
   }
 }

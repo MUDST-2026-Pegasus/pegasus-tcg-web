@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState, type ReactNode } from "react";
 
 import { Flag, Gavel } from "lucide-react";
@@ -32,6 +33,7 @@ const PAGE_SIZE = 20;
 
 /** `/admin/auctions` — A1 การประมูลทั้งหมด ตาม Figma 2299:8127 [TCG-635 · FE-9] */
 export function AdminAuctionsPage() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = readAdminAuctionTab(searchParams.get("tab"));
   const search = searchParams.get("q") ?? "";
@@ -73,7 +75,7 @@ export function AdminAuctionsPage() {
   const exportCsv = () => {
     if (!data) return;
     downloadCsv(`auctions-${tab.toLowerCase()}.csv`, [
-      ["รหัสประมูล", "การ์ด", "ผู้ขาย", "ราคาปัจจุบัน", "บิด", "ผู้บิด", "สถานะ", "ปิด"],
+      ["รหัสประมูล", translate("การ์ด", "Cards"), translate("ผู้ขาย", "Seller"), translate("ราคาปัจจุบัน", "Current price"), translate("บิด", "Bids"), translate("ผู้บิด", "Bidder"), translate("สถานะ", "Status"), translate("ปิด", "Close")],
       ...data.page.items.map((row) => [row.auctionNumber, row.cardName, row.shopName, row.currentPrice, row.bidCount, row.bidderCount, row.status, row.endsAt]),
     ]);
   };
@@ -82,13 +84,12 @@ export function AdminAuctionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">การประมูลทั้งหมด</h1>
+          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">{translate("การประมูลทั้งหมด", "All auctions")}</h1>
           <p className="text-[13px] text-muted-foreground">ดูประมูลทั้งแพลตฟอร์ม ระงับประมูลที่ผิดกฎ และจัดการผู้ใช้ที่ติดโทษห้ามบิด</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="rounded-md px-2.5" disabled={!data} onClick={exportCsv}>
-            ส่งออก CSV
-          </Button>
+            {translate("ส่งออก CSV", "Export CSV")}</Button>
           <Button className="rounded-md px-2.5" nativeButton={false} render={<Link to="/admin/auctions/banned-bidders" />}>
             ผู้ใช้ที่ห้ามบิด{bannedCount !== undefined ? ` (${bannedCount.toLocaleString("th-TH")})` : ""}
           </Button>
@@ -99,15 +100,15 @@ export function AdminAuctionsPage() {
 
       {data ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <AdminKpi label="กำลังประมูล" value={data.kpis.live} />
+          <AdminKpi label={translate("กำลังประมูล", "Live auction")} value={data.kpis.live} />
           <AdminKpi label="จบภายใน 1 ชม." value={data.kpis.endingWithinHour} valueClass="text-red-700" />
-          <AdminKpi label="รอผู้ชนะชำระ" value={data.kpis.awaitingPayment} valueClass="text-amber-800" />
+          <AdminKpi label={translate("รอผู้ชนะชำระ", "Awaiting winner's payment")} value={data.kpis.awaitingPayment} valueClass="text-amber-800" />
           <AdminKpi label="ถูกระงับ (30 วัน)" value={data.kpis.suspendedLast30Days} />
         </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <AdminTabs label="สถานะการประมูล" tabs={ADMIN_AUCTION_TABS} active={tab} counts={data?.tabCounts} onChange={(next) => updateParams({ tab: next })} />
+        <AdminTabs label={translate("สถานะการประมูล", "Auction status")} tabs={ADMIN_AUCTION_TABS} active={tab} counts={data?.tabCounts} onChange={(next) => updateParams({ tab: next })} />
         <AdminSearchBox value={search} placeholder="ค้นหาการ์ด ผู้ขาย หรือรหัสประมูล…" onChange={(q) => updateParams({ q })} />
       </div>
 
@@ -147,6 +148,7 @@ export function AdminAuctionsPage() {
 }
 
 function FlaggedBanner({ data }: { data: AdminAuctionPage }) {
+  useLanguage();
   return (
     <div role="status" className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
       <Flag aria-hidden className="mt-0.5 size-5 shrink-0" />
@@ -168,6 +170,7 @@ type AdminAuctionsTableProps = {
 };
 
 function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctionsTableProps) {
+  useLanguage();
   const navigate = useNavigate();
   const head = "text-xs font-normal text-muted-foreground";
   const link = "cursor-pointer text-xs font-semibold hover:underline";
@@ -178,13 +181,13 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
             <TableHead className={`pl-4 ${head}`}>การ์ด / รหัส</TableHead>
-            <TableHead className={head}>ผู้ขาย</TableHead>
-            <TableHead className={head}>ราคาปัจจุบัน</TableHead>
+            <TableHead className={head}>{translate("ผู้ขาย", "Seller")}</TableHead>
+            <TableHead className={head}>{translate("ราคาปัจจุบัน", "Current price")}</TableHead>
             <TableHead className={head}>บิด / ผู้บิด</TableHead>
-            <TableHead className={head}>เวลา</TableHead>
-            <TableHead className={head}>สถานะ</TableHead>
+            <TableHead className={head}>{translate("เวลา", "Time")}</TableHead>
+            <TableHead className={head}>{translate("สถานะ", "Status")}</TableHead>
             <TableHead className="pr-4">
-              <span className="sr-only">การกระทำ</span>
+              <span className="sr-only">{translate("การกระทำ", "Action")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -218,12 +221,12 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
                   <TimeCell row={row} serverTime={data.serverTime} />
                 </TableCell>
                 <TableCell>
-                  <AuctionStatusPill kind={pillForStatus(row.status)} label={row.status === "SOLD" ? "ขายแล้ว" : undefined} />
+                  <AuctionStatusPill kind={pillForStatus(row.status)} label={row.status === "SOLD" ? translate("ขายแล้ว", "Sold") : undefined} />
                 </TableCell>
                 <TableCell className="pr-4 text-right" onClick={(event) => event.stopPropagation()}>
                   <div className="flex items-center justify-end gap-3">
                     <Link to={`/admin/auctions/${row.id}`} className={`${link} text-primary`}>
-                      {suspended ? "ดูเหตุผล" : "ดู"}
+                      {suspended ? "ดูเหตุผล" : translate("ดู", "View")}
                     </Link>
                     {canSuspend(row.status) ? (
                       <button type="button" className={`${link} text-destructive`} onClick={() => onSuspend(row)}>
@@ -243,6 +246,7 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
 }
 
 function TimeCell({ row, serverTime }: { row: AdminAuctionRow; serverTime: string }) {
+  useLanguage();
   const cell = adminTimeCell(row);
   if (cell.kind === "countdown") return <AuctionCountdown target={row.endsAt} serverTime={serverTime} prefix="" />;
   if (cell.kind === "payment" && row.deadline) return <PaymentDue deadline={row.deadline} serverTime={serverTime} />;
@@ -250,6 +254,7 @@ function TimeCell({ row, serverTime }: { row: AdminAuctionRow; serverTime: strin
 }
 
 function PaymentDue({ deadline, serverTime }: { deadline: string; serverTime: string }) {
+  useLanguage();
   const remaining = useCountdown(deadline, serverTime) ?? 0;
-  return <span className="text-xs text-muted-foreground tabular-nums">ชำระใน {formatRemaining(remaining)}</span>;
+  return <span className="text-xs text-muted-foreground tabular-nums">{translate("ชำระใน", "Pay within") + " "}{formatRemaining(remaining)}</span>;
 }

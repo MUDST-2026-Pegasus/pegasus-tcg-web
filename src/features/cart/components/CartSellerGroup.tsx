@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ReactNode } from "react";
 import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -48,6 +49,7 @@ export function CartSellerGroup({
   codeSlot,
   subtotal,
 }: CartSellerGroupProps) {
+  useLanguage();
   const checkedCount = items.filter((item) => selectedIds.has(item.id)).length;
   const allChecked = checkedCount === items.length;
 
@@ -55,7 +57,7 @@ export function CartSellerGroup({
     <Card className="gap-0 rounded-xl p-0 shadow-none">
       <div className="flex items-center gap-3 px-5 pt-5 pb-2">
         <Checkbox
-          aria-label={`เลือกทั้งร้าน ${sellerName}`}
+          aria-label={translate(`เลือกทั้งร้าน ${sellerName}`, `Select all from ${sellerName}`)}
           checked={allChecked}
           indeterminate={checkedCount > 0 && !allChecked}
           onCheckedChange={(checked) => onToggleSeller(checked === true)}
@@ -75,7 +77,7 @@ export function CartSellerGroup({
 
       <ul className="flex flex-col">
         {items.map((item) => {
-          const name = item.productName || `Listing #${item.listingId}`;
+          const name = item.productName || translate(`ประกาศ #${item.listingId}`, `Listing #${item.listingId}`);
           const price = item.currentPrice ?? item.unitPriceAtAdd;
           const condition = item.condition
             ? CONDITION_LABELS[item.condition as CardCondition] ?? item.condition
@@ -83,7 +85,7 @@ export function CartSellerGroup({
           return (
             <li key={item.id} className="flex items-center gap-3 px-5 py-3">
               <Checkbox
-                aria-label={`เลือก ${name}`}
+                aria-label={translate(`เลือก ${name}`, `Select ${name}`)}
                 checked={selectedIds.has(item.id)}
                 onCheckedChange={() => onToggleItem(item.id)}
               />
@@ -103,25 +105,24 @@ export function CartSellerGroup({
                 {item.priceChanged && (
                   <p className="mt-1 w-fit rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-700">
                     {saleEndedInCart(item)
-                      ? `⚠ ราคาลดจบแล้ว ราคากลับเป็น ${checkoutMoney(item.currentPrice ?? 0)} (เดิม ${checkoutMoney(item.unitPriceAtAdd)}) · กด "ยอมรับราคาใหม่" ก่อนไปต่อ`
-                      : <>ราคาเปลี่ยน: {checkoutMoney(item.unitPriceAtAdd)} → {item.currentPrice == null ? "ไม่พร้อมจำหน่าย" : checkoutMoney(item.currentPrice)}</>}
+                      ? translate(`⚠ ราคาลดจบแล้ว ราคากลับเป็น ${checkoutMoney(item.currentPrice ?? 0)} (เดิม ${checkoutMoney(item.unitPriceAtAdd)}) · กด "ยอมรับราคาใหม่" ก่อนไปต่อ`, `⚠ The sale ended. The price is now ${checkoutMoney(item.currentPrice ?? 0)} (was ${checkoutMoney(item.unitPriceAtAdd)}). Accept the new price before continuing`)
+                      : <>{translate("ราคาเปลี่ยน:", "Price changed:")} {checkoutMoney(item.unitPriceAtAdd)} → {item.currentPrice == null ? translate("ไม่พร้อมจำหน่าย", "Unavailable") : checkoutMoney(item.currentPrice)}</>}
                   </p>
                 )}
                 {!item.purchasable && (
                   <p className="mt-1 w-fit rounded-md border border-destructive/20 bg-destructive/10 px-2 py-0.5 text-[11px] text-destructive">
-                    สินค้านี้ไม่พร้อมจำหน่ายแล้ว
-                  </p>
+                    {translate("สินค้านี้ไม่พร้อมจำหน่ายแล้ว", "This item is no longer available")}</p>
                 )}
               </div>
               <div className="flex items-center gap-2 rounded-full border px-2 py-0.5">
-                <button type="button" aria-label={`ลดจำนวน ${name}`}
+                <button type="button" aria-label={translate(`ลดจำนวน ${name}`, `Decrease quantity of ${name}`)}
                   className="text-muted-foreground hover:text-foreground disabled:opacity-40"
                   disabled={item.quantity <= 1 || quantityBusy}
                   onClick={() => onQuantity(item.id, item.quantity - 1)}>
                   <Minus className="size-3" />
                 </button>
-                <span className="w-4 text-center text-xs font-medium" aria-label={`จำนวน ${name}`}>{item.quantity}</span>
-                <button type="button" aria-label={`เพิ่มจำนวน ${name}`}
+                <span className="w-4 text-center text-xs font-medium" aria-label={translate(`จำนวน ${name}`, `Quantity of ${name}`)}>{item.quantity}</span>
+                <button type="button" aria-label={translate(`เพิ่มจำนวน ${name}`, `Increase quantity of ${name}`)}
                   className="text-muted-foreground hover:text-foreground disabled:opacity-40"
                   disabled={(item.quantityAvailable !== null && item.quantity >= item.quantityAvailable) || quantityBusy}
                   onClick={() => onQuantity(item.id, item.quantity + 1)}>
@@ -133,7 +134,7 @@ export function CartSellerGroup({
               ) : (
                 <strong className="w-20 text-right text-sm font-semibold">{checkoutMoney(price)}</strong>
               )}
-              <Button type="button" variant="ghost" size="icon-xs" aria-label={`ลบ ${name}`}
+              <Button type="button" variant="ghost" size="icon-xs" aria-label={translate(`ลบ ${name}`, `Remove ${name}`)}
                 disabled={removeBusy} onClick={() => onRemove(item.id)}
                 className="text-muted-foreground hover:text-destructive">
                 <Trash2 />
@@ -146,7 +147,7 @@ export function CartSellerGroup({
       {codeSlot && <div className="px-5 pt-1 pb-2">{codeSlot}</div>}
 
       <div className="flex items-center justify-between px-5 pt-2 pb-5">
-        <span className="text-xs text-muted-foreground">รวมร้านนี้</span>
+        <span className="text-xs text-muted-foreground">{translate("รวมร้านนี้", "Shop total")}</span>
         <strong className="text-base font-bold">{checkoutMoney(subtotal)}</strong>
       </div>
     </Card>

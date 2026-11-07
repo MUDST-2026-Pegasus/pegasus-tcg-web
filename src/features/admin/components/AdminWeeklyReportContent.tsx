@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -29,6 +30,7 @@ import { WeeklyTrendChart } from "./WeeklyTrendChart";
 
 /** รายงานสต็อกและกำไรรายสัปดาห์ — ตัวกรองอยู่ใน URL (`?week=&game=`) เปิดลิงก์ซ้ำได้สัปดาห์เดิม */
 export function AdminWeeklyReportContent() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const today = bangkokToday();
   const weekStart = resolveWeekParam(searchParams.get("week"), today);
@@ -58,7 +60,7 @@ export function AdminWeeklyReportContent() {
         })),
     [games.data, allGames.data],
   );
-  const gameLabel = gameOptions.find((option) => option.slug === game)?.name ?? (game ?? "ทุกเกม");
+  const gameLabel = gameOptions.find((option) => option.slug === game)?.name ?? (game ?? translate("ทุกเกม", "All games"));
 
   const setFilter = (key: "week" | "game", value: string | null) => {
     setSearchParams(
@@ -105,14 +107,12 @@ export function AdminWeeklyReportContent() {
             disabled={report.isFetching || !report.data?.hasData}
             onClick={() => setExportOpen(true)}
           >
-            ส่งออกรายงาน
-          </Button>
+            {translate("ส่งออกรายงาน", "Export report")}</Button>
           <Button
             className="h-[41px] rounded-lg px-3.5 font-normal"
             onClick={() => setSettingsOpen(true)}
           >
-            ตั้งค่าระบบ
-          </Button>
+            {translate("ตั้งค่าระบบ", "System settings")}</Button>
         </div>
       </div>
 
@@ -170,6 +170,7 @@ function WeeklyReportEmptyCard({
   isCurrentWeek: boolean;
   onBackToCurrent: () => void;
 }) {
+  useLanguage();
   return (
     <Card className="items-center gap-0 rounded-xl border border-border px-6 py-20 text-center shadow-none ring-0">
       {/* Card ตัด padding บนออกเมื่อลูกตัวแรกเป็น img จึงต้องมีกรอบครอบ */}
@@ -197,6 +198,7 @@ function WeeklyReportEmptyCard({
 }
 
 function WeeklyReportSkeleton() {
+  useLanguage();
   return (
     <div aria-busy="true" className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-4">

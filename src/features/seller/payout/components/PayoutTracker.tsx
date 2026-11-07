@@ -1,19 +1,20 @@
+import { useLanguage, translate } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import type { Payout } from "@/features/finance/finance.types";
 import { formatThaiDateTime, money, payoutDetail } from "../payout.format";
 import { PayoutStatusBadge } from "./PayoutStatusBadge";
 
-const labels = ["ส่งคำขอ", "แอดมินอนุมัติ", "กำลังโอน", "โอนสำเร็จ"];
-
 export function PayoutTracker({ payouts, onSelect }: { payouts: Payout[]; onSelect: (payout: Payout) => void }) {
+  useLanguage();
+  const labels = [translate("ส่งคำขอ", "Request submitted"), translate("แอดมินอนุมัติ", "Administrator approval"), translate("กำลังโอน", "Transferring"), translate("โอนสำเร็จ", "Transfer completed")];
   if (!payouts.length) return null;
   const total = payouts.reduce((sum, payout) => sum + Number(payout.amount), 0);
 
   return (
     <Card className="gap-0 rounded-xl border bg-card py-0">
       <div className="border-b px-5 py-4">
-        <h2 className="font-semibold">คำขอที่ยังไม่โอน</h2>
-        <p className="text-xs text-muted-foreground">ยอดรวม {money(total)} ถูกกันไว้ ยังไม่ถูกตัดจากกระเป๋า</p>
+        <h2 className="font-semibold">{translate("คำขอที่ยังไม่โอน", "Pending withdrawals")}</h2>
+        <p className="text-xs text-muted-foreground">{translate("ยอดรวม", "Total") + " "}{money(total)} {" " + translate("ถูกกันไว้ ยังไม่ถูกตัดจากกระเป๋า", "is reserved and has not been deducted from your wallet")}</p>
       </div>
       <div className="space-y-3 p-5">
         {payouts.map((payout) => {
@@ -41,7 +42,7 @@ export function PayoutTracker({ payouts, onSelect }: { payouts: Payout[]; onSele
                   </div>
                 ))}
               </div>
-              <span className="text-right text-xs text-teal-700">รายละเอียด ›</span>
+              <span className="text-right text-xs text-teal-700">{translate("รายละเอียด ›", "Details ›")}</span>
             </button>
           );
         })}

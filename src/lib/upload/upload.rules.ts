@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import type { UploadPurpose } from "./upload.types";
 
 /**
@@ -51,14 +52,14 @@ export function formatFileSize(bytes: number): string {
 export function describeTypes(rule: UploadRule): string {
   const labels = rule.contentTypes.map((type) => TYPE_LABELS[type] ?? type);
   return labels.length > 1
-    ? `${labels.slice(0, -1).join(", ")} หรือ ${labels.at(-1)}`
+    ? translate(`${labels.slice(0, -1).join(", ")} หรือ ${labels.at(-1)}`, `${labels.slice(0, -1).join(", ")} or ${labels.at(-1)}`)
     : labels.join("");
 }
 
 /** "JPG · PNG · WEBP · ไม่เกิน 5 MB" — บรรทัดใบ้ข้างช่องอัปโหลด */
 export function describeRule(rule: UploadRule): string {
   const labels = rule.contentTypes.map((type) => TYPE_LABELS[type] ?? type);
-  return [...labels, `ไม่เกิน ${formatFileSize(rule.maxBytes)}`].join(" · ");
+  return [...labels, translate(`ไม่เกิน ${formatFileSize(rule.maxBytes)}`, `Up to ${formatFileSize(rule.maxBytes)}`)].join(" · ");
 }
 
 /** ค่า `accept` ของ `<input type="file">` */
@@ -75,13 +76,13 @@ export function isAllowedType(rule: UploadRule, contentType: string): boolean {
  */
 export function validateFile(file: File, rule: UploadRule): string | null {
   if (!isAllowedType(rule, file.type)) {
-    return `ไฟล์ "${file.name}" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ ${describeTypes(rule)}`;
+    return translate(`ไฟล์ "${file.name}" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ ${describeTypes(rule)}`, `File "${file.name}" has an unsupported type. Allowed: ${describeTypes(rule)}`);
   }
   if (file.size === 0) {
-    return `ไฟล์ "${file.name}" ว่างเปล่า ลองเลือกไฟล์ใหม่`;
+    return translate(`ไฟล์ "${file.name}" ว่างเปล่า ลองเลือกไฟล์ใหม่`, `File "${file.name}" is empty. Select another file.`);
   }
   if (file.size > rule.maxBytes) {
-    return `ไฟล์ "${file.name}" ขนาด ${formatFileSize(file.size)} ใหญ่เกิน ${formatFileSize(rule.maxBytes)}`;
+    return translate(`ไฟล์ "${file.name}" ขนาด ${formatFileSize(file.size)} ใหญ่เกิน ${formatFileSize(rule.maxBytes)}`, `File "${file.name}" (${formatFileSize(file.size)}) exceeds ${formatFileSize(rule.maxBytes)}`);
   }
   return null;
 }

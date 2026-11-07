@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { ImageIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ export function ProductStockCard({
   stock,
   unit,
 }: ProductStockCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center gap-3.5">

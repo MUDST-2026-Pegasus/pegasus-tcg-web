@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 
 type ShippingStepsCardProps = {
@@ -7,6 +8,7 @@ type ShippingStepsCardProps = {
 
 /** ลำดับงานแพ็คที่ร้านควรทำ — เป็นคำแนะนำ ไม่ได้ติดตามว่าทำข้อไหนไปแล้ว */
 export function ShippingStepsCard({ title, items }: ShippingStepsCardProps) {
+  useLanguage();
   return (
     <Card className="w-full gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <p className="text-xs font-semibold text-foreground">{title}</p>

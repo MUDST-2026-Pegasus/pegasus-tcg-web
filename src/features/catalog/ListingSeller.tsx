@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -7,6 +8,7 @@ import type { PublicListingDto } from "./catalog.types";
 import { formatSellerReputation } from "./listing.format";
 
 export function ListingSeller({ seller, productSlug }: { seller: PublicListingDto["seller"]; productSlug: string }) {
+  useLanguage();
   const profileHref = `/u/${encodeURIComponent(seller.username)}?from=${encodeURIComponent(productSlug)}`;
 
   return (
@@ -19,7 +21,7 @@ export function ListingSeller({ seller, productSlug }: { seller: PublicListingDt
       </Link>
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5">
-          {seller.verified && <BadgeCheck aria-label="ร้านค้ายืนยันแล้ว" className="size-4 shrink-0 fill-primary text-white" />}
+          {seller.verified && <BadgeCheck aria-label={translate("ร้านค้ายืนยันแล้ว", "Verified store")} className="size-4 shrink-0 fill-primary text-white" />}
           <Link
             to={profileHref}
             className="truncate text-sm font-bold hover:text-primary hover:underline"

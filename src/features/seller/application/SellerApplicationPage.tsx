@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
@@ -20,6 +21,7 @@ import { SellerApplicationForm } from "./components/SellerApplicationForm";
  * ไม่ได้อยู่ใต้ /seller ที่บังคับบทบาท SELLER
  */
 export function SellerApplicationPage() {
+  useLanguage();
   const queryClient = useQueryClient();
   const { user, hasRole } = useAuth();
   const {

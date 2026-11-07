@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import pegasusCampaignTable from "@/assets/home/pegasus-campaign-table.jpeg";
 import {
   CONDITION_LABELS,
@@ -32,15 +33,14 @@ const THEMES = {
 /** แสดงเมื่อยังไม่มีสไลด์ในระบบ หรือโหลดสไลด์ไม่สำเร็จ หน้าแรกจะได้ไม่เริ่มด้วยช่องว่าง */
 export const FALLBACK_HERO_SLIDE: HeroSlide = {
   id: "fallback",
-  eyebrow: "NEW FROM PEGASUS",
-  title: "FRESH CARDS.\nREADY TO PLAY.",
-  description:
-    "Discover the newest singles and sealed releases from verified sellers.",
+  get eyebrow() { return translate("ใหม่จาก PEGASUS", "NEW FROM PEGASUS"); },
+  get title() { return translate("การ์ดใหม่ พร้อมเล่น", "FRESH CARDS.\nREADY TO PLAY."); },
+  get description() { return translate("ค้นพบการ์ดเดี่ยวและสินค้าซีลออกใหม่จากผู้ขายที่ยืนยันแล้ว", "Discover the newest singles and sealed releases from verified sellers."); },
   image: pegasusCampaignTable,
-  imageAlt: "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ",
+  get imageAlt() { return translate("การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ", "New Pegasus collectible cards displayed on a table"); },
   theme: "campaign",
-  primaryAction: { label: "Shop New Releases", href: "/search?sort=newest" },
-  secondaryAction: { label: "Explore Cards", href: "/search" },
+  get primaryAction() { return { label: translate("เลือกซื้อสินค้าใหม่", "Shop New Releases"), href: "/search?sort=newest" }; },
+  get secondaryAction() { return { label: translate("สำรวจการ์ด", "Explore Cards"), href: "/search" }; },
 };
 
 /**
@@ -108,7 +108,7 @@ export function toHomeProduct(product: ProductSummaryDto): HomeProduct {
   return {
     id: String(product.id),
     name: product.name,
-    type: PRODUCT_TYPE_LABELS[product.productType] ?? "Other",
+    type: PRODUCT_TYPE_LABELS[product.productType] ?? translate("อื่นๆ", "Other"),
     price: product.lowestPrice,
     pricing: product.pricing ?? null,
     image: product.primaryImageUrl ?? undefined,

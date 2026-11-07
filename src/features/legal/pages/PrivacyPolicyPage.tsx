@@ -1,70 +1,62 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Shield } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const sections = [
   {
     id: "01",
-    title: "Information We Collect",
-    content: (
-      <p>
-        We collect information you provide directly, including your name, email address, shipping address, and payment details. We may also collect device and usage data such as IP address and browser type.
-      </p>
-    ),
+    get title() { return translate("ข้อมูลที่เราเก็บ", "Information We Collect"); },
+    get content() { return (
+      <p>{translate("เราเก็บข้อมูลที่คุณให้โดยตรง เช่น ชื่อ อีเมล ที่อยู่จัดส่ง และรายละเอียดการชำระเงิน รวมถึงอาจเก็บข้อมูลอุปกรณ์และการใช้งาน เช่น ที่อยู่ IP และประเภทเบราว์เซอร์", "We collect information you provide directly, including your name, email address, shipping address, and payment details. We may also collect device and usage data such as IP address and browser type.")}</p>
+    ); },
   },
   {
     id: "02",
-    title: "How We Use Your Information",
-    content: (
+    get title() { return translate("การใช้ข้อมูลของคุณ", "How We Use Your Information"); },
+    get content() { return (
       <div className="space-y-2">
-        <p>We use your information to:</p>
+        <p>{translate("เราใช้ข้อมูลของคุณเพื่อ:", "We use your information to:")}</p>
         <ul className="list-inside space-y-1 text-muted-foreground">
-          <li>• Process and fulfill orders</li>
-          <li>• Communicate purchase and account updates</li>
-          <li>• Improve our services and user experience</li>
-          <li>• Prevent fraud and protect system security</li>
+          <li>{translate("• ดำเนินการและจัดส่งคำสั่งซื้อ", "• Process and fulfill orders")}</li>
+          <li>{translate("• แจ้งความคืบหน้าการซื้อและข้อมูลบัญชี", "• Communicate purchase and account updates")}</li>
+          <li>{translate("• ปรับปรุงบริการและประสบการณ์ใช้งาน", "• Improve our services and user experience")}</li>
+          <li>{translate("• ป้องกันการฉ้อโกงและรักษาความปลอดภัยของระบบ", "• Prevent fraud and protect system security")}</li>
         </ul>
       </div>
-    ),
+    ); },
   },
   {
     id: "03",
-    title: "Information Sharing",
-    content: (
-      <p>
-        We do not sell personal data. We share information only with trusted providers, such as payment gateways and shipping partners, when required to deliver our services.
-      </p>
-    ),
+    get title() { return translate("การเปิดเผยข้อมูล", "Information Sharing"); },
+    get content() { return (
+      <p>{translate("เราไม่ขายข้อมูลส่วนบุคคล เราเปิดเผยข้อมูลเฉพาะกับผู้ให้บริการที่เชื่อถือได้ เช่น ผู้ให้บริการชำระเงินและขนส่ง เมื่อจำเป็นต่อการให้บริการเท่านั้น", "We do not sell personal data. We share information only with trusted providers, such as payment gateways and shipping partners, when required to deliver our services.")}</p>
+    ); },
   },
   {
     id: "04",
-    title: "Data Security",
-    content: (
-      <p>
-        We use industry-standard safeguards to protect personal information. No internet transmission or electronic storage method is completely secure, so absolute security cannot be guaranteed.
-      </p>
-    ),
+    get title() { return translate("ความปลอดภัยของข้อมูล", "Data Security"); },
+    get content() { return (
+      <p>{translate("เราใช้มาตรการป้องกันตามมาตรฐานอุตสาหกรรมเพื่อดูแลข้อมูลส่วนบุคคล อย่างไรก็ตาม ไม่มีการส่งข้อมูลผ่านอินเทอร์เน็ตหรือการจัดเก็บอิเล็กทรอนิกส์ใดปลอดภัยอย่างสมบูรณ์ จึงไม่สามารถรับประกันความปลอดภัยได้ทั้งหมด", "We use industry-standard safeguards to protect personal information. No internet transmission or electronic storage method is completely secure, so absolute security cannot be guaranteed.")}</p>
+    ); },
   },
   {
     id: "05",
-    title: "Your Rights",
-    content: (
-      <p>
-        Depending on your location, you may request access to, correction of, or deletion of your personal data. Contact our support team to exercise these rights.
-      </p>
-    ),
+    get title() { return translate("สิทธิของคุณ", "Your Rights"); },
+    get content() { return (
+      <p>{translate("คุณอาจมีสิทธิขอเข้าถึง แก้ไข หรือลบข้อมูลส่วนบุคคลของคุณตามกฎหมายในพื้นที่ของคุณ โปรดติดต่อทีมสนับสนุนเพื่อใช้สิทธิเหล่านี้", "Depending on your location, you may request access to, correction of, or deletion of your personal data. Contact our support team to exercise these rights.")}</p>
+    ); },
   },
   {
     id: "06",
-    title: "Contact Us",
-    content: (
-      <p>
-        Questions about this Privacy Policy? Contact us at support@pegasus-store.com.
-      </p>
-    ),
+    get title() { return translate("ติดต่อเรา", "Contact Us"); },
+    get content() { return (
+      <p>{translate("หากมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัวนี้ ติดต่อเราได้ที่ support@pegasus-store.com", "Questions about this Privacy Policy? Contact us at support@pegasus-store.com.")}</p>
+    ); },
   },
 ];
 
 export function PrivacyPolicyPage() {
+  useLanguage();
   const [activeId, setActiveId] = useState("01");
   const isManualScroll = useRef(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -123,17 +115,10 @@ export function PrivacyPolicyPage() {
         {/* Header */}
         <div className="rounded-xl border border-border/50 bg-background p-8 md:p-10 shadow-sm">
           <div className="flex w-fit items-center gap-2 rounded-md bg-muted px-2.5 py-1 text-xs font-semibold tracking-wider text-foreground">
-            <Shield className="size-4" />
-            LEGAL CENTER
-          </div>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-            Privacy Policy
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            How PEGASUS collects, uses, protects, and respects your personal information.
-          </p>
-          <div className="mt-8 text-sm text-muted-foreground">
-            Last updated <span className="font-semibold text-primary">August 29, 2026</span>
+            <Shield className="size-4" />{translate("ศูนย์ข้อมูลทางกฎหมาย", "LEGAL CENTER")}</div>
+          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground md:text-5xl">{translate("นโยบายความเป็นส่วนตัว", "Privacy Policy")}</h1>
+          <p className="mt-4 text-lg text-muted-foreground">{translate("วิธีที่ PEGASUS เก็บ ใช้ ปกป้อง และเคารพข้อมูลส่วนบุคคลของคุณ", "How PEGASUS collects, uses, protects, and respects your personal information.")}</p>
+          <div className="mt-8 text-sm text-muted-foreground">{translate("ปรับปรุงล่าสุด", "Last updated")}<span className="font-semibold text-primary">{translate("29 สิงหาคม 2569", "August 29, 2026")}</span>
           </div>
         </div>
 
@@ -142,7 +127,7 @@ export function PrivacyPolicyPage() {
           {/* Sidebar */}
           <aside className="sticky top-24 w-full shrink-0 lg:w-[280px]">
             <div className="rounded-xl border border-border/50 bg-background p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground">On this page</h3>
+              <h3 className="font-semibold text-foreground">{translate("เนื้อหาในหน้านี้", "On this page")}</h3>
               <ul className="mt-5 space-y-4 text-sm">
                 {sections.map((section) => (
                   <li key={section.id}>

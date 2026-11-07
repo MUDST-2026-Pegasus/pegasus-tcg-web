@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useEffectEvent, useState, type FormEvent, type MouseEvent } from "react";
 import { SearchIcon } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -71,13 +72,14 @@ const TYPING_DELAY_MS = 300;
 const ALL_CATEGORIES = "all";
 
 function SearchProductCard({ product }: { product: ProductSummaryDto }) {
+  useLanguage();
   const onSale = isOnSale(product.pricing);
   const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.lowestPrice);
 
   return (
     <Link
       to={productHref(product.slug)}
-      aria-label={`${product.name} ราคา ${price}`}
+      aria-label={translate(`${product.name} ราคา ${price}`, `${product.name}, price ${price}`)}
       className="block rounded-[11px] outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <Card className="h-[231px] gap-3 rounded-[11px] py-[15px] shadow-none ring-1 ring-foreground/5">
@@ -102,7 +104,7 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
         </CardContent>
         <CardHeader className="gap-2 px-[19px]">
           <Badge variant="secondary" className="h-4 rounded-full px-2 text-[9px]">
-            {PRODUCT_TYPE_LABELS[product.productType] ?? "Other"}
+            {PRODUCT_TYPE_LABELS[product.productType] ?? translate("อื่นๆ", "Other")}
           </Badge>
           <CardTitle className="line-clamp-2 h-[37px] text-xs leading-[18px] font-semibold">
             {product.name}
@@ -124,6 +126,7 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
 }
 
 function ResultsSkeleton() {
+  useLanguage();
   return (
     <div aria-hidden="true" className="grid grid-cols-1 gap-[21px] sm:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 8 }, (_, index) => (
@@ -154,6 +157,7 @@ function toggle<T>(list: T[], value: T): T[] {
 }
 
 export function SearchResultsPage() {
+  useLanguage();
   const [params, setParams] = useSearchParams();
   const filters = readFilters(params);
 
@@ -251,37 +255,36 @@ export function SearchResultsPage() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-[21px] px-[21px] pt-8 pb-14">
         <Breadcrumb>
           <BreadcrumbList className="text-[12px]">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{translate("หน้าแรก", "Home")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Search Results</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>{translate("ผลการค้นหา", "Search Results")}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <header className="flex flex-col gap-[7px] border-b border-border pb-[22px]">
-          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">All products</h1>
+          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">{translate("สินค้าทั้งหมด", "All products")}</h1>
           <p className="text-[12px] leading-[18px] text-muted-foreground" aria-live="polite">
             {lookupFailure
               ? ""
               : data && !waiting
                 ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
-                : "Searching…"}
+                : translate("กำลังค้นหา…", "Searching…")}
           </p>
           {data?.correctedQuery && !waiting ? (
-            <p className="text-sm text-primary" aria-live="polite">
-              Showing results for “{data.correctedQuery}” · You searched “{filters.q}”
+            <p className="text-sm text-primary" aria-live="polite">{translate("แสดงผลสำหรับ “", "Showing results for “")}{data.correctedQuery}{translate("” · คุณค้นหา “", "” · You searched “")}{filters.q}”
             </p>
           ) : null}
         </header>
 
         <div className="grid items-start gap-[28px] pt-[7px] lg:grid-cols-[228px_minmax(0,1fr)]">
-          <aside className="flex flex-col gap-[28px]" aria-label="Search filters">
+          <aside className="flex flex-col gap-[28px]" aria-label={translate("ตัวกรองค้นหา", "Search filters")}>
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Game</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{translate("เกม", "Game")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {games.isPending ? (
                   Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-40" />)
                 ) : games.isError ? (
-                  <p className="text-sm text-muted-foreground">โหลดรายชื่อเกมไม่สำเร็จ</p>
+                  <p className="text-sm text-muted-foreground">{translate("โหลดรายชื่อเกมไม่สำเร็จ", "Unable to load games")}</p>
                 ) : (
                   games.data.map((game) => {
                     const id = `game-${game.slug}`;
@@ -304,13 +307,13 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Category</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{translate("หมวดหมู่", "Category")}</FieldLegend>
               {categories.isPending ? (
                 <div className="flex flex-col gap-3">
                   {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-32" />)}
                 </div>
               ) : categories.isError ? (
-                <p className="text-sm text-muted-foreground">โหลดหมวดหมู่ไม่สำเร็จ</p>
+                <p className="text-sm text-muted-foreground">{translate("โหลดหมวดหมู่ไม่สำเร็จ", "Unable to load categories")}</p>
               ) : (
                 <RadioGroup
                   value={filters.category ?? ALL_CATEGORIES}
@@ -320,7 +323,7 @@ export function SearchResultsPage() {
                 >
                   <Field orientation="horizontal">
                     <RadioGroupItem id="category-all" value={ALL_CATEGORIES} />
-                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">All categories</FieldLabel>
+                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">{translate("ทุกหมวดหมู่", "All categories")}</FieldLabel>
                   </Field>
                   {orderedCategories(categories.data).map(({ category, child }) => {
                     const id = `category-${category.slug}`;
@@ -338,24 +341,24 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Price Range</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{translate("ช่วงราคา", "Price Range")}</FieldLegend>
               <form onSubmit={applyPrice} className="flex flex-col gap-3">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Minimum price" placeholder="฿ Min" value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={translate("ราคาต่ำสุด", "Minimum price")} placeholder={translate("฿ Min", "฿ ต่ำสุด")} value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
                   <span className="text-muted-foreground">-</span>
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Maximum price" placeholder="฿ Max" value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={translate("ราคาสูงสุด", "Maximum price")} placeholder={translate("฿ Max", "฿ สูงสุด")} value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
                 </div>
                 {priceRangeInvalid ? (
-                  <p role="alert" className="text-xs text-destructive">ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด</p>
+                  <p role="alert" className="text-xs text-destructive">{translate("ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด", "Minimum price must not exceed maximum price")}</p>
                 ) : null}
-                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>Apply Filter</Button>
+                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>{translate("ใช้ตัวกรอง", "Apply Filter")}</Button>
               </form>
             </FieldSet>
 
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Condition</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{translate("สภาพ", "Condition")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {SEARCH_CONDITIONS.map((condition: CardCondition) => {
                   const id = `condition-${condition.toLowerCase()}`;
@@ -385,7 +388,7 @@ export function SearchResultsPage() {
                 onCheckedChange={() => update({ inStock: !filters.inStock })}
                 className="rounded-none"
               />
-              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">In stock only</FieldLabel>
+              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">{translate("เฉพาะสินค้าที่มีสต็อก", "In stock only")}</FieldLabel>
             </Field>
 
             {filtered ? (
@@ -394,27 +397,25 @@ export function SearchResultsPage() {
                 variant="outline"
                 className="w-full rounded-md"
                 onClick={clearFilters}
-              >
-                Clear filters
-              </Button>
+              >{translate("ล้างตัวกรอง", "Clear filters")}</Button>
             ) : null}
           </aside>
 
-          <section className="min-w-0" aria-label="Search results">
+          <section className="min-w-0" aria-label={translate("ผลการค้นหา", "Search results")}>
             <div className="mb-[21px] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full sm:max-w-[341px]">
                 <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
-                  aria-label="Search products"
-                  placeholder="Search cards, sets or card numbers"
+                  aria-label={translate("ค้นหาสินค้า", "Search products")}
+                  placeholder={translate("ค้นหาการ์ด ชุดการ์ด หรือเลขการ์ด", "Search cards, sets or card numbers")}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
                   className="rounded-md border-border bg-background pl-10"
                 />
               </div>
               <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-                <span>Sort by:</span>
+                <span>{translate("เรียงตาม:", "Sort by:")}</span>
                 <Select
                   value={filters.sort}
                   onValueChange={(value) => update({ sort: (value ?? "featured") as SearchSort })}
@@ -435,7 +436,7 @@ export function SearchResultsPage() {
             {lookupFailure ? (
               <ErrorState
                 error={lookupFailure.error}
-                title="โหลดตัวกรองไม่สำเร็จ"
+                title={translate("โหลดตัวกรองไม่สำเร็จ", "Unable to load filters")}
                 onRetry={() => lookupFailure.refetch()}
               />
             ) : !ready ? (
@@ -444,18 +445,16 @@ export function SearchResultsPage() {
               <QueryBoundary
                 query={results}
                 loading={<ResultsSkeleton />}
-                errorTitle="ค้นหาไม่สำเร็จ"
+                errorTitle={translate("ค้นหาไม่สำเร็จ", "Unable to search")}
                 isEmpty={(page) => page.items.length === 0}
                 empty={
                   <EmptyState
                     icon={SearchIcon}
-                    title={filters.q ? `No products match "${filters.q}"` : "No products found"}
-                    description={filtered ? "Try removing a filter or two." : undefined}
+                    title={filters.q ? `No products match "${filters.q}"` : translate("ไม่พบสินค้า", "No products found")}
+                    description={filtered ? translate("ลองนำตัวกรองบางรายการออก", "Try removing a filter or two.") : undefined}
                   >
                     {filtered ? (
-                      <Button type="button" variant="outline" onClick={clearFilters}>
-                        Clear filters
-                      </Button>
+                      <Button type="button" variant="outline" onClick={clearFilters}>{translate("ล้างตัวกรอง", "Clear filters")}</Button>
                     ) : null}
                   </EmptyState>
                 }

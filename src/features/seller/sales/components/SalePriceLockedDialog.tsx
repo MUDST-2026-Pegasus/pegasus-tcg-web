@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Lock } from "lucide-react";
 
 import { formatSaleBaht } from "@/components/sale";
@@ -27,6 +28,7 @@ export function SalePriceLockedDialog({
   attemptedPrice: number | null;
   details: SalePriceLockedDetails;
 }) {
+  useLanguage();
   const owner = details.ownerType === "PLATFORM" ? " (Pegasus)" : details.ownerType === "SELLER" ? " (ร้าน)" : "";
   const sale = details.saleName ? `“${details.saleName}”${owner}` : "การลดราคา";
   const until = details.endsAt ? ` ถึง ${endDate.format(new Date(details.endsAt))}` : "";
@@ -42,7 +44,7 @@ export function SalePriceLockedDialog({
     >
       <dl className="grid gap-1.5 rounded-md bg-muted px-3.5 py-2.5 text-xs [&>div]:flex [&>div]:justify-between [&_dt]:text-muted-foreground [&_dd]:font-semibold">
         <div>
-          <dt>ราคาปัจจุบัน</dt>
+          <dt>{translate("ราคาปัจจุบัน", "Current price")}</dt>
           <dd>{formatSaleBaht(details.currentPrice ?? currentPrice)}</dd>
         </div>
         {attemptedPrice != null ? (

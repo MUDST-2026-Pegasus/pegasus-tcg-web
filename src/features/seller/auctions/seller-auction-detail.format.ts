@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { formatAuctionShortDateTime, formatBaht } from "@/features/auction/auction.format";
 import type { AuctionBid, SellerAuctionDetail, SellerAuctionRow } from "@/features/auction/auction.types";
 
@@ -48,7 +49,7 @@ export function headerMeta(detail: SellerAuctionDetail): string {
 
 /** แถว "ซื้อทันที" ในการ์ดการตั้งค่า */
 export function buyNowSetting(detail: SellerAuctionDetail): string {
-  if (detail.buyNowPrice === null) return "ไม่ได้ตั้ง";
+  if (detail.buyNowPrice === null) return translate("ไม่ได้ตั้ง", "Not set");
   if (!detail.buyNowAvailable && detail.firstBidAt !== null) return `${formatBaht(detail.buyNowPrice)} · ปิดแล้ว (มีบิดแรก)`;
   return formatBaht(detail.buyNowPrice);
 }
@@ -74,7 +75,7 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
   const time = (iso: string | null) => (iso ? formatAuctionShortDateTime(iso) : null);
   const live = detail.status === "LIVE";
 
-  const steps: TimelineStep[] = [{ id: "open", label: "เปิดประมูล", detail: time(detail.startedAt), tone: "done" }];
+  const steps: TimelineStep[] = [{ id: "open", label: translate("เปิดประมูล", "Start auction"), detail: time(detail.startedAt), tone: "done" }];
 
   if (detail.firstBidAt !== null) {
     steps.push({
@@ -91,7 +92,7 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
     steps.push({
       id: "live",
       label: `กำลังประมูล${extended}`,
-      detail: live ? "ตอนนี้" : null,
+      detail: live ? translate("ตอนนี้", "Now") : null,
       tone: live ? "current" : "done",
     });
   }
@@ -110,7 +111,7 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
         {
           id: "close",
           label: soldByBuyNow(detail) ? `ขายด้วยซื้อทันที ${formatBaht(detail.currentPrice)}` : CLOSE_STEP,
-          detail: "ตอนนี้",
+          detail: translate("ตอนนี้", "Now"),
           tone: "current",
         },
         { id: "ship", label: SHIP_STEP, detail: null, tone: "pending" },
@@ -120,7 +121,7 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
       return [
         ...steps,
         { id: "close", label: CLOSE_STEP, detail: time(detail.endsAt), tone: "done" },
-        { id: "ship", label: SHIP_STEP, detail: "ตอนนี้", tone: "current" },
+        { id: "ship", label: SHIP_STEP, detail: translate("ตอนนี้", "Now"), tone: "current" },
         { id: "receive", label: RECEIVE_STEP, detail: null, tone: "pending" },
       ];
     case "UNSOLD":
@@ -130,11 +131,11 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
             { id: "close", label: CLOSE_STEP, detail: time(detail.endsAt), tone: "done" },
             { id: "unpaid", label: "ผู้ชนะไม่ชำระใน 24 ชม. → ยกเลิกคำสั่งซื้อ · การ์ดกลับเข้าสต็อก", detail: null, tone: "failed" },
           ]
-        : [...steps, { id: "no-bids", label: "ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว", detail: time(detail.endsAt), tone: "ended" }];
+        : [...steps, { id: "no-bids", label: translate("ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว", "No bids — cards returned to stock"), detail: time(detail.endsAt), tone: "ended" }];
     case "CANCELLED":
-      return [...steps, { id: "cancelled", label: "ยกเลิกประมูล", detail: null, tone: "ended" }];
+      return [...steps, { id: "cancelled", label: translate("ยกเลิกประมูล", "Cancel auction"), detail: null, tone: "ended" }];
     case "SUSPENDED":
-      return [...steps, { id: "suspended", label: "ถูกระงับ", detail: null, tone: "failed" }];
+      return [...steps, { id: "suspended", label: translate("ถูกระงับ", "Suspended"), detail: null, tone: "failed" }];
   }
 }
 

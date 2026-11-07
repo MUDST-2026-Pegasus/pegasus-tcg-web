@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useId, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export function BulkPriceDialog({
   listings,
   onSubmit,
 }: BulkPriceDialogProps) {
+  useLanguage();
   const [percentText, setPercentText] = useState("");
   const inputId = useId();
 
@@ -68,8 +70,7 @@ export function BulkPriceDialog({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <DialogTitle className="text-base font-bold text-foreground">
-              แก้ไขราคาพร้อมกัน
-            </DialogTitle>
+              {translate("แก้ไขราคาพร้อมกัน", "Bulk price update")}</DialogTitle>
             <DialogDescription className="text-xs text-gray-500">
               ปรับ {eligible.length} ประกาศเป็นเปอร์เซ็นต์เดียวกัน
               {skipped > 0
@@ -80,8 +81,7 @@ export function BulkPriceDialog({
 
           <Field className="gap-1.5">
             <FieldLabel htmlFor={inputId} className="text-xs">
-              ปรับราคา
-            </FieldLabel>
+              {translate("ปรับราคา", "Adjust price")}</FieldLabel>
             <InputGroup className="h-9">
               <InputGroupInput
                 id={inputId}
@@ -105,7 +105,7 @@ export function BulkPriceDialog({
 
           {valid && example ? (
             <p className="rounded-lg bg-neutral-50 px-3 py-2 text-xs text-gray-600">
-              ตัวอย่าง: {example.card.productName} {formatBaht(example.price)} →{" "}
+              {translate("ตัวอย่าง:", "Example:") + " "}{example.card.productName} {formatBaht(example.price)} →{" "}
               <span className="font-semibold text-foreground">
                 {formatBaht(adjustPrice(example.price, percent))}
               </span>
@@ -120,15 +120,14 @@ export function BulkPriceDialog({
               className="rounded-md px-2.5"
               onClick={() => handleOpenChange(false)}
             >
-              ยกเลิก
-            </Button>
+              {translate("ยกเลิก", "Cancel")}</Button>
             <Button
               type="submit"
               size="sm"
               className="rounded-md px-2.5"
               disabled={!valid}
             >
-              ปรับราคา {eligible.length} ประกาศ
+              {translate("ปรับราคา", "Adjust price") + " "}{eligible.length} ประกาศ
             </Button>
           </DialogFooter>
         </form>

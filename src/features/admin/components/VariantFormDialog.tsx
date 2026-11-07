@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -83,11 +84,12 @@ export function VariantFormDialog({
   product,
   variant,
 }: VariantFormDialogProps) {
+  useLanguage();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{variant ? "แก้ไข variant" : "เพิ่ม variant"}</DialogTitle>
+          <DialogTitle>{variant ? "แก้ไข variant" : translate("เพิ่ม variant", "Add variant")}</DialogTitle>
           <DialogDescription>
             หนึ่ง variant = หนึ่งแบบที่ซื้อขายจริง เช่น ภาษาอังกฤษ Foil กับภาษาญี่ปุ่นปกติ
             คือคนละ variant ประกาศขายและราคากลางผูกกับ variant
@@ -113,6 +115,7 @@ function VariantForm({
   variant?: CatalogVariant;
   onSaved: () => void;
 }) {
+  useLanguage();
   const saveVariant = useSaveVariant(product.id);
 
   const {
@@ -290,11 +293,11 @@ function VariantForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.barcode) || undefined}>
-            <FieldLabel htmlFor="barcode">บาร์โค้ด</FieldLabel>
+            <FieldLabel htmlFor="barcode">{translate("บาร์โค้ด", "Barcode")}</FieldLabel>
             <Input
               id="barcode"
               maxLength={64}
-              placeholder="ไม่บังคับ"
+              placeholder={translate("ไม่บังคับ", "Optional")}
               aria-invalid={Boolean(errors.barcode)}
               {...register("barcode")}
             />
@@ -323,11 +326,10 @@ function VariantForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
-        </DialogClose>
+          {translate("ยกเลิก", "Cancel")}</DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {variant ? "บันทึก" : "เพิ่ม variant"}
+          {variant ? translate("บันทึก", "Save") : translate("เพิ่ม variant", "Add variant")}
         </Button>
       </DialogFooter>
     </form>

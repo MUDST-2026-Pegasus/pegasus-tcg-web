@@ -1,10 +1,12 @@
+import { translate, useLanguage } from "@/lib/language";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** วางตรงกับหัวการ์ด `OrderCard` ตอนพับ — ภาพไม่กระโดดตอนข้อมูลมาถึง */
 export function OrderListSkeleton({ rows = 4 }: { rows?: number }) {
+  useLanguage();
   return (
-    <div className="flex flex-col gap-3.5" aria-busy="true" aria-label="กำลังโหลดคำสั่งซื้อ">
+    <div className="flex flex-col gap-3.5" aria-busy="true" aria-label={translate("กำลังโหลดคำสั่งซื้อ", "Loading orders")}>
       {Array.from({ length: rows }, (_, index) => (
         <Card
           key={index}

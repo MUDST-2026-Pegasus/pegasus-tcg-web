@@ -1,3 +1,4 @@
+import { translate } from "@/lib/language";
 import { z } from "zod";
 
 import type { Address, AddressPayload } from "./address.types";
@@ -6,26 +7,37 @@ import type { Address, AddressPayload } from "./address.types";
  * ตั้งให้ตรงกับ Bean Validation ใน `dto/AddressRequest.java`
  * ถ้าฝั่งโน้นแก้กติกา ต้องตามมาแก้ที่นี่ ไม่งั้นฟอร์มจะปล่อยผ่านแล้วไปตกที่ backend
  *
- * ข้อความเป็นภาษาอังกฤษให้เข้ากับหน้า Address Book ที่ใช้อังกฤษทั้งหน้า
  */
 
 /** ช่องที่ backend ปล่อยว่างได้ — ส่งเป็น `null` ไม่ใช่สตริงว่าง */
+const fieldLabel = (field: string) => ({
+  Label: translate("ชื่อเรียกที่อยู่", "Label"),
+  "Recipient name": translate("ชื่อผู้รับ", "Recipient name"),
+  "Phone number": translate("หมายเลขโทรศัพท์", "Phone number"),
+  "Address line 1": translate("ที่อยู่บรรทัดที่ 1", "Address line 1"),
+  "Address line 2": translate("ที่อยู่บรรทัดที่ 2", "Address line 2"),
+  Subdistrict: translate("ตำบล/แขวง", "Subdistrict"),
+  District: translate("อำเภอ/เขต", "District"),
+  Province: translate("จังหวัด", "Province"),
+  "Postal code": translate("รหัสไปรษณีย์", "Postal code"),
+} as Record<string, string>)[field] ?? field;
+
 const optional = (max: number, field: string) =>
-  z.string().trim().max(max, `${field} must be at most ${max} characters`);
+  z.string().trim().max(max, { error: () => translate(`${fieldLabel(field)}ต้องไม่เกิน ${max} ตัวอักษร`, `${field} must be at most ${max} characters`) });
 
 const required = (max: number, field: string) =>
   z
     .string()
     .trim()
-    .min(1, `${field} is required`)
-    .max(max, `${field} must be at most ${max} characters`);
+    .min(1, { error: () => translate(`กรุณากรอก${fieldLabel(field)}`, `${field} is required`) })
+    .max(max, { error: () => translate(`${fieldLabel(field)}ต้องไม่เกิน ${max} ตัวอักษร`, `${field} must be at most ${max} characters`) });
 
 export const addressSchema = z.object({
   label: optional(50, "Label"),
   recipientName: required(150, "Recipient name"),
   phone: required(20, "Phone number").regex(
     /^[0-9+()\-\s]+$/,
-    "Enter a valid phone number",
+    { error: () => translate("กรุณากรอกหมายเลขโทรศัพท์ที่ถูกต้อง", "Enter a valid phone number") },
   ),
   line1: required(255, "Address line 1"),
   line2: optional(255, "Address line 2"),
@@ -34,7 +46,7 @@ export const addressSchema = z.object({
   province: required(100, "Province"),
   postalCode: required(10, "Postal code").regex(
     /^[0-9]{5}$/,
-    "Postal code must be 5 digits",
+    { error: () => translate("รหัสไปรษณีย์ต้องมี 5 หลัก", "Postal code must be 5 digits") },
   ),
   /** ในหน้านี้ "default" หมายถึงที่อยู่จัดส่งหลัก ส่วน billing ไม่ได้ให้ผู้ใช้เลือก */
   defaultShipping: z.boolean(),

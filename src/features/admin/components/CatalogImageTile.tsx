@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { ImageOff, RefreshCw, Star, Trash2 } from "lucide-react";
@@ -40,6 +41,7 @@ export function CatalogImageTile({
   onDelete,
   onExpired,
 }: CatalogImageTileProps) {
+  useLanguage();
   const [retriedUrl, setRetriedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -80,8 +82,7 @@ export function CatalogImageTile({
         ) : failedUrl === image.url ? (
           <div className="flex size-full flex-col items-center justify-center gap-2 p-3 text-center text-xs text-muted-foreground">
             <ImageOff className="size-5" aria-hidden />
-            โหลดรูปไม่สำเร็จ
-            <Button
+            {translate("โหลดรูปไม่สำเร็จ", "Unable to load image")}<Button
               type="button"
               variant="outline"
               size="sm"
@@ -89,8 +90,7 @@ export function CatalogImageTile({
               onClick={refresh}
             >
               <RefreshCw data-icon="inline-start" />
-              ลองใหม่
-            </Button>
+              {translate("ลองใหม่", "Retry")}</Button>
           </div>
         ) : (
           <img
@@ -103,7 +103,7 @@ export function CatalogImageTile({
 
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
           {image.primary ? (
-            <Badge className="rounded-full">รูปหลัก</Badge>
+            <Badge className="rounded-full">{translate("รูปหลัก", "Primary image")}</Badge>
           ) : null}
           {variantLabel ? (
             <Badge variant="secondary" className="rounded-full">

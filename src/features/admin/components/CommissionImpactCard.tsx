@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { TriangleAlert } from "lucide-react";
 
 import type { AdminCommissionData } from "@/features/admin/admin.types";
@@ -11,6 +12,7 @@ export function CommissionImpactCard({
   title,
   description,
 }: CommissionImpactCardProps) {
+  useLanguage();
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-[#fdf0dd] px-4 py-4 text-[#b45309]">
       <div className="flex items-center gap-2">

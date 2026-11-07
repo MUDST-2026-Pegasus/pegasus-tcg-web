@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 import { AUCTION_PILL_LABEL, type AuctionPillKind } from "../auction.format";
@@ -26,6 +27,7 @@ type AuctionStatusPillProps = {
 
 /** ป้ายสถานะประมูลทรงแคปซูล มีจุดสีหน้าข้อความ [TCG-627] */
 export function AuctionStatusPill({ kind, label, className }: AuctionStatusPillProps) {
+  useLanguage();
   return (
     <span
       className={cn(

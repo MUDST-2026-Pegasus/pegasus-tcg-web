@@ -1,7 +1,9 @@
+import { translate, useLanguage } from "@/lib/language";
 import type { ProfitSummary } from "../../orders.format";
 
 /** การ์ดพื้นดำสรุปกำไรหลังหักต้นทุนสินค้า */
 export function OrderProfitCard({ rows, net }: ProfitSummary) {
+  useLanguage();
   return (
     <div className="flex w-full flex-col gap-3.5 rounded-xl bg-foreground p-5">
       <p className="text-xs font-semibold text-white">กำไรจากออเดอร์นี้</p>
@@ -18,7 +20,7 @@ export function OrderProfitCard({ rows, net }: ProfitSummary) {
       <div className="h-px bg-gray-800" />
 
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-medium text-white">กำไรสุทธิ</p>
+        <p className="text-xs font-medium text-white">{translate("กำไรสุทธิ", "Net profit")}</p>
         <p className="text-xl font-bold text-teal-300">{net}</p>
       </div>
     </div>

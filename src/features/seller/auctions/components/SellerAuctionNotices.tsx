@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { CircleCheck, Clock, Gavel, Undo2, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -17,6 +18,7 @@ type SellerAuctionNoticesProps = {
 
 /** แบนเนอร์แจ้งเตือนฝั่งผู้ขาย ตาม Figma S3-C [TCG-634 · FE-8] */
 export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesProps) {
+  useLanguage();
   const kind = sellerNoticeKind(detail, newBid);
   const name = detail.item.card.productName;
 
@@ -77,7 +79,7 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="slate"
           icon={<Undo2 />}
-          title="ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว"
+          title={translate("ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว", "No bids — cards returned to stock")}
           detail={name}
           action={<RelistButton auctionId={detail.id} variant="outline" />}
         />
@@ -88,11 +90,13 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
 }
 
 function Remaining({ target, serverTime }: { target: string; serverTime: string }) {
+  useLanguage();
   const remaining = useCountdown(target, serverTime) ?? 0;
   return <span className="tabular-nums">{formatRemaining(remaining)}</span>;
 }
 
 function RelistButton({ auctionId, variant }: { auctionId: number; variant: "default" | "outline" }) {
+  useLanguage();
   return (
     <Button
       variant={variant}
@@ -101,7 +105,6 @@ function RelistButton({ auctionId, variant }: { auctionId: number; variant: "def
       nativeButton={false}
       render={<Link to={relistPath(auctionId)} />}
     >
-      ประมูลใหม่
-    </Button>
+      {translate("ประมูลใหม่", "Relist auction")}</Button>
   );
 }

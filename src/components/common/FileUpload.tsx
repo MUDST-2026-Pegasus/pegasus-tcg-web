@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import {
   CircleAlert,
   CircleCheck,
@@ -34,15 +35,16 @@ type FileUploadProps = {
 export function FileUpload({
   upload,
   id,
-  title = "ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์",
+  title = translate("ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์", "Drop files here or click to select"),
   description,
   invalid,
   disabled,
   className,
 }: FileUploadProps) {
+  useLanguage();
   const limit =
     upload.multiple && upload.maxFiles !== undefined
-      ? ` · สูงสุด ${upload.maxFiles} ไฟล์`
+      ? translate(` · สูงสุด ${upload.maxFiles} ไฟล์`, ` · Up to ${upload.maxFiles} files`)
       : "";
 
   return (
@@ -71,7 +73,7 @@ export function FileUpload({
           disabled={disabled}
           className="rounded-md px-2.5"
         >
-          เลือกไฟล์
+          {translate("เลือกไฟล์", "Select files")}
         </Button>
       </FileDropzone>
 
@@ -100,6 +102,7 @@ function FileUploadRow({
   onRemove: () => void;
   onRetry: () => void;
 }) {
+  useLanguage();
   const percent = Math.round(item.progress * 100);
 
   return (
@@ -129,7 +132,7 @@ function FileUploadRow({
           <div className="flex items-center gap-2">
             <Progress
               value={percent}
-              aria-label={`กำลังอัปโหลด ${item.file.name}`}
+              aria-label={translate(`กำลังอัปโหลด ${item.file.name}`, `Uploading ${item.file.name}`)}
               className="flex-1 [&_[data-slot=progress-track]]:h-1.5"
             />
             <span className="text-[11px] text-muted-foreground tabular-nums">
@@ -140,7 +143,7 @@ function FileUploadRow({
         {item.status === "done" && (
           <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <CircleCheck aria-hidden className="size-3.5 text-primary" />
-            อัปโหลดแล้ว · {formatFileSize(item.file.size)}
+            {translate("อัปโหลดแล้ว", "Uploaded")} · {formatFileSize(item.file.size)}
           </p>
         )}
         {item.status === "error" && (
@@ -164,7 +167,7 @@ function FileUploadRow({
             onClick={onRetry}
           >
             <RotateCw data-icon="inline-start" />
-            ลองใหม่
+            {translate("ลองใหม่", "Try again")}
           </Button>
         )}
         <Button
@@ -173,8 +176,8 @@ function FileUploadRow({
           size="icon-sm"
           aria-label={
             item.status === "uploading"
-              ? `ยกเลิกการอัปโหลด ${item.file.name}`
-              : `ลบ ${item.file.name}`
+              ? translate(`ยกเลิกการอัปโหลด ${item.file.name}`, `Cancel upload of ${item.file.name}`)
+              : translate(`ลบ ${item.file.name}`, `Remove ${item.file.name}`)
           }
           onClick={onRemove}
         >

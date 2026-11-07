@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useEffect, useRef, useState } from "react";
 
 import { SearchIcon, Users } from "lucide-react";
@@ -28,6 +29,7 @@ const SEARCH_DELAY_MS = 300;
  * เลือก 1 บัญชี → confirm "ตั้งเป็นผู้ดูแล" → `POST /users/{id}/roles {role: ADMIN}`
  */
 export function AddAdminDialog({ onClose }: { onClose: () => void }) {
+  useLanguage();
   const [text, setText] = useState("");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<AdminUser | null>(null);
@@ -58,8 +60,8 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
           setConfirming(false);
           toast.add({
             type: "error",
-            title: "ทำรายการไม่สำเร็จ",
-            description: userErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: translate("ทำรายการไม่สำเร็จ", "Action failed"),
+            description: userErrorMessage(error, translate("ลองใหม่อีกครั้ง", "Try again")),
           });
         },
       },
@@ -89,17 +91,15 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
       onClose={onClose}
       tone="info"
       icon={<Users />}
-      title="เพิ่มผู้ดูแล"
+      title={translate("เพิ่มผู้ดูแล", "Add administrator")}
       description="ค้นหาบัญชีที่มีอยู่แล้วเพื่อให้สิทธิ์ผู้ดูแล (ไม่ได้สร้างบัญชีใหม่)"
       footerNote={selectable ? "ต่อด้วยการยืนยัน “ตั้งเป็นผู้ดูแล”" : undefined}
       actions={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
-            ยกเลิก
-          </Button>
+            {translate("ยกเลิก", "Cancel")}</Button>
           <Button size="sm" disabled={!selectable} onClick={() => setConfirming(true)}>
-            ถัดไป
-          </Button>
+            {translate("ถัดไป", "Next")}</Button>
         </>
       }
     >
@@ -120,8 +120,7 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
 
       {!q ? (
         <p className="text-[10px] text-[#9aa5ad]">
-          พิมพ์เพื่อค้นหา · แสดงสูงสุด {USER_SEARCH_SIZE} รายการ
-        </p>
+          พิมพ์เพื่อค้นหา · แสดงสูงสุด {USER_SEARCH_SIZE} {" " + translate("รายการ", "Items")}</p>
       ) : search.isPending ? (
         <div aria-busy="true" className="flex flex-col gap-2">
           {Array.from({ length: 3 }, (_, index) => (

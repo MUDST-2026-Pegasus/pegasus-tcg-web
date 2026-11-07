@@ -1,3 +1,4 @@
+import { useLanguage } from "@/lib/language";
 import { Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ export function ReviewStars({
   className?: string;
   starClassName?: string;
 }) {
+  useLanguage();
   const filled = Math.floor(rating);
   return (
     <span role="img" aria-label={`${rating} จาก 5 ดาว`} className={cn("flex items-center gap-0.5", className)}>

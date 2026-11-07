@@ -1,3 +1,4 @@
+import { translate, useLanguage } from "@/lib/language";
 import { useState } from "react";
 
 import { Info, ShieldCheck } from "lucide-react";
@@ -29,6 +30,7 @@ type OpenDialog = { bidder: BannedBidder; mode: "lift" | "history" };
 
 /** `/admin/auctions/banned-bidders` — A4 ผู้ใช้ที่ถูกห้ามบิด ตาม Figma 2309:8795 [TCG-635 · FE-9] */
 export function AdminBannedBiddersPage() {
+  useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = readBanTab(searchParams.get("tab"));
   const search = searchParams.get("q") ?? "";
@@ -64,7 +66,7 @@ export function AdminBannedBiddersPage() {
   const exportCsv = () => {
     if (!data) return;
     downloadCsv(`banned-bidders-${tab.toLowerCase()}.csv`, [
-      ["ผู้ใช้", "อีเมล", "ไม่ชำระ", "ครั้งล่าสุด", "ห้ามบิดถึง"],
+      [translate("ผู้ใช้", "User"), translate("อีเมล", "Email"), translate("ไม่ชำระ", "Unpaid"), translate("ครั้งล่าสุด", "Last occurrence"), translate("ห้ามบิดถึง", "Bidding banned until")],
       ...data.page.items.map((b) => [b.username, b.maskedEmail, `${b.strikeCount}/${b.strikeLimit}`, latestStrike(b), b.bannedUntil ? formatDayMonthYear(b.bannedUntil) : ""]),
     ]);
   };
@@ -74,25 +76,24 @@ export function AdminBannedBiddersPage() {
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/admin/auctions" />}>การประมูลทั้งหมด</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/admin/auctions" />}>{translate("การประมูลทั้งหมด", "All auctions")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
-            <BreadcrumbPage className="font-medium text-gray-700">ผู้ใช้ที่ถูกห้ามบิด</BreadcrumbPage>
+            <BreadcrumbPage className="font-medium text-gray-700">{translate("ผู้ใช้ที่ถูกห้ามบิด", "Banned bidders")}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">ผู้ใช้ที่ถูกห้ามบิด</h1>
+          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">{translate("ผู้ใช้ที่ถูกห้ามบิด", "Banned bidders")}</h1>
           <p className="text-[13px] text-muted-foreground">
             ระบบห้ามบิดอัตโนมัติเมื่อไม่ชำระหลังชนะครบ 3 ครั้ง · แอดมินยกเลิกโทษได้ถ้าไม่ใช่ความผิดของผู้ใช้
           </p>
         </div>
         <Button variant="outline" className="rounded-md px-2.5" disabled={!data} onClick={exportCsv}>
-          ส่งออก CSV
-        </Button>
+          {translate("ส่งออก CSV", "Export CSV")}</Button>
       </div>
 
       <p className="flex items-start gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs leading-5 text-sky-800">
@@ -102,7 +103,7 @@ export function AdminBannedBiddersPage() {
 
       {data ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <AdminKpi label="ห้ามบิดอยู่" value={data.tabCounts.BANNED} valueClass="text-red-700" />
+          <AdminKpi label={translate("ห้ามบิดอยู่", "Bidding banned")} value={data.tabCounts.BANNED} valueClass="text-red-700" />
           <AdminKpi label="ใกล้ถูกห้าม (2/3)" value={data.tabCounts.AT_RISK} valueClass="text-amber-800" />
           <AdminKpi label="ยกเลิกโทษแล้ว (30 วัน)" value={data.liftedLast30Days} />
           <AdminKpi label="พ้นโทษแล้ว (30 วัน)" value={data.expiredLast30Days} />
@@ -136,6 +137,7 @@ export function AdminBannedBiddersPage() {
 }
 
 function BannedBiddersTable({ bidders, onOpen }: { bidders: BannedBidder[]; onOpen: (bidder: BannedBidder, mode: OpenDialog["mode"]) => void }) {
+  useLanguage();
   const head = "text-xs font-normal text-muted-foreground";
   const action = "cursor-pointer text-xs font-semibold text-primary hover:underline";
   return (
@@ -143,12 +145,12 @@ function BannedBiddersTable({ bidders, onOpen }: { bidders: BannedBidder[]; onOp
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={`pl-4 ${head}`}>ผู้ใช้</TableHead>
-            <TableHead className={head}>ไม่ชำระ</TableHead>
-            <TableHead className={head}>ครั้งล่าสุด</TableHead>
-            <TableHead className={head}>ห้ามบิดถึง</TableHead>
+            <TableHead className={`pl-4 ${head}`}>{translate("ผู้ใช้", "User")}</TableHead>
+            <TableHead className={head}>{translate("ไม่ชำระ", "Unpaid")}</TableHead>
+            <TableHead className={head}>{translate("ครั้งล่าสุด", "Last occurrence")}</TableHead>
+            <TableHead className={head}>{translate("ห้ามบิดถึง", "Bidding banned until")}</TableHead>
             <TableHead className="pr-4">
-              <span className="sr-only">การกระทำ</span>
+              <span className="sr-only">{translate("การกระทำ", "Action")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -175,8 +177,7 @@ function BannedBiddersTable({ bidders, onOpen }: { bidders: BannedBidder[]; onOp
                   </button>
                   {canLiftBan(bidder) ? (
                     <button type="button" className={action} onClick={() => onOpen(bidder, "lift")}>
-                      ยกเลิกโทษ
-                    </button>
+                      {translate("ยกเลิกโทษ", "Lift ban")}</button>
                   ) : null}
                 </div>
               </TableCell>
