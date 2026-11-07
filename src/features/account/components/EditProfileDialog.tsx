@@ -242,7 +242,7 @@ function EditProfileForm({
           <FieldError errors={[errors.phone]} />
         </Field>
 
-        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 p-3">
+        <div className="flex items-center justify-between gap-4 py-1">
           <div>
             <label htmlFor="phone-public" className="text-xs font-medium">
               แสดงเบอร์โทรบนหน้าร้าน
