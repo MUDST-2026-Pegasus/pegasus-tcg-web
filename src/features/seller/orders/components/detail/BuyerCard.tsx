@@ -33,7 +33,9 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
           </p>
           <p className="text-[10px] text-gray-400">
             @{buyer.username} ·{" "}
-            {orderCount > 1 ? `ซื้อจากร้านคุณ ${orderCount} ครั้ง` : "ลูกค้าใหม่ของร้าน"}
+            {orderCount > 1
+              ? `ซื้อจากร้านคุณ ${orderCount} ครั้ง`
+              : "ลูกค้าใหม่ของร้าน"}
           </p>
         </div>
       </div>
@@ -48,7 +50,7 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
         variant="outline"
         size="sm"
         className="w-full rounded-md px-2.5"
-        render={<Link to={`/users/${buyer.username}`} />}
+        render={<Link to={`/u/${buyer.username}`} />}
         nativeButton={false}
       >
         ดูโปรไฟล์ผู้ซื้อ
