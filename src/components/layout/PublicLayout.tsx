@@ -1,3 +1,5 @@
+import { QuickCartToaster } from "@/components/common/QuickCartToaster";
+import { MiniCartDrawer } from "@/features/cart/components/MiniCartDrawer";
 import { Outlet } from "react-router-dom";
 
 import { PageTransition } from "@/components/common/PageTransition";
@@ -21,6 +23,8 @@ export function PublicLayout() {
         </PageTransition>
       </main>
       <Footer />
+      <MiniCartDrawer />
+      <QuickCartToaster />
     </div>
   );
 }

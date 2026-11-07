@@ -202,8 +202,10 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
     cy.visit('/listings/101');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Card Kingdom').should('be.visible');
-    cy.contains('มี 1 ชิ้น').should('be.visible');
-    cy.contains('รายละเอียดจากผู้ขาย').should('be.visible');
+    cy.get('[data-buy-box="graded"]').should('be.visible');
+    cy.contains('ใบสุดท้าย').should('be.visible');
+    cy.get('button[aria-label="เพิ่มจำนวน"]').should('be.disabled');
+    cy.contains('หมายเหตุจากผู้ขาย').should('be.visible');
     cy.contains('Near mint condition').should('be.visible');
     cy.contains('PSA 9').should('be.visible');
 

@@ -12,12 +12,16 @@ export const catalogKeys = {
   all: ["catalog"] as const,
   games: () => [...catalogKeys.all, "games"] as const,
   categories: () => [...catalogKeys.all, "categories"] as const,
-  cardSets: (gameId: number) => [...catalogKeys.all, "card-sets", gameId] as const,
+  cardSets: (gameId: number) =>
+    [...catalogKeys.all, "card-sets", gameId] as const,
   products: (query: ProductQuery) =>
     [...catalogKeys.all, "products", query] as const,
-  product: (idOrSlug: string) => [...catalogKeys.all, "product", idOrSlug] as const,
-  market: (productId: number) => [...catalogKeys.all, "product", productId, "market"] as const,
-  listings: (productId: number) => [...catalogKeys.all, "product", productId, "listings"] as const,
+  product: (idOrSlug: string) =>
+    [...catalogKeys.all, "product", idOrSlug] as const,
+  market: (productId: number) =>
+    [...catalogKeys.all, "product", productId, "market"] as const,
+  listings: (productId: number) =>
+    [...catalogKeys.all, "product", productId, "listings"] as const,
   listing: (id: number) => [...catalogKeys.all, "listing", id] as const,
   collectors: (productId: number, page: number) =>
     [...catalogKeys.all, "product", productId, "collectors", page] as const,
@@ -101,13 +105,30 @@ export function useListingDetail(id: number) {
 export function useProductCollectors(productId: number, page: number) {
   return useQuery({
     queryKey: catalogKeys.collectors(productId, page),
-    queryFn: ({ signal }) => catalogApi.getProductCollectors(productId, page, signal),
+    queryFn: ({ signal }) =>
+      catalogApi.getProductCollectors(productId, page, signal),
   });
 }
 
 export function useProductCardEffects(productId: number) {
   return useQuery({
     queryKey: catalogKeys.effects(productId),
-    queryFn: ({ signal }) => catalogApi.getProductCardEffects(productId, signal),
+    queryFn: ({ signal }) =>
+      catalogApi.getProductCardEffects(productId, signal),
+  });
+}
+
+export function useGameAttributes(gameId: number) {
+  return useQuery({
+    queryKey: [...catalogKeys.all, "attributes", gameId],
+    queryFn: ({ signal }) => catalogApi.getGameAttributes(gameId, signal),
+  });
+}
+
+export function useSellerListings(username: string) {
+  return useQuery({
+    queryKey: [...catalogKeys.all, "seller-listings", username],
+    queryFn: ({ signal }) => catalogApi.getSellerListings(username, signal),
+    enabled: Boolean(username),
   });
 }

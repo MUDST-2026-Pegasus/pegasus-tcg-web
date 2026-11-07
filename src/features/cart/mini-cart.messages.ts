@@ -1,0 +1,31 @@
+export const miniCartText = {
+  added: "เพิ่มลงตะกร้าแล้ว",
+  updated: "อัปเดตจำนวนในตะกร้าแล้ว",
+  close: "ปิดตะกร้าย่อ",
+  cart: "ในตะกร้า",
+  justAdded: "เพิ่งเพิ่ม",
+  loading: "กำลังโหลดตะกร้า",
+  failed: "โหลดตะกร้าไม่สำเร็จ",
+  retry: "ลองใหม่",
+  view: "ดูตะกร้า",
+  checkout: "ชำระเงิน",
+  continue: "เลือกซื้อต่อ",
+  review: "ตรวจสอบในตะกร้า",
+  subtotal: "ยอดรวมสินค้า",
+  beforeDiscount: "ราคาสินค้า (ก่อนลด)",
+  discount: "ส่วนลดราคาสินค้า",
+  shipping: "ค่าส่งคำนวณตอนชำระเงิน",
+  unavailable: "ขายหมดแล้ว · ไม่นับในยอดรวม",
+  saleEnded: "การลดราคาจบแล้ว",
+  addFailed: "เพิ่มลงตะกร้าไม่สำเร็จ",
+  empty: "ไม่มีสินค้าในตะกร้า",
+  quantity: (n: number, previous = 0) =>
+    `จำนวน ${n}${previous > 0 ? ` (เดิม ${previous})` : ""}`,
+  count: (quantity: number, shops: number) =>
+    `${quantity} ชิ้น · ${shops} ร้าน`,
+  attention: (n: number) => `มี ${n} รายการต้องตรวจสอบในตะกร้าก่อนชำระเงิน`,
+  changed: (before: string, after: string) =>
+    `ราคาเปลี่ยน ${before} → ${after}`,
+  more: (name: string) => `ซื้อเพิ่มจาก ${name} ส่งรวมกล่องเดียว`,
+  quickAdd: (name: string) => `เพิ่ม ${name} ลงตะกร้า`,
+} as const;
