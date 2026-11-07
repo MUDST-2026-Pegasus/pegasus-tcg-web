@@ -47,18 +47,24 @@ describe('ShopProfileCard', () => {
     await waitFor(() => expect(save).toHaveBeenLastCalledWith({ displayName: 'Second name', phone: null, avatarUrl: null }));
     await waitFor(() => expect(button).toBeDisabled());
   });
-  it('keeps phone private by default and saves the public visibility preference', async () => {
-    const save = vi.spyOn(profileApi, 'updateProfile').mockResolvedValue({ ...user, phonePublic: true });
+  it('does not render phone visibility switch in shop profile card', () => {
     renderWithProviders(<ShopProfileCard user={user} handlingDays={2} verified stats={null} verification={null}/>);
-    const interaction = userEvent.setup();
+    expect(screen.queryByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' })).not.toBeInTheDocument();
+    expect(screen.queryByText('แสดงเบอร์โทรบนหน้าร้าน')).not.toBeInTheDocument();
+  });
+  it('renders phone in preview when user.phonePublic is true and hides when false', () => {
+    const { unmount } = renderWithProviders(
+      <ShopProfileCard user={{ ...user, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>
+    );
     expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
-    const toggle = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
-    expect(toggle).not.toBeChecked();
-    await interaction.click(toggle);
+    unmount();
+
+    renderWithProviders(
+      <ShopProfileCard user={{ ...user, phonePublic: true }} handlingDays={2} verified stats={null} verification={null}/>
+    );
     expect(screen.getByText('Phone number : 0812345678')).toBeInTheDocument();
-    await interaction.click(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' }));
-    await waitFor(() => expect(save).toHaveBeenCalledWith({ phone: null, avatarUrl: null, phonePublic: true }));
-  });  it('accepts one character names and rejects blank names per backend constraints', () => {
+  });
+  it('accepts one character names and rejects blank names per backend constraints', () => {
     expect(editProfileSchema.safeParse({ displayName: 'ก', phone: '', bio: '' }).success).toBe(true);
     expect(editProfileSchema.safeParse({ displayName: '  ', phone: '', bio: '' }).success).toBe(false);
   });

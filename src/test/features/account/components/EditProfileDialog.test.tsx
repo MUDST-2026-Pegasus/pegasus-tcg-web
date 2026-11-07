@@ -150,4 +150,164 @@ describe('EditProfileDialog', () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent(/network error occurred/i);
   });
+
+  it('renders phone visibility switch under the phone number field', () => {
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, phone: '0812345678', phonePublic: false }}
+      />
+    );
+
+    const phoneInput = screen.getByLabelText(/phone number/i);
+    const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+
+    expect(phoneInput).toBeInTheDocument();
+    expect(switchElement).toBeInTheDocument();
+    expect(phoneInput.compareDocumentPosition(switchElement) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('toggles label text between ON and OFF states', async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, phone: '0812345678', phonePublic: false }}
+      />
+    );
+
+    const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(switchElement).not.toBeChecked();
+    expect(screen.getByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).toBeInTheDocument();
+    expect(screen.queryByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).not.toBeInTheDocument();
+
+    // Toggle to ON
+    await user.click(switchElement);
+    expect(switchElement).toBeChecked();
+    expect(screen.getByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).toBeInTheDocument();
+    expect(screen.queryByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).not.toBeInTheDocument();
+
+    // Toggle back to OFF
+    await user.click(switchElement);
+    expect(switchElement).not.toBeChecked();
+    expect(screen.getByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).toBeInTheDocument();
+    expect(screen.queryByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).not.toBeInTheDocument();
+
+    unmount();
+
+    // Initialize with phonePublic: true
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, phone: '0812345678', phonePublic: true }}
+      />
+    );
+    const switchOn = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(switchOn).toBeChecked();
+    expect(screen.getByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).toBeInTheDocument();
+  });
+
+  it('disables the switch when phone number is blank and enables when filled', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={{ ...mockUser, phone: null }} />
+    );
+
+    const phoneInput = screen.getByLabelText(/phone number/i);
+    const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+
+    // Initially blank -> disabled
+    expect(switchElement).toHaveAttribute('aria-disabled', 'true');
+    expect(switchElement).toHaveAttribute('data-disabled');
+
+    // Clicking while disabled should not toggle switch
+    await user.click(switchElement);
+    expect(switchElement).not.toBeChecked();
+
+    // Typing whitespace only -> still disabled
+    await user.type(phoneInput, '   ');
+    expect(switchElement).toHaveAttribute('aria-disabled', 'true');
+    expect(switchElement).toHaveAttribute('data-disabled');
+
+    // Entering a phone number -> enabled
+    await user.clear(phoneInput);
+    await user.type(phoneInput, '0812345678');
+    expect(switchElement).not.toHaveAttribute('aria-disabled', 'true');
+    expect(switchElement).not.toHaveAttribute('data-disabled');
+
+    // Now clicking toggles the switch
+    await user.click(switchElement);
+    expect(switchElement).toBeChecked();
+
+    // Clearing the phone number -> disabled again
+    await user.clear(phoneInput);
+    expect(switchElement).toHaveAttribute('aria-disabled', 'true');
+    expect(switchElement).toHaveAttribute('data-disabled');
+  });
+
+  it('submits phonePublic in the payload when toggled', async () => {
+    const user = userEvent.setup();
+    mockMutateAsync.mockResolvedValueOnce({});
+
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, phone: '0812345678', phonePublic: false }}
+      />
+    );
+
+    const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    await user.click(switchElement);
+
+    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    expect(saveButton).toBeEnabled();
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        displayName: 'John Doe',
+        phone: null,
+        avatarUrl: null,
+        bio: null,
+        phonePublic: true,
+      });
+    });
+
+    expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('submits phonePublic: false when toggled from true to false', async () => {
+    const user = userEvent.setup();
+    mockMutateAsync.mockResolvedValueOnce({});
+
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, phone: '0812345678', phonePublic: true }}
+      />
+    );
+
+    const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(switchElement).toBeChecked();
+    await user.click(switchElement);
+
+    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    expect(saveButton).toBeEnabled();
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        displayName: 'John Doe',
+        phone: null,
+        avatarUrl: null,
+        bio: null,
+        phonePublic: false,
+      });
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +21,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
@@ -59,7 +60,7 @@ export function EditProfileDialog({
           </DialogDescription>
         </DialogHeader>
         <EditProfileForm
-          key={user.id}
+          key={`${user.id}-${user.phonePublic ?? false}-${user.phone ?? ""}`}
           user={user}
           onSaved={() => onOpenChange(false)}
         />
@@ -87,12 +88,19 @@ function EditProfileForm({
   const {
     register,
     handleSubmit,
+    control,
+    watch,
     setError,
     formState: { errors, isSubmitting, isDirty, dirtyFields },
   } = useForm<EditProfileFormValues>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: toEditProfileForm(user),
   });
+
+  const phone = watch("phone") ?? "";
+  const phonePublic = watch("phonePublic") ?? false;
+  const isPhoneBlank = !phone.trim();
+  const isSwitchDisabled = isSubmitting || isPhoneBlank;
 
   const uploadedAvatarKey = avatarUpload.objectKeys[0] ?? null;
   const isUploading = avatarUpload.isUploading;
@@ -233,6 +241,33 @@ function EditProfileForm({
           />
           <FieldError errors={[errors.phone]} />
         </Field>
+
+        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 p-3">
+          <div>
+            <label htmlFor="phone-public" className="text-xs font-medium">
+              แสดงเบอร์โทรบนหน้าร้าน
+            </label>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {phonePublic
+                ? "สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้"
+                : "Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์"}
+            </p>
+          </div>
+          <Controller
+            control={control}
+            name="phonePublic"
+            render={({ field }) => (
+              <Switch
+                id="phone-public"
+                aria-label="แสดงเบอร์โทรบนหน้าร้าน"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={isSwitchDisabled}
+              />
+            )}
+          />
+        </div>
 
         <Field className="hidden">
           <FieldLabel htmlFor="avatarUrl">Avatar URL</FieldLabel>
