@@ -88,7 +88,7 @@ export function SellerQueueList({
                   </div>
 
                   {isActive ? (
-                    <Badge className="h-5 rounded-full bg-[#e8f1fc] px-2 text-[11px] font-medium text-[#0058bc]">
+                    <Badge variant="info">
                       {viewingLabel}
                     </Badge>
                   ) : null}

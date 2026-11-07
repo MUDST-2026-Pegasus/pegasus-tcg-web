@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 
 import { ErrorState } from "@/components/common";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -192,9 +193,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
         <Section
           title="ข้อมูลติดต่อ"
           aside={
-            <span className="rounded-full bg-[#fdf1e3] px-2 py-[3px] text-[10px] font-medium text-[#c2620a]">
-              ข้อมูลส่วนบุคคล
-            </span>
+            <Badge variant="warning">ข้อมูลส่วนบุคคล</Badge>
           }
         >
           <Row label="อีเมล">
@@ -211,9 +210,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           <Row label="เบอร์โทร">
             <span>{formatPhone(user.phone)}</span>
             {user.phone ? (
-              <span className="shrink-0 rounded-full bg-[#f1f3f4] px-2 py-[3px] text-[10px] font-medium text-muted-foreground">
-                {user.phonePublic ? "แสดงบนหน้าร้าน" : "ไม่แสดงต่อสาธารณะ"}
-              </span>
+              <Badge variant="secondary">{user.phonePublic ? "แสดงบนหน้าร้าน" : "ไม่แสดงต่อสาธารณะ"}</Badge>
             ) : null}
           </Row>
         </Section>

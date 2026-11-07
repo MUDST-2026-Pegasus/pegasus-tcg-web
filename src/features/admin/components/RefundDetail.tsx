@@ -139,7 +139,7 @@ export function RefundDetail({
               </p>
             )}
             {refund.failedAttempts > 0 && refund.status === "APPROVED" && (
-              <Badge className="h-auto self-start rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[11px] font-medium whitespace-normal text-[#b45309]">
+              <Badge variant="warning" className="h-auto self-start whitespace-normal">
                 โอนไม่สำเร็จ {refund.failedAttempts} ครั้ง — ตรวจว่าผู้ซื้อแก้บัญชีแล้วก่อนเริ่มโอนใหม่
               </Badge>
             )}

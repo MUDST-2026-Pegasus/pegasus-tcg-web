@@ -4,13 +4,12 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 import type { LowStock, StockSeverity } from "../dashboard.types";
 
-const PILL_COLOR: Record<StockSeverity, string> = {
-  critical: "bg-[#fdecea] text-[#d0342c]",
-  warning: "bg-[#fdf0dd] text-[#b45309]",
+const PILL_VARIANT: Record<StockSeverity, "destructive" | "warning"> = {
+  critical: "destructive",
+  warning: "warning",
 };
 
 /** แต่ละแถวพาไปหน้าเติมสต็อกของประกาศนั้นตรง ๆ */
@@ -23,7 +22,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
           <p className="mt-1 text-xs text-gray-400">{subtitle}</p>
         </div>
         {count > 0 && (
-          <Badge className="h-auto shrink-0 rounded-full bg-[#fdf0dd] px-2 py-[3px] text-xs text-[#b45309]">
+          <Badge variant="warning">
             {count} รายการ
           </Badge>
         )}
@@ -46,9 +45,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
                   <p className="truncate text-xs font-semibold text-foreground" title={item.name}>{item.name}</p>
                   {item.metaLabel && <p className="truncate text-xs text-gray-400">{item.metaLabel}</p>}
                 </div>
-                <span className={cn("shrink-0 rounded-full px-2 py-1 text-[11px] font-medium", PILL_COLOR[item.severity])}>
-                  {item.remainingLabel}
-                </span>
+                <Badge variant={PILL_VARIANT[item.severity]}>{item.remainingLabel}</Badge>
               </Link>
             </li>
           ))}

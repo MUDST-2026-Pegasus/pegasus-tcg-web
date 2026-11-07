@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from '@tanstack/react-query';
 import { ShieldCheck, Palmtree, CheckCircle2, Circle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -22,7 +23,7 @@ function VerificationCard() {
   const v = verification.data;
   const p = payout.data;
   const labels = { SUBMITTED: 'ส่งเอกสารแล้ว', UNDER_REVIEW: 'กำลังตรวจสอบ', APPROVED: 'ยืนยันแล้ว', REJECTED: 'ไม่ผ่านการยืนยัน' };
-  return <ShopCard title="การยืนยันตัวตน" action={v && <span className={`rounded-full px-2 py-1 text-[10px] ${v.status === 'APPROVED' ? 'bg-[#e3f4ec] text-emerald-700' : 'bg-muted text-muted-foreground'}`}>{labels[v.status]}</span>}>
+  return <ShopCard title="การยืนยันตัวตน" action={v && <Badge variant={v.status === 'APPROVED' ? 'success' : 'secondary'}>{labels[v.status]}</Badge>}>
     {verification.isPending || payout.isPending ? <ShopLoading/> : <>{verification.isError && <ShopError error={verification.error} retry={() => void verification.refetch()}/>} {payout.isError && <ShopError error={payout.error} retry={() => void payout.refetch()}/>}
     <ul className="space-y-3 text-xs">{[
       { checked: Boolean(v?.legalFirstName && v?.legalLastName), label: 'ชื่อ-นามสกุลตามบัตร' },

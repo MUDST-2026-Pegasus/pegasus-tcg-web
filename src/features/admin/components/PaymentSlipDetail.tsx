@@ -78,7 +78,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-foreground">{payment.buyer.username}</h2>
-              <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-[11px] font-medium text-[#b45309]">
+              <Badge variant="warning">
                 รอตรวจสอบ
               </Badge>
               <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">

@@ -90,7 +90,7 @@ export function TodoCard({ title, description, count, items, emptyLabel }: TodoL
           <p className="text-xs text-gray-500">{description}</p>
         </div>
         {count > 0 ? (
-          <Badge className="h-auto rounded-full bg-[#fbe9e8] px-2 py-[3px] text-xs text-[#d0342c]">
+          <Badge variant="destructive">
             {count}
           </Badge>
         ) : null}

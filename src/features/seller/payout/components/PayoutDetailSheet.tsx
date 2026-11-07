@@ -1,5 +1,6 @@
 import { Check, Copy, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { toast } from "@/components/ui/toast";
@@ -40,7 +41,7 @@ export function PayoutDetailSheet({ payout, onClose, onRetry, canRetry }: Props)
         <SheetHeader className="pr-14">
           <SheetTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold">
             คำขอถอน #{payout?.id}
-            {status && <span className={`rounded-full px-2 py-1 text-xs ${status.className}`}>● {status.label}</span>}
+            {status && <Badge variant={status.variant}>● {status.label}</Badge>}
           </SheetTitle>
           <SheetDescription>รายละเอียดและความคืบหน้าของคำขอถอนเงิน</SheetDescription>
         </SheetHeader>

@@ -105,7 +105,7 @@ export function PayoutDetail({ payout, onMoved }: PayoutDetailProps) {
                 <InfoField label="ชื่อบัญชี" value={payout.account.accountName ?? "—"} />
                 <InfoField label="เลขบัญชี" value={formatAccountNumber(payout.account.accountNumber)} large />
                 {payout.account.verifiedAt && (
-                  <Badge className="h-5 self-start rounded-full bg-[#e3f4ec] px-2 text-[10px] font-medium text-[#12805c]">
+                  <Badge variant="success" className="self-start">
                     ยืนยันบัญชีแล้ว · สร้างตอนอนุมัติ KYC
                   </Badge>
                 )}

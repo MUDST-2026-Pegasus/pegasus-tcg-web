@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/common";
 import { cn } from "@/lib/utils";
 
@@ -44,9 +45,7 @@ export function CatalogProductGrid({
           <div className="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap gap-1">
             {/* ไม่มี variant = ผู้ขายยังลงขายการ์ดใบนี้ไม่ได้ เตือนให้เห็นจากตาราง */}
             {product.variantCount === 0 ? (
-              <span className="rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
-                ยังไม่มี variant
-              </span>
+              <Badge variant="warning">ยังไม่มี variant</Badge>
             ) : null}
             {/* นับเฉพาะที่ผู้ซื้อซื้อได้ตอนนี้ */}
             <span
@@ -62,9 +61,7 @@ export function CatalogProductGrid({
                 : `${formatCount(product.sellerCount)} ร้าน · เหลือ ${formatCount(product.availableQuantity)} ใบ`}
             </span>
             {product.blockedListingCount > 0 ? (
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">
-                ระงับ {formatCount(product.blockedListingCount)}
-              </span>
+              <Badge variant="destructive">ระงับ {formatCount(product.blockedListingCount)}</Badge>
             ) : null}
           </div>
         </li>

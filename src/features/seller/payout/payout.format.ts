@@ -3,16 +3,16 @@ import type { Payout } from "@/features/finance/finance.types";
 // The seller API does not expose payout.minimum_amount yet.
 export const PAYOUT_MINIMUM = 100;
 
-export const payoutStatuses: Record<string, { label: string; className: string }> = {
-  REQUESTED: { label: "รอตรวจสอบ", className: "bg-secondary text-slate-600" },
-  APPROVED: { label: "อนุมัติแล้ว", className: "bg-sky-100 text-primary" },
-  PROCESSING: { label: "กำลังโอน", className: "bg-amber-100 text-amber-700" },
-  PAID: { label: "โอนสำเร็จ", className: "bg-emerald-100 text-emerald-700" },
-  REJECTED: { label: "ไม่อนุมัติ", className: "bg-red-100 text-red-700" },
-  FAILED: { label: "โอนไม่สำเร็จ", className: "bg-red-100 text-red-700" },
+export const payoutStatuses: Record<string, { label: string; variant: "secondary" | "info" | "warning" | "success" | "destructive" }> = {
+  REQUESTED: { label: "รอตรวจสอบ", variant: "secondary" },
+  APPROVED: { label: "อนุมัติแล้ว", variant: "info" },
+  PROCESSING: { label: "กำลังโอน", variant: "warning" },
+  PAID: { label: "โอนสำเร็จ", variant: "success" },
+  REJECTED: { label: "ไม่อนุมัติ", variant: "destructive" },
+  FAILED: { label: "โอนไม่สำเร็จ", variant: "destructive" },
 };
 
-export const payoutStatus = (status: string) => payoutStatuses[status] ?? { label: status, className: "bg-secondary text-slate-600" };
+export const payoutStatus = (status: string) => payoutStatuses[status] ?? { label: status, variant: "secondary" as const };
 export const money = (value: number | string) => `฿${Number(value).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 export const formatThaiDateTime = (value: string | null | undefined) => value ? new Intl.DateTimeFormat("th-TH", {
   day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Bangkok",

@@ -6,6 +6,7 @@ import {
   Star,
   StarOff,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { PublicReview, PublicReviews } from "./after-sales.types";
@@ -125,11 +126,7 @@ export function ReviewCard({
             <span>· {formatReviewDate(review.createdAt)}</span>
           </div>
         </div>
-        <span
-          className={`rounded-full px-2 py-0.5 text-[11px] ${replied ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}
-        >
-          {replied ? "ตอบแล้ว" : "ยังไม่ตอบ"}
-        </span>
+        <Badge variant={replied ? "success" : "warning"}>{replied ? "ตอบแล้ว" : "ยังไม่ตอบ"}</Badge>
       </div>
       {review.title?.trim() && (
         <h2 className="mt-4 text-sm font-semibold">{review.title}</h2>

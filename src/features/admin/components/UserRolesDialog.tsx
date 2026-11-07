@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Lock, Shield, ShieldOff } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -149,10 +150,10 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
                 </p>
               </div>
               {locked ? (
-                <span className="flex shrink-0 items-center gap-1 rounded-full bg-[#f1f3f4] px-2 py-[3px] text-[10px] font-medium text-muted-foreground">
-                  <Lock aria-hidden="true" className="size-[11px]" />
+                <Badge variant="secondary">
+                  <Lock aria-hidden="true" />
                   {locked}
-                </span>
+                </Badge>
               ) : (
                 <Switch
                   id={switchId}

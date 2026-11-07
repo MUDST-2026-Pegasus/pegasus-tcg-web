@@ -1,4 +1,5 @@
 import { CreditCard } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { PayoutAccount } from "@/features/finance/finance.types";
 import { formatThaiDateTime, maskAccount } from "../payout.format";
@@ -15,9 +16,7 @@ export function PayoutAccountCard({ account, missingAccount }: Props) {
     <Card className="gap-4 rounded-xl border bg-card p-5">
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">บัญชีรับเงิน</h2>
-        <span className={`rounded-full px-2 py-1 text-xs ${account ? "bg-emerald-100 text-emerald-700" : "bg-secondary text-slate-600"}`}>
-          {badge}
-        </span>
+        <Badge variant={account ? "success" : "secondary"}>{badge}</Badge>
       </div>
 
       {account ? (

@@ -115,12 +115,12 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
               </Link>
               <AuctionSourcePill order={summary} basePath="/seller/auctions" />
               {urgentLabel ? (
-                <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-xs text-[#b45309]">
+                <Badge variant="warning">
                   {urgentLabel}
                 </Badge>
               ) : null}
               {order.status === "PREPARING" ? (
-                <Badge className="h-5 rounded-full bg-[#e6f4f2] px-2 text-xs text-teal-600">
+                <Badge variant="info">
                   กำลังแพ็ค
                 </Badge>
               ) : null}
