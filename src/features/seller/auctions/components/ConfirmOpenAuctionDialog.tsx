@@ -1,9 +1,7 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 import { formatBaht } from "@/features/auction/auction.format";
 import type { EligibleUnit } from "@/features/auction/auction.types";
 import { ESTIMATED_COMMISSION_PERCENT } from "@/features/seller/products/listing-form.format";
@@ -49,39 +47,30 @@ export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now
   ];
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !pending && onOpenChange(next)}>
-      <DialogContent showCloseButton={false} className="gap-0 rounded-2xl bg-card p-6 sm:max-w-[460px]">
-        <div className="flex flex-col gap-1.5">
-          <DialogTitle className="text-lg font-bold text-foreground">เปิดประมูลการ์ดใบนี้?</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            {unit ? `${unit.item.card.productName} · ${unit.item.condition}` : ""}
-          </DialogDescription>
-        </div>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="เปิดประมูลการ์ดใบนี้?"
+      description={unit ? `${unit.item.card.productName} · ${unit.item.condition}` : undefined}
+      confirmLabel="เปิดประมูล"
+      cancelLabel="ย้อนกลับ"
+      isPending={pending}
+      confirmDisabled={!acknowledged}
+      onConfirm={onConfirm}
+    >
+      <dl className="flex flex-col gap-2 rounded-xl bg-muted/40 px-4 py-3.5 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-start justify-between gap-4">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="text-right font-semibold text-foreground tabular-nums">{value}</dd>
+          </div>
+        ))}
+      </dl>
 
-        <dl className="mt-5 flex flex-col gap-2 rounded-xl bg-muted/40 px-4 py-3.5 text-sm">
-          {rows.map(([label, value]) => (
-            <div key={label} className="flex items-start justify-between gap-4">
-              <dt className="text-muted-foreground">{label}</dt>
-              <dd className="text-right font-semibold text-foreground tabular-nums">{value}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
-          <Checkbox checked={acknowledged} onCheckedChange={(checked) => setAcknowledged(checked === true)} className="mt-0.5" />
-          ฉันเข้าใจว่าเมื่อมีผู้บิดแล้ว จะยกเลิกการประมูลไม่ได้
-        </label>
-
-        <DialogFooter className="mt-5 flex-row justify-end gap-2.5 border-0 bg-transparent p-0">
-          <DialogClose disabled={pending} render={<Button variant="outline" className="rounded-full px-5" />}>
-            ย้อนกลับ
-          </DialogClose>
-          <Button className="rounded-full px-5" disabled={!acknowledged || pending} onClick={onConfirm}>
-            {pending ? <Spinner /> : null}
-            เปิดประมูล
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
+        <Checkbox checked={acknowledged} onCheckedChange={(checked) => setAcknowledged(checked === true)} className="mt-0.5" />
+        ฉันเข้าใจว่าเมื่อมีผู้บิดแล้ว จะยกเลิกการประมูลไม่ได้
+      </label>
+    </ConfirmDialog>
   );
 }

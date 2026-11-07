@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Fragment } from "react";
 import { DisabledActionHint } from "@/components/common/DisabledActionHint";
-import { EmptyState, ErrorState } from "@/components/common";
+import { ConfirmDialog, EmptyState, ErrorState } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import {
   cardDate,
@@ -34,13 +34,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/toast";
 import { SaleBuyBox } from "@/features/sale/components/SaleBuyBox";
 import {
@@ -615,22 +608,17 @@ function ListingDetailContent({
             {t.retry}
           </Button>
         )}
-        <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
-          <AlertDialogContent>
-            <AlertDialogTitle>{t.closeConfirm}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {listing.card.productName}
-            </AlertDialogDescription>
-            <Button
-              variant="destructive"
-              disabled={changeStatus.isPending}
-              onClick={() => void close()}
-            >
-              {t.close}
-            </Button>
-            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+          open={confirmClose}
+          onOpenChange={setConfirmClose}
+          variant="destructive"
+          title={t.closeConfirm}
+          description={listing.card.productName}
+          confirmLabel={t.close}
+          cancelLabel={t.cancel}
+          isPending={changeStatus.isPending}
+          onConfirm={() => void close()}
+        />
       </main>
     </div>
   );

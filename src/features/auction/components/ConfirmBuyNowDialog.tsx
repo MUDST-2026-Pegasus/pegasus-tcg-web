@@ -1,10 +1,8 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from "react";
 import { Ban } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 
 import { auctionErrorMessage, type AuctionErrorMessage } from "../auction.errors";
 import { formatBaht } from "../auction.format";
@@ -44,32 +42,25 @@ export function ConfirmBuyNowDialog({ auction, open, onOpenChange }: ConfirmBuyN
   };
 
   return (
-    <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="rounded-xl sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">ซื้อทันทีในราคา {formatBaht(price)}?</DialogTitle>
-          <DialogDescription>ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม.</DialogDescription>
-        </DialogHeader>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={close}
+      title={`ซื้อทันทีในราคา ${formatBaht(price)}?`}
+      description="ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม."
+      confirmLabel="ซื้อทันที"
+      isPending={buyNow.isPending}
+      onConfirm={confirm}
+    >
+      <PriceSummary
+        rows={[
+          ["ราคาซื้อทันที", price],
+          ["ค่าจัดส่ง", auction.shippingFee],
+        ]}
+        totalLabel="ยอดชำระ"
+        total={price + auction.shippingFee}
+      />
 
-        <PriceSummary
-          rows={[
-            ["ราคาซื้อทันที", price],
-            ["ค่าจัดส่ง", auction.shippingFee],
-          ]}
-          totalLabel="ยอดชำระ"
-          total={price + auction.shippingFee}
-        />
-
-        {error ? <AuctionNotice tone="red" role="alert" icon={<Ban />} title={error.title} detail={error.detail} /> : null}
-
-        <DialogFooter>
-          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>ยกเลิก</DialogClose>
-          <Button className="rounded-full px-5" disabled={buyNow.isPending} onClick={confirm}>
-            {buyNow.isPending && <Spinner />}
-            ซื้อทันที
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {error ? <AuctionNotice tone="red" role="alert" icon={<Ban />} title={error.title} detail={error.detail} /> : null}
+    </ConfirmDialog>
   );
 }

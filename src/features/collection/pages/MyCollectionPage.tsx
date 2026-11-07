@@ -2,9 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
-import { ItemCard, QueryBoundary } from "@/components/common";
+import { ConfirmDialog, ItemCard, QueryBoundary } from "@/components/common";
 import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/auth.queries";
@@ -86,12 +85,8 @@ export function MyCollectionPage() {
 
     <EditCardDialog item={editing} onClose={() => setEditing(null)} />
 
-    <AlertDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}>
-      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Remove card?</AlertDialogTitle>
-        <AlertDialogDescription>Remove this card from your collection?</AlertDialogDescription></AlertDialogHeader>
-        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button variant="destructive" disabled={remove.isPending} onClick={() => void deleteCard()}>Remove Card</Button></AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}
+      variant="destructive" title="Remove card?" description="Remove this card from your collection?"
+      confirmLabel="Remove Card" cancelLabel="Cancel" isPending={remove.isPending} onConfirm={() => void deleteCard()} />
   </main>;
 }

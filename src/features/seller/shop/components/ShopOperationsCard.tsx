@@ -1,10 +1,10 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/toast';
 import { getErrorMessage } from '@/lib/api';
 import type { ShopSettings } from '../shop.types';
@@ -28,5 +28,5 @@ export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
     {form.formState.errors.handlingDays && <p role="alert" className="text-xs text-destructive">ระบุจำนวนเต็ม 0–30 วัน</p>}
     <div className={row}><label htmlFor="auto-accept" className="text-xs font-medium">รับออเดอร์อัตโนมัติ</label><Switch id="auto-accept" checked={values.autoAcceptOrders} disabled={mutation.isPending} onCheckedChange={(v) => form.setValue('autoAcceptOrders', v, { shouldDirty: true })}/></div>
     <div className={shopFooter}><Button type="button" variant="ghost" size="sm" disabled={mutation.isPending} onClick={() => form.reset(settings)}>ยกเลิก</Button><Button type="submit" size="sm" disabled={!form.formState.isDirty || mutation.isPending}>บันทึกการตั้งค่า</Button></div>
-  </form><AlertDialog open={confirm} onOpenChange={setConfirm}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>ปิดร้านชั่วคราว?</AlertDialogTitle><AlertDialogDescription>สินค้าทั้งร้านจะถูกซ่อนเมื่อบันทึกการตั้งค่า คำสั่งซื้อที่ชำระเงินแล้วยังต้องจัดส่งตามปกติ</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>ยกเลิก</AlertDialogCancel><AlertDialogAction onClick={() => { form.setValue('vacationMode', true, { shouldDirty: true }); setConfirm(false); }}>ยืนยันปิดร้าน</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></ShopCard>;
+  </form><ConfirmDialog open={confirm} onOpenChange={setConfirm} title="ปิดร้านชั่วคราว?" description="สินค้าทั้งร้านจะถูกซ่อนเมื่อบันทึกการตั้งค่า คำสั่งซื้อที่ชำระเงินแล้วยังต้องจัดส่งตามปกติ" confirmLabel="ยืนยันปิดร้าน" onConfirm={() => { form.setValue('vacationMode', true, { shouldDirty: true }); setConfirm(false); }} /></ShopCard>;
 }

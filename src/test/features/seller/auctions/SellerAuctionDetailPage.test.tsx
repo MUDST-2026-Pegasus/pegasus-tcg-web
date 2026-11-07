@@ -62,7 +62,7 @@ describe("SellerAuctionDetailContent — ยังไม่มีบิด", () 
     renderDetail(noBids);
 
     await user.click(screen.getByRole("button", { name: "ยกเลิกประมูล" }));
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "ยกเลิกประมูล" }));
 
     expect(cancel).toHaveBeenCalledWith(150);
