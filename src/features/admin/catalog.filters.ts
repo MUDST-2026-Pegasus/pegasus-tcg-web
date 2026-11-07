@@ -1,6 +1,8 @@
 import { PRODUCT_SORTS, PRODUCT_TYPES } from "./catalog.format";
 import type {
+  AdminCardListingQuery,
   AdminProductQuery,
+  AdminSaleStatus,
   ProductSort,
   ProductType,
 } from "./catalog.types";
@@ -15,6 +17,12 @@ export const CATALOG_PAGE_SIZE = 24;
 
 export const DEFAULT_SORT: ProductSort = "newest";
 
+const SALE_STATUSES: AdminSaleStatus[] = [
+  "HAS_SELLER",
+  "NO_SELLER",
+  "HAS_BLOCKED",
+];
+
 export type CatalogFilters = {
   /** `null` = URL ไม่ได้ระบุ หน้าเลือกเกมแรกให้ */
   gameId: number | null;
@@ -25,6 +33,8 @@ export type CatalogFilters = {
   sort: ProductSort;
   /** false = รวมสินค้าที่ปิดใช้งาน (ค่าเริ่มต้นของหลังบ้าน) */
   activeOnly: boolean;
+  /** `null` = ทั้งหมด */
+  saleStatus: AdminSaleStatus | null;
   q: string;
   /** เริ่มที่ 1 ให้คนอ่านรู้เรื่อง — backend เริ่มที่ 0 */
   page: number;
@@ -37,6 +47,7 @@ const PARAM = {
   type: "type",
   sort: "sort",
   status: "status",
+  sale: "sale",
   q: "q",
   page: "page",
 } as const;
@@ -50,6 +61,7 @@ function readId(value: string | null): number | null {
 export function readFilters(params: URLSearchParams): CatalogFilters {
   const type = params.get(PARAM.type);
   const sort = params.get(PARAM.sort);
+  const sale = params.get(PARAM.sale);
 
   return {
     gameId: readId(params.get(PARAM.game)),
@@ -58,6 +70,7 @@ export function readFilters(params: URLSearchParams): CatalogFilters {
     productType: PRODUCT_TYPES.find((value) => value === type) ?? null,
     sort: PRODUCT_SORTS.find((value) => value === sort) ?? DEFAULT_SORT,
     activeOnly: params.get(PARAM.status) === "active",
+    saleStatus: SALE_STATUSES.find((value) => value === sale) ?? null,
     q: params.get(PARAM.q)?.trim() ?? "",
     page: readId(params.get(PARAM.page)) ?? 1,
   };
@@ -104,6 +117,9 @@ export function writeFilters(
   if (changes.activeOnly !== undefined) {
     set(PARAM.status, changes.activeOnly ? "active" : null);
   }
+  if (changes.saleStatus !== undefined) {
+    set(PARAM.sale, changes.saleStatus);
+  }
   if (changes.q !== undefined) {
     set(PARAM.q, changes.q.trim());
   }
@@ -124,6 +140,7 @@ export function hasNarrowingFilters(filters: CatalogFilters): boolean {
     filters.categoryId !== null ||
     filters.productType !== null ||
     filters.activeOnly ||
+    filters.saleStatus !== null ||
     filters.q !== ""
   );
 }
@@ -135,12 +152,19 @@ export type ProductTarget = "new" | number;
 
 export const PRODUCT_TABS = [
   "details",
+  "listings",
   "variants",
   "images",
   "effects",
 ] as const;
 
 export type ProductTab = (typeof PRODUCT_TABS)[number];
+
+/** หน้าแรกของแท็บ "ร้านที่ขาย" ไม่มีตัวกรอง — ชื่อแท็บอ่านจำนวนจากก้อนเดียวกัน */
+export const CARD_LISTINGS_FIRST_PAGE: AdminCardListingQuery = {
+  page: 0,
+  size: 20,
+};
 
 /** `?product=` → สินค้าที่ต้องเปิด · ไม่มีหรือพิมพ์มั่ว → `null` (ปิด) */
 export function readProductTarget(params: URLSearchParams): ProductTarget | null {
@@ -183,6 +207,7 @@ export function toProductQuery(
     q: filters.q || undefined,
     sort: filters.sort,
     activeOnly: filters.activeOnly || undefined,
+    saleStatus: filters.saleStatus ?? undefined,
     page: filters.page - 1,
     size: CATALOG_PAGE_SIZE,
   };

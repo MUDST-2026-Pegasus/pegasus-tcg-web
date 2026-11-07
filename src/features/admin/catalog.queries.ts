@@ -10,6 +10,7 @@ import { catalogKeys } from "@/features/catalog/catalog.queries";
 
 import * as catalogApi from "./catalog.api";
 import type {
+  AdminCardListingQuery,
   AdminProductQuery,
   CardEffect,
   CardEffectPayload,
@@ -45,6 +46,10 @@ export const adminCatalogKeys = {
     [...adminCatalogKeys.all, "detail", productId] as const,
   effects: (productId: number) =>
     [...adminCatalogKeys.all, "effects", productId] as const,
+  listings: (productId: number) =>
+    [...adminCatalogKeys.all, "listings", productId] as const,
+  listingPage: (productId: number, query: AdminCardListingQuery) =>
+    [...adminCatalogKeys.listings(productId), query] as const,
 };
 
 /** เกม ชุด หมวด และช่องของเกมแทบไม่เปลี่ยนระหว่างใช้หน้า — ไม่ต้องดึงใหม่บ่อย */
@@ -216,6 +221,48 @@ export function useDeleteProduct() {
     mutationFn: (productId: number) => catalogApi.deleteProduct(productId),
     onSuccess: () =>
       Promise.all([
+        queryClient.invalidateQueries({ queryKey: adminCatalogKeys.products() }),
+        queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
+      ]),
+  });
+}
+
+/** ประกาศของการ์ดจากทุกร้าน — ชื่อแท็บก็อ่านจำนวนจากก้อนนี้ */
+export function useCardListings(
+  productId: number,
+  query: AdminCardListingQuery,
+) {
+  return useQuery({
+    queryKey: adminCatalogKeys.listingPage(productId, query),
+    queryFn: () => catalogApi.getCardListings(productId, query),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * ระงับหรือปลดการระงับ — ตัวเลขในแท็บ ชิปบนการ์ด และหน้าร้านเปลี่ยนตาม
+ * ถูกปฏิเสธก็ดึงใหม่ เพราะแปลว่าข้อมูลบนจอเก่าไปแล้ว
+ */
+export function useChangeListingBlock(productId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      listingId,
+      action,
+      reason,
+    }: {
+      listingId: number;
+      action: "block" | "unblock";
+      reason: string;
+    }) =>
+      action === "block"
+        ? catalogApi.blockListing(listingId, reason)
+        : catalogApi.unblockListing(listingId, reason),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: adminCatalogKeys.listings(productId),
+        }),
         queryClient.invalidateQueries({ queryKey: adminCatalogKeys.products() }),
         queryClient.invalidateQueries({ queryKey: catalogKeys.all }),
       ]),
