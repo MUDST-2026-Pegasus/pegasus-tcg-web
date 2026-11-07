@@ -83,6 +83,8 @@ const mockListing: SellerListing = {
     totalCost: 20000,
     averageUnitCost: 10000,
   },
+  blockReason: null,
+  blockedAt: null,
 };
 
 const mockStockInHistory = {
