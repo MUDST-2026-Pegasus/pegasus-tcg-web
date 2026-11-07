@@ -40,7 +40,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { downloadBlob } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
@@ -49,8 +51,9 @@ import { reviewKeys } from "@/features/finance/reviews.queries";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
-import { useBuyerOrders } from "../orders.queries";
+import { useBuyerOrders, useDownloadBuyerOrderSummary } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
+import { buyerOrderSummaryDownloadErrorMessage } from "../orders.format";
 import {
   canBuyerCancel,
   firstTracking,
@@ -460,6 +463,7 @@ function OrderCardItem({
   isConfirming: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const downloadSummary = useDownloadBuyerOrderSummary();
 
   const { stage, label, badgeClassName } = orderStage(order);
   const canCancel = canBuyerCancel(order);
@@ -494,6 +498,26 @@ function OrderCardItem({
     : "Recent";
 
   const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
+
+  function handleDownloadSummary() {
+    downloadSummary.mutate(order.id, {
+      onSuccess: ({ blob, filename }) => {
+        const downloadFilename = filename ?? `order-summary-${order.orderNumber}.pdf`;
+        downloadBlob(blob, downloadFilename);
+        toast.add({
+          type: "success",
+          title: "ดาวน์โหลด Order Summary แล้ว",
+          description: downloadFilename,
+        });
+      },
+      onError: (error) =>
+        toast.add({
+          type: "error",
+          title: "ดาวน์โหลด Order Summary ไม่สำเร็จ",
+          description: buyerOrderSummaryDownloadErrorMessage(error),
+        }),
+    });
+  }
 
   return (
     <Card
@@ -627,8 +651,18 @@ function OrderCardItem({
       <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
           {stage === "COMPLETED" && (
-            <Button type="button" variant="link" size="sm" className="px-0">
-              Download Invoice <Download data-icon="inline-end" />
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="px-0"
+              disabled={downloadSummary.isPending}
+              aria-busy={downloadSummary.isPending}
+              aria-label={downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+              onClick={handleDownloadSummary}
+            >
+              {downloadSummary.isPending ? <Spinner /> : <Download data-icon="inline-end" />}
+              {downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
             </Button>
           )}
           {canCancel && (
