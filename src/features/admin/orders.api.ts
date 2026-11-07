@@ -1,4 +1,4 @@
-import { api, type PageResponse } from "@/lib/api";
+import { api, type FileDownload, type PageResponse } from "@/lib/api";
 
 import type {
   AdminOrderDetail,
@@ -38,4 +38,8 @@ export function getAdminOrders(
 
 export function getAdminOrder(sellerOrderId: number): Promise<AdminOrderDetail> {
   return api.get<AdminOrderDetail>(`/admin/orders/${sellerOrderId}`);
+}
+
+export function downloadAdminOrderSummary(sellerOrderId: number): Promise<FileDownload> {
+  return api.download(`/admin/orders/${sellerOrderId}/summary.pdf`);
 }
