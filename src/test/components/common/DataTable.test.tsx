@@ -57,4 +57,27 @@ describe("DataTable", () => {
     await userEvent.click(screen.getByText("B"));
     expect(onRowClick).toHaveBeenCalledWith(data[1]);
   });
+
+  it("keeps cell state when columns get a new identity on re-render", async () => {
+    const make = (): DataTableColumn<Row>[] => [{ id: "input", header: "ช่อง", cell: () => <input aria-label="ช่อง" /> }];
+    const { rerender } = render(<DataTable columns={make()} data={data.slice(0, 1)} />);
+    const input = screen.getByLabelText("ช่อง");
+    await userEvent.type(input, "abc");
+    rerender(<DataTable columns={make()} data={data.slice(0, 1)} />);
+    expect(screen.getByLabelText("ช่อง")).toBe(input);
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("abc");
+  });
+
+  it("renders the footer, column classes and expanded rows", () => {
+    const withFooter: DataTableColumn<Row>[] = [
+      { accessorKey: "name", header: "ชื่อ", footer: () => "รวม", meta: { cellClassName: "name-cell", headClassName: "name-head" } },
+    ];
+    render(<DataTable columns={withFooter} data={data} renderExpandedRow={(row) => (row.name === "B" ? "รายละเอียด B" : null)} />);
+    expect(screen.getByText("รวม")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "ชื่อ" })).toHaveClass("name-head");
+    expect(screen.getByRole("cell", { name: "A" })).toHaveClass("name-cell");
+    expect(screen.getByRole("cell", { name: "รายละเอียด B" })).toHaveAttribute("colspan", "1");
+    expect(screen.getAllByText(/รายละเอียด/)).toHaveLength(1);
+  });
 });
