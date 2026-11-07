@@ -32,6 +32,12 @@ export function useOrderDetails(orderId: number) {
   });
 }
 
+export function useDownloadBuyerOrderSummary() {
+  return useMutation({
+    mutationFn: (orderId: number) => ordersApi.downloadOrderSummary(orderId),
+  });
+}
+
 export function useCancelOrder() {
   const queryClient = useQueryClient();
   return useMutation({

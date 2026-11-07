@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, type FileDownload } from "@/lib/api";
 import type { OrderDetails, PageResponse, ReorderItemsResponse } from "./orders.types";
 
 function isRecord(val: unknown): val is Record<string, unknown> {
@@ -61,6 +61,9 @@ export const ordersApi = {
 
   getOrder: (id: number): Promise<OrderDetails> =>
     api.get<OrderDetails>(`/orders/${id}`),
+
+  downloadOrderSummary: (id: number): Promise<FileDownload> =>
+    api.download(`/orders/${id}/summary.pdf`),
 
   payOrder: (id: number): Promise<OrderDetails> =>
     api.post<OrderDetails>(`/orders/${id}/pay`),
