@@ -216,7 +216,7 @@ export function SaleBuyBox({
         ) : (
           <>
             {versions && <div className="border-t pt-5">{versions}</div>}
-            <div className="flex flex-wrap items-center gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-3 text-[13px]">
               <span className="text-muted-foreground">{t.quantity}</span>
               <div className="flex items-center rounded-lg border">
                 <Button
@@ -265,7 +265,7 @@ export function SaleBuyBox({
             <div className="flex gap-2.5">
               <Button
                 className={cn(
-                  "h-[52px] flex-1 rounded-xl font-semibold",
+                  "h-[52px] flex-1 rounded-xl text-[15px] font-semibold",
                   flash && "bg-red-600 text-white hover:bg-red-700",
                 )}
                 disabled={pending}
@@ -280,7 +280,7 @@ export function SaleBuyBox({
               </Button>
               <Button
                 variant="outline"
-                className="h-[52px] flex-1 rounded-xl font-semibold"
+                className="h-[52px] flex-1 rounded-xl text-[15px] font-semibold"
                 disabled={pending || auth.isLoading}
                 onClick={(event) => void add(true, event.currentTarget)}
               >
@@ -290,7 +290,7 @@ export function SaleBuyBox({
               <DisabledActionHint label={t.wishlistUnavailable}>
                 <Button
                   variant="outline"
-                  className="h-[52px] rounded-xl"
+                  className="h-[52px] w-[52px] rounded-xl"
                   size="icon"
                   disabled
                   aria-label={t.wishlist}

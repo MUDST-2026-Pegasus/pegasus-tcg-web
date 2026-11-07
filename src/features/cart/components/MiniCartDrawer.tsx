@@ -59,7 +59,7 @@ export function MiniCartDrawer() {
         showCloseButton={false}
         finalFocus={() => (mini.trigger?.isConnected ? mini.trigger : false)}
         className={cn(
-          "gap-0 overflow-hidden p-0",
+          "mini-cart-surface gap-0 overflow-hidden p-0",
           mobile
             ? "h-[85dvh] max-h-[85dvh] rounded-t-2xl"
             : "data-[side=right]:w-[420px] data-[side=right]:sm:max-w-[420px]",
@@ -126,11 +126,11 @@ function ItemRow({
         <Link
           to={`/listings/${item.listingId}`}
           onClick={mini.close}
-          className="line-clamp-2 text-[13px] font-semibold"
+          className={cn("line-clamp-2 leading-normal font-semibold", recent ? "text-sm" : "text-[13px]")}
         >
           {item.productName}
         </Link>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 text-xs leading-normal text-muted-foreground">
           {[
             item.condition,
             item.variantLabel,
@@ -212,9 +212,9 @@ function MiniCartBody() {
       className="flex min-h-0 flex-1 flex-col"
       data-mini-cart-state={summary.state}
     >
-      <header className="flex shrink-0 items-center gap-2.5 border-b px-5 py-5">
+      <header className="flex shrink-0 items-center gap-2.5 border-b px-5 py-[18px]">
         <CheckCircle2 className="size-5 shrink-0 fill-emerald-700 text-white" />
-        <SheetTitle className="flex-1 text-base font-bold">
+        <SheetTitle className="flex-1 text-[17px] leading-normal font-bold">
           {mini.previousQuantity > 0 ? t.updated : t.added}
         </SheetTitle>
         <Button
@@ -368,7 +368,7 @@ function MiniCartBody() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold">{t.subtotal}</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-xs leading-normal text-muted-foreground">
               {t.shipping}
             </p>
           </div>

@@ -195,9 +195,9 @@ function ListingDetailContent({
     listing.status === "SOLD_OUT" || listing.quantityAvailable === 0;
   return (
     <div className="bg-secondary/60">
-      <main className="mx-auto max-w-[1280px] space-y-7 px-5 pt-7 pb-16 lg:px-20">
+      <main className="listing-detail mx-auto max-w-[1280px] space-y-7 px-5 pt-7 pb-16 lg:px-20">
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="gap-2 text-[13px] sm:gap-2">
             {[
               { label: t.home, href: "/" },
               ...(game
@@ -247,7 +247,7 @@ function ListingDetailContent({
           />
           <div className="min-w-0 space-y-5">
             <header>
-              <div className="mb-3 flex flex-wrap gap-2 text-[11px] font-medium">
+              <div className="mb-5 flex flex-wrap items-center gap-2 text-xs leading-normal font-medium">
                 {game && (
                   <span className="rounded-full bg-sky-50 px-2.5 py-1 text-primary">
                     {game.nameLocal || game.name}
@@ -261,21 +261,24 @@ function ListingDetailContent({
                 <Badge
                   variant="secondary"
                   className={
-                    soldOut ? "text-muted-foreground" : "text-emerald-700"
+                    soldOut
+                      ? "h-auto px-2.5 py-1 text-xs leading-normal text-muted-foreground"
+                      : "h-auto gap-1.5 bg-emerald-50 px-2.5 py-1 text-xs leading-normal text-emerald-700"
                   }
                 >
+                  {!soldOut && <BadgeCheck className="size-3.5" aria-hidden="true" />}
                   {soldOut ? t.soldOut : t.active}
                 </Badge>
               </div>
-              <h1 className="text-3xl leading-tight font-bold tracking-tight">
+              <h1 className="text-[30px] leading-[38px] font-bold tracking-normal sm:text-[36px] sm:leading-[44px]">
                 {listing.card.productName}
               </h1>
               {product?.nameLocal && (
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-1.5 text-base leading-normal text-muted-foreground">
                   {product.nameLocal}
                 </p>
               )}
-              <p className="mt-3 text-xs">
+              <p className="mt-1.5 text-sm leading-normal font-medium text-muted-foreground">
                 {[
                   cardSet?.nameLocal || cardSet?.name,
                   product?.cardNumber ? `#${product.cardNumber}` : null,
@@ -304,7 +307,7 @@ function ListingDetailContent({
                     {grade || listing.condition}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
+                    <p className="text-[15px] leading-normal font-semibold">
                       {grade ||
                         `${t.condition} ${CONDITION_LABELS[listing.condition]}`}
                     </p>
@@ -346,7 +349,7 @@ function ListingDetailContent({
               versions={
                 offers.length ? (
                   <>
-                    <p className="mb-3 text-xs text-muted-foreground">
+                    <p className="mb-2 text-[13px] font-medium text-muted-foreground">
                       {t.version}
                     </p>
                     <div className="grid grid-cols-2 gap-3">
@@ -354,7 +357,7 @@ function ListingDetailContent({
                         const active = v.id === listing.card.variantId;
                         const content = (
                           <>
-                            <strong className="text-xs">
+                            <strong className="text-sm leading-normal font-semibold">
                               {[
                                 languageLabel(v.languageCode),
                                 finishLabel(v.finish),
@@ -436,7 +439,7 @@ function ListingDetailContent({
               }
               delivery={
                 listing.delivery?.optionCount > 0 ? (
-                  <div className="flex flex-wrap justify-between gap-3 rounded-xl bg-muted/60 px-3 py-3 text-xs">
+                  <div className="flex flex-wrap justify-between gap-3 rounded-xl bg-muted/60 px-4 py-3 text-[13px]">
                     <span className="flex items-center gap-1.5">
                       <Truck className="size-4 text-emerald-700" />
                       {listing.delivery.freeShipping
