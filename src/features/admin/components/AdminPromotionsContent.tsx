@@ -1,15 +1,37 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Info, Plus, Search, TicketPercent } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Plus,
+  Search,
+  TicketPercent,
+} from "lucide-react";
 
 import { ErrorState } from "@/components/common";
 import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -31,14 +53,24 @@ import {
   usePromotions,
 } from "../promotions.queries";
 import { PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
-import type { AdminPromotion, PromotionOwnerType, PromotionStatus } from "../promotions.types";
-import { PromotionActionDialog, type PromotionActionState } from "./PromotionActionDialog";
+import type {
+  AdminPromotion,
+  PromotionOwnerType,
+  PromotionStatus,
+} from "../promotions.types";
+import {
+  PromotionActionDialog,
+  type PromotionActionState,
+} from "./PromotionActionDialog";
 import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
 import { PromotionPageTabs } from "./PromotionPageTabs";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
 
-const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> = [
+const OWNER_FILTERS: Array<{
+  value: PromotionOwnerType | null;
+  label: string;
+}> = [
   { value: null, label: "ทุกเจ้าของ" },
   { value: "PLATFORM", label: "Pegasus" },
   { value: "SELLER", label: "ร้านค้า" },
@@ -79,13 +111,21 @@ export function AdminPromotionsContent() {
   const scopeNames = useMemo<ScopeNames>(
     () => ({
       games: new Map((games.data ?? []).map((game) => [game.id, game.name])),
-      categories: new Map((categories.data ?? []).map((category) => [category.id, category.name])),
+      categories: new Map(
+        (categories.data ?? []).map((category) => [category.id, category.name]),
+      ),
     }),
     [games.data, categories.data],
   );
-  const homeIds = useMemo(() => currentHomeIds(platform.data ?? []), [platform.data]);
+  const homeIds = useMemo(
+    () => currentHomeIds(platform.data ?? []),
+    [platform.data],
+  );
 
-  const updateParams = (changes: Record<string, string | null>, resetPage = true) => {
+  const updateParams = (
+    changes: Record<string, string | null>,
+    resetPage = true,
+  ) => {
     const next = new URLSearchParams(params);
     for (const [key, value] of Object.entries(changes)) {
       if (value) next.set(key, value);
@@ -97,7 +137,10 @@ export function AdminPromotionsContent() {
 
   useEffect(() => {
     if (search.trim() === q) return;
-    const timer = window.setTimeout(() => updateParams({ q: search.trim() || null }), SEARCH_DEBOUNCE_MS);
+    const timer = window.setTimeout(
+      () => updateParams({ q: search.trim() || null }),
+      SEARCH_DEBOUNCE_MS,
+    );
     return () => window.clearTimeout(timer);
     // updateParams อ่าน params ล่าสุดทุกครั้ง ไม่ต้องอยู่ใน deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,17 +148,25 @@ export function AdminPromotionsContent() {
 
   const onRowAction = (kind: PromotionRowAction, promotion: AdminPromotion) => {
     if (kind === "copy") {
-      void navigator.clipboard
-        ?.writeText(promotion.code)
-        .then(() => toast.add({ title: `คัดลอก ${promotion.code} แล้ว`, type: "success" }));
+      void navigator.clipboard?.writeText(promotion.code).then(() =>
+        toast.add({
+          title: `คัดลอก ${promotion.code} แล้ว`,
+          type: "success",
+        }),
+      );
       return;
     }
     if (kind === "redemptions") {
-      updateParams({ promo: String(promotion.id), redemptionPage: null }, false);
+      updateParams(
+        { promo: String(promotion.id), redemptionPage: null },
+        false,
+      );
       return;
     }
     // รู้อยู่แล้วว่ามีคนเก็บ/ใช้ ไม่ต้องให้พิมพ์ยืนยันก่อนค่อยบอกว่าลบไม่ได้
-    const blocked = kind === "delete" && (promotion.usedCount > 0 || promotion.claimedCount > 0);
+    const blocked =
+      kind === "delete" &&
+      (promotion.usedCount > 0 || promotion.claimedCount > 0);
     setAction({ kind: blocked ? "blocked" : kind, promotion });
   };
 
@@ -124,23 +175,43 @@ export function AdminPromotionsContent() {
   const totalPages = Math.max(1, list.data?.page.totalPages ?? 1);
   const counts = list.data?.statusCounts;
   const firstPage = Math.max(0, Math.min(page - 1, totalPages - 3));
-  const pageNumbers = Array.from({ length: Math.min(3, totalPages) }, (_, index) => firstPage + index);
+  const pageNumbers = Array.from(
+    { length: Math.min(3, totalPages) },
+    (_, index) => firstPage + index,
+  );
   const change = summary.data?.redemptionsChangePercent;
-  const costShare = summary.data ? percentOf(summary.data.platformDiscountCost30d, summary.data.gmv30d) : null;
-  const orderShare = summary.data ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d) : null;
+  const costShare = summary.data
+    ? percentOf(summary.data.platformDiscountCost30d, summary.data.gmv30d)
+    : null;
+  const orderShare = summary.data
+    ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d)
+    : null;
 
   return (
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-1">
           <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
-          <p className="text-sm text-muted-foreground">สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง</p>
+          <p className="text-sm text-muted-foreground">
+            สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="px-2.5" disabled={!platform.data} onClick={() => setHomeOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="px-2.5"
+            disabled={!platform.data}
+            onClick={() => setHomeOpen(true)}
+          >
             จัดลำดับหน้าแรก
           </Button>
-          <Button size="sm" className="px-2.5" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+          <Button
+            size="sm"
+            className="px-2.5"
+            render={<Link to="/admin/promotions/new" />}
+            nativeButton={false}
+          >
             <Plus />
             สร้างโค้ด Pegasus
           </Button>
@@ -152,14 +223,27 @@ export function AdminPromotionsContent() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="โค้ดที่ใช้งานอยู่"
-          value={((summary.data?.activePlatformCodes ?? 0) + (summary.data?.activeSellerCodes ?? 0)).toLocaleString("th-TH")}
+          value={(
+            (summary.data?.activePlatformCodes ?? 0) +
+            (summary.data?.activeSellerCodes ?? 0)
+          ).toLocaleString("th-TH")}
           note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
         />
         <KpiCard
           label="ใช้โค้ด (30 วัน)"
           value={(summary.data?.redemptions30d ?? 0).toLocaleString("th-TH")}
-          note={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`}
-          tone={change == null || change === 0 ? undefined : change > 0 ? "up" : "down"}
+          note={
+            change == null
+              ? "ยังไม่มีข้อมูลเดือนก่อน"
+              : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`
+          }
+          tone={
+            change == null || change === 0
+              ? undefined
+              : change > 0
+                ? "up"
+                : "down"
+          }
         />
         <KpiCard
           label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
@@ -169,18 +253,34 @@ export function AdminPromotionsContent() {
         <KpiCard
           label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          note={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={
+            orderShare
+              ? `${orderShare} ของออเดอร์ทั้งหมด`
+              : "ยังไม่มียอดขายใน 30 วัน"
+          }
         />
       </div>
 
       <Card className="gap-0 overflow-hidden rounded-[12px] border border-border p-0 shadow-none ring-0">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
-            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]">
+          <Tabs
+            className="w-fit max-w-full"
+            value={status ?? "ALL"}
+            onValueChange={(value) =>
+              updateParams({ status: value === "ALL" ? null : String(value) })
+            }
+          >
+            <TabsList
+              aria-label="กรองตามสถานะ"
+              className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]"
+            >
               {STATUS_TABS.map((tab) => {
                 const count =
                   tab.value == null
-                    ? Object.values(counts ?? {}).reduce((sum, value) => sum + value, 0)
+                    ? Object.values(counts ?? {}).reduce(
+                        (sum, value) => sum + value,
+                        0,
+                      )
                     : (counts?.[tab.value] ?? 0);
                 return (
                   <TabsTrigger
@@ -189,7 +289,9 @@ export function AdminPromotionsContent() {
                     className="h-auto gap-1.5 rounded-sm border-0! px-2.5 py-1.5 text-[13px] text-muted-foreground data-active:font-semibold data-active:shadow-xs"
                   >
                     {tab.label}
-                    <span className="text-[11px] font-semibold text-[#9aa5ad]">{count}</span>
+                    <span className="text-[11px] font-semibold text-[#9aa5ad]">
+                      {count}
+                    </span>
                   </TabsTrigger>
                 );
               })}
@@ -213,7 +315,7 @@ export function AdminPromotionsContent() {
                 <ToggleGroupItem
                   key={filter.label}
                   value={filter.value ?? "ALL"}
-                  className="rounded-none! text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
+                  className="rounded-sm text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                 >
                   {filter.label}
                 </ToggleGroupItem>
@@ -243,7 +345,13 @@ export function AdminPromotionsContent() {
           </div>
         </div>
 
-        {list.isPending ? <TableSkeleton rows={5} columns={6} className="mx-5 mb-5 rounded-md" /> : null}
+        {list.isPending ? (
+          <TableSkeleton
+            rows={5}
+            columns={6}
+            className="mx-5 mb-5 rounded-md"
+          />
+        ) : null}
         {list.isError && !list.data ? (
           <ErrorState
             error={list.error}
@@ -259,10 +367,16 @@ export function AdminPromotionsContent() {
                 <TicketPercent />
               </EmptyMedia>
               <EmptyTitle>ยังไม่มีโค้ดในแท็บนี้</EmptyTitle>
-              <EmptyDescription>สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ</EmptyDescription>
+              <EmptyDescription>
+                สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ
+              </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button size="sm" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+              <Button
+                size="sm"
+                render={<Link to="/admin/promotions/new" />}
+                nativeButton={false}
+              >
                 <Plus />
                 สร้างโค้ด Pegasus
               </Button>
@@ -270,13 +384,18 @@ export function AdminPromotionsContent() {
           </Empty>
         ) : null}
         {rows.length > 0 ? (
-          <PromotionTable promotions={rows} scopeNames={scopeNames} now={now} onAction={onRowAction} />
+          <PromotionTable
+            promotions={rows}
+            scopeNames={scopeNames}
+            now={now}
+            onAction={onRowAction}
+          />
         ) : null}
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
-            {totalItems} โค้ด
+            แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–
+            {page * PROMOTION_PAGE_SIZE + rows.length} จาก {totalItems} โค้ด
           </span>
           <Pagination aria-label="หน้ารายการโปรโมชั่น" className="mx-0 w-auto">
             <PaginationContent className="gap-2">
@@ -287,7 +406,9 @@ export function AdminPromotionsContent() {
                   variant="outline"
                   aria-label="หน้าก่อนหน้า"
                   disabled={page === 0}
-                  onClick={() => updateParams({ page: String(page - 1) }, false)}
+                  onClick={() =>
+                    updateParams({ page: String(page - 1) }, false)
+                  }
                 >
                   <ChevronLeft />
                 </Button>
@@ -300,7 +421,12 @@ export function AdminPromotionsContent() {
                     variant={number === page ? "default" : "outline"}
                     aria-current={number === page ? "page" : undefined}
                     aria-label={`หน้า ${number + 1}`}
-                    onClick={() => updateParams({ page: number ? String(number) : null }, false)}
+                    onClick={() =>
+                      updateParams(
+                        { page: number ? String(number) : null },
+                        false,
+                      )
+                    }
                   >
                     {number + 1}
                   </Button>
@@ -313,7 +439,9 @@ export function AdminPromotionsContent() {
                   variant="outline"
                   aria-label="หน้าถัดไป"
                   disabled={page + 1 >= totalPages}
-                  onClick={() => updateParams({ page: String(page + 1) }, false)}
+                  onClick={() =>
+                    updateParams({ page: String(page + 1) }, false)
+                  }
                 >
                   <ChevronRight />
                 </Button>
@@ -326,25 +454,49 @@ export function AdminPromotionsContent() {
       <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] px-4 py-3.5 text-[#956019]">
         <Info />
         <AlertDescription className="text-[13px] text-[#956019]">
-          โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล
-          (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
+          โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่
+          “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล (ร้านจะเห็นเหตุผลนั้น) · โค้ด
+          Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
         </AlertDescription>
       </Alert>
 
-      <PromotionActionDialog action={action} homeIds={homeIds} now={now} onChange={setAction} />
-      <PromotionHomeOrderDialog open={homeOpen} onOpenChange={setHomeOpen} promotions={platform.data ?? []} />
+      <PromotionActionDialog
+        action={action}
+        homeIds={homeIds}
+        now={now}
+        onChange={setAction}
+      />
+      <PromotionHomeOrderDialog
+        open={homeOpen}
+        onOpenChange={setHomeOpen}
+        promotions={platform.data ?? []}
+      />
       <PromotionRedemptionSheet
         promotionId={promoId}
         page={redemptionPage}
-        onPageChange={(next) => updateParams({ redemptionPage: next ? String(next) : null }, false)}
-        onClose={() => updateParams({ promo: null, redemptionPage: null }, false)}
+        onPageChange={(next) =>
+          updateParams({ redemptionPage: next ? String(next) : null }, false)
+        }
+        onClose={() =>
+          updateParams({ promo: null, redemptionPage: null }, false)
+        }
       />
     </main>
   );
 }
 
 /** การ์ดตัวเลขบนหัวหน้า (Figma PRM-A1 KPIs) — ป้ายเทา ตัวเลขหนา และบรรทัดเล็กใต้ตัวเลข */
-function KpiCard({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "up" | "down" }) {
+function KpiCard({
+  label,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note: string;
+  tone?: "up" | "down";
+}) {
   return (
     <Card className="min-w-0 gap-1.5 rounded-[12px] border border-border px-5 py-4 shadow-none ring-0">
       <p className="text-xs text-muted-foreground">{label}</p>
