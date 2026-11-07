@@ -47,22 +47,77 @@ describe('ShopProfileCard', () => {
     await waitFor(() => expect(save).toHaveBeenLastCalledWith({ displayName: 'Second name', phone: null, avatarUrl: null }));
     await waitFor(() => expect(button).toBeDisabled());
   });
-  it('does not render phone visibility switch in shop profile card', () => {
-    renderWithProviders(<ShopProfileCard user={user} handlingDays={2} verified stats={null} verification={null}/>);
-    expect(screen.queryByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' })).not.toBeInTheDocument();
-    expect(screen.queryByText('แสดงเบอร์โทรบนหน้าร้าน')).not.toBeInTheDocument();
-  });
-  it('renders phone in preview when user.phonePublic is true and hides when false', () => {
+  it('renders phone visibility switch with correct default state based on phonePublic', () => {
     const { unmount } = renderWithProviders(
       <ShopProfileCard user={{ ...user, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>
     );
-    expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
+    const switchOff = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(switchOff).not.toBeChecked();
     unmount();
 
     renderWithProviders(
       <ShopProfileCard user={{ ...user, phonePublic: true }} handlingDays={2} verified stats={null} verification={null}/>
     );
+    const switchOn = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(switchOn).toBeChecked();
+  });
+  it('switches dynamic label properly between ON and OFF states', async () => {
+    renderWithProviders(<ShopProfileCard user={{ ...user, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>);
+    const interaction = userEvent.setup();
+    const toggle = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+
+    expect(screen.getByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).toBeInTheDocument();
+    expect(screen.queryByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).not.toBeInTheDocument();
+
+    await interaction.click(toggle);
+    expect(screen.getByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).toBeInTheDocument();
+    expect(screen.queryByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).not.toBeInTheDocument();
+
+    await interaction.click(toggle);
+    expect(screen.getByText('Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์')).toBeInTheDocument();
+    expect(screen.queryByText('สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้')).not.toBeInTheDocument();
+  });
+  it('disables the switch when phone number is empty or whitespace and enables when phone is entered', async () => {
+    renderWithProviders(<ShopProfileCard user={{ ...user, phone: null, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>);
+    const interaction = userEvent.setup();
+    const phoneInput = screen.getByLabelText('เบอร์โทรติดต่อ');
+    const toggle = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+
+    // Initially empty -> disabled
+    expect(toggle).toHaveAttribute('aria-disabled', 'true');
+    expect(toggle).toHaveAttribute('data-disabled');
+
+    // Type whitespace -> still disabled
+    await interaction.type(phoneInput, '   ');
+    expect(toggle).toHaveAttribute('aria-disabled', 'true');
+    expect(toggle).toHaveAttribute('data-disabled');
+
+    // Type valid phone -> enabled
+    await interaction.clear(phoneInput);
+    await interaction.type(phoneInput, '0812345678');
+    expect(toggle).not.toHaveAttribute('aria-disabled', 'true');
+    expect(toggle).not.toHaveAttribute('data-disabled');
+
+    // Clear phone -> disabled again
+    await interaction.clear(phoneInput);
+    expect(toggle).toHaveAttribute('aria-disabled', 'true');
+    expect(toggle).toHaveAttribute('data-disabled');
+  });
+  it('triggers update payload with phonePublic when toggled', async () => {
+    const save = vi.spyOn(profileApi, 'updateProfile').mockResolvedValue({ ...user, phonePublic: true });
+    renderWithProviders(<ShopProfileCard user={{ ...user, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>);
+    const interaction = userEvent.setup();
+
+    expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
+    const toggle = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
+    expect(toggle).not.toBeChecked();
+
+    await interaction.click(toggle);
+    expect(toggle).toBeChecked();
     expect(screen.getByText('Phone number : 0812345678')).toBeInTheDocument();
+
+    await interaction.click(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith({ phone: null, avatarUrl: null, phonePublic: true }));
   });
   it('accepts one character names and rejects blank names per backend constraints', () => {
     expect(editProfileSchema.safeParse({ displayName: 'ก', phone: '', bio: '' }).success).toBe(true);

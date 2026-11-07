@@ -6,6 +6,7 @@ import { Info, Lock, Eye, BadgeCheck } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { useFileUpload } from '@/hooks/use-file-upload';
 import { getErrorMessage } from '@/lib/api';
@@ -15,10 +16,10 @@ import { editProfileSchema, toUpdateProfilePayload } from '@/features/account/pr
 import { useUpdateProfile } from '@/features/account/profile.queries';
 import { ShopCard, shopFooter } from './ShopCard';
 
-const schema = editProfileSchema.pick({ displayName: true, phone: true });
+const schema = editProfileSchema.pick({ displayName: true, phone: true }).extend({ phonePublic: z.boolean() });
 type ShopProfileValues = z.infer<typeof schema>;
 function toForm(user: AuthUser): ShopProfileValues {
-  return { displayName: user.displayName ?? '', phone: user.phone ?? '' };
+  return { displayName: user.displayName ?? '', phone: user.phone ?? '', phonePublic: user.phonePublic ?? false };
 }
 function ShopAvatar({ name, url, small = false }: { name: string; url: string | null; small?: boolean }) {
   return <Avatar className={small ? 'size-14' : 'size-16'}>
@@ -40,9 +41,14 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
   const avatar = cleared ? null : (item?.status !== 'error' ? item?.previewUrl : null) || user.avatarUrl;
   const name = values.displayName ?? '';
   const phone = values.phone ?? '';
+  const phonePublic = values.phonePublic ?? false;
   // Compare only visible editable fields with the last saved values. Hidden account
   // fields must not affect dirty tracking after reset or subsequent edits.
-  const changed = { displayName: name !== baseline.displayName, phone: phone !== baseline.phone };
+  const changed = {
+    displayName: name !== baseline.displayName,
+    phone: phone !== baseline.phone,
+    phonePublic: phonePublic !== baseline.phonePublic,
+  };
   const hasChanges = Object.values(changed).some(Boolean) || cleared || upload.objectKeys.length > 0;
   const busy = update.isPending || upload.isUploading;
   const url = `${window.location.origin}/u/${encodeURIComponent(user.username)}`;
@@ -60,6 +66,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
       });
       delete payload.bio;
       if (!changed.displayName) delete payload.displayName;
+      if (changed.phonePublic) payload.phonePublic = data.phonePublic;
       const saved = await update.mutateAsync(payload);
       reset(saved);
       toast.add({ type: 'success', title: 'บันทึกข้อมูลหน้าร้านแล้ว' });
@@ -100,6 +107,25 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
             {form.formState.errors.phone && <p role="alert" className="text-xs text-destructive">{form.formState.errors.phone.message}</p>}
           </div>
         </div>
+        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 p-3">
+          <div>
+            <label htmlFor="phone-public" className="text-xs font-medium">
+              แสดงเบอร์โทรบนหน้าร้าน
+            </label>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {phonePublic
+                ? 'สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้'
+                : 'Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์'}
+            </p>
+          </div>
+          <Switch
+            id="phone-public"
+            aria-label="แสดงเบอร์โทรบนหน้าร้าน"
+            checked={phonePublic}
+            disabled={busy || !phone.trim()}
+            onCheckedChange={(checked) => form.setValue('phonePublic', checked, { shouldDirty: true })}
+          />
+        </div>
         <div className="space-y-2">
           <label htmlFor="shop-link" className="text-xs">ลิงก์หน้าร้าน</label>
           <div className="flex flex-wrap gap-2">
@@ -117,7 +143,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
         <div className="space-y-3 px-[18px] pb-[18px]">
           <ShopAvatar name={name} url={avatar} small/>
           <h3 className="flex items-center gap-2 break-all text-base font-bold">{name}{verified && <BadgeCheck className="size-4 shrink-0 text-teal-600"/>}</h3>
-          {user.phonePublic && phone && <p className="text-xs text-muted-foreground">Phone number : {phone}</p>}
+          {phonePublic && phone && <p className="text-xs text-muted-foreground">Phone number : {phone}</p>}
           {stats}
           <div className="flex flex-wrap gap-1">{[...(handlingDays === null ? [] : ['จัดส่งภายใน ' + handlingDays + ' วัน']), 'รับคืน 7 วัน', 'รับประกันของแท้'].map((label) => <span key={label} className="rounded bg-[#e6f4f2] px-1.5 py-1 text-[10px] text-teal-700">{label}</span>)}</div>
         </div>
