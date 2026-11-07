@@ -1,7 +1,5 @@
 import { conditionDescription } from "@/lib/condition-description";
-import {
-  ConditionGuide,
-} from "../components/ConditionGuide";
+import { ConditionGuide } from "../components/ConditionGuide";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -52,7 +50,10 @@ import {
   isOnSale,
 } from "@/components/sale";
 import { useAddCartItem } from "@/features/cart/cart.queries";
-import { notifyQuickAdded, notifyQuickAddError } from "@/features/cart/mini-cart.notify";
+import {
+  notifyQuickAdded,
+  notifyQuickAddError,
+} from "@/features/cart/mini-cart.notify";
 import { useChangeListingStatus } from "@/features/seller/products/products.queries";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ApiError } from "@/lib/api";
@@ -67,10 +68,7 @@ import {
   useProductListings,
   useSellerListings,
 } from "../catalog.queries";
-import {
-  certificateHref,
-  versionOffers,
-} from "../listing-detail.format";
+import { certificateHref, versionOffers } from "../listing-detail.format";
 import { listingText as t } from "../listing-detail.messages";
 import type {
   PublicListingDetailDto,
@@ -266,7 +264,9 @@ function ListingDetailContent({
                       : "h-auto gap-1.5 bg-emerald-50 px-2.5 py-1 text-xs leading-normal text-emerald-700"
                   }
                 >
-                  {!soldOut && <BadgeCheck className="size-3.5" aria-hidden="true" />}
+                  {!soldOut && (
+                    <BadgeCheck className="size-3.5" aria-hidden="true" />
+                  )}
                   {soldOut ? t.soldOut : t.active}
                 </Badge>
               </div>
@@ -644,7 +644,10 @@ function RelatedListing({ listing }: { listing: PublicListingDto }) {
   const own = auth.user?.username === listing.seller.username;
   const add = async () => {
     try {
-      const item = await addCart.mutateAsync({ listingId: listing.id, quantity: 1 });
+      const item = await addCart.mutateAsync({
+        listingId: listing.id,
+        quantity: 1,
+      });
       notifyQuickAdded(item, () => navigate("/cart"));
     } catch (error) {
       notifyQuickAddError(error);
