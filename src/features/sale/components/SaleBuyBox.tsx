@@ -1,3 +1,5 @@
+import { DisabledActionHint } from "@/components/common/DisabledActionHint";
+import { Progress } from "@/components/ui/progress";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Heart, Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
@@ -21,11 +23,8 @@ import type {
   PublicListingDetailDto,
   PublicListingDto,
 } from "@/features/catalog/catalog.types";
-import {
-  buyBoxState,
-  listingTotal,
-} from "@/features/catalog/listing-detail.format";
-import { listingText as t } from "@/features/catalog/listing-detail.messages";
+import { buyBoxState, listingTotal } from "@/lib/listing-detail.format";
+import { listingText as t } from "@/lib/listing-detail.messages";
 import { cn } from "@/lib/utils";
 import { notifyAddedAtSalePrice } from "../sale.notify";
 import { untilLabel } from "../sale.format";
@@ -174,19 +173,12 @@ export function SaleBuyBox({
         {flash && (
           <div className="grid gap-2">
             {progress && (
-              <div
-                role="progressbar"
+              <Progress
+                value={progress.sold}
+                max={progress.quota}
                 aria-label={t.flashQuota}
-                aria-valuenow={progress.sold}
-                aria-valuemin={0}
-                aria-valuemax={progress.quota}
-                className="h-2 overflow-hidden rounded bg-orange-100"
-              >
-                <div
-                  className="h-full rounded bg-orange-600"
-                  style={{ width: `${progress.percent}%` }}
-                />
-              </div>
+                className="[&_[data-slot=progress-track]]:h-2 [&_[data-slot=progress-indicator]]:bg-destructive"
+              />
             )}
             <p className="text-xs font-medium text-orange-700">
               {[
@@ -295,7 +287,7 @@ export function SaleBuyBox({
                 {buying && <Loader2 className="size-4 animate-spin" />}
                 {t.buy}
               </Button>
-              <span title={t.wishlistUnavailable} className="inline-flex">
+              <DisabledActionHint label={t.wishlistUnavailable}>
                 <Button
                   variant="outline"
                   className="h-[52px] rounded-xl"
@@ -305,7 +297,7 @@ export function SaleBuyBox({
                 >
                   <Heart className="size-5" />
                 </Button>
-              </span>
+              </DisabledActionHint>
             </div>
           </>
         )}

@@ -312,18 +312,22 @@ describe("TCG-663 listing detail v2", () => {
       ...flash,
       sale: {
         ...flash.sale,
-        endsAt: new Date(Date.now() + 3500).toISOString(),
+        endsAt: new Date(Date.now() + 60000).toISOString(),
       },
     };
     mocks(detail({ pricing: expiring }));
     let reads = 0;
+    let expired = false;
     cy.intercept("GET", "**/api/v1/listings/877", (req) => {
       reads += 1;
-      req.reply(ok(reads === 1 ? detail({ pricing: expiring }) : detail()));
+      req.reply(ok(expired ? detail() : detail({ pricing: expiring })));
     }).as("expiry");
     cy.visit("/listings/877");
     cy.wait("@expiry");
     cy.get('[data-buy-box="flash"]').should("exist");
+    cy.clock(Date.now(), ["Date"]);
+    cy.then(() => { expired = true; });
+    cy.tick(61000);
     cy.get('[data-buy-box="raw"]', { timeout: 10000 }).should("exist");
     cy.then(() => expect(reads).to.be.greaterThan(1));
   });
