@@ -1,3 +1,4 @@
+import { DataTable, type DataTableColumn } from "@/components/common";
 import { Link } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 
@@ -10,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { formatBaht } from "../promotions.format";
@@ -33,16 +33,6 @@ import type { AdminSale, SaleStatus } from "../sales.types";
 import { PromotionOwnerTag } from "./PromotionBadges";
 
 export type SaleRowAction = "pause" | "resume" | "end" | "delete";
-
-const HEADERS: Array<{ label: string; width: string }> = [
-  { label: "แคมเปญ", width: "w-[21%]" },
-  { label: "ประเภท", width: "w-[11%]" },
-  { label: "ส่วนลด", width: "w-[12%]" },
-  { label: "ขอบเขต", width: "w-[15%]" },
-  { label: "งบ / ขายแล้ว", width: "w-[14%]" },
-  { label: "ระยะเวลา", width: "w-[13%]" },
-  { label: "สถานะ", width: "w-[10%]" },
-];
 
 const HEAD_CLASS = "h-10 px-3 text-xs font-medium text-muted-foreground";
 const CELL_CLASS = "px-3 py-2.5 align-middle text-[13px] whitespace-normal";
@@ -72,50 +62,14 @@ export function SaleTable({
   now: number;
   onAction: (action: SaleRowAction, sale: AdminSale) => void;
 }) {
-  return (
-    <Table className="min-w-[940px] table-fixed">
-      <TableHeader>
-        <TableRow className="bg-muted hover:bg-muted">
-          {HEADERS.map((head) => (
-            <TableHead key={head.label} className={cn(HEAD_CLASS, head.width)}>
-              {head.label}
-            </TableHead>
-          ))}
-          <TableHead className={cn(HEAD_CLASS, MENU_CLASS, "bg-muted")}>
-            <span className="sr-only">จัดการ</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sales.map((sale) => (
-          <SaleRow key={sale.id} sale={sale} scopeNames={scopeNames} now={now} onAction={onAction} />
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-function SaleRow({
-  sale,
-  scopeNames,
-  now,
-  onAction,
-}: {
-  sale: AdminSale;
-  scopeNames: SaleScopeNames;
-  now: number;
-  onAction: (action: SaleRowAction, sale: AdminSale) => void;
-}) {
-  const isPlatform = sale.ownerType === "PLATFORM";
-  const badge = saleTypeBadge(sale);
-  const percent = budgetPercent(sale);
-  const finished = isFinished(sale.status);
-  const paused = sale.status === "PAUSED";
-  const budgetOut = sale.status === "BUDGET_EXHAUSTED" || sale.status === "SOLD_OUT" || (percent ?? 0) >= 100;
-
-  return (
-    <TableRow className="h-[60px]">
-      <TableCell className={CELL_CLASS}>
+  const columns: DataTableColumn<AdminSale>[] = [
+    {
+      id: "col0",
+      header: "แคมเปญ",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[21%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        return (
+          <>
         <div className="flex min-w-0 items-center gap-1.5">
           <strong className="truncate text-[13px] font-bold">{sale.name}</strong>
           <PromotionOwnerTag owner={sale.ownerType} />
@@ -123,23 +77,62 @@ function SaleRow({
         <span className={SUB_CLASS} title={saleSubtitle(sale)}>
           {saleSubtitle(sale)}
         </span>
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col1",
+      header: "ประเภท",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[11%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        const badge = saleTypeBadge(sale);
+        return (
+          <>
         <SaleBadge type={badge.type} label={badge.label} />
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col2",
+      header: "ส่วนลด",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[12%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        return (
+          <>
         <span className={MAIN_CLASS}>{saleDiscountLabel(sale)}</span>
         <span className={SUB_CLASS}>{saleDiscountDetail(sale)}</span>
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col3",
+      header: "ขอบเขต",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[15%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        return (
+          <>
         <span className={MAIN_CLASS} title={saleScopeLabel(sale, scopeNames)}>
           {saleScopeLabel(sale, scopeNames)}
         </span>
         <span className={SUB_CLASS} title={saleScopeDetail(sale)}>
           {saleScopeDetail(sale)}
         </span>
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col4",
+      header: "งบ / ขายแล้ว",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[14%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        const percent = budgetPercent(sale);
+        const budgetOut = sale.status === "BUDGET_EXHAUSTED" || sale.status === "SOLD_OUT" || (budgetPercent(sale) ?? 0) >= 100;
+        return (
+          <>
         {sale.budgetCap != null ? (
           <>
             <span className="block truncate text-xs font-semibold">
@@ -164,17 +157,47 @@ function SaleRow({
                 ? "จบเพราะงบหมด"
                 : `ขายแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น`}
         </span>
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col5",
+      header: "ระยะเวลา",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[13%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        return (
+          <>
         <span className={MAIN_CLASS}>{salePeriod(sale)}</span>
         <span className={SUB_CLASS} title={salePeriodHint(sale, now)}>
           {salePeriodHint(sale, now)}
         </span>
-      </TableCell>
-      <TableCell className={CELL_CLASS}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col6",
+      header: "สถานะ",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[10%]"), cellClassName: CELL_CLASS },
+      cell: ({ row: { original: sale } }) => {
+        return (
+          <>
         <SaleStatusPill status={sale.status} />
-      </TableCell>
-      <TableCell className={cn(CELL_CLASS, MENU_CLASS)}>
+          </>
+        );
+      },
+    },
+    {
+      id: "col7",
+      header: () => <span className="sr-only">จัดการ</span>,
+      meta: { headClassName: cn(HEAD_CLASS, MENU_CLASS, "bg-muted"), cellClassName: cn(CELL_CLASS, MENU_CLASS) },
+      cell: ({ row: { original: sale } }) => {
+        const isPlatform = sale.ownerType === "PLATFORM";
+        const finished = isFinished(sale.status);
+        const paused = sale.status === "PAUSED";
+        return (
+          <>
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${sale.name}`} />}>
             <MoreVertical className="size-4" />
@@ -206,7 +229,20 @@ function SaleRow({
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
-      </TableCell>
-    </TableRow>
+          </>
+        );
+      },
+    },
+  ];
+
+  return (
+    <DataTable
+      columns={columns}
+      data={sales}
+      getRowId={(sale) => String(sale.id)}
+      tableClassName="min-w-[940px] table-fixed"
+      headerRowClassName="bg-muted hover:bg-muted"
+      rowClassName={() => "h-[60px]"}
+    />
   );
 }

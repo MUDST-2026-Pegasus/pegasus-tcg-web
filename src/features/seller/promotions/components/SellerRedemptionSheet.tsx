@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
 import { ChartColumn } from "lucide-react";
 
-import { EmptyState, ErrorState } from "@/components/common";
+import { EmptyState, ErrorState, DataTable, type DataTableColumn } from "@/components/common";
 import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { RedemptionStatusPill } from "@/features/admin/components/PromotionBadges";
 
@@ -12,6 +11,30 @@ import { useSellerRedemptions } from "../promotions.queries";
 import { discountLabel, formatPeriod, limitLabel, maskBuyer, minSpendLabel, money } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
 import { PromotionPagination } from "@/features/promotions/PromotionPagination";
+
+type RedemptionEntry = NonNullable<ReturnType<typeof useSellerRedemptions>["data"]>["items"][number];
+
+const REDEMPTION_COLUMNS: DataTableColumn<RedemptionEntry>[] = [
+  {
+    id: "order",
+    header: "คำสั่งซื้อ",
+    meta: { headClassName: "h-8 px-0", cellClassName: "px-0" },
+    cell: ({ row: { original: entry } }) =>
+      entry.sellerOrderNumber ? (
+        <Link
+          className="text-primary hover:underline"
+          to={entry.sellerOrderId ? `/seller/orders/${entry.sellerOrderId}` : `/seller/orders?q=${encodeURIComponent(entry.sellerOrderNumber)}`}
+        >
+          {entry.sellerOrderNumber}
+        </Link>
+      ) : (
+        "—"
+      ),
+  },
+  { id: "buyer", header: "ลูกค้า", meta: { headClassName: "h-8" }, cell: ({ row }) => maskBuyer(row.original.buyerDisplayName) },
+  { id: "amount", header: "ส่วนลด", meta: { headClassName: "h-8" }, cell: ({ row }) => money(row.original.amount) },
+  { id: "status", header: "สถานะ", meta: { headClassName: "h-8" }, cell: ({ row }) => <RedemptionStatusPill status={row.original.status} /> },
+];
 
 /**
  * การใช้โค้ด (Figma PRM-M2 SHEET) — ช่อง "ยอดขาย" ในบอร์ดยังไม่มีข้อมูลจาก backend จึงแสดงสามช่อง
@@ -75,43 +98,7 @@ export function SellerRedemptionSheet({
           <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
         ) : null}
         {redemptions.data?.items.length ? (
-          <Table className="text-xs">
-            <TableHeader>
-              <TableRow className="text-[11px]">
-                <TableHead className="h-8 px-0">คำสั่งซื้อ</TableHead>
-                <TableHead className="h-8">ลูกค้า</TableHead>
-                <TableHead className="h-8">ส่วนลด</TableHead>
-                <TableHead className="h-8">สถานะ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {redemptions.data.items.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="px-0">
-                    {entry.sellerOrderNumber ? (
-                      <Link
-                        className="text-primary hover:underline"
-                        to={
-                          entry.sellerOrderId
-                            ? `/seller/orders/${entry.sellerOrderId}`
-                            : `/seller/orders?q=${encodeURIComponent(entry.sellerOrderNumber)}`
-                        }
-                      >
-                        {entry.sellerOrderNumber}
-                      </Link>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{maskBuyer(entry.buyerDisplayName)}</TableCell>
-                  <TableCell>{money(entry.amount)}</TableCell>
-                  <TableCell>
-                    <RedemptionStatusPill status={entry.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable columns={REDEMPTION_COLUMNS} data={redemptions.data.items} getRowId={(entry) => String(entry.id)} tableClassName="text-xs" headerRowClassName="text-[11px]" />
         ) : null}
       </div>
       <PromotionPagination

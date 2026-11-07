@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 
-import { EmptyState, ErrorState } from "@/components/common";
+import { EmptyState, ErrorState, DataTable, type DataTableColumn } from "@/components/common";
 import { TableSkeleton } from "@/components/common/PageSkeletons";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import {
@@ -26,6 +25,24 @@ type PromotionRedemptionSheetProps = {
   onPageChange: (page: number) => void;
   onClose: () => void;
 };
+
+type RedemptionEntry = NonNullable<ReturnType<typeof useRedemptions>["data"]>["items"][number];
+
+const REDEMPTION_COLUMNS: DataTableColumn<RedemptionEntry>[] = [
+  {
+    id: "order",
+    header: "คำสั่งซื้อ",
+    meta: { headClassName: "h-9 px-0 text-muted-foreground", cellClassName: "px-0" },
+    cell: ({ row: { original: entry } }) => (
+      <Link className="text-primary underline-offset-2 hover:underline" to={`/admin/orders?q=${encodeURIComponent(entry.orderNumber)}`}>
+        {entry.orderNumber}
+      </Link>
+    ),
+  },
+  { id: "buyer", header: "ผู้ซื้อ", meta: { headClassName: "h-9 text-muted-foreground" }, cell: ({ row }) => maskBuyer(row.original.buyer) },
+  { id: "amount", header: "ส่วนลด", meta: { headClassName: "h-9 text-muted-foreground" }, cell: ({ row }) => formatBaht(row.original.amount) },
+  { id: "status", header: "สถานะ", meta: { headClassName: "h-9 text-muted-foreground" }, cell: ({ row }) => <RedemptionStatusPill status={row.original.status} /> },
+];
 
 /** Sheet การใช้โค้ด (Figma PRM-A3 D) — เปิดจาก `?promo=ID` reload แล้วยังอยู่ */
 export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onClose }: PromotionRedemptionSheetProps) {
@@ -82,35 +99,7 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
             <EmptyState title="ยังไม่มีการใช้โค้ด" className="min-h-40" />
           ) : null}
           {redemptions.data && redemptions.data.items.length > 0 ? (
-            <Table className="text-xs">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="h-9 px-0 text-muted-foreground">คำสั่งซื้อ</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">ผู้ซื้อ</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">ส่วนลด</TableHead>
-                  <TableHead className="h-9 text-muted-foreground">สถานะ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {redemptions.data.items.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="px-0">
-                      <Link
-                        className="text-primary underline-offset-2 hover:underline"
-                        to={`/admin/orders?q=${encodeURIComponent(entry.orderNumber)}`}
-                      >
-                        {entry.orderNumber}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{maskBuyer(entry.buyer)}</TableCell>
-                    <TableCell>{formatBaht(entry.amount)}</TableCell>
-                    <TableCell>
-                      <RedemptionStatusPill status={entry.status} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable columns={REDEMPTION_COLUMNS} data={redemptions.data.items} getRowId={(entry) => String(entry.id)} tableClassName="text-xs" />
           ) : null}
           <PromotionPagination
             page={page}

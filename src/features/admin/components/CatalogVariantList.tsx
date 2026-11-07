@@ -2,17 +2,9 @@ import { useState } from "react";
 
 import { Layers, Pencil } from "lucide-react";
 
-import { EmptyState } from "@/components/common";
+import { EmptyState, DataTable, type DataTableColumn } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { variantLabel } from "../catalog.format";
@@ -44,6 +36,32 @@ export function CatalogVariantList({
     setIsDialogOpen(true);
   }
 
+  const columns: DataTableColumn<CatalogVariant>[] = [
+    { id: "variant", header: "Variant", meta: { cellClassName: "font-medium" }, cell: ({ row }) => variantLabel(row.original) },
+    { id: "sku", header: "SKU", meta: { cellClassName: "font-mono text-xs" }, cell: ({ row }) => row.original.sku },
+    { id: "barcode", header: "บาร์โค้ด", meta: { cellClassName: "text-xs" }, cell: ({ row }) => row.original.barcode ?? "—" },
+    {
+      id: "status",
+      header: "สถานะ",
+      meta: { headClassName: "w-24" },
+      cell: ({ row: { original: variant } }) => (
+        <Badge variant={variant.active ? "outline" : "secondary"} className="rounded-full">
+          {variant.active ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+        </Badge>
+      ),
+    },
+    {
+      id: "edit",
+      header: () => <span className="sr-only">แก้ไข</span>,
+      meta: { headClassName: "w-12" },
+      cell: ({ row: { original: variant } }) => (
+        <Button variant="ghost" size="icon-sm" aria-label={`แก้ไข ${variantLabel(variant)}`} onClick={() => openDialog(variant)}>
+          <Pencil />
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4 px-6 pb-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -68,55 +86,12 @@ export function CatalogVariantList({
         />
       ) : (
         <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Variant</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>บาร์โค้ด</TableHead>
-                <TableHead className="w-24">สถานะ</TableHead>
-                <TableHead className="w-12">
-                  <span className="sr-only">แก้ไข</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {variants.map((variant) => (
-                <TableRow
-                  key={variant.id}
-                  className={cn(!variant.active && "text-muted-foreground")}
-                >
-                  <TableCell className="font-medium">
-                    {variantLabel(variant)}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {variant.sku}
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {variant.barcode ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={variant.active ? "outline" : "secondary"}
-                      className="rounded-full"
-                    >
-                      {variant.active ? "เปิดใช้งาน" : "ปิดใช้งาน"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`แก้ไข ${variantLabel(variant)}`}
-                      onClick={() => openDialog(variant)}
-                    >
-                      <Pencil />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={variants}
+            getRowId={(variant) => String(variant.id)}
+            rowClassName={(variant) => cn(!variant.active && "text-muted-foreground")}
+          />
         </div>
       )}
 

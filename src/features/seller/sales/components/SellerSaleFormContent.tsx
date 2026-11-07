@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { Link, useBlocker, useNavigate } from "react-router-dom";
@@ -12,7 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { DateTimePicker } from "@/components/common";
+import { DateTimePicker, DataTable, type DataTableColumn } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -260,6 +261,101 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
       : "ระหว่างนี้ขึ้นราคา listing ที่เข้าร่วมไม่ได้",
   ];
 
+  const changeRow = (row: SaleRowDraft, next: SaleRowDraft) => {
+    if (overlap.ids.has(row.listingId) && !next.selected) {
+      setOverlap((current) => {
+        const ids = new Set(current.ids);
+        ids.delete(row.listingId);
+        return { ...current, ids };
+      });
+    }
+    updateRows((current) => current.map((item) => (item.listingId === row.listingId ? next : item)));
+  };
+  const notes = (row: SaleRowDraft) => {
+    const props = { row, listing: byId.get(row.listingId), error: errors.get(row.listingId), overlapName: overlap.saleName, platformSale: platformById.get(row.listingId) };
+    return rowMessage(props) || (props.platformSale && row.selected) ? <ListingRowNotes {...props} /> : null;
+  };
+  const rowName = (row: SaleRowDraft) => byId.get(row.listingId)?.card.productName ?? `#${row.listingId}`;
+  const head = "px-3 py-2.5 text-left font-medium";
+  const cell = "px-3 py-2.5";
+  const listingColumns: DataTableColumn<SaleRowDraft>[] = [
+    {
+      id: "select",
+      header: () => (
+        <Checkbox
+          aria-label="เลือกทั้งหมด"
+          checked={allVisibleSelected}
+          onCheckedChange={(checked) => {
+            const ids = new Set(visibleRows.filter(selectable).map((row) => row.listingId));
+            updateRows((current) => current.map((row) => (ids.has(row.listingId) ? { ...row, selected: checked === true } : row)));
+          }}
+        />
+      ),
+      meta: { headClassName: cn(head, "w-10"), cellClassName: cell },
+      cell: ({ row: { original: row } }) => (
+        <Checkbox
+          aria-label={`เลือก ${rowName(row)}`}
+          checked={row.selected}
+          disabled={!!byId.get(row.listingId)?.inAuction}
+          onCheckedChange={(checked) => changeRow(row, { ...row, selected: checked === true })}
+        />
+      ),
+    },
+    {
+      id: "listing",
+      header: "Listing",
+      meta: { headClassName: head, cellClassName: cell },
+      cell: ({ row: { original: row } }) => {
+        const listing = byId.get(row.listingId);
+        const detail = listing ? [CONDITION_LABEL[listing.condition], listing.card.variantLabel].filter(Boolean).join(" · ") : "";
+        return (
+          <>
+            <p className="name truncate font-semibold">{rowName(row)}</p>
+            <p className="truncate text-xs text-muted-foreground">{listing?.inAuction ? "อยู่ในการประมูล — เลือกไม่ได้" : detail}</p>
+          </>
+        );
+      },
+    },
+    { id: "stock", header: "คงเหลือ", meta: { headClassName: cn(head, "w-[72px] whitespace-nowrap"), cellClassName: cell }, cell: ({ row }) => byId.get(row.original.listingId)?.quantityAvailable ?? "—" },
+    { id: "price", header: "ราคาปัจจุบัน", meta: { headClassName: cn(head, "w-24"), cellClassName: cell }, cell: ({ row }) => formatSaleBaht(row.original.price) },
+    {
+      id: "salePrice",
+      header: "ราคาลด",
+      meta: { headClassName: cn(head, "w-32"), cellClassName: cell },
+      cell: ({ row: { original: row } }) => {
+        const error = errors.get(row.listingId);
+        return (
+          <InputGroup className={cn("h-9", error && error !== "overlap" && "border-destructive")}>
+            <InputGroupAddon>
+              <InputGroupText>฿</InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label={`ราคาลด ${rowName(row)}`}
+              aria-invalid={!!error || undefined}
+              type="number"
+              min={1}
+              className="font-semibold"
+              disabled={!row.selected}
+              placeholder="—"
+              value={row.selected && row.salePrice != null ? row.salePrice : ""}
+              onFocus={() => setFocusId(row.listingId)}
+              onChange={(event) => changeRow(row, { ...row, salePrice: event.target.value === "" ? null : Number(event.target.value) })}
+            />
+          </InputGroup>
+        );
+      },
+    },
+    {
+      id: "percent",
+      header: "ลด",
+      meta: { headClassName: cn(head, "w-16"), cellClassName: cell },
+      cell: ({ row: { original: row } }) => {
+        const percent = rowPercent(row.price, row.salePrice);
+        return <span className={cn("font-semibold", percent != null ? "text-[#dc2626]" : "text-muted-foreground")}>{row.selected && percent != null ? `-${percent}%` : "—"}</span>;
+      },
+    },
+  ];
+
   return (
     <main className={cn("grid w-full min-w-0 content-start gap-5", PROMOTION_PAGE_CONTROLS)}>
       <div className="grid gap-3">
@@ -426,59 +522,19 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border">
-                  <table className="w-full min-w-[580px] table-fixed text-[13px]">
-                    <thead className="bg-muted text-xs text-muted-foreground">
-                      <tr className="[&>th]:px-3 [&>th]:py-2.5 [&>th]:text-left [&>th]:font-medium">
-                        <th className="w-10">
-                          <Checkbox
-                            aria-label="เลือกทั้งหมด"
-                            checked={allVisibleSelected}
-                            onCheckedChange={(checked) => {
-                              const ids = new Set(visibleRows.filter(selectable).map((row) => row.listingId));
-                              updateRows((current) =>
-                                current.map((row) => (ids.has(row.listingId) ? { ...row, selected: checked === true } : row)),
-                              );
-                            }}
-                          />
-                        </th>
-                        <th>Listing</th>
-                        <th className="w-[72px] whitespace-nowrap">คงเหลือ</th>
-                        <th className="w-24">ราคาปัจจุบัน</th>
-                        <th className="w-32">ราคาลด</th>
-                        <th className="w-16">ลด</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleRows.map((row) => (
-                        <ListingRow
-                          key={row.listingId}
-                          row={row}
-                          listing={byId.get(row.listingId)}
-                          error={errors.get(row.listingId)}
-                          overlapName={overlap.saleName}
-                          platformSale={platformById.get(row.listingId)}
-                          onFocus={() => setFocusId(row.listingId)}
-                          onChange={(next) => {
-                            if (overlap.ids.has(row.listingId) && !next.selected) {
-                              setOverlap((current) => {
-                                const ids = new Set(current.ids);
-                                ids.delete(row.listingId);
-                                return { ...current, ids };
-                              });
-                            }
-                            updateRows((current) => current.map((item) => (item.listingId === row.listingId ? next : item)));
-                          }}
-                        />
-                      ))}
-                      {visibleRows.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="p-6 text-center text-muted-foreground">
-                            {rows.length === 0 ? "ยังไม่มี listing ที่เปิดขาย" : "ไม่พบ listing ที่ค้นหา"}
-                          </td>
-                        </tr>
-                      ) : null}
-                    </tbody>
-                  </table>
+                  <DataTable
+                    columns={listingColumns}
+                    data={visibleRows}
+                    getRowId={(row) => String(row.listingId)}
+                    tableClassName="min-w-[580px] table-fixed text-[13px]"
+                    headerRowClassName="bg-muted text-xs text-muted-foreground"
+                    emptyMessage={rows.length === 0 ? "ยังไม่มี listing ที่เปิดขาย" : "ไม่พบ listing ที่ค้นหา"}
+                    rowProps={(row) => ({ "data-row": row.listingId, "aria-invalid": !!errors.get(row.listingId) || undefined } as ComponentProps<"tr">)}
+                    rowClassName={(row) => cn(errors.get(row.listingId) === "overlap" && "bg-[#fdf2f2]", (byId.get(row.listingId)?.inAuction || !row.selected) && "[&_.name]:text-muted-foreground")}
+                    expandedRowClassName={(row) => cn(errors.get(row.listingId) === "overlap" && "bg-[#fdf2f2]")}
+                    expandedCellClassName="px-3 pb-2.5 pt-0 whitespace-normal"
+                    renderExpandedRow={(row) => notes(row)}
+                  />
                 </div>
                 <p className="text-xs text-muted-foreground">
                   เลือกแล้ว {selectedRows.length} จาก {rows.length} listing · listing ประมูลเลือกไม่ได้
@@ -575,120 +631,44 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
   );
 }
 
-function ListingRow({
-  row,
-  listing,
-  error,
-  overlapName,
-  platformSale,
-  onChange,
-  onFocus,
-}: {
-  row: SaleRowDraft;
-  listing?: SellerListingSummary;
-  error?: string;
-  overlapName?: string;
-  platformSale?: { saleName: string; salePrice: number };
-  onChange: (row: SaleRowDraft) => void;
-  onFocus: () => void;
-}) {
-  const auction = !!listing?.inAuction;
-  const percent = rowPercent(row.price, row.salePrice);
-  const overlap = error === "overlap";
-  const message =
-    error === "overlap"
-      ? `อยู่ในการลดราคา${overlapName ? ` “${overlapName}”` : "อื่น"} ช่วงเดียวกัน → SALE_OVERLAP เอาออกจากอันเดิมก่อน`
-      : error
-        ? ROW_ERROR_MESSAGE[error as keyof typeof ROW_ERROR_MESSAGE]
-        : null;
-  const buyerSees =
-    platformSale && row.selected && row.salePrice != null
-      ? Math.min(platformSale.salePrice, row.salePrice)
-      : null;
-  const name = listing?.card.productName ?? `#${row.listingId}`;
-  const detail = listing ? [CONDITION_LABEL[listing.condition], listing.card.variantLabel].filter(Boolean).join(" · ") : "";
-
-  return (
-    <>
-      <tr
-        data-row={row.listingId}
-        aria-invalid={!!error || undefined}
-        className={cn(
-          "border-t [&>td]:px-3 [&>td]:py-2.5",
-          overlap && "bg-[#fdf2f2]",
-          (auction || !row.selected) && "[&_.name]:text-muted-foreground",
-          message || platformSale ? "[&>td]:pb-1" : "",
-        )}
-      >
-        <td>
-          <Checkbox
-            aria-label={`เลือก ${name}`}
-            checked={row.selected}
-            disabled={auction}
-            onCheckedChange={(checked) => onChange({ ...row, selected: checked === true })}
-          />
-        </td>
-        <td>
-          <p className="name truncate font-semibold">{name}</p>
-          <p className="truncate text-xs text-muted-foreground">{auction ? "อยู่ในการประมูล — เลือกไม่ได้" : detail}</p>
-        </td>
-        <td>{listing?.quantityAvailable ?? "—"}</td>
-        <td>{formatSaleBaht(row.price)}</td>
-        <td>
-          <InputGroup className={cn("h-9", error && error !== "overlap" && "border-destructive")}>
-            <InputGroupAddon>
-              <InputGroupText>฿</InputGroupText>
-            </InputGroupAddon>
-            <InputGroupInput
-              aria-label={`ราคาลด ${name}`}
-              aria-invalid={!!error || undefined}
-              type="number"
-              min={1}
-              className="font-semibold"
-              disabled={!row.selected}
-              placeholder="—"
-              value={row.selected && row.salePrice != null ? row.salePrice : ""}
-              onFocus={onFocus}
-              onChange={(event) =>
-                onChange({ ...row, salePrice: event.target.value === "" ? null : Number(event.target.value) })
-              }
-            />
-          </InputGroup>
-        </td>
-        <td className={cn("font-semibold", percent != null ? "text-[#dc2626]" : "text-muted-foreground")}>
-          {row.selected && percent != null ? `-${percent}%` : "—"}
-        </td>
-      </tr>
-      {message || (platformSale && row.selected) ? (
-        <tr className={cn(overlap && "bg-[#fdf2f2]")}>
-          <td />
-          <td colSpan={5} className="px-3 pb-2.5 text-[11px]">
-            {message ? (
-              <p className="flex items-center gap-1 text-[#dc2626]">
-                <TriangleAlert className="size-3 shrink-0" aria-hidden />
-                {message}
-              </p>
-            ) : null}
-            {platformSale && row.selected && buyerSees != null ? (
-              <p className="flex items-center gap-1 text-[#0058bc]">
-                <Info className="size-3 shrink-0" aria-hidden />
-                อยู่ในแคมเปญ {platformSale.saleName} ({formatSaleBaht(platformSale.salePrice)}) ·{" "}
-                {(row.salePrice ?? Infinity) < platformSale.salePrice ? "ราคาของคุณต่ำกว่า" : "ราคาแคมเปญต่ำกว่า"} → ผู้ซื้อเห็น{" "}
-                {formatSaleBaht(buyerSees)}
-              </p>
-            ) : null}
-          </td>
-        </tr>
-      ) : null}
-    </>
-  );
-}
-
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Card className="gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <h2 className="text-[15px] font-semibold">{title}</h2>
       {children}
     </Card>
+  );
+}
+
+type ListingRowProps = { row: SaleRowDraft; listing?: SellerListingSummary; error?: string; overlapName?: string; platformSale?: { saleName: string; salePrice: number } };
+
+function rowMessage({ error, overlapName }: ListingRowProps) {
+  if (error === "overlap") return `อยู่ในการลดราคา${overlapName ? ` “${overlapName}”` : "อื่น"} ช่วงเดียวกัน → SALE_OVERLAP เอาออกจากอันเดิมก่อน`;
+  return error ? ROW_ERROR_MESSAGE[error as keyof typeof ROW_ERROR_MESSAGE] : null;
+}
+
+/** ข้อความใต้แถว: error ของแถว และราคาที่ผู้ซื้อเห็นถ้าอยู่ในแคมเปญ Pegasus ด้วย */
+function ListingRowNotes(props: ListingRowProps) {
+  const { row, platformSale } = props;
+  const message = rowMessage(props);
+  if (!message && !(platformSale && row.selected)) return null;
+  const buyerSees = platformSale && row.selected && row.salePrice != null ? Math.min(platformSale.salePrice, row.salePrice) : null;
+  return (
+    <div className="pl-10 text-[11px]">
+      {message ? (
+        <p className="flex items-center gap-1 text-[#dc2626]">
+          <TriangleAlert className="size-3 shrink-0" aria-hidden />
+          {message}
+        </p>
+      ) : null}
+      {platformSale && row.selected && buyerSees != null ? (
+        <p className="flex items-center gap-1 text-[#0058bc]">
+          <Info className="size-3 shrink-0" aria-hidden />
+          อยู่ในแคมเปญ {platformSale.saleName} ({formatSaleBaht(platformSale.salePrice)}) ·{" "}
+          {(row.salePrice ?? Infinity) < platformSale.salePrice ? "ราคาของคุณต่ำกว่า" : "ราคาแคมเปญต่ำกว่า"} → ผู้ซื้อเห็น{" "}
+          {formatSaleBaht(buyerSees)}
+        </p>
+      ) : null}
+    </div>
   );
 }

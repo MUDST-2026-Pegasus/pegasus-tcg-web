@@ -7,7 +7,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { EmptyState } from "@/components/common";
+import { EmptyState, DataTable, type DataTableColumn } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -18,14 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
@@ -76,102 +68,53 @@ export function CardSchemaTable({
   onToggle,
   onMove,
 }: CardSchemaTableProps) {
-  return (
-    <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
-      <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3.5">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="text-[15px] font-semibold text-foreground">
-            คุณสมบัติการ์ดของ {game.name}
-          </h3>
-          <p className="text-[11px] text-muted-foreground">
-            {attributes.length} ฟิลด์
-            {productCount === undefined
-              ? ""
-              : ` · ใช้กับการ์ด ${formatCount(productCount)} ใบ`}
-          </p>
+  const flagColumn = (flag: AttributeFlag, label: string): DataTableColumn<GameAttribute> => ({
+    id: flag,
+    header: label,
+    meta: { headClassName: cn(HEAD_CLASS, "w-[70px]"), cellClassName: "py-2.5" },
+    cell: ({ row: { original: attribute } }) => (
+      <Switch
+        checked={attribute[flag]}
+        disabled={isBusy(attribute.id)}
+        onCheckedChange={(checked) => onToggle(attribute, flag, checked)}
+        aria-label={`${label}: ${attribute.label}`}
+        className={ROW_SWITCH}
+      />
+    ),
+  });
+  const columns: DataTableColumn<GameAttribute>[] = [
+    {
+      id: "label",
+      header: "ชื่อฟิลด์",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[260px] pl-5"), cellClassName: "py-2.5 pl-5" },
+      cell: ({ row: { original: attribute } }) => (
+        <div className="flex flex-col">
+          <span className="text-[13px] font-medium text-foreground">{attribute.label}</span>
+          <code className="text-[11px] text-[#9aa5ad]">{attribute.attrKey}</code>
         </div>
-
-        <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
-          + เพิ่มฟิลด์
-        </Button>
-      </div>
-
-      {attributes.length === 0 ? (
-        <EmptyState
-          icon={ListPlus}
-          title="ยังไม่มีฟิลด์"
-          description={`เพิ่มฟิลด์แรกของ ${game.name} เช่น HP หรือความหายาก แล้วฟอร์มเพิ่มการ์ดจะมีช่องนี้ทันที`}
-          className={CARD_EMPTY_CLASS}
-        />
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow className={HEAD_ROW_CLASS}>
-              <TableHead className={cn(HEAD_CLASS, "w-[260px] pl-5")}>
-                ชื่อฟิลด์
-              </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>ประเภท</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[280px]")}>
-                ค่าที่รับ
-              </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>จำเป็น</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[70px]")}>ใช้กรอง</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-                <span className="sr-only">จัดการ</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody className="[&_tr]:border-muted">
-            {attributes.map((attribute, index) => {
-              const busy = isBusy(attribute.id);
-
-              return (
-                <TableRow key={attribute.id} className="hover:bg-[#fafbfb]">
-                  <TableCell className="py-2.5 pl-5">
-                    <div className="flex flex-col">
-                      <span className="text-[13px] font-medium text-foreground">
-                        {attribute.label}
-                      </span>
-                      <code className="text-[11px] text-[#9aa5ad]">
-                        {attribute.attrKey}
-                      </code>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    <FieldTypeBadge type={attribute.dataType} />
-                  </TableCell>
-
-                  <TableCell className="max-w-[280px] truncate py-2.5 text-xs text-muted-foreground">
-                    {acceptedValues(attribute)}
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    <Switch
-                      checked={attribute.required}
-                      disabled={busy}
-                      onCheckedChange={(checked) =>
-                        onToggle(attribute, "required", checked)
-                      }
-                      aria-label={`จำเป็น: ${attribute.label}`}
-                      className={ROW_SWITCH}
-                    />
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    <Switch
-                      checked={attribute.filterable}
-                      disabled={busy}
-                      onCheckedChange={(checked) =>
-                        onToggle(attribute, "filterable", checked)
-                      }
-                      aria-label={`ใช้กรอง: ${attribute.label}`}
-                      className={ROW_SWITCH}
-                    />
-                  </TableCell>
-
-                  <TableCell className="py-2 pr-5 text-right">
+      ),
+    },
+    {
+      id: "type",
+      header: "ประเภท",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5" },
+      cell: ({ row }) => <FieldTypeBadge type={row.original.dataType} />,
+    },
+    {
+      id: "values",
+      header: "ค่าที่รับ",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[280px]"), cellClassName: "max-w-[280px] truncate py-2.5 text-xs text-muted-foreground" },
+      cell: ({ row }) => acceptedValues(row.original),
+    },
+    flagColumn("required", "จำเป็น"),
+    flagColumn("filterable", "ใช้กรอง"),
+    {
+      id: "actions",
+      header: () => <span className="sr-only">จัดการ</span>,
+      meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: "py-2 pr-5 text-right" },
+      cell: ({ row: { original: attribute, index } }) => {
+        const busy = isBusy(attribute.id);
+        return (
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={
@@ -217,12 +160,47 @@ export function CardSchemaTable({
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        );
+      },
+    },
+  ];
+
+  return (
+    <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
+      <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3.5">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-[15px] font-semibold text-foreground">
+            คุณสมบัติการ์ดของ {game.name}
+          </h3>
+          <p className="text-[11px] text-muted-foreground">
+            {attributes.length} ฟิลด์
+            {productCount === undefined
+              ? ""
+              : ` · ใช้กับการ์ด ${formatCount(productCount)} ใบ`}
+          </p>
+        </div>
+
+        <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
+          + เพิ่มฟิลด์
+        </Button>
+      </div>
+
+      {attributes.length === 0 ? (
+        <EmptyState
+          icon={ListPlus}
+          title="ยังไม่มีฟิลด์"
+          description={`เพิ่มฟิลด์แรกของ ${game.name} เช่น HP หรือความหายาก แล้วฟอร์มเพิ่มการ์ดจะมีช่องนี้ทันที`}
+          className={CARD_EMPTY_CLASS}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={attributes}
+          getRowId={(attribute) => String(attribute.id)}
+          headerRowClassName={HEAD_ROW_CLASS}
+          bodyClassName="[&_tr]:border-muted"
+          rowClassName={() => "hover:bg-[#fafbfb]"}
+        />
       )}
     </Card>
   );

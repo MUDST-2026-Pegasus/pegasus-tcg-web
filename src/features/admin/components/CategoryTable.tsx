@@ -1,18 +1,10 @@
 import { FolderTree, ImageIcon, Info, Pencil } from "lucide-react";
 
-import { EmptyState } from "@/components/common";
+import { EmptyState, DataTable, type DataTableColumn } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import type { CatalogCategory, Game } from "../catalog.types";
@@ -54,6 +46,88 @@ export function CategoryTable({
   const crossGame = categories.filter((category) => category.gameId === null).length;
   const ownGame = categories.length - crossGame;
 
+  const columns: DataTableColumn<(typeof rows)[number]>[] = [
+    {
+      id: "name",
+      header: "หมวดหมู่",
+      meta: { headClassName: cn(HEAD_CLASS, "pl-5"), cellClassName: "py-2.5 pl-5" },
+      cell: ({ row: { original: { category, depth } } }) => {
+        const image = imageUrls.get(category.id);
+        return (
+          <div className={cn("flex items-center gap-2.5", depth === 1 && "pl-2", !category.active && "opacity-55")}>
+            {depth === 1 && (
+              <span aria-hidden="true" className="text-sm text-[#9aa5ad]">
+                └
+              </span>
+            )}
+            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
+              {image ? <img src={image} alt="" className="size-full object-cover" /> : <ImageIcon aria-hidden="true" className="size-4" />}
+            </span>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-[13px] font-medium text-foreground">{category.name}</span>
+              <span className="truncate text-[11px] text-[#9aa5ad]">/{category.slug}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "code",
+      header: "รหัส",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[120px]"), cellClassName: "py-2.5 text-xs font-medium text-muted-foreground" },
+      cell: ({ row }) => row.original.category.code,
+    },
+    {
+      id: "scope",
+      header: "ใช้กับ",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[130px]"), cellClassName: "py-2.5" },
+      cell: ({ row }) =>
+        row.original.category.gameId === null ? (
+          <Badge className="h-5 rounded-[5px] bg-[#e8f1fc] px-2 text-[10px] font-medium text-[#0058bc]">ทุกเกม</Badge>
+        ) : (
+          <Badge variant="outline" className="h-5 max-w-full rounded-[5px] px-1.5 text-[10px] font-medium">
+            <span className="truncate">เฉพาะ {game.name}</span>
+          </Badge>
+        ),
+    },
+    {
+      id: "order",
+      header: "ลำดับ",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[60px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
+      cell: ({ row }) => row.original.category.displayOrder,
+    },
+    {
+      id: "active",
+      header: "เปิดใช้งาน",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[80px]"), cellClassName: "py-2.5" },
+      cell: ({ row: { original: { category } } }) => (
+        <Switch
+          checked={category.active}
+          disabled={isBusy(category.id)}
+          onCheckedChange={(checked) => onToggleActive(category, checked)}
+          aria-label={`เปิดใช้งาน: ${category.name}`}
+          className={ROW_SWITCH}
+        />
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">จัดการ</span>,
+      meta: { headClassName: cn(HEAD_CLASS, "w-[56px] pr-5"), cellClassName: "py-2 pr-5 text-right" },
+      cell: ({ row: { original: { category } } }) => (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`แก้ไขหมวด ${category.name}`}
+          className="rounded-md text-[#9aa5ad]"
+          onClick={() => onEdit(category)}
+        >
+          <Pencil />
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 pb-3.5">
@@ -87,106 +161,14 @@ export function CategoryTable({
           className={CARD_EMPTY_CLASS}
         />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow className={HEAD_ROW_CLASS}>
-              <TableHead className={cn(HEAD_CLASS, "pl-5")}>หมวดหมู่</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>รหัส</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>ใช้กับ</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[60px]")}>ลำดับ</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[80px]")}>เปิดใช้งาน</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[56px] pr-5")}>
-                <span className="sr-only">จัดการ</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody className="[&_tr]:border-muted">
-            {rows.map(({ category, depth }) => {
-              const image = imageUrls.get(category.id);
-
-              return (
-                <TableRow key={category.id} className="hover:bg-[#fafbfb]">
-                  <TableCell className="py-2.5 pl-5">
-                    <div
-                      className={cn(
-                        "flex items-center gap-2.5",
-                        depth === 1 && "pl-2",
-                        !category.active && "opacity-55",
-                      )}
-                    >
-                      {depth === 1 && (
-                        <span aria-hidden="true" className="text-sm text-[#9aa5ad]">
-                          └
-                        </span>
-                      )}
-                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
-                        {image ? (
-                          <img src={image} alt="" className="size-full object-cover" />
-                        ) : (
-                          <ImageIcon aria-hidden="true" className="size-4" />
-                        )}
-                      </span>
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-[13px] font-medium text-foreground">
-                          {category.name}
-                        </span>
-                        <span className="truncate text-[11px] text-[#9aa5ad]">
-                          /{category.slug}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="py-2.5 text-xs font-medium text-muted-foreground">
-                    {category.code}
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    {category.gameId === null ? (
-                      <Badge className="h-5 rounded-[5px] bg-[#e8f1fc] px-2 text-[10px] font-medium text-[#0058bc]">
-                        ทุกเกม
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="h-5 max-w-full rounded-[5px] px-1.5 text-[10px] font-medium"
-                      >
-                        <span className="truncate">เฉพาะ {game.name}</span>
-                      </Badge>
-                    )}
-                  </TableCell>
-
-                  <TableCell className="py-2.5 text-xs text-muted-foreground">
-                    {category.displayOrder}
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    <Switch
-                      checked={category.active}
-                      disabled={isBusy(category.id)}
-                      onCheckedChange={(checked) => onToggleActive(category, checked)}
-                      aria-label={`เปิดใช้งาน: ${category.name}`}
-                      className={ROW_SWITCH}
-                    />
-                  </TableCell>
-
-                  <TableCell className="py-2 pr-5 text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`แก้ไขหมวด ${category.name}`}
-                      className="rounded-md text-[#9aa5ad]"
-                      onClick={() => onEdit(category)}
-                    >
-                      <Pencil />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <DataTable
+          columns={columns}
+          data={rows}
+          getRowId={(row) => String(row.category.id)}
+          headerRowClassName={HEAD_ROW_CLASS}
+          bodyClassName="[&_tr]:border-muted"
+          rowClassName={() => "hover:bg-[#fafbfb]"}
+        />
       )}
     </Card>
   );

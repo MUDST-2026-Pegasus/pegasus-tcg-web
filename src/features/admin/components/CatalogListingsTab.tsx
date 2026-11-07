@@ -1,9 +1,9 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ChevronDown, ChevronUp, ExternalLink, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { EmptyState, QueryBoundary } from "@/components/common";
+import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { LISTING_STATUS_BADGE } from "@/features/seller/products/products.format";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +44,6 @@ import { ListingBlockDialog } from "./ListingBlockDialog";
 
 const ALL = "all";
 const SEARCH_DELAY_MS = 350;
-const COLUMN_COUNT = 6;
 
 type CatalogListingsTabProps = {
   productId: number;
@@ -127,6 +118,148 @@ export function CatalogListingsTab({
     })),
   ];
 
+  const listingColumns: DataTableColumn<AdminCardListing>[] = [
+    {
+      id: "col0",
+      header: "ร้าน",
+      cell: ({ row: { original: listing } }) => {
+          const { seller } = listing;
+          const closedShop = closedShopLabel(listing);
+          return (
+          <>
+        <div className="flex items-center gap-2">
+          <Avatar className="size-8 shrink-0">
+            {seller.avatarUrl && <AvatarImage src={seller.avatarUrl} alt="" />}
+            <AvatarFallback className="text-xs">
+              {shopInitials(seller.username)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-[13px] font-semibold">
+              {seller.username}
+            </span>
+            <span
+              className={cn(
+                "truncate text-[11px]",
+                closedShop ? "text-rose-700" : "text-muted-foreground",
+              )}
+            >
+              {closedShop ?? seller.displayName ?? "—"}
+            </span>
+          </div>
+        </div>
+          </>
+          );
+      },
+    },
+    {
+      id: "col1",
+      header: "Variant / สภาพ",
+      cell: ({ row: { original: listing } }) => {
+          const variantLabel = variantName(listing.catalogVariantId);
+          return (
+          <>
+        <div className="flex flex-col">
+          <span className="text-xs font-medium whitespace-normal">
+            {variantLabel}
+          </span>
+          <span className="text-[11px] text-muted-foreground">
+            {listingConditionLabel(listing)}
+          </span>
+        </div>
+          </>
+          );
+      },
+    },
+    {
+      id: "col2",
+      header: "ราคา", meta: { headClassName: "text-right", cellClassName: "text-right" },
+      cell: ({ row: { original: listing } }) => {
+          
+          return (
+          <>
+        <div className="flex flex-col items-end">
+          <span className="text-[13px] font-semibold">
+            {formatBaht(listing.salePrice ?? listing.price)}
+          </span>
+          <span className="text-[11px] text-muted-foreground">
+            {listing.salePrice !== null
+              ? `ลดจาก ${formatBaht(listing.price)}`
+              : pricingModeLabel(listing)}
+          </span>
+        </div>
+          </>
+          );
+      },
+    },
+    {
+      id: "col3",
+      header: "เหลือ", meta: { headClassName: "text-right", cellClassName: "text-right" },
+      cell: ({ row: { original: listing } }) => {
+          
+          return (
+          <>
+        <div className="flex flex-col items-end">
+          <span
+            className={cn(
+              "text-[13px] font-semibold",
+              listing.quantityAvailable === 0 && "text-[#d0342c]",
+            )}
+          >
+            {formatCount(listing.quantityAvailable)} ใบ
+          </span>
+          {listing.quantityReserved > 0 ? (
+            <span className="text-[11px] text-muted-foreground">
+              จอง {formatCount(listing.quantityReserved)}
+            </span>
+          ) : null}
+        </div>
+          </>
+          );
+      },
+    },
+    {
+      id: "col4",
+      header: "สถานะ", meta: { headClassName: "text-right", cellClassName: "text-right" },
+      cell: ({ row: { original: listing } }) => {
+          
+          return (
+          <>
+        <Badge
+          className={cn(
+            "h-5 rounded-full px-2 text-xs",
+            LISTING_STATUS_BADGE[listing.status],
+          )}
+        >
+          {LISTING_STATUS_LABEL[listing.status]}
+        </Badge>
+          </>
+          );
+      },
+    },
+    {
+      id: "toggle",
+      header: () => <span className="sr-only">รายละเอียด</span>,
+      meta: { headClassName: "w-10" },
+      cell: ({ row: { original: listing } }) => (
+        <>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-expanded={openId === listing.id}
+          aria-label={`รายละเอียดประกาศ #${listing.id}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpenId(openId === listing.id ? null : listing.id);
+          }}
+        >
+          {openId === listing.id ? <ChevronUp /> : <ChevronDown />}
+        </Button>
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-3.5 px-6 pb-6">
       {listings.data ? <ListingSummary summary={listings.data.summary} /> : null}
@@ -195,49 +328,21 @@ export function CatalogListingsTab({
                 listings.isPlaceholderData && "opacity-60",
               )}
             >
-              <Table className="min-w-[580px]">
-                <TableHeader>
-                  <TableRow className="bg-muted hover:bg-muted">
-                    <TableHead>ร้าน</TableHead>
-                    <TableHead>Variant / สภาพ</TableHead>
-                    <TableHead className="text-right">ราคา</TableHead>
-                    <TableHead className="text-right">เหลือ</TableHead>
-                    <TableHead className="text-right">สถานะ</TableHead>
-                    <TableHead className="w-10">
-                      <span className="sr-only">รายละเอียด</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.listings.items.map((listing) => (
-                    <Fragment key={listing.id}>
-                      <ListingRow
-                        listing={listing}
-                        variantName={variantName(listing.catalogVariantId)}
-                        open={openId === listing.id}
-                        onToggle={() =>
-                          setOpenId(openId === listing.id ? null : listing.id)
-                        }
-                      />
-                      {openId === listing.id ? (
-                        <TableRow className="hover:bg-transparent">
-                          <TableCell
-                            colSpan={COLUMN_COUNT}
-                            className="bg-muted/40 p-4 whitespace-normal"
-                          >
-                            <ListingDetail
-                              listing={listing}
-                              onAction={(action) =>
-                                setBlockTarget({ listing, action })
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ) : null}
-                    </Fragment>
-                  ))}
-                </TableBody>
-              </Table>
+              <DataTable
+                columns={listingColumns}
+                data={data.listings.items}
+                getRowId={(listing) => String(listing.id)}
+                tableClassName="min-w-[580px]"
+                headerRowClassName="bg-muted hover:bg-muted"
+                rowClassName={(listing) => cn(listing.status === "BLOCKED" && "bg-rose-50 hover:bg-rose-100/70")}
+                onRowClick={(listing) => setOpenId(openId === listing.id ? null : listing.id)}
+                expandedCellClassName="bg-muted/40 p-4 whitespace-normal"
+                renderExpandedRow={(listing) =>
+                  openId === listing.id ? (
+                    <ListingDetail listing={listing} onAction={(action) => setBlockTarget({ listing, action })} />
+                  ) : null
+                }
+              />
             </div>
 
             <p className="text-xs text-muted-foreground">
@@ -362,119 +467,6 @@ function SummaryTile({
       </dd>
       <dd className="text-[11px] text-muted-foreground">{note}</dd>
     </div>
-  );
-}
-
-function ListingRow({
-  listing,
-  variantName,
-  open,
-  onToggle,
-}: {
-  listing: AdminCardListing;
-  variantName: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  const { seller } = listing;
-  const closedShop = closedShopLabel(listing);
-  const blocked = listing.status === "BLOCKED";
-
-  return (
-    <TableRow
-      className={cn(
-        "cursor-pointer",
-        blocked && "bg-rose-50 hover:bg-rose-100/70",
-      )}
-      onClick={onToggle}
-    >
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <Avatar className="size-8 shrink-0">
-            {seller.avatarUrl && <AvatarImage src={seller.avatarUrl} alt="" />}
-            <AvatarFallback className="text-xs">
-              {shopInitials(seller.username)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-[13px] font-semibold">
-              {seller.username}
-            </span>
-            <span
-              className={cn(
-                "truncate text-[11px]",
-                closedShop ? "text-rose-700" : "text-muted-foreground",
-              )}
-            >
-              {closedShop ?? seller.displayName ?? "—"}
-            </span>
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex flex-col">
-          <span className="text-xs font-medium whitespace-normal">
-            {variantName}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {listingConditionLabel(listing)}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex flex-col items-end">
-          <span className="text-[13px] font-semibold">
-            {formatBaht(listing.salePrice ?? listing.price)}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {listing.salePrice !== null
-              ? `ลดจาก ${formatBaht(listing.price)}`
-              : pricingModeLabel(listing)}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="text-right">
-        <div className="flex flex-col items-end">
-          <span
-            className={cn(
-              "text-[13px] font-semibold",
-              listing.quantityAvailable === 0 && "text-[#d0342c]",
-            )}
-          >
-            {formatCount(listing.quantityAvailable)} ใบ
-          </span>
-          {listing.quantityReserved > 0 ? (
-            <span className="text-[11px] text-muted-foreground">
-              จอง {formatCount(listing.quantityReserved)}
-            </span>
-          ) : null}
-        </div>
-      </TableCell>
-      <TableCell className="text-right">
-        <Badge
-          className={cn(
-            "h-5 rounded-full px-2 text-xs",
-            LISTING_STATUS_BADGE[listing.status],
-          )}
-        >
-          {LISTING_STATUS_LABEL[listing.status]}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-expanded={open}
-          aria-label={`รายละเอียดประกาศ #${listing.id}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            onToggle();
-          }}
-        >
-          {open ? <ChevronUp /> : <ChevronDown />}
-        </Button>
-      </TableCell>
-    </TableRow>
   );
 }
 

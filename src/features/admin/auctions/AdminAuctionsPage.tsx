@@ -3,10 +3,9 @@ import { useState, type ReactNode } from "react";
 import { Flag, Gavel } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-import { EmptyState, QueryBoundary } from "@/components/common";
+import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatBaht, formatRemaining, pillForStatus } from "@/features/auction/auction.format";
 import { useAdminAuctions, useBannedBidders } from "@/features/auction/auction.queries";
 import type { AdminAuctionPage, AdminAuctionRow, AdminAuctionTab } from "@/features/auction/auction.types";
@@ -172,71 +171,61 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
   const head = "text-xs font-normal text-muted-foreground";
   const link = "cursor-pointer text-xs font-semibold hover:underline";
 
+  const columns: DataTableColumn<AdminAuctionRow>[] = [
+    {
+      id: "card",
+      header: "การ์ด / รหัส",
+      meta: { headClassName: `pl-4 ${head}`, cellClassName: "py-3 pl-4" },
+      cell: ({ row: { original: row } }) => (
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-9 shrink-0 overflow-hidden rounded bg-secondary">
+            {row.cardImageUrl ? <img src={row.cardImageUrl} alt="" className="size-full object-cover" loading="lazy" /> : null}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">{row.cardName}</p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">#{row.auctionNumber}</span>
+              {auctionFlags(row.signals, row.reportCount).map((flag) => (
+                <RiskFlag key={flag} label={flag} />
+              ))}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    { id: "shop", header: "ผู้ขาย", meta: { headClassName: head, cellClassName: "text-xs text-muted-foreground" }, cell: ({ row }) => row.original.shopName },
+    { id: "price", header: "ราคาปัจจุบัน", meta: { headClassName: head, cellClassName: "text-sm font-semibold tabular-nums text-foreground" }, cell: ({ row }) => formatBaht(row.original.currentPrice) },
+    { id: "bids", header: "บิด / ผู้บิด", meta: { headClassName: head, cellClassName: "text-xs tabular-nums text-muted-foreground" }, cell: ({ row }) => `${row.original.bidCount} / ${row.original.bidderCount}` },
+    { id: "time", header: "เวลา", meta: { headClassName: head }, cell: ({ row }) => <TimeCell row={row.original} serverTime={data.serverTime} /> },
+    { id: "status", header: "สถานะ", meta: { headClassName: head }, cell: ({ row }) => <AuctionStatusPill kind={pillForStatus(row.original.status)} label={row.original.status === "SOLD" ? "ขายแล้ว" : undefined} /> },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">การกระทำ</span>,
+      meta: { headClassName: "pr-4", cellClassName: "pr-4 text-right" },
+      cell: ({ row: { original: row } }) => (
+        <div className="flex items-center justify-end gap-3" onClick={(event) => event.stopPropagation()}>
+          <Link to={`/admin/auctions/${row.id}`} className={`${link} text-primary`}>
+            {row.status === "SUSPENDED" ? "ดูเหตุผล" : "ดู"}
+          </Link>
+          {canSuspend(row.status) ? (
+            <button type="button" className={`${link} text-destructive`} onClick={() => onSuspend(row)}>
+              ระงับ
+            </button>
+          ) : null}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none" aria-busy={disabled || undefined}>
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={`pl-4 ${head}`}>การ์ด / รหัส</TableHead>
-            <TableHead className={head}>ผู้ขาย</TableHead>
-            <TableHead className={head}>ราคาปัจจุบัน</TableHead>
-            <TableHead className={head}>บิด / ผู้บิด</TableHead>
-            <TableHead className={head}>เวลา</TableHead>
-            <TableHead className={head}>สถานะ</TableHead>
-            <TableHead className="pr-4">
-              <span className="sr-only">การกระทำ</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.page.items.map((row) => {
-            const suspended = row.status === "SUSPENDED";
-            return (
-              <TableRow key={row.id} className="cursor-pointer" onClick={() => navigate(`/admin/auctions/${row.id}`)}>
-                <TableCell className="py-3 pl-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-9 shrink-0 overflow-hidden rounded bg-secondary">
-                      {row.cardImageUrl ? <img src={row.cardImageUrl} alt="" className="size-full object-cover" loading="lazy" /> : null}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">{row.cardName}</p>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs text-muted-foreground">#{row.auctionNumber}</span>
-                        {auctionFlags(row.signals, row.reportCount).map((flag) => (
-                          <RiskFlag key={flag} label={flag} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">{row.shopName}</TableCell>
-                <TableCell className="text-sm font-semibold tabular-nums text-foreground">{formatBaht(row.currentPrice)}</TableCell>
-                <TableCell className="text-xs tabular-nums text-muted-foreground">
-                  {row.bidCount} / {row.bidderCount}
-                </TableCell>
-                <TableCell>
-                  <TimeCell row={row} serverTime={data.serverTime} />
-                </TableCell>
-                <TableCell>
-                  <AuctionStatusPill kind={pillForStatus(row.status)} label={row.status === "SOLD" ? "ขายแล้ว" : undefined} />
-                </TableCell>
-                <TableCell className="pr-4 text-right" onClick={(event) => event.stopPropagation()}>
-                  <div className="flex items-center justify-end gap-3">
-                    <Link to={`/admin/auctions/${row.id}`} className={`${link} text-primary`}>
-                      {suspended ? "ดูเหตุผล" : "ดู"}
-                    </Link>
-                    {canSuspend(row.status) ? (
-                      <button type="button" className={`${link} text-destructive`} onClick={() => onSuspend(row)}>
-                        ระงับ
-                      </button>
-                    ) : null}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={columns}
+        data={data.page.items}
+        getRowId={(row) => String(row.id)}
+        headerRowClassName="bg-muted/40 hover:bg-muted/40"
+        onRowClick={(row) => navigate(`/admin/auctions/${row.id}`)}
+      />
       {footer}
     </Card>
   );
