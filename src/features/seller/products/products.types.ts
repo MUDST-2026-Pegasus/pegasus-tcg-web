@@ -98,6 +98,9 @@ export type SellerListing = Omit<SellerListingSummary, "primaryPhotoUrl"> & {
   photos: ListingPhoto[];
   similarListings: SimilarListing[];
   costBasis: ListingCostBasis;
+  /** เหตุผลที่แอดมินระงับ — `null` เว้นแต่ BLOCKED */
+  blockReason: string | null;
+  blockedAt: string | null;
 };
 
 /**

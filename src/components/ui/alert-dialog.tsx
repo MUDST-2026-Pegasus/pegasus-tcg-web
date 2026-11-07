@@ -25,7 +25,9 @@ function AlertDialogOverlay({
   ...props
 }: AlertDialogPrimitive.Backdrop.Props) {
   return (
+    // forceRender: Base UI ไม่วาด backdrop ของ dialog ที่ซ้อนอยู่ใน Sheet เลยกดของข้างหลังได้
     <AlertDialogPrimitive.Backdrop
+      forceRender
       data-slot="alert-dialog-overlay"
       className={cn(
         "fixed inset-0 isolate z-50 bg-black/30 duration-100 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",

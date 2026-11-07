@@ -1,6 +1,9 @@
 import { api, type PageResponse } from "@/lib/api";
 
 import type {
+  AdminCardListing,
+  AdminCardListingPage,
+  AdminCardListingQuery,
   AdminProductQuery,
   CardEffect,
   CardEffectPayload,
@@ -59,6 +62,37 @@ export function getProducts(
 ): Promise<PageResponse<ProductSummary>> {
   return api.get<PageResponse<ProductSummary>>("/admin/catalog/products", {
     query,
+  });
+}
+
+/** ประกาศของการ์ดจากทุกร้าน — `AdminCardListingController.java` */
+export function getCardListings(
+  productId: number,
+  query: AdminCardListingQuery,
+): Promise<AdminCardListingPage> {
+  return api.get<AdminCardListingPage>(
+    `/admin/catalog/products/${productId}/listings`,
+    { query },
+  );
+}
+
+/** ระงับการขาย — ออเดอร์ที่จองไปแล้วเดินต่อ · ระงับซ้ำหรือปิดการขายแล้วได้ `LISTING_STATUS_TRANSITION` */
+export function blockListing(
+  listingId: number,
+  reason: string,
+): Promise<AdminCardListing> {
+  return api.post<AdminCardListing>(`/admin/listings/${listingId}/block`, {
+    reason,
+  });
+}
+
+/** ปลดการระงับ — กลับสถานะเดิม ถ้าร้านไม่ VERIFIED แล้วจะกลับเป็น PAUSED */
+export function unblockListing(
+  listingId: number,
+  reason: string,
+): Promise<AdminCardListing> {
+  return api.post<AdminCardListing>(`/admin/listings/${listingId}/unblock`, {
+    reason,
   });
 }
 
