@@ -6,23 +6,17 @@ export function cartUnitPrice(item: Pick<CartItemResponse, "currentPrice" | "uni
   return item.currentPrice ?? item.unitPriceAtAdd;
 }
 
-/**
- * แถว "ราคาสินค้า (ก่อนลด)" และ "ส่วนลดราคาสินค้า" ในสรุปตะกร้า/checkout (Figma SAL-B3 C / D)
- * รวมตัวเลขที่ API ส่งมา (`listPrice`, `salePrice`) × จำนวน — ไม่ได้คิดส่วนลดเองที่ FE
- */
-export function cartSaleTotals(items: CartItemResponse[]) {
-  let listTotal = 0;
-  let saleDiscount = 0;
-  for (const item of items) {
-    const unit = cartUnitPrice(item);
-    if (isOnSale(item.pricing)) {
-      listTotal += item.pricing.listPrice * item.quantity;
-      saleDiscount += (item.pricing.listPrice - item.pricing.salePrice) * item.quantity;
-    } else {
-      listTotal += unit * item.quantity;
-    }
-  }
+export function cartLineTotals(item: CartItemResponse) {
+  const listTotal = (isOnSale(item.pricing) ? item.pricing.listPrice : cartUnitPrice(item)) * item.quantity;
+  const eligible = isOnSale(item.pricing) ? Math.min(item.quantity, Math.max(0, item.pricing.sale.perBuyerLimit ?? item.quantity)) : 0;
+  const saleDiscount = isOnSale(item.pricing) ? (item.pricing.listPrice - item.pricing.salePrice) * eligible : 0;
   return { listTotal, saleDiscount, subtotal: listTotal - saleDiscount };
+}
+export function cartSaleTotals(items: CartItemResponse[]) {
+  return items.reduce((total, item) => {
+    const line = cartLineTotals(item);
+    return { listTotal: total.listTotal + line.listTotal, saleDiscount: total.saleDiscount + line.saleDiscount, subtotal: total.subtotal + line.subtotal };
+  }, { listTotal: 0, saleDiscount: 0, subtotal: 0 });
 }
 
 /**

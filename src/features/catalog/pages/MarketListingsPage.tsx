@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
+import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { ApiError } from "@/lib/api";
 import { CONDITION_LABELS, marketForListing, productHref } from "../catalog.mappers";
@@ -88,18 +89,16 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   const gameName = gamesQuery.data?.find((game) => game.id === product.gameId)?.name;
   const title = `${product.name}${product.cardNumber ? ` #${product.cardNumber.split("/")[0]}` : ""}`;
   const addCartItem = useAddCartItem();
+  const miniCart = useMiniCart();
   const addingListingId = addCartItem.isPending ? addCartItem.variables?.listingId : undefined;
 
   /** ปุ่ม Add ใส่ทีละ 1 ชิ้น — อยากได้หลายชิ้นปรับจำนวนต่อในตะกร้า */
-  async function addListingToCart(listing: PublicListingDto) {
+  async function addListingToCart(listing: PublicListingDto, trigger?: HTMLElement) {
+    const opening = miniCart.capture(listing.id, trigger);
     try {
       await addCartItem.mutateAsync({ listingId: listing.id, quantity: 1 });
-      if (notifyAddedAtSalePrice(listing.card.productName, 1, listing.pricing)) return;
-      toast.add({
-        title: "เพิ่มลงรถเข็นแล้ว",
-        description: `${listing.seller.displayName || listing.seller.username} · ${CONDITION_LABELS[listing.condition]}`,
-        type: "success",
-      });
+      miniCart.open(opening);
+      notifyAddedAtSalePrice(listing.card.productName, 1, listing.pricing);
     } catch (error) {
       toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
     }
@@ -155,7 +154,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
                   <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
                   <ListingRowPrice price={listing.price} pricing={listing.pricing} />
-                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={() => void addListingToCart(listing)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={(event) => void addListingToCart(listing, event.currentTarget)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>

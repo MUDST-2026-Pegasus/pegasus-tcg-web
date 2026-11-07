@@ -129,3 +129,7 @@ export function useRemoveCartItem() {
     },
   });
 }
+
+export function useMiniCartQuery() {
+  return useQuery({ queryKey: cartKeys.all, queryFn: cartApi.getCart, refetchOnMount: "always", refetchInterval: 15000 });
+}

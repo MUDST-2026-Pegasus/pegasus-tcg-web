@@ -19,6 +19,7 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
+import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
@@ -117,6 +118,7 @@ function ProductDetailContent({
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
+  const miniCart = useMiniCart();
   const itemLabel = product.productType === "SINGLE_CARD" ? "cards" : "items";
   const variantItems = [
     { value: ALL_VARIANTS, label: "All variants" },
@@ -204,16 +206,13 @@ function ProductDetailContent({
   const availableQuantity = filteredListings.reduce((sum, row) => sum + row.quantityAvailable, 0);
   const hasListings = filteredListings.length > 0;
 
-  async function addListingToCart(listingId: number, amount: number) {
+  async function addListingToCart(listingId: number, amount: number, trigger?: HTMLElement) {
+    const opening = miniCart.capture(listingId, trigger);
     try {
       await addCartItem.mutateAsync({ listingId, quantity: amount });
       const added = listings.find((item) => item.id === listingId);
-      if (added && notifyAddedAtSalePrice(added.card.productName, amount, added.pricing)) return true;
-      toast.add({
-        title: "เพิ่มลงรถเข็นแล้ว",
-        description: `เพิ่มสินค้า ${amount} ${amount === 1 ? itemLabel.slice(0, -1) : itemLabel}`,
-        type: "success",
-      });
+      miniCart.open(opening);
+      if (added) notifyAddedAtSalePrice(added.card.productName, amount, added.pricing);
       return true;
     } catch (error) {
       toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
@@ -221,9 +220,9 @@ function ProductDetailContent({
     }
   }
 
-  async function handleAddToCart() {
+  async function handleAddToCart(trigger?: HTMLElement) {
     if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
-    await addListingToCart(purchasableListing.id, selectedQuantity);
+    await addListingToCart(purchasableListing.id, selectedQuantity, trigger);
   }
 
   async function handleBuyNow() {
@@ -383,7 +382,7 @@ function ProductDetailContent({
                 {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
                 {availableForSelectedListing === 0 ? "Out of Stock" : isAuthLoading ? "Loading…" : "Buy now"}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price), purchasableListing.currency)}` : ""}
               </Button>
-              <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={() => void handleAddToCart()}>
+              <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={(event) => void handleAddToCart(event.currentTarget)}>
                 {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
                 {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
               </Button>
@@ -410,7 +409,7 @@ function ProductDetailContent({
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
                   <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={(event) => void addListingToCart(listing.id, 1, event.currentTarget)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
                 </article>
               ))}
             </div>

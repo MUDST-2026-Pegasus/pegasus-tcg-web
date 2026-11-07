@@ -46,3 +46,10 @@ describe("cart sale rows (Figma SAL-B3 C)", () => {
     expect(saleEndedInCart(item({ currentPrice: 1990, unitPriceAtAdd: 1393, priceChanged: true }))).toBe(false);
   });
 });
+
+it("charges regular prices above a Flash buyer limit", () => {
+  expect(cartSaleTotals([item({ quantity: 3, currentPrice: 1995,
+    pricing: { listPrice: 2850, salePrice: 1995, discountPercent: 30,
+      sale: { id: 1, slug: "flash", name: "Flash", type: "FLASH_SALE", endsAt: "2099-01-01", quotaLeft: 10, perBuyerLimit: 1 } } })]))
+    .toEqual({ listTotal: 8550, saleDiscount: 855, subtotal: 7695 });
+});

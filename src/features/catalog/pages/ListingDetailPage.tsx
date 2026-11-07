@@ -22,7 +22,8 @@ import {
   rarityLabel,
 } from "@/lib/card-labels";
 import { getErrorMessage } from "@/lib/api";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+
 import { useState } from "react";
 import {
   BadgeCheck,
@@ -51,8 +52,7 @@ import {
   isOnSale,
 } from "@/components/sale";
 import { useAddCartItem } from "@/features/cart/cart.queries";
-import { addToCartErrorMessage } from "@/features/cart/cart.format";
-import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
+import { notifyQuickAdded, notifyQuickAddError } from "@/features/cart/mini-cart.notify";
 import { useChangeListingStatus } from "@/features/seller/products/products.queries";
 import { useAuth } from "@/features/auth/auth.queries";
 import { ApiError } from "@/lib/api";
@@ -635,20 +635,16 @@ function ListingDetailContent({
 
 function RelatedListing({ listing }: { listing: PublicListingDto }) {
   const addCart = useAddCartItem();
+  const navigate = useNavigate();
   const relatedProduct = useProductDetail(listing.card.productSlug);
   const auth = useAuth();
   const own = auth.user?.username === listing.seller.username;
   const add = async () => {
     try {
-      await addCart.mutateAsync({ listingId: listing.id, quantity: 1 });
-      if (!notifyAddedAtSalePrice(listing.card.productName, 1, listing.pricing))
-        toast.add({ title: t.added, type: "success" });
+      const item = await addCart.mutateAsync({ listingId: listing.id, quantity: 1 });
+      notifyQuickAdded(item, () => navigate("/cart"));
     } catch (error) {
-      toast.add({
-        title: t.addFailed,
-        description: addToCartErrorMessage(error),
-        type: "error",
-      });
+      notifyQuickAddError(error);
     }
   };
   return (
