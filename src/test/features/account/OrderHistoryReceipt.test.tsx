@@ -11,6 +11,7 @@ const useBuyerOrders = vi.fn();
 
 vi.mock("@/features/account/orders.queries", () => ({
   useBuyerOrders: () => useBuyerOrders(),
+  useDownloadBuyerOrderSummary: () => ({ mutate: vi.fn(), isPending: false }),
   useReorderPreview: () => ({ data: undefined, isLoading: false, isError: false }),
 }));
 vi.mock("@/features/auth/auth.queries", () => ({ useAuth: () => ({ user: null }) }));
