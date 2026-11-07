@@ -180,22 +180,12 @@ function ToastIcon({ type }: { type: string | undefined }) {
 }
 
 function ToastList() {
-  const { toasts } = ToastPrimitive.useToastManager<{ quickCart?: boolean; imageUrl?: string | null }>()
+  const { toasts } = ToastPrimitive.useToastManager()
 
   return toasts.map((toastItem) => (
-    <Toast
-      key={toastItem.id}
-      toast={toastItem}
-      className={toastItem.data?.quickCart
-        ? "bg-[#1e242b] text-white [&_[data-slot=toast-description]]:text-slate-300 [&_[data-slot=toast-action]]:border-0 [&_[data-slot=toast-action]]:bg-transparent [&_[data-slot=toast-action]]:text-sky-300"
-        : undefined}
-    >
+    <Toast key={toastItem.id} toast={toastItem}>
       <ToastContent>
-        {toastItem.data?.quickCart && toastItem.data?.imageUrl ? (
-          <img src={toastItem.data.imageUrl} alt="" className="h-12 w-9 shrink-0 rounded object-contain" />
-        ) : (
-          <ToastIcon type={toastItem.type} />
-        )}
+        <ToastIcon type={toastItem.type} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <ToastTitle />
           <ToastDescription />

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   groupMiniCart,
   miniCartSummary,
@@ -91,4 +91,13 @@ describe("mini-cart rules", () => {
       shops: 0,
     });
   });
+});
+
+it("quick-add toast reports the new addition rather than aggregate cart quantity", async () => {
+  const { quickCartToast } = await import("@/components/common/quick-cart-toast");
+  const { notifyQuickAdded } = await import("@/features/cart/mini-cart.notify");
+  const add = vi.spyOn(quickCartToast, "add").mockReturnValue("test");
+  notifyQuickAdded(item({ quantity: 3 }), () => {});
+  expect(add).toHaveBeenCalledWith(expect.objectContaining({ description: "Card · ฿100" }));
+  add.mockRestore();
 });

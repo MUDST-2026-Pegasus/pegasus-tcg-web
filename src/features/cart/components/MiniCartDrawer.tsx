@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import {
   CheckCircle2,
   Loader2,
@@ -26,14 +25,13 @@ import {
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSellerListings } from "@/features/catalog/catalog.queries";
-import { cartUnitPrice, saleEndedInCart } from "@/features/sale/sale.cart";
-import { cartApi } from "./cart.api";
-import { cartKeys, useAddCartItem } from "./cart.queries";
-import { useMiniCart } from "./mini-cart.store";
-import { groupMiniCart, miniCartSummary } from "./mini-cart.format";
-import { miniCartText as t } from "./mini-cart.messages";
-import { addToCartErrorMessage } from "./cart.format";
-import type { CartItemResponse } from "./cart.types";
+import { cartLineTotals, cartUnitPrice, saleEndedInCart } from "@/features/sale/sale.cart";
+import { useMiniCartQuery, useAddCartItem } from "../cart.queries";
+import { useMiniCart } from "../mini-cart.store";
+import { groupMiniCart, miniCartSummary } from "../mini-cart.format";
+import { miniCartText as t } from "../mini-cart.messages";
+import { addToCartErrorMessage } from "../cart.format";
+import type { CartItemResponse } from "../cart.types";
 import { cn } from "@/lib/utils";
 
 export function MiniCartDrawer() {
@@ -73,18 +71,19 @@ export function MiniCartDrawer() {
   );
 }
 
-function ItemPrice({ item }: { item: CartItemResponse }) {
+function ItemPrice({ item, recent }: { item: CartItemResponse; recent: boolean }) {
   if (!item.purchasable)
     return (
       <span className="text-muted-foreground">
         {formatSaleBaht(cartUnitPrice(item) * item.quantity)}
       </span>
     );
+  const totals = cartLineTotals(item);
   const pricing = item.pricing
     ? {
         ...item.pricing,
-        listPrice: item.pricing.listPrice * item.quantity,
-        salePrice: item.pricing.salePrice * item.quantity,
+        listPrice: totals.listTotal,
+        salePrice: totals.subtotal,
       }
     : null;
   return (
@@ -93,7 +92,7 @@ function ItemPrice({ item }: { item: CartItemResponse }) {
       price={cartUnitPrice(item) * item.quantity}
       showBadge={false}
       size="sm"
-      className="items-end"
+      className={cn("items-end", !recent && "[&>span]:text-foreground")}
     />
   );
 }
@@ -161,7 +160,7 @@ function ItemRow({
         )}
       </div>
       <div className="shrink-0 pt-5 text-right text-sm font-semibold">
-        <ItemPrice item={item} />
+        <ItemPrice item={item} recent={recent} />
       </div>
     </article>
   );
@@ -169,12 +168,7 @@ function ItemRow({
 
 function MiniCartBody() {
   const mini = useMiniCart();
-  const query = useQuery({
-    queryKey: cartKeys.all,
-    queryFn: cartApi.getCart,
-    refetchOnMount: "always",
-    refetchInterval: 15000,
-  });
+  const query = useMiniCartQuery();
   const items = query.data?.items ?? [];
   const recent = items.find((item) => item.listingId === mini.listingId);
   const summary = miniCartSummary(items, mini.previousQuantity);

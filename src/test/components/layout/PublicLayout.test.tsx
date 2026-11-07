@@ -19,7 +19,7 @@ vi.mock("@/features/promotions/PendingClaimRunner", () => ({
   PendingClaimRunner: () => null,
 }));
 
-vi.mock("@/features/cart/MiniCartDrawer", () => ({
+vi.mock("@/features/cart/components/MiniCartDrawer", () => ({
   MiniCartDrawer: () => null,
 }));
 

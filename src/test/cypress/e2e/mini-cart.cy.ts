@@ -88,7 +88,7 @@ const row = (overrides: Partial<CartItemResponse> = {}): CartItemResponse => ({
 });
 function mocks(
   initial: CartItemResponse[] = [],
-  pricing?: typeof sale,
+  pricing?: import("../../../components/sale").ListingPricing,
   guest = false,
 ) {
   let items = initial;
@@ -256,6 +256,17 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
       .should("contain.text", "฿150")
       .and("contain.text", "−฿30")
       .and("contain.text", "฿120");
+  });
+  it("prices quantities above the Flash buyer limit consistently in rows and subtotal", () => {
+    const flash = { ...sale, listPrice: 2850, salePrice: 1995,
+      sale: { ...sale.sale, type: "FLASH_SALE" as const, perBuyerLimit: 1, quotaLeft: 10 } };
+    mocks([row({ quantity: 2, pricing: flash })], flash);
+    open();
+    cy.get('[data-mini-cart-item="877"]').each(($row) => {
+      cy.wrap($row).should("contain.text", "฿7,695");
+    });
+    cy.get("[data-mini-cart-footer]").should("contain.text", "฿8,550")
+      .and("contain.text", "−฿855").and("contain.text", "฿7,695");
   });
   it("blocks checkout for changed/unavailable items and excludes unavailable value", () => {
     mocks([

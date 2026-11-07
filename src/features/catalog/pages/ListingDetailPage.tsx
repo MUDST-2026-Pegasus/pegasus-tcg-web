@@ -52,7 +52,6 @@ import {
   isOnSale,
 } from "@/components/sale";
 import { useAddCartItem } from "@/features/cart/cart.queries";
-import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { notifyQuickAdded, notifyQuickAddError } from "@/features/cart/mini-cart.notify";
 import { useChangeListingStatus } from "@/features/seller/products/products.queries";
 import { useAuth } from "@/features/auth/auth.queries";
