@@ -9,6 +9,7 @@ import { ApiError } from "@/lib/api";
 import { renderWithProviders } from "@/test/utils";
 
 vi.mock("@/features/admin/catalog.api", () => ({
+  getCardListings: vi.fn(() => new Promise(() => {})),
   getProduct: vi.fn(),
   getGameAttributes: vi.fn(),
   getCardSets: vi.fn(),

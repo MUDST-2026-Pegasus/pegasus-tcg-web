@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router-dom";
 
 import { ProductCard } from "@/components/common";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -225,7 +225,18 @@ export function ListingEditContent({
         </div>
       </div>
 
-      {isClosed ? (
+      {listing.status === "BLOCKED" ? (
+        <Alert variant="destructive">
+          <AlertTitle>แอดมินระงับการขายประกาศนี้</AlertTitle>
+          <AlertDescription>
+            {listing.blockReason ?? "ไม่ได้ระบุเหตุผล"}
+            {listing.blockedAt
+              ? ` · ${new Date(listing.blockedAt).toLocaleDateString("th-TH", { dateStyle: "medium" })}`
+              : null}
+            {" · แก้ไขหรือลบไม่ได้ ติดต่อทีมงานเพื่อขอตรวจสอบ"}
+          </AlertDescription>
+        </Alert>
+      ) : isClosed ? (
         <Alert>
           <AlertDescription>
             ประกาศนี้{LISTING_STATUS_LABEL[listing.status]} แก้ไขไม่ได้แล้ว

@@ -39,7 +39,12 @@ import {
   useCatalogCounts,
   useCategories,
 } from "../catalog.queries";
-import type { Game, ProductSort, ProductType } from "../catalog.types";
+import type {
+  AdminSaleStatus,
+  Game,
+  ProductSort,
+  ProductType,
+} from "../catalog.types";
 
 import { CatalogFilterPanel } from "./CatalogFilterPanel";
 import { CatalogPagination } from "./CatalogPagination";
@@ -230,6 +235,21 @@ function CatalogWorkspace({
       ],
       onValueChange: (value) =>
         onFiltersChange({ activeOnly: value === "active" }),
+    },
+    {
+      id: "sale-status",
+      label: "สถานะการขาย",
+      value: filters.saleStatus ?? ALL,
+      options: [
+        { value: ALL, label: "สถานะการขาย: ทั้งหมด" },
+        { value: "HAS_SELLER", label: "มีร้านขาย" },
+        { value: "NO_SELLER", label: "ไม่มีร้านขาย" },
+        { value: "HAS_BLOCKED", label: "มีประกาศถูกระงับ" },
+      ],
+      onValueChange: (value) =>
+        onFiltersChange({
+          saleStatus: value === ALL ? null : (value as AdminSaleStatus),
+        }),
     },
     {
       id: "sort",

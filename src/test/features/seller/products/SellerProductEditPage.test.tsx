@@ -84,6 +84,8 @@ const mockListing: SellerListing = {
     totalCost: 20000,
     averageUnitCost: 10000,
   },
+  blockReason: null,
+  blockedAt: null,
 };
 
 describe("SellerProductEditPage", () => {
@@ -126,6 +128,19 @@ describe("SellerProductEditPage", () => {
     renderPage("999");
 
     expect(await screen.findByText("ไม่พบสินค้านี้")).toBeInTheDocument();
+  });
+
+  it("shows the seller why an admin blocked the listing", async () => {
+    vi.mocked(productsApi.getMyListing).mockResolvedValue({
+      ...mockListing,
+      status: "BLOCKED",
+      blockReason: "สงสัยการ์ดปลอม",
+      blockedAt: "2026-11-07T07:20:00Z",
+    });
+    renderPage();
+
+    expect(await screen.findByText("แอดมินระงับการขายประกาศนี้")).toBeInTheDocument();
+    expect(screen.getByText(/สงสัยการ์ดปลอม/)).toBeInTheDocument();
   });
 
   it("renders edit page and enables save when price is modified", async () => {
