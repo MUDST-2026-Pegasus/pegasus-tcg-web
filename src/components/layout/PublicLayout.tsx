@@ -1,3 +1,4 @@
+import "@/styles/listing-surfaces.css";
 import { QuickCartToaster } from "@/components/common/QuickCartToaster";
 import { MiniCartDrawer } from "@/features/cart/components/MiniCartDrawer";
 import { Outlet } from "react-router-dom";
