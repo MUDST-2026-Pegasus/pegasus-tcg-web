@@ -24,13 +24,7 @@ function formatMarketPrice(amount: number, currency: string) {
   return new Intl.NumberFormat("th-TH", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
-const RARITY_LABELS: Record<string, string> = {
-  RR: "Double Rare",
-  UR: "Ultra Rare",
-  SAR: "Special Art Rare",
-  SR: "Super Rare",
-  SIR: "Special Illustration Rare",
-};
+import { RARITY_LABELS } from "@/lib/card-labels";
 
 export function MarketListingsPage() {
   const { productId } = useParams<{ productId: string }>();
