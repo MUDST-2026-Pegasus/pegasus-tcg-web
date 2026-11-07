@@ -1,6 +1,21 @@
+import {
+  CARD_FINISH_LABEL,
+  CARD_EDITION_LABEL,
+  languageLabel,
+  rarityLabel,
+  cardDate,
+} from "@/lib/card-labels";
+import { Badge } from "@/components/ui/badge";
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
+  Flame,
+  Droplets,
+  Zap,
+  Leaf,
+  Eye,
+  Circle,
+  TrendingUp,
   Camera,
   ChevronLeft,
   ChevronRight,
@@ -51,7 +66,7 @@ export function ListingGallery({
     setIndex((selected + step + photos.length) % photos.length);
   return (
     <div className="min-w-0 space-y-5">
-      <div className="relative flex aspect-[7/8] items-center justify-center overflow-hidden rounded-[20px] bg-[#1e242b]">
+      <div className="relative flex aspect-[7/8] items-center justify-center overflow-hidden rounded-[20px] bg-foreground">
         {photos[selected] ? (
           <button
             aria-label={t.zoom}
@@ -180,7 +195,9 @@ export function ListingGallery({
 export function ListingMarketHint({
   market,
   price,
+  condition,
 }: {
+  condition?: string;
   market: MarketStatDto | null | undefined;
   price: number;
 }) {
@@ -207,6 +224,7 @@ export function ListingMarketHint({
               : "bg-muted text-muted-foreground",
         )}
       >
+        <TrendingUp className="mr-1 inline size-3" />
         {labels[hint.kind]}
         {hint.kind === "below" || hint.kind === "above"
           ? ` ${hint.percent.toFixed(0)}%`
@@ -214,7 +232,7 @@ export function ListingMarketHint({
       </span>
       {market?.medianPrice != null && (
         <span className="text-muted-foreground">
-          {t.median} {formatSaleBaht(market.medianPrice)}
+          {t.median} {condition} 30 วัน {formatSaleBaht(market.medianPrice)}
         </span>
       )}
     </div>
@@ -236,7 +254,7 @@ export function InformationGroup({
   if (!visible.length) return null;
   return (
     <div className="min-w-0">
-      <h3 className="mb-2 text-sm font-semibold text-primary">{title}</h3>
+      {title && <h3 className="mb-2 text-sm font-semibold text-primary">{title}</h3>}
       <dl>
         {visible.map(([label, value]) => (
           <div
@@ -244,7 +262,13 @@ export function InformationGroup({
             className="flex items-start justify-between gap-3 border-b py-3 text-[13px] last:border-b-0"
           >
             <dt className="shrink-0 text-muted-foreground">{label}</dt>
-            <dd className="text-right font-medium break-words">{value}</dd>
+            <dd className="text-right font-medium break-words">
+              {label === t.condition ? (
+                <Badge variant="secondary">{value}</Badge>
+              ) : (
+                value
+              )}
+            </dd>
           </div>
         ))}
       </dl>
@@ -335,12 +359,10 @@ export function ListingCardInformation({
             [t.game, gameName],
             [t.set, cardSet?.nameLocal || cardSet?.name],
             [t.number, product.cardNumber],
-            [t.rarity, product.rarityCode],
+            [t.rarity, rarityLabel(product.rarityCode)],
             [
               t.release,
-              cardSet?.releaseDate
-                ? new Date(cardSet.releaseDate).toLocaleDateString("th-TH")
-                : null,
+              cardSet?.releaseDate ? cardDate(cardSet.releaseDate) : null,
             ],
             [t.artist, attr.artist],
           ]}
@@ -349,9 +371,21 @@ export function ListingCardInformation({
           <InformationGroup
             title={t.offeredCard}
             rows={[
-              [t.language, variant?.languageCode],
-              [t.finish, variant?.finish],
-              [t.edition, variant?.edition],
+              [t.language, languageLabel(variant?.languageCode)],
+              [
+                t.finish,
+                variant?.finish === "NOT_APPLICABLE"
+                  ? null
+                  : (CARD_FINISH_LABEL[variant?.finish ?? ""] ??
+                    variant?.finish),
+              ],
+              [
+                t.edition,
+                variant?.edition === "NOT_APPLICABLE"
+                  ? null
+                  : (CARD_EDITION_LABEL[variant?.edition ?? ""] ??
+                    variant?.edition),
+              ],
               ...(listing.gradingCompany
                 ? ([
                     [t.gradingCompany, listing.gradingCompany],
@@ -359,9 +393,8 @@ export function ListingCardInformation({
                   ] as Row[])
                 : ([
                     [t.condition, CONDITION_LABELS[listing.condition]],
-                    [t.gradingCompany, t.raw],
+                    [t.grading, t.raw],
                   ] as Row[])),
-              [t.sku, variant?.sku || listing.card.sku],
             ]}
           />
           {listing.gradingCompany && cert && (
@@ -382,6 +415,10 @@ export function ListingCardInformation({
               )}
             </div>
           )}
+          <InformationGroup
+            title=""
+            rows={[[t.sku, variant?.sku || listing.card.sku]]}
+          />
         </div>
         {!energy && (
           <InformationGroup
@@ -416,7 +453,25 @@ export function ListingCardInformation({
                 </span>
                 {effect.energyCost.length > 0 && (
                   <span className="text-xs text-muted-foreground">
-                    {effect.energyCost.join(" · ")}
+                    {effect.energyCost.map((energy, n) => {
+                      const Icon =
+                        (
+                          {
+                            Fire: Flame,
+                            Water: Droplets,
+                            Lightning: Zap,
+                            Grass: Leaf,
+                            Psychic: Eye,
+                          } as Record<string, typeof Circle>
+                        )[energy] ?? Circle;
+                      return (
+                        <Icon
+                          key={n}
+                          aria-label={energy}
+                          className="inline size-4"
+                        />
+                      );
+                    })}
                   </span>
                 )}
                 <h4 className="text-sm font-semibold">{effect.name}</h4>
@@ -438,6 +493,27 @@ export function ListingCardInformation({
           {product.description}
         </p>
       )}
+    </section>
+  );
+}
+
+export function ListingInformationSkeleton() {
+  return (
+    <section
+      aria-label={t.loadingInfo}
+      aria-busy="true"
+      className="min-h-[480px] rounded-[20px] border bg-card p-7"
+    >
+      <Skeleton className="mb-6 h-6 w-40" />
+      <div className="grid gap-8 md:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="space-y-5">
+            {[0, 1, 2, 3, 4, 5].map((j) => (
+              <Skeleton key={j} className="h-6 w-full" />
+            ))}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

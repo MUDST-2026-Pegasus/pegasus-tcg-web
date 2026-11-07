@@ -65,15 +65,8 @@ export const CARD_FINISHES: CardFinish[] = [
   "NOT_APPLICABLE",
 ];
 
-export const CARD_FINISH_LABEL: Record<CardFinish, string> = {
-  NORMAL: "Normal",
-  HOLO: "Holo",
-  REVERSE_HOLO: "Reverse Holo",
-  FOIL: "Foil",
-  ETCHED: "Etched",
-  TEXTURED: "Textured",
-  NOT_APPLICABLE: "ไม่มี (ของซีล/อุปกรณ์)",
-};
+export { CARD_FINISH_LABEL } from "@/lib/card-labels";
+import { CARD_FINISH_LABEL, CARD_EDITION_LABEL } from "@/lib/card-labels";
 
 export const CARD_EDITIONS: CardEdition[] = [
   "NOT_APPLICABLE",
@@ -82,12 +75,7 @@ export const CARD_EDITIONS: CardEdition[] = [
   "PROMO",
 ];
 
-export const CARD_EDITION_LABEL: Record<CardEdition, string> = {
-  FIRST_EDITION: "1st Edition",
-  UNLIMITED: "Unlimited",
-  PROMO: "Promo",
-  NOT_APPLICABLE: "ไม่ระบุ",
-};
+export { CARD_EDITION_LABEL } from "@/lib/card-labels";
 
 /**
  * "EN / Foil / 1st Edition / Alt Art" — อ่านแบบเดียวกับ `CatalogVariant.label()`

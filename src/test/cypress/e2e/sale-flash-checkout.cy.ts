@@ -114,7 +114,7 @@ describe("Flash Sale: add to cart → checkout total", () => {
     cy.contains(/จบใน \d{2}:\d{2}:\d{2}/).should("be.visible");
     cy.contains("฿1,393").should("be.visible");
     cy.contains("s", "฿1,990").should("exist");
-    cy.contains("ขายแล้ว 17/20 · ราคานี้เหลือ 3 ชิ้น · คนละ 1 ชิ้น").should("be.visible");
+    cy.contains("ขายแล้ว 17/20 · ราคานี้เหลือ 3 ใบ · คนละ 1 ชิ้น").should("be.visible");
 
     cy.contains("button", "เพิ่มลงตะกร้า").click();
     cy.wait("@addItem");

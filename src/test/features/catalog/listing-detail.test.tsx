@@ -1,3 +1,4 @@
+import { cardDate, languageLabel, finishLabel, editionLabel, rarityLabel } from "@/lib/card-labels";
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import {
@@ -148,6 +149,8 @@ describe("listing detail rules", () => {
     expect(screen.queryByText("Placeholder")).not.toBeInTheDocument();
     expect(screen.getByText("0")).toBeInTheDocument();
     expect(displayValue({})).toBeNull();
+    expect(displayValue(false)).toBeNull();
+    expect(displayValue(true)).toBeNull();
   });
   it("chooses variant offers by API effective price and counts listings", () => {
     const variants = [
@@ -199,4 +202,14 @@ describe("listing detail rules", () => {
       ]).map((e) => e.effectType),
     ).toEqual(["ABILITY", "ATTACK", "RULE"]);
   });
+});
+
+it("formats public card labels and dates without exposing enum codes or Buddhist years", () => {
+  expect(finishLabel("REVERSE_HOLO")).toBe("Reverse Holo");
+  expect(editionLabel("UNLIMITED")).toBe("Unlimited");
+  expect(finishLabel("NOT_APPLICABLE")).toBeNull();
+  expect(languageLabel("EN")).toBe("English (EN)");
+  expect(rarityLabel("SIR")).toBe("SIR · Special Illustration Rare");
+  expect(cardDate("2026-10-09")).toContain("2026");
+  expect(cardDate("2026-10-09")).not.toContain("2569");
 });
