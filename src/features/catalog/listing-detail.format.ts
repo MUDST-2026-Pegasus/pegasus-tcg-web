@@ -31,9 +31,10 @@ export function marketHint(
   market: MarketStatDto | null | undefined,
   price: number,
 ) {
-  if (!market || market.medianPrice == null || market.medianPrice <= 0)
-    return { kind: "none", percent: 0 } as const;
+  if (!market) return { kind: "none", percent: 0 } as const;
   if (market.sampleSize < 3) return { kind: "low", percent: 0 } as const;
+  if (market.medianPrice == null || market.medianPrice <= 0)
+    return { kind: "none", percent: 0 } as const;
   const delta = ((price - market.medianPrice) / market.medianPrice) * 100;
   return {
     kind: Math.abs(delta) <= 3 ? "equal" : delta < 0 ? "below" : "above",
