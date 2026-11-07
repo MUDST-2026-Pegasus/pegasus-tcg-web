@@ -12,13 +12,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 
-import type { ProductTab, ProductTarget } from "../catalog.filters";
+import {
+  CARD_LISTINGS_FIRST_PAGE,
+  type ProductTab,
+  type ProductTarget,
+} from "../catalog.filters";
 import { productTitle } from "../catalog.format";
-import { useAdminProduct, useDeleteProduct } from "../catalog.queries";
+import {
+  useAdminProduct,
+  useCardListings,
+  useDeleteProduct,
+} from "../catalog.queries";
 import type { CatalogProduct, Game } from "../catalog.types";
 
 import { CatalogCardEffectEditor } from "./CatalogCardEffectEditor";
 import { CatalogImageManager } from "./CatalogImageManager";
+import { CatalogListingsTab } from "./CatalogListingsTab";
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
 import { CatalogVariantList } from "./CatalogVariantList";
@@ -111,6 +120,8 @@ function EditProductPanel({
   onClose: () => void;
 }) {
   const detail = useAdminProduct(productId);
+  // ชื่อแท็บบอกจำนวนตั้งแต่ยังไม่ได้เปิดแท็บ — ใช้ก้อนเดียวกับหน้าแรกของแท็บ
+  const listings = useCardListings(productId, CARD_LISTINGS_FIRST_PAGE);
   const deleteProduct = useDeleteProduct();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -158,9 +169,15 @@ function EditProductPanel({
               onValueChange={(next) => onTabChange(next as ProductTab)}
               className="min-h-0 flex-1 gap-4"
             >
-              {/* สี่แท็บกว้างกว่าจอมือถือ — เลื่อนข้างในแทนการล้นออกนอกหน้าต่าง */}
+              {/* ห้าแท็บกว้างกว่าจอมือถือ — เลื่อนข้างในแทนการล้นออกนอกหน้าต่าง */}
               <TabsList className="mx-6 max-w-[calc(100%-3rem)] justify-start overflow-x-auto [scrollbar-width:none]">
                 <TabsTrigger value="details">ข้อมูลสินค้า</TabsTrigger>
+                <TabsTrigger value="listings">
+                  ร้านที่ขาย
+                  {listings.data
+                    ? ` (${listings.data.summary.listingCount})`
+                    : null}
+                </TabsTrigger>
                 <TabsTrigger value="variants">
                   Variant ({variants.length})
                 </TabsTrigger>
@@ -188,6 +205,14 @@ function EditProductPanel({
                   isPending={deleteProduct.isPending}
                   error={deleteProduct.error}
                   onConfirm={handleDelete}
+                />
+              </TabsContent>
+
+              <TabsContent value="listings" className="min-h-0 overflow-y-auto">
+                <CatalogListingsTab
+                  productId={product.id}
+                  productName={productTitle(product)}
+                  variants={variants}
                 />
               </TabsContent>
 

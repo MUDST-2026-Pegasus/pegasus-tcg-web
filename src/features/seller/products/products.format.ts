@@ -103,6 +103,16 @@ export const LISTING_STATUS_LABEL: Record<ListingStatus, string> = {
   BLOCKED: "ถูกระงับ",
 };
 
+/** สีของ badge สถานะ — ใช้ทั้งฝั่งผู้ขายและหน้าแคตตาล็อกของแอดมิน */
+export const LISTING_STATUS_BADGE: Record<ListingStatus, string> = {
+  ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
+  SOLD_OUT: "bg-[#fbe9e8] text-[#d0342c]",
+  PAUSED: "bg-[#fdf0dd] text-[#b45309]",
+  DRAFT: "bg-muted text-[#6b7280]",
+  DELISTED: "bg-secondary text-zinc-500",
+  BLOCKED: "bg-rose-100 text-rose-700",
+};
+
 /** ตัวเลือกการเรียงในแถบตัวกรอง — ตัวแรกคือค่าเริ่มต้นของ backend */
 export const LISTING_SORTS: ListingSort[] = [
   "updated",

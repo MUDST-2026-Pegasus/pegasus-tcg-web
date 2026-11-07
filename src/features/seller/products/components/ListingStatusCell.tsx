@@ -22,19 +22,14 @@ import {
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-import { LISTING_STATUS_LABEL, listingErrorMessage } from "../products.format";
+import {
+  LISTING_STATUS_BADGE,
+  LISTING_STATUS_LABEL,
+  listingErrorMessage,
+} from "../products.format";
 import { useChangeListingStatus } from "../products.queries";
 import { activateBlockedReason, statusTargets } from "../products.rules";
 import type { ListingStatus, SellerListingSummary } from "../products.types";
-
-const STATUS_BADGE: Record<ListingStatus, string> = {
-  ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
-  SOLD_OUT: "bg-[#fbe9e8] text-[#d0342c]",
-  PAUSED: "bg-[#fdf0dd] text-[#b45309]",
-  DRAFT: "bg-muted text-[#6b7280]",
-  DELISTED: "bg-secondary text-zinc-500",
-  BLOCKED: "bg-rose-100 text-rose-700",
-};
 
 const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 
@@ -72,7 +67,7 @@ export function ListingStatusCell({
 
   if (readOnly || targets.length === 0) {
     return (
-      <Badge className={cn(BADGE_CLASS, STATUS_BADGE[listing.status])}>
+      <Badge className={cn(BADGE_CLASS, LISTING_STATUS_BADGE[listing.status])}>
         {label}
       </Badge>
     );
@@ -112,7 +107,7 @@ export function ListingStatusCell({
           }
         >
           <Badge
-            className={cn(BADGE_CLASS, "gap-0.5", STATUS_BADGE[listing.status])}
+            className={cn(BADGE_CLASS, "gap-0.5", LISTING_STATUS_BADGE[listing.status])}
           >
             {label}
             <ChevronDown aria-hidden="true" className="size-3" />
