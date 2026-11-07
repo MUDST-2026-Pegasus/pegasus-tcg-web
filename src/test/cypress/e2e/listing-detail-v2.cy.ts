@@ -241,7 +241,6 @@ describe("TCG-663 listing detail v2", () => {
     cy.get('[role="dialog"]').should("be.visible");
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    cy.document().then((doc) => doc.fonts.ready);
     cy.screenshot("TCG-663-raw-1280", {
       capture: "fullPage",
       onBeforeScreenshot: ($el) => {
