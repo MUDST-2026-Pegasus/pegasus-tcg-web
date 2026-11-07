@@ -25,7 +25,11 @@ import {
 import { toast } from "@/components/ui/toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSellerListings } from "@/features/catalog/catalog.queries";
-import { cartLineTotals, cartUnitPrice, saleEndedInCart } from "@/features/sale/sale.cart";
+import {
+  cartLineTotals,
+  cartUnitPrice,
+  saleEndedInCart,
+} from "@/features/sale/sale.cart";
 import { useMiniCartQuery, useAddCartItem } from "../cart.queries";
 import { useMiniCart } from "../mini-cart.store";
 import { groupMiniCart, miniCartSummary } from "../mini-cart.format";
@@ -59,7 +63,7 @@ export function MiniCartDrawer() {
         showCloseButton={false}
         finalFocus={() => (mini.trigger?.isConnected ? mini.trigger : false)}
         className={cn(
-          "mini-cart-surface gap-0 overflow-hidden p-0",
+          "gap-0 overflow-hidden p-0",
           mobile
             ? "h-[85dvh] max-h-[85dvh] rounded-t-2xl"
             : "data-[side=right]:w-[420px] data-[side=right]:sm:max-w-[420px]",
@@ -71,7 +75,13 @@ export function MiniCartDrawer() {
   );
 }
 
-function ItemPrice({ item, recent }: { item: CartItemResponse; recent: boolean }) {
+function ItemPrice({
+  item,
+  recent,
+}: {
+  item: CartItemResponse;
+  recent: boolean;
+}) {
   if (!item.purchasable)
     return (
       <span className="text-muted-foreground">
@@ -126,7 +136,10 @@ function ItemRow({
         <Link
           to={`/listings/${item.listingId}`}
           onClick={mini.close}
-          className={cn("line-clamp-2 leading-normal font-semibold", recent ? "text-sm" : "text-[13px]")}
+          className={cn(
+            "line-clamp-2 leading-normal font-semibold",
+            recent ? "text-sm" : "text-[13px]",
+          )}
         >
           {item.productName}
         </Link>
