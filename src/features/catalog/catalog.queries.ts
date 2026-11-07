@@ -129,5 +129,6 @@ export function useSellerListings(username: string) {
   return useQuery({
     queryKey: [...catalogKeys.all, "seller-listings", username],
     queryFn: ({ signal }) => catalogApi.getSellerListings(username, signal),
+    enabled: Boolean(username),
   });
 }

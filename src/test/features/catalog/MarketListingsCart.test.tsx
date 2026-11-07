@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
+import { miniCartStore } from "@/features/cart/mini-cart.store";
 import { toast } from "@/components/ui/toast";
 import { cartApi } from "@/features/cart/cart.api";
 import * as catalogQueries from "@/features/catalog/catalog.queries";
@@ -100,7 +101,7 @@ describe("MarketListingsPage Add button", () => {
 
     await waitFor(() => expect(addItem).toHaveBeenCalledWith({ listingId: 55, quantity: 1 }));
     await waitFor(() =>
-      expect(toastAdd).toHaveBeenCalledWith(expect.objectContaining({ title: "เพิ่มลงรถเข็นแล้ว", type: "success" })),
+      expect(miniCartStore.getSnapshot()).toMatchObject({ isOpen: true, listingId: 55 }),
     );
   });
 

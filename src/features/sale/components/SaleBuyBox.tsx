@@ -13,6 +13,7 @@ import {
 } from "@/components/sale";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useAuth } from "@/features/auth/auth.queries";
@@ -60,6 +61,7 @@ export function SaleBuyBox({
   const sale = isOnSale(pricing) ? pricing.sale : null;
   const flash = priceTagState(pricing) === "flash" && sale != null;
   const addCartItem = useAddCartItem();
+  const miniCart = useMiniCart();
   const [selection, setSelection] = useState({ id: listing.id, quantity: 1 });
   const max = listing.gradingCompany
     ? 1
@@ -74,7 +76,7 @@ export function SaleBuyBox({
   const limit = sale?.perBuyerLimit ?? null;
   const pending = addCartItem.isPending || buying;
 
-  const add = async (buyNow = false) => {
+  const add = async (buyNow = false, trigger?: HTMLElement) => {
     if (own || soldOut || pending) return;
     if (buyNow && !auth.isAuthenticated) {
       navigate("/login", {
@@ -82,6 +84,7 @@ export function SaleBuyBox({
       });
       return;
     }
+    const opening = miniCart.capture(listing.id, trigger);
     setBuying(buyNow);
     try {
       const item = await addCartItem.mutateAsync({
@@ -90,12 +93,9 @@ export function SaleBuyBox({
       });
       if (buyNow)
         navigate(`/checkout?items=${item.id}&listingId=${listing.id}`);
-      else if (!notifyAddedAtSalePrice(title, quantity, pricing)) {
-        toast.add({
-          title: t.added,
-          description: `${title} × ${quantity}`,
-          type: "success",
-        });
+      else {
+        miniCart.open(opening);
+        notifyAddedAtSalePrice(title, quantity, pricing);
       }
     } catch (error) {
       toast.add({
@@ -277,7 +277,7 @@ export function SaleBuyBox({
                   flash && "bg-red-600 text-white hover:bg-red-700",
                 )}
                 disabled={pending}
-                onClick={() => void add()}
+                onClick={(event) => void add(false, event.currentTarget)}
               >
                 {pending && !buying ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -290,7 +290,7 @@ export function SaleBuyBox({
                 variant="outline"
                 className="h-[52px] flex-1 rounded-xl font-semibold"
                 disabled={pending || auth.isLoading}
-                onClick={() => void add(true)}
+                onClick={(event) => void add(true, event.currentTarget)}
               >
                 {buying && <Loader2 className="size-4 animate-spin" />}
                 {t.buy}

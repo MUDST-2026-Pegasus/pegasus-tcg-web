@@ -14,10 +14,13 @@ export function notifyAddedAtSalePrice(
   name: string,
   quantity: number,
   pricing: ListingPricing | null | undefined,
+  options?: { imageUrl: string | null; onViewCart: () => void },
 ): boolean {
   if (!isOnSale(pricing) || pricing.sale.type !== "FLASH_SALE") return false;
   const limit = pricing.sale.perBuyerLimit;
   toast.add({
+    ...(options ? { timeout: 4000, data: { quickCart: true, imageUrl: options.imageUrl },
+      actionProps: { children: "ดูตะกร้า", onClick: options.onViewCart } } : {}),
     title: "เพิ่มลงตะกร้าที่ราคา Flash",
     description: `เพิ่ม ${name} ราคา ${formatSaleBaht(pricing.salePrice)} แล้ว · ราคานี้ถึง ${clock.format(new Date(pricing.sale.endsAt))} ต้องชำระก่อนหมดเวลาจองสต็อก`,
     type: "success",

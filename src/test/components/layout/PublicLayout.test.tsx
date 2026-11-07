@@ -19,6 +19,10 @@ vi.mock("@/features/promotions/PendingClaimRunner", () => ({
   PendingClaimRunner: () => null,
 }));
 
+vi.mock("@/features/cart/MiniCartDrawer", () => ({
+  MiniCartDrawer: () => null,
+}));
+
 vi.mock("@/components/layout/Footer", () => ({
   Footer: () => <footer data-testid="footer" />,
 }));
