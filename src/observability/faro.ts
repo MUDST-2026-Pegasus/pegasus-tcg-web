@@ -105,9 +105,9 @@ export function initializeFaroClient(): FaroClient | null {
   faroClient = initializeFaro({
     url,
     app: {
-      name: "pegasus-web",
+      name: "web",
       version: import.meta.env.VITE_APP_VERSION || "dev",
-      environment: import.meta.env.VITE_APP_ENV || import.meta.env.MODE,
+      environment: import.meta.env.VITE_APP_ENV || "dev",
     },
     instrumentations: [
       ...getWebInstrumentations({ captureConsole: true }),
