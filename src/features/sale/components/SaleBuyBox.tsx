@@ -1,8 +1,10 @@
-import { DisabledActionHint } from "@/components/common/DisabledActionHint";
+// Wishlist is temporarily hidden; keep its imports and markup for re-enabling.
+// import { DisabledActionHint } from "@/components/common/DisabledActionHint";
 import { Progress } from "@/components/ui/progress";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
+// import { Heart } from "lucide-react";
+import { Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
 import {
   PriceTag,
   formatCountdown,
@@ -287,6 +289,7 @@ export function SaleBuyBox({
                 {buying && <Loader2 className="size-4 animate-spin" />}
                 {t.buy}
               </Button>
+              {/* Wishlist temporarily hidden.
               <DisabledActionHint label={t.wishlistUnavailable}>
                 <Button
                   variant="outline"
@@ -298,6 +301,7 @@ export function SaleBuyBox({
                   <Heart className="size-5" />
                 </Button>
               </DisabledActionHint>
+              */}
             </div>
           </>
         )}
