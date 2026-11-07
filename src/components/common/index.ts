@@ -4,6 +4,7 @@
  */
 
 export { DataTable, type DataTableColumn } from "./DataTable";
+export { DateRangePicker, type DateRangeValue } from "./DateRangePicker";
 export { DateTimePicker } from "./DateTimePicker";
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
