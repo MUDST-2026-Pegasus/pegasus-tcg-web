@@ -89,6 +89,7 @@ describe("listing detail rules", () => {
     expect(marketHint(null, 100).kind).toBe("none");
     expect(marketHint({ ...market, medianPrice: 0 }, 100).kind).toBe("none");
     expect(marketHint({ ...market, sampleSize: 2 }, 70).kind).toBe("low");
+    expect(marketHint({ ...market, sampleSize: 0, medianPrice: null }, 70).kind).toBe("low");
     expect(marketHint(market, pricing.salePrice).kind).toBe("below");
   });
   it("selects all seven states with owner and sold-out precedence", () => {
