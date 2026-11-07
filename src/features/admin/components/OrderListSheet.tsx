@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import {
   Sheet,
   SheetContent,
@@ -142,21 +143,18 @@ function OrderListPanel({
               <ul className="flex flex-col divide-y rounded-[10px] border">
                 {result.items.map((order) => (
                   <li key={order.sellerOrderId}>
-                    <button
-                      type="button"
-                      onClick={() => onSelect(order)}
-                      className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
+                    <Item
+                      render={<button type="button" onClick={() => onSelect(order)} />}
+                      className="flex-nowrap justify-between gap-3 rounded-none border-0 px-3 py-2.5 text-left hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-0"
                     >
-                      <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate text-sm font-medium">
-                          {order.sellerOrderNumber}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">
+                      <ItemContent className="min-w-0 gap-0.5">
+                        <ItemTitle className="block w-full truncate">{order.sellerOrderNumber}</ItemTitle>
+                        <ItemDescription className="line-clamp-1 text-xs">
                           {partyName(order.seller)} → {partyName(order.buyer)} ·{" "}
                           {formatItemCount(order.itemCount)}
-                        </span>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        </ItemDescription>
+                      </ItemContent>
+                      <ItemActions className="shrink-0 flex-col items-end gap-1">
                         <span className="text-sm font-medium">
                           {formatBaht(order.grandTotal)}
                         </span>
@@ -168,8 +166,8 @@ function OrderListPanel({
                         >
                           {orderContextLabel(column.key, order)}
                         </Badge>
-                      </div>
-                    </button>
+                      </ItemActions>
+                    </Item>
                   </li>
                 ))}
               </ul>

@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Item, ItemActions, ItemContent, ItemMedia } from "@/components/ui/item";
 import {
   Select,
   SelectContent,
@@ -445,22 +446,20 @@ function ProductDetailContent({
           ) : (
             <div className="divide-y">
               {collectorsQuery.data.items.map((collector) => (
-                <article key={collector.username} className="flex min-h-16 items-center justify-between gap-4 py-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Avatar size="lg">
+                <Item key={collector.username} render={<article />} className="min-h-16 flex-nowrap gap-3 rounded-none px-0 py-2">
+                  <ItemMedia><Avatar size="lg">
                       {collector.avatarUrl && <AvatarImage src={collector.avatarUrl} alt="" />}
                       <AvatarFallback>{initialsOf(collector.displayName || collector.username)}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
+                    </Avatar></ItemMedia>
+                  <ItemContent className="min-w-0 gap-0">
                       <h3 className="truncate text-sm font-semibold leading-5">{collector.displayName || collector.username}</h3>
                       <p className="truncate text-xs leading-4 text-muted-foreground">@{collector.username} · {collector.quantity} {collector.quantity === 1 ? itemLabel.slice(0, -1) : itemLabel}</p>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
+                    </ItemContent>
+                  <ItemActions className="shrink-0 gap-3">
                     <Badge variant="secondary">In catalog</Badge>
                     <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>View profile</Button>
-                  </div>
-                </article>
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           )}

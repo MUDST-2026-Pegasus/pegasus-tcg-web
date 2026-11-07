@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { ErrorState } from "@/components/common";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 
 import { formatBaht, formatBidTime } from "../auction.format";
 import { useBidHistory } from "../auction.queries";
@@ -47,17 +48,19 @@ export function BidHistory({ auctionId, bidCount, live }: BidHistoryProps) {
       ) : (
         <ol className="divide-y">
           {visible.map((bid, index) => (
-            <li key={`${bid.placedAt}-${bid.amount}`} className="flex items-center gap-3 py-3">
-              <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-muted-foreground">
+            <Item key={`${bid.placedAt}-${bid.amount}`} render={<li />} className="flex-nowrap gap-3 rounded-none px-0 py-3">
+              <ItemMedia aria-hidden className="size-9 rounded-full bg-secondary text-xs font-bold text-muted-foreground">
                 {bid.bidderInitials}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{bid.bidderAlias}{bid.mine ? " (คุณ)" : ""}</p>
-                <p className="text-xs text-muted-foreground">{formatBidTime(bid.placedAt)}</p>
-              </div>
-              {live && index === 0 ? <AuctionStatusPill kind="Leading" label="สูงสุดตอนนี้" /> : null}
-              <span className="text-base font-bold tabular-nums">{formatBaht(bid.amount)}</span>
-            </li>
+              </ItemMedia>
+              <ItemContent className="min-w-0 gap-0">
+                <ItemTitle className="block w-full truncate font-semibold">{bid.bidderAlias}{bid.mine ? " (คุณ)" : ""}</ItemTitle>
+                <ItemDescription className="text-xs">{formatBidTime(bid.placedAt)}</ItemDescription>
+              </ItemContent>
+              <ItemActions className="shrink-0 gap-3">
+                {live && index === 0 ? <AuctionStatusPill kind="Leading" label="สูงสุดตอนนี้" /> : null}
+                <span className="text-base font-bold tabular-nums">{formatBaht(bid.amount)}</span>
+              </ItemActions>
+            </Item>
           ))}
         </ol>
       )}

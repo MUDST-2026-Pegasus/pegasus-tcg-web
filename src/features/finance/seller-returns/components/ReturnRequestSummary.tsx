@@ -1,6 +1,7 @@
 import { Image as ImageIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 
 import { formatBahtShort, returnReasonLabel } from "../../after-sales.format";
 import type { ReturnEvidenceLink, SellerReturnRequest } from "../../after-sales.types";
@@ -46,12 +47,11 @@ export function ReturnRequestSummary({
         <div className="divide-y divide-border rounded-lg border border-border bg-card">
           {item.items && item.items.length > 0 ? (
             item.items.map((cardItem) => (
-              <div
+              <Item
                 key={cardItem.returnItemId}
-                className="flex items-center justify-between p-3"
+                className="flex-nowrap gap-3 rounded-none p-3"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-muted/30 overflow-hidden shadow-2xs">
+                <ItemMedia className="size-11 shrink-0 items-center justify-center rounded-md border border-border bg-muted/30 overflow-hidden shadow-2xs">
                     {cardItem.imageUrl ? (
                       <img
                         src={cardItem.imageUrl}
@@ -61,22 +61,21 @@ export function ReturnRequestSummary({
                     ) : (
                       <ImageIcon className="size-5 text-muted-foreground" />
                     )}
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="text-xs sm:text-sm font-medium text-foreground">
+                  </ItemMedia>
+                <ItemContent className="min-w-0 gap-0.5">
+                  <ItemTitle className="line-clamp-none text-xs text-foreground sm:text-sm">
                       {cardItem.cardName}
                       {cardItem.variantLabel ? ` — ${cardItem.variantLabel}` : ""}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
+                    </ItemTitle>
+                  <ItemDescription className="text-[11px]">
                       {cardItem.conditionCode} · คืน {cardItem.quantityReturned} จาก{" "}
                       {cardItem.quantityOrdered} ใบ
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right text-xs sm:text-sm font-semibold text-foreground">
+                    </ItemDescription>
+                </ItemContent>
+                <ItemActions className="shrink-0 text-right text-xs font-semibold text-foreground sm:text-sm">
                   {formatBahtShort(cardItem.unitPrice * cardItem.quantityReturned)}
-                </div>
-              </div>
+                </ItemActions>
+              </Item>
             ))
           ) : (
             <div className="p-3 text-xs text-muted-foreground">
