@@ -59,7 +59,7 @@ export function MiniCartDrawer() {
         showCloseButton={false}
         finalFocus={() => (mini.trigger?.isConnected ? mini.trigger : false)}
         className={cn(
-          "mini-cart-surface gap-0 overflow-hidden p-0",
+          "gap-0 overflow-hidden p-0",
           mobile
             ? "h-[85dvh] max-h-[85dvh] rounded-t-2xl"
             : "data-[side=right]:w-[420px] data-[side=right]:sm:max-w-[420px]",

@@ -195,7 +195,7 @@ function ListingDetailContent({
     listing.status === "SOLD_OUT" || listing.quantityAvailable === 0;
   return (
     <div className="bg-secondary/60">
-      <main className="listing-detail mx-auto max-w-[1280px] space-y-7 px-5 pt-7 pb-16 lg:px-20">
+      <main className="mx-auto max-w-[1280px] space-y-7 px-5 pt-7 pb-16 lg:px-20">
         <Breadcrumb>
           <BreadcrumbList className="gap-2 text-[13px] sm:gap-2">
             {[
