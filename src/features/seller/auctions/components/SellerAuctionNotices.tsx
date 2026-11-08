@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Clock, Gavel, Undo2, UserX } from "lucide-react";
+import { CircleCheck, CircleX, Clock, Gavel, ShieldAlert, Undo2, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,18 @@ type SellerAuctionNoticesProps = {
 export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesProps) {
   const kind = sellerNoticeKind(detail, newBid);
   const name = detail.item.card.productName;
+
+  // แอดมินระงับ — บอกเหตุผลให้ผู้ขายเห็นเหมือนที่ผู้บิดเห็น [TCG-640]
+  if (detail.status === "SUSPENDED") {
+    return (
+      <AuctionNotice
+        tone="red"
+        icon={<ShieldAlert />}
+        title="แอดมินระงับประมูลนี้ — การ์ดกลับเข้าสต็อกแล้ว"
+        detail={detail.suspendReason ? `เหตุผล: ${detail.suspendReason}` : name}
+      />
+    );
+  }
 
   switch (kind) {
     case "NEW_BID":

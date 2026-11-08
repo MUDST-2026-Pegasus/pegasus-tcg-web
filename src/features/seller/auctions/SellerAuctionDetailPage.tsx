@@ -216,6 +216,8 @@ function Kpi({ label, value, note, valueClass }: { label: string; value: string;
 
 /** ตาราง "ประวัติการบิด" — ใหม่สุดก่อน ชื่อผู้บิดปิดบัง */
 function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
+  // ระงับแล้วบิดทุกตัวถูกยกเลิก — ยังแสดงให้ผู้ขายเห็น แต่ขีดฆ่าและไม่มี "สูงสุด" [TCG-640]
+  const cancelled = detail.status === "SUSPENDED";
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl p-0 shadow-none">
       <div className="flex items-center justify-between px-5 py-4">
@@ -233,8 +235,12 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
               meta: { headClassName: "pl-5 text-xs font-normal text-muted-foreground", cellClassName: "py-3 pl-5" },
               cell: ({ row }) => (
                 <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  {row.original.bidderAlias}
-                  {row.index === 0 ? <AuctionStatusPill kind="Leading" label="สูงสุด" /> : null}
+                  <span className={cancelled ? "text-muted-foreground line-through" : undefined}>{row.original.bidderAlias}</span>
+                  {cancelled ? (
+                    <AuctionStatusPill kind="Unsold" label="ยกเลิก" />
+                  ) : row.index === 0 ? (
+                    <AuctionStatusPill kind="Leading" label="สูงสุด" />
+                  ) : null}
                 </span>
               ),
             },
@@ -242,7 +248,11 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
               id: "amount",
               header: "ราคา",
               meta: { headClassName: "text-xs font-normal text-muted-foreground", cellClassName: "text-sm font-semibold tabular-nums" },
-              cell: ({ row }) => <span className={row.index === 0 ? "text-primary" : "text-foreground"}>{formatBaht(row.original.amount)}</span>,
+              cell: ({ row }) => (
+                <span className={cancelled ? "text-muted-foreground line-through" : row.index === 0 ? "text-primary" : "text-foreground"}>
+                  {formatBaht(row.original.amount)}
+                </span>
+              ),
             },
             {
               id: "time",

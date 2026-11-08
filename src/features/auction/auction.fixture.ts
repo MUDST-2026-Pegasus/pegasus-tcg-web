@@ -415,6 +415,7 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
     ...CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
     { bidderAlias: "k***e", bidderInitials: "KE", mine: false, amount: 2000, placedAt: at(-3 * DAY + 40 * MINUTE) },
   ],
+  suspendReason: null,
   serverTime: serverTime(),
 };
 
