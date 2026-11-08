@@ -6,6 +6,7 @@ import {
   ImageIcon,
   MapIcon,
   MessageSquareText,
+  Send,
   ShoppingBag,
   Truck,
 } from "lucide-react";
@@ -35,6 +36,7 @@ import {
   deadlineLabel,
   formatAgo,
   itemMeta,
+  listCarrierChipLabel,
   orderErrorMessage,
   parseShippingAddress,
   paymentStateOf,
@@ -53,6 +55,16 @@ const PAYMENT_TEXT: Record<PaymentState, string> = {
   cancelled: "text-gray-400",
 };
 
+/** บอกขนส่งที่ผู้ซื้อเลือก ให้ผู้ขายแยกกองพัสดุได้โดยไม่ต้องกางการ์ด */
+function CarrierChip({ label }: { label: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1 rounded-md bg-[#f0f7fc] px-1.5 py-0.5 text-[10px] font-medium text-primary">
+      <Send aria-hidden="true" className="size-2.5" />
+      {label}
+    </span>
+  );
+}
+
 type OrderCardProps = {
   summary: SellerOrderSummary;
   defaultOpen?: boolean;
@@ -66,7 +78,7 @@ type OrderCardProps = {
  * ฟอร์มเลขพัสดุอยู่ใน panel ที่ไม่ถูก unmount ตอนพับ ค่าที่กรอกจึงไม่หาย
  */
 export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
-  const { order, buyer } = summary;
+  const { order, buyer, shippingChoice } = summary;
   const accept = useAcceptOrder();
   const [now] = useState(() => new Date());
   // Collapsible อ่าน defaultOpen ครั้งเดียว — รับออเดอร์/ส่งของแล้วลำดับในรายการเปลี่ยน
@@ -128,6 +140,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             <div className="flex min-w-0 items-center gap-1.5 text-xs">
               <span className="truncate text-gray-500">{buyer.username}</span>
               <span className="shrink-0 text-gray-400">· สั่ง{formatAgo(order.createdAt, now)}</span>
+              {shippingChoice ? <CarrierChip label={listCarrierChipLabel(shippingChoice)} /> : null}
             </div>
           </div>
 
@@ -184,7 +197,12 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <ShoppingBag aria-hidden="true" className="size-4 text-slate-500" />
                 </div>
-                <p className="flex-1 text-xs font-medium text-foreground">ค่าจัดส่ง</p>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <p className="truncate text-xs font-medium text-foreground">
+                    ค่าจัดส่ง{shippingChoice ? ` · ${shippingChoice.name}` : ""}
+                  </p>
+                  {shippingChoice ? <CarrierChip label={listCarrierChipLabel(shippingChoice)} /> : null}
+                </div>
                 <p className="shrink-0 text-xs font-medium text-gray-700">
                   {order.shippingFee > 0 ? formatBaht(order.shippingFee) : "ส่งฟรี"}
                 </p>
@@ -223,7 +241,11 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                       รับออเดอร์
                     </Button>
                   ) : null}
-                  <ShipmentForm orderId={order.id} orderNumber={order.sellerOrderNumber} />
+                  <ShipmentForm
+                    orderId={order.id}
+                    orderNumber={order.sellerOrderNumber}
+                    shippingChoice={shippingChoice}
+                  />
                 </div>
               </div>
             ) : null}
