@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useAuth } from "@/features/auth/auth.queries";
 import type { PromotionOwner } from "@/features/cart/promotions.types";
 import { normalizePromotionCode } from "@/features/cart/checkout.format";
 import { ClaimSuccessDialog } from "@/features/promotions/ClaimSuccessDialog";
@@ -19,8 +18,6 @@ import { WalletTicket } from "@/features/promotions/WalletTicket";
 import { claimErrorMessage, copyPromotionCode } from "@/features/promotions/claim.format";
 import { useClaimByCode, useWallet } from "@/features/promotions/claim.queries";
 import type { WalletTab } from "@/features/promotions/claim.types";
-import { toSidebarUser } from "../account.format";
-import { AccountSidebar } from "../components/AccountSidebar";
 
 const TABS: Array<{ value: WalletTab; label: string }> = [
   { value: "AVAILABLE", label: "ใช้ได้" },
@@ -107,7 +104,6 @@ function WalletSkeleton() {
 
 /** W1 "โค้ดของฉัน" — `/account/coupons`. */
 export function MyCouponsPage() {
-  const { user } = useAuth();
   const [tab, setTab] = useState<WalletTab>("AVAILABLE");
   const [owner, setOwner] = useState<PromotionOwner | undefined>(undefined);
   const [termsCode, setTermsCode] = useState<string | null>(null);
@@ -116,9 +112,7 @@ export function MyCouponsPage() {
   const counts = wallet.data?.counts;
 
   return (
-    <div className="min-h-[720px] bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={toSidebarUser(user)} />
+    <>
         <div className="flex min-w-0 flex-col gap-5">
           <div>
             <h1 className="text-3xl font-semibold">โค้ดของฉัน</h1>
@@ -197,7 +191,6 @@ export function MyCouponsPage() {
             แท็บ “ใช้แล้ว” แสดงเลขคำสั่งซื้อที่ใช้ · “หมดอายุ” แสดงโค้ดที่หมดเวลาหรือถูกหยุด (เก็บไว้ 30 วันแล้วซ่อน)
           </p>
         </div>
-      </div>
 
       <PromotionTermsDialog
         code={termsCode}
@@ -205,6 +198,6 @@ export function MyCouponsPage() {
         onCopy={copyPromotionCode}
       />
       <ClaimSuccessDialog code={claimedCode} onOpenChange={(open) => !open && setClaimedCode(null)} />
-    </div>
+    </>
   );
 }
