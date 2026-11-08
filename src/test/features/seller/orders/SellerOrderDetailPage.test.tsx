@@ -71,6 +71,7 @@ const mockOrderDetail: SellerOrderDetail = {
       phone: "0812345678",
     }),
     buyerNote: "Please pack carefully",
+    shippingChoice: null,
   },
   payment: {
     method: "BANK_TRANSFER",

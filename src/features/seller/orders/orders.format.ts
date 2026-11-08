@@ -8,6 +8,8 @@ import { getErrorMessage, hasErrorCode, isApiError, isNetworkError } from "@/lib
 
 import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
 
+import { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
+
 import type {
   OrderItem,
   OrderPayment,
@@ -18,6 +20,7 @@ import type {
   SellerOrderDetails,
   SellerOrderSort,
   ShippingAddressSnapshot,
+  ShippingChoice,
 } from "./orders.types";
 
 /**
@@ -104,6 +107,51 @@ export function sortOf(value: string | null): SortChoice {
 
 /** `carrierCode` ที่ส่งไปกับ `ShipOrderRequest` — ชื่อที่ผู้ซื้อเห็นคือ `label` */
 export { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
+
+/** ขนส่งที่ผู้ซื้อเลือก เฉพาะที่อยู่ในรายการให้เลือก รหัสอื่นถือว่าเลือกแทนให้ไม่ได้ */
+export function buyerCarrierCode(choice: ShippingChoice | null): string | null {
+  const code = choice?.carrierCode;
+  return code && CARRIER_OPTIONS.some((option) => option.value === code) ? code : null;
+}
+
+/** ค่าเริ่มต้นของช่องขนส่ง — `""` คือให้ผู้ขายเลือกเอง ออเดอร์ที่ไม่มี snapshot ใช้ตัวแรกตามเดิม */
+export function defaultCarrier(choice: ShippingChoice | null): string {
+  return choice ? (buyerCarrierCode(choice) ?? "") : CARRIER_OPTIONS[0].value;
+}
+
+export type CarrierMatch = "matches" | "differs" | "unset" | null;
+
+/** ค่าในช่องขนส่งเทียบกับที่ผู้ซื้อเลือก — `null` คือไม่มีอะไรต้องบอกผู้ขาย */
+export function carrierMatch(choice: ShippingChoice | null, carrier: string): CarrierMatch {
+  if (!choice) return null;
+  const buyerCode = buyerCarrierCode(choice);
+  if (buyerCode === null) return carrier === "" ? "unset" : null;
+  return carrier === buyerCode ? "matches" : "differs";
+}
+
+/** chip ในกล่องการจัดส่งที่ผู้ซื้อเลือก */
+export function buyerCarrierChipLabel(choice: ShippingChoice): string {
+  return choice.carrierCode ? carrierLabel(choice.carrierCode) : "ไม่ระบุขนส่ง";
+}
+
+/** chip ในหน้ารายการ — ตัวเลือกที่ไม่ผูกขนส่งแสดงชื่อตัวเลือกแทน */
+export function listCarrierChipLabel(choice: ShippingChoice): string {
+  return choice.carrierCode ? carrierLabel(choice.carrierCode) : choice.name;
+}
+
+/** "1–2" หรือ "1" — `null` เมื่อร้านไม่ได้ระบุ */
+export function estDaysLabel(min: number | null, max: number | null): string | null {
+  if (min === null && max === null) return null;
+  if (min === null || max === null || min === max) return String(min ?? max);
+  return `${min}–${max}`;
+}
+
+/** บรรทัดใน dialog ยืนยันจัดส่ง — เฉพาะตอนส่งด้วยขนส่งที่ไม่ตรงกับที่ผู้ซื้อเลือก */
+export function buyerChoiceNote(choice: ShippingChoice | null, match: CarrierMatch): string | null {
+  return choice && match === "differs"
+    ? `ผู้ซื้อเลือก: ${choice.name} (${buyerCarrierChipLabel(choice)})`
+    : null;
+}
 
 /** ส่งได้ทั้งจาก PAID (ข้ามการกดรับ) และ PREPARING */
 export function canShip(status: SellerOrderStatus): boolean {

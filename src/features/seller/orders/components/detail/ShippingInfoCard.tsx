@@ -14,9 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
-import { CARRIER_OPTIONS } from "../../orders.format";
-import type { Shipment } from "../../orders.types";
+import { CARRIER_OPTIONS, type CarrierMatch } from "../../orders.format";
+import type { Shipment, ShippingChoice } from "../../orders.types";
+
+import { CarrierHint } from "../CarrierHint";
+
+import { BuyerShippingChoice } from "./BuyerShippingChoice";
 
 /** ตรงกับ `@Size(max = 64)` ของ `ShipOrderRequest.trackingNumber` */
 const TRACKING_MAX = 64;
@@ -33,7 +38,10 @@ type ShippingInfoCardProps = {
   shipByLabel: string | null;
   /** ส่งแล้ว โชว์ขนส่งกับเลขพัสดุแบบอ่านอย่างเดียว */
   shipment: Shipment | null;
+  /** `null` = ออเดอร์ก่อนมี snapshot ซ่อนกล่องที่ผู้ซื้อเลือก */
+  shippingChoice: ShippingChoice | null;
   carrier: string;
+  carrierMatch: CarrierMatch;
   onCarrierChange: (value: string) => void;
   trackingNumber: string;
   onTrackingNumberChange: (value: string) => void;
@@ -50,7 +58,9 @@ export function ShippingInfoCard({
   editable,
   shipByLabel,
   shipment,
+  shippingChoice,
   carrier,
+  carrierMatch,
   onCarrierChange,
   trackingNumber,
   onTrackingNumberChange,
@@ -100,6 +110,8 @@ export function ShippingInfoCard({
         </address>
       </div>
 
+      {shippingChoice ? <BuyerShippingChoice choice={shippingChoice} /> : null}
+
       {editable ? (
         <>
           <div className="flex flex-col gap-3.5 sm:flex-row">
@@ -109,11 +121,14 @@ export function ShippingInfoCard({
               </Label>
               <Select
                 items={CARRIER_OPTIONS}
-                value={carrier}
+                value={carrier || null}
                 onValueChange={(value) => onCarrierChange(value ?? "")}
               >
-                <SelectTrigger id={carrierId} className={`${FIELD_CLASS} w-full`}>
-                  <SelectValue />
+                <SelectTrigger
+                  id={carrierId}
+                  className={cn(`${FIELD_CLASS} w-full`, carrierMatch === "differs" && "border-[#b45309]")}
+                >
+                  <SelectValue placeholder="เลือกบริษัทขนส่ง" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -125,6 +140,7 @@ export function ShippingInfoCard({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              <CarrierHint match={carrierMatch} choice={shippingChoice} />
             </div>
 
             <div className="flex flex-1 flex-col gap-1.5">

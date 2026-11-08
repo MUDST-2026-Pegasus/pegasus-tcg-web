@@ -50,6 +50,7 @@ function summary(id: number, sellerOrderNumber: string): SellerOrderSummary {
     shipBy: null,
     shippingAddressSnapshot: null,
     buyerNote: null,
+    shippingChoice: null,
   };
 }
 

@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils";
 import { downloadBlob } from "@/lib/download";
 
 import {
-  CARRIER_OPTIONS,
   RETURNS_PATH,
   addressLines,
+  buyerChoiceNote,
   canAccept,
   canCancel,
   canShip,
@@ -46,6 +46,7 @@ import {
 } from "../../orders.format";
 import { useAcceptOrder, useDownloadOrderSummary, useShipOrder } from "../../orders.queries";
 import type { SellerOrderDetail } from "../../orders.types";
+import { useCarrierPicker } from "../../useCarrierPicker";
 
 import { ConfirmShipDialog } from "../ConfirmShipDialog";
 
@@ -98,7 +99,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
   const accept = useAcceptOrder();
   const ship = useShipOrder();
   const downloadSummary = useDownloadOrderSummary();
-  const [carrier, setCarrier] = useState(CARRIER_OPTIONS[0].value);
+  const { carrier, setCarrier, match: carrierMatch } = useCarrierPicker(summary.shippingChoice);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [packedIds, setPackedIds] = useState<number[]>([]);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -248,11 +249,11 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             </Button>
           ) : null}
           {shippable ? (
-            // ยังไม่ได้กรอกเลขพัสดุในการ์ดข้อมูลการจัดส่ง = ยืนยันไม่ได้
+            // ยังไม่ได้เลือกขนส่งหรือกรอกเลขพัสดุในการ์ดข้อมูลการจัดส่ง = ยืนยันไม่ได้
             <Button
               size="sm"
               className="rounded-md px-2.5"
-              disabled={tracking === "" || busy}
+              disabled={tracking === "" || carrier === "" || busy}
               onClick={() => setShipConfirmOpen(true)}
             >
               {ship.isPending ? <Spinner /> : null}
@@ -289,7 +290,9 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             editable={shippable}
             shipByLabel={shippable && summary.shipBy ? shipByLabel(summary.shipBy) : null}
             shipment={order.shipments[0] ?? null}
+            shippingChoice={summary.shippingChoice}
             carrier={carrier}
+            carrierMatch={carrierMatch}
             onCarrierChange={setCarrier}
             trackingNumber={trackingNumber}
             onTrackingNumberChange={setTrackingNumber}
@@ -316,6 +319,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
         orderNumber={order.sellerOrderNumber}
         carrierName={carrierLabel(carrier)}
         trackingNumber={tracking}
+        buyerChoiceNote={buyerChoiceNote(summary.shippingChoice, carrierMatch)}
         onConfirm={handleShip}
       />
 
