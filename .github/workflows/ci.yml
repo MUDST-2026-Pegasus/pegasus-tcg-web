@@ -41,8 +41,21 @@ jobs:
           # This job never runs Cypress, so skip its binary download.
           CYPRESS_INSTALL_BINARY: 0
 
+      # ESLint, tsc (tsbuildinfo) and Vite/Vitest caches all live here.
+      - name: Cache tool outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache
+            node_modules/.tmp
+            node_modules/.vite
+          key: tools-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            tools-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            tools-${{ runner.os }}-
+
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
 
       - name: Type check
         run: pnpm exec tsc -b --noEmit
@@ -121,6 +134,8 @@ jobs:
         with:
           context: image
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ env.IMAGE }}:sha-${{ github.sha }}
             ${{ env.IMAGE }}:${{ github.ref_name == 'main' && 'latest' || 'develop' }}
