@@ -104,6 +104,18 @@ export type OrderBuyer = {
   avatarUrl: string | null;
 };
 
+/** ตัวเลือกการจัดส่งที่ผู้ซื้อเลือก ตาม snapshot ตอน checkout (`SellerOrderViews.ShippingChoice`) */
+export type ShippingChoice = {
+  /** `null` = ร้านลบตัวเลือกนี้ไปแล้ว */
+  optionId: number | null;
+  name: string;
+  /** `null` = ตัวเลือกนี้ไม่ผูกบริษัทขนส่ง */
+  carrierCode: string | null;
+  fee: number;
+  estDaysMin: number | null;
+  estDaysMax: number | null;
+};
+
 /** หนึ่งแถวในหน้ารายการ */
 export type SellerOrderSummary = OrderAuctionSource & {
   order: SellerOrderDetails;
@@ -116,6 +128,8 @@ export type SellerOrderSummary = OrderAuctionSource & {
   /** JSON ของที่อยู่ตอนสั่ง แปลงด้วย `parseShippingAddress()` */
   shippingAddressSnapshot: string | null;
   buyerNote: string | null;
+  /** `null` = ออเดอร์ก่อนมี snapshot */
+  shippingChoice: ShippingChoice | null;
 };
 
 /** `payment.method` */

@@ -49,6 +49,7 @@ const paidOrder: SellerOrderDetail = {
     shipBy: "2026-10-15T03:00:00Z",
     shippingAddressSnapshot: null,
     buyerNote: null,
+    shippingChoice: null,
   },
   payment: null,
   costTotal: 980,

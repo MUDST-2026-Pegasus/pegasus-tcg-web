@@ -69,6 +69,7 @@ function detail(overrides: Partial<SellerOrderDetails> = {}, costTotal = 980): S
       shipBy: "2026-10-15T03:00:00Z",
       shippingAddressSnapshot: null,
       buyerNote: null,
+      shippingChoice: null,
     },
     payment: null,
     costTotal,
