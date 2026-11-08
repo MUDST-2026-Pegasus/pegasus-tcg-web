@@ -111,16 +111,16 @@ describe("Legal and About Pages", () => {
       );
 
       expect(
-        screen.getByRole("heading", { level: 1, name: /Empowering the TCG Community/i })
+        screen.getByRole("heading", { level: 1, name: /เติบโตไปด้วยกันกับชุมชน TCG/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Pegasus TCG is the premier destination for collectors/i)
+        screen.getByText(/Pegasus TCG คือพื้นที่สำหรับนักสะสม/i)
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { level: 2, name: /Our Story/i })
+        screen.getByRole("heading", { level: 2, name: /เรื่องราวของเรา/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { level: 2, name: /Meet the Team/i })
+        screen.getByRole("heading", { level: 2, name: /พบกับทีมงาน/i })
       ).toBeInTheDocument();
     });
   });
