@@ -6,6 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
+
+export function getVisiblePages(currentPage: number, totalPages: number): number[] {
+  if (totalPages <= 5) {
+    return Array.from({ length: Math.max(1, totalPages) }, (_, index) => index + 1);
+  }
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, 5];
+  }
+  if (currentPage >= totalPages - 2) {
+    return [
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+  return [
+    currentPage - 2,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    currentPage + 2,
+  ];
+}
 
 type Forecast = {
   listingId: number;
@@ -52,7 +78,9 @@ export function StockForecast() {
     return true;
   }).sort((a, b) => (a.daysRemaining ?? Infinity) - (b.daysRemaining ?? Infinity));
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const currentPage = Math.min(Math.max(1, page), pages);
+  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visiblePages = getVisiblePages(currentPage, pages);
 
   return <>
     <section aria-label="คาดการณ์การเติมสต็อก" className="rounded-xl border border-border bg-card p-5">
@@ -69,7 +97,56 @@ export function StockForecast() {
         <div><DialogTitle className="text-lg font-bold">คาดการณ์การเติมสต็อกทั้งหมด</DialogTitle><DialogDescription className="mt-1 text-xs">ข้อมูลรายสินค้า · ยอดขายสำเร็จ 30 วันล่าสุด · คาดการณ์จากจำนวนพร้อมขาย</DialogDescription></div>
         <div className="flex flex-wrap gap-2"><Input aria-label="ค้นหาสินค้า" placeholder="ค้นหาชื่อสินค้า…" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} className="w-full sm:w-80 lg:w-96" />{([["all", "ทั้งหมด"], ["soon", "ใกล้หมดตามยอดขาย"], ["insufficient", "ข้อมูลไม่พอ"]] as const).map(([key, label]) => <Button key={key} size="sm" variant={filter === key ? "default" : "outline"} onClick={() => { setFilter(key); setPage(1); }}>{label}</Button>)}</div>
         <div aria-label="รายการคาดการณ์สินค้า" className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2">{forecast.isPending ? <p className="py-8 text-center text-muted-foreground">กำลังโหลดคาดการณ์…</p> : forecast.isError ? <div className="py-8 text-center"><p>โหลดคาดการณ์ไม่สำเร็จ</p><Button className="mt-2" variant="outline" onClick={() => forecast.refetch()}>ลองใหม่</Button></div> : filtered.length === 0 ? <p className="py-8 text-center text-muted-foreground">{rows.length === 0 ? "ยังไม่มีสินค้าในร้าน" : "ไม่พบสินค้าที่ตรงกับการค้นหาหรือตัวกรอง"}</p> : <div className="space-y-1"><div className="sticky top-0 z-10 hidden grid-cols-[2fr_0.7fr_0.8fr_1.4fr_1.2fr] gap-2 rounded bg-muted px-3 py-2 text-xs text-muted-foreground lg:grid"><span>สินค้า</span><span>พร้อมขาย</span><span>ขายแล้ว 30 วัน</span><span>คาดการณ์ / สถานะ</span><span>การดำเนินการ</span></div>{visible.map((row) => <div key={row.listingId} className="grid min-h-20 gap-2 rounded border border-border px-3 py-3 text-xs lg:grid-cols-[2fr_0.7fr_0.8fr_1.4fr_1.2fr] lg:items-center"><span className="font-medium">{row.listingName}</span><span>{row.availableStock} ชิ้น</span><span>{row.completedSales30Days} ชิ้น</span><span>{result(row)}</span><span className="flex gap-1"><Link className="rounded-md border border-border px-2 py-1.5" to={`/listings/${row.listingId}`}>ดูสินค้า</Link><Link className="rounded-md bg-primary px-2 py-1.5 text-primary-foreground" to={`/seller/products/${row.listingId}/restock`}>เติมสต็อก</Link></span></div>)}</div>}</div>
-        {!forecast.isPending && !forecast.isError && <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"><span>แสดง {filtered.length ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ</span><div className="flex flex-wrap items-center gap-1"><Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>ก่อนหน้า</Button>{Array.from({ length: pages }, (_, index) => <Button key={index} size="sm" variant={page === index + 1 ? "default" : "outline"} onClick={() => setPage(index + 1)}>{index + 1}</Button>)}<Button variant="outline" size="sm" disabled={page === pages} onClick={() => setPage(page + 1)}>ถัดไป</Button></div></div>}
+        {!forecast.isPending && !forecast.isError && (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span>
+              แสดง {filtered.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} จาก {filtered.length} รายการ
+            </span>
+            <nav aria-label="เปลี่ยนหน้า" className="flex flex-nowrap items-center justify-end gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage <= 1}
+                onClick={() => setPage(Math.max(1, currentPage - 1))}
+                className="h-9 rounded-xl border border-input px-3.5 text-xs text-foreground hover:bg-muted disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                ก่อนหน้า
+              </Button>
+              {visiblePages.map((pageNum) => {
+                const isActive = currentPage === pageNum;
+                return (
+                  <Button
+                    key={pageNum}
+                    type="button"
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPage(pageNum)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "size-9 min-w-9 rounded-xl border text-xs font-medium transition-colors",
+                      isActive
+                        ? "border-teal-600 bg-teal-600 text-white hover:bg-teal-600/90 hover:text-white"
+                        : "border-input bg-background text-foreground hover:bg-muted",
+                    )}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={currentPage >= pages}
+                onClick={() => setPage(Math.min(pages, currentPage + 1))}
+                className="h-9 rounded-xl border border-input px-3.5 text-xs text-foreground hover:bg-muted disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                ถัดไป
+              </Button>
+            </nav>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   </>;
