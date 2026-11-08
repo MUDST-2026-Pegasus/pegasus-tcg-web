@@ -76,11 +76,11 @@ export function AboutPage() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-x-6 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-4">
           {aboutTeam.map((member, index) => (
             <article
               key={`${member.name}-${index}`}
-              className="flex flex-col items-center text-center"
+              className="row-span-4 grid grid-rows-subgrid justify-items-center pb-14 text-center"
             >
               <Avatar className="size-40 shadow-sm sm:size-44">
                 <AvatarImage src={member.image} alt={member.name} />
@@ -91,7 +91,7 @@ export function AboutPage() {
                     .join("")}
                 </AvatarFallback>
               </Avatar>
-              <h3 className="mt-4 text-[clamp(1.125rem,0.3vw_+_1.05rem,1.25rem)] leading-snug font-bold text-foreground">
+              <h3 className="mt-4 self-end text-[clamp(1.125rem,0.3vw_+_1.05rem,1.25rem)] leading-snug font-bold text-foreground">
                 {member.name}
               </h3>
               <p className="mt-1 text-[clamp(0.8125rem,0.2vw_+_0.775rem,0.875rem)] leading-relaxed font-semibold text-primary">
