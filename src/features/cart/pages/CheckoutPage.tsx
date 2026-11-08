@@ -1,15 +1,14 @@
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
-import { useAuth } from "@/features/auth/auth.queries";
 import { useAddresses, addressKeys } from "@/features/account/address.queries";
-import { useCart, useShippingQuotes, cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
+import { cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
 import { SaleQuotaDialog } from "@/features/sale/components/SaleBuyerDialogs";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
 import { notifyBuyerLimit, quotaListingId } from "@/features/sale/sale.notify";
@@ -24,14 +23,12 @@ import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPro
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
 import { CheckoutErrorAlert } from "../components/CheckoutErrorAlert";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
+import { useCheckoutData, useCheckoutRedirects } from "../useCheckoutData";
+import { useShippingSelection } from "../useShippingSelection";
 import { clearPromotionSelection } from "../promotions.storage";
 import type { CartItemResponse } from "../cart.types";
 import { AuctionCheckout } from "@/features/auction/components/AuctionCheckout";
 import "./checkout.css";
-
-interface CheckoutLocationState {
-  selectedCartItemIds?: number[];
-}
 
 /**
  * `/checkout` — `?auction={id}` เป็นโหมดประมูล (การ์ดใบเดียวที่ชนะ) [TCG-631]
@@ -48,20 +45,26 @@ export function CheckoutPage() {
 
 function CartCheckout() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const hasRedirected = useRef(false);
   const completed = useRef(false);
   const submitting = useRef(false);
   const attempt = useRef<{ signature: string; key: string } | null>(null);
+  const data = useCheckoutData();
   const {
-    data: cart,
-    isLoading: isCartLoading,
-    isFetching: isCartFetching,
-    error: cartError,
-  } = useCart();
+    user,
+    isAuthenticated,
+    isAuthLoading,
+    cart,
+    isCartLoading,
+    isCartFetching,
+    cartError,
+    checkoutItems,
+    cartItemIds,
+    cartNeedsReview,
+    quotes,
+    quotePriceChanged,
+  } = data;
   const {
     data: addresses = [],
     isLoading: isAddressLoading,
@@ -69,73 +72,20 @@ function CartCheckout() {
     refetch: refetchAddresses,
   } = useAddresses();
 
-  const targetItemIds = useMemo(() => {
-    const params = searchParams.getAll("items");
-    const state = location.state as CheckoutLocationState | null;
-    const raw = params.length
-      ? params.flatMap((p) => p.split(",").map(Number))
-      : state?.selectedCartItemIds ?? [];
-    return [...new Set(raw.filter((id) => Number.isInteger(id) && id > 0))];
-  }, [searchParams, location.state]);
-
-  const targetProductId = Number(searchParams.get("productId"));
-  const targetListingId = Number(searchParams.get("listingId"));
-
   const [quotaItem, setQuotaItem] = useState<CartItemResponse | null>(null);
   const removeCartItem = useRemoveCartItem();
   const acceptPrices = useAcceptCartPrices();
-  const checkoutItems = useMemo(() => {
-    const items = cart?.items ?? [];
-    if (targetItemIds.length) {
-      return items.filter((item) => targetItemIds.includes(item.id));
-    }
-    if (targetProductId > 0 && targetListingId > 0) {
-      return items.filter(
-        (item) =>
-          item.productId === targetProductId && item.listingId === targetListingId,
-      );
-    }
-    return [];
-  }, [cart, targetItemIds, targetProductId, targetListingId]);
-
-  const hasPriceChanges = checkoutItems.some((item) => item.priceChanged);
-  const hasUnavailableItems = checkoutItems.some((item) => !item.purchasable);
-  const cartNeedsReview = hasPriceChanges || hasUnavailableItems;
-  const cartItemIds = useMemo(() => checkoutItems.map((item) => item.id), [checkoutItems]);
-
-  const quotes = useShippingQuotes(cartItemIds, {
-    userId: user?.id,
-    cartId: cart?.id,
-    items: checkoutItems,
-    enabled:
-      isAuthenticated &&
-      !isAuthLoading &&
-      !isCartLoading &&
-      !isCartFetching &&
-      !cartError &&
-      !cartNeedsReview &&
-      checkoutItems.length > 0,
-  });
 
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [addressPickerOpen, setAddressPickerOpen] = useState(false);
-  const [shippingChoices, setShippingChoices] = useState<Record<number, number>>({});
-  const [selectionQuotes, setSelectionQuotes] = useState(quotes.data);
-
-  // Reconcile only fresh quotes: a removed choice must not reappear on a later refresh.
-  if (quotes.data !== selectionQuotes && !quotes.isPlaceholderData) {
-    setSelectionQuotes(quotes.data);
-    const nextChoices: Record<number, number> = {};
-    for (const quote of quotes.data ?? []) {
-      const selected =
-        quote.options.find(
-          (option) => option.id === shippingChoices[quote.sellerProfileId],
-        ) ??
-        quote.options.find((option) => option.id === quote.defaultOptionId);
-      if (selected) nextChoices[quote.sellerProfileId] = selected.id;
-    }
-    setShippingChoices(nextChoices);
-  }
+  const {
+    sellerGroups,
+    selectedOptions,
+    shippingReady,
+    shippingFee,
+    shippingOptionBySeller,
+    setShippingChoices,
+  } = useShippingSelection(checkoutItems, quotes);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [shippingNotice, setShippingNotice] = useState<string | null>(null);
@@ -152,53 +102,6 @@ function CartCheckout() {
     addresses.find((address) => address.defaultShipping) ??
     addresses[0] ??
     null;
-
-  const sellerGroups = useMemo(() => {
-    const groups = new Map<number | null, CartItemResponse[]>();
-    for (const item of checkoutItems) {
-      const group = groups.get(item.sellerProfileId) ?? [];
-      group.push(item);
-      groups.set(item.sellerProfileId, group);
-    }
-    return [...groups].map(([sellerId, items]) => ({
-      sellerId,
-      items,
-      quote: quotes.data?.find((quote) => quote.sellerProfileId === sellerId),
-    }));
-  }, [checkoutItems, quotes.data]);
-
-  const selectedOptions = sellerGroups.map(
-    ({ sellerId, quote }) =>
-      quote?.options.find(
-        (option) =>
-          option.id === (sellerId == null ? undefined : shippingChoices[sellerId]),
-      ) ??
-      quote?.options.find((option) => option.id === quote.defaultOptionId) ??
-      quote?.options[0],
-  );
-
-  const shippingReady =
-    !quotes.isPending &&
-    !quotes.isFetching &&
-    !quotes.isPlaceholderData &&
-    !quotes.isError &&
-    sellerGroups.length > 0 &&
-    selectedOptions.every(Boolean);
-
-  const shippingFee = selectedOptions.reduce(
-    (sum, option) => sum + (option?.fee ?? 0),
-    0,
-  );
-
-  const shippingOptionBySeller: Record<number, number> = useMemo(() => {
-    const map: Record<number, number> = {};
-    sellerGroups.forEach(({ sellerId }, index) => {
-      if (sellerId != null && selectedOptions[index]) {
-        map[sellerId] = selectedOptions[index]!.id;
-      }
-    });
-    return map;
-  }, [sellerGroups, selectedOptions]);
 
   const {
     promotionSelection,
@@ -267,87 +170,11 @@ function CartCheckout() {
     isAuthenticated &&
     !cartNeedsReview;
 
-  const quotePriceChanged =
-    quotes.error instanceof ApiError &&
-    (quotes.error.code === "CART_PRICE_CHANGED" ||
-      quotes.error.code === "PRICE_CHANGED");
-
-  useEffect(() => {
-    if (
-      !isAuthLoading &&
-      isAuthenticated &&
-      !isCartLoading &&
-      !isCartFetching &&
-      !cartError &&
-      (cartNeedsReview || quotePriceChanged) &&
-      !hasRedirected.current &&
-      !completed.current
-    ) {
-      hasRedirected.current = true;
-      if (quotePriceChanged) void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      toast.add({
-        title:
-          hasPriceChanges || quotePriceChanged
-            ? "ราคาสินค้ามีการเปลี่ยนแปลง"
-            : "สินค้าบางรายการไม่พร้อมจำหน่าย",
-        description:
-          hasPriceChanges || quotePriceChanged
-            ? "กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ"
-            : "กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ",
-        type: "warning",
-      });
-      navigate("/cart", { replace: true });
-    }
-  }, [
-    isAuthLoading,
-    isAuthenticated,
-    isCartLoading,
-    isCartFetching,
-    cartError,
-    cartNeedsReview,
-    hasPriceChanges,
-    quotePriceChanged,
-    queryClient,
-    navigate,
-  ]);
-
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      navigate(
-        `/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`,
-        { replace: true },
-      );
-    }
-  }, [isAuthLoading, isAuthenticated, location.pathname, location.search, navigate]);
-
-  useEffect(() => {
-    if (
-      !isAuthLoading &&
-      isAuthenticated &&
-      !isCartLoading &&
-      !isCartFetching &&
-      !cartError &&
-      checkoutItems.length === 0 &&
-      !hasRedirected.current &&
-      !completed.current
-    ) {
-      hasRedirected.current = true;
-      toast.add({
-        title: "ไม่พบสินค้าที่เลือกสั่งซื้อ",
-        description: "กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า",
-        type: "warning",
-      });
-      navigate("/cart", { replace: true });
-    }
-  }, [
-    isAuthLoading,
-    isAuthenticated,
-    isCartLoading,
-    isCartFetching,
-    cartError,
-    checkoutItems.length,
-    navigate,
-  ]);
+  useCheckoutRedirects({
+    data,
+    hasRedirectedRef: hasRedirected,
+    completedRef: completed,
+  });
 
   const handlePurchase = async () => {
     if (!canPurchase || submitting.current) return;
