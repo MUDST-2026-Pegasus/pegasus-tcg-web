@@ -63,7 +63,7 @@ export function PaymentPage() {
   const state = location.state as { orderId?: number; order?: CheckoutResponse } | null;
   const orderId = Number(state?.orderId ?? searchParams.get("orderId"));
   // คำสั่งซื้อจากประมูล — ยังไม่มี `source` ใน order จึงส่งเลขประมูลมาทาง query [TCG-631]
-  const auctionNumber = parseAuctionNumber(searchParams.get("auction"));
+  const auctionFromQuery = parseAuctionNumber(searchParams.get("auction"));
   const validOrderId = Number.isSafeInteger(orderId) && orderId > 0;
   const [attemptKey, setAttemptKey] = useState(() => crypto.randomUUID());
   const [referenceCode, setReferenceCode] = useState("");
@@ -76,6 +76,8 @@ export function PaymentPage() {
     enabled: validOrderId && !state?.order,
   });
   const order = state?.order ?? orderQuery.data;
+  // เข้ามาจากประวัติคำสั่งซื้อไม่มี `?auction=` — ใช้เลขประมูลจากคำสั่งซื้อแทน (BE-12) [TCG-639]
+  const auctionNumber = auctionFromQuery ?? parseAuctionNumber(orderQuery.data?.auctionNumber ?? null);
 
   const paymentQuery = useQuery({
     queryKey: ["finance", "payment", orderId, attemptKey],
