@@ -1,15 +1,15 @@
 import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { useAddresses } from "@/features/account/address.queries";
-import { cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
-import { SaleQuotaDialog } from "@/features/sale/components/SaleBuyerDialogs";
+import { cartKeys } from "../cart.queries";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
 import { CheckoutAddressSummary } from "../components/CheckoutAddressSummary";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
-import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPromotionCard";
+import { CheckoutPlatformPromotion } from "../components/CheckoutPlatformPromotion";
+import { CheckoutSaleQuotaDialog } from "../components/CheckoutSaleQuotaDialog";
+import { CheckoutShippingNotice } from "../components/CheckoutShippingNotice";
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
 import { CheckoutErrorAlert } from "../components/CheckoutErrorAlert";
 import { CheckoutSellerList } from "../components/CheckoutSellerList";
@@ -18,6 +18,7 @@ import { CheckoutCartError, CheckoutEmpty, CheckoutLoading } from "../components
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import { useCheckoutData, useCheckoutRedirects } from "../useCheckoutData";
 import { useShippingSelection } from "../useShippingSelection";
+import { useCheckoutAddress } from "../useCheckoutAddress";
 import { useCheckoutSubmit } from "../useCheckoutSubmit";
 import { useCheckoutErrorHandler } from "../useCheckoutErrorHandler";
 import { AuctionCheckout } from "@/features/auction/components/AuctionCheckout";
@@ -57,31 +58,24 @@ function CartCheckout() {
     quotePriceChanged,
   } = data;
   const {
-    data: addresses = [],
-    isLoading: isAddressLoading,
-    error: addressError,
-    refetch: refetchAddresses,
-  } = useAddresses();
-
-  const removeCartItem = useRemoveCartItem();
-  const acceptPrices = useAcceptCartPrices();
-
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-  const [addressPickerOpen, setAddressPickerOpen] = useState(false);
+    addresses,
+    isAddressLoading,
+    addressError,
+    refetchAddresses,
+    activeAddress,
+    setSelectedAddressId,
+    addressPickerOpen,
+    setAddressPickerOpen,
+  } = useCheckoutAddress();
   const {
     sellerGroups,
     selectedOptions,
+    subtotal,
     shippingReady,
     shippingFee,
     shippingOptionBySeller,
     setShippingChoices,
   } = useShippingSelection(checkoutItems, quotes);
-
-  const activeAddress =
-    addresses.find((address) => address.id === selectedAddressId) ??
-    addresses.find((address) => address.defaultShipping) ??
-    addresses[0] ??
-    null;
 
   const promotions = useCheckoutPromotions({
     checkoutItems,
@@ -92,34 +86,8 @@ function CartCheckout() {
     userId: user?.id,
     cartId: cart?.id,
   });
-  const {
-    promotionSelection,
-    setPromotionPicker,
-    typedPlatformCode,
-    setTypedPlatformCode,
-    platformError,
-    setPlatformError,
-    promotionList,
-    promoPreview,
-    preview,
-    previewReady,
-    appliedPlatformCode,
-    appliedPlatformPromotion,
-    setCode,
-  } = promotions;
-
-  const subtotal = sellerGroups.reduce(
-    (sum, { items, quote }) =>
-      sum +
-      (quote?.itemsSubtotal ??
-        items.reduce(
-          (total, item) =>
-            total +
-            (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity,
-          0,
-        )),
-    0,
-  );
+  const { promotionSelection, promoPreview, preview, previewReady, appliedPlatformCode } =
+    promotions;
 
   const itemCount = checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
   // ราคาสินค้า (ก่อนลด) / ส่วนลดราคาสินค้า แยกจากโค้ด (Figma SAL-B3 D)
@@ -202,14 +170,7 @@ function CartCheckout() {
 
         <div className="checkout-columns">
           <div className="flex min-w-0 flex-col gap-4">
-            {shippingNotice && (
-              <div role="alert" className="checkout-alert checkout-alert-warning">
-                <p className="font-semibold">
-                  ตัวเลือกการจัดส่งของ {shippingNotice} มีการเปลี่ยนแปลง
-                </p>
-                <p>เราเลือกวิธีจัดส่งให้ใหม่แล้ว โปรดตรวจสอบค่าส่งและยอดรวมอีกครั้ง</p>
-              </div>
-            )}
+            {shippingNotice && <CheckoutShippingNotice sellerNames={shippingNotice} />}
 
             {quotes.isError && (
               <CheckoutErrorAlert
@@ -262,30 +223,7 @@ function CartCheckout() {
               </div>
             </Card>
 
-            <CheckoutPlatformPromotionCard
-              selectedCode={promotionSelection.platformCode}
-              selectedPromotion={appliedPlatformPromotion ?? null}
-              discount={preview?.platformDiscountTotal ?? 0}
-              availableCount={
-                promotionList.data?.filter(
-                  (promotion) => promotion.ownerType === "PLATFORM",
-                ).length ?? 0
-              }
-              typedCode={typedPlatformCode}
-              error={platformError}
-              loading={promoPreview.isFetching}
-              onTypedCodeChange={(code) => {
-                setTypedPlatformCode(code);
-                if (platformError) setPlatformError(null);
-              }}
-              onApplyTypedCode={() => {
-                if (!typedPlatformCode.trim()) return;
-                setCode("PLATFORM", typedPlatformCode);
-                setTypedPlatformCode("");
-              }}
-              onRemoveCode={() => setCode("PLATFORM", null)}
-              onOpenPicker={() => setPromotionPicker("PLATFORM")}
-            />
+            <CheckoutPlatformPromotion promotions={promotions} />
 
             <CheckoutOrderSummary
               itemCount={itemCount}
@@ -311,16 +249,7 @@ function CartCheckout() {
               onReturnToCart={() => navigate("/cart")}
             />
           </aside>
-          <SaleQuotaDialog
-            open={quotaItem !== null}
-            productName={quotaItem?.productName || "สินค้านี้"}
-            salePrice={quotaItem?.pricing?.salePrice ?? null}
-            listPrice={quotaItem?.pricing?.listPrice ?? null}
-            pending={removeCartItem.isPending || acceptPrices.isPending}
-            onClose={() => setQuotaItem(null)}
-            onRemove={() => quotaItem && removeCartItem.mutate(quotaItem.id, { onSettled: () => setQuotaItem(null) })}
-            onBuyAtListPrice={() => quotaItem && acceptPrices.mutate([quotaItem.id], { onSettled: () => setQuotaItem(null) })}
-          />
+          <CheckoutSaleQuotaDialog item={quotaItem} onClose={() => setQuotaItem(null)} />
         </div>
 
         <CheckoutAddressPicker

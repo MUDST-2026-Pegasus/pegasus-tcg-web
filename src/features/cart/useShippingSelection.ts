@@ -4,7 +4,8 @@ import type { CartItemResponse } from "./cart.types";
 
 /**
  * Checkout items grouped by seller, each with its shipping quote and the chosen
- * delivery option (buyer's pick, else the quote default, else the first option).
+ * delivery option (buyer's pick, else the quote default, else the first option),
+ * plus the shipping fee and item subtotal those quotes give.
  */
 export function useShippingSelection(
   checkoutItems: CartItemResponse[],
@@ -75,9 +76,24 @@ export function useShippingSelection(
     return map;
   }, [sellerGroups, selectedOptions]);
 
+  // Quoted item subtotal per seller, else the cart price while quotes are not in yet.
+  const subtotal = sellerGroups.reduce(
+    (sum, { items, quote }) =>
+      sum +
+      (quote?.itemsSubtotal ??
+        items.reduce(
+          (total, item) =>
+            total +
+            (item.currentPrice ?? item.unitPriceAtAdd) * item.quantity,
+          0,
+        )),
+    0,
+  );
+
   return {
     sellerGroups,
     selectedOptions,
+    subtotal,
     shippingReady,
     shippingFee,
     shippingOptionBySeller,
