@@ -37,9 +37,6 @@ jobs:
           fi
 
       - name: Initialize CodeQL
-        id: codeql-init
-        # A GitHub Releases outage must not fail CI; the last step reports the skipped scan.
-        continue-on-error: true
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
@@ -47,11 +44,6 @@ jobs:
           tools: ${{ steps.codeql-tools.outputs.url }}
 
       - name: Perform CodeQL Analysis
-        if: steps.codeql-init.outcome == 'success'
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
-
-      - name: Report skipped CodeQL scan
-        if: steps.codeql-init.outcome == 'failure'
-        run: echo "::warning title=CodeQL skipped::CodeQL could not be initialized, so this run was not scanned."
