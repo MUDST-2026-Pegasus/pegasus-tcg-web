@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StockForecast, getVisiblePages } from "@/features/seller/products/components/StockForecast";
+import { StockForecast } from "@/features/seller/products/components/StockForecast";
+import { getVisiblePages } from "@/features/seller/products/utils/pagination";
 import { renderWithProviders } from "@/test/utils";
 import { api } from "@/lib/api";
 
