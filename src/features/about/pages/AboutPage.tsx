@@ -12,6 +12,7 @@ import { aboutTeam } from "@/features/about/about.fixture";
 import { cn } from "@/lib/utils";
 
 const SENIOR_TITLE = /\b(FOUNDER|CEO|LEAD|SENIOR|EXPERT)\b/;
+const ASSOCIATE_TITLE = /\bASSOCIATE\b/;
 
 function seniorTitlesFirst(role: string) {
   return role
@@ -136,7 +137,9 @@ export function AboutPage() {
                           "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs leading-snug font-bold tracking-wide",
                           isSenior
                             ? "bg-linear-to-r from-amber-300 via-yellow-200 to-amber-400 text-amber-950 shadow-sm ring-1 ring-amber-500/50"
-                            : "bg-primary/10 text-primary",
+                            : ASSOCIATE_TITLE.test(title)
+                              ? "bg-linear-to-r from-slate-300 via-slate-100 to-slate-400 text-slate-800 shadow-sm ring-1 ring-slate-400/60"
+                              : "bg-linear-to-r from-sky-300 via-cyan-100 to-blue-300 text-blue-950 shadow-sm ring-1 ring-sky-500/50",
                         )}
                       >
                         {isSenior && (
