@@ -19,7 +19,7 @@ type BidHistoryProps = {
 
 /** "ประวัติการบิด" ใหม่สุดก่อน ชื่อผู้บิดถูกปิดบัง [TCG-629] */
 export function BidHistory({ auctionId, bidCount, live }: BidHistoryProps) {
-  const history = useBidHistory(auctionId);
+  const history = useBidHistory(auctionId, 0, bidCount);
   const [expanded, setExpanded] = useState(false);
   const bids = history.data?.page.items ?? [];
   const visible = expanded ? bids : bids.slice(0, PREVIEW_ROWS);

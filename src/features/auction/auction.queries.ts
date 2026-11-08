@@ -98,9 +98,13 @@ export function useVariantAuctions(variantIds: number[]) {
   });
 }
 
-export function useBidHistory(id: number | null, page = 0) {
+/**
+ * @param bidCount จำนวนบิดจากรายละเอียดที่ poll อยู่ — เปลี่ยนเมื่อไรดึงประวัติใหม่
+ * ให้คนที่ถูกบิดแซงเห็นบิดใหม่ในรายการด้วย ไม่ใช่แค่ราคา [TCG-638]
+ */
+export function useBidHistory(id: number | null, page = 0, bidCount?: number) {
   return useQuery({
-    queryKey: auctionKeys.bids(id ?? 0, page),
+    queryKey: [...auctionKeys.bids(id ?? 0, page), bidCount ?? null] as const,
     queryFn: () => auctionApi.getBidHistory(id ?? 0, page),
     enabled: id !== null,
     placeholderData: keepPreviousData,

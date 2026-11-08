@@ -46,6 +46,15 @@ export function auctionErrorMessage(error: unknown, context: ErrorContext): Auct
     }
     case "OWN_AUCTION":
       return { title: "บิดประมูลของตัวเองไม่ได้", detail: "ประมูลนี้เปิดโดยร้านของคุณ" };
+    // ข้อความจาก API เป็นภาษาอังกฤษ — แปลง code ที่ผู้ซื้อเจอได้เป็นข้อความไทย [TCG-638]
+    case "AUCTION_CLOSED":
+      return { title: "ประมูลจบแล้ว", detail: "ประมูลนี้ปิดรับบิดแล้ว รีเฟรชหน้าเพื่อดูผล" };
+    case "BUY_NOW_UNAVAILABLE":
+      return { title: "ซื้อทันทีไม่ได้แล้ว", detail: "มีผู้บิดคนแรกแล้ว ประมูลนี้เป็นการบิดปกติ" };
+    case "AUCTION_NOT_FOUND":
+      return { title: "ไม่พบประมูลนี้", detail: "ประมูลอาจถูกลบหรือลิงก์ไม่ถูกต้อง" };
+    case "IDEMPOTENCY_KEY_CONFLICT":
+      return { title: "บิดไม่สำเร็จ", detail: "คำขอซ้ำกับครั้งก่อน ลองกดบิดใหม่อีกครั้ง" };
     default:
       return { title: "บิดไม่สำเร็จ", detail: error.message };
   }
