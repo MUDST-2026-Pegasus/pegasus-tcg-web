@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getPublicProfile } from "@/features/home/home.api";
+import { getPublicProfile, getRecommendedShops } from "@/features/home/home.api";
 import { api, ApiError } from "@/lib/api";
 
 afterEach(() => vi.restoreAllMocks());
+
+it("loads recommended shops without authentication", async () => {
+  const get = vi.spyOn(api, "get").mockResolvedValueOnce([]);
+
+  await expect(getRecommendedShops()).resolves.toEqual([]);
+  expect(get).toHaveBeenCalledWith("/home/recommended-shops", { auth: false });
+});
 
 describe("getPublicProfile", () => {
   it("uses the public profile endpoint when available", async () => {

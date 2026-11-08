@@ -29,6 +29,7 @@ import {
   useHeroSlides,
   useNewReleases,
   usePegasusPicks,
+  useRecommendedShops,
   useTrending,
 } from "@/features/home/home.queries";
 import type {
@@ -42,6 +43,7 @@ import { ClaimTicketRail } from "@/features/promotions/ClaimTicketRail";
 import { useFeaturedPromotions } from "@/features/promotions/claim.queries";
 import { env } from "@/lib/env";
 import { AuctionEndingSoonSection } from "./AuctionEndingSoonSection";
+import { ShopCard, ShopCardSkeleton } from "./ShopCard";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
@@ -627,6 +629,34 @@ function GamesSection() {
   return <BrowseByGame games={query.data} />;
 }
 
+export function RecommendedShopsSection() {
+  const query = useRecommendedShops();
+  if (query.isError || (!query.isPending && !query.data?.length)) return null;
+
+  return (
+    <section aria-label="ร้านค้าแนะนำ" className="min-w-0 overflow-hidden bg-secondary px-4 py-7 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1216px] min-w-0">
+        <SectionHeader title="ร้านค้าแนะนำ" description="ร้านที่ยืนยันตัวตนแล้ว จัดอันดับจากรีวิวของผู้ซื้อ" />
+        <Carousel opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }} className="mt-[18px] min-w-0">
+          <CarouselContent className="cursor-grab pl-4 pr-4 pt-1 pb-6 active:cursor-grabbing">
+            {query.isPending
+              ? [0, 1, 2, 3].map((index) => (
+                  <CarouselItem key={index} className="basis-[296px]">
+                    <ShopCardSkeleton />
+                  </CarouselItem>
+                ))
+              : query.data?.map((shop) => (
+                  <CarouselItem key={shop.username} className="basis-[296px]">
+                    <ShopCard shop={shop} />
+                  </CarouselItem>
+                ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+    </section>
+  );
+}
+
 function TrendingSection() {
   const query = useTrending();
 
@@ -682,6 +712,7 @@ export function HomeContent() {
       <PromotionsSection />
       <NewReleasesSection />
       <GamesSection />
+      <RecommendedShopsSection />
       <TrendingSection />
       {/* ระบบประมูล [TCG-636] */}
       <AuctionEndingSoonSection />
