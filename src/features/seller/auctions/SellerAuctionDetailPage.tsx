@@ -160,7 +160,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
 
       <SellerAuctionNotices detail={detail} newBid={newBid} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`grid gap-4 sm:grid-cols-2 ${detail.watcherCount === undefined ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}>
         <Kpi
           label="ราคาบิดสูงสุด"
           value={hasBids ? formatBaht(detail.currentPrice) : "—"}
@@ -168,7 +168,9 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
           note={`เริ่มต้น ${formatBaht(detail.startingPrice)}`}
         />
         <Kpi label="จำนวนบิด" value={detail.bidCount.toLocaleString("th-TH")} note={`จาก ${detail.bidderCount.toLocaleString("th-TH")} ผู้บิด`} />
-        <Kpi label="ผู้ติดตาม" value={detail.watcherCount.toLocaleString("th-TH")} note="กดติดตามประมูลนี้" />
+        {detail.watcherCount !== undefined && (
+          <Kpi label="ผู้ติดตาม" value={detail.watcherCount.toLocaleString("th-TH")} note="กดติดตามประมูลนี้" />
+        )}
         <Kpi
           label="รายรับโดยประมาณ"
           value={formatBaht(detail.estimatedPayout)}

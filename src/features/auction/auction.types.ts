@@ -211,13 +211,11 @@ export type AuctionDetail = {
   recentBids: AuctionBid[];
   viewer: AuctionViewer | null;
   /**
-   * ชื่อผู้ชนะแบบปิดบัง ("n***t") — B4-D "ผู้ชนะ n***t · 12 บิด"
-   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-3 (TCG-616) · ไม่ส่งมา = ซ่อน
+   * ชื่อผู้ชนะแบบปิดบัง ("n***t") — B4-D "ผู้ชนะ n***t · 12 บิด" · `null` = ยังไม่มีผู้ชนะ (ซ่อน)
    */
   winnerAlias?: string | null;
   /**
-   * เหตุผลที่แอดมินระงับ — B4-G "เหตุผล: …"
-   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-3 (TCG-616) · ไม่ส่งมา = ซ่อน
+   * เหตุผลที่แอดมินระงับ — B4-G "เหตุผล: …" · มาเฉพาะ SUSPENDED ไม่งั้น `null` (ซ่อน)
    */
   suspendReason?: string | null;
   serverTime: string;
@@ -411,9 +409,9 @@ export type SellerAuctionDetail = {
   bidderCount: number;
   /**
    * คนที่กดติดตามประมูลนี้ — การ์ด "ผู้ติดตาม" ใน S4 [TCG-634]
-   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `SellerAuctionDetailResponse`
+   * ระบบติดตามประมูลยังไม่มีใน BE จึงยังไม่ส่งมา · ไม่ส่ง = ซ่อนการ์ด [TCG-637]
    */
-  watcherCount: number;
+  watcherCount?: number;
   /** ราคาปัจจุบันหลังหักค่าคอม */
   estimatedPayout: number;
   /** เท่าการขายปกติ เช่น 5 */
