@@ -225,3 +225,5 @@ export function useCheckoutPromotions({
     setCode,
   };
 }
+
+export type CheckoutPromotions = ReturnType<typeof useCheckoutPromotions>;
