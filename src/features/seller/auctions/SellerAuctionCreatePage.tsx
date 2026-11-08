@@ -104,18 +104,21 @@ export function SellerAuctionCreatePage() {
 
   // ---------- "ประมูลใหม่" ----------
   const source = useSellerAuction(fromId, { poll: false });
-  const stock = useEligibleUnits();
+  // ค้นการ์ดใบเดิมด้วย id ตรง ๆ — สต็อกหน้าแรกมีแค่ 20 ใบ ใบเดิมอาจไม่อยู่ในนั้น [TCG-639]
+  const sourceUnitUid = source.data?.unitUid ?? null;
+  const stock = useEligibleUnits({ q: sourceUnitUid ?? undefined, size: 1 }, { enabled: sourceUnitUid !== null });
   // การ์ดใบเดิมของประมูลที่จะเปิดใหม่ — ยังว่างอยู่ถึงเลือกให้
   const relistUnit =
     source.data && stock.data
-      ? (stock.data.page.items.find((item) => item.unitLabel === source.data.unitLabel && isSelectableUnit(item)) ?? null)
+      ? (stock.data.page.items.find((item) => item.unitUid === sourceUnitUid && isSelectableUnit(item)) ?? null)
       : null;
   const prefilled = useRef(false);
   useEffect(() => {
-    if (prefilled.current || !source.data || !stock.data) return;
+    // การ์ดใบเดิมไม่อยู่แล้ว (`unitUid` = null) — เติมแค่ราคา/เวลา ให้ผู้ขายเลือกการ์ดเอง
+    if (prefilled.current || !source.data || (sourceUnitUid !== null && !stock.data)) return;
     prefilled.current = true;
     reset({ ...relistAuctionForm(source.data), unitUid: relistUnit?.unitUid ?? null });
-  }, [source.data, stock.data, relistUnit, reset]);
+  }, [source.data, sourceUnitUid, stock.data, relistUnit, reset]);
 
   const unit = pickedUnit ?? (relistUnit && values.unitUid === relistUnit.unitUid ? relistUnit : null);
 

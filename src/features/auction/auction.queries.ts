@@ -177,9 +177,11 @@ export function useSellerAuction(id: number | null, options: { poll?: boolean } 
   });
 }
 
-export function useEligibleUnits(params: EligibleUnitParams = {}) {
+/** @param options.enabled `false` = ยังไม่ต้องยิง เช่น รอรู้การ์ดของประมูลเดิมก่อน */
+export function useEligibleUnits(params: EligibleUnitParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: auctionKeys.eligibleUnits(params),
+    enabled: options.enabled ?? true,
     queryFn: () => auctionApi.getEligibleUnits(params),
     placeholderData: keepPreviousData,
   });
