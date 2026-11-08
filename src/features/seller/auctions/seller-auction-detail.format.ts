@@ -140,7 +140,7 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
 
 // ---------- แจ้งเตือน S3-C ----------
 
-export type SellerNoticeKind = "NEW_BID" | "BUY_NOW_SOLD" | "AWAITING_PAYMENT" | "WINNER_UNPAID" | "NO_BIDS";
+export type SellerNoticeKind = "NEW_BID" | "BUY_NOW_SOLD" | "AWAITING_PAYMENT" | "WINNER_UNPAID" | "NO_BIDS" | "CANCELLED";
 
 /**
  * แบนเนอร์บนหัวหน้า S4 — `null` = ไม่มี
@@ -154,6 +154,9 @@ export function sellerNoticeKind(detail: SellerAuctionDetail, newBid: boolean): 
       return soldByBuyNow(detail) ? "BUY_NOW_SOLD" : "AWAITING_PAYMENT";
     case "UNSOLD":
       return hadWinner(detail) ? "WINNER_UNPAID" : "NO_BIDS";
+    // ผู้ขายยกเลิกเอง การ์ดก็กลับเข้ามือเหมือนกัน — บอกให้ชัดพร้อมทางไปต่อ [TCG-639]
+    case "CANCELLED":
+      return "CANCELLED";
     default:
       return null;
   }
