@@ -401,6 +401,8 @@ export type SellerAuctionDetail = {
   status: AuctionStatus;
   item: AuctionItem;
   unitLabel: string;
+  /** การ์ดใบนี้ในสต็อก — ใช้ตอน "ประมูลใหม่" · `null` = การ์ดไม่อยู่แล้ว [TCG-639] */
+  unitUid: string | null;
   startingPrice: number;
   bidIncrement: number;
   currentPrice: number;

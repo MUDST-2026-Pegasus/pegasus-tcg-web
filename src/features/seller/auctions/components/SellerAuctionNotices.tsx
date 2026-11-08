@@ -1,5 +1,4 @@
-import { CircleCheck, Clock, Gavel, Undo2, UserX } from "lucide-react";
-import { ShieldAlert } from "lucide-react";
+import { CircleCheck, CircleX, Clock, Gavel, ShieldAlert, Undo2, UserX } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { AuctionNotice } from "@/features/auction/components/AuctionNotice";
 import { useCountdown } from "@/features/auction/useCountdown";
 
 import { relistPath, sellerNoticeKind } from "../seller-auction-detail.format";
+import { ReturnToListingButton } from "./ReturnToListingButton";
 
 type SellerAuctionNoticesProps = {
   detail: SellerAuctionDetail;
@@ -82,7 +82,7 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
           icon={<UserX />}
           title="ผู้ชนะไม่ชำระ — การ์ดกลับเข้าสต็อกแล้ว"
           detail={`${name} · คำสั่งซื้อถูกยกเลิก · ผู้ชนะถูกบันทึกไม่ชำระ 1 ครั้ง`}
-          action={<RelistButton auctionId={detail.id} variant="default" />}
+          action={<BackInStockActions detail={detail} relistVariant="default" />}
         />
       );
     case "NO_BIDS":
@@ -92,7 +92,17 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
           icon={<Undo2 />}
           title="ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว"
           detail={name}
-          action={<RelistButton auctionId={detail.id} variant="outline" />}
+          action={<BackInStockActions detail={detail} relistVariant="outline" />}
+        />
+      );
+    case "CANCELLED":
+      return (
+        <AuctionNotice
+          tone="slate"
+          icon={<CircleX />}
+          title="ยกเลิกประมูลแล้ว — การ์ดกลับเข้าสต็อกแล้ว"
+          detail={name}
+          action={<BackInStockActions detail={detail} relistVariant="outline" />}
         />
       );
     default:
@@ -103,6 +113,16 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
 function Remaining({ target, serverTime }: { target: string; serverTime: string }) {
   const remaining = useCountdown(target, serverTime) ?? 0;
   return <span className="tabular-nums">{formatRemaining(remaining)}</span>;
+}
+
+/** การ์ดกลับเข้ามือแล้ว: เอากลับไปลงขาย หรือเปิดประมูลใหม่ */
+function BackInStockActions({ detail, relistVariant }: { detail: SellerAuctionDetail; relistVariant: "default" | "outline" }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <ReturnToListingButton detail={detail} />
+      <RelistButton auctionId={detail.id} variant={relistVariant} />
+    </div>
+  );
 }
 
 function RelistButton({ auctionId, variant }: { auctionId: number; variant: "default" | "outline" }) {

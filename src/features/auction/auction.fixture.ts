@@ -388,6 +388,7 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   status: "LIVE",
   item: I.charizard,
   unitLabel: "U-0771",
+  unitUid: null,
   startingPrice: 2000,
   bidIncrement: 100,
   currentPrice: 8450,

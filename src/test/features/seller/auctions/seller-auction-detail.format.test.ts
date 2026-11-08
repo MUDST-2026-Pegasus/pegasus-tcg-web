@@ -46,7 +46,7 @@ describe("sellerNoticeKind", () => {
     [121, "WINNER_UNPAID"],
     [126, "NO_BIDS"],
     [133, null],
-    [140, null],
+    [140, "CANCELLED"],
   ])("auction %i → %s", (id, kind) => {
     expect(sellerNoticeKind(F[id], false)).toBe(kind);
   });
