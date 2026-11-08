@@ -57,8 +57,8 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 export const AUCTION_MOCK = {
   /** รายการ / รายละเอียด / ประวัติบิด — ใช้ API จริงแล้ว [TCG-637] */
   public: false,
-  /** บิด / ซื้อทันที / checkout / การประมูลของฉัน */
-  buyer: true,
+  /** บิด / ซื้อทันที / checkout / การประมูลของฉัน — ใช้ API จริงแล้ว [TCG-638] */
+  buyer: false,
   /** หน้าผู้ขายทั้งหมด — ใช้ API จริงแล้ว [TCG-637] */
   seller: false,
   /** หน้าแอดมินทั้งหมด */
@@ -157,7 +157,7 @@ export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHisto
 /**
  * บิดแล้วถอนไม่ได้ — error ที่ต้องรับ: BID_TOO_LOW, AUCTION_CLOSED, BIDDING_BANNED, OWN_AUCTION, NO_SHIPPING_ADDRESS, EMAIL_NOT_VERIFIED
  * ส่ง `Idempotency-Key` ใหม่ทุกครั้งที่กดยืนยัน กันเน็ตกระตุกแล้วบิดซ้ำ [TCG-630]
- * ⚠️ contract C-2 ยังรับ header นี้เฉพาะ checkout — BE-4 (TCG-617) ต้องรับด้วย
+ * BE ส่งผลบิดเดิมกลับถ้า key ซ้ำ (BE-4 · TCG-617)
  */
 export function placeBid(id: number, payload: PlaceBidRequest, idempotencyKey: string = newIdempotencyKey()): Promise<BidPlaced> {
   if (AUCTION_MOCK.buyer) {
@@ -178,7 +178,8 @@ export function placeBid(id: number, payload: PlaceBidRequest, idempotencyKey: s
 
 /**
  * ได้เฉพาะ LIVE + ยังไม่มีบิด — error: BUY_NOW_UNAVAILABLE, AUCTION_CLOSED
- * ⚠️ `Idempotency-Key` ยังไม่อยู่ใน contract — BE-5 (TCG-618) ต้องรับด้วย
+ * BE ยังไม่อ่าน `Idempotency-Key` ของ endpoint นี้ — กดซ้ำครั้งที่สองได้ AUCTION_CLOSED เพราะประมูลจบไปแล้ว
+ * ปุ่มใน dialog ปิดระหว่างรอผลอยู่แล้ว จึงยังส่ง header ไว้เผื่อ BE รับในอนาคต [TCG-638]
  */
 export function buyNow(id: number, idempotencyKey: string = newIdempotencyKey()): Promise<AuctionWin> {
   if (AUCTION_MOCK.buyer) {
