@@ -2,21 +2,19 @@ import { CHECKOUT_CARD_CLASS } from "@/features/cart/checkout.styles";
 import { useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { FormPageSkeleton } from "@/components/common/PageSkeletons";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAddresses } from "@/features/account/address.queries";
 import { cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
 import { SaleQuotaDialog } from "@/features/sale/components/SaleBuyerDialogs";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
-import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
 import { CheckoutAddressSummary } from "../components/CheckoutAddressSummary";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
-import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
-import { PromotionChangedDialog } from "../components/PromotionChangedDialog";
 import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPromotionCard";
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
 import { CheckoutErrorAlert } from "../components/CheckoutErrorAlert";
+import { CheckoutSellerList } from "../components/CheckoutSellerList";
+import { CheckoutPromotionDialogs } from "../components/CheckoutPromotionDialogs";
+import { CheckoutCartError, CheckoutEmpty, CheckoutLoading } from "../components/CheckoutStatusScreens";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import { useCheckoutData, useCheckoutRedirects } from "../useCheckoutData";
 import { useShippingSelection } from "../useShippingSelection";
@@ -85,26 +83,7 @@ function CartCheckout() {
     addresses[0] ??
     null;
 
-  const {
-    promotionSelection,
-    promotionPicker,
-    setPromotionPicker,
-    typedPlatformCode,
-    setTypedPlatformCode,
-    platformError,
-    setPlatformError,
-    sellerErrors,
-    pendingTypedCode,
-    setPendingTypedCode,
-    promotionList,
-    promoPreview,
-    preview,
-    previewReady,
-    appliedPlatformCode,
-    appliedPlatformPromotion,
-    sellerDiscounts,
-    setCode,
-  } = useCheckoutPromotions({
+  const promotions = useCheckoutPromotions({
     checkoutItems,
     cartItemIds,
     cartNeedsReview,
@@ -113,13 +92,21 @@ function CartCheckout() {
     userId: user?.id,
     cartId: cart?.id,
   });
-
-  const promotionStoreUsername =
-    promotionPicker == null || promotionPicker === "PLATFORM"
-      ? undefined
-      : sellerGroups
-          .find((group) => group.sellerId === promotionPicker)
-          ?.items.find((item) => item.sellerUsername)?.sellerUsername ?? undefined;
+  const {
+    promotionSelection,
+    setPromotionPicker,
+    typedPlatformCode,
+    setTypedPlatformCode,
+    platformError,
+    setPlatformError,
+    promotionList,
+    promoPreview,
+    preview,
+    previewReady,
+    appliedPlatformCode,
+    appliedPlatformPromotion,
+    setCode,
+  } = promotions;
 
   const subtotal = sellerGroups.reduce(
     (sum, { items, quote }) =>
@@ -191,43 +178,17 @@ function CartCheckout() {
     completedRef: completed,
   });
 
-  if (isAuthLoading || isCartLoading) {
-    return (
-      <div className="checkout-page">
-        <FormPageSkeleton label="กำลังเตรียมคำสั่งซื้อ" />
-      </div>
-    );
-  }
-
+  if (isAuthLoading || isCartLoading) return <CheckoutLoading />;
   if (!isAuthenticated) return null;
   if (cartNeedsReview || quotePriceChanged) return null;
   if (cartError) {
     return (
-      <div className="checkout-page">
-        <div role="alert" className="checkout-container checkout-alert checkout-alert-error">
-          <p>โหลดตะกร้าไม่สำเร็จ</p>
-          <Button
-            variant="outline"
-            onClick={() => void queryClient.invalidateQueries({ queryKey: cartKeys.all })}
-          >
-            ลองอีกครั้ง
-          </Button>
-        </div>
-      </div>
+      <CheckoutCartError
+        onRetry={() => void queryClient.invalidateQueries({ queryKey: cartKeys.all })}
+      />
     );
   }
-  if (!checkoutItems.length) {
-    return (
-      <div className="checkout-page">
-        <div className="checkout-container">
-          <h1 className="text-xl font-bold">ไม่พบสินค้าที่เลือกสั่งซื้อ</h1>
-          <Button onClick={() => navigate("/cart")} className="mt-4">
-            กลับไปยังตะกร้า
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!checkoutItems.length) return <CheckoutEmpty onBackToCart={() => navigate("/cart")} />;
 
   return (
     <div className="checkout-page">
@@ -271,55 +232,17 @@ function CartCheckout() {
               />
             )}
 
-            {sellerGroups.map(({ sellerId, items, quote }, index) => {
-              const count =
-                promotionList.data?.filter(
-                  (promotion) =>
-                    promotion.sellerProfileId === sellerId && promotion.applicable,
-                ).length || 0;
-              const sellerGrandTotal =
-                sellerId == null
-                  ? null
-                  : preview?.sellers.find((s) => s.sellerProfileId === sellerId)
-                      ?.grandTotal ?? null;
-
-              return (
-                <CheckoutSellerCard
-                  key={sellerId ?? "unknown"}
-                  sellerId={sellerId}
-                  sellerName={quote?.sellerName || items[0]?.sellerName || "ร้านค้า"}
-                  items={items}
-                  quote={quote}
-                  selected={selectedOptions[index]}
-                  loading={quotes.isPending || quotes.isFetching}
-                  failed={quotes.isError}
-                  disabled={isSubmitting}
-                  onSelect={(id) => {
-                    if (sellerId != null) {
-                      setShippingChoices((previous) => ({
-                        ...previous,
-                        [sellerId]: id,
-                      }));
-                    }
-                  }}
-                  promotionCode={
-                    sellerId == null ? null : promotionSelection.sellerCodes[sellerId]
-                  }
-                  promotionDiscount={
-                    sellerId == null ? 0 : sellerDiscounts.get(sellerId) || 0
-                  }
-                  promotionCount={count}
-                  sellerGrandTotal={sellerGrandTotal}
-                  previewReady={previewReady}
-                  promotionError={
-                    sellerId == null ? null : sellerErrors[sellerId] ?? null
-                  }
-                  onOpenPromotions={
-                    sellerId == null ? undefined : () => setPromotionPicker(sellerId)
-                  }
-                />
-              );
-            })}
+            <CheckoutSellerList
+              sellerGroups={sellerGroups}
+              selectedOptions={selectedOptions}
+              shippingLoading={quotes.isPending || quotes.isFetching}
+              shippingFailed={quotes.isError}
+              disabled={isSubmitting}
+              onSelectShipping={(sellerId, id) =>
+                setShippingChoices((previous) => ({ ...previous, [sellerId]: id }))
+              }
+              promotions={promotions}
+            />
           </div>
 
           <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
@@ -408,84 +331,12 @@ function CartCheckout() {
           onOpenChange={setAddressPickerOpen}
         />
 
-        <CodePickerDialog
-          open={promotionPicker !== null}
-          onOpenChange={(open) => {
-            if (!open) setPromotionPicker(null);
-          }}
-          owner={promotionPicker ?? "PLATFORM"}
-          sellerName={
-            sellerGroups.find((group) => group.sellerId === promotionPicker)?.quote
-              ?.sellerName ||
-            sellerGroups.find((group) => group.sellerId === promotionPicker)?.items[0]
-              ?.sellerName ||
-            undefined
-          }
-          promotions={promotionList.data || []}
-          selectedCode={
-            promotionPicker === "PLATFORM"
-              ? promotionSelection.platformCode
-              : promotionPicker == null
-                ? null
-                : promotionSelection.sellerCodes[promotionPicker] ?? null
-          }
-          onSelect={(code) => {
-            if (promotionPicker !== null) {
-              setCode(promotionPicker, code);
-            }
-          }}
-          onTryCode={(code) => {
-            if (promotionPicker !== null) {
-              setPendingTypedCode({ owner: promotionPicker, code });
-              setCode(promotionPicker, code);
-            }
-          }}
-          error={
-            promotionPicker === "PLATFORM"
-              ? platformError
-              : promotionPicker != null
-                ? sellerErrors[promotionPicker]
-                : null
-          }
-          onNavigateHome={() => navigate("/")}
-          onNavigateToStore={
-            promotionStoreUsername
-              ? () => navigate(`/u/${encodeURIComponent(promotionStoreUsername)}`)
-              : undefined
-          }
-          loading={
-            pendingTypedCode?.owner === promotionPicker &&
-            (!previewReady || promoPreview.isFetching)
-          }
-        />
-
-        <PromotionChangedDialog
-          open={promotionChanged !== null}
-          onOpenChange={(open) => {
-            if (!open) setPromotionChanged(null);
-          }}
-          previousTotal={promotionChanged?.previous ?? 0}
-          newTotal={preview?.grandTotal ?? promotionChanged?.next ?? 0}
-          droppedCode={promotionChanged?.code}
-          droppedOwner={promotionChanged?.owner}
-          droppedReason={
-            promotionChanged?.owner === "PLATFORM"
-              ? platformError
-              : promotionChanged?.owner != null
-                ? sellerErrors[promotionChanged.owner]
-                : null
-          }
-          sellerDiscountTotal={preview?.sellerDiscountTotal ?? 0}
-          platformDiscountTotal={preview?.platformDiscountTotal ?? 0}
-          loading={promoPreview.isFetching}
-          onChooseAnotherCode={(owner) => {
-            setPromotionChanged(null);
-            setPromotionPicker(owner ?? "PLATFORM");
-          }}
-          onConfirmNewTotal={() => {
-            setPromotionChanged(null);
-            void handlePurchase();
-          }}
+        <CheckoutPromotionDialogs
+          promotions={promotions}
+          sellerGroups={sellerGroups}
+          promotionChanged={promotionChanged}
+          onClosePromotionChanged={() => setPromotionChanged(null)}
+          onConfirmNewTotal={() => void handlePurchase()}
         />
       </div>
     </div>
