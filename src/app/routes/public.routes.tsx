@@ -10,6 +10,7 @@ import {
   ProfilePageSkeleton,
 } from "@/components/common/PageSkeletons";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { AccountLayout } from "@/features/account/components/AccountLayout";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import {
   LegacyGameRedirect,
@@ -92,12 +93,20 @@ export const publicRoutes: RouteObject = {
       children: [
         { path: "payment", element: <PaymentPage /> },
         { path: "payment/success", element: <PaymentSuccessPage /> },
-        { path: "account/profile", element: <ProfilePage /> },
-        { path: "account/orders", element: <OrderHistoryPage /> },
-        { path: "account/addresses", element: <AddressBookPage /> },
-        { path: "account/coupons", element: <MyCouponsPage /> },
+        // sidebar อยู่ใน AccountLayout — เปลี่ยนแท็บแล้วโหลดใหม่แค่เนื้อหา [TCG-732]
+        {
+          path: "account",
+          element: <AccountLayout />,
+          children: [
+            { path: "profile", element: <ProfilePage /> },
+            { path: "orders", element: <OrderHistoryPage /> },
+            { path: "addresses", element: <AddressBookPage /> },
+            { path: "coupons", element: <MyCouponsPage /> },
+            { path: "auctions", element: <MyAuctionsPage /> },
+          ],
+        },
+        // คอลเลกชันใช้หน้าเต็มของตัวเอง ไม่มี sidebar
         { path: "account/collection", element: <MyCollectionPage /> },
-        { path: "account/auctions", element: <MyAuctionsPage /> },
         // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
         { path: "become-a-seller", element: <SellerApplicationPage /> },
       ],

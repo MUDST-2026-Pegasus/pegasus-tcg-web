@@ -27,13 +27,12 @@ import { useAuth } from "@/features/auth/auth.queries";
 import type { AuthUser } from "@/features/auth/auth.types";
 import { getErrorMessage } from "@/lib/api";
 
-import { initialsOf, toSidebarUser } from "../account.format";
+import { initialsOf } from "../account.format";
 import { formatAddressLines } from "../address.format";
 import { useAddresses } from "../address.queries";
 import type { Address } from "../address.types";
 import { formatOrderDateTime, orderStage } from "../order-stage";
 import { useBuyerOrders } from "../orders.queries";
-import { AccountSidebar } from "../components/AccountSidebar";
 import { EditProfileDialog } from "../components/EditProfileDialog";
 
 function ProfileAvatar({
@@ -329,9 +328,7 @@ export function ProfilePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   return (
-    <div className="bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={toSidebarUser(user)} />
+    <>
 
         {isLoading || !user ? (
           <ProfileSkeleton />
@@ -372,7 +369,6 @@ export function ProfilePage() {
             />
           </div>
         )}
-      </div>
-    </div>
+    </>
   );
 }

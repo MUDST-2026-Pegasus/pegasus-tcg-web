@@ -4,14 +4,11 @@ import { MapPinPlus, Plus } from "lucide-react";
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { useAuth } from "@/features/auth/auth.queries";
 import { getErrorMessage } from "@/lib/api";
 
-import { toSidebarUser } from "../account.format";
 import { useAddresses, useSetDefaultAddress } from "../address.queries";
 import { MAX_ADDRESSES } from "../address.format";
 import type { Address } from "../address.types";
-import { AccountSidebar } from "../components/AccountSidebar";
 import { AddressBookSkeleton } from "../components/AddressBookSkeleton";
 import { AddressCard } from "../components/AddressCard";
 import { AddressFormDialog } from "../components/AddressFormDialog";
@@ -29,7 +26,6 @@ import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
  * - ทุก mutation `invalidateQueries` ให้เอง รายการจึงอัปเดตโดยไม่ต้อง reload
  */
 export function AddressBookPage() {
-  const { user } = useAuth();
   const addresses = useAddresses();
   const setDefault = useSetDefaultAddress();
 
@@ -49,9 +45,7 @@ export function AddressBookPage() {
   };
 
   return (
-    <div className="min-h-[720px] bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={toSidebarUser(user)} />
+    <>
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-3xl font-semibold">Address Book</h1>
@@ -111,7 +105,6 @@ export function AddressBookPage() {
             )}
           </QueryBoundary>
         </div>
-      </div>
 
       <AddressFormDialog
         open={editing !== null}
@@ -123,6 +116,6 @@ export function AddressBookPage() {
         onOpenChange={(open) => !open && setDeleting(null)}
         address={deleting ?? undefined}
       />
-    </div>
+    </>
   );
 }

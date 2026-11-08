@@ -556,28 +556,12 @@ export function DashboardPageSkeleton({ label = "กำลังโหลดห�
   );
 }
 
-/** หน้าบัญชีผู้ใช้: เมนูซ้าย (AccountSidebar) + เนื้อหาขวา */
+/** เนื้อหาฝั่งขวาของหน้า /account/* — sidebar มาจาก AccountLayout อยู่แล้ว */
 export function AccountPageSkeleton({ label = "กำลังโหลดบัญชี" }: { label?: string }) {
   return (
-    <PageStatus label={label} className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <div className="flex h-fit flex-col gap-3 rounded-xl border bg-card p-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-12 rounded-full" />
-            <div className="flex flex-1 flex-col gap-2">
-              <Skeleton className="h-4 w-28 rounded-md" />
-              <Skeleton className="h-3 w-20 rounded-md" />
-            </div>
-          </div>
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-9 w-full rounded-lg" />
-          ))}
-        </div>
-        <div className="flex min-w-0 flex-col gap-6">
-          <HeadingSkeleton />
-          <ProductRowsSkeleton rows={2} />
-        </div>
-      </div>
+    <PageStatus label={label} className="flex min-w-0 flex-col gap-6">
+      <HeadingSkeleton />
+      <ProductRowsSkeleton rows={2} />
     </PageStatus>
   );
 }

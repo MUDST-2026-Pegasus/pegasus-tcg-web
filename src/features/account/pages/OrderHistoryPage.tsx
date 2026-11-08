@@ -18,7 +18,6 @@ import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getListingDetail } from "@/features/catalog/catalog.api";
 import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
-import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
 import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
 import { OrderDetailsModal } from "@/features/account/components/OrderDetailsModal";
@@ -42,7 +41,6 @@ import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { reviewKeys } from "@/features/finance/reviews.queries";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
-import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
 import { useBuyerOrders, useDownloadBuyerOrderSummary } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
@@ -55,9 +53,6 @@ import {
   orderStage,
 } from "../order-stage";
 
-import {
-  toSidebarUser,
-} from "../account.format";
 import {
   ORDER_FILTER_TABS,
   matchesOrderFilter,
@@ -77,7 +72,6 @@ export function OrderHistoryPage() {
     retry: false,
   });
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   const { data: ordersData, isLoading, error, refetch } = useBuyerOrders(0, 50, true);
   const refunds = useBuyerRefunds();
@@ -94,8 +88,6 @@ export function OrderHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<OrderFilterTab>("ALL");
   const [reorderOrderId, setReorderOrderId] = useState<number | null>(null);
   const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
-
-  const sidebarUser = toSidebarUser(user);
 
   const orders: OrderDetails[] = useMemo(() => {
     if (Array.isArray(ordersData)) return ordersData;
@@ -255,9 +247,7 @@ export function OrderHistoryPage() {
   };
 
   return (
-    <div className="min-h-[956px] bg-muted/60 px-4 py-8 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={sidebarUser} />
+    <>
 
         <div className="flex min-w-0 flex-col gap-4">
           {refunds.isError && (
@@ -369,7 +359,6 @@ export function OrderHistoryPage() {
             ))
           )}
         </div>
-      </div>
 
       {/* Custom Cancel Order Confirmation Dialog */}
       <CancelOrderConfirmationDialog
@@ -424,7 +413,7 @@ export function OrderHistoryPage() {
           if (target) void handleConfirmReceived(target.id);
         }}
       />
-    </div>
+    </>
   );
 }
 

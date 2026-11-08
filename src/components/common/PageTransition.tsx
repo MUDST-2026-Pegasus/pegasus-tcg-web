@@ -13,15 +13,18 @@ import { cn } from "@/lib/utils";
 export function PageTransition({
   children,
   className,
+  transitionKey,
 }: {
   children: ReactNode;
   className?: string;
+  /** path ไหนให้นับเป็นหน้าเดียวกัน (ไม่ mount ใหม่) — ไม่ใส่ = ใช้ pathname */
+  transitionKey?: (pathname: string) => string;
 }) {
   const { pathname } = useLocation();
 
   return (
     <div
-      key={pathname}
+      key={transitionKey ? transitionKey(pathname) : pathname}
       className={cn(
         "animate-page-in motion-reduce:animate-none",
         className,

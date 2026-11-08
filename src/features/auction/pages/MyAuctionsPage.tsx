@@ -3,9 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
-import { AccountSidebar } from "@/features/account/components/AccountSidebar";
-import { toSidebarUser } from "@/features/account/account.format";
-import { useAuth } from "@/features/auth/auth.queries";
 import { cn } from "@/lib/utils";
 
 import { MY_AUCTION_TABS, strikeTone, type StrikeTone } from "../auction.format";
@@ -26,7 +23,6 @@ function parseTab(raw: string | null): MyAuctionTab {
 
 /** `/account/auctions` — การประมูลของฉัน ฝั่งผู้ซื้อ (Figma W1 + B3-H) [TCG-631 · FE-5] */
 export function MyAuctionsPage() {
-  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = parseTab(searchParams.get("tab"));
   const { data, isLoading, isError, refetch } = useMyAuctions(tab);
@@ -45,9 +41,7 @@ export function MyAuctionsPage() {
   const neverBid = data !== undefined && data.tabCounts.ALL === 0;
 
   return (
-    <div className="min-h-[956px] bg-muted/60 px-4 py-8 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={toSidebarUser(user)} />
+    <>
 
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -126,8 +120,7 @@ export function MyAuctionsPage() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </>
   );
 }
 
