@@ -4,6 +4,7 @@ import type {
   HomeBannerDto,
   PublicListingDto,
   PublicProfileDto,
+  RecommendedShopDto,
   TrendingProductDto,
 } from "./home.types";
 
@@ -30,6 +31,10 @@ export async function getPublicProfile(username: string, signal?: AbortSignal): 
 
 export function getBanners(): Promise<HomeBannerDto[]> {
   return api.get<HomeBannerDto[]>("/home/banners", PUBLIC);
+}
+
+export function getRecommendedShops(): Promise<RecommendedShopDto[]> {
+  return api.get<RecommendedShopDto[]>("/home/recommended-shops", PUBLIC);
 }
 
 export function getTrending(limit: number): Promise<TrendingProductDto[]> {

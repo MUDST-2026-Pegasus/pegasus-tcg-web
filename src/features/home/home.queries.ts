@@ -33,6 +33,7 @@ export const homeKeys = {
   all: ["home"] as const,
   banners: () => [...homeKeys.all, "banners"] as const,
   trending: () => [...homeKeys.all, "trending"] as const,
+  recommendedShops: () => [...homeKeys.all, "recommended-shops"] as const,
   pegasusPicks: (username: string) =>
     [...homeKeys.all, "pegasus-picks", username] as const,
 };
@@ -87,6 +88,13 @@ export function useTrending() {
     queryKey: homeKeys.trending(),
     queryFn: () => homeApi.getTrending(RAIL_COUNT),
     select: (entries) => entries.map(toTrendingProduct),
+  });
+}
+
+export function useRecommendedShops() {
+  return useQuery({
+    queryKey: homeKeys.recommendedShops(),
+    queryFn: homeApi.getRecommendedShops,
   });
 }
 
