@@ -23,11 +23,21 @@ export function getMyListings(
     query: {
       status: query.status,
       q: query.q,
+      variantId: query.variantId,
+      condition: query.condition,
       sort: query.sort,
       page: query.page,
       size: query.size,
     },
   });
+}
+
+/**
+ * ย้ายการ์ดใบเดิมเข้าประกาศ (พิมพ์ + สภาพต้องตรงกัน) หรือกลับเข้ามือด้วย `listingId` = null
+ * (`SellerInventoryController.move`) — error: LISTING_UNIT_MISMATCH, LISTING_CLOSED และการ์ดที่ย้ายไม่ได้แล้ว [TCG-639]
+ */
+export function moveUnit(unitUid: string, listingId: number | null): Promise<unknown> {
+  return api.post<unknown>(`/sellers/me/units/${unitUid}/move`, { listingId });
 }
 
 export function getMyListing(id: number): Promise<SellerListing> {
