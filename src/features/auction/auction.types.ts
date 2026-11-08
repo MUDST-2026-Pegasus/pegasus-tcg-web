@@ -433,6 +433,8 @@ export type SellerAuctionDetail = {
   orderId: number | null;
   /** ใหม่สุดก่อน ชื่อปิดบัง */
   bids: AuctionBid[];
+  /** เหตุผลที่แอดมินระงับ — มาเฉพาะ SUSPENDED ไม่งั้น `null` [TCG-640] */
+  suspendReason: string | null;
   serverTime: string;
 };
 
