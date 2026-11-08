@@ -52,7 +52,7 @@ export const aboutTeam = [
   },
   {
     name: "Gritsada Moeithaisong",
-    role: "AI ENGINEER",
+    role: "AI ENGINEER · INTEGRATION DEVELOPER · SENIOR FRONTEND DEVELOPER",
     description:
       "ทหารรูปงามผู้แข็งแกร่งจนมีผู้ชื่นชมเดินทางมาจากทั่วทุกอาณาจักร ว่ากันว่ารอยยิ้มของเขาหยุดสงครามได้ถึงสามครั้ง โดยเฉพาะเหล่าชายหนุ่มที่มาต่อแถวยาวเป็นพิเศษ จนทางวังต้องเปิดระบบจองคิว ส่วนเขายังคงยืนยันกับเพื่อน ๆ ว่า “พวกเขาแค่มาดูการ์ด!”",
     image: team2,
