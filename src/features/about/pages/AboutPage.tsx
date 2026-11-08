@@ -24,13 +24,12 @@ export function AboutPage() {
         />
         <div className="relative mx-auto flex min-h-[304px] max-w-[1280px] flex-col items-center justify-center px-6 py-16 text-center sm:px-12 sm:py-24">
           <h1 className="text-[32px] leading-10 font-bold tracking-[-0.64px] text-foreground">
-            Empowering the TCG Community
+            เติบโตไปด้วยกันกับชุมชน TCG
           </h1>
           <p className="mt-6 max-w-[768px] text-base leading-6 text-muted-foreground">
-            Pegasus TCG is the premier destination for collectors, players, and
-            enthusiasts. We provide a secure, efficient, and transparent
-            marketplace to discover, trade, and track the value of your most
-            prized trading cards.
+            Pegasus TCG คือพื้นที่สำหรับนักสะสม ผู้เล่น และคนรักการ์ด
+            ที่คุณสามารถค้นหา ซื้อขาย และติดตามมูลค่าการ์ดใบโปรดได้
+            บนแพลตฟอร์มที่ปลอดภัย สะดวก และโปร่งใส
           </p>
         </div>
       </section>
@@ -39,20 +38,19 @@ export function AboutPage() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col gap-4">
             <h2 className="text-2xl leading-8 font-bold text-foreground">
-              Our Story
+              เรื่องราวของเรา
             </h2>
             <p className="text-base leading-6 text-muted-foreground">
-              What began as a passionate group of local hobbyists trading cards
-              over weekend tournaments has evolved into Pegasus TCG. We
-              experienced firsthand the friction of fragmented marketplaces,
-              inconsistent grading standards, and opaque pricing.
+              Pegasus TCG เริ่มต้นจากกลุ่มคนรักการ์ดที่แลกเปลี่ยนการ์ดกัน
+              ในการแข่งขันช่วงสุดสัปดาห์ เราเคยพบกับความยุ่งยากในการซื้อขาย
+              ทั้งแหล่งซื้อขายที่กระจัดกระจาย มาตรฐานการประเมินที่แตกต่างกัน
+              และราคาที่ไม่ชัดเจน
             </p>
             <p className="text-base leading-6 text-muted-foreground">
-              Driven by a desire to bring clarity and trust to the hobby we
-              love, we built Pegasus. Our goal was simple: create the platform
-              we wished existed when we started collecting. Today, we stand as
-              a leading marketplace, empowering thousands of collectors
-              worldwide.
+              เราจึงสร้าง Pegasus ขึ้นด้วยความตั้งใจที่จะทำให้งานอดิเรกที่เรารัก
+              โปร่งใสและน่าเชื่อถือยิ่งขึ้น เป้าหมายของเราเรียบง่าย:
+              สร้างแพลตฟอร์มที่เราเองก็อยากมีตั้งแต่เริ่มสะสมการ์ด
+              และเป็นพื้นที่ให้ชุมชนนักสะสมได้เติบโตไปด้วยกัน
             </p>
           </div>
           <Card className="overflow-hidden rounded-xl p-px shadow-sm [--card-spacing:0px]">
@@ -70,11 +68,11 @@ export function AboutPage() {
       <section className="mx-auto max-w-[1280px] px-6 pt-12 pb-16 sm:px-12 lg:pt-[46px] lg:pb-14">
         <div className="flex flex-col items-center gap-3 text-center">
           <h2 className="text-2xl leading-8 font-bold text-foreground">
-            Meet the Team
+            พบกับทีมงาน
           </h2>
           <p className="max-w-[672px] text-base leading-6 text-muted-foreground">
-            The dedicated professionals working behind the scenes to elevate
-            your collecting experience.
+            พบกับทีมงานเบื้องหลังกองทัพ Pegasus ผู้ร่วมสร้างประสบการณ์
+            การสะสมการ์ดให้ดียิ่งขึ้น
           </p>
         </div>
 
