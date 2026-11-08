@@ -7,6 +7,8 @@ type ConfirmShipDialogProps = {
   /** ชื่อขนส่งที่ผู้ซื้อจะเห็น เช่น "Flash Express" */
   carrierName: string;
   trackingNumber: string;
+  /** "ผู้ซื้อเลือก: …" เมื่อส่งด้วยขนส่งที่ไม่ตรงกับที่ผู้ซื้อเลือก */
+  buyerChoiceNote?: string | null;
   onConfirm: () => void;
 };
 
@@ -23,6 +25,7 @@ export function ConfirmShipDialog({
   orderNumber,
   carrierName,
   trackingNumber,
+  buyerChoiceNote,
   onConfirm,
 }: ConfirmShipDialogProps) {
   return (
@@ -38,7 +41,8 @@ export function ConfirmShipDialog({
         onConfirm();
       }}
     >
-      <dl className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
+      <div className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
+        <dl className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <dt className="text-gray-500">บริษัทขนส่ง</dt>
           <dd className="font-medium text-foreground">{carrierName}</dd>
@@ -48,6 +52,8 @@ export function ConfirmShipDialog({
           <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
         </div>
       </dl>
+      {buyerChoiceNote ? <p className="text-[#b45309]">{buyerChoiceNote}</p> : null}
+      </div>
     </ConfirmDialog>
   );
 }
