@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import { useEffect } from "react";
 import aboutHero from "@/assets/about/about-hero.jpeg";
 import teamGroup from "@/assets/about/team-group.jpeg";
@@ -8,6 +9,17 @@ import {
 } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { aboutTeam } from "@/features/about/about.fixture";
+import { cn } from "@/lib/utils";
+
+const SENIOR_TITLE = /\b(FOUNDER|CEO|LEAD|SENIOR|EXPERT)\b/;
+
+function seniorTitlesFirst(role: string) {
+  return role
+    .split(" · ")
+    .sort(
+      (a, b) => Number(SENIOR_TITLE.test(b)) - Number(SENIOR_TITLE.test(a)),
+    );
+}
 
 export function AboutPage() {
   useEffect(() => {
@@ -76,13 +88,19 @@ export function AboutPage() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-1 gap-x-12 sm:grid-cols-2 xl:grid-cols-4">
           {aboutTeam.map((member, index) => (
             <article
               key={`${member.name}-${index}`}
-              className="@container row-span-4 grid min-w-0 grid-rows-subgrid justify-items-center pb-14 text-center"
+              className="@container flex min-w-0 flex-col items-center pb-14 text-center"
             >
-              <Avatar className="size-40 shadow-sm sm:size-44">
+              <Avatar
+                className={cn(
+                  "size-40 shadow-sm sm:size-44",
+                  member.stars >= 4 &&
+                    "ring-4 ring-amber-400 ring-offset-2 ring-offset-background",
+                )}
+              >
                 <AvatarImage src={member.image} alt={member.name} />
                 <AvatarFallback>
                   {member.name
@@ -91,13 +109,49 @@ export function AboutPage() {
                     .join("")}
                 </AvatarFallback>
               </Avatar>
-              <h3 className="mt-4 self-end whitespace-nowrap text-[clamp(0.75rem,5.5cqw,1.25rem)] leading-snug font-bold text-foreground">
+              <h3 className="mt-5 whitespace-nowraptext-[clamp(0.75rem,5.5cqw,1.25rem)] leading-snug font-bold text-foreground">
                 {member.name}
               </h3>
-              <p className="mt-1 text-[clamp(0.8125rem,0.2vw_+_0.775rem,0.875rem)] leading-relaxed font-semibold text-primary">
-                {member.role}
-              </p>
-              <p className="mt-3 max-w-[278px] text-[clamp(0.9375rem,0.2vw_+_0.9rem,1rem)] leading-relaxed text-foreground/80">
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <div
+                  role="img"
+                  aria-label={`ยศ ${member.stars} ดาว`}
+                  className="flex items-center gap-0.5"
+                >
+                  {Array.from({ length: member.stars }, (_, star) => (
+                    <Star
+                      key={star}
+                      aria-hidden
+                      className="size-5 fill-amber-400 text-amber-500 drop-shadow-sm"
+                    />
+                  ))}
+                </div>
+                <ul className="flex flex-col items-center gap-1.5 sm:min-h-[5.75rem]">
+                  {seniorTitlesFirst(member.role).map((title) => {
+                    const isSenior = SENIOR_TITLE.test(title);
+                    return (
+                      <li
+                        key={title}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs leading-snug font-bold tracking-wide",
+                          isSenior
+                            ? "bg-linear-to-r from-amber-300 via-yellow-200 to-amber-400 text-amber-950 shadow-sm ring-1 ring-amber-500/50"
+                            : "bg-primary/10 text-primary",
+                        )}
+                      >
+                        {isSenior && (
+                          <Star aria-hidden className="size-3 shrink-0 fill-current" />
+                        )}
+                        {title}
+                        {isSenior && (
+                          <Star aria-hidden className="size-3 shrink-0 fill-current" />
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              <p className="mt-4 max-w-[260px] text-sm leading-relaxed text-foreground/70">
                 {member.description}
               </p>
             </article>
