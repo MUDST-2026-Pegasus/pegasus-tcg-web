@@ -86,3 +86,14 @@ export type TrendingProductDto = {
   unitsSold: number;
   product: ProductSummaryDto;
 };
+
+/** `RecommendedShopResponse` — `GET /home/recommended-shops` */
+export type RecommendedShopDto = {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  ratingAvg: number;
+  ratingCount: number;
+  activeListingCount: number;
+  previews: { listingId: number; imageUrl: string | null }[];
+};
