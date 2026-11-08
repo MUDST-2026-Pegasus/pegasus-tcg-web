@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSyncExternalStore } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createTestQueryClient, render } from "@/test/utils";
@@ -9,6 +10,7 @@ import * as authQueries from "@/features/auth/auth.queries";
 import * as cartQueries from "@/features/cart/cart.queries";
 import * as addressQueries from "@/features/account/address.queries";
 import { checkoutApi } from "@/features/cart/checkout.api";
+import { cartApi } from "@/features/cart/cart.api";
 import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
 import type { CartResponse } from "@/features/cart/cart.types";
@@ -918,5 +920,196 @@ describe("CheckoutPage", () => {
     await ready();
     expect(screen.queryByText("คำนวณส่วนลดและยอดรวมไม่สำเร็จ")).not.toBeInTheDocument();
     expect(previewSpy).toHaveBeenCalledTimes(2);
+  });
+
+  // Characterization tests for TCG-735: lock current behavior before the refactor.
+  describe("current behavior (TCG-735)", () => {
+    const flashItem = {
+      ...mockCart.items[0],
+      currentPrice: 300,
+      pricing: {
+        listPrice: 400, salePrice: 300, discountPercent: 25,
+        sale: { id: 7, slug: "flash", name: "Flash", type: "FLASH_SALE" as const, endsAt: "2099-01-01T00:00:00Z", quotaLeft: 3, perBuyerLimit: 2 },
+      },
+    };
+    const mockFlashCart = () => vi.spyOn(cartQueries, "useCart").mockReturnValue({
+      data: { ...mockCart, items: [flashItem, mockCart.items[1]] },
+      isLoading: false, isFetching: false, error: null,
+    } as unknown as ReturnType<typeof cartQueries.useCart>);
+
+    it("redirects a signed-out buyer to login once with the original return URL", async () => {
+      vi.spyOn(authQueries, "useAuth").mockReturnValue({
+        isAuthenticated: false, isLoading: false, user: null,
+      } as unknown as ReturnType<typeof authQueries.useAuth>);
+      renderCheckout("/checkout?items=42");
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith(
+        "/login?returnTo=%2Fcheckout%3Fitems%3D42", { replace: true },
+      ));
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+      expect(checkoutApi.getShippingQuotes).not.toHaveBeenCalled();
+      expect(screen.queryByRole("button", { name: "สั่งซื้อและไปชำระเงิน" })).not.toBeInTheDocument();
+    });
+
+    it("shows a cart load error with a retry that refreshes the cart", async () => {
+      vi.spyOn(cartQueries, "useCart").mockReturnValue({
+        data: undefined, isLoading: false, isFetching: false, error: new Error("offline"),
+      } as unknown as ReturnType<typeof cartQueries.useCart>);
+      const view = renderCheckout("/checkout?items=42");
+      const invalidate = vi.spyOn(view.queryClient, "invalidateQueries");
+      expect(screen.getByRole("alert")).toHaveTextContent("โหลดตะกร้าไม่สำเร็จ");
+      await userEvent.setup().click(screen.getByRole("button", { name: "ลองอีกครั้ง" }));
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: cartQueries.cartKeys.all });
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(checkoutApi.getShippingQuotes).not.toHaveBeenCalled();
+    });
+
+    it("sends the buyer back to the cart from a shipping quote error", async () => {
+      vi.spyOn(checkoutApi, "getShippingQuotes").mockRejectedValue(new ApiError({
+        status: 503, code: "SHIPPING_DOWN", message: "Shipping service down",
+      }));
+      renderCheckout("/checkout?items=42");
+      expect(await screen.findByText("Shipping service down")).toBeInTheDocument();
+      await userEvent.setup().click(screen.getByRole("button", { name: "กลับไปตรวจสอบตะกร้า" }));
+      expect(mockNavigate).toHaveBeenCalledWith("/cart");
+    });
+
+    it("shows the ApiError message when the promotion preview fails", async () => {
+      vi.spyOn(checkoutApi, "previewPromotions").mockRejectedValue(new ApiError({
+        status: 500, code: "INTERNAL_ERROR", message: "Server error",
+      }));
+      renderCheckout("/checkout?items=42");
+      const alert = (await screen.findByText("คำนวณส่วนลดและยอดรวมไม่สำเร็จ")).closest("[role=alert]");
+      expect(alert).toHaveTextContent("Server error");
+    });
+
+    it("falls back to a connection message when the promotion preview fails without an ApiError", async () => {
+      vi.spyOn(checkoutApi, "previewPromotions").mockRejectedValue(new Error("boom"));
+      renderCheckout("/checkout?items=42");
+      const alert = (await screen.findByText("คำนวณส่วนลดและยอดรวมไม่สำเร็จ")).closest("[role=alert]");
+      expect(alert).toHaveTextContent("กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง");
+      expect(alert).not.toHaveTextContent("boom");
+    });
+
+    it("counts only applicable codes of each seller", async () => {
+      const promo = (id: number, ownerType: "PLATFORM" | "SELLER", sellerProfileId: number | null, applicable: boolean) => ({
+        id, code: `CODE${id}`, name: `Code ${id}`, ownerType, sellerProfileId, sellerName: null,
+        discountType: "FIXED" as const, discountValue: 10, maxDiscount: null, minSpend: 0,
+        endsAt: "2099-01-01T00:00:00Z", source: "PUBLIC" as const, remainingClaims: null,
+        applicable, estimatedDiscount: 10, reason: null, shortfall: null,
+      });
+      vi.spyOn(checkoutApi, "getPromotions").mockResolvedValue([
+        promo(1, "SELLER", 1, true), promo(2, "SELLER", 1, true), promo(3, "SELLER", 1, false),
+        promo(4, "SELLER", 2, true), promo(5, "PLATFORM", null, true),
+      ]);
+      renderCheckout("/checkout?items=42,45");
+      await ready();
+      expect(await screen.findByText("มี 2 โค้ดที่ใช้ได้")).toBeInTheDocument();
+      expect(screen.getByText("มี 1 โค้ดที่ใช้ได้")).toBeInTheDocument();
+      expect(screen.getByText("ดูโค้ดทั้งหมด (1)")).toBeInTheDocument();
+    });
+
+    it("starts a new idempotency key after a 4xx failure on the same order", async () => {
+      const user = userEvent.setup();
+      const submit = vi.spyOn(checkoutApi, "checkout").mockRejectedValueOnce(new ApiError({
+        status: 409, code: "INSUFFICIENT_STOCK", message: "Out of stock",
+      })).mockResolvedValue(orderResponse);
+      renderCheckout("/checkout?items=42");
+      await ready();
+      await user.click(purchase());
+      await waitFor(() => expect(toast.add).toHaveBeenCalled());
+      await ready();
+      await user.click(purchase());
+      await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
+      expect(submit.mock.calls[0][0]).toEqual(submit.mock.calls[1][0]);
+      expect(submit.mock.calls[1][1]).not.toBe(submit.mock.calls[0][1]);
+    });
+
+    it("refreshes the cart after success and does not bounce back when the cart empties", async () => {
+      // A store-backed mock re-renders the page like a real query update would.
+      let cartResult = { data: mockCart, isLoading: false, isFetching: false, error: null };
+      const listeners = new Set<() => void>();
+      const subscribe = (listener: () => void) => {
+        listeners.add(listener);
+        return () => { listeners.delete(listener); };
+      };
+      function useMockCart() {
+        return useSyncExternalStore(subscribe, () => cartResult) as unknown as ReturnType<typeof cartQueries.useCart>;
+      }
+      vi.spyOn(cartQueries, "useCart").mockImplementation(useMockCart);
+      vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
+      const view = renderCheckout("/checkout?items=42");
+      const invalidate = vi.spyOn(view.queryClient, "invalidateQueries");
+      await ready();
+      await userEvent.setup().click(purchase());
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/payment?orderId=1001", expect.anything()));
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: cartQueries.cartKeys.all });
+      expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "สร้างคำสั่งซื้อสำเร็จ", description: "คำสั่งซื้อ ORD-1001" }));
+      act(() => {
+        cartResult = { data: { ...mockCart, items: [] }, isLoading: false, isFetching: false, error: null };
+        listeners.forEach((listener) => listener());
+      });
+      await waitFor(() => expect(screen.getByText("ไม่พบสินค้าที่เลือกสั่งซื้อ")).toBeInTheDocument());
+      expect(mockNavigate).toHaveBeenCalledTimes(1);
+      expect(toast.add).not.toHaveBeenCalledWith(expect.objectContaining({ title: "ไม่พบสินค้าที่เลือกสั่งซื้อ" }));
+    });
+
+    it("opens the Flash quota dialog on SALE_QUOTA_REACHED and removes the item on request", async () => {
+      const user = userEvent.setup();
+      mockFlashCart();
+      const remove = vi.spyOn(cartApi, "removeItem").mockResolvedValue(undefined as never);
+      vi.spyOn(checkoutApi, "checkout").mockRejectedValue(new ApiError({
+        status: 409, code: "SALE_QUOTA_REACHED", message: "quota", details: { listingId: 101 },
+      }));
+      const view = renderCheckout("/checkout?items=42");
+      const invalidate = vi.spyOn(view.queryClient, "invalidateQueries");
+      await ready();
+      await user.click(purchase());
+      expect(await screen.findByText("ราคา Flash Sale เต็มแล้ว")).toBeInTheDocument();
+      expect(screen.getByText(/ของ Pikachu Illustrator ถูกซื้อครบแล้ว/)).toBeInTheDocument();
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: cartQueries.cartKeys.all });
+      await user.click(screen.getByRole("button", { name: "นำออก" }));
+      await waitFor(() => expect(remove).toHaveBeenCalledWith(42));
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("warns about the Flash per-buyer limit on SALE_BUYER_LIMIT_REACHED", async () => {
+      mockFlashCart();
+      vi.spyOn(checkoutApi, "checkout").mockRejectedValue(new ApiError({
+        status: 409, code: "SALE_BUYER_LIMIT_REACHED", message: "limit", details: { listingId: 101 },
+      }));
+      renderCheckout("/checkout?items=42");
+      await ready();
+      await userEvent.setup().click(purchase());
+      await waitFor(() => expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({
+        title: "SALE_BUYER_LIMIT_REACHED", type: "warning",
+      })));
+      expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({
+        description: expect.stringContaining("จำกัดคนละ 2 ชิ้น"),
+      }));
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it("stacks the sale price with a seller code and submits the preview total", async () => {
+      mockFlashCart();
+      sessionStorage.setItem(PROMOTION_SELECTION_KEY, JSON.stringify({ platformCode: null, sellerCodes: { 1: "STORE50" } }));
+      vi.spyOn(checkoutApi, "previewPromotions").mockResolvedValue({
+        sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 50, platformDiscount: 0, grandTotal: 290 }],
+        itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 50, platformDiscountTotal: 0, grandTotal: 290,
+        shippingEstimated: false, bestPick: null,
+        codes: [{ code: "STORE50", ownerType: "SELLER", sellerProfileId: 1, sellerName: "Store A", status: "APPLIED", discount: 50, shortfall: null, pendingShipping: false }],
+      });
+      const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
+      renderCheckout("/checkout?items=42");
+      await ready();
+      expect(screen.getByText("ราคาสินค้า (ก่อนลด)").parentElement).toHaveTextContent("฿400");
+      expect(screen.getByText("ส่วนลดราคาสินค้า").parentElement).toHaveTextContent("−฿100");
+      expect(screen.getAllByText("− ฿50").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿290");
+      await userEvent.setup().click(purchase());
+      await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
+      expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({
+        sellerCodes: { 1: "STORE50" }, expectedGrandTotal: 290,
+      }));
+    });
   });
 });
