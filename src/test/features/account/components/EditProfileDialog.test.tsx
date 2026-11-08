@@ -33,18 +33,44 @@ describe('EditProfileDialog', () => {
     } as unknown as ReturnType<typeof profileQueries.useUpdateProfile>);
   });
 
-  it('renders form fields with default values', () => {
+  it('renders form fields with default values without Avatar or Bio', () => {
     renderWithProviders(
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
     
-    // Using string matching for values
-    expect(screen.getByLabelText(/display name/i)).toHaveValue('John Doe');
-    expect(screen.getByLabelText(/email/i)).toHaveValue('john@example.com');
-    expect(screen.getByLabelText(/email/i)).toBeDisabled();
-    expect(screen.getByLabelText(/phone number/i)).toHaveValue('');
-    expect(screen.getByLabelText(/avatar url/i)).toHaveValue('');
-    expect(screen.getByLabelText(/bio/i)).toHaveValue('');
+    // Name field
+    const nameInput = screen.getByLabelText(/name/i);
+    expect(nameInput).toHaveValue('John Doe');
+
+    // Email field (disabled)
+    const emailInput = screen.getByLabelText(/email/i);
+    expect(emailInput).toHaveValue('john@example.com');
+    expect(emailInput).toBeDisabled();
+
+    // Phone number field
+    const phoneInput = screen.getByLabelText(/phone number/i);
+    expect(phoneInput).toHaveValue('');
+    expect(phoneInput).toHaveAttribute('placeholder', '(+66) 89-123-4567');
+
+    // Bio field should be removed
+    expect(screen.queryByLabelText(/bio/i)).not.toBeInTheDocument();
+
+    // Avatar upload buttons should be removed
+    expect(screen.queryByRole('button', { name: /change photo/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+  });
+
+  it('falls back to username when displayName is blank', () => {
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, displayName: '', username: 'custom_username' }}
+      />
+    );
+
+    const nameInput = screen.getByLabelText(/name/i);
+    expect(nameInput).toHaveValue('custom_username');
   });
 
   it('calls update mutation and closes dialog on success', async () => {
@@ -55,7 +81,7 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
 
-    const nameInput = screen.getByLabelText(/display name/i);
+    const nameInput = screen.getByLabelText(/name/i);
     fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
 
     const phoneInput = screen.getByLabelText(/phone number/i);
@@ -83,58 +109,6 @@ describe('EditProfileDialog', () => {
 
     const saveButton = screen.getByRole('button', { name: /save changes/i });
     expect(saveButton).toBeDisabled();
-  });
-
-  it('sends empty avatarUrl to clear avatar when remove is clicked', async () => {
-    mockMutateAsync.mockResolvedValueOnce({});
-    const userWithAvatar: AuthUser = {
-      ...mockUser,
-      avatarUrl: 'https://storage.example.com/avatars/me.jpg',
-    };
-
-    renderWithProviders(
-      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={userWithAvatar} />
-    );
-
-    const removeButton = screen.getByRole('button', { name: /remove/i });
-    await userEvent.click(removeButton);
-
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
-    expect(saveButton).toBeEnabled();
-    await userEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(mockMutateAsync).toHaveBeenCalledWith({
-        displayName: 'John Doe',
-        phone: null,
-        avatarUrl: '',
-        bio: null,
-      });
-    });
-  });
-
-  it('updates bio when bio is changed', async () => {
-    mockMutateAsync.mockResolvedValueOnce({});
-
-    renderWithProviders(
-      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
-    );
-
-    const bioInput = screen.getByLabelText(/bio/i);
-    await userEvent.type(bioInput, 'TCG card collector');
-
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
-    expect(saveButton).toBeEnabled();
-    await userEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(mockMutateAsync).toHaveBeenCalledWith({
-        displayName: 'John Doe',
-        phone: null,
-        avatarUrl: null,
-        bio: 'TCG card collector',
-      });
-    });
   });
 
   it('displays error alert when mutation fails', () => {

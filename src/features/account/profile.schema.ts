@@ -30,7 +30,7 @@ export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
 
 export function toEditProfileForm(user: AuthUser): EditProfileFormValues {
   return {
-    displayName: user.displayName ?? "",
+    displayName: user.displayName?.trim() || user.username || "",
     phone: user.phone ?? "",
     phonePublic: user.phonePublic ?? false,
     bio: user.bio ?? "",
