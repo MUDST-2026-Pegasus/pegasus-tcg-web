@@ -55,12 +55,12 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 //   I-1 → public + seller · I-2 → buyer · I-3 → buyer + seller · I-4 → admin
 
 export const AUCTION_MOCK = {
-  /** รายการ / รายละเอียด / ประวัติบิด */
-  public: true,
+  /** รายการ / รายละเอียด / ประวัติบิด — ใช้ API จริงแล้ว [TCG-637] */
+  public: false,
   /** บิด / ซื้อทันที / checkout / การประมูลของฉัน */
   buyer: true,
-  /** หน้าผู้ขายทั้งหมด */
-  seller: true,
+  /** หน้าผู้ขายทั้งหมด — ใช้ API จริงแล้ว [TCG-637] */
+  seller: false,
   /** หน้าแอดมินทั้งหมด */
   admin: true,
 };
@@ -148,7 +148,8 @@ export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHisto
     if (id === 142 || !recent) return mock(BID_HISTORY_FIXTURE);
     return mock({ page: { items: recent, page: 0, size, totalItems: recent.length, totalPages: recent.length ? 1 : 0 }, serverTime: nowIso() });
   }
-  return api.get<BidHistory>(`/auctions/${id}/bids`, { query: { page, size }, auth: false });
+  // ส่ง token ถ้าล็อกอินอยู่ ให้ BE ติดป้าย "(คุณ)" ที่บิดของผู้ใช้ได้
+  return api.get<BidHistory>(`/auctions/${id}/bids`, { query: { page, size } });
 }
 
 // ---------- ผู้ซื้อ (ต้องล็อกอิน) ----------
