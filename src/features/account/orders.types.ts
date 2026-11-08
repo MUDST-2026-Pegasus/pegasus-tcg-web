@@ -51,6 +51,7 @@ export interface SellerOrderDetails {
   salesOrderId: number;
   sellerProfileId: number;
   sellerName?: string | null;
+  sellerUsername?: string | null;
   sellerOrderNumber: string;
   status: string;
   itemsSubtotal: number;

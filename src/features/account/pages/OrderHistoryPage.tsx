@@ -1,6 +1,6 @@
 import { ConfirmDialog } from "@/components/common";
 import { useState, useMemo, useRef, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronUp,
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { getListingDetail } from "@/features/catalog/catalog.api";
 import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
 import { AccountSidebar } from "@/features/account/components/AccountSidebar";
@@ -448,6 +449,8 @@ function OrderCardItem({
 }) {
   const [expanded, setExpanded] = useState(false);
   const downloadSummary = useDownloadBuyerOrderSummary();
+  const navigate = useNavigate();
+  const [loadingSeller, setLoadingSeller] = useState(false);
 
   const { stage, label, badgeClassName } = orderStage(order);
   const canCancel = canBuyerCancel(order);
@@ -471,6 +474,7 @@ function OrderCardItem({
     (so) => so.items ?? [],
   );
   const firstItem = allItems[0];
+  const firstSeller = (order.sellerOrders ?? []).find((seller) => seller.items?.length);
   const otherItems = allItems.slice(1);
 
   const placedDate = order.placedAt
@@ -562,12 +566,35 @@ function OrderCardItem({
               .join(" • ")}
             {firstItem && ` • Qty: ${firstItem.quantity}`}
           </p>
-          {order.sellerOrders?.[0]?.sellerName && (
+          {firstSeller?.sellerName && (
             <p className="text-xs text-muted-foreground mt-0.5">
               Seller:{" "}
-              <span className="text-foreground font-medium">
-                {order.sellerOrders[0].sellerName}
-              </span>
+              {firstSeller.sellerUsername ? (
+                <Link className="text-foreground font-medium hover:underline focus-visible:underline" to={`/u/${encodeURIComponent(firstSeller.sellerUsername)}`}>
+                  {firstSeller.sellerName}
+                </Link>
+              ) : firstItem?.listingId ? (
+                <button
+                  type="button"
+                  className="text-foreground font-medium hover:underline focus-visible:underline cursor-pointer"
+                  disabled={loadingSeller}
+                  onClick={async () => {
+                    setLoadingSeller(true);
+                    try {
+                      const listing = await getListingDetail(firstItem.listingId!);
+                      navigate(`/u/${encodeURIComponent(listing.listing.seller.username)}`);
+                    } catch {
+                      toast.add({ type: "error", title: "ไม่สามารถเปิดหน้าร้านได้", description: "ไม่พบข้อมูลร้านค้าสำหรับสินค้านี้" });
+                    } finally {
+                      setLoadingSeller(false);
+                    }
+                  }}
+                >
+                  {firstSeller.sellerName}
+                </button>
+              ) : (
+                <span className="text-foreground font-medium">{firstSeller.sellerName}</span>
+              )}
             </p>
           )}
 
