@@ -6,7 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatBaht, formatRemaining, pillForStatus } from "@/features/auction/auction.format";
+import { AUCTION_STATUS_LABEL, formatBaht, formatRemaining, pillForStatus } from "@/features/auction/auction.format";
 import { useAdminAuctions, useBannedBidders } from "@/features/auction/auction.queries";
 import type { AdminAuctionPage, AdminAuctionRow, AdminAuctionTab } from "@/features/auction/auction.types";
 import { AuctionCountdown } from "@/features/auction/components/AuctionCountdown";
@@ -30,6 +30,17 @@ import { SuspendAuctionDialog, type SuspendTarget } from "./components/SuspendAu
 const PAGE_SIZE = 20;
 
 /** `/admin/auctions` — A1 การประมูลทั้งหมด ตาม Figma 2299:8127 [TCG-635 · FE-9] */
+/**
+ * ข้อความป้ายที่ต่างจากค่าเริ่มต้นของ kind — ยกเลิกใช้ป้ายสีเดียวกับไม่มีผู้บิด แต่ต้องบอกว่ายกเลิก
+ * และ UNSOLD ที่มีบิดคือผู้ชนะไม่ชำระ [TCG-640]
+ */
+function adminStatusLabel(row: AdminAuctionRow): string | undefined {
+  if (row.status === "SOLD") return "ขายแล้ว";
+  if (row.status === "CANCELLED") return AUCTION_STATUS_LABEL.CANCELLED;
+  if (row.status === "UNSOLD" && row.bidCount > 0) return "ไม่มีผู้ชำระ";
+  return undefined;
+}
+
 export function AdminAuctionsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = readAdminAuctionTab(searchParams.get("tab"));
@@ -197,7 +208,7 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
     { id: "price", header: "ราคาปัจจุบัน", meta: { headClassName: head, cellClassName: "text-sm font-semibold tabular-nums text-foreground" }, cell: ({ row }) => formatBaht(row.original.currentPrice) },
     { id: "bids", header: "บิด / ผู้บิด", meta: { headClassName: head, cellClassName: "text-xs tabular-nums text-muted-foreground" }, cell: ({ row }) => `${row.original.bidCount} / ${row.original.bidderCount}` },
     { id: "time", header: "เวลา", meta: { headClassName: head }, cell: ({ row }) => <TimeCell row={row.original} serverTime={data.serverTime} /> },
-    { id: "status", header: "สถานะ", meta: { headClassName: head }, cell: ({ row }) => <AuctionStatusPill kind={pillForStatus(row.original.status)} label={row.original.status === "SOLD" ? "ขายแล้ว" : undefined} /> },
+    { id: "status", header: "สถานะ", meta: { headClassName: head }, cell: ({ row }) => <AuctionStatusPill kind={pillForStatus(row.original.status)} label={adminStatusLabel(row.original)} /> },
     {
       id: "actions",
       header: () => <span className="sr-only">การกระทำ</span>,
