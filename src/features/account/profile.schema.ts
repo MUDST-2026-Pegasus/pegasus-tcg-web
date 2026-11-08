@@ -18,6 +18,7 @@ export const editProfileSchema = z.object({
       (val) => !val || /^(\+?\d[\d()\-\s]*)?$/.test(val),
       "Enter a valid phone number",
     ),
+  phonePublic: z.boolean().optional(),
   bio: z
     .string()
     .trim()
@@ -29,8 +30,9 @@ export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
 
 export function toEditProfileForm(user: AuthUser): EditProfileFormValues {
   return {
-    displayName: user.displayName ?? "",
+    displayName: user.displayName?.trim() || user.username || "",
     phone: user.phone ?? "",
+    phonePublic: user.phonePublic ?? false,
     bio: user.bio ?? "",
     avatarUrl: user.avatarUrl ?? "",
   };
@@ -73,10 +75,16 @@ export function toUpdateProfilePayload(
     avatarUrl = null; // null = keep current avatar
   }
 
-  return {
+  const payload: UpdateProfilePayload = {
     displayName: values.displayName.trim(),
     phone,
     bio,
     avatarUrl,
   };
+
+  if ((!dirty || dirty.phonePublic) && values.phonePublic !== undefined) {
+    payload.phonePublic = values.phonePublic;
+  }
+
+  return payload;
 }

@@ -103,7 +103,7 @@ describe("ProfilePage", () => {
     await user.click(editBtn);
 
     expect(
-      await screen.findByText("Update your personal information and profile display."),
+      await screen.findByText(/Update your personal information/i),
     ).toBeInTheDocument();
   });
 

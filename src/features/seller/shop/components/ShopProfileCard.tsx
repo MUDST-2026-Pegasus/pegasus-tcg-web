@@ -44,7 +44,11 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
   const phonePublic = values.phonePublic ?? false;
   // Compare only visible editable fields with the last saved values. Hidden account
   // fields must not affect dirty tracking after reset or subsequent edits.
-  const changed = { displayName: name !== baseline.displayName, phone: phone !== baseline.phone, phonePublic: phonePublic !== baseline.phonePublic };
+  const changed = {
+    displayName: name !== baseline.displayName,
+    phone: phone !== baseline.phone,
+    phonePublic: phonePublic !== baseline.phonePublic,
+  };
   const hasChanges = Object.values(changed).some(Boolean) || cleared || upload.objectKeys.length > 0;
   const busy = update.isPending || upload.isUploading;
   const url = `${window.location.origin}/u/${encodeURIComponent(user.username)}`;
@@ -104,8 +108,23 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
           </div>
         </div>
         <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 p-3">
-          <div><label htmlFor="phone-public" className="text-xs font-medium">แสดงเบอร์โทรบนหน้าร้าน</label><p className="mt-1 text-[11px] text-muted-foreground">{phonePublic ? 'สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้' : 'Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์'}</p></div>
-          <Switch id="phone-public" checked={phonePublic} disabled={update.isPending} onCheckedChange={(checked) => form.setValue('phonePublic', checked, { shouldDirty: true })}/>
+          <div>
+            <label htmlFor="phone-public" className="text-xs font-medium">
+              แสดงเบอร์โทรบนหน้าร้าน
+            </label>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {phonePublic
+                ? 'สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้'
+                : 'Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์'}
+            </p>
+          </div>
+          <Switch
+            id="phone-public"
+            aria-label="แสดงเบอร์โทรบนหน้าร้าน"
+            checked={phonePublic}
+            disabled={busy || !phone.trim()}
+            onCheckedChange={(checked) => form.setValue('phonePublic', checked, { shouldDirty: true })}
+          />
         </div>
         <div className="space-y-2">
           <label htmlFor="shop-link" className="text-xs">ลิงก์หน้าร้าน</label>
