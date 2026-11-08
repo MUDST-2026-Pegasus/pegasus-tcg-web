@@ -1,9 +1,7 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from "react";
 import { Ban, TriangleAlert } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 
 import { auctionErrorMessage, type AuctionErrorMessage } from "../auction.errors";
 import { formatBaht } from "../auction.format";
@@ -50,43 +48,34 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
   };
 
   return (
-    <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="rounded-xl sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">ยืนยันการบิด {formatBaht(value)}?</DialogTitle>
-          <DialogDescription>
-            {auction.item.card.productName} · {auction.item.condition} · {auction.seller.shopName}
-          </DialogDescription>
-        </DialogHeader>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={close}
+      title={`ยืนยันการบิด ${formatBaht(value)}?`}
+      description={`${auction.item.card.productName} · ${auction.item.condition} · ${auction.seller.shopName}`}
+      confirmLabel={`ยืนยันบิด ${formatBaht(value)}`}
+      isPending={placeBid.isPending}
+      onConfirm={confirm}
+    >
+      <PriceSummary
+        rows={[
+          ["ราคาบิดของคุณ", value],
+          ["ค่าจัดส่ง (ถ้าชนะ)", auction.shippingFee],
+        ]}
+        totalLabel="ยอดที่ต้องชำระถ้าชนะ"
+        total={value + auction.shippingFee}
+      />
 
-        <PriceSummary
-          rows={[
-            ["ราคาบิดของคุณ", value],
-            ["ค่าจัดส่ง (ถ้าชนะ)", auction.shippingFee],
-          ]}
-          totalLabel="ยอดที่ต้องชำระถ้าชนะ"
-          total={value + auction.shippingFee}
+      {error ? (
+        <AuctionNotice tone="red" role="alert" icon={<Ban />} title={error.title} detail={error.detail} />
+      ) : (
+        <AuctionNotice
+          tone="amber"
+          icon={<TriangleAlert />}
+          title="บิดแล้วถอนไม่ได้"
+          detail="ถ้าชนะต้องชำระภายใน 24 ชม. ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ 3 ครั้งห้ามบิด 30 วัน)"
         />
-
-        {error ? (
-          <AuctionNotice tone="red" role="alert" icon={<Ban />} title={error.title} detail={error.detail} />
-        ) : (
-          <AuctionNotice
-            tone="amber"
-            icon={<TriangleAlert />}
-            title="บิดแล้วถอนไม่ได้"
-            detail="ถ้าชนะต้องชำระภายใน 24 ชม. ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ 3 ครั้งห้ามบิด 30 วัน)"
-          />
-        )}
-
-        <DialogFooter>
-          <DialogClose render={<Button variant="outline" className="rounded-full px-5" />}>ยกเลิก</DialogClose>
-          <Button className="rounded-full px-5" disabled={placeBid.isPending} onClick={confirm}>
-            {placeBid.isPending && <Spinner />}
-            ยืนยันบิด {formatBaht(value)}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+    </ConfirmDialog>
   );
 }

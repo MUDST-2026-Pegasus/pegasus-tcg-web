@@ -1,9 +1,7 @@
 import { useId, useState } from "react";
 
-import { th } from "react-day-picker/locale";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { DateTimePicker } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import {
   Field,
@@ -14,11 +12,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -28,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { formatThaiDate, parseIsoDate, toIsoDate } from "../../restock.calc";
+import { toIsoDate } from "../../restock.calc";
 import type { RestockData, RestockDraft } from "../../restock.types";
 import { AmountInput } from "../AmountInput";
 
@@ -36,10 +29,6 @@ const FIELD_CLASS = "h-8 rounded-lg border-input bg-background px-2.5 text-sm";
 const LABEL_CLASS = "text-xs font-medium text-gray-700";
 const HELPER_CLASS = "text-[10px] leading-normal text-gray-400";
 
-const thaiMonthYear = new Intl.DateTimeFormat("th-TH", {
-  month: "long",
-  year: "numeric",
-});
 
 /** ไม่ให้ `unitNote` (แหล่งที่มา · อ้างอิง · บันทึก) เกิน 255 ตัวอักษรของ backend */
 const NOTE_MAX_LENGTH = 150;
@@ -75,10 +64,8 @@ export function RestockFormCard({
   const referenceId = useId();
   const noteId = useId();
 
-  const [isDateOpen, setIsDateOpen] = useState(false);
   // รับของล่วงหน้าไม่ได้ — ห้ามเลือกวันที่หลังวันนี้
   const [today] = useState(() => new Date());
-  const receivedAt = parseIsoDate(draft.receivedAt);
 
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
@@ -128,42 +115,15 @@ export function RestockFormCard({
           <FieldLabel htmlFor={receivedAtId} className={LABEL_CLASS}>
             {receivedAtLabel} *
           </FieldLabel>
-          <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
-            <PopoverTrigger
-              id={receivedAtId}
-              render={
-                <Button
-                  variant="outline"
-                  className="h-8 w-full justify-start rounded-lg border-input bg-background px-2.5 text-sm font-normal text-foreground hover:bg-background"
-                />
-              }
-            >
-              {receivedAt ? (
-                formatThaiDate(draft.receivedAt)
-              ) : (
-                <span className="text-muted-foreground">
-                  {receivedAtPlaceholder}
-                </span>
-              )}
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-auto rounded-xl p-0">
-              <Calendar
-                mode="single"
-                locale={th}
-                selected={receivedAt}
-                defaultMonth={receivedAt}
-                disabled={{ after: today }}
-                formatters={{
-                  formatCaption: (month) => thaiMonthYear.format(month),
-                }}
-                onSelect={(date) => {
-                  if (!date) return;
-                  onFieldChange("receivedAt", toIsoDate(date));
-                  setIsDateOpen(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+          <DateTimePicker
+            id={receivedAtId}
+            mode="date"
+            value={draft.receivedAt}
+            max={toIsoDate(today)}
+            placeholder={receivedAtPlaceholder}
+            className="h-8 rounded-lg px-2.5"
+            onChange={(value) => onFieldChange("receivedAt", value)}
+          />
         </Field>
       </FieldGroup>
 

@@ -26,6 +26,8 @@ type DateTimePickerProps = {
   invalid?: boolean;
   /** รูปแบบเดียวกับ `value` — วันก่อนหน้านี้เลือกไม่ได้ */
   min?: string;
+  /** รูปแบบเดียวกับ `value` — วันหลังจากนี้เลือกไม่ได้ */
+  max?: string;
   /** เวลาที่ใส่ให้ตอนเลือกวันครั้งแรก เช่น `"23:59"` สำหรับวันสิ้นสุด */
   defaultTime?: string;
   placeholder?: string;
@@ -61,6 +63,7 @@ export function DateTimePicker({
   disabled,
   invalid,
   min,
+  max,
   defaultTime = "00:00",
   placeholder = mode === "date" ? "เลือกวัน" : "เลือกวันและเวลา",
   suffix,
@@ -70,6 +73,9 @@ export function DateTimePicker({
   const selected = parse(value);
   const minDate = parse(min ?? "");
   const minDay = minDate ? new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) : undefined;
+  const maxDate = parse(max ?? "");
+  const maxDay = maxDate ? new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate()) : undefined;
+  const blocked = [...(minDay ? [{ before: minDay }] : []), ...(maxDay ? [{ after: maxDay }] : [])];
   const [defaultHour, defaultMinute] = defaultTime.split(":");
 
   const pickDay = (day: Date | undefined) => {
@@ -127,7 +133,7 @@ export function DateTimePicker({
           locale={th}
           selected={selected}
           defaultMonth={selected ?? minDay}
-          disabled={minDay ? { before: minDay } : undefined}
+          disabled={blocked.length ? blocked : undefined}
           formatters={{ formatCaption: (month) => monthCaption.format(month) }}
           onSelect={pickDay}
         />

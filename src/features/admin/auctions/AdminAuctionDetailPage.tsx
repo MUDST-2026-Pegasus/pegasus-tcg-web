@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { ArrowRight, Flag, SearchXIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
-import { QueryBoundary } from "@/components/common";
+import { QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import { DashboardPageSkeleton } from "@/components/common/PageSkeletons";
 import {
   Breadcrumb,
@@ -16,7 +16,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAuctionShortDateTime, formatBaht, pillForStatus } from "@/features/auction/auction.format";
 import { useAdminAuction } from "@/features/auction/auction.queries";
 import type { AdminAuctionDetail } from "@/features/auction/auction.types";
@@ -171,48 +170,54 @@ function BidLogCard({ detail }: { detail: AdminAuctionDetail }) {
       </Card>
     );
   }
+  const columns: DataTableColumn<(typeof detail.bids)[number]>[] = [
+    {
+      id: "bidder",
+      header: "ผู้บิด",
+      meta: { headClassName: `pl-4 ${head}`, cellClassName: "py-3 pl-4" },
+      cell: ({ row: { original: bid } }) => (
+        <>
+          <p className={cn("text-sm font-semibold text-foreground", bid.status === "CANCELLED" && "line-through")}>{bid.username}</p>
+          <p className="text-[11px] text-muted-foreground">{bidderMeta(bid.memberSince, bid.orderCount)}</p>
+        </>
+      ),
+    },
+    {
+      id: "amount",
+      header: "ราคา",
+      meta: { headClassName: head, cellClassName: "text-sm font-semibold tabular-nums" },
+      cell: ({ row: { original: bid, index } }) => {
+        const cancelled = bid.status === "CANCELLED";
+        return <span className={cn(index === 0 && !cancelled ? "text-primary" : "text-foreground", cancelled && "line-through")}>{formatBaht(bid.amount)}</span>;
+      },
+    },
+    { id: "time", header: "เวลา", meta: { headClassName: head, cellClassName: "text-xs tabular-nums text-muted-foreground" }, cell: ({ row }) => formatBidSecond(row.original.placedAt) },
+    {
+      id: "signals",
+      header: "สัญญาณ",
+      meta: { headClassName: `pr-4 text-right ${head}`, cellClassName: "pr-4 text-right" },
+      cell: ({ row: { original: bid } }) =>
+        bid.signals.length > 0 ? (
+          <span className="inline-flex flex-wrap justify-end gap-1">
+            {bid.signals.map((signal) => (
+              <RiskFlag key={signal} label={BID_SIGNAL_LABEL[signal]} />
+            ))}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        ),
+    },
+  ];
+
   return (
     <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={`pl-4 ${head}`}>ผู้บิด</TableHead>
-            <TableHead className={head}>ราคา</TableHead>
-            <TableHead className={head}>เวลา</TableHead>
-            <TableHead className={`pr-4 text-right ${head}`}>สัญญาณ</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {detail.bids.map((bid, index) => {
-            const cancelled = bid.status === "CANCELLED";
-            return (
-              <TableRow key={bid.bidId} className={cn(cancelled && "opacity-60")}>
-                <TableCell className="py-3 pl-4">
-                  <p className={cn("text-sm font-semibold text-foreground", cancelled && "line-through")}>{bid.username}</p>
-                  <p className="text-[11px] text-muted-foreground">{bidderMeta(bid.memberSince, bid.orderCount)}</p>
-                </TableCell>
-                <TableCell
-                  className={cn("text-sm font-semibold tabular-nums", index === 0 && !cancelled ? "text-primary" : "text-foreground", cancelled && "line-through")}
-                >
-                  {formatBaht(bid.amount)}
-                </TableCell>
-                <TableCell className="text-xs tabular-nums text-muted-foreground">{formatBidSecond(bid.placedAt)}</TableCell>
-                <TableCell className="pr-4 text-right">
-                  {bid.signals.length > 0 ? (
-                    <span className="inline-flex flex-wrap justify-end gap-1">
-                      {bid.signals.map((signal) => (
-                        <RiskFlag key={signal} label={BID_SIGNAL_LABEL[signal]} />
-                      ))}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={columns}
+        data={detail.bids}
+        getRowId={(bid) => String(bid.bidId)}
+        headerRowClassName="bg-muted/40 hover:bg-muted/40"
+        rowClassName={(bid) => cn(bid.status === "CANCELLED" && "opacity-60")}
+      />
     </Card>
   );
 }

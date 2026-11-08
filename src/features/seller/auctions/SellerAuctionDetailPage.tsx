@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SearchXIcon } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
-import { QueryBoundary } from "@/components/common";
+import { QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import { DashboardPageSkeleton } from "@/components/common/PageSkeletons";
 import {
   Breadcrumb,
@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAuctionShortDateTime, formatBaht } from "@/features/auction/auction.format";
 import { useSellerAuction } from "@/features/auction/auction.queries";
 import type { SellerAuctionDetail } from "@/features/auction/auction.types";
@@ -221,37 +220,36 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
       {detail.bids.length === 0 ? (
         <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">ยังไม่มีผู้บิด</p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="pl-5 text-xs font-normal text-muted-foreground">ผู้บิด</TableHead>
-              <TableHead className="text-xs font-normal text-muted-foreground">ราคา</TableHead>
-              <TableHead className="pr-5 text-xs font-normal text-muted-foreground">เวลา</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {detail.bids.map((bid, index) => {
-              const top = index === 0;
-              return (
-                <TableRow key={`${bid.placedAt}-${bid.amount}`}>
-                  <TableCell className="py-3 pl-5">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                      {bid.bidderAlias}
-                      {top ? <AuctionStatusPill kind="Leading" label="สูงสุด" /> : null}
-                    </span>
-                  </TableCell>
-                  <TableCell className={cn("text-sm font-semibold tabular-nums", top ? "text-primary" : "text-foreground")}>
-                    {formatBaht(bid.amount)}
-                  </TableCell>
-                  <TableCell className="pr-5 text-xs text-muted-foreground">
-                    {formatAuctionShortDateTime(bid.placedAt)}
-                    {isFirstBid(bid, detail) ? " · บิดแรก" : ""}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <DataTable
+          columns={[
+            {
+              id: "bidder",
+              header: "ผู้บิด",
+              meta: { headClassName: "pl-5 text-xs font-normal text-muted-foreground", cellClassName: "py-3 pl-5" },
+              cell: ({ row }) => (
+                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  {row.original.bidderAlias}
+                  {row.index === 0 ? <AuctionStatusPill kind="Leading" label="สูงสุด" /> : null}
+                </span>
+              ),
+            },
+            {
+              id: "amount",
+              header: "ราคา",
+              meta: { headClassName: "text-xs font-normal text-muted-foreground", cellClassName: "text-sm font-semibold tabular-nums" },
+              cell: ({ row }) => <span className={row.index === 0 ? "text-primary" : "text-foreground"}>{formatBaht(row.original.amount)}</span>,
+            },
+            {
+              id: "time",
+              header: "เวลา",
+              meta: { headClassName: "pr-5 text-xs font-normal text-muted-foreground", cellClassName: "pr-5 text-xs text-muted-foreground" },
+              cell: ({ row }) => `${formatAuctionShortDateTime(row.original.placedAt)}${isFirstBid(row.original, detail) ? " · บิดแรก" : ""}`,
+            },
+          ] satisfies DataTableColumn<(typeof detail.bids)[number]>[]}
+          data={detail.bids}
+          getRowId={(bid) => `${bid.placedAt}-${bid.amount}`}
+          headerRowClassName="bg-muted/40 hover:bg-muted/40"
+        />
       )}
     </Card>
   );

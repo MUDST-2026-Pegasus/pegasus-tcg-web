@@ -1,3 +1,4 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -30,15 +31,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
@@ -416,29 +408,21 @@ export function OrderHistoryPage() {
         />
       )}
 
-      <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="border-t pt-4">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              type="button"
-              onClick={() => {
-                const target = confirmTarget;
-                setConfirmTarget(null);
-                if (target) void handleConfirmReceived(target.id);
-              }}
-            >
-              Confirm receipt
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirmTarget}
+        onOpenChange={(open) => {
+          if (!open) setConfirmTarget(null);
+        }}
+        title="Confirm receipt?"
+        description="Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers."
+        confirmLabel="Confirm receipt"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          const target = confirmTarget;
+          setConfirmTarget(null);
+          if (target) void handleConfirmReceived(target.id);
+        }}
+      />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { DataTable, type DataTableColumn } from "@/components/common";
 import { CircleX, Ellipsis, RotateCw, Shield, User, UserX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,14 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -72,89 +65,63 @@ export function UsersTable({
   onPageChange,
   onAction,
 }: UsersTableProps) {
+  const columns: DataTableColumn<AdminUser>[] = [
+    {
+      id: "user",
+      header: "ผู้ใช้",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[320px] pl-5"), cellClassName: cn(CELL_CLASS, "pl-5") },
+      cell: ({ row: { original: user } }) => (
+        <div className="flex items-center gap-2.5">
+          <SellerAvatar initials={userInitials(user)} accent={userAccent(user)} src={user.avatarUrl} className="size-7" />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onAction(user, "view");
+              }}
+              aria-label={`ดูรายละเอียด: ${user.username}`}
+              className="truncate rounded-sm text-left font-medium text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            >
+              {user.displayName}
+              <span className="ml-1.5 font-normal text-muted-foreground">@{user.username}</span>
+              {user.id === currentUserId ? <span className="ml-1.5 text-[10px] font-normal text-primary">(คุณ)</span> : null}
+            </button>
+            <span className="truncate text-[10px] text-[#9aa5ad]">{user.email}</span>
+          </div>
+        </div>
+      ),
+    },
+    { id: "roles", header: "บทบาท", meta: { headClassName: cn(HEAD_CLASS, "w-[200px]"), cellClassName: CELL_CLASS }, cell: ({ row }) => <RoleBadges roles={row.original.roles} /> },
+    { id: "created", header: "สมัครเมื่อ", meta: { headClassName: cn(HEAD_CLASS, "w-[130px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") }, cell: ({ row }) => formatThaiDate(row.original.createdAt) },
+    { id: "lastLogin", header: "เข้าใช้ล่าสุด", meta: { headClassName: cn(HEAD_CLASS, "w-[140px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") }, cell: ({ row }) => formatLastLogin(row.original.lastLoginAt) },
+    { id: "status", header: "สถานะ", meta: { headClassName: cn(HEAD_CLASS, "w-[120px]"), cellClassName: CELL_CLASS }, cell: ({ row }) => <StatusBadge status={row.original.status} /> },
+    {
+      // คอลัมน์สุดท้ายไม่มีหัวตารางในดีไซน์ และกินพื้นที่ที่เหลือแทน spacer
+      id: "menu",
+      header: () => <span className="sr-only">ตัวเลือกเพิ่มเติม</span>,
+      meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: cn(CELL_CLASS, "pr-5 text-right") },
+      cell: ({ row: { original: user } }) => (
+        // เมนูอยู่ใน portal แต่ event ยังไหลตาม React tree — กันไม่ให้ไปเปิด Sidebar ซ้อน
+        <span onClick={(event) => event.stopPropagation()}>
+          <UserRowMenu user={user} isSelf={user.id === currentUserId} onAction={onAction} />
+        </span>
+      ),
+    },
+  ];
+
   return (
     <>
-      <Table className={cn(disabled && "opacity-60")}>
-        <TableHeader>
-          <TableRow className="border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]">
-            <TableHead className={cn(HEAD_CLASS, "w-[320px] pl-5")}>ผู้ใช้</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[200px]")}>บทบาท</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[130px]")}>สมัครเมื่อ</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[140px]")}>เข้าใช้ล่าสุด</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-[120px]")}>สถานะ</TableHead>
-            {/* คอลัมน์สุดท้ายไม่มีหัวตารางในดีไซน์ และกินพื้นที่ที่เหลือแทน spacer */}
-            <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              <span className="sr-only">ตัวเลือกเพิ่มเติม</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="[&_tr]:border-muted">
-          {users.map((user) => {
-            const isSelf = user.id === currentUserId;
-            return (
-              <TableRow
-                key={user.id}
-                onClick={() => onAction(user, "view")}
-                className="cursor-pointer even:bg-[#fcfdfd] hover:bg-[#f6f8f9]"
-              >
-                <TableCell className={cn(CELL_CLASS, "pl-5")}>
-                  <div className="flex items-center gap-2.5">
-                    <SellerAvatar
-                      initials={userInitials(user)}
-                      accent={userAccent(user)}
-                      src={user.avatarUrl}
-                      className="size-7"
-                    />
-                    <div className="flex min-w-0 flex-col gap-0.5">
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onAction(user, "view");
-                        }}
-                        aria-label={`ดูรายละเอียด: ${user.username}`}
-                        className="truncate rounded-sm text-left font-medium text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      >
-                        {user.displayName}
-                        <span className="ml-1.5 font-normal text-muted-foreground">
-                          @{user.username}
-                        </span>
-                        {isSelf ? (
-                          <span className="ml-1.5 text-[10px] font-normal text-primary">
-                            (คุณ)
-                          </span>
-                        ) : null}
-                      </button>
-                      <span className="truncate text-[10px] text-[#9aa5ad]">
-                        {user.email}
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className={CELL_CLASS}>
-                  <RoleBadges roles={user.roles} />
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "text-muted-foreground")}>
-                  {formatThaiDate(user.createdAt)}
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "text-muted-foreground")}>
-                  {formatLastLogin(user.lastLoginAt)}
-                </TableCell>
-                <TableCell className={CELL_CLASS}>
-                  <StatusBadge status={user.status} />
-                </TableCell>
-                {/* เมนูอยู่ใน portal แต่ event ยังไหลตาม React tree — กันไม่ให้ไปเปิด Sidebar ซ้อน */}
-                <TableCell
-                  className={cn(CELL_CLASS, "pr-5 text-right")}
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <UserRowMenu user={user} isSelf={isSelf} onAction={onAction} />
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={columns}
+        data={users}
+        getRowId={(user) => String(user.id)}
+        tableClassName={cn(disabled && "opacity-60")}
+        headerRowClassName="border-y border-muted bg-[#fafbfb] hover:bg-[#fafbfb]"
+        bodyClassName="[&_tr]:border-muted"
+        rowClassName={() => "even:bg-[#fcfdfd] hover:bg-[#f6f8f9]"}
+        onRowClick={(user) => onAction(user, "view")}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-muted px-5 py-3.5">
         <p className="text-xs text-muted-foreground">

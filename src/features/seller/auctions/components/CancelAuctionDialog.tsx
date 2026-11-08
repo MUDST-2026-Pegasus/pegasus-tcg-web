@@ -1,8 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { Ban } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useCancelAuction } from "@/features/auction/auction.queries";
 import type { SellerAuctionRow } from "@/features/auction/auction.types";
@@ -34,33 +32,17 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className="gap-0 overflow-hidden rounded-2xl bg-card p-0 sm:max-w-[460px]">
-        <div className="flex flex-col gap-3 px-6 pt-6 pb-5">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-red-50">
-            <Ban aria-hidden className="size-5 text-destructive" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <DialogTitle className="text-base font-bold text-foreground">ยกเลิกการประมูลนี้?</DialogTitle>
-            <DialogDescription className="text-xs leading-5 text-muted-foreground">
-              {row ? `${row.item.card.productName} · ` : ""}ยังไม่มีผู้บิด — การ์ดจะกลับเข้าสต็อกและขายในหน้าร้านได้ตามปกติ
-            </DialogDescription>
-          </div>
-        </div>
-        <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ไม่ยกเลิก</DialogClose>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="rounded-md bg-destructive px-2.5 text-white hover:bg-destructive/90"
-            disabled={cancel.isPending}
-            onClick={confirm}
-          >
-            {cancel.isPending && <Spinner />}
-            ยกเลิกประมูล
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Ban}
+      variant="destructive"
+      title="ยกเลิกการประมูลนี้?"
+      description={`${row ? `${row.item.card.productName} · ` : ""}ยังไม่มีผู้บิด — การ์ดจะกลับเข้าสต็อกและขายในหน้าร้านได้ตามปกติ`}
+      confirmLabel="ยกเลิกประมูล"
+      cancelLabel="ไม่ยกเลิก"
+      isPending={cancel.isPending}
+      onConfirm={confirm}
+    />
   );
 }

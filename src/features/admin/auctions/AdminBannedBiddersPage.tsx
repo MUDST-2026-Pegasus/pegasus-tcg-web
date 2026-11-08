@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Info, ShieldCheck } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 
-import { EmptyState, QueryBoundary } from "@/components/common";
+import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useBannedBidders } from "@/features/auction/auction.queries";
 import type { BannedBidder, BanTab } from "@/features/auction/auction.types";
 import { ProductTableSkeleton } from "@/features/seller/products/components/ProductTableSkeleton";
@@ -138,52 +137,50 @@ export function AdminBannedBiddersPage() {
 function BannedBiddersTable({ bidders, onOpen }: { bidders: BannedBidder[]; onOpen: (bidder: BannedBidder, mode: OpenDialog["mode"]) => void }) {
   const head = "text-xs font-normal text-muted-foreground";
   const action = "cursor-pointer text-xs font-semibold text-primary hover:underline";
+  const columns: DataTableColumn<BannedBidder>[] = [
+    {
+      id: "user",
+      header: "ผู้ใช้",
+      meta: { headClassName: `pl-4 ${head}`, cellClassName: "py-3 pl-4" },
+      cell: ({ row: { original: bidder } }) => (
+        <>
+          <p className="text-sm font-semibold text-foreground">{bidder.username}</p>
+          <p className="text-[11px] text-muted-foreground">
+            {bidder.maskedEmail} · สมาชิก {memberAge(bidder.memberSince)}
+          </p>
+        </>
+      ),
+    },
+    { id: "strikes", header: "ไม่ชำระ", meta: { headClassName: head }, cell: ({ row }) => <StrikeDots count={row.original.strikeCount} limit={row.original.strikeLimit} /> },
+    { id: "latest", header: "ครั้งล่าสุด", meta: { headClassName: head, cellClassName: "text-xs text-muted-foreground" }, cell: ({ row }) => latestStrike(row.original) },
+    {
+      id: "until",
+      header: "ห้ามบิดถึง",
+      meta: { headClassName: head, cellClassName: "text-sm font-semibold text-red-700" },
+      cell: ({ row: { original: bidder } }) =>
+        bidder.bannedUntil && canLiftBan(bidder) ? formatDayMonthYear(bidder.bannedUntil) : <span className="text-xs font-normal text-muted-foreground">—</span>,
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">การกระทำ</span>,
+      meta: { headClassName: "pr-4", cellClassName: "pr-4 text-right" },
+      cell: ({ row: { original: bidder } }) => (
+        <div className="flex items-center justify-end gap-3">
+          <button type="button" className={action} onClick={() => onOpen(bidder, "history")}>
+            ดูประวัติ
+          </button>
+          {canLiftBan(bidder) ? (
+            <button type="button" className={action} onClick={() => onOpen(bidder, "lift")}>
+              ยกเลิกโทษ
+            </button>
+          ) : null}
+        </div>
+      ),
+    },
+  ];
   return (
     <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/40 hover:bg-muted/40">
-            <TableHead className={`pl-4 ${head}`}>ผู้ใช้</TableHead>
-            <TableHead className={head}>ไม่ชำระ</TableHead>
-            <TableHead className={head}>ครั้งล่าสุด</TableHead>
-            <TableHead className={head}>ห้ามบิดถึง</TableHead>
-            <TableHead className="pr-4">
-              <span className="sr-only">การกระทำ</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {bidders.map((bidder) => (
-            <TableRow key={bidder.userId}>
-              <TableCell className="py-3 pl-4">
-                <p className="text-sm font-semibold text-foreground">{bidder.username}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {bidder.maskedEmail} · สมาชิก {memberAge(bidder.memberSince)}
-                </p>
-              </TableCell>
-              <TableCell>
-                <StrikeDots count={bidder.strikeCount} limit={bidder.strikeLimit} />
-              </TableCell>
-              <TableCell className="text-xs text-muted-foreground">{latestStrike(bidder)}</TableCell>
-              <TableCell className="text-sm font-semibold text-red-700">
-                {bidder.bannedUntil && canLiftBan(bidder) ? formatDayMonthYear(bidder.bannedUntil) : <span className="text-xs font-normal text-muted-foreground">—</span>}
-              </TableCell>
-              <TableCell className="pr-4 text-right">
-                <div className="flex items-center justify-end gap-3">
-                  <button type="button" className={action} onClick={() => onOpen(bidder, "history")}>
-                    ดูประวัติ
-                  </button>
-                  {canLiftBan(bidder) ? (
-                    <button type="button" className={action} onClick={() => onOpen(bidder, "lift")}>
-                      ยกเลิกโทษ
-                    </button>
-                  ) : null}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DataTable columns={columns} data={bidders} getRowId={(bidder) => String(bidder.userId)} headerRowClassName="bg-muted/40 hover:bg-muted/40" />
     </Card>
   );
 }

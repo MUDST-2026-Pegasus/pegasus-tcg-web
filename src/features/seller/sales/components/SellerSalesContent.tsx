@@ -1,3 +1,4 @@
+import { DataTable, type DataTableColumn } from "@/components/common";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { BadgePercent, Info, Lock, MoreVertical, Plus } from "lucide-react";
@@ -14,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import { useSellerProfile } from "@/features/seller/shared/seller.queries";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,102 @@ export function SellerSalesContent() {
     else search.set("page", String(next + 1));
     setParams(search, { replace: true });
   };
+
+  const columns: DataTableColumn<SellerSale>[] = [
+    {
+      id: "col0",
+      header: "การลดราคา",
+      meta: { headClassName: cn(HEAD, "w-[27%]"), cellClassName: CELL },
+      cell: ({ row: { original: sale } }) => (
+        <>
+        <strong className="block truncate text-[13px] font-bold">{sale.name}</strong>
+        <span className={SUB}>{sellerScopeLabel(sale)}</span>
+        </>
+      ),
+    },
+    {
+      id: "col1",
+      header: "ส่วนลด",
+      meta: { headClassName: cn(HEAD, "w-[16%]"), cellClassName: CELL },
+      cell: ({ row: { original: sale } }) => (
+        <>
+        <span className="block font-semibold">{sellerDiscountLabel(sale)}</span>
+        <span className={SUB}>{sellerDiscountDetail(sale)}</span>
+        </>
+      ),
+    },
+    {
+      id: "col2",
+      header: "สินค้า",
+      meta: { headClassName: cn(HEAD, "w-[18%]"), cellClassName: CELL },
+      cell: ({ row: { original: sale } }) => (
+        <>
+        <span className="block font-semibold">{sale.listingCount.toLocaleString("th-TH")} listing</span>
+        <span className={SUB}>{sale.soldUnits > 0 ? `ขายแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น` : "—"}</span>
+        </>
+      ),
+    },
+    {
+      id: "col3",
+      header: "ระยะเวลา",
+      meta: { headClassName: cn(HEAD, "w-[18%]"), cellClassName: CELL },
+      cell: ({ row: { original: sale } }) => (
+        <>
+        <span className="block truncate font-semibold">{salePeriod(sale)}</span>
+        <span className={SUB}>{sellerPeriodHint(sale, now)}</span>
+        </>
+      ),
+    },
+    {
+      id: "col4",
+      header: "สถานะ",
+      meta: { headClassName: cn(HEAD, "w-[15%]"), cellClassName: CELL },
+      cell: ({ row: { original: sale } }) => (
+        <>
+        <Badge className={cn("h-5 gap-1.5 rounded-full px-2 text-xs font-medium", SALE_STATUS_STYLE[sale.status])}>
+          <span className="size-1.5 rounded-full bg-current" aria-hidden />
+          {SALE_STATUS_LABEL[sale.status]}
+        </Badge>
+        </>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">จัดการ</span>,
+      meta: { headClassName: cn(HEAD, "w-[6%]"), cellClassName: cn(CELL, "px-2 text-right") },
+      cell: ({ row: { original: sale } }) => {
+        const finished = isSaleFinished(sale.status);
+        const paused = sale.status === "PAUSED";
+        return (
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${sale.name}`} />}>
+            <MoreVertical className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={4} className="w-44 min-w-44">
+            {!finished && verified ? (
+              <DropdownMenuItem render={<Link to={`/seller/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+            ) : null}
+            {paused && sale.pausedByPegasus ? (
+              <DropdownMenuItem onClick={() => setAction({ kind: "admin-paused", sale })}>ดูเหตุผลที่ทีมงานหยุด</DropdownMenuItem>
+            ) : !finished ? (
+              <DropdownMenuItem onClick={() => setAction({ kind: paused ? "resume" : "pause", sale })}>
+                {paused ? "เปิดอีกครั้ง" : "หยุดชั่วคราว"}
+              </DropdownMenuItem>
+            ) : null}
+            {sale.status === "ACTIVE" ? (
+              <DropdownMenuItem onClick={() => setAction({ kind: "end", sale })}>จบก่อนกำหนด</DropdownMenuItem>
+            ) : null}
+            {sale.soldUnits === 0 ? (
+              <DropdownMenuItem variant="destructive" onClick={() => setAction({ kind: "delete", sale })}>
+                ลบ
+              </DropdownMenuItem>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   return (
     <main className="grid w-full min-w-0 content-start gap-5 text-foreground">
@@ -130,25 +226,14 @@ export function SellerSalesContent() {
           </Empty>
         ) : null}
         {rows.length > 0 ? (
-          <Table className="min-w-[760px] table-fixed">
-            <TableHeader>
-              <TableRow className="bg-muted hover:bg-muted">
-                <TableHead className={cn(HEAD, "w-[27%]")}>การลดราคา</TableHead>
-                <TableHead className={cn(HEAD, "w-[16%]")}>ส่วนลด</TableHead>
-                <TableHead className={cn(HEAD, "w-[18%]")}>สินค้า</TableHead>
-                <TableHead className={cn(HEAD, "w-[18%]")}>ระยะเวลา</TableHead>
-                <TableHead className={cn(HEAD, "w-[15%]")}>สถานะ</TableHead>
-                <TableHead className={cn(HEAD, "w-[6%]")}>
-                  <span className="sr-only">จัดการ</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((sale) => (
-                <SaleRow key={sale.id} sale={sale} now={now} verified={verified} onAction={setAction} />
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={rows}
+            getRowId={(sale) => String(sale.id)}
+            tableClassName="min-w-[760px] table-fixed"
+            headerRowClassName="bg-muted hover:bg-muted"
+            rowClassName={() => "h-[57px]"}
+          />
         ) : null}
         {totalPages > 1 ? (
           <nav aria-label="หน้ารายการลดราคา" className="flex items-center justify-end gap-2 border-t px-4 py-3">
@@ -187,74 +272,6 @@ function Kpi({ label, value, note }: { label: string; value: string; note: strin
       <strong className="text-2xl font-extrabold">{value}</strong>
       <small className="text-xs text-muted-foreground">{note}</small>
     </Card>
-  );
-}
-
-function SaleRow({
-  sale,
-  now,
-  verified,
-  onAction,
-}: {
-  sale: SellerSale;
-  now: number;
-  verified: boolean;
-  onAction: (action: SellerSaleActionState) => void;
-}) {
-  const finished = isSaleFinished(sale.status);
-  const paused = sale.status === "PAUSED";
-  return (
-    <TableRow className="h-[57px]">
-      <TableCell className={CELL}>
-        <strong className="block truncate text-[13px] font-bold">{sale.name}</strong>
-        <span className={SUB}>{sellerScopeLabel(sale)}</span>
-      </TableCell>
-      <TableCell className={CELL}>
-        <span className="block font-semibold">{sellerDiscountLabel(sale)}</span>
-        <span className={SUB}>{sellerDiscountDetail(sale)}</span>
-      </TableCell>
-      <TableCell className={CELL}>
-        <span className="block font-semibold">{sale.listingCount.toLocaleString("th-TH")} listing</span>
-        <span className={SUB}>{sale.soldUnits > 0 ? `ขายแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น` : "—"}</span>
-      </TableCell>
-      <TableCell className={CELL}>
-        <span className="block truncate font-semibold">{salePeriod(sale)}</span>
-        <span className={SUB}>{sellerPeriodHint(sale, now)}</span>
-      </TableCell>
-      <TableCell className={CELL}>
-        <Badge className={cn("h-5 gap-1.5 rounded-full px-2 text-xs font-medium", SALE_STATUS_STYLE[sale.status])}>
-          <span className="size-1.5 rounded-full bg-current" aria-hidden />
-          {SALE_STATUS_LABEL[sale.status]}
-        </Badge>
-      </TableCell>
-      <TableCell className={cn(CELL, "px-2 text-right")}>
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${sale.name}`} />}>
-            <MoreVertical className="size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={4} className="w-44 min-w-44">
-            {!finished && verified ? (
-              <DropdownMenuItem render={<Link to={`/seller/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
-            ) : null}
-            {paused && sale.pausedByPegasus ? (
-              <DropdownMenuItem onClick={() => onAction({ kind: "admin-paused", sale })}>ดูเหตุผลที่ทีมงานหยุด</DropdownMenuItem>
-            ) : !finished ? (
-              <DropdownMenuItem onClick={() => onAction({ kind: paused ? "resume" : "pause", sale })}>
-                {paused ? "เปิดอีกครั้ง" : "หยุดชั่วคราว"}
-              </DropdownMenuItem>
-            ) : null}
-            {sale.status === "ACTIVE" ? (
-              <DropdownMenuItem onClick={() => onAction({ kind: "end", sale })}>จบก่อนกำหนด</DropdownMenuItem>
-            ) : null}
-            {sale.soldUnits === 0 ? (
-              <DropdownMenuItem variant="destructive" onClick={() => onAction({ kind: "delete", sale })}>
-                ลบ
-              </DropdownMenuItem>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
   );
 }
 

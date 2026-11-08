@@ -1,18 +1,9 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from "react";
 
 import { Ban, ChevronDown, Pause, Play, type LucideIcon } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,33 +135,18 @@ export function ListingStatusCell({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={confirmDelist} onOpenChange={setConfirmDelist}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ปิดการขาย “{listing.card.productName}” ถาวร?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่
-              การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ
-              ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้
-              “พักการขาย” แทน
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setConfirmDelist(false);
-                move("DELISTED");
-              }}
-            >
-              ปิดการขายถาวร
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmDelist}
+        onOpenChange={setConfirmDelist}
+        variant="destructive"
+        title={`ปิดการขาย “${listing.card.productName}” ถาวร?`}
+        description="ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่ การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้ “พักการขาย” แทน"
+        confirmLabel="ปิดการขายถาวร"
+        onConfirm={() => {
+          setConfirmDelist(false);
+          move("DELISTED");
+        }}
+      />
     </>
   );
 }

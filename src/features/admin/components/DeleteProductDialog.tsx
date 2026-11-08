@@ -1,18 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { hasErrorCode } from "@/lib/api";
 
 import { catalogErrorMessage, productTitle } from "../catalog.format";
@@ -42,42 +30,19 @@ export function DeleteProductDialog({
   const inUse = hasErrorCode(error, "PRODUCT_IN_USE");
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="text-destructive">
-            <Trash2 />
-          </AlertDialogMedia>
-          <AlertDialogTitle>ลบ {productTitle(product)}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            variant รูป และ Abilities &amp; Attacks ของสินค้านี้จะถูกลบไปด้วย
-            กู้คืนไม่ได้ · ลบได้เฉพาะสินค้าที่ยังไม่มีประกาศขาย คำสั่งซื้อ
-            หรือคอลเลกชันอ้างถึง
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>
-              {catalogErrorMessage(error, "ลบสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง")}
-            </AlertDescription>
-          </Alert>
-        ) : null}
-
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>
-            {inUse ? "ปิด" : "ยกเลิก"}
-          </AlertDialogCancel>
-          <Button
-            variant="destructive"
-            disabled={isPending || inUse}
-            onClick={onConfirm}
-          >
-            {isPending && <Spinner data-icon="inline-start" />}
-            ลบสินค้า
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Trash2}
+      variant="destructive"
+      title={`ลบ ${productTitle(product)}?`}
+      description="variant รูป และ Abilities & Attacks ของสินค้านี้จะถูกลบไปด้วย กู้คืนไม่ได้ · ลบได้เฉพาะสินค้าที่ยังไม่มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันอ้างถึง"
+      confirmLabel="ลบสินค้า"
+      cancelLabel={inUse ? "ปิด" : "ยกเลิก"}
+      isPending={isPending}
+      confirmDisabled={inUse}
+      error={error ? catalogErrorMessage(error, "ลบสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง") : null}
+      onConfirm={onConfirm}
+    />
   );
 }

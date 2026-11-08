@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { ImageIcon, Layers, Pencil, Search, Trash2 } from "lucide-react";
 
-import { EmptyState } from "@/components/common";
+import { EmptyState, DataTable, type DataTableColumn } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,14 +11,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
@@ -53,6 +45,67 @@ export function CardSetTable({
         ),
       )
     : cardSets;
+
+  const dash = <span className="text-[#9aa5ad]">—</span>;
+  const columns: DataTableColumn<CardSet>[] = [
+    {
+      id: "name",
+      header: "ชุดการ์ด",
+      meta: { headClassName: cn(HEAD_CLASS, "pl-5"), cellClassName: "py-2.5 pl-5" },
+      cell: ({ row: { original: cardSet } }) => (
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
+            {cardSet.logoImageUrl ? (
+              <img src={cardSet.logoImageUrl} alt="" className="size-full object-contain" />
+            ) : (
+              <ImageIcon aria-hidden="true" className="size-4" />
+            )}
+          </span>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-[13px] font-medium text-foreground">{cardSet.name}</span>
+            {cardSet.nameLocal && <span className="truncate text-[11px] text-[#9aa5ad]">{cardSet.nameLocal}</span>}
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "code",
+      header: "รหัส",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5" },
+      cell: ({ row }) => (
+        <Badge variant="outline" className="h-5 rounded-[5px] px-1.5 text-[10px] font-medium">
+          {row.original.code}
+        </Badge>
+      ),
+    },
+    {
+      id: "released",
+      header: "วันวางจำหน่าย",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[140px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
+      cell: ({ row }) => formatReleaseDate(row.original.releaseDate) ?? dash,
+    },
+    {
+      id: "total",
+      header: "จำนวนการ์ด",
+      meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
+      cell: ({ row }) => (row.original.totalCards === null ? dash : `${formatCount(row.original.totalCards)} ใบ`),
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">จัดการ</span>,
+      meta: { headClassName: cn(HEAD_CLASS, "w-[88px] pr-5"), cellClassName: "py-2 pr-5" },
+      cell: ({ row: { original: cardSet } }) => (
+        <div className="flex justify-end gap-1">
+          <Button variant="ghost" size="icon-sm" aria-label={`แก้ไขชุด ${cardSet.name}`} className="rounded-md text-[#9aa5ad]" onClick={() => onEdit(cardSet)}>
+            <Pencil />
+          </Button>
+          <Button variant="ghost" size="icon-sm" aria-label={`ลบชุด ${cardSet.name}`} className="rounded-md text-[#9aa5ad] hover:text-destructive" onClick={() => onDelete(cardSet)}>
+            <Trash2 />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
@@ -102,100 +155,14 @@ export function CardSetTable({
           className={CARD_EMPTY_CLASS}
         />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow className={HEAD_ROW_CLASS}>
-              <TableHead className={cn(HEAD_CLASS, "pl-5")}>ชุดการ์ด</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>รหัส</TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[140px]")}>
-                วันวางจำหน่าย
-              </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[110px]")}>
-                จำนวนการ์ด
-              </TableHead>
-              <TableHead className={cn(HEAD_CLASS, "w-[88px] pr-5")}>
-                <span className="sr-only">จัดการ</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody className="[&_tr]:border-muted">
-            {visible.map((cardSet) => {
-              const logo = cardSet.logoImageUrl;
-              const released = formatReleaseDate(cardSet.releaseDate);
-
-              return (
-                <TableRow key={cardSet.id} className="hover:bg-[#fafbfb]">
-                  <TableCell className="py-2.5 pl-5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-[#9aa5ad]">
-                        {logo ? (
-                          <img src={logo} alt="" className="size-full object-contain" />
-                        ) : (
-                          <ImageIcon aria-hidden="true" className="size-4" />
-                        )}
-                      </span>
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-[13px] font-medium text-foreground">
-                          {cardSet.name}
-                        </span>
-                        {cardSet.nameLocal && (
-                          <span className="truncate text-[11px] text-[#9aa5ad]">
-                            {cardSet.nameLocal}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="py-2.5">
-                    <Badge
-                      variant="outline"
-                      className="h-5 rounded-[5px] px-1.5 text-[10px] font-medium"
-                    >
-                      {cardSet.code}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="py-2.5 text-xs text-muted-foreground">
-                    {released ?? <span className="text-[#9aa5ad]">—</span>}
-                  </TableCell>
-
-                  <TableCell className="py-2.5 text-xs text-muted-foreground">
-                    {cardSet.totalCards === null ? (
-                      <span className="text-[#9aa5ad]">—</span>
-                    ) : (
-                      `${formatCount(cardSet.totalCards)} ใบ`
-                    )}
-                  </TableCell>
-
-                  <TableCell className="py-2 pr-5">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`แก้ไขชุด ${cardSet.name}`}
-                        className="rounded-md text-[#9aa5ad]"
-                        onClick={() => onEdit(cardSet)}
-                      >
-                        <Pencil />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`ลบชุด ${cardSet.name}`}
-                        className="rounded-md text-[#9aa5ad] hover:text-destructive"
-                        onClick={() => onDelete(cardSet)}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <DataTable
+          columns={columns}
+          data={visible}
+          getRowId={(cardSet) => String(cardSet.id)}
+          headerRowClassName={HEAD_ROW_CLASS}
+          bodyClassName="[&_tr]:border-muted"
+          rowClassName={() => "hover:bg-[#fafbfb]"}
+        />
       )}
     </Card>
   );

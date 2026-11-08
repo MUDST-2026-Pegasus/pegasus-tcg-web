@@ -1,15 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { AlertTriangle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 import type { SellerReturnRequest } from "../../after-sales.types";
 
@@ -32,18 +23,17 @@ export function RejectReturnModal({
   if (!item) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg text-destructive">
-            <AlertTriangle className="size-5 text-destructive" />
-            ยืนยันการปฏิเสธคำขอคืนสินค้า
-          </DialogTitle>
-          <DialogDescription>
-            คำขอ RT-{item.id} · คำสั่งซื้อย่อย {item.sellerOrderNumber} ({item.buyer.username})
-          </DialogDescription>
-        </DialogHeader>
-
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={AlertTriangle}
+      variant="destructive"
+      title="ยืนยันการปฏิเสธคำขอคืนสินค้า"
+      description={`คำขอ RT-${item.id} · คำสั่งซื้อย่อย ${item.sellerOrderNumber} (${item.buyer.username})`}
+      confirmLabel="ยืนยันปฏิเสธคำขอ"
+      isPending={loading}
+      onConfirm={onConfirm}
+    >
         <div className="space-y-3 py-2 text-sm">
           <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-foreground space-y-2">
             <p className="font-semibold text-destructive">คำเตือนสำคัญ:</p>
@@ -57,20 +47,6 @@ export function RejectReturnModal({
             กรุณาตรวจสอบหลักฐานและข้อความจากผู้ซื้ออย่างรอบคอบก่อนตัดสินใจปฏิเสธ
           </p>
         </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <DialogClose render={<Button variant="outline" disabled={loading} />}>
-            ยกเลิก
-          </DialogClose>
-          <Button
-            variant="destructive"
-            disabled={loading}
-            onClick={onConfirm}
-          >
-            {loading ? "กำลังดำเนินการ..." : "ยืนยันปฏิเสธคำขอ"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ConfirmDialog>
   );
 }

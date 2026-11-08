@@ -1,20 +1,8 @@
+import { ConfirmDialog } from "@/components/common";
 import type { ReactNode } from "react";
 
 import { Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 
 import { taxonomyErrorMessage } from "../taxonomy.format";
 
@@ -49,38 +37,20 @@ export function ConfirmDeleteDialog({
   onConfirm,
 }: ConfirmDeleteDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="text-destructive">
-            <Trash2 />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-
-        {children}
-
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>
-              {taxonomyErrorMessage(error, errorFallback)}
-            </AlertDescription>
-          </Alert>
-        ) : null}
-
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>ยกเลิก</AlertDialogCancel>
-          <Button
-            variant="destructive"
-            disabled={isPending || confirmDisabled}
-            onClick={onConfirm}
-          >
-            {isPending && <Spinner data-icon="inline-start" />}
-            {confirmLabel}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Trash2}
+      variant="destructive"
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      isPending={isPending}
+      confirmDisabled={confirmDisabled}
+      error={error ? taxonomyErrorMessage(error, errorFallback) : null}
+      onConfirm={onConfirm}
+    >
+      {children}
+    </ConfirmDialog>
   );
 }

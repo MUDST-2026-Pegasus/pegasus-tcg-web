@@ -1,18 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { getErrorMessage } from "@/lib/api";
 
 import { useDeleteAddress } from "../address.queries";
@@ -54,45 +42,24 @@ export function DeleteAddressDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="text-destructive">
-            <Trash2 />
-          </AlertDialogMedia>
-          <AlertDialogTitle>Delete this address?</AlertDialogTitle>
-          <AlertDialogDescription>
-            {address?.recipientName} · {address?.line1}
-            <br />
-            Past orders keep their own copy, so they stay unchanged.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        {deleteAddress.isError && (
-          <Alert variant="destructive">
-            <AlertDescription>
-              {getErrorMessage(
-                deleteAddress.error,
-                "Could not delete this address.",
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteAddress.isPending}>
-            Cancel
-          </AlertDialogCancel>
-          <Button
-            variant="destructive"
-            disabled={deleteAddress.isPending}
-            onClick={onConfirm}
-          >
-            {deleteAddress.isPending && <Spinner data-icon="inline-start" />}
-            Delete
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      icon={Trash2}
+      variant="destructive"
+      title="Delete this address?"
+      description={
+        <>
+          {address?.recipientName} · {address?.line1}
+          <br />
+          Past orders keep their own copy, so they stay unchanged.
+        </>
+      }
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      isPending={deleteAddress.isPending}
+      error={deleteAddress.isError ? getErrorMessage(deleteAddress.error, "Could not delete this address.") : null}
+      onConfirm={() => void onConfirm()}
+    />
   );
 }

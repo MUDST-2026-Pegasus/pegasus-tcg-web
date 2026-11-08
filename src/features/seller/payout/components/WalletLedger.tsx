@@ -1,3 +1,4 @@
+import { DataTable, type DataTableColumn } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import type { Payout, Wallet } from "@/features/finance/finance.types";
 import { formatThaiDateTime, money, walletEntryLabel } from "../payout.format";
@@ -21,6 +22,37 @@ export function WalletLedger({ wallet, payouts, page, pageSize, isFetching, onPa
   const start = totalItems ? page * pageSize + 1 : 0;
   const end = Math.min((page + 1) * pageSize, totalItems);
 
+  const columns: DataTableColumn<(typeof items)[number]>[] = [
+    { id: "date", header: "วันที่", meta: { headClassName: "px-5 py-3", cellClassName: "px-5 py-4" }, cell: ({ row }) => formatThaiDateTime(row.original.createdAt) },
+    { id: "type", header: "รายการ", meta: { cellClassName: "font-medium" }, cell: ({ row }) => walletEntryLabel(row.original.type) },
+    {
+      id: "reference",
+      header: "อ้างอิง",
+      cell: ({ row: { original: entry } }) => {
+        const linked = entry.referenceType === "PAYOUT" ? payouts.find((payout) => payout.id === entry.referenceId) : null;
+        if (linked) {
+          return (
+            <button type="button" className="text-teal-700 hover:underline" onClick={() => onSelect(linked)}>
+              คำขอถอน #{linked.id}
+            </button>
+          );
+        }
+        return entry.referenceId ? `${entry.referenceType ?? "รายการ"} #${entry.referenceId}` : "—";
+      },
+    },
+    {
+      id: "amount",
+      header: "จำนวน",
+      meta: { headClassName: "text-right", cellClassName: "text-right" },
+      cell: ({ row: { original: entry } }) => (
+        <span className={`font-semibold ${entry.direction === "CREDIT" ? "text-emerald-700" : "text-destructive"}`}>
+          {entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}
+        </span>
+      ),
+    },
+    { id: "balance", header: "คงเหลือ", meta: { headClassName: "pr-5 text-right", cellClassName: "pr-5 text-right text-muted-foreground" }, cell: ({ row }) => money(row.original.balanceAfter) },
+  ];
+
   return (
     <>
       <div className="px-5 py-4">
@@ -28,42 +60,14 @@ export function WalletLedger({ wallet, payouts, page, pageSize, isFetching, onPa
         <p className="text-xs text-muted-foreground">ทุกการเปลี่ยนแปลงยอดในกระเป๋า เรียงล่าสุดก่อน · ยอดที่ขอถอนจะขึ้นที่นี่เมื่อโอนสำเร็จเท่านั้น</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[700px] text-left text-sm">
-          <thead className="bg-muted text-xs text-muted-foreground">
-            <tr>
-              <th className="px-5 py-3">วันที่</th>
-              <th>รายการ</th>
-              <th>อ้างอิง</th>
-              <th className="text-right">จำนวน</th>
-              <th className="pr-5 text-right">คงเหลือ</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((entry) => {
-              const linked = entry.referenceType === "PAYOUT"
-                ? payouts.find((payout) => payout.id === entry.referenceId)
-                : null;
-              return (
-                <tr key={entry.id} className="border-t">
-                  <td className="px-5 py-4">{formatThaiDateTime(entry.createdAt)}</td>
-                  <td className="font-medium">{walletEntryLabel(entry.type)}</td>
-                  <td>
-                    {linked ? (
-                      <button type="button" className="text-teal-700 hover:underline" onClick={() => onSelect(linked)}>
-                        คำขอถอน #{linked.id}
-                      </button>
-                    ) : entry.referenceId ? `${entry.referenceType ?? "รายการ"} #${entry.referenceId}` : "—"}
-                  </td>
-                  <td className={`text-right font-semibold ${entry.direction === "CREDIT" ? "text-emerald-700" : "text-destructive"}`}>
-                    {entry.direction === "CREDIT" ? "+" : "−"}{money(entry.amount)}
-                  </td>
-                  <td className="pr-5 text-right text-muted-foreground">{money(entry.balanceAfter)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {!items.length && <p className="p-8 text-center text-sm text-muted-foreground">ยังไม่มีรายการเคลื่อนไหว</p>}
+        <DataTable
+          columns={columns}
+          data={items}
+          getRowId={(entry) => String(entry.id)}
+          tableClassName="min-w-[700px] text-left"
+          headerRowClassName="bg-muted text-xs text-muted-foreground"
+          emptyMessage="ยังไม่มีรายการเคลื่อนไหว"
+        />
       </div>
       <div className="flex items-center justify-between border-t px-5 py-3 text-xs text-muted-foreground">
         <p aria-live="polite">{isFetching ? "กำลังโหลดรายการ..." : `แสดง ${start}–${end} จาก ${totalItems} รายการ`}</p>
