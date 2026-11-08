@@ -5,17 +5,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { toast } from "@/components/ui/toast";
-import { ApiError } from "@/lib/api/errors";
-import { useAddresses, addressKeys } from "@/features/account/address.queries";
+import { useAddresses } from "@/features/account/address.queries";
 import { cartKeys, useAcceptCartPrices, useRemoveCartItem } from "../cart.queries";
 import { SaleQuotaDialog } from "@/features/sale/components/SaleBuyerDialogs";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
-import { notifyBuyerLimit, quotaListingId } from "@/features/sale/sale.notify";
-import { checkoutApi } from "../checkout.api";
 import { CheckoutSellerCard } from "../components/CheckoutSellerCard";
 import { CheckoutAddressSummary } from "../components/CheckoutAddressSummary";
-import { findPromotionOwnerForCode } from "../checkout.format";
 import { CheckoutAddressPicker } from "../components/CheckoutAddressPicker";
 import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
 import { PromotionChangedDialog } from "../components/PromotionChangedDialog";
@@ -25,8 +20,8 @@ import { CheckoutErrorAlert } from "../components/CheckoutErrorAlert";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import { useCheckoutData, useCheckoutRedirects } from "../useCheckoutData";
 import { useShippingSelection } from "../useShippingSelection";
-import { clearPromotionSelection } from "../promotions.storage";
-import type { CartItemResponse } from "../cart.types";
+import { useCheckoutSubmit } from "../useCheckoutSubmit";
+import { useCheckoutErrorHandler } from "../useCheckoutErrorHandler";
 import { AuctionCheckout } from "@/features/auction/components/AuctionCheckout";
 import "./checkout.css";
 
@@ -48,8 +43,6 @@ function CartCheckout() {
   const queryClient = useQueryClient();
   const hasRedirected = useRef(false);
   const completed = useRef(false);
-  const submitting = useRef(false);
-  const attempt = useRef<{ signature: string; key: string } | null>(null);
   const data = useCheckoutData();
   const {
     user,
@@ -72,7 +65,6 @@ function CartCheckout() {
     refetch: refetchAddresses,
   } = useAddresses();
 
-  const [quotaItem, setQuotaItem] = useState<CartItemResponse | null>(null);
   const removeCartItem = useRemoveCartItem();
   const acceptPrices = useAcceptCartPrices();
 
@@ -86,16 +78,6 @@ function CartCheckout() {
     shippingOptionBySeller,
     setShippingChoices,
   } = useShippingSelection(checkoutItems, quotes);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shippingNotice, setShippingNotice] = useState<string | null>(null);
-
-  const [promotionChanged, setPromotionChanged] = useState<{
-    previous: number;
-    next: number;
-    code?: string;
-    owner?: "PLATFORM" | number;
-  } | null>(null);
 
   const activeAddress =
     addresses.find((address) => address.id === selectedAddressId) ??
@@ -156,7 +138,26 @@ function CartCheckout() {
   // ราคาสินค้า (ก่อนลด) / ส่วนลดราคาสินค้า แยกจากโค้ด (Figma SAL-B3 D)
   const saleTotals = cartSaleTotals(checkoutItems);
 
-  const canPurchase =
+  const {
+    handleError,
+    shippingNotice,
+    promotionChanged,
+    setPromotionChanged,
+    quotaItem,
+    setQuotaItem,
+  } = useCheckoutErrorHandler({
+    sellerGroups,
+    checkoutItems,
+    promotionSelection,
+    setShippingChoices,
+    refetchQuotes: quotes.refetch,
+    refetchPreview: promoPreview.refetch,
+    setSelectedAddressId,
+    setAddressPickerOpen,
+    hasRedirectedRef: hasRedirected,
+  });
+
+  const readyToPurchase =
     shippingReady &&
     previewReady &&
     !promoPreview.isError &&
@@ -166,158 +167,29 @@ function CartCheckout() {
     !addressError &&
     !cartError &&
     !isCartFetching &&
-    !isSubmitting &&
     isAuthenticated &&
     !cartNeedsReview;
+
+  const { submit: handlePurchase, isSubmitting } = useCheckoutSubmit({
+    canPurchase: readyToPurchase,
+    buildPayload: () => ({
+      cartItemIds,
+      shippingAddressId: activeAddress!.id,
+      shippingOptionBySeller,
+      platformCode: promotionSelection.platformCode,
+      sellerCodes: promotionSelection.sellerCodes,
+      expectedGrandTotal: preview!.grandTotal,
+    }),
+    completedRef: completed,
+    onError: handleError,
+  });
+  const canPurchase = readyToPurchase && !isSubmitting;
 
   useCheckoutRedirects({
     data,
     hasRedirectedRef: hasRedirected,
     completedRef: completed,
   });
-
-  const handlePurchase = async () => {
-    if (!canPurchase || submitting.current) return;
-    submitting.current = true;
-    setIsSubmitting(true);
-    const payload = {
-      cartItemIds,
-      shippingAddressId: activeAddress.id,
-      shippingOptionBySeller,
-      platformCode: promotionSelection.platformCode,
-      sellerCodes: promotionSelection.sellerCodes,
-      expectedGrandTotal: preview!.grandTotal,
-    };
-    const signature = JSON.stringify(payload);
-
-    // Preserve the key after uncertain network failures so retrying cannot place a duplicate order.
-    if (attempt.current?.signature !== signature) {
-      attempt.current = { signature, key: crypto.randomUUID() };
-    }
-
-    try {
-      const response = await checkoutApi.checkout(payload, attempt.current.key);
-      completed.current = true;
-      clearPromotionSelection();
-      toast.add({
-        title: "สร้างคำสั่งซื้อสำเร็จ",
-        description: `คำสั่งซื้อ ${response.orderNumber}`,
-        type: "success",
-      });
-      navigate(`/payment?orderId=${response.orderId}`, {
-        state: { orderId: response.orderId, order: response },
-      });
-      void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        if (error.status > 0 && error.status < 500) attempt.current = null;
-        if (
-          error.code === "SHIPPING_OPTION_INVALID" ||
-          error.code === "SELLER_SHIPPING_UNAVAILABLE"
-        ) {
-          const changedSeller = sellerGroups.find(
-            (group) => group.sellerId === Number(error.details?.sellerProfileId),
-          );
-          const sellerNames = changedSeller
-            ? changedSeller.quote?.sellerName ||
-              changedSeller.items[0]?.sellerName ||
-              "ร้านค้า"
-            : sellerGroups
-                .map(
-                  (group) =>
-                    group.quote?.sellerName ||
-                    group.items[0]?.sellerName ||
-                    "ร้านค้า",
-                )
-                .join(", ");
-          setShippingNotice(
-            error.code === "SHIPPING_OPTION_INVALID" ? sellerNames : null,
-          );
-          setShippingChoices((previous) => {
-            if (changedSeller?.sellerId == null) return {};
-            const next = { ...previous };
-            delete next[changedSeller.sellerId];
-            return next;
-          });
-          await quotes.refetch();
-        } else if (
-          error.code === "PROMO_CHANGED" ||
-          error.code === "PROMO_USED_UP"
-        ) {
-          const details = error.details as Record<string, unknown> | undefined;
-          const droppedCode =
-            typeof details?.code === "string" ? details.code : undefined;
-          const targetOwner =
-            findPromotionOwnerForCode(droppedCode, promotionSelection) ?? "PLATFORM";
-
-          setPromotionChanged({
-            previous: payload.expectedGrandTotal,
-            next: Number(details?.grandTotal) || payload.expectedGrandTotal,
-            code: droppedCode,
-            owner: targetOwner,
-          });
-          await promoPreview.refetch();
-        } else if (
-          error.code === "SHIPPING_ADDRESS_REQUIRED" ||
-          error.code === "ADDRESS_NOT_FOUND"
-        ) {
-          setSelectedAddressId(null);
-          await queryClient.invalidateQueries({ queryKey: addressKeys.all });
-          setAddressPickerOpen(true);
-          toast.add({
-            title: "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง",
-            description: "ที่อยู่เดิมไม่พร้อมใช้งาน",
-            type: "warning",
-          });
-        } else if (error.code === "SALE_QUOTA_REACHED") {
-          // โควตาราคา Flash เต็มระหว่างทาง → modal ให้เลือกนำออกหรือซื้อราคาปกติ (Figma SAL-M1)
-          const listingId = quotaListingId(error);
-          setQuotaItem(
-            checkoutItems.find((item) => item.listingId === listingId) ??
-              checkoutItems.find((item) => item.pricing?.sale?.type === "FLASH_SALE") ??
-              null,
-          );
-          void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-        } else if (error.code === "SALE_BUYER_LIMIT_REACHED") {
-          const item =
-            checkoutItems.find((row) => row.listingId === quotaListingId(error)) ??
-            checkoutItems.find((row) => row.pricing?.sale?.perBuyerLimit != null);
-          notifyBuyerLimit(item?.pricing?.sale?.perBuyerLimit ?? 1, item?.pricing?.listPrice ?? 0);
-          void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-        } else if (
-          error.code === "PRICE_CHANGED" ||
-          error.code === "CART_PRICE_CHANGED"
-        ) {
-          void queryClient.invalidateQueries({ queryKey: cartKeys.all });
-          hasRedirected.current = true;
-          toast.add({
-            title: "ราคาสินค้ามีการเปลี่ยนแปลง",
-            description: "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง",
-            type: "warning",
-          });
-          navigate("/cart");
-        } else {
-          toast.add({
-            title:
-              error.code === "INSUFFICIENT_STOCK"
-                ? "สินค้าไม่เพียงพอ"
-                : "สั่งซื้อไม่สำเร็จ",
-            description: error.message,
-            type: "error",
-          });
-        }
-      } else {
-        toast.add({
-          title: "สั่งซื้อไม่สำเร็จ",
-          description: "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง",
-          type: "error",
-        });
-      }
-    } finally {
-      submitting.current = false;
-      setIsSubmitting(false);
-    }
-  };
 
   if (isAuthLoading || isCartLoading) {
     return (
