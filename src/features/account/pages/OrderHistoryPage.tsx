@@ -566,7 +566,7 @@ function OrderCardItem({
             <p className="text-xs text-muted-foreground mt-0.5">
               Seller:{" "}
               <span className="text-foreground font-medium">
-                {order.sellerOrders[0].sellerName}
+                <a href={`/u/${order.sellerOrders?.[0]?.sellerName?.replace(/\s+/g, "_")}`}>{order.sellerOrders[0].sellerName}</a>
               </span>
             </p>
           )}
