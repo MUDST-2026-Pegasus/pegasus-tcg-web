@@ -22,6 +22,7 @@ import { CodePickerDialog } from "@/features/promotions/CodePickerDialog";
 import { PromotionChangedDialog } from "../components/PromotionChangedDialog";
 import { CheckoutPlatformPromotionCard } from "../components/CheckoutPlatformPromotionCard";
 import { CheckoutOrderSummary } from "../components/CheckoutOrderSummary";
+import { CheckoutErrorAlert } from "../components/CheckoutErrorAlert";
 import { useCheckoutPromotions } from "../useCheckoutPromotions";
 import { clearPromotionSelection } from "../promotions.storage";
 import type { CartItemResponse } from "../cart.types";
@@ -551,46 +552,24 @@ function CartCheckout() {
             )}
 
             {quotes.isError && (
-              <div role="alert" className="checkout-alert checkout-alert-error">
-                <p className="font-semibold">โหลดตัวเลือกจัดส่งไม่สำเร็จ</p>
-                <p>
-                  {quotes.error instanceof ApiError
-                    ? quotes.error.message
-                    : "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"}
-                </p>
-                <button
-                  type="button"
-                  className="checkout-link justify-self-start"
-                  onClick={() => void quotes.refetch()}
-                >
-                  ลองอีกครั้ง
-                </button>
-                <button
-                  type="button"
-                  className="checkout-link justify-self-start"
-                  onClick={() => navigate("/cart")}
-                >
-                  กลับไปตรวจสอบตะกร้า
-                </button>
-              </div>
+              <CheckoutErrorAlert
+                title="โหลดตัวเลือกจัดส่งไม่สำเร็จ"
+                error={quotes.error}
+                actions={[
+                  { label: "ลองอีกครั้ง", onClick: () => void quotes.refetch() },
+                  { label: "กลับไปตรวจสอบตะกร้า", onClick: () => navigate("/cart") },
+                ]}
+              />
             )}
 
             {promoPreview.isError && (
-              <div role="alert" className="checkout-alert checkout-alert-error">
-                <p className="font-semibold">คำนวณส่วนลดและยอดรวมไม่สำเร็จ</p>
-                <p>
-                  {promoPreview.error instanceof ApiError
-                    ? promoPreview.error.message
-                    : "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"}
-                </p>
-                <button
-                  type="button"
-                  className="checkout-link justify-self-start"
-                  onClick={() => void promoPreview.refetch()}
-                >
-                  ลองอีกครั้ง
-                </button>
-              </div>
+              <CheckoutErrorAlert
+                title="คำนวณส่วนลดและยอดรวมไม่สำเร็จ"
+                error={promoPreview.error}
+                actions={[
+                  { label: "ลองอีกครั้ง", onClick: () => void promoPreview.refetch() },
+                ]}
+              />
             )}
 
             {sellerGroups.map(({ sellerId, items, quote }, index) => {
