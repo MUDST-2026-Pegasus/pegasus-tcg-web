@@ -16,10 +16,10 @@ describe('Core Legal and About Pages Flow', () => {
   it('renders about page with story and mission statement', () => {
     cy.visit('/about');
 
-    cy.contains('h1', 'Empowering the TCG Community').should('be.visible');
-    cy.contains('h2', 'Our Story').should('be.visible');
-    cy.contains('Pegasus TCG is the premier destination').should('be.visible');
-    cy.contains('What began as a passionate group').should('be.visible');
+    cy.contains('h1', 'เติบโตไปด้วยกันกับชุมชน TCG').should('be.visible');
+    cy.contains('h2', 'เรื่องราวของเรา').should('be.visible');
+    cy.contains('Pegasus TCG คือพื้นที่สำหรับนักสะสม').should('be.visible');
+    cy.contains('Pegasus TCG เริ่มต้นจากกลุ่มคนรักการ์ด').should('be.visible');
   });
 
   it('renders terms of service with legal sections and navigation', () => {
