@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { AdminAuctionDetailContent } from "@/features/admin/auctions/AdminAuctionDetailPage";
 import { AdminAuctionsPage } from "@/features/admin/auctions/AdminAuctionsPage";
@@ -10,6 +10,14 @@ import { render, renderWithProviders, screen, userEvent, waitFor, within } from 
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+// หน้าแอดมินใช้ API จริงแล้ว [TCG-640] — เทสต์นี้ยังใช้ข้อมูล fixture (กรองแท็บ/ค้นหาใน mock)
+beforeAll(() => {
+  auctionApi.AUCTION_MOCK.admin = true;
+});
+afterAll(() => {
+  auctionApi.AUCTION_MOCK.admin = false;
 });
 
 /** แถวในตารางที่มีชื่อการ์ดนี้ */

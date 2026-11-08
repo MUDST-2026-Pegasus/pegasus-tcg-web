@@ -50,7 +50,7 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 // endpoint ครบทั้ง 18 ตัวตาม contract C-2 (`AuctionController`, `SellerAuctionController`,
 // `AdminAuctionController`) — component ไม่เรียกตรง ๆ ให้ผ่าน hook ใน `auction.queries.ts`
 //
-// ระหว่างที่ BE ยังไม่มี logic ทุกฟังก์ชันคืนข้อมูลจาก `auction.fixture.ts`
+// ตอนนี้ทุกกลุ่มใช้ API จริงแล้ว (I-1 ถึง I-4) — ตั้งกลุ่มไหนเป็น `true` จะกลับไปใช้ข้อมูลจาก `auction.fixture.ts`
 // การ์ดเชื่อมระบบสลับทีละกลุ่มด้วย `AUCTION_MOCK` ข้างล่าง (true → false) ไม่ต้องแก้ส่วนอื่น:
 //   I-1 → public + seller · I-2 → buyer · I-3 → buyer + seller · I-4 → admin
 
@@ -61,8 +61,8 @@ export const AUCTION_MOCK = {
   buyer: false,
   /** หน้าผู้ขายทั้งหมด — ใช้ API จริงแล้ว [TCG-637] */
   seller: false,
-  /** หน้าแอดมินทั้งหมด */
-  admin: true,
+  /** หน้าแอดมินทั้งหมด — ใช้ API จริงแล้ว [TCG-640] */
+  admin: false,
 };
 
 const MOCK_DELAY_MS = 300;

@@ -100,7 +100,6 @@ export type AuctionListParams = {
   variantId?: number;
   /**
    * ประมูลของร้านนี้ (แท็บ "ประมูล" ในหน้าร้าน) — หน้าร้านรู้แค่ username [TCG-636]
-   * ⚠️ backend รับแค่ `sellerId` (profile id) — BE ต้องรับ `sellerUsername` ด้วย
    */
   sellerUsername?: string;
   q?: string;
@@ -299,7 +298,7 @@ export type MyAuctionPage = {
   bannedUntil: string | null;
   /**
    * ชื่อการ์ดของครั้งล่าสุดที่ไม่ชำระ — ใช้ในแบนเนอร์ B3-H "{การ์ด} · คำสั่งซื้อถูกยกเลิกแล้ว"
-   * ⚠️ ยังไม่มีใน `AuctionViews.java` ต้องเพิ่มใน BE-10 (TCG-623) · ไม่ส่งมา = ซ่อนชื่อการ์ด
+   * `null` / ไม่ส่งมา = ซ่อนชื่อการ์ด
    */
   lastStrikeCardName?: string | null;
   serverTime: string;
@@ -450,8 +449,7 @@ export type AdminAuctionKpis = {
   awaitingPayment: number;
   suspendedLast30Days: number;
   /**
-   * ยอดขายจากประมูล 30 วัน — ภาพรวมแพลตฟอร์มของแอดมิน [TCG-636]
-   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionViews.Kpis`
+   * ยอดขายจากประมูล 30 วัน — ภาพรวมแพลตฟอร์มของแอดมิน [TCG-636 · TCG-640]
    */
   soldLast30Days: number;
 };
@@ -461,8 +459,7 @@ export type AdminAuctionRow = {
   auctionNumber: string;
   cardName: string;
   /**
-   * รูปในคอลัมน์ "การ์ด / รหัส" ของ A1 [TCG-635]
-   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionRowResponse`
+   * รูปในคอลัมน์ "การ์ด / รหัส" ของ A1 [TCG-635 · TCG-640]
    */
   cardImageUrl: string | null;
   shopName: string;
@@ -487,7 +484,7 @@ export type AdminAuctionPage = {
   flaggedCount: number;
   /**
    * แบนเนอร์ A1 แยกนับ "ถูกรายงาน" กับ "รูปแบบบิดผิดปกติ" [TCG-635]
-   * ⚠️ ยังไม่อยู่ใน contract C-2 — BE ต้องเพิ่มใน `AdminAuctionPageResponse`
+   * BE ยังเป็น 0 จนกว่าจะมีระบบรายงานและกฎตรวจจับ — แบนเนอร์จึงไม่ขึ้น [TCG-640]
    */
   reportedCount: number;
   suspiciousCount: number;
