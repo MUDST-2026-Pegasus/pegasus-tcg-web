@@ -32,6 +32,7 @@ import { EditBuyNowDialog } from "./components/EditBuyNowDialog";
 import { SellerAuctionNotices } from "./components/SellerAuctionNotices";
 import {
   buyNowSetting,
+  hadWinner,
   headerMeta,
   isFirstBid,
   relistPath,
@@ -98,7 +99,9 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
   }
 
   const row = toSellerAuctionRow(detail);
-  const { pill } = sellerAuctionRowView(row);
+  const { pill: rowPill } = sellerAuctionRowView(row);
+  // แถวในตารางเดาผู้ชนะจากจำนวนบิด — ซื้อทันทีแล้วไม่จ่ายไม่มีบิด หน้านี้รู้ผู้ชนะจริง [TCG-639]
+  const pill = detail.status === "UNSOLD" && hadWinner(detail) ? { kind: rowPill.kind, label: "ไม่มีผู้ชำระ" } : rowPill;
   const live = detail.status === "LIVE";
   const hasBids = detail.bidCount > 0;
   const { card } = detail.item;

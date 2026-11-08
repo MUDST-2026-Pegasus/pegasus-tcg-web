@@ -71,7 +71,8 @@ function endedPill(auction: AuctionDetail, state: BidPanelState): { kind: Auctio
     case "SOLD":
       return { kind: "Ended", label: "ขายแล้ว" };
     case "UNSOLD":
-      return { kind: "Unsold", label: auction.bidCount > 0 ? "ไม่มีผู้ชำระ" : "ไม่มีผู้บิด" };
+      // ซื้อทันทีแล้วไม่จ่ายไม่มีบิด แต่มีผู้ชนะ — ดู `winnerAlias` ด้วย [TCG-639]
+      return { kind: "Unsold", label: auction.bidCount > 0 || auction.winnerAlias ? "ไม่มีผู้ชำระ" : "ไม่มีผู้บิด" };
     case "SUSPENDED":
       return { kind: "Suspended" };
     default:
@@ -118,7 +119,9 @@ function PriceBlock({ auction, state, onShowHistory }: { auction: AuctionDetail;
     case "UNSOLD":
       label = "ราคาเริ่มต้น";
       price = auction.startingPrice;
-      sub = `${auction.bidCount > 0 ? formatBidCount(auction.bidCount) : "ไม่มีผู้บิด"} · ปิด ${formatAuctionDate(auction.endsAt)}`;
+      sub = `${
+        auction.bidCount > 0 ? formatBidCount(auction.bidCount) : auction.winnerAlias ? "ผู้ชนะไม่ชำระ" : "ไม่มีผู้บิด"
+      } · ปิด ${formatAuctionDate(auction.endsAt)}`;
       history = false;
       break;
     case "SUSPENDED":
