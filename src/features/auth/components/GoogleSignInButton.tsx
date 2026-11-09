@@ -161,12 +161,13 @@ export function GoogleSignInButton({
 
   return (
     <div className="flex w-full flex-col gap-3">
+      <GoogleOrDivider />
       {isLoading && (
         <button
           type="button"
           disabled
           aria-busy="true"
-          className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-[4px] border border-border bg-muted px-4 text-sm font-medium text-muted-foreground"
+          className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 text-sm font-medium text-muted-foreground"
         >
           <Spinner className="size-4" />
           <span>Signing in with Google...</span>
@@ -177,12 +178,11 @@ export function GoogleSignInButton({
         data-testid="google-signin-button"
         aria-disabled={disabled || undefined}
         className={cn(
-          "mx-auto flex min-h-10 w-full max-w-[400px] justify-center",
+          "relative mx-auto flex min-h-10 w-full max-w-[400px] justify-center overflow-hidden rounded-lg [&_iframe]:rounded-lg after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:border after:border-[#dadce0]",
           isLoading && "hidden",
           disabled && "pointer-events-none opacity-60",
         )}
       />
-      <GoogleOrDivider />
     </div>
   );
 }

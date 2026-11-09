@@ -158,7 +158,7 @@ describe('RegisterForm', () => {
     expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
   });
 
-  it('renders Google button and "or" divider at the top of RegisterForm without duplicating legal links', async () => {
+  it('renders "or" divider and Google button below the Sign up button without duplicating legal links', async () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
     let capturedCallback: ((res: { credential?: string }) => void) | undefined;
     window.google = {

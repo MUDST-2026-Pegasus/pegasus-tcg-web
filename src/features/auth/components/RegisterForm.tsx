@@ -112,12 +112,6 @@ export function RegisterForm() {
         </Alert>
       )}
 
-      <GoogleSignInButton
-        onCredential={handleGoogleCredential}
-        isLoading={isGoogleSigningIn}
-        disabled={isSubmitting}
-      />
-
       <FieldGroup>
         <Field data-invalid={Boolean(errors.username) || undefined}>
           <FieldLabel htmlFor="username">Username</FieldLabel>
@@ -229,6 +223,12 @@ export function RegisterForm() {
           {isSubmitting ? "Creating account…" : "Sign up"}
         </Button>
       </FieldGroup>
+
+      <GoogleSignInButton
+        onCredential={handleGoogleCredential}
+        isLoading={isGoogleSigningIn}
+        disabled={isSubmitting}
+      />
       <p className="text-center text-sm text-muted-foreground ">
         Already have an account? &nbsp;
         <Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">

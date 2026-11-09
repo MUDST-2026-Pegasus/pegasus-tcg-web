@@ -82,12 +82,6 @@ export function LoginForm() {
         </Alert>
       )}
 
-      <GoogleSignInButton
-        onCredential={handleGoogleCredential}
-        isLoading={isGoogleSigningIn}
-        disabled={isSubmitting}
-      />
-
       <FieldGroup className="gap-5">
         <Field className="gap-2" data-invalid={Boolean(errors.email) || undefined}>
           <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -126,6 +120,12 @@ export function LoginForm() {
         {isSubmitting && <Spinner />}
         {isSubmitting ? "Signing in…" : "Log in"}
       </Button>
+
+      <GoogleSignInButton
+        onCredential={handleGoogleCredential}
+        isLoading={isGoogleSigningIn}
+        disabled={isSubmitting}
+      />
 
       <div className="flex flex-col gap-2 pt-2">
         <Separator />
