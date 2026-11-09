@@ -1,4 +1,4 @@
-import { DevTools, LanguageStorage, Tolgee, type TolgeeInstance } from "@tolgee/react";
+import { DevTools, LanguageStorage, TolgeeCore, type TolgeeInstance } from "@tolgee/react";
 import { FormatIcu } from "@tolgee/format-icu";
 
 export const LANGUAGES = ["th", "en"] as const;
@@ -36,7 +36,9 @@ interface CreateTolgeeOptions {
 
 export function createTolgee({ language, live = true }: CreateTolgeeOptions = {}): TolgeeInstance {
   const apiKey = live ? DEV_API_KEY : undefined;
-  let chain = Tolgee().use(FormatIcu());
+  // TolgeeCore ไม่ใช่ Tolgee(): Tolgee() แถม BrowserExtensionPlugin ที่ ping extension ด้วย timer 4×300ms ตอนเริ่ม
+  // (ค้างหลังเทสต์จบจน CI พัง "window is not defined" และฝัง loader CDN ใน production) — แก้คำแปลบนหน้าเว็บใช้ DevTools แทน
+  let chain = TolgeeCore().use(FormatIcu());
   // DevTools ห่อทุกข้อความด้วยอักขระล่องหน (ไว้ Alt+คลิก) — ใส่เฉพาะตอนมี key ไม่งั้นเทสต์ที่หาด้วยข้อความพัง
   // production build ได้ DevTools ตัว no-op จาก export condition "production" อยู่แล้ว
   if (apiKey) chain = chain.use(DevTools());
