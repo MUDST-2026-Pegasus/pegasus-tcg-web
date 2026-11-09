@@ -487,6 +487,20 @@ production build ไม่มี key หรือ DevTools (`src/lib/i18n/tolgee
 - `setupTests.ts` เตรียม instance ภาษาไทยไว้แล้ว เทสต์ที่ `render` เองหาด้วยข้อความไทยได้เลยไม่ต้องครอบ provider
 - อยากเทสต์ภาษาอังกฤษ: `renderWithProviders(<Page />, { language: "en" })`
 
+### ตรวจใน CI
+
+job `quality` รันสองขั้นนี้ (ไม่ต่อ Tolgee ไม่ใช้ API key) — รันเองก่อน push ได้:
+
+```bash
+pnpm i18n:extract-check  # warning ของ extractor ขึ้นเป็น annotation ใน PR
+pnpm i18n:check          # key ที่โค้ดใช้ต้องอยู่ใน th.json แล้ว (ลืม pull = fail) · en ขาด / ว่าง = warning
+```
+
+- `pnpm i18n:check --strict` (หรือ `I18N_STRICT=1`) ให้ en ที่ขาดเป็น error — เปิดใน CI ตอน I18N-21
+- หลัง build CI เช็คว่า `dist/` ไม่มี Tolgee API key (`tgpak_…`)
+- **ESLint guard:** โฟลเดอร์ใน `I18N_GUARDED` (`eslint.config.js`) ห้ามมีข้อความไทยตรง ๆ ใน JSX / string / template
+  ยกเว้น default ของ `t()` — การ์ดย้ายข้อความเพิ่ม path ของตัวเองเข้าไปตอนย้ายเสร็จ
+
 ## กติกา
 
 - **ห้ามแก้ `src/components/ui/*`** — เป็นของ shadcn CLI ถ้าอยากได้สไตล์อื่นให้ override ด้วย `className` ตรงจุดที่ใช้

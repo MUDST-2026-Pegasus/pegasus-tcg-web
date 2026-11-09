@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "i18n:extract-check": "tolgee extract check",
+    "i18n:check": "node scripts/i18n-check.mjs",
     "i18n:compare": "tolgee compare",
     "i18n:sync": "tolgee sync",
     "i18n:pull": "tolgee pull",
