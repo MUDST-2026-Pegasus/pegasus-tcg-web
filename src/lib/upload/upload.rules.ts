@@ -27,6 +27,7 @@ export const UPLOAD_RULES: Record<UploadPurpose, UploadRule> = {
   COLLECTION_IMAGE: { contentTypes: IMAGES, maxBytes: 5 * MB },
   SELLER_VERIFICATION: { contentTypes: IMAGES, maxBytes: 5 * MB },
   AVATAR_IMAGE: { contentTypes: IMAGES, maxBytes: 5 * MB },
+  SHOP_BANNER: { contentTypes: IMAGES, maxBytes: 5 * MB },
 };
 
 const TYPE_LABELS: Record<string, string> = {

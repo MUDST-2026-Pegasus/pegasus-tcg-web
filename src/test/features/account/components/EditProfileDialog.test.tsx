@@ -12,7 +12,7 @@ const mockUser: AuthUser = {
   email: 'john@example.com',
   displayName: 'John Doe',
   roles: ['BUYER'],
-  avatarUrl: null,
+  avatarUrl: null, bannerUrl: null,
   phone: null,
   bio: null,
   status: 'ACTIVE',

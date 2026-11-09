@@ -28,7 +28,7 @@ describe("getPublicProfile", () => {
       .mockRejectedValueOnce(new ApiError({ status: 401, code: "UNAUTHORIZED", message: "Unauthorized" }))
       .mockResolvedValueOnce({ items: [{ seller }] });
 
-    await expect(getPublicProfile("cardvault")).resolves.toEqual(seller);
+    await expect(getPublicProfile("cardvault")).resolves.toEqual({ ...seller, bannerUrl: null });
     expect(get).toHaveBeenNthCalledWith(2, "/u/cardvault/listings", {
       auth: false, signal: undefined, query: { sort: "newest", size: 1, page: 0 },
     });

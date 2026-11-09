@@ -86,6 +86,7 @@
     },
     "shop": {
       "avatarAlt": "รูปโปรไฟล์ร้าน {name}",
+      "bannerAlt": "แบนเนอร์ร้าน {name}",
       "listings": "{count} สินค้า",
       "new": "ร้านใหม่",
       "previewAlt": "ตัวอย่างสินค้าร้าน {name} รายการที่ {index}",

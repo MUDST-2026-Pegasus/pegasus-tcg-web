@@ -33,12 +33,18 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
   "use no memo"; // RHF subscriptions must remain live after reset for subsequent edits.
   const update = useUpdateProfile();
   const upload = useFileUpload({ purpose: 'AVATAR_IMAGE' });
+  const bannerUpload = useFileUpload({ purpose: 'SHOP_BANNER' });
   const [cleared, setCleared] = useState(false);
+  const [bannerCleared, setBannerCleared] = useState(false);
+  const [failedBannerUrl, setFailedBannerUrl] = useState<string | null>(null);
   const [baseline, setBaseline] = useState(() => toForm(user));
   const form = useForm<ShopProfileValues>({ resolver: zodResolver(schema), defaultValues: baseline });
   const values = useWatch({ control: form.control });
   const item = upload.items[0];
+  const bannerItem = bannerUpload.items[0];
   const avatar = cleared ? null : (item?.status !== 'error' ? item?.previewUrl : null) || user.avatarUrl;
+  const candidateBanner = bannerCleared ? null : (bannerItem?.status !== 'error' ? bannerItem?.previewUrl : null) || user.bannerUrl;
+  const banner = candidateBanner === failedBannerUrl ? null : candidateBanner;
   const name = values.displayName ?? '';
   const phone = values.phone ?? '';
   const phonePublic = values.phonePublic ?? false;
@@ -49,8 +55,9 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
     phone: phone !== baseline.phone,
     phonePublic: phonePublic !== baseline.phonePublic,
   };
-  const hasChanges = Object.values(changed).some(Boolean) || cleared || upload.objectKeys.length > 0;
-  const busy = update.isPending || upload.isUploading;
+  const bannerChanged = (bannerCleared && !!user.bannerUrl) || bannerUpload.objectKeys.length > 0;
+  const hasChanges = Object.values(changed).some(Boolean) || cleared || upload.objectKeys.length > 0 || bannerChanged;
+  const busy = update.isPending || upload.isUploading || bannerUpload.isUploading;
   const url = `${window.location.origin}/u/${encodeURIComponent(user.username)}`;
   function reset(saved: AuthUser) {
     const next = toForm(saved);
@@ -58,6 +65,9 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
     form.reset(next);
     upload.clear();
     setCleared(false);
+    bannerUpload.clear();
+    setBannerCleared(false);
+    setFailedBannerUrl(null);
   }
   const save = form.handleSubmit(async (data) => {
     try {
@@ -65,6 +75,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
         dirtyFields: changed, newAvatarKey: upload.objectKeys[0], isAvatarCleared: cleared,
       });
       delete payload.bio;
+      if (bannerChanged) payload.bannerUrl = bannerCleared ? '' : bannerUpload.objectKeys[0];
       if (!changed.displayName) delete payload.displayName;
       if (changed.phonePublic) payload.phonePublic = data.phonePublic;
       const saved = await update.mutateAsync(payload);
@@ -80,6 +91,25 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
         <Info className="size-3.5 shrink-0"/>ใช้ข้อมูลเดียวกับโปรไฟล์บัญชีของคุณ — แก้ที่นี่แล้วชื่อและรูปในโปรไฟล์จะเปลี่ยนตามด้วย
       </div>
       <form className="space-y-[18px]" onSubmit={save} noValidate>
+        <div className="space-y-2">
+          <p className="text-xs font-medium">รูปแบนเนอร์ร้าน</p>
+          <div className="relative aspect-[4/1] w-full overflow-hidden rounded-lg bg-gradient-to-r from-[#0B4D94] via-[#083568] to-[#031B38]">
+            {banner && <img src={banner} alt={`แบนเนอร์ร้าน ${name || user.username}`} className="size-full object-cover object-center" onError={() => setFailedBannerUrl(banner)} />}
+            {bannerUpload.isUploading && <div role="status" className="absolute inset-0 flex items-center justify-center bg-black/45 text-xs text-white">กำลังอัปโหลด…</div>}
+            {!banner && !bannerUpload.isUploading && <span className="absolute inset-0 flex items-center justify-center text-xs text-white/80">ยังไม่มีรูปแบนเนอร์</span>}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cursor-pointer rounded-md border px-2.5 py-1.5 text-xs">อัปโหลดรูปใหม่
+              <input aria-label="อัปโหลดรูปแบนเนอร์ร้าน" type="file" accept={bannerUpload.accept} disabled={busy} className="sr-only"
+                onChange={(e) => { if (e.target.files?.length) { setBannerCleared(false); bannerUpload.addFiles(e.target.files); } e.target.value = ''; }}/>
+            </label>
+            <Button type="button" variant="ghost" size="sm" aria-label="ลบรูปแบนเนอร์" disabled={busy || !banner} onClick={() => { bannerUpload.clear(); setBannerCleared(true); }}>ลบรูป</Button>
+            {bannerItem?.status === 'done' && <span className="text-[11px] text-teal-700">รูปใหม่ยังไม่บันทึก</span>}
+            {bannerCleared && user.bannerUrl && <span className="text-[11px] text-muted-foreground">รอบันทึกเพื่อลบรูป</span>}
+          </div>
+          <p className="text-[10px] text-muted-foreground">{bannerUpload.hint} · แนะนำ 1920 × 480 px และวางเนื้อหาสำคัญไว้กลางภาพ</p>
+          {bannerItem?.error && <p role="alert" className="text-xs text-destructive">{bannerItem.error}</p>}
+        </div>
         <div className="flex items-center gap-4">
           <ShopAvatar name={name} url={avatar}/>
           <div className="space-y-2">
@@ -134,12 +164,12 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
           </div>
           <p className="text-[10px] text-muted-foreground">แก้ไขไม่ได้ เพราะผูกกับ username ของบัญชี</p>
         </div>
-        <div className={shopFooter}><Button type="button" variant="ghost" size="sm" onClick={() => reset(user)} disabled={busy}>ยกเลิก</Button><Button type="submit" size="sm" disabled={!hasChanges || busy || item?.status === 'error'}>บันทึกข้อมูลหน้าร้าน</Button></div>
+        <div className={shopFooter}><Button type="button" variant="ghost" size="sm" onClick={() => reset(user)} disabled={busy}>ยกเลิก</Button><Button type="submit" size="sm" disabled={!hasChanges || busy || item?.status === 'error' || bannerItem?.status === 'error'}>บันทึกข้อมูลหน้าร้าน</Button></div>
       </form>
     </ShopCard>
     <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
       <p className="mb-4 flex items-center gap-2 text-xs text-muted-foreground"><Eye className="size-4"/>ตัวอย่างหน้าร้านที่ผู้ซื้อเห็น</p>
-      <div className="overflow-hidden rounded-xl border bg-card"><div className="h-[76px] bg-teal-600"/>
+      <div className="overflow-hidden rounded-xl border bg-card"><div className="h-[76px] bg-teal-600">{banner && <img src={banner} alt={`แบนเนอร์ร้าน ${name || user.username}`} className="size-full object-cover object-center" onError={() => setFailedBannerUrl(banner)} />}</div>
         <div className="space-y-3 px-[18px] pb-[18px]">
           <ShopAvatar name={name} url={avatar} small/>
           <h3 className="flex items-center gap-2 break-all text-base font-bold">{name}{verified && <BadgeCheck className="size-4 shrink-0 text-teal-600"/>}</h3>

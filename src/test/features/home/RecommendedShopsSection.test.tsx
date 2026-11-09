@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RecommendedShopsSection } from "@/features/home/components/HomeContent";
+import { ShopCard } from "@/features/home/components/ShopCard";
 import * as homeApi from "@/features/home/home.api";
 import type { RecommendedShopDto } from "@/features/home/home.types";
 import { createTestQueryClient } from "@/test/utils";
@@ -17,7 +18,7 @@ vi.mock("@/features/home/home.api", async (importOriginal) => ({
 const shop: RecommendedShopDto = {
   username: "siamcardhouse",
   displayName: "Siam Card House",
-  avatarUrl: null,
+  avatarUrl: null, bannerUrl: null,
   ratingAvg: 4.9,
   ratingCount: 128,
   activeListingCount: 342,
@@ -27,6 +28,14 @@ const shop: RecommendedShopDto = {
     { listingId: 3, imageUrl: "/card-3.jpg" },
   ],
 };
+
+it('shows a shop banner and falls back when its URL fails', () => {
+  render(<MemoryRouter><ShopCard shop={{ ...shop, bannerUrl: '/shop-banner.webp' }} /></MemoryRouter>);
+  const banner = screen.getByAltText('แบนเนอร์ร้าน Siam Card House');
+  expect(banner).toHaveAttribute('src', '/shop-banner.webp');
+  fireEvent.error(banner);
+  expect(screen.queryByAltText('แบนเนอร์ร้าน Siam Card House')).not.toBeInTheDocument();
+});
 
 function renderSection() {
   const client = createTestQueryClient();

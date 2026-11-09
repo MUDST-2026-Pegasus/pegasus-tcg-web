@@ -1,16 +1,56 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import { ShopProfileCard } from '@/features/seller/shop/components/ShopProfileCard';
 import * as profileApi from '@/features/account/profile.api';
+import * as uploadLib from '@/lib/upload';
 import { editProfileSchema } from '@/features/account/profile.schema';
 import type { AuthUser } from '@/features/auth/auth.types';
 vi.mock('@/components/ui/toast', () => ({ toast: { add: vi.fn() } }));
-const user: AuthUser = { id: 1, username: 'seller', displayName: 'Seller', avatarUrl: 'https://example.com/avatar.jpg', phone: '0812345678', bio: 'Original bio', email: 'seller@example.com', roles: ['SELLER'], status: 'ACTIVE', createdAt: '', lastLoginAt: null };
+vi.mock('@/lib/upload', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/upload')>(),
+  uploadFile: vi.fn(),
+}));
+const user: AuthUser = { id: 1, username: 'seller', displayName: 'Seller', avatarUrl: 'https://example.com/avatar.jpg', bannerUrl: null, phone: '0812345678', bio: 'Original bio', email: 'seller@example.com', roles: ['SELLER'], status: 'ACTIVE', createdAt: '', lastLoginAt: null };
 afterEach(() => vi.restoreAllMocks());
 
 describe('ShopProfileCard', () => {
+  it('previews a selected banner, saves its key, and keeps the avatar unchanged', async () => {
+    const interaction = userEvent.setup();
+    vi.stubGlobal('URL', { ...URL, createObjectURL: vi.fn(() => 'blob:banner'), revokeObjectURL: vi.fn() });
+    vi.mocked(uploadLib.uploadFile).mockResolvedValue('banners/new.webp');
+    const save = vi.spyOn(profileApi, 'updateProfile').mockResolvedValue({ ...user, bannerUrl: 'https://example.com/new.webp' });
+    renderWithProviders(<ShopProfileCard user={user} handlingDays={2} verified stats={null} verification={null}/>);
+    await interaction.upload(screen.getByLabelText('อัปโหลดรูปแบนเนอร์ร้าน'), new File(['banner'], 'banner.webp', { type: 'image/webp' }));
+    await waitFor(() => expect(screen.getAllByAltText('แบนเนอร์ร้าน Seller')[0]).toHaveAttribute('src', 'blob:banner'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' })).toBeEnabled());
+    await interaction.click(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({ bannerUrl: 'banners/new.webp' })));
+    expect(save.mock.calls[0][0]).not.toHaveProperty('avatarUrl', '');
+    vi.unstubAllGlobals();
+  });
+
+  it('cancels banner removal and sends an empty key only when removal is saved', async () => {
+    const interaction = userEvent.setup();
+    const save = vi.spyOn(profileApi, 'updateProfile').mockResolvedValue({ ...user, bannerUrl: null });
+    renderWithProviders(<ShopProfileCard user={{ ...user, bannerUrl: 'https://example.com/saved.webp' }} handlingDays={2} verified stats={null} verification={null}/>);
+    await interaction.click(screen.getByRole('button', { name: 'ลบรูปแบนเนอร์' }));
+    expect(screen.queryByAltText('แบนเนอร์ร้าน Seller')).not.toBeInTheDocument();
+    await interaction.click(screen.getByRole('button', { name: 'ยกเลิก' }));
+    expect(screen.getAllByAltText('แบนเนอร์ร้าน Seller')).toHaveLength(2);
+    await interaction.click(screen.getByRole('button', { name: 'ลบรูปแบนเนอร์' }));
+    await interaction.click(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' }));
+    await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({ bannerUrl: '' })));
+  });
+
+  it('keeps the saved banner after an invalid file', async () => {
+    renderWithProviders(<ShopProfileCard user={{ ...user, bannerUrl: 'https://example.com/saved.webp' }} handlingDays={2} verified stats={null} verification={null}/>);
+    fireEvent.change(screen.getByLabelText('อัปโหลดรูปแบนเนอร์ร้าน'), { target: { files: [new File(['bad'], 'banner.pdf', { type: 'application/pdf' })] } });
+    expect(screen.getAllByAltText('แบนเนอร์ร้าน Seller')[0]).toHaveAttribute('src', 'https://example.com/saved.webp');
+    expect(screen.getByRole('alert')).toHaveTextContent('ไม่รองรับ');
+    expect(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' })).toBeDisabled();
+  });
   it('previews edits live, clears avatar with empty string and saves only changed fields', async () => {
     const save = vi.spyOn(profileApi, 'updateProfile').mockResolvedValue({ ...user, displayName: 'New name', avatarUrl: null });
     renderWithProviders(<ShopProfileCard user={user} handlingDays={2} verified stats={null} verification={null}/>);

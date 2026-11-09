@@ -11,7 +11,7 @@ function user(overrides: Partial<AuthUser> = {}): AuthUser {
     displayName: "Ash Ketchum",
     bio: null,
     phone: null,
-    avatarUrl: null,
+    avatarUrl: null, bannerUrl: null,
     status: "ACTIVE",
     roles: ["BUYER"],
     createdAt: "2026-01-01T00:00:00Z",

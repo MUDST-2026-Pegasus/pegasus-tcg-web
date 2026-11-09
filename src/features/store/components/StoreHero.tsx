@@ -1,4 +1,5 @@
 import { Layers, Package, Phone, Star, ThumbsUp } from "lucide-react";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,22 +28,25 @@ export function StoreHero({
 }: StoreHeroProps) {
   const displayName = profile.displayName || profile.username;
   const initials = getInitials(displayName);
+  const [failedBannerUrl, setFailedBannerUrl] = useState<string | null>(null);
+  const bannerUrl = !isNonSeller && profile.bannerUrl && profile.bannerUrl !== failedBannerUrl ? profile.bannerUrl : null;
 
   return (
     <section
       aria-label="Store profile"
       className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xs sm:rounded-3xl"
     >
-      {/* Section 1: Cover Gradient Banner */}
+      {/* Section 1: Store banner */}
       <div className="relative h-44 w-full overflow-hidden bg-gradient-to-r from-[#0B4D94] via-[#083568] to-[#031B38] sm:h-52">
+        {bannerUrl && <img src={bannerUrl} alt={`แบนเนอร์ร้าน ${displayName}`} className="absolute inset-0 size-full object-cover object-center" onError={() => setFailedBannerUrl(bannerUrl)} />}
         {/* Card silhouettes */}
-        <div className="pointer-events-none absolute -top-10 right-4 hidden h-64 w-80 overflow-hidden opacity-25 sm:block">
+        {!bannerUrl && <div className="pointer-events-none absolute -top-10 right-4 hidden h-64 w-80 overflow-hidden opacity-25 sm:block">
           <div className="relative size-full">
             <div className="absolute top-6 right-24 h-44 w-32 -rotate-12 rounded-xl border-2 border-white/40 bg-white/5 backdrop-blur-xs" />
             <div className="absolute top-2 right-12 h-44 w-32 rotate-6 rounded-xl border-2 border-white/40 bg-white/5 backdrop-blur-xs" />
             <div className="absolute top-8 -right-2 h-44 w-32 rotate-18 rounded-xl border-2 border-white/40 bg-white/5 backdrop-blur-xs" />
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Section 2: Store Info */}
