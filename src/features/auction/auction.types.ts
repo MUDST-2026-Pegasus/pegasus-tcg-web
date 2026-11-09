@@ -217,8 +217,12 @@ export type AuctionDetail = {
    * เหตุผลที่แอดมินระงับ — B4-G "เหตุผล: …" · มาเฉพาะ SUSPENDED ไม่งั้น `null` (ซ่อน)
    */
   suspendReason?: string | null;
+  /** กติกาปัจจุบันที่แอดมินตั้ง — ไม่มี (fixture เก่า) ใช้ `DEFAULT_AUCTION_RULES` */
+  rules?: AuctionRules;
   serverTime: string;
 };
+
+export type AuctionRules = { paymentHours: number; strikeLimit: number; banDays: number };
 
 export type BidHistory = {
   page: PageResponse<AuctionBid>;
@@ -275,7 +279,8 @@ export type MyAuction = {
   currentPrice: number;
   /** บิดสูงสุดของผู้ใช้ */
   myHighestBid: number;
-  shippingFee: number;
+  /** `null` = ร้านไม่มีตัวเลือกจัดส่งที่เปิดอยู่ (ชำระไม่ได้จนกว่าร้านจะตั้ง) */
+  shippingFee: number | null;
   /** ราคา + ค่าส่ง — มากับ WON_AWAITING_PAYMENT */
   totalDue: number | null;
   /** มาตอนยังเปิด ใช้กับปุ่ม "บิด ฿X" */

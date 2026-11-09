@@ -8,6 +8,8 @@ import type { AuctionDetail } from "./auction.types";
 export type BidPanelState =
   /** B4-G ถูกแอดมินระงับ */
   | "SUSPENDED"
+  /** ยัง LIVE แต่หมดเวลาแล้ว รอระบบปิดประมูล (ไม่เกินราว 1 นาที) — บิดไม่ได้ */
+  | "CLOSING"
   /** B4-E ขายแล้ว */
   | "SOLD"
   /** B4-F ไม่มีผู้บิด / ผู้ชนะไม่ชำระ / ผู้ขายยกเลิก */
@@ -31,7 +33,10 @@ export type BidPanelState =
   /** กล่องบิดปกติ (B2) */
   | "OPEN";
 
-export function resolveBidPanelState(auction: AuctionDetail, now: number = Date.now()): BidPanelState {
+/**
+ * @param ended ตัวนับถอยหลังถึง 0 แล้ว (ตามนาฬิกา server) — ส่งจาก `useCountdown` ของหน้า
+ */
+export function resolveBidPanelState(auction: AuctionDetail, now: number = Date.now(), ended = false): BidPanelState {
   const { viewer } = auction;
   switch (auction.status) {
     case "SUSPENDED":
@@ -44,6 +49,7 @@ export function resolveBidPanelState(auction: AuctionDetail, now: number = Date.
     case "AWAITING_PAYMENT":
       return viewer?.state === "WON_AWAITING_PAYMENT" ? "WON_AWAITING_PAYMENT" : "AWAITING_PAYMENT";
     case "LIVE":
+      if (ended) return "CLOSING";
       break;
   }
 

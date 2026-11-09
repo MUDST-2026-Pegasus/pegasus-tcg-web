@@ -83,8 +83,11 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
     );
   }
 
-  const total = auction.totalDue ?? auction.currentPrice + auction.shippingFee;
-  const canPurchase = !!activeAddress && !isAddressLoading && !addressError && !checkout.isPending && !existingOrderId;
+  // ร้านไม่มีตัวเลือกจัดส่ง → ยังคิดยอดไม่ได้ ห้ามสั่งซื้อ (ไม่ใช่นับค่าส่งเป็น 0)
+  const noShipping = auction.shippingFee === null;
+  const total = auction.totalDue ?? auction.currentPrice + (auction.shippingFee ?? 0);
+  const canPurchase =
+    !noShipping && !!activeAddress && !isAddressLoading && !addressError && !checkout.isPending && !existingOrderId;
 
   const handlePurchase = () => {
     if (!canPurchase || !activeAddress) return;
@@ -212,13 +215,18 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
               </div>
               <div className="flex items-center justify-between gap-3 text-[13px]">
                 <span className="text-muted-foreground">ค่าจัดส่ง</span>
-                <span>{checkoutMoney(auction.shippingFee)}</span>
+                <span>{noShipping ? "—" : checkoutMoney(auction.shippingFee ?? 0)}</span>
               </div>
               <Separator className="checkout-divider" />
               <div className="flex items-center justify-between gap-3 text-lg">
                 <span className="font-semibold">ยอดรวม</span>
-                <strong data-testid="checkout-grand-total">{checkoutMoney(total)}</strong>
+                <strong data-testid="checkout-grand-total">{noShipping ? "—" : checkoutMoney(total)}</strong>
               </div>
+              {noShipping ? (
+                <p role="alert" className="text-xs text-red-700">
+                  ร้านนี้ยังไม่มีตัวเลือกจัดส่ง จึงยังสั่งซื้อไม่ได้ — กรุณาติดต่อร้าน
+                </p>
+              ) : null}
               <Button
                 className="checkout-primary h-11 w-full cursor-pointer rounded-full text-sm font-semibold"
                 disabled={!canPurchase}

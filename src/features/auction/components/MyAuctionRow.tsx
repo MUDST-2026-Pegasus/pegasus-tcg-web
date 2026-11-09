@@ -113,7 +113,7 @@ function RowPrice({ auction }: { auction: MyAuction }) {
       content = (
         <>
           <span className={label}>ยอดชำระ (รวมส่ง)</span>
-          <span className={cn(big, "text-primary")}>{formatBaht(auction.totalDue ?? auction.currentPrice + auction.shippingFee)}</span>
+          <span className={cn(big, "text-primary")}>{formatBaht(auction.totalDue ?? auction.currentPrice + (auction.shippingFee ?? 0))}</span>
           <span className={small}>ราคาชนะ {formatBaht(auction.currentPrice)}</span>
         </>
       );

@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Ban, TriangleAlert } from "lucide-react";
 
 
+import { newIdempotencyKey } from "../auction.api";
 import { auctionErrorMessage, type AuctionErrorMessage } from "../auction.errors";
-import { formatBaht } from "../auction.format";
+import { auctionRules, formatBaht, formatPaymentWindow } from "../auction.format";
 import { usePlaceBid } from "../auction.queries";
 import type { AuctionDetail, BidPlaced } from "../auction.types";
 import { AuctionNotice } from "./AuctionNotice";
@@ -23,20 +24,27 @@ type ConfirmBidDialogProps = {
 export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: ConfirmBidDialogProps) {
   const placeBid = usePlaceBid(auction.id);
   const [error, setError] = useState<AuctionErrorMessage | null>(null);
+  // key เดียวต่อราคาที่ยืนยัน: กดซ้ำหลังเน็ตกระตุกได้ผลบิดเดิมกลับมา ไม่ใช่ "คุณนำอยู่แล้ว"
+  const [attempt, setAttempt] = useState<{ amount: number; key: string } | null>(null);
+  const rules = auctionRules(auction);
   const open = amount !== null;
   const value = amount ?? 0;
 
   const close = (next: boolean) => {
-    if (!next) setError(null);
+    if (!next) {
+      setError(null);
+      setAttempt(null);
+    }
     onOpenChange(next);
   };
 
   const confirm = () => {
     if (amount === null || placeBid.isPending) return;
     setError(null);
-    // ไม่ส่ง key = api สร้างใหม่ทุกครั้งที่กดยืนยัน
+    const key = attempt?.amount === amount ? attempt.key : newIdempotencyKey();
+    if (attempt?.key !== key) setAttempt({ amount, key });
     placeBid.mutate(
-      { amount },
+      { payload: { amount }, idempotencyKey: key },
       {
         onSuccess: (result) => {
           onPlaced(result);
@@ -73,7 +81,7 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
           tone="amber"
           icon={<TriangleAlert />}
           title="บิดแล้วถอนไม่ได้"
-          detail="ถ้าชนะต้องชำระภายใน 24 ชม. ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ 3 ครั้งห้ามบิด 30 วัน)"
+          detail={`ถ้าชนะต้องชำระภายใน ${formatPaymentWindow(rules.paymentHours)} ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ ${rules.strikeLimit} ครั้งห้ามบิด ${rules.banDays} วัน)`}
         />
       )}
     </ConfirmDialog>
