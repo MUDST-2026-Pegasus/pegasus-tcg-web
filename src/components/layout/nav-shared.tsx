@@ -3,33 +3,34 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/toast";
 import { useAuth, useLogout } from "@/features/auth/auth.queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslate } from "@/lib/i18n";
 
-export const guestLinks = [
-  { label: "Log in", to: "/login" },
-  { label: "Sign up", to: "/register" },
-];
 
 export function useAccountLinks() {
+  const { t } = useTranslate();
   const auth = useAuth();
   const logout = useLogout();
   const navigate = useNavigate();
   const sellerLink = auth.hasRole("SELLER")
-    ? { label: "Seller Dashboard", to: "/seller" }
-    : { label: "Become a Seller", to: "/become-a-seller" };
+    ? { label: t("account.sellerDashboard", "Seller Dashboard"), to: "/seller" }
+    : { label: t("account.becomeSeller", "Become a Seller"), to: "/become-a-seller" };
   const links = auth.isAuthenticated
     ? [
-        { label: "My Account", to: "/account/profile" },
-        { label: "My Collection", to: "/account/collection" },
+        { label: t("account.myAccount", "My Account"), to: "/account/profile" },
+        { label: t("account.myCollection", "My Collection"), to: "/account/collection" },
         sellerLink,
         ...(auth.hasRole("ADMIN")
-          ? [{ label: "Admin Dashboard", to: "/admin" }]
+          ? [{ label: t("account.adminDashboard", "Admin Dashboard"), to: "/admin" }]
           : []),
       ]
-    : guestLinks;
+    : [
+        { label: t("nav.login", "Log in"), to: "/login" },
+        { label: t("nav.signup", "Sign up"), to: "/register" },
+      ];
   const handleLogout = async () => {
     await logout.mutateAsync();
     navigate("/login", { replace: true });
-    toast.add({ type: "success", title: "ออกจากระบบเรียบร้อยแล้ว" });
+    toast.add({ type: "success", title: t("account.loggedOut", "ออกจากระบบเรียบร้อยแล้ว") });
   };
   return {
     ...auth,

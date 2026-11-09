@@ -37,7 +37,8 @@ export const FALLBACK_HERO_SLIDE: HeroSlide = {
   description:
     "Discover the newest singles and sealed releases from verified sellers.",
   image: pegasusCampaignTable,
-  imageAlt: "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ",
+  // ข้อความแปลใน HeroSection (HomeContent) — ที่นี่เก็บไว้เป็นค่าตั้งต้นภาษาอังกฤษ
+  imageAlt: "Pegasus trading cards on display",
   theme: "campaign",
   primaryAction: { label: "Shop New Releases", href: "/search?sort=newest" },
   secondaryAction: { label: "Explore Cards", href: "/search" },

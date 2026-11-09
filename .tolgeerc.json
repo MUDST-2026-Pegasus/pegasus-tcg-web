@@ -2,6 +2,7 @@
   "$schema": "https://docs.tolgee.io/cli-schema.json",
   "projectId": 36508,
   "format": "JSON_TOLGEE",
+  "defaultNamespace": "common",
   "patterns": [
     "./src/{app,components,features,hooks,lib}/**/*.ts?(x)"
   ],

@@ -14,7 +14,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { sellerNav } from "@/lib/nav-config";
+import { useSellerNav } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 
 const NAV_ACTIVE =
@@ -27,6 +27,7 @@ const NAV_HOVER = "hover:bg-secondary hover:text-gray-700";
  */
 export function SellerSidebar() {
   const { isMobile } = useSidebar();
+  const sellerNav = useSellerNav();
 
   return (
     <Sidebar

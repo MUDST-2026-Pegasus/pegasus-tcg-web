@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -46,7 +47,7 @@ export function ConfirmDialog({
   description,
   children,
   confirmLabel,
-  cancelLabel = "ยกเลิก",
+  cancelLabel,
   variant = "default",
   icon: Icon,
   isPending = false,
@@ -54,6 +55,7 @@ export function ConfirmDialog({
   error,
   onConfirm,
 }: ConfirmDialogProps) {
+  const { t } = useTranslate();
   return (
     <AlertDialog
       open={open}
@@ -82,7 +84,7 @@ export function ConfirmDialog({
         ) : null}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{cancelLabel ?? t("actions.cancel", "ยกเลิก")}</AlertDialogCancel>
           <Button variant={variant} disabled={isPending || confirmDisabled} onClick={onConfirm}>
             {isPending ? <Spinner data-icon="inline-start" /> : null}
             {confirmLabel}

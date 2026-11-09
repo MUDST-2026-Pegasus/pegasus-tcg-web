@@ -1,8 +1,10 @@
+import type { Message } from "@/lib/i18n/message";
 import { useEffect, useId, useSyncExternalStore } from "react";
 
 /** ใส่ใน `handle` ของ route: `{ path: "cart", handle: { title: "ตะกร้าสินค้า" } }` */
 export interface RouteHandle {
-  title?: string;
+  /** msg("routes.title.<page>", "ชื่อไทย") ให้เปลี่ยนตามภาษา — string ธรรมดาก็ได้ (ไม่แปล) */
+  title?: Message | string;
 }
 
 export const SITE_NAME = "Pegasus TCG";

@@ -12,7 +12,7 @@ import type {
   PresignUploadResponse,
   UploadPurpose,
 } from "./upload.types";
-import { translateError } from "@/lib/i18n";
+import { errorMessage, translateError } from "@/lib/i18n";
 
 /**
  * ไฟล์ไม่ผ่าน API ของเรา — ขอ presigned URL จาก `POST /uploads/presign` แล้ว PUT
@@ -83,7 +83,7 @@ export function putToStorage(
         new ApiError({
           status: xhr.status,
           code: STORAGE_REJECTED,
-          message: "อัปโหลดไฟล์ไม่สำเร็จ",
+          message: errorMessage("upload.storageFailed", "อัปโหลดไฟล์ไม่สำเร็จ"),
         }),
       );
     };
@@ -92,7 +92,7 @@ export function putToStorage(
         new ApiError({
           status: 0,
           code: CLIENT_ERROR_CODES.NETWORK_ERROR,
-          message: "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
+          message: errorMessage("upload.storageUnreachable", "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่"),
         }),
       );
     xhr.onabort = () => settle(abortedError());
@@ -107,7 +107,7 @@ function abortedError(): ApiError {
   return new ApiError({
     status: 0,
     code: CLIENT_ERROR_CODES.ABORTED,
-    message: "ยกเลิกการอัปโหลดแล้ว",
+    message: errorMessage("upload.cancelled", "ยกเลิกการอัปโหลดแล้ว"),
   });
 }
 
@@ -171,19 +171,34 @@ export function uploadErrorMessage(
   rule: UploadRule,
 ): string {
   if (hasErrorCode(error, "UNSUPPORTED_FILE_TYPE")) {
-    return `ไฟล์ "${file.name}" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ ${describeTypes(rule)}`;
+    return errorMessage("upload.unsupportedType", "ไฟล์ \"{name}\" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ {types}", { name: file.name, types: describeTypes(rule) });
   }
   if (hasErrorCode(error, "FILE_TOO_LARGE")) {
-    return `ไฟล์ "${file.name}" ใหญ่เกิน ${formatFileSize(rule.maxBytes)}`;
+    return errorMessage("upload.tooLarge", "ไฟล์ \"{name}\" ใหญ่เกิน {max}", { name: file.name, max: formatFileSize(rule.maxBytes) });
   }
   if (hasErrorCode(error, "ACCESS_DENIED")) {
-    return "บัญชีนี้ไม่มีสิทธิ์อัปโหลดไฟล์ประเภทนี้";
+    return errorMessage("upload.accessDenied", "บัญชีนี้ไม่มีสิทธิ์อัปโหลดไฟล์ประเภทนี้");
   }
   if (hasErrorCode(error, STORAGE_REJECTED)) {
-    return "ที่เก็บไฟล์ไม่รับไฟล์นี้ ลองใหม่อีกครั้ง";
+    return errorMessage("upload.storageRejected", "ที่เก็บไฟล์ไม่รับไฟล์นี้ ลองใหม่อีกครั้ง");
   }
   if (isNetworkError(error)) {
-    return "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่";
+    return errorMessage("upload.networkError", "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
   }
-  return translateError(error, "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง");
+  return translateError(error, errorMessage("upload.failed", "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง"));
 }
+
+// key ของ errorMessage() ในโฟลเดอร์นี้ — ประกาศให้ tolgee CLI เห็น [TCG-550]
+// @tolgee-key {"key": "upload.storageFailed", "ns": "errors", "defaultValue": "อัปโหลดไฟล์ไม่สำเร็จ"}
+// @tolgee-key {"key": "upload.storageUnreachable", "ns": "errors", "defaultValue": "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่"}
+// @tolgee-key {"key": "upload.cancelled", "ns": "errors", "defaultValue": "ยกเลิกการอัปโหลดแล้ว"}
+// @tolgee-key {"key": "upload.unsupportedType", "ns": "errors", "defaultValue": "ไฟล์ \"{name}\" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ {types}"}
+// @tolgee-key {"key": "upload.tooLarge", "ns": "errors", "defaultValue": "ไฟล์ \"{name}\" ใหญ่เกิน {max}"}
+// @tolgee-key {"key": "upload.accessDenied", "ns": "errors", "defaultValue": "บัญชีนี้ไม่มีสิทธิ์อัปโหลดไฟล์ประเภทนี้"}
+// @tolgee-key {"key": "upload.storageRejected", "ns": "errors", "defaultValue": "ที่เก็บไฟล์ไม่รับไฟล์นี้ ลองใหม่อีกครั้ง"}
+// @tolgee-key {"key": "upload.networkError", "ns": "errors", "defaultValue": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่"}
+// @tolgee-key {"key": "upload.failed", "ns": "errors", "defaultValue": "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง"}
+// @tolgee-key {"key": "upload.typeList", "ns": "errors", "defaultValue": "{list} หรือ {last}"}
+// @tolgee-key {"key": "upload.maxSize", "ns": "errors", "defaultValue": "ไม่เกิน {max}"}
+// @tolgee-key {"key": "upload.empty", "ns": "errors", "defaultValue": "ไฟล์ \"{name}\" ว่างเปล่า ลองเลือกไฟล์ใหม่"}
+// @tolgee-key {"key": "upload.tooLargeWithSize", "ns": "errors", "defaultValue": "ไฟล์ \"{name}\" ขนาด {size} ใหญ่เกิน {max}"}

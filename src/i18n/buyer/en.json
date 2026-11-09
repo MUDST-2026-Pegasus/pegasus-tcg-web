@@ -1,15 +1,116 @@
 {
+  "about": {
+    "hero": {
+      "body": "Pegasus TCG is a space for collectors, players, and card enthusiasts to discover, buy, sell, and track the value of their favorite cards on a secure, convenient, and transparent platform",
+      "title": "Growing Together with the TCG Community"
+    },
+    "story": {
+      "imageAlt": "Illustration of the Pegasus team in an ancient Greek setting",
+      "p1": "Pegasus TCG began with a group of card enthusiasts trading cards at weekend tournaments. We experienced difficulties buying and selling, including fragmented marketplaces, inconsistent grading standards, and unclear pricing",
+      "p2": "So we created Pegasus with the goal of making the hobby we love more transparent and trustworthy. Our goal is simple: to build the platform we wish we'd had when we started collecting cards, and a place where the collector community can grow together",
+      "title": "Our Story"
+    },
+    "team": {
+      "apirak": {
+        "bio": "Can delete a thousand lines of code in the blink of an eye. Usually asks for five more minutes of sleep before heading into battle, but if a fair maiden is leading the charge, even a Pegasus would ask him to slow down"
+      },
+      "arlif": {
+        "bio": "Knows every nook and cranny of the infrastructure, but whenever the system goes down, rushes over with a shocked look and asks, “Huh, who did this? It was working just a second ago”"
+      },
+      "body": "Meet the team behind the Pegasus army, working together to make the card-collecting experience even better",
+      "chanasorn": {
+        "bio": "Can explain complex topics well enough to get the whole room nodding along, even if some still don't understand. In his free time, he likes to show off his knowledge and good looks"
+      },
+      "gritsada": {
+        "bio": "They say his smile has stopped three wars. Fans lined up until the palace had to launch a booking system, while he insists, “They only came to see the guards!”"
+      },
+      "krittatee": {
+        "bio": "Intercepts intruders before anyone else, unfazed even by legendary bugs. But on quiet nights, often sits gazing at the sea and wonders, “Has he eaten yet?”"
+      },
+      "stars": "{count}-star rank",
+      "thanapat": {
+        "bio": "His eyes are sharp enough to spot a beautiful woman across the sea, but ask if his Sprint work is done and he immediately reaches for the binoculars"
+      },
+      "title": "Meet the team",
+      "torntun": {
+        "bio": "Whether someone asks or no one else is willing to do it, the work always ends up in his hands. Even Jira knows who to send an unassigned Ticket to"
+      },
+      "wichapon": {
+        "bio": "Plans ten moves ahead, so meticulous even the gods ask to see his slides—but the moment he hears his wife call, he turns around and pretends to read Jira"
+      }
+    }
+  },
+  "home": {
+    "auctions": {
+      "description": "Bid before time runs out — if someone bids near the end, the auction will be extended by 2 minutes",
+      "title": "Ending soon",
+      "viewAll": "View all auctions"
+    },
+    "featured": {
+      "goTo": "Go to category",
+      "pagination": "Select product category"
+    },
+    "hero": {
+      "aria": "Recommended promotions",
+      "fallback": {
+        "description": "Discover the newest singles and sealed releases from verified sellers.",
+        "eyebrow": "NEW FROM PEGASUS",
+        "imageAlt": "New Pegasus collectible cards displayed on a table",
+        "primary": "Shop New Releases",
+        "secondary": "Explore Cards",
+        "title": "FRESH CARDS.\nREADY TO PLAY."
+      },
+      "goTo": "Go to promotions",
+      "pagination": "Select promotion"
+    },
+    "picks": {
+      "action": "Shop Pegasus",
+      "description": "Curated, verified, and shipped by Pegasus."
+    },
+    "productAria": "{name} price {price}",
+    "promotions": {
+      "description": "Save it now, then apply it in your cart · Can be used with a shop code",
+      "myCodes": "View my codes",
+      "title": "Discount codes"
+    },
+    "sectionError": "Failed to load {title}",
+    "sections": {
+      "explore": "More to Explore",
+      "featured": "Featured",
+      "more": "more",
+      "newReleases": "New Releases",
+      "pegasusPicks": "Pegasus Picks",
+      "shopByGame": "Shop by Game",
+      "trending": "Trending Now",
+      "viewAll": "View All"
+    },
+    "shop": {
+      "avatarAlt": "{name} shop profile picture",
+      "listings": "{count} listings",
+      "new": "New shop",
+      "previewAlt": "Preview of item {index} from {name}'s shop",
+      "previews": "Product previews",
+      "reviews": "({count} reviews)",
+      "verified": "Verified shop",
+      "visit": "Visit shop",
+      "visitAria": "Visit {name} shop"
+    },
+    "shops": {
+      "description": "Verified shops ranked by buyer reviews",
+      "title": "Recommended shops"
+    }
+  },
   "notFound": {
-    "eyebrow": "ERROR 404 · PAGE NOT FOUND",
-    "title": "We couldn't find that page",
+    "about": "About us",
+    "allProducts": "Browse all products",
     "body1": "This card may have moved, been removed, or the link may be mistyped.",
     "body2": "Try searching again, or start over from the home page.",
-    "search": "Search cards, products or stores",
-    "home": "Back to home",
-    "allProducts": "Browse all products",
-    "quickLinks": "Quick links",
-    "orGoTo": "Or go to",
     "cart": "Cart",
-    "about": "About us"
+    "eyebrow": "ERROR 404 · PAGE NOT FOUND",
+    "home": "Back to home",
+    "orGoTo": "Or go to",
+    "quickLinks": "Quick links",
+    "search": "Search cards, products or stores",
+    "title": "We couldn't find that page"
   }
 }
