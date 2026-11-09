@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode, Ref } from "react";
 import { Lock } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -132,12 +132,68 @@ export function FormField({
   );
 }
 
+/** `page` = ฟอร์มเต็มหน้าของแอดมิน (PRM-A2) · `compact` = dialog ของร้าน (PRM-S2 / M2) */
+export type PromotionFieldAppearance = "page" | "compact";
+
+const BOX_STYLES: Record<
+  PromotionFieldAppearance,
+  { group?: string; input?: string; end?: string; text?: string; lock?: string }
+> = {
+  page: {},
+  compact: {
+    group: "h-9 rounded-lg border-border bg-card has-[input:disabled]:bg-muted",
+    input: "px-3 text-[13px] md:text-[13px] disabled:text-muted-foreground/70 disabled:opacity-100",
+    end: "gap-1.5",
+    text: "text-[13px] text-muted-foreground/70",
+    lock: "size-3.5 text-muted-foreground/70",
+  },
+};
+
+/** กรอบช่องกรอก มีหน่วยหน้า/หลัง และแม่กุญแจเมื่อแก้ไม่ได้ · ขอบแดงตอน error มาจาก `aria-invalid` ของ `InputGroup` */
+export function PromotionInputBox({
+  appearance = "page",
+  prefix,
+  suffix,
+  locked,
+  disabled,
+  ...input
+}: ComponentProps<typeof InputGroupInput> & {
+  appearance?: PromotionFieldAppearance;
+  prefix?: string;
+  suffix?: string;
+  locked?: boolean;
+}) {
+  const styles = BOX_STYLES[appearance];
+  return (
+    <InputGroup
+      className={styles.group}
+      data-disabled={appearance === "page" ? disabled || locked || undefined : undefined}
+    >
+      {prefix ? (
+        <InputGroupAddon>
+          <InputGroupText className={styles.text}>{prefix}</InputGroupText>
+        </InputGroupAddon>
+      ) : null}
+      <InputGroupInput {...input} disabled={locked || disabled} className={styles.input} />
+      {suffix || locked ? (
+        <InputGroupAddon align="inline-end" className={styles.end}>
+          {suffix ? <InputGroupText className={styles.text}>{suffix}</InputGroupText> : null}
+          {locked ? <Lock aria-label="ล็อก" className={styles.lock} /> : null}
+        </InputGroupAddon>
+      ) : null}
+    </InputGroup>
+  );
+}
+
 /** ช่องตัวเลข เว้นว่าง = `null` · ล็อกแล้วมีแม่กุญแจท้ายช่อง (Figma PRM-A3 E) */
 export function NumberInput({
   id,
   label,
   value,
   onChange,
+  onBlur,
+  inputRef,
+  appearance,
   prefix,
   suffix,
   min = 0,
@@ -150,6 +206,9 @@ export function NumberInput({
   label: string;
   value: number | null;
   onChange: (value: number | null) => void;
+  onBlur?: () => void;
+  inputRef?: Ref<HTMLInputElement>;
+  appearance?: PromotionFieldAppearance;
   prefix?: string;
   suffix?: string;
   min?: number;
@@ -159,26 +218,24 @@ export function NumberInput({
   invalid?: boolean;
 }) {
   return (
-    <InputGroup data-disabled={disabled || locked || undefined}>
-      {prefix ? (
-        <InputGroupAddon>
-          <InputGroupText>{prefix}</InputGroupText>
-        </InputGroupAddon>
-      ) : null}
-      <InputGroupInput
-        id={id}
-        aria-label={label}
-        aria-invalid={invalid || undefined}
-        type="number"
-        inputMode="decimal"
-        min={min}
-        max={max}
-        value={value ?? ""}
-        disabled={disabled || locked}
-        onChange={(event) => onChange(event.target.value === "" ? null : Number(event.target.value))}
-      />
-      <LockedSuffix suffix={suffix} locked={locked} />
-    </InputGroup>
+    <PromotionInputBox
+      ref={inputRef}
+      appearance={appearance}
+      id={id}
+      aria-label={label}
+      aria-invalid={invalid || undefined}
+      type="number"
+      inputMode="decimal"
+      min={min}
+      max={max}
+      value={value ?? ""}
+      disabled={disabled}
+      locked={locked}
+      prefix={prefix}
+      suffix={suffix}
+      onBlur={onBlur}
+      onChange={(event) => onChange(event.target.value === "" ? null : Number(event.target.value))}
+    />
   );
 }
 

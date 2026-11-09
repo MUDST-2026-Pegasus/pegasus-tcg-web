@@ -1,16 +1,13 @@
-import { useState, type ComponentProps, type ReactNode } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm, useWatch, type Control, type FieldErrors } from "react-hook-form";
-import { Lock, LogOut, Pencil } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { LogOut, Pencil } from "lucide-react";
 
-import { DateTimePicker } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "@/components/ui/toast";
-import { FormField, ToggleRow } from "@/features/admin/components/PromotionFormControls";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
+import { toLocalInput } from "@/features/promotions/shared/promotionForm.dates";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
@@ -18,9 +15,17 @@ import { useCreateSellerPromotion, useUpdateSellerPromotion } from "../promotion
 import { discountLabel, money } from "../promotions.format";
 import { schemaForSellerPromotion } from "../promotions.schema";
 import type { SellerPromotion, SellerPromotionInput } from "../promotions.types";
-import { CouponTicket } from "@/features/promotions/CouponTicket";
-
-type NumberKey = "discountValue" | "maxDiscount" | "minSpend" | "usageLimitTotal" | "usageLimitPerUser" | "claimLimit";
+import {
+  ClaimFields,
+  DateField,
+  DiscountFields,
+  LockedText,
+  NumberField,
+  Row,
+  Segmented,
+  TextField,
+} from "./SellerPromotionFields";
+import { SellerPromotionPreview } from "./SellerPromotionPreview";
 
 const newInput = (): SellerPromotionInput => ({
   code: "",
@@ -59,19 +64,6 @@ function fromExisting(source: SellerPromotion): SellerPromotionInput {
     endsAt: source.endsAt,
   };
 }
-
-/** ISO → ค่าแบบ `datetime-local` ตามเวลาเครื่อง (ค่าของ `DateTimePicker`) */
-function toLocal(value: string) {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime())
-    ? new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
-    : "";
-}
-
-/** ยอดตัวอย่างใน preview ตาม Figma PRM-S2 A (ลูกค้าซื้อ ฿1,200) */
-const SAMPLE_SUBTOTAL = 1200;
-/** อัตราคอมมิชชั่นสมมติ 5% ใช้อธิบายการคำนวณเท่านั้น (อัตราจริงอยู่ที่ backend ตอนปล่อยเงิน) */
-const SAMPLE_COMMISSION_RATE = 0.05;
 
 /**
  * ฟอร์มโค้ดร้าน — สร้าง/แก้โค้ดที่ยังไม่มีคนใช้เป็น dialog สองคอลัมน์พร้อมตัวอย่าง (Figma PRM-S2 A)
@@ -195,7 +187,7 @@ export function SellerPromotionForm({
               errors={errors}
               name="endsAt"
               label="สิ้นสุด (ยืดได้)"
-              min={toLocal(existing.endsAt)}
+              min={toLocalInput(existing.endsAt)}
             />
             <NumberField
               control={control}
@@ -323,336 +315,11 @@ export function SellerPromotionForm({
                 </Button>
               </div>
             </form>
-            <PreviewAside control={control} />
+            <SellerPromotionPreview control={control} />
           </div>
         </DialogContent>
       </Dialog>
       {discard}
     </>
-  );
-}
-
-type FieldProps = { control: Control<SellerPromotionInput>; errors: FieldErrors<SellerPromotionInput> };
-
-function Row({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">{children}</div>;
-}
-
-/**
- * ช่องกรอกแบบ Figma PRM-S2 / M2: กรอบ 8px ขาวเส้นเทา ตัวอักษร 13px · ช่องที่ล็อกเป็นพื้นเทา ตัวหนังสือจาง และมีแม่กุญแจ
- * ขอบแดงตอน error มาจาก `aria-invalid` ของ `InputGroup` เอง
- */
-function FieldBox({
-  prefix,
-  suffix,
-  locked,
-  ...input
-}: ComponentProps<typeof InputGroupInput> & { prefix?: string; suffix?: string; locked?: boolean }) {
-  return (
-    <InputGroup className="h-9 rounded-lg border-border bg-card has-[input:disabled]:bg-muted">
-      {prefix ? (
-        <InputGroupAddon>
-          <InputGroupText className="text-[13px] text-muted-foreground/70">{prefix}</InputGroupText>
-        </InputGroupAddon>
-      ) : null}
-      <InputGroupInput
-        {...input}
-        disabled={locked || input.disabled}
-        className="px-3 text-[13px] md:text-[13px] disabled:text-muted-foreground/70 disabled:opacity-100"
-      />
-      {suffix || locked ? (
-        <InputGroupAddon align="inline-end" className="gap-1.5">
-          {suffix ? <InputGroupText className="text-[13px] text-muted-foreground/70">{suffix}</InputGroupText> : null}
-          {locked ? <Lock aria-label="ล็อก" className="size-3.5 text-muted-foreground/70" /> : null}
-        </InputGroupAddon>
-      ) : null}
-    </InputGroup>
-  );
-}
-
-function TextField({
-  control,
-  errors,
-  name,
-  label,
-  required,
-  hint,
-  upper,
-}: FieldProps & { name: "code" | "name"; label: string; required?: boolean; hint?: string; upper?: boolean }) {
-  return (
-    <FormField field={name} label={label} required={required} hint={hint} error={errors[name]?.message}>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <FieldBox
-            ref={field.ref}
-            aria-label={label}
-            aria-invalid={!!errors[name] || undefined}
-            value={field.value ?? ""}
-            onBlur={field.onBlur}
-            onChange={(event) => field.onChange(upper ? event.target.value.toUpperCase() : event.target.value)}
-          />
-        )}
-      />
-    </FormField>
-  );
-}
-
-function LockedText({ label, value }: { label: string; value: string }) {
-  return (
-    <FormField field={label} label={label}>
-      <FieldBox aria-label={label} value={value} readOnly locked />
-    </FormField>
-  );
-}
-
-function NumberField({
-  control,
-  errors,
-  name,
-  label,
-  unit,
-  hint,
-  required,
-  locked,
-}: FieldProps & { name: NumberKey; label: string; unit: string; hint?: string; required?: boolean; locked?: boolean }) {
-  return (
-    <FormField field={name} label={label} required={required} hint={hint} error={errors[name]?.message}>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <FieldBox
-            ref={field.ref}
-            id={`seller-promotion-${name}`}
-            aria-label={label}
-            aria-invalid={!!errors[name] || undefined}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            value={field.value ?? ""}
-            onBlur={field.onBlur}
-            onChange={(event) => field.onChange(event.target.value === "" ? null : Number(event.target.value))}
-            prefix={unit === "฿" ? unit : undefined}
-            suffix={unit === "฿" ? undefined : unit}
-            locked={locked}
-          />
-        )}
-      />
-    </FormField>
-  );
-}
-
-function DateField({
-  control,
-  errors,
-  name,
-  label,
-  required,
-  min,
-}: FieldProps & { name: "startsAt" | "endsAt"; label: string; required?: boolean; min?: string }) {
-  return (
-    <FormField field={name} label={label} required={required} error={errors[name]?.message}>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <DateTimePicker
-            aria-label={label}
-            invalid={!!errors[name]}
-            min={min}
-            defaultTime={name === "endsAt" ? "23:59" : "00:00"}
-            className="rounded-lg border-border bg-card text-[13px] hover:bg-card disabled:bg-muted"
-            value={toLocal(field.value)}
-            onChange={(value) => {
-              field.onChange(value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString() : "");
-              field.onBlur();
-            }}
-          />
-        )}
-      />
-    </FormField>
-  );
-}
-
-/** ปุ่มเลือกสองทางแบบแถบเดียว (Figma PRM-S2 A: ประเภทส่วนลด / การมองเห็น) */
-function Segmented<K extends "discountType" | "visibility">({
-  control,
-  name,
-  label,
-  options,
-  disabled,
-  onPick,
-}: {
-  control: Control<SellerPromotionInput>;
-  name: K;
-  label: string;
-  options: Array<[SellerPromotionInput[K], string]>;
-  disabled?: boolean;
-  onPick?: (value: SellerPromotionInput[K]) => void;
-}) {
-  return (
-    <FormField field={name} label={label}>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) => (
-          <ToggleGroup
-            aria-label={label}
-            spacing={0}
-            disabled={disabled}
-            value={[field.value as string]}
-            onValueChange={(next: string[]) => {
-              const value = next[0] as SellerPromotionInput[K] | undefined;
-              if (!value) return;
-              field.onChange(value);
-              onPick?.(value);
-            }}
-            className="grid w-full grid-cols-2 overflow-hidden rounded-lg border border-border bg-card"
-          >
-            {options.map(([value, text]) => (
-              <ToggleGroupItem
-                key={value as string}
-                value={value as string}
-                className="h-8.5 w-full rounded-none! text-[13px] font-medium aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90"
-              >
-                {text}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        )}
-      />
-    </FormField>
-  );
-}
-
-function DiscountFields({ control, errors }: FieldProps) {
-  const discountType = useWatch({ control, name: "discountType" });
-  const fixed = discountType === "FIXED";
-  return (
-    <>
-      <Row>
-        <NumberField control={control} errors={errors} name="discountValue" label="ลด" unit={fixed ? "฿" : "%"} required />
-        <NumberField
-          control={control}
-          errors={errors}
-          name="minSpend"
-          label="ยอดขั้นต่ำ (เฉพาะสินค้าร้านนี้)"
-          unit="฿"
-          hint={fixed ? "ส่วนลดต้องไม่เกินยอดขั้นต่ำ · 0 = ไม่มีขั้นต่ำ" : "0 = ไม่มีขั้นต่ำ"}
-        />
-      </Row>
-      {fixed ? null : (
-        <NumberField
-          control={control}
-          errors={errors}
-          name="maxDiscount"
-          label="ลดสูงสุด"
-          unit="฿"
-          hint="เว้นว่าง = ไม่จำกัด"
-        />
-      )}
-    </>
-  );
-}
-
-function ClaimFields({ control, errors, claimFixed }: FieldProps & { claimFixed: boolean }) {
-  const visibility = useWatch({ control, name: "visibility" });
-  const claimable = useWatch({ control, name: "claimable" });
-  return (
-    <>
-      <Controller
-        control={control}
-        name="claimable"
-        render={({ field }) => (
-          <ToggleRow
-            id="seller-promotion-claimable"
-            title="ให้ลูกค้ากดเก็บที่หน้าร้าน"
-            hint={
-              claimFixed
-                ? "มีลูกค้าเก็บโค้ดแล้ว จึงเปลี่ยนการกดเก็บไม่ได้"
-                : "แสดงในแถบ “โค้ดส่วนลดของร้าน” บนหน้าร้าน (ต้องเป็นสาธารณะ)"
-            }
-            checked={field.value}
-            disabled={visibility !== "PUBLIC" || claimFixed}
-            onChange={field.onChange}
-          />
-        )}
-      />
-      {errors.claimable ? (
-        <p role="alert" className="text-[11px] text-destructive">
-          {errors.claimable.message}
-        </p>
-      ) : null}
-      {claimable ? (
-        <NumberField
-          control={control}
-          errors={errors}
-          name="claimLimit"
-          label="จำนวนที่แจก"
-          unit="ใบ"
-          hint="เว้นว่าง = ไม่จำกัด"
-        />
-      ) : null}
-    </>
-  );
-}
-
-function PreviewAside({ control }: { control: Control<SellerPromotionInput> }) {
-  const form = useWatch({ control }) as SellerPromotionInput;
-  const subtotal = Math.max(SAMPLE_SUBTOTAL, form.minSpend || 0);
-  const discount = Math.min(
-    subtotal,
-    form.discountType === "FIXED"
-      ? form.discountValue || 0
-      : Math.min((subtotal * (form.discountValue || 0)) / 100, form.maxDiscount ?? Infinity),
-  );
-  const afterShopCode = subtotal - discount;
-  const commission = Math.round(afterShopCode * SAMPLE_COMMISSION_RATE);
-  const payout = afterShopCode - commission;
-
-  return (
-    <aside className="grid min-w-0 content-start gap-3.5 rounded-xl bg-muted p-4">
-      <strong className="text-xs font-semibold">ตัวอย่าง</strong>
-      <CouponTicket promotion={form} preview />
-      <dl className="grid gap-2.5 text-xs">
-        <strong className="text-xs font-semibold">ถ้าลูกค้าซื้อ {money(subtotal)} จากร้านคุณ</strong>
-        <PreviewRow label="ยอดสินค้า" value={money(subtotal)} />
-        <PreviewRow label="โค้ดร้าน (ร้านออก)" value={`− ${money(discount)}`} className="text-amber-700" />
-        <PreviewRow
-          label={`คอมมิชชั่น ${SAMPLE_COMMISSION_RATE * 100}% ของ ${money(afterShopCode)}`}
-          value={`− ${money(commission)}`}
-        />
-        <PreviewRow
-          label="ร้านได้รับ (ไม่รวมค่าส่ง)"
-          value={money(payout)}
-          className="text-emerald-700"
-          total
-        />
-        <p className="text-[11px] text-muted-foreground">
-          ถ้าลูกค้าใช้โค้ด Pegasus ร่วมด้วย ร้านยังได้ {money(payout)} เท่าเดิม
-        </p>
-      </dl>
-    </aside>
-  );
-}
-
-function PreviewRow({
-  label,
-  value,
-  className,
-  total,
-}: {
-  label: string;
-  value: string;
-  className?: string;
-  total?: boolean;
-}) {
-  return (
-    <div className={total ? "flex justify-between gap-2 border-t border-border pt-2.5" : "flex justify-between gap-2"}>
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className={className ? `font-semibold ${className}` : "font-semibold"}>{value}</dd>
-    </div>
   );
 }
