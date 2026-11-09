@@ -8,6 +8,7 @@ export type PublicProfileDto = {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   phone?: string | null;
 };
 
@@ -92,6 +93,7 @@ export type RecommendedShopDto = {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   ratingAvg: number;
   ratingCount: number;
   activeListingCount: number;

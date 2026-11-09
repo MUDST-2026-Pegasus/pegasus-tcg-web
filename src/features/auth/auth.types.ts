@@ -20,6 +20,7 @@ export type AuthUser = {
   phone: string | null;
   phonePublic?: boolean;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   status: UserStatus;
   roles: RoleCode[];
   createdAt: string;

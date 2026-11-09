@@ -26,7 +26,7 @@ const mockUser: AuthUser = {
   status: "ACTIVE",
   bio: "Pokemon master",
   phone: "0812345678",
-  avatarUrl: null,
+  avatarUrl: null, bannerUrl: null,
   createdAt: "2026-01-01T00:00:00Z",
   lastLoginAt: null,
 };

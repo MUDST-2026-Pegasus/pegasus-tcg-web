@@ -44,7 +44,7 @@ const listing = {
   seller: {
     username: "cardvault",
     displayName: "CardVault BKK",
-    avatarUrl: null,
+    avatarUrl: null, bannerUrl: null,
     verified: false,
     ratingAvg: null,
     ratingCount: 0,
@@ -76,7 +76,7 @@ beforeEach(() => {
   vi.mocked(getPublicProfile).mockResolvedValue({
     username: "cardvault",
     displayName: "CardVault BKK",
-    avatarUrl: null,
+    avatarUrl: null, bannerUrl: null,
   });
   vi.mocked(getStorefront).mockResolvedValue(page([listing], 7));
   vi.mocked(getPublicCollection).mockResolvedValue(
@@ -158,7 +158,7 @@ describe("PublicSellerPage V3", () => {
     vi.mocked(getPublicProfile).mockResolvedValue({
       username: "cardvault",
       displayName: "CardVault BKK",
-      avatarUrl: "/avatar.jpg",
+      avatarUrl: "/avatar.jpg", bannerUrl: null,
     });
     vi.mocked(getStorefront).mockResolvedValue(page([]));
     renderStore();
@@ -183,7 +183,7 @@ describe("PublicSellerPage V3", () => {
     vi.mocked(getPublicProfile).mockResolvedValue({
       username: "empty",
       displayName: null,
-      avatarUrl: null,
+      avatarUrl: null, bannerUrl: null,
     });
     renderStore("/u/empty?tab=collection");
     expect(await screen.findByRole("heading", { name: "empty" })).toBeInTheDocument();
@@ -207,7 +207,7 @@ describe("PublicSellerPage V3", () => {
     vi.mocked(getPublicProfile).mockResolvedValue({
       username: "cardvault",
       displayName: "CardVault BKK",
-      avatarUrl: null,
+      avatarUrl: null, bannerUrl: null,
       phone: "081-234-5678",
     });
     renderStore();
@@ -222,7 +222,7 @@ describe("PublicSellerPage V3", () => {
     vi.mocked(getPublicProfile).mockResolvedValue({
       username: "cardvault",
       displayName: "CardVault BKK",
-      avatarUrl: null,
+      avatarUrl: null, bannerUrl: null,
       phone: null,
     });
     renderStore();
