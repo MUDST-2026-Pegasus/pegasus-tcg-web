@@ -434,7 +434,7 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 
 ## ข้อความ / หลายภาษา
 
-เว็บรองรับ `th` (ภาษาหลัก) และ `en` ด้วย [Tolgee](https://app.tolgee.io/projects/36504) — epic TCG-543
+เว็บรองรับ `th` (ภาษาหลัก) และ `en` ด้วย [Tolgee](https://app.tolgee.io/projects/36508) — epic TCG-543
 คำแปลอยู่ใน `src/i18n/<namespace>/<lang>.json` ที่ `pnpm i18n:pull` มา commit ไว้ เว็บไม่เรียก Tolgee ตอน runtime
 
 ```tsx
