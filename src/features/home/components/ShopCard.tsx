@@ -22,7 +22,7 @@ export function ShopCard({ shop }: { shop: RecommendedShopDto }) {
       className="group block w-[280px] shrink-0 overflow-hidden rounded-2xl bg-card text-left shadow-[0_0_0_1px_rgba(9,11,12,0.06)] outline-none transition-[box-shadow] hover:shadow-[0_8px_18px_-4px_rgba(8,26,51,0.16),0_0_0_1px_rgba(0,88,188,0.45)] focus-visible:ring-3 focus-visible:ring-primary/50"
     >
       <div className="h-16 bg-gradient-to-r from-[#0B4D94] via-[#083568] to-[#031B38]">
-        {bannerUrl && <img src={bannerUrl} alt={`แบนเนอร์ร้าน ${name}`} loading="lazy" className="size-full object-cover object-center" onError={() => setFailedBannerUrl(bannerUrl)} />}
+        {bannerUrl && <img src={bannerUrl} alt={t("home.shop.bannerAlt", "แบนเนอร์ร้าน {name}", { name })} loading="lazy" className="size-full object-cover object-center" onError={() => setFailedBannerUrl(bannerUrl)} />}
       </div>
       <div className="relative px-4 pt-9 pb-4">
         <Avatar className="absolute -top-7 left-4 size-14 border-[3px] border-white bg-[#e5effb]">

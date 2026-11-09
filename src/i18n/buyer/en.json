@@ -86,6 +86,7 @@
     },
     "shop": {
       "avatarAlt": "{name} shop profile picture",
+      "bannerAlt": "{name} shop banner",
       "listings": "{count} listings",
       "new": "New shop",
       "previewAlt": "Preview of item {index} from {name}'s shop",
