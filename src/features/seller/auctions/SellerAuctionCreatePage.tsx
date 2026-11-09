@@ -30,6 +30,7 @@ import {
   auctionFormIssues,
   auctionFormSchema,
   createAuctionErrorIssue,
+  defaultCloseTime,
   emptyAuctionForm,
   isSelectableUnit,
   issueMessage,
@@ -97,7 +98,7 @@ export function SellerAuctionCreatePage() {
 
   const form = useForm<AuctionFormValues>({
     resolver: zodResolver(auctionFormSchema()),
-    defaultValues: emptyAuctionForm(),
+    defaultValues: { ...emptyAuctionForm(), ...defaultCloseTime(now) },
   });
   const { control, setValue, trigger, setError, handleSubmit, formState, reset } = form;
   const values = useWatch({ control }) as AuctionFormValues;
@@ -117,7 +118,7 @@ export function SellerAuctionCreatePage() {
     // การ์ดใบเดิมไม่อยู่แล้ว (`unitUid` = null) — เติมแค่ราคา/เวลา ให้ผู้ขายเลือกการ์ดเอง
     if (prefilled.current || !source.data || (sourceUnitUid !== null && !stock.data)) return;
     prefilled.current = true;
-    reset({ ...relistAuctionForm(source.data), unitUid: relistUnit?.unitUid ?? null });
+    reset({ ...relistAuctionForm(source.data), ...defaultCloseTime(Date.now()), unitUid: relistUnit?.unitUid ?? null });
   }, [source.data, sourceUnitUid, stock.data, relistUnit, reset]);
 
   const unit = pickedUnit ?? (relistUnit && values.unitUid === relistUnit.unitUid ? relistUnit : null);
