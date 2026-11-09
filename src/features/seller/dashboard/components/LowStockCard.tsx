@@ -1,4 +1,3 @@
-import { ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import type { LowStock, StockSeverity } from "../dashboard.types";
+import { ProductThumbnail } from "./ProductThumbnail";
 
 const PILL_COLOR: Record<StockSeverity, string> = {
   critical: "bg-[#fdecea] text-[#d0342c]",
@@ -39,9 +39,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
                 to={`/seller/products/${item.listingId}/restock`}
                 className="flex min-w-0 items-center gap-3 px-5 py-3 outline-none hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:ring-3 focus-visible:ring-ring/30"
               >
-                <div className="flex size-[34px] shrink-0 items-center justify-center rounded-md bg-secondary">
-                  <ImageIcon aria-hidden="true" className="size-3.5 text-gray-400" />
-                </div>
+                <ProductThumbnail imageUrl={item.imageUrl} name={item.name} className="size-[34px]" />
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
                   <p className="truncate text-xs font-semibold text-foreground" title={item.name}>{item.name}</p>
                   {item.metaLabel && <p className="truncate text-xs text-gray-400">{item.metaLabel}</p>}
