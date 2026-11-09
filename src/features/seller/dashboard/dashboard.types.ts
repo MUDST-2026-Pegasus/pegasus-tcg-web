@@ -68,6 +68,8 @@ export type StatCardData = {
 
 export type OrderRow = {
   id: number;
+  productName: string;
+  imageUrl: string | null;
   number: string;
   buyer: string;
   item: string;
@@ -87,6 +89,7 @@ export type StockSeverity = "critical" | "warning";
 
 export type LowStockItem = {
   listingId: number;
+  imageUrl: string | null;
   name: string;
   metaLabel: string | null;
   remainingLabel: string;
@@ -159,6 +162,7 @@ export type DashboardMonthSummary = {
 
 export type LowStockListing = {
   listingId: number;
+  imageUrl: string | null;
   productName: string;
   lotLabel: string | null;
   conditionCode: string;
@@ -192,6 +196,7 @@ export type DashboardWallet = {
 
 export type RecentOrder = {
   sellerOrderId: number;
+  firstImageUrl: string | null;
   sellerOrderNumber: string;
   buyerUsername: string;
   buyerDisplayName: string | null;

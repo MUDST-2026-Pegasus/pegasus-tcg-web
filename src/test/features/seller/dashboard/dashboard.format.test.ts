@@ -40,6 +40,7 @@ function dashboard(overrides: Partial<SellerDashboard> = {}): SellerDashboard {
       lowStock: [
         {
           listingId: 7,
+          imageUrl: "https://example.com/charizard.png",
           productName: "Charizard ex",
           lotLabel: "Box A",
           conditionCode: "NM",
@@ -48,6 +49,7 @@ function dashboard(overrides: Partial<SellerDashboard> = {}): SellerDashboard {
         },
         {
           listingId: 8,
+          imageUrl: null,
           productName: "Pikachu VMAX",
           lotLabel: null,
           conditionCode: "LP",
@@ -65,6 +67,7 @@ function dashboard(overrides: Partial<SellerDashboard> = {}): SellerDashboard {
         buyerUsername: "nattapong_p",
         buyerDisplayName: "Nattapong",
         firstItemName: "Charizard ex",
+        firstImageUrl: "https://example.com/order-item.png",
         itemCount: 2,
         grandTotal: 1850,
         status: "PAID",
@@ -183,6 +186,7 @@ describe("recentOrders and lowStock", () => {
     expect(recentOrders(dashboard()).items[0]).toMatchObject({
       id: 41,
       item: "Charizard ex · 2 ชิ้น",
+      imageUrl: "https://example.com/order-item.png",
       price: "฿1,850",
       statusLabel: "รอแพ็ค",
     });
@@ -193,8 +197,8 @@ describe("recentOrders and lowStock", () => {
     expect(result.subtitle).toBe("ประกาศที่เหลือไม่เกิน 2 ชิ้น · น้อยสุดก่อน");
     expect(result.actionTo).toBe("/seller/products?status=ACTIVE&sort=stock_asc");
     expect(result.items).toEqual([
-      { listingId: 7, name: "Charizard ex", metaLabel: "Box A · NM", remainingLabel: "เหลือ 1 ชิ้น", severity: "critical" },
-      { listingId: 8, name: "Pikachu VMAX", metaLabel: null, remainingLabel: "เหลือ 2 ชิ้น", severity: "warning" },
+      { listingId: 7, imageUrl: "https://example.com/charizard.png", name: "Charizard ex", metaLabel: "Box A · NM", remainingLabel: "เหลือ 1 ชิ้น", severity: "critical" },
+      { listingId: 8, imageUrl: null, name: "Pikachu VMAX", metaLabel: null, remainingLabel: "เหลือ 2 ชิ้น", severity: "warning" },
     ]);
   });
 
