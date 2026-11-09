@@ -12,6 +12,9 @@ import { CommissionDefaultRateCard } from "@/features/admin/components/Commissio
 import { CommissionImpactCard } from "@/features/admin/components/CommissionImpactCard";
 import { CommissionRuleDialog, type CommissionRuleDialogRequest } from "@/features/admin/components/CommissionRuleDialog";
 import { CommissionRulesCard } from "@/features/admin/components/CommissionRulesCard";
+import { AuditEntrySheet } from "@/features/admin/components/AuditEntrySheet";
+import { CommissionHistorySheet } from "@/features/admin/components/CommissionHistorySheet";
+import type { AuditLogEntry } from "@/features/admin/audit.types";
 import type { CommissionCategory } from "@/features/admin/admin.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRuleInput } from "@/features/finance/after-sales.types";
@@ -35,6 +38,8 @@ export function AdminCommissionPage() {
   const [categoryDrafts, setCategoryDrafts] = useState<Record<string, { rate: string; useCustom: boolean }>>({});
   // ปิดแล้ว unmount ทิ้ง เปิดรอบใหม่ฟอร์มข้างในจึงเริ่มจาก request ล่าสุดเสมอ
   const [ruleDialog, setRuleDialog] = useState<CommissionRuleDialogRequest | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyEntry, setHistoryEntry] = useState<AuditLogEntry | null>(null);
   const openRuleDialog = setRuleDialog;
   const currentGlobal = rules.data?.find((rule) => rule.scope === "GLOBAL" && rule.active);
   const fallbackRate = Number(setting.data?.value?.replaceAll('"', "") ?? 0);
@@ -142,7 +147,7 @@ export function AdminCommissionPage() {
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-col gap-1"><h1 className="text-[26px] font-bold tracking-[-0.5px] text-foreground">ค่าคอมมิชชั่น</h1>
         <p className="text-[13px] text-muted-foreground">กำหนดอัตราค่าธรรมเนียมที่แพลตฟอร์มเก็บจากผู้ขายในแต่ละหมวดหมู่</p></div>
-      <div className="flex gap-2"><Button variant="outline" className="rounded-md px-2.5" disabled title="ระบบยังไม่มี API ประวัติการแก้ไขค่าคอมมิชชั่น">ดูประวัติการแก้ไข</Button>
+      <div className="flex gap-2"><Button variant="outline" className="rounded-md px-2.5" onClick={() => setHistoryOpen(true)}>ดูประวัติการแก้ไข</Button>
         <Button className="rounded-md px-2.5" disabled={busy || !hasChanges} onClick={() => void saveSettings()}>บันทึกการตั้งค่า</Button></div>
     </div>
     {(rules.isPending || setting.isPending || games.isPending || categories.isPending) && <div role="status" aria-busy="true" aria-label="กำลังโหลดการตั้งค่าค่าคอมมิชชั่น" className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -187,5 +192,9 @@ export function AdminCommissionPage() {
     {ready && ruleDialog && <CommissionRuleDialog open request={ruleDialog}
       onOpenChange={(open) => { if (!open) setRuleDialog(null); }}
       rules={rules.data} games={games.data} categories={categories.data} onChanged={invalidate} />}
+    {/* เลือกแถวในประวัติ → ปิดรายการแล้วเปิดรายละเอียด ไม่ซ้อน Sheet สองชั้น */}
+    <CommissionHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)}
+      onSelect={(entry) => { setHistoryOpen(false); setHistoryEntry(entry); }} />
+    <AuditEntrySheet entry={historyEntry} onClose={() => setHistoryEntry(null)} />
   </div>;
 }
