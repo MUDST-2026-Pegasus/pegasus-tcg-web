@@ -40,6 +40,7 @@ import { AdminPromotionFormSections } from "./AdminPromotionFormSections";
 import { PromotionDialog } from "./PromotionDialog";
 import { PromotionFormAside } from "./PromotionFormAside";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
+import { intlLocale } from "@/lib/i18n";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminPromotionInput> = [
@@ -255,12 +256,12 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           <AlertDescription className="text-xs text-[#0058bc]">
             {locks.used ? (
               <>
-                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString("th-TH")} ครั้ง — ฟิลด์ที่มี{" "}
+                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString(intlLocale())} ครั้ง — ฟิลด์ที่มี{" "}
                 <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
               </>
             ) : (
               <>
-                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString("th-TH")} คน — “ต้องเก็บก่อนใช้” ล็อก
+                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString(intlLocale())} คน — “ต้องเก็บก่อนใช้” ล็อก
                 และจำนวนที่แจกเพิ่มได้อย่างเดียว
               </>
             )}

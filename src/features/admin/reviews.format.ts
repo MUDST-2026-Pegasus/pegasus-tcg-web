@@ -1,7 +1,5 @@
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
-
 import type { AdminReview } from "./reviews.types";
+import { formatDate } from "@/lib/i18n";
 
 export type ReviewFilter = "ALL" | "VISIBLE" | "HIDDEN" | "UNREPLIED" | "LOW";
 
@@ -21,10 +19,9 @@ export type RatingSummary = {
   distribution: [number, number, number, number, number];
 };
 
-/** "13 ต.ค. 2569" — date-fns ยังพิมพ์ ค.ศ. ต้องบวก 543 เอง */
+/** "13 ต.ค. 2569" / "13 Oct 2026" */
 export function formatThaiDate(value: string): string {
-  const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${date.getFullYear() + 543}`;
+  return formatDate(value);
 }
 
 export function isLowRating(review: AdminReview): boolean {

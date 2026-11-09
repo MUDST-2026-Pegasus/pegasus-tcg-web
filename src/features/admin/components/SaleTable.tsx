@@ -31,6 +31,7 @@ import {
 } from "../sales.format";
 import type { AdminSale, SaleStatus } from "../sales.types";
 import { PromotionOwnerTag } from "./PromotionBadges";
+import { intlLocale } from "@/lib/i18n";
 
 export type SaleRowAction = "pause" | "resume" | "end" | "delete";
 
@@ -150,12 +151,12 @@ export function SaleTable({
         )}
         <span className={SUB_CLASS}>
           {sale.status === "SCHEDULED"
-            ? `เข้าร่วม ${sale.listingCount.toLocaleString("th-TH")} listing`
+            ? `เข้าร่วม ${sale.listingCount.toLocaleString(intlLocale())} listing`
             : sale.status === "SOLD_OUT"
               ? "ขายหมดทุก listing"
               : sale.status === "BUDGET_EXHAUSTED"
                 ? "จบเพราะงบหมด"
-                : `ขายแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น`}
+                : `ขายแล้ว ${sale.soldUnits.toLocaleString(intlLocale())} ชิ้น`}
         </span>
           </>
         );

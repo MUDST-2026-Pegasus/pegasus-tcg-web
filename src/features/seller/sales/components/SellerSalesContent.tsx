@@ -33,6 +33,7 @@ import { usePlatformListings, useSellerSaleSummary, useSellerSales } from "../sa
 import type { PlatformSaleListing, SellerSale } from "../sales.types";
 import { SellerPromotionPageTabs } from "./SellerPromotionPageTabs";
 import { SellerSaleActionDialog, type SellerSaleActionState } from "./SellerSaleActionDialog";
+import { intlLocale } from "@/lib/i18n";
 
 const HEAD = "h-10 px-4 text-xs font-medium text-muted-foreground";
 const CELL = "px-4 py-3 align-middle text-[13px] whitespace-normal";
@@ -90,8 +91,8 @@ export function SellerSalesContent() {
       meta: { headClassName: cn(HEAD, "w-[18%]"), cellClassName: CELL },
       cell: ({ row: { original: sale } }) => (
         <>
-        <span className="block font-semibold">{sale.listingCount.toLocaleString("th-TH")} listing</span>
-        <span className={SUB}>{sale.soldUnits > 0 ? `ขายแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น` : "—"}</span>
+        <span className="block font-semibold">{sale.listingCount.toLocaleString(intlLocale())} listing</span>
+        <span className={SUB}>{sale.soldUnits > 0 ? `ขายแล้ว ${sale.soldUnits.toLocaleString(intlLocale())} ชิ้น` : "—"}</span>
         </>
       ),
     },
@@ -185,7 +186,7 @@ export function SellerSalesContent() {
         <Kpi label="กำลังลดราคา" value={String(s?.activeSales ?? 0)} note={`${list.data?.statusCounts.SCHEDULED ?? 0} ตั้งเวลาไว้`} />
         <Kpi
           label="Listing ที่ลดอยู่"
-          value={(s?.listingsOnSale ?? 0).toLocaleString("th-TH")}
+          value={(s?.listingsOnSale ?? 0).toLocaleString(intlLocale())}
           note="ด้วยราคาลดของร้าน"
         />
         <Kpi
@@ -278,7 +279,7 @@ function Kpi({ label, value, note }: { label: string; value: string; note: strin
 /** การ์ด "สินค้าของคุณในแคมเปญ Pegasus" (Figma SAL-S1) — ราคาล็อก ขึ้นราคาไม่ได้ระหว่างแคมเปญ */
 function PlatformCampaignCard({ listings, loading }: { listings: PlatformSaleListing[]; loading: boolean }) {
   if (!loading && listings.length === 0) return null;
-  const endLabel = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
+  const endLabel = new Intl.DateTimeFormat(intlLocale({ calendar: "gregory" }), { day: "numeric", month: "short" });
   return (
     <Card className="gap-0 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-wrap items-center gap-2">

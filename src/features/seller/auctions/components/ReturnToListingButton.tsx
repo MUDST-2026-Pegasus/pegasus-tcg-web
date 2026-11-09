@@ -11,6 +11,7 @@ import { getMyListings, moveUnit } from "@/features/seller/products/products.api
 import { listingKeys } from "@/features/seller/products/products.queries";
 import type { ListingQuery, ListingStatus, SellerListingSummary } from "@/features/seller/products/products.types";
 import { ApiError } from "@/lib/api/errors";
+import { intlLocale } from "@/lib/i18n";
 
 /** ประกาศที่รับการ์ดได้ — ผู้ซื้อเห็นก่อน (ACTIVE / SOLD_OUT) แล้วค่อยที่ยังพักไว้ */
 const TARGET_ORDER: ListingStatus[] = ["ACTIVE", "SOLD_OUT", "PAUSED", "DRAFT"];
@@ -95,7 +96,7 @@ export function ReturnToListingButton({ detail }: ReturnToListingButtonProps) {
         onConfirm={() => move.mutate(target.id)}
       >
         <p className="text-sm text-muted-foreground">
-          ย้ายเข้าประกาศราคา {formatBaht(target.price)} (ขายอยู่ {target.quantityAvailable.toLocaleString("th-TH")} ใบ)
+          ย้ายเข้าประกาศราคา {formatBaht(target.price)} (ขายอยู่ {target.quantityAvailable.toLocaleString(intlLocale())} ใบ)
           {statusNote} — ถ้าจะประมูลใหม่ภายหลังก็ยังเลือกการ์ดใบนี้ได้
         </p>
       </ConfirmDialog>

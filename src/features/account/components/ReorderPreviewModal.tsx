@@ -15,6 +15,7 @@ import type {
   ReorderItemDto,
   ReorderItemsResponse,
 } from "../orders.types";
+import { intlLocale } from "@/lib/i18n";
 
 export interface ReorderPreviewModalProps {
   isOpen?: boolean;
@@ -250,7 +251,7 @@ export function ReorderPreviewModal({
 
                   <div className="mt-1.5">
                     <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md inline-block font-normal">
-                      ราคาเดิมที่เคยซื้อ: ฿{item.originalPrice.toLocaleString()} • จำนวน {item.originalQuantity} ใบ
+                      ราคาเดิมที่เคยซื้อ: ฿{item.originalPrice.toLocaleString(intlLocale())} • จำนวน {item.originalQuantity} ใบ
                     </span>
                   </div>
                 </div>

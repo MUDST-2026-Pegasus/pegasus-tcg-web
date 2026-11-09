@@ -1,4 +1,5 @@
 import type { OrderDetails, SellerOrderDetails } from "./orders.types";
+import { formatDateTime } from "@/lib/i18n";
 
 /**
  * Where a buyer's order is in the checkout → payout flow, as the order card shows it.
@@ -102,11 +103,5 @@ export function firstTracking(order: OrderDetails): { carrier: string; trackingN
 }
 
 export function formatOrderDateTime(value: string): string {
-  return new Date(value).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTime(value);
 }

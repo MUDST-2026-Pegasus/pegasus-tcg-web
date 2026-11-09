@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
 
 import { stockForecastKeys } from "../../restock.queries";
+import { intlLocale } from "@/lib/i18n";
 
 type Forecast = {
   listingId: number;
@@ -20,7 +21,7 @@ type Forecast = {
 };
 
 function forecastDate(value: string) {
-  return new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+  return new Intl.DateTimeFormat(intlLocale({ calendar: "gregory" }), {
     day: "numeric",
     month: "short",
     year: "numeric",

@@ -20,6 +20,7 @@ import { toLocalInput } from "@/features/promotions/shared/promotionForm.dates";
 import { HOME_STRIP_MAX } from "../promotions.format";
 import type { PromotionFormErrors, PromotionLocks } from "../promotions.schema";
 import type { AdminPromotion, AdminPromotionInput } from "../promotions.types";
+import { intlLocale } from "@/lib/i18n";
 
 const SCOPE_OPTIONS: Array<{ value: AdminPromotionInput["scopeType"]; label: string }> = [
   { value: "ALL", label: "ทุกเกม" },
@@ -338,7 +339,7 @@ export function AdminPromotionFormSections({
             field="usageLimitTotal"
             label={
               locks.used
-                ? `จำนวนสิทธิ์ทั้งหมด (เพิ่มได้เท่านั้น ≥ ${usedLimitFloor.toLocaleString("th-TH")})`
+                ? `จำนวนสิทธิ์ทั้งหมด (เพิ่มได้เท่านั้น ≥ ${usedLimitFloor.toLocaleString(intlLocale())})`
                 : "จำนวนสิทธิ์ทั้งหมด"
             }
             hint="เว้นว่าง = ไม่จำกัด"

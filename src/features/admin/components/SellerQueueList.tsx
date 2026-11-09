@@ -12,6 +12,7 @@ import {
   VERIFICATION_STATUS_META,
 } from "../verification.format";
 import type { Verification, VerificationStatus } from "../verification.types";
+import { intlLocale } from "@/lib/i18n";
 
 type SellerQueueListProps = {
   status: VerificationStatus;
@@ -44,7 +45,7 @@ export function SellerQueueList({
     <div className="flex w-full flex-col gap-3 lg:w-[420px] lg:shrink-0">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-semibold text-foreground">
-          {title} ({count.toLocaleString("th-TH")})
+          {title} ({count.toLocaleString(intlLocale())})
         </p>
         <p className="text-[11px] text-muted-foreground">{sortLabel}</p>
       </div>

@@ -55,6 +55,7 @@ import { DetailsCard } from "../create/DetailsCard";
 import { ListingPhotosCard } from "../create/ListingPhotosCard";
 import { PricingCard } from "../create/PricingCard";
 import { PricingTipCard } from "../create/PricingTipCard";
+import { intlLocale } from "@/lib/i18n";
 
 const PRODUCTS_PATH = "/seller/products";
 
@@ -231,7 +232,7 @@ export function ListingEditContent({
           <AlertDescription>
             {listing.blockReason ?? "ไม่ได้ระบุเหตุผล"}
             {listing.blockedAt
-              ? ` · ${new Date(listing.blockedAt).toLocaleDateString("th-TH", { dateStyle: "medium" })}`
+              ? ` · ${new Date(listing.blockedAt).toLocaleDateString(intlLocale(), { dateStyle: "medium" })}`
               : null}
             {" · แก้ไขหรือลบไม่ได้ ติดต่อทีมงานเพื่อขอตรวจสอบ"}
           </AlertDescription>

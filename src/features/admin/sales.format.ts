@@ -2,6 +2,7 @@ import { hasErrorCode } from "@/lib/api";
 
 import { formatBaht, formatPeriod } from "./promotions.format";
 import type { AdminSale, SaleOwnerType, SaleStatus, SaleType } from "./sales.types";
+import { dateTimeFormat, intlLocale } from "@/lib/i18n";
 
 /** ตาราง Figma SAL-A1 — 8 แถวต่อหน้าเหมือนแท็บโค้ด */
 export const SALE_PAGE_SIZE = 8;
@@ -55,9 +56,9 @@ export function ownerLabel(owner: SaleOwnerType): string {
   return owner === "PLATFORM" ? "Pegasus" : "ร้านค้า";
 }
 
-const dayMonthYear = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short", year: "numeric" });
-const dayMonth = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
-const time = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const dayMonthYear = dateTimeFormat({ day: "numeric", month: "short", year: "numeric" }, { calendar: "gregory" });
+const dayMonth = dateTimeFormat({ day: "numeric", month: "short" }, { calendar: "gregory" });
+const time = dateTimeFormat({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" }, { calendar: "gregory" });
 
 function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -89,7 +90,7 @@ export function salePeriod(sale: Pick<AdminSale, "startsAt" | "endsAt">): string
   return compactRange(start, end);
 }
 
-const monthShort = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { month: "short" });
+const monthShort = dateTimeFormat({ month: "short" }, { calendar: "gregory" });
 
 /** "1–30 พ.ย. 2026" · "25 ต.ค. – 10 พ.ย." (ปีนี้) · ข้ามปีพิมพ์ปีทั้งสองฝั่ง */
 function compactRange(start: Date, end: Date): string {
@@ -218,7 +219,7 @@ export function saleScopeDetail(sale: AdminSale): string {
     ].filter(Boolean);
     return parts.length ? parts.join(" · ") : "ไม่จำกัดโควตา";
   }
-  if (sale.scopeType === "LISTINGS") return `${sale.listingCount.toLocaleString("th-TH")} listing`;
+  if (sale.scopeType === "LISTINGS") return `${sale.listingCount.toLocaleString(intlLocale())} listing`;
   if (sale.scopeType === "SHOP") return "ไม่รวมสินค้าประมูล";
   const parts = [
     sale.conditions.length ? sale.conditions.map(conditionLabel).join(", ") : "ทุกสภาพ",
@@ -230,7 +231,7 @@ export function saleScopeDetail(sale: AdminSale): string {
 /** บรรทัดรองของคอลัมน์แคมเปญ */
 export function saleSubtitle(sale: AdminSale): string {
   if (sale.ownerType === "SELLER") {
-    return `${sale.owner?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString("th-TH")} listing`;
+    return `${sale.owner?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString(intlLocale())} listing`;
   }
   const link = sale.slug ? `/sale/${sale.slug}` : "ไม่มีหน้าแคมเปญ";
   return sale.featuredOnHome ? `${link} · หน้าแรก` : link;
@@ -275,8 +276,8 @@ export function sampleSaleCalculation(
 
 /** "฿4.82M" — ยอดรวมก้อนใหญ่ในแถบผล preview */
 export function compactBaht(amount: number): string {
-  if (amount >= 1_000_000) return `฿${(amount / 1_000_000).toLocaleString("th-TH", { maximumFractionDigits: 2 })}M`;
-  if (amount >= 10_000) return `฿${(amount / 1000).toLocaleString("th-TH", { maximumFractionDigits: 1 })}K`;
+  if (amount >= 1_000_000) return `฿${(amount / 1_000_000).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}M`;
+  if (amount >= 10_000) return `฿${(amount / 1000).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}K`;
   return formatBaht(amount);
 }
 

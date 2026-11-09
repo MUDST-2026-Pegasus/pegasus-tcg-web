@@ -9,6 +9,7 @@ import { hasErrorCode } from "@/lib/api";
 import { sellerSaleErrorMessage } from "../sales.format";
 import { useSellerSaleAction } from "../sales.queries";
 import type { SellerSale } from "../sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 export type SellerSaleActionKind = "pause" | "resume" | "end" | "delete" | "admin-paused";
 export type SellerSaleActionState = { kind: SellerSaleActionKind; sale: SellerSale };
@@ -68,7 +69,7 @@ export function SellerSaleActionDialog({
           tone="warning"
           icon={<Square />}
           title={`จบ “${sale.name}” ตอนนี้?`}
-          description={`${sale.listingCount.toLocaleString("th-TH")} listing กลับเป็นราคาปกติทันที · ขายไปแล้ว ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น ไม่กระทบ`}
+          description={`${sale.listingCount.toLocaleString(intlLocale())} listing กลับเป็นราคาปกติทันที · ขายไปแล้ว ${sale.soldUnits.toLocaleString(intlLocale())} ชิ้น ไม่กระทบ`}
           actions={
             <>
               {cancel}
@@ -139,7 +140,7 @@ export function SellerSaleActionDialog({
           tone="warning"
           icon={<Pause />}
           title={`หยุด “${sale.name}” ชั่วคราว?`}
-          description={`${sale.listingCount.toLocaleString("th-TH")} listing กลับเป็นราคาปกติจนกว่าจะเปิดอีกครั้ง`}
+          description={`${sale.listingCount.toLocaleString(intlLocale())} listing กลับเป็นราคาปกติจนกว่าจะเปิดอีกครั้ง`}
           actions={
             <>
               {cancel}

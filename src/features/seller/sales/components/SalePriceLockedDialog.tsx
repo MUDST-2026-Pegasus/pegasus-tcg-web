@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 
 import type { SalePriceLockedDetails } from "../sales.types";
+import { dateTimeFormat } from "@/lib/i18n";
 
-const endDate = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
+const endDate = dateTimeFormat({ day: "numeric", month: "short" }, { calendar: "gregory" });
 
 /**
  * Figma SAL-M1 (Seller ERROR) "ขึ้นราคาไม่ได้ระหว่างการลดราคา" — แสดงแทน toast error ทั่วไป

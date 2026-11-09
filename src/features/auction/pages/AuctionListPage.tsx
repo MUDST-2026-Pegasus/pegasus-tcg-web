@@ -40,6 +40,7 @@ import {
   writeAuctionFilters,
   type AuctionSearchFilters,
 } from "../search.params";
+import { intlLocale } from "@/lib/i18n";
 
 const TYPING_DELAY_MS = 300;
 const ALL_GAMES = "__all__";
@@ -263,7 +264,7 @@ function FilterTab({
       {label}
       {count !== null ? (
         <span className={cn("text-xs font-medium tabular-nums", selected ? "text-background/80" : "text-muted-foreground")}>
-          {count.toLocaleString("th-TH")}
+          {count.toLocaleString(intlLocale())}
         </span>
       ) : null}
     </button>

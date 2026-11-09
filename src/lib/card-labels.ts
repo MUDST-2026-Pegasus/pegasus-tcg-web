@@ -1,3 +1,4 @@
+import { intlLocale } from "@/lib/i18n";
 export const CARD_FINISH_LABEL: Record<string, string> = {
   NORMAL: "Normal",
   HOLO: "Holo",
@@ -30,7 +31,7 @@ export const languageLabel = (code?: string) =>
 export const rarityLabel = (code?: string | null) =>
   code ? [code, RARITY_LABELS[code]].filter(Boolean).join(" · ") : null;
 export const cardDate = (value: string) =>
-  new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+  new Intl.DateTimeFormat(intlLocale({ calendar: "gregory" }), {
     day: "numeric",
     month: "short",
     year: "numeric",

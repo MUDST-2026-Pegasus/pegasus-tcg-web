@@ -15,11 +15,12 @@ import { CommissionRulesCard } from "@/features/admin/components/CommissionRules
 import type { CommissionCategory } from "@/features/admin/admin.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRuleInput } from "@/features/finance/after-sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 const blank = (): CommissionRuleInput => ({ scope: "GLOBAL", gameId: null, categoryId: null,
   sellerProfileId: null, ratePercent: 0, fixedFee: 0, minFee: null, maxFee: null,
   priority: 0, effectiveFrom: new Date().toISOString(), effectiveTo: null, active: true });
-const money = (value: number) => `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const money = (value: number) => `฿${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatRate = (value: number) => Number.isInteger(value) ? value.toFixed(1) : String(value);
 const examplePrice = 1290;
 
@@ -169,7 +170,7 @@ export function AdminCommissionPage() {
       </div>
       <div className="space-y-4">
         <CommissionCalcCard title="ตัวอย่างการคำนวณ" rows={[
-          { id: "price", label: "ราคาขาย", value: `฿${examplePrice.toLocaleString("th-TH")}` },
+          { id: "price", label: "ราคาขาย", value: `฿${examplePrice.toLocaleString(intlLocale())}` },
           { id: "commission", label: `ค่าคอมมิชชั่น (${previewRate.toFixed(1)}%)`, value: `− ${money(preview.percentPart)}` },
           { id: "fixed", label: "ค่าธรรมเนียมคงที่", value: `− ${money(preview.fixedFee)}` },
           ...(preview.clamped ? [{ id: "limit", label: "ปรับตามขั้นต่ำ/ขั้นสูง", value: money(preview.fee) }] : []),

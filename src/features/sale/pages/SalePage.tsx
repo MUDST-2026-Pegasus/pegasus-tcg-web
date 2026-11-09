@@ -28,6 +28,7 @@ import { listingCardProps, saleHeadline, saleTerms } from "../sale.format";
 import { SALE_GRID_PAGE_SIZE, useSaleListings, useSales } from "../sale.queries";
 import type { PublicSale, SaleListingQuery, SaleSort } from "../sale.types";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale } from "@/lib/i18n";
 
 const SORTS: Array<{ value: SaleSort; label: string }> = [
   { value: "discount_desc", label: "ลดมากสุด" },
@@ -116,7 +117,7 @@ export function SalePage() {
 
       <nav aria-label="แคมเปญลดราคา" className="flex flex-wrap gap-2">
         <TabLink to="/sale" active={!slug}>
-          ทั้งหมด {allCount ? allCount.toLocaleString("th-TH") : ""}
+          ทั้งหมด {allCount ? allCount.toLocaleString(intlLocale()) : ""}
         </TabLink>
         {(sales.data ?? [])
           .filter((item) => item.slug)
@@ -223,7 +224,7 @@ export function SalePage() {
 
       {items.length > 0 ? (
         <p className="text-center text-[13px] text-primary">
-          แสดง 1–{items.length.toLocaleString("th-TH")} จาก {total.toLocaleString("th-TH")}
+          แสดง 1–{items.length.toLocaleString(intlLocale())} จาก {total.toLocaleString(intlLocale())}
           {listings.hasNextPage ? (
             <>
               {" · "}
@@ -337,7 +338,7 @@ function CampaignHero({ sale }: { sale: PublicSale }) {
           <p className="text-xs opacity-80">{ended ? "สถานะ" : upcoming ? "เริ่มในอีก" : "เหลืออีก"}</p>
           <p className="text-2xl font-black tabular-nums">{ended ? "จบแล้ว" : formatCountdown(left)}</p>
           <p className="text-xs opacity-80">
-            {sale.listingCount.toLocaleString("th-TH")} listing{sale.shop ? ` · ร้าน ${sale.shop.displayName ?? sale.shop.username}` : ""}
+            {sale.listingCount.toLocaleString(intlLocale())} listing{sale.shop ? ` · ร้าน ${sale.shop.displayName ?? sale.shop.username}` : ""}
           </p>
         </div>
       </section>

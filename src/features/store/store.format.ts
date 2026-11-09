@@ -1,5 +1,4 @@
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
+import { getDateTimeFormat, intlLocale } from "@/lib/i18n";
 
 /**
  * คำนวณเปอร์เซ็นต์รีวิวเชิงบวก (4–5 ดาว)
@@ -24,7 +23,8 @@ export function formatReviewDate(dateString: string | null | undefined): string 
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
-    return `${format(date, "d MMM", { locale: th })} ${date.getFullYear()}`;
+    // ดีไซน์ใช้ปี ค.ศ. ทั้งสองภาษา
+    return getDateTimeFormat({ day: "numeric", month: "short", year: "numeric" }, intlLocale({ calendar: "gregory" })).format(date);
   } catch {
     return dateString;
   }

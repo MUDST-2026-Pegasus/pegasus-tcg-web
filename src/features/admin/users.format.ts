@@ -1,10 +1,8 @@
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
-
 import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { AdminUser, RoleCode, UserStatus } from "./users.types";
+import { formatDate, intlLocale } from "@/lib/i18n";
 
 /** ตัวช่วยแปลงข้อมูลผู้ใช้จาก `/admin/users` → ข้อความบนตาราง ไม่มีการ log PII */
 
@@ -43,10 +41,9 @@ export function userAccent(user: Pick<AdminUser, "id">): SellerAvatarAccent {
   return ACCENTS[user.id % ACCENTS.length];
 }
 
-/** "12 ม.ค. 2569" — locale ไทยของ date-fns ยังพิมพ์ปี ค.ศ. ต้องบวกเป็น พ.ศ. เอง */
+/** "13 ต.ค. 2569" / "13 Oct 2026" */
 export function formatThaiDate(value: string): string {
-  const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${date.getFullYear() + 543}`;
+  return formatDate(value);
 }
 
 /** "0812345678" → "081-234-5678" · รูปแบบอื่นคืนตามเดิม · ไม่มี → "—" */
@@ -75,7 +72,7 @@ export function pageSummary(page: number, size: number, total: number): string {
   }
   const from = page * size + 1;
   const to = Math.min(total, (page + 1) * size);
-  const number = new Intl.NumberFormat("th-TH");
+  const number = new Intl.NumberFormat(intlLocale());
   return `แสดง ${number.format(from)}–${number.format(to)} จาก ${number.format(total)} บัญชี`;
 }
 

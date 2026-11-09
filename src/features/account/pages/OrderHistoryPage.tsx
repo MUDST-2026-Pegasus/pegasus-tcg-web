@@ -58,6 +58,7 @@ import {
   matchesOrderFilter,
   type OrderFilterTab,
 } from "../order-filter";
+import { formatDate, intlLocale } from "@/lib/i18n";
 
 export { OrderDetailsModal };
 
@@ -467,14 +468,10 @@ function OrderCardItem({
   const otherItems = allItems.slice(1);
 
   const placedDate = order.placedAt
-    ? new Date(order.placedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? formatDate(order.placedAt)
     : "Recent";
 
-  const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
+  const formatPrice = (amount: number) => `฿${amount.toLocaleString(intlLocale())}`;
 
   function handleDownloadSummary() {
     downloadSummary.mutate(order.id, {

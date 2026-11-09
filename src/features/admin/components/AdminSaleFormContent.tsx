@@ -43,6 +43,7 @@ import { PromotionDialog } from "./PromotionDialog";
 import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "@/features/promotions/shared/PromotionFormControls";
 import { SaleFormAside } from "./SaleFormAside";
 import { ChipPicker, Segmented, ToggleChips } from "./SaleFormControls";
+import { intlLocale } from "@/lib/i18n";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminSaleInput> = [
@@ -226,7 +227,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
   const scopeNoun =
     form.scopeType === "GAME" ? "เกม" : form.scopeType === "CATEGORY" ? "หมวดหมู่" : form.scopeType === "CARD_SET" ? "ชุดการ์ด" : "";
   const summaryLines = [
-    `${form.scopeType === "ALL" ? "ทุกสินค้า" : `${form.scopeIds.length} ${scopeNoun}`}${preview.data ? ` · ${preview.data.listingCount.toLocaleString("th-TH")} listing` : ""}`,
+    `${form.scopeType === "ALL" ? "ทุกสินค้า" : `${form.scopeIds.length} ${scopeNoun}`}${preview.data ? ` · ${preview.data.listingCount.toLocaleString(intlLocale())} listing` : ""}`,
     form.discountType === "PERCENT"
       ? `ลด ${form.discountValue ?? 0}%${form.maxDiscountPerUnit != null ? ` สูงสุด ${formatBaht(form.maxDiscountPerUnit)}/ชิ้น` : ""}`
       : `ลด ${formatBaht(form.discountValue)}/ชิ้น`,
@@ -315,7 +316,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         <Alert className="border-[#cfe0f7] bg-[#e8f1fc] text-[#0058bc]">
           <Info />
           <AlertDescription className="text-xs text-[#0058bc]">
-            แคมเปญนี้มีออเดอร์แล้ว (ขายไป {(existing?.soldUnits ?? 0).toLocaleString("th-TH")} ชิ้น) — ฟิลด์ที่มี{" "}
+            แคมเปญนี้มีออเดอร์แล้ว (ขายไป {(existing?.soldUnits ?? 0).toLocaleString(intlLocale())} ชิ้น) — ฟิลด์ที่มี{" "}
             <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้ · งบและโควตาเพิ่มได้อย่างเดียว
           </AlertDescription>
         </Alert>
@@ -717,7 +718,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
             <dt>listing ที่เข้าตอนนี้</dt>
             <dd>
               {preview.data
-                ? `${preview.data.listingCount.toLocaleString("th-TH")} จาก ${preview.data.shopCount.toLocaleString("th-TH")} ร้าน`
+                ? `${preview.data.listingCount.toLocaleString(intlLocale())} จาก ${preview.data.shopCount.toLocaleString(intlLocale())} ร้าน`
                 : "—"}
             </dd>
           </div>
@@ -776,7 +777,7 @@ function ScopePreviewBar({
       <Check className="size-4 shrink-0" aria-hidden />
       {loading || listingCount == null
         ? "กำลังนับ listing ที่เข้าเงื่อนไข…"
-        : `เข้าเงื่อนไขตอนนี้ ${listingCount.toLocaleString("th-TH")} listing จาก ${(sellerCount ?? 0).toLocaleString("th-TH")} ร้าน · ราคารวมก่อนลด ${compactBaht(total ?? 0)}`}
+        : `เข้าเงื่อนไขตอนนี้ ${listingCount.toLocaleString(intlLocale())} listing จาก ${(sellerCount ?? 0).toLocaleString(intlLocale())} ร้าน · ราคารวมก่อนลด ${compactBaht(total ?? 0)}`}
     </p>
   );
 }

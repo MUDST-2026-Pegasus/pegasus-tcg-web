@@ -6,6 +6,7 @@ import type {
   Game,
   GameAttribute,
 } from "./catalog.types";
+import { dateTimeFormat } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงข้อมูลเกม ฟิลด์ ชุด และหมวดหมู่ → ข้อความที่โชว์บนจอ
@@ -64,7 +65,7 @@ export function gameInitials(game: Pick<Game, "name" | "code">): string {
   return initials.slice(0, 3).toUpperCase();
 }
 
-const RELEASE_DATE = new Intl.DateTimeFormat("th-TH", {
+const RELEASE_DATE = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",

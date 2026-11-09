@@ -16,6 +16,7 @@ import { AuctionOrderBadge } from "@/features/auction/components/AuctionOrderBad
 import { PaymentQrCard } from "../components/PaymentQrCard";
 import { PaymentSteps } from "../components/PaymentSteps";
 import { PaymentOrderSummary, type OrderItemSummaryData } from "../components/PaymentOrderSummary";
+import { intlLocale } from "@/lib/i18n";
 
 function transferAccount(raw: string | undefined): Record<string, string> {
   try {
@@ -206,7 +207,7 @@ export function PaymentPage() {
 
   const orderNumber =
     order?.orderNumber ?? (orderId ? `ORD-${orderId}` : "ORD-10241");
-  const formattedAmount = Number(payment.amount).toLocaleString("th-TH", {
+  const formattedAmount = Number(payment.amount).toLocaleString(intlLocale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

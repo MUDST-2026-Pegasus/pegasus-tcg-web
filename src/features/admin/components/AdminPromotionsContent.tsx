@@ -66,6 +66,7 @@ import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
 import { PromotionPageTabs } from "./PromotionPageTabs";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
+import { intlLocale } from "@/lib/i18n";
 
 const OWNER_FILTERS: Array<{
   value: PromotionOwnerType | null;
@@ -226,12 +227,12 @@ export function AdminPromotionsContent() {
           value={(
             (summary.data?.activePlatformCodes ?? 0) +
             (summary.data?.activeSellerCodes ?? 0)
-          ).toLocaleString("th-TH")}
+          ).toLocaleString(intlLocale())}
           note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
         />
         <KpiCard
           label="ใช้โค้ด (30 วัน)"
-          value={(summary.data?.redemptions30d ?? 0).toLocaleString("th-TH")}
+          value={(summary.data?.redemptions30d ?? 0).toLocaleString(intlLocale())}
           note={
             change == null
               ? "ยังไม่มีข้อมูลเดือนก่อน"

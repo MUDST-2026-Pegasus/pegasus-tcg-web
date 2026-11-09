@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { NotFoundPage } from "@/features/not-found/pages/NotFoundPage";
-import { createTolgee, I18nProvider, useLanguage, useTranslate } from "@/lib/i18n";
+import { createTolgee, formatDate, I18nProvider, useLanguage, useTranslate } from "@/lib/i18n";
 import { renderWithProviders } from "@/test/utils";
 
 const STORAGE_KEY = "__tolgee_currentLanguage";
@@ -18,6 +18,11 @@ function LanguageProbe() {
       <button type="button" onClick={() => void setLanguage("en")}>en</button>
     </>
   );
+}
+
+// ไม่ได้ subscribe ภาษาเอง — ได้ภาษาใหม่เพราะ I18nProvider remount
+function PlainDate() {
+  return <time>{formatDate("2026-10-19T07:05:00Z")}</time>;
 }
 
 function LazyNamespace() {
@@ -74,5 +79,13 @@ describe("i18n setup", () => {
   it("renderWithProviders renders in the requested language", () => {
     renderWithProviders(<NotFoundPage />, { language: "en" });
     expect(screen.getByRole("heading", { name: "We couldn't find that page" })).toBeInTheDocument();
+  });
+
+  it("remounts on language change so plain format helpers switch too", async () => {
+    render(<I18nProvider><LanguageProbe /><PlainDate /></I18nProvider>);
+    expect(await screen.findByText("19 ต.ค. 2569")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "en" });
+    await act(async () => button.click());
+    expect(await screen.findByText("19 Oct 2026")).toBeInTheDocument();
   });
 });

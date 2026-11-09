@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { FileUploadState } from "@/hooks/use-file-upload";
+import { intlLocale } from "@/lib/i18n";
 
 interface PaymentStepsProps {
   amount?: number;
@@ -31,7 +32,7 @@ export function PaymentSteps({
 
   const formattedAmount =
     amount !== undefined
-      ? Number(amount).toLocaleString("th-TH", {
+      ? Number(amount).toLocaleString(intlLocale(), {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })

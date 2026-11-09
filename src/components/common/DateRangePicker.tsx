@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { th } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
 
-const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
-const dateLabel = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
+const monthCaption = dateTimeFormat({ month: "long", year: "numeric" });
+const dateLabel = dateTimeFormat({ day: "numeric", month: "short", year: "numeric" });
 
 /** `YYYY-MM-DD` ทั้งคู่ · สตริงว่าง = ยังไม่เลือก */
 export type DateRangeValue = { from: string; to: string };
@@ -92,7 +92,7 @@ export function DateRangePicker({
         <Calendar
           mode="range"
           className="w-full p-4 [--cell-size:--spacing(9)]"
-          locale={th}
+          locale={dayPickerLocale()}
           selected={from ? { from, to: toDate(value.to) } : undefined}
           defaultMonth={from ?? minDate}
           disabled={blocked.length ? blocked : undefined}

@@ -28,6 +28,7 @@ import { BID_SIGNAL_LABEL, bidderMeta, canSuspend, detailFlags, formatBidSecond 
 import { RiskFlag } from "./components/RiskFlag";
 import { SuspendAuctionDialog } from "./components/SuspendAuctionDialog";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale } from "@/lib/i18n";
 
 function parseAuctionId(value: string | undefined): number | null {
   const id = Number(value);
@@ -254,7 +255,7 @@ function SellerCard({ detail }: { detail: AdminAuctionDetail }) {
         rows={[
           { label: "ร้าน", value: seller.shopName },
           { label: "สถานะร้าน", value: seller.verified ? "ยืนยันแล้ว" : "ยังไม่ยืนยัน" },
-          { label: "ประมูลทั้งหมด", value: seller.auctionCount.toLocaleString("th-TH") },
+          { label: "ประมูลทั้งหมด", value: seller.auctionCount.toLocaleString(intlLocale()) },
           { label: "เคยถูกระงับ", value: `${seller.suspensionCount} ครั้ง` },
         ]}
       />

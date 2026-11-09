@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 import { isSelectableUnit } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
+import { intlLocale } from "@/lib/i18n";
 
 const RESTOCK_PATH = "/seller/products";
 const ALL = "ALL";
@@ -124,7 +125,7 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <p className="text-muted-foreground">
-          {units.data ? `แสดง ${items.length.toLocaleString("th-TH")} จาก ${units.data.totalInStock.toLocaleString("th-TH")} ใบในสต็อก` : null}
+          {units.data ? `แสดง ${items.length.toLocaleString(intlLocale())} จาก ${units.data.totalInStock.toLocaleString(intlLocale())} ใบในสต็อก` : null}
         </p>
         <Link to={RESTOCK_PATH} className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
           ไม่มีการ์ดที่ต้องการ? เติมสต็อก

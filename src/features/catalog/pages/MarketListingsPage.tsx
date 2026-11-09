@@ -22,11 +22,12 @@ import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 const PAGE_SIZE = 20;
 
 function formatMarketPrice(amount: number, currency: string) {
-  return new Intl.NumberFormat("th-TH", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+  return new Intl.NumberFormat(intlLocale(), { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
 import { RARITY_LABELS } from "@/lib/card-labels";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale } from "@/lib/i18n";
 
 export function MarketListingsPage() {
   const { productId } = useParams<{ productId: string }>();

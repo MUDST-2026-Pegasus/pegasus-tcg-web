@@ -33,12 +33,13 @@ import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale } from "@/lib/i18n";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
 const ALL_VARIANTS = "all";
 
 function formatPrice(amount: number, currency = "THB") {
-  return new Intl.NumberFormat("th-TH", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency,
   }).format(amount);
@@ -308,7 +309,7 @@ function ProductDetailContent({
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div><p className="text-sm font-medium text-muted-foreground">Market price</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
-                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`}</span>last 30 days</div>
+                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}%`}</span>last 30 days</div>
                 </div>
                 {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">

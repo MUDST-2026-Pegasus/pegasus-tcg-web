@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Clock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildPromptPayPayload } from "../promptpay";
+import { intlLocale } from "@/lib/i18n";
 
 interface PaymentQrCardProps {
   amount: number;
@@ -120,7 +121,7 @@ async function exportQrCardPng(
     context.fillText(`Order Ref: ${refText}`, width / 2, 545);
 
     // Amount
-    const formattedAmount = Number(options.amount).toLocaleString("th-TH", {
+    const formattedAmount = Number(options.amount).toLocaleString(intlLocale(), {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -173,7 +174,7 @@ export function PaymentQrCard({
       // Invalid merchant configuration must never produce a misleading payment QR.
     }
   }
-  const amountText = `฿${amount.toLocaleString("th-TH", {
+  const amountText = `฿${amount.toLocaleString(intlLocale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

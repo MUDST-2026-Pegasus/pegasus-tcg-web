@@ -1,19 +1,19 @@
 import { useState, type ReactNode } from "react";
 import { CalendarIcon } from "lucide-react";
-import { th } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 const HOURS = Array.from({ length: 24 }, (_, hour) => ({ value: pad(hour), label: pad(hour) }));
 const MINUTES = Array.from({ length: 60 }, (_, minute) => ({ value: pad(minute), label: pad(minute) }));
 
-const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
-const dateLabel = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
+const monthCaption = dateTimeFormat({ month: "long", year: "numeric" });
+const dateLabel = dateTimeFormat({ day: "numeric", month: "short", year: "numeric" });
 
 type DateTimePickerProps = {
   /** แบบเดียวกับ `<input type="datetime-local">` (`YYYY-MM-DDTHH:mm`) หรือ `YYYY-MM-DD` เมื่อ `mode="date"` · ว่าง = ยังไม่เลือก */
@@ -130,7 +130,7 @@ export function DateTimePicker({
           mode="single"
           className="w-full p-4 [--cell-size:--spacing(9)]"
           classNames={{ root: "w-full", month: "w-full gap-3", week: "mt-1 flex w-full justify-around", weekdays: "flex justify-around", weekday: "flex-1 pb-1 text-center text-[0.8rem] font-normal text-muted-foreground" }}
-          locale={th}
+          locale={dayPickerLocale()}
           selected={selected}
           defaultMonth={selected ?? minDay}
           disabled={blocked.length ? blocked : undefined}

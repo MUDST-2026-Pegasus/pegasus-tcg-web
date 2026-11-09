@@ -3,6 +3,7 @@ import { SALE_STATUS_LABEL, SALE_STATUS_STYLE, salePeriod } from "@/features/adm
 import { hasErrorCode, isApiError } from "@/lib/api";
 
 import type { SalePriceLockedDetails, SellerSale, SellerSaleStatus } from "./sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 export { SALE_STATUS_LABEL, SALE_STATUS_STYLE, salePeriod };
 
@@ -14,8 +15,8 @@ const DAY_MS = 86_400_000;
 /** "ทุกสินค้าในร้าน" / "2 หมวด" / "เลือก 6 listing" — API ไม่ส่งชื่อหมวดมา */
 export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeIds" | "items">): string {
   if (sale.scopeType === "SHOP") return "ทุกสินค้าในร้าน";
-  if (sale.scopeType === "LISTINGS") return `เลือก ${sale.items.length.toLocaleString("th-TH")} listing`;
-  return `${sale.scopeIds.length.toLocaleString("th-TH")} หมวด`;
+  if (sale.scopeType === "LISTINGS") return `เลือก ${sale.items.length.toLocaleString(intlLocale())} listing`;
+  return `${sale.scopeIds.length.toLocaleString(intlLocale())} หมวด`;
 }
 
 /** "ลด 15%" / "ลด ฿150/ชิ้น" / "ราคาใหม่รายชิ้น" */

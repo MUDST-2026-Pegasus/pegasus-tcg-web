@@ -7,6 +7,7 @@ import type {
   PromotionStatus,
   RedemptionStatus,
 } from "./promotions.types";
+import { dateTimeFormat, intlLocale } from "@/lib/i18n";
 
 /** ตารางหน้ารวมตาม Figma PRM-A1 — 8 แถวต่อหน้า */
 export const PROMOTION_PAGE_SIZE = 8;
@@ -63,24 +64,24 @@ export const SELLER_PAUSE_REASONS = [
 ];
 
 export function formatBaht(amount: number | null | undefined): string {
-  return `฿${Number(amount ?? 0).toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  return `฿${Number(amount ?? 0).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 }
 
 // ปีตาม Figma เป็น ค.ศ. ("1 พ.ย. 2026") จึงบังคับปฏิทินเกรกอเรียน
-const dayMonthYear = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+const dayMonthYear = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
-});
-const dayMonth = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
-const dateTime = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+}, { calendar: "gregory" });
+const dayMonth = dateTimeFormat({ day: "numeric", month: "short" }, { calendar: "gregory" });
+const dateTime = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
   hourCycle: "h23",
-});
+}, { calendar: "gregory" });
 
 /** "30 พ.ย. 2026" */
 export function formatPromoDate(value: string): string {
@@ -191,7 +192,7 @@ export function isUsageFull(promotion: AdminPromotion): boolean {
 }
 
 export function limitLabel(value: number | null): string {
-  return value == null ? "ไม่จำกัด" : value.toLocaleString("th-TH");
+  return value == null ? "ไม่จำกัด" : value.toLocaleString(intlLocale());
 }
 
 /**
@@ -265,7 +266,7 @@ export function maskBuyer(buyer: PromotionParty | string): string {
 /** "3.1%" — ทศนิยมหนึ่งตำแหน่ง ตัวหารเป็นศูนย์ได้ `null` */
 export function percentOf(part: number, whole: number): string | null {
   if (!whole) return null;
-  return `${((100 * part) / whole).toLocaleString("th-TH", { maximumFractionDigits: 1 })}%`;
+  return `${((100 * part) / whole).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}%`;
 }
 
 /** ข้อความ error ของหน้านี้ — แปลจาก `ApiError.code` (ภายหลังย้ายไป Tolgee ได้) */
@@ -354,7 +355,7 @@ export function formatFieldValue(key: keyof AdminPromotionInput, input: AdminPro
     case "usageLimitTotal":
     case "usageLimitPerUser":
     case "claimLimit":
-      return Number(value).toLocaleString("th-TH");
+      return Number(value).toLocaleString(intlLocale());
     default:
       return typeof value === "boolean" ? (value ? "เปิด" : "ปิด") : String(value);
   }

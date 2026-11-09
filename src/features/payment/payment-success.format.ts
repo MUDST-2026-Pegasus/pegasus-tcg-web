@@ -1,13 +1,9 @@
+import { formatDateTime } from "@/lib/i18n";
 export function paymentSuccessDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Bangkok", month: "short", day: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: false,
-  }).formatToParts(date);
-  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((entry) => entry.type === type)?.value ?? "";
-  return `${part("month")} ${part("day")}, ${part("year")} ${part("hour")}:${part("minute")}`;
+  return formatDateTime(date);
 }
 
 export function paymentMethodName(method: string | undefined): string {

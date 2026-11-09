@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { financeErrorMessage } from "../finance.format";
 import { SLIP_AUTO_APPROVE_KEY } from "../finance.api";
 import { useSetSlipAutoApprove, useSlipAutoApprove } from "../finance.queries";
+import { intlLocale } from "@/lib/i18n";
 
 /**
  * การ์ดสลับโหมดตรวจสลิป — อ่าน/เขียน platform setting `payment.slip_auto_approve`
@@ -60,7 +61,7 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
             ระบบยืนยันการชำระเงินทันทีที่ผู้ซื้อแนบสลิป (ยังตรวจยอดเงินและสลิปซ้ำให้ทุกครั้ง)
           </p>
           <p className="text-[11px] text-[#9aa5ad]">
-            การเปลี่ยนโหมดมีผลกับสลิปที่แนบหลังจากนี้ — สลิป {queueCount.toLocaleString("th-TH")}{" "}
+            การเปลี่ยนโหมดมีผลกับสลิปที่แนบหลังจากนี้ — สลิป {queueCount.toLocaleString(intlLocale())}{" "}
             รายการที่อยู่ในคิวตอนนี้ยังต้องตรวจเอง
           </p>
         </div>

@@ -40,6 +40,7 @@ import {
   toSellerAuctionRow,
 } from "./seller-auction-detail.format";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale } from "@/lib/i18n";
 
 function parseAuctionId(value: string | undefined): number | null {
   const id = Number(value);
@@ -172,9 +173,9 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
           valueClass={hasBids ? "text-primary" : undefined}
           note={`เริ่มต้น ${formatBaht(detail.startingPrice)}`}
         />
-        <Kpi label="จำนวนบิด" value={detail.bidCount.toLocaleString("th-TH")} note={`จาก ${detail.bidderCount.toLocaleString("th-TH")} ผู้บิด`} />
+        <Kpi label="จำนวนบิด" value={detail.bidCount.toLocaleString(intlLocale())} note={`จาก ${detail.bidderCount.toLocaleString(intlLocale())} ผู้บิด`} />
         {detail.watcherCount !== undefined && (
-          <Kpi label="ผู้ติดตาม" value={detail.watcherCount.toLocaleString("th-TH")} note="กดติดตามประมูลนี้" />
+          <Kpi label="ผู้ติดตาม" value={detail.watcherCount.toLocaleString(intlLocale())} note="กดติดตามประมูลนี้" />
         )}
         <Kpi
           label="รายรับโดยประมาณ"
@@ -224,7 +225,7 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
     <Card className="w-full gap-0 overflow-hidden rounded-xl p-0 shadow-none">
       <div className="flex items-center justify-between px-5 py-4">
         <p className="text-base font-semibold text-foreground">ประวัติการบิด</p>
-        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString("th-TH")} บิด</p>
+        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString(intlLocale())} บิด</p>
       </div>
       {detail.bids.length === 0 ? (
         <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">ยังไม่มีผู้บิด</p>

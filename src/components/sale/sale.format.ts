@@ -1,8 +1,9 @@
 import type { ListingPricing } from "./sale.types";
+import { formatCountdown as formatSharedCountdown, intlLocale } from "@/lib/i18n";
 
 /** ราคาบาทแบบ "฿4,200" — ราคาที่มาจาก API เป็นบาทเต็มอยู่แล้ว */
 export function formatSaleBaht(amount: number | null | undefined): string {
-  return `฿${Number(amount ?? 0).toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  return `฿${Number(amount ?? 0).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 }
 
 /** มีราคาลดที่ผู้ซื้อเห็นอยู่ตอนนี้ไหม */
@@ -46,13 +47,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
  * ค่าติดลบนับเป็น 0
  */
 export function formatCountdown(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const days = Math.floor(total / 86_400);
-  const hours = Math.floor((total % 86_400) / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
-  const clock = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  return days > 0 ? `${days} วัน ${clock}` : clock;
+  return formatSharedCountdown(ms);
 }
 
 /** แยกเป็นช่อง ชม./นาที/วินาที ให้กล่องนับถอยหลังบนหน้าแรก (ชั่วโมงรวมวันไว้แล้ว) */

@@ -2,8 +2,9 @@ import { MAX_UNITS_PER_STOCK_IN } from "./listing-form.schema";
 import type { NewUnitsPayload } from "./listing-form.types";
 import { roundMoney, toNumber } from "./products.format";
 import type { RestockData, RestockDraft } from "./restock.types";
+import { dateTimeFormat } from "@/lib/i18n";
 
-const thaiShortDate = new Intl.DateTimeFormat("th-TH", {
+const thaiShortDate = dateTimeFormat({
   day: "2-digit",
   month: "short",
   year: "numeric",

@@ -23,6 +23,7 @@ import {
   formatOrderStatus,
   getOrderStatusBadge,
 } from "../account.format";
+import { intlLocale } from "@/lib/i18n";
 
 export interface OrderDetailsModalProps {
   order: OrderDetails;
@@ -41,7 +42,7 @@ export function OrderDetailsModal({
   onConfirmReceived,
   isConfirming = false,
 }: OrderDetailsModalProps) {
-  const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
+  const formatPrice = (amount: number) => `฿${amount.toLocaleString(intlLocale())}`;
 
   // Parse address snapshot if JSON
   let addressText = "Standard Shipping Address";

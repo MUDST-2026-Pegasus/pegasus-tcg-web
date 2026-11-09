@@ -28,6 +28,7 @@ import type { AdminPromotion } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
 import { PROMOTION_DANGER_BUTTON } from "../promotions.styles";
 import { CheckRow } from "@/features/promotions/shared/PromotionFormControls";
+import { intlLocale } from "@/lib/i18n";
 
 const SUMMARY_BOX = "grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-xs";
 const SUMMARY_ROW = "flex justify-between gap-3 text-muted-foreground [&>strong]:font-semibold [&>strong]:text-foreground";
@@ -130,11 +131,11 @@ function PausePlatformDialog({
       <div className={SUMMARY_BOX}>
         <p className={SUMMARY_ROW}>
           <span>ผู้ที่เก็บไว้</span>
-          <strong>{promotion.claimedCount.toLocaleString("th-TH")} คน</strong>
+          <strong>{promotion.claimedCount.toLocaleString(intlLocale())} คน</strong>
         </p>
         <p className={SUMMARY_ROW}>
           <span>ออเดอร์รอชำระที่ใช้โค้ดนี้</span>
-          <strong>{promotion.reservedOrders.toLocaleString("th-TH")} รายการ</strong>
+          <strong>{promotion.reservedOrders.toLocaleString(intlLocale())} รายการ</strong>
         </p>
       </div>
       <p className="text-[11px] leading-4 text-muted-foreground">
@@ -250,7 +251,7 @@ function ResumeDialog({ promotion, onClose }: { promotion: AdminPromotion; onClo
   const remaining =
     promotion.usageLimitTotal == null
       ? "ไม่จำกัด"
-      : `${Math.max(0, promotion.usageLimitTotal - promotion.usedCount).toLocaleString("th-TH")} / ${limitLabel(promotion.usageLimitTotal)}`;
+      : `${Math.max(0, promotion.usageLimitTotal - promotion.usedCount).toLocaleString(intlLocale())} / ${limitLabel(promotion.usageLimitTotal)}`;
 
   const submit = () =>
     resume.mutate(
@@ -409,7 +410,7 @@ function DeleteBlockedDialog({
       tone="warning"
       icon={<TriangleAlert />}
       title="ลบโค้ดนี้ไม่ได้"
-      description={`${promotion.code} ถูกเก็บ ${promotion.claimedCount.toLocaleString("th-TH")} ครั้ง และใช้ในคำสั่งซื้อ ${promotion.usedCount.toLocaleString("th-TH")} รายการ ต้องเก็บไว้เพื่อให้ใบเสร็จและบัญชีย้อนหลังถูกต้อง`}
+      description={`${promotion.code} ถูกเก็บ ${promotion.claimedCount.toLocaleString(intlLocale())} ครั้ง และใช้ในคำสั่งซื้อ ${promotion.usedCount.toLocaleString(intlLocale())} รายการ ต้องเก็บไว้เพื่อให้ใบเสร็จและบัญชีย้อนหลังถูกต้อง`}
       actions={
         <>
           <Button variant="outline" disabled={end.isPending} onClick={onClose}>
