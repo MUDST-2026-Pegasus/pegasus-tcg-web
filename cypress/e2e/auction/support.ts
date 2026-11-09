@@ -95,8 +95,14 @@ export function useShortAuctionSettings() {
   });
 }
 
-export function sellerUnits(token: string): Cypress.Chainable<EligibleUnits["page"]["items"]> {
-  return request<EligibleUnits>(token, "GET", "/sellers/me/auctions/eligible-units?size=100").then(({ page }) => page.items) as unknown as Cypress.Chainable<EligibleUnits["page"]["items"]>;
+type Units = EligibleUnits["page"]["items"];
+
+/** Every card the seller could auction, across all pages (the seed seller has more than one page). */
+export function sellerUnits(token: string, page = 0, seen: Units = []): Cypress.Chainable<Units> {
+  return request<EligibleUnits>(token, "GET", `/sellers/me/auctions/eligible-units?size=100&page=${page}`).then(({ page: result }) => {
+    const all = [...seen, ...result.items];
+    return result.items.length < 100 ? cy.wrap(all, { log: false }) : sellerUnits(token, page + 1, all);
+  }) as unknown as Cypress.Chainable<Units>;
 }
 
 /** Cards the seller may auction: free ones, or ones on a listing (opening the auction takes them off it). */

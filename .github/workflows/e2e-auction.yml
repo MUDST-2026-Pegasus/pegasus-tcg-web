@@ -33,6 +33,15 @@ jobs:
       - uses: actions/checkout@v4
 
       # The API repo is private: API_REPO_TOKEN needs read access to MUDST-2026-Pegasus/pegasus-tcg-api.
+      - name: Require API_REPO_TOKEN
+        env:
+          API_REPO_TOKEN: ${{ secrets.API_REPO_TOKEN }}
+        run: |
+          if [ -z "$API_REPO_TOKEN" ]; then
+            echo "::error::Add repo secret API_REPO_TOKEN (fine-grained token, Contents: Read on pegasus-tcg-api)."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           repository: MUDST-2026-Pegasus/pegasus-tcg-api
