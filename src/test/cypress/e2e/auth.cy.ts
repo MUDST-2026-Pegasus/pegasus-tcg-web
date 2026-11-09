@@ -164,7 +164,7 @@ describe('Authentication Flow', () => {
         },
       });
 
-      cy.contains('By continuing with Google, you agree to the Pegasus').should('be.visible');
+      cy.contains('By continuing, you agree to the Pegasus').should('be.visible');
       cy.get('[data-cy="google-signin-trigger"]').click();
 
       cy.wait('@googleAuthRequest');
@@ -197,7 +197,7 @@ describe('Authentication Flow', () => {
         },
       });
 
-      cy.contains('By continuing with Google, you agree to the Pegasus').should('be.visible');
+      cy.contains('I agree to the Pegasus').should('be.visible');
       cy.get('[data-cy="google-signin-trigger"]').click();
 
       cy.wait('@googleAuthRequest');

@@ -150,16 +150,15 @@ describe('RegisterForm', () => {
     });
   });
 
-  it('hides Google button, consent text, and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
+  it('hides Google button and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
     renderWithProviders(<RegisterForm />);
 
     expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
-    expect(screen.queryByText(/by continuing with google/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
   });
 
-  it('renders Google button, consent text, and "or" divider at the top of RegisterForm when configured', async () => {
+  it('renders Google button and "or" divider at the top of RegisterForm without duplicating legal links', async () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
     let capturedCallback: ((res: { credential?: string }) => void) | undefined;
     window.google = {
@@ -186,7 +185,8 @@ describe('RegisterForm', () => {
 
     renderWithProviders(<RegisterForm />);
 
-    expect(screen.getByText(/by continuing with google, you agree to the pegasus/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'Terms of Service' })).toHaveLength(1);
+    expect(screen.getAllByRole('link', { name: 'Privacy Policy' })).toHaveLength(1);
     expect(screen.getByText('or')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));

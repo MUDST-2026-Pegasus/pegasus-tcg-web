@@ -137,6 +137,27 @@ export function LoginForm() {
         </p>
       </div>
       <BackHomeLink />
+      <p className="pt-2 text-center text-xs leading-relaxed tracking-[0.24px] text-muted-foreground">
+        By continuing, you agree to the Pegasus{" "}
+        <Link
+          to="/terms-of-service"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-primary hover:underline"
+        >
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link
+          to="/privacy-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-primary hover:underline"
+        >
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </form>
   );
 }

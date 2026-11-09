@@ -136,16 +136,16 @@ describe('LoginForm', () => {
     expect(screen.getByText(/could not sign you in/i)).toBeInTheDocument();
   });
 
-  it('hides Google button, consent text, and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
+  it('hides Google button and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
     renderWithProviders(<LoginForm />);
 
     expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
-    expect(screen.queryByText(/by continuing with google/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/by continuing, you agree to the pegasus/i)).toBeInTheDocument();
   });
 
-  it('hides Google button, consent text, and "or" divider when GIS script fails to load', async () => {
+  it('hides Google button and "or" divider when GIS script fails to load', async () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
     renderWithProviders(<LoginForm />);
 
@@ -159,7 +159,6 @@ describe('LoginForm', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
-      expect(screen.queryByText(/by continuing with google/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
     });
     expect(screen.getByLabelText(/email/i)).toBeEnabled();
@@ -212,7 +211,7 @@ describe('LoginForm', () => {
       }),
     );
 
-    expect(screen.getByText(/by continuing with google, you agree to the pegasus/i)).toBeInTheDocument();
+    expect(screen.getByText(/by continuing, you agree to the pegasus/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Terms of Service' })).toHaveAttribute('href', '/terms-of-service');
     expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy-policy');
     expect(screen.getByText('or')).toBeInTheDocument();

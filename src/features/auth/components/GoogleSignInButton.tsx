@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
@@ -33,31 +32,6 @@ function getGoogleClientId(): string {
 
 function hasGoogleIdentityServices(): boolean {
   return typeof window !== "undefined" && Boolean(window.google?.accounts?.id);
-}
-
-export function GoogleConsentText() {
-  return (
-    <p className="text-center text-xs leading-relaxed text-muted-foreground">
-      By continuing with Google, you agree to the Pegasus{" "}
-      <Link
-        to="/terms-of-service"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-medium text-primary hover:underline"
-      >
-        Terms of Service
-      </Link>{" "}
-      and{" "}
-      <Link
-        to="/privacy-policy"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-medium text-primary hover:underline"
-      >
-        Privacy Policy
-      </Link>
-    </p>
-  );
 }
 
 export function GoogleOrDivider() {
@@ -208,7 +182,6 @@ export function GoogleSignInButton({
           disabled && "pointer-events-none opacity-60",
         )}
       />
-      <GoogleConsentText />
       <GoogleOrDivider />
     </div>
   );
