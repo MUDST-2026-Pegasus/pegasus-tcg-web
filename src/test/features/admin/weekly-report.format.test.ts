@@ -150,7 +150,7 @@ describe("weeklyStatCards", () => {
   it("hides comparisons until the previous week is known", () => {
     const cards = weeklyStatCards(report(), undefined);
     expect(byId(cards, "net-profit").delta).toBeNull();
-    expect(byId(cards, "net-profit").footnote).toBe("หักค่าธรรมเนียมระบบแล้ว");
+    expect(byId(cards, "net-profit").footnote).toBe("รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม");
   });
 
   it("never renders NaN for an empty week", () => {
