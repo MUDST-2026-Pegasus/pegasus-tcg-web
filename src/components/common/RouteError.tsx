@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 
 import { InitialRouteReady } from "@/app/InitialRouteReady";
@@ -9,9 +10,15 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { formatPageTitle } from "@/hooks/use-page-title";
 
 export function RouteError() {
   const error = useRouteError();
+
+  // errorElement ของ root แสดงแทน RootLayout — PageTitleSync ไม่ทำงาน จึงตั้งเอง
+  useEffect(() => {
+    document.title = formatPageTitle("เกิดข้อผิดพลาด");
+  }, []);
 
   const detail = isRouteErrorResponse(error)
     ? `${error.status} ${error.statusText}`

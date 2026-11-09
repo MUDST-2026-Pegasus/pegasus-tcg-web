@@ -1,5 +1,6 @@
 import { Outlet, ScrollRestoration } from "react-router-dom";
 
+import { PageTitleSync } from "@/components/layout/PageTitleSync";
 import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
 
 /**
@@ -10,6 +11,7 @@ import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
 export function RootLayout() {
   return (
     <>
+      <PageTitleSync />
       <FaroPageViewTracker />
       <ScrollRestoration />
       <Outlet />

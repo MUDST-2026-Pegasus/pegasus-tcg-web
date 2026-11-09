@@ -60,58 +60,58 @@ const NotFoundPage = lazyPage(() => import("@/features/not-found/pages/NotFoundP
 export const publicRoutes: RouteObject = {
   element: <PublicLayout />,
   children: [
-    { index: true, element: <HomePage /> },
+    { index: true, handle: { title: "หน้าแรก" }, element: <HomePage /> },
 
     { path: "products", element: <LegacyProductsRedirect /> },
-    { path: "products/:productId", element: <ProductDetailPage /> },
-    { path: "collectors/:username", element: <CollectorProfilePage /> },
-    { path: "products/:productId/listings", element: <MarketListingsPage /> },
-    { path: "listings/:listingId", element: <ListingDetailPage /> },
+    { path: "products/:productId", handle: { title: "สินค้า" }, element: <ProductDetailPage /> },
+    { path: "collectors/:username", handle: { title: "นักสะสม" }, element: <CollectorProfilePage /> },
+    { path: "products/:productId/listings", handle: { title: "ประกาศขาย" }, element: <MarketListingsPage /> },
+    { path: "listings/:listingId", handle: { title: "ประกาศขาย" }, element: <ListingDetailPage /> },
     { path: "pokemon", element: <LegacyGameRedirect gameCode="POKEMON" fallbackSlug="pokemon-tcg" /> },
     { path: "one-piece", element: <LegacyGameRedirect gameCode="ONE_PIECE" fallbackSlug="one-piece-card-game" /> },
-    { path: "search", element: <SearchResultsPage /> },
+    { path: "search", handle: { title: "ค้นหา" }, element: <SearchResultsPage /> },
     // หน้า SALE — ราคาลดแล้วไม่ต้องใช้โค้ด [TCG-683]
-    { path: "sale", element: <SalePage /> },
-    { path: "sale/:slug", element: <SalePage /> },
+    { path: "sale", handle: { title: "สินค้าลดราคา" }, element: <SalePage /> },
+    { path: "sale/:slug", handle: { title: "สินค้าลดราคา" }, element: <SalePage /> },
     // ระบบประมูล [TCG-627] — guest ดูได้ บิดต้องล็อกอิน (เช็กตอนกดบิด)
-    { path: "auctions", element: <AuctionListPage /> },
-    { path: "auctions/:auctionId", element: <AuctionDetailPage /> },
+    { path: "auctions", handle: { title: "ประมูล" }, element: <AuctionListPage /> },
+    { path: "auctions/:auctionId", handle: { title: "ประมูล" }, element: <AuctionDetailPage /> },
 
     { path: "store/:storeId", element: <StoreRedirect /> },
-    { path: "u/:username", element: <PublicSellerPage /> },
-    { path: "users/:username", element: <PublicCollectionPage /> },
+    { path: "u/:username", handle: { title: "ร้านค้า" }, element: <PublicSellerPage /> },
+    { path: "users/:username", handle: { title: "คอลเลกชัน" }, element: <PublicCollectionPage /> },
 
-    { path: "cart", element: <CartPage /> },
-    { path: "checkout", element: <CheckoutPage /> },
+    { path: "cart", handle: { title: "ตะกร้าสินค้า" }, element: <CartPage /> },
+    { path: "checkout", handle: { title: "ชำระเงิน" }, element: <CheckoutPage /> },
 
-    { path: "about", element: <AboutPage /> },
-    { path: "terms-of-service", element: <TermsOfServicePage /> },
-    { path: "privacy-policy", element: <PrivacyPolicyPage /> },
+    { path: "about", handle: { title: "เกี่ยวกับเรา" }, element: <AboutPage /> },
+    { path: "terms-of-service", handle: { title: "ข้อตกลงการใช้งาน" }, element: <TermsOfServicePage /> },
+    { path: "privacy-policy", handle: { title: "นโยบายความเป็นส่วนตัว" }, element: <PrivacyPolicyPage /> },
 
     {
       element: <RequireAuth />,
       children: [
-        { path: "payment", element: <PaymentPage /> },
-        { path: "payment/success", element: <PaymentSuccessPage /> },
+        { path: "payment", handle: { title: "ชำระเงิน" }, element: <PaymentPage /> },
+        { path: "payment/success", handle: { title: "ชำระเงินสำเร็จ" }, element: <PaymentSuccessPage /> },
         // sidebar อยู่ใน AccountLayout — เปลี่ยนแท็บแล้วโหลดใหม่แค่เนื้อหา [TCG-732]
         {
           path: "account",
           element: <AccountLayout />,
           children: [
-            { path: "profile", element: <ProfilePage /> },
-            { path: "orders", element: <OrderHistoryPage /> },
-            { path: "addresses", element: <AddressBookPage /> },
-            { path: "coupons", element: <MyCouponsPage /> },
-            { path: "auctions", element: <MyAuctionsPage /> },
+            { path: "profile", handle: { title: "โปรไฟล์" }, element: <ProfilePage /> },
+            { path: "orders", handle: { title: "คำสั่งซื้อของฉัน" }, element: <OrderHistoryPage /> },
+            { path: "addresses", handle: { title: "ที่อยู่" }, element: <AddressBookPage /> },
+            { path: "coupons", handle: { title: "โค้ดของฉัน" }, element: <MyCouponsPage /> },
+            { path: "auctions", handle: { title: "การประมูลของฉัน" }, element: <MyAuctionsPage /> },
           ],
         },
         // คอลเลกชันใช้หน้าเต็มของตัวเอง ไม่มี sidebar
-        { path: "account/collection", element: <MyCollectionPage /> },
+        { path: "account/collection", handle: { title: "คอลเลกชันของฉัน" }, element: <MyCollectionPage /> },
         // ยื่นคำขอผ่าน /sellers/me ต้องรู้ว่าเป็นใคร
-        { path: "become-a-seller", element: <SellerApplicationPage /> },
+        { path: "become-a-seller", handle: { title: "สมัครเป็นผู้ขาย" }, element: <SellerApplicationPage /> },
       ],
     },
 
-    { path: "*", element: <NotFoundPage /> },
+    { path: "*", handle: { title: "ไม่พบหน้านี้" }, element: <NotFoundPage /> },
   ],
 };
