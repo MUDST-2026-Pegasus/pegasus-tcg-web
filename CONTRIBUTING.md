@@ -432,6 +432,61 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 `globals.css` แก้ได้เฉพาะเรื่อง **theme ระดับทั้งแอป** เท่านั้น (เพิ่ม token ใน `@theme inline`,
 สีใน `:root` / `.dark`) และควรแจ้งในกลุ่มก่อน
 
+## ข้อความ / หลายภาษา
+
+เว็บรองรับ `th` (ภาษาหลัก) และ `en` ด้วย [Tolgee](https://app.tolgee.io/projects/36508) — epic TCG-543
+คำแปลอยู่ใน `src/i18n/<namespace>/<lang>.json` ที่ `pnpm i18n:pull` มา commit ไว้ เว็บไม่เรียก Tolgee ตอน runtime
+
+```tsx
+import { useTranslate } from "@/lib/i18n"; // ไม่ใช่ "@tolgee/react" — ตัวนี้ได้ autocomplete key
+
+const { t } = useTranslate("buyer");
+t("cart.summary.title", "สรุปคำสั่งซื้อ");              // default = ข้อความไทยเดิม
+t("cart.items", "{count} ชิ้น", { count: items.length }); // ICU: en ใช้ plural one / other ได้
+```
+
+- **namespace** ตาม route group: `common` (layout, components/common, คำกลาง), `errors`, `buyer`, `seller`, `admin`
+  — `common` / `errors` โหลดตั้งแต่แรก ที่เหลือโหลดตอนหน้าแรกที่ใช้เปิด (skeleton ของ `lazyPage` รับไว้)
+- **ตั้งชื่อ key** `<page>.<section>.<element>` แบบ lowerCamel; คำกลาง (ลองใหม่, ยกเลิก, บันทึก …) ใช้
+  `common:actions.*` / `common:states.*` — รวม aria-label, placeholder, toast และ `document.title`
+- **ข้อความที่มี key แล้วให้แก้ใน Tolgee** ไม่ใช่แก้ default ในโค้ด แล้ว `pnpm i18n:pull`
+- **JSON conflict ตอน merge** ให้ `pnpm i18n:pull` ใหม่ ห้ามแก้มือ
+- **ห้ามใช้ผลของ `t()` เป็น id / key / ค่าที่เอาไปเทียบ** — ตอน dev ที่ตั้ง API key ข้อความถูกฝังอักขระล่องหนไว้ทำ Alt+คลิก
+- **label map / ค่าคงที่ระดับ module** (`*_LABEL`, `nav-config.ts`, `new Intl.*Format` นอก component) ต้องย้ายเข้า hook
+  ไม่งั้นเปลี่ยนภาษาแล้วค้างภาษาเดิม
+- **`t` ที่ส่งเข้าไปเป็น parameter** (เช่น zod schema factory) CLI หา key ไม่เจอ — ประกาศไว้เหนือจุดนั้น:
+  `// @tolgee-key {"key":"form.nameRequired","ns":"buyer","defaultValue":"กรุณากรอกชื่อ"}`
+  key ที่ประกอบตอน runtime (`` t(`order.status.${s}`) ``) ประกาศทีละ key: `// @tolgee-key order.status.PAID`
+- **ไม่แปล:** ชื่อแบรนด์, ชื่อการ์ด / เกม, ข้อมูลที่ผู้ใช้กรอก; `languageCode` ของ variant คือภาษาบนการ์ด ไม่ใช่ภาษา UI
+
+### ขั้นตอน (sync → pull)
+
+```bash
+pnpm i18n:extract-check  # หา key ในโค้ด เช็ค warning (CI ใช้)
+pnpm i18n:compare        # key ไหนมีในโค้ดแต่ยังไม่มีใน Tolgee / ไม่ได้ใช้แล้ว
+pnpm i18n:sync           # ส่ง key ใหม่ + default ไทยขึ้น Tolgee (ถามก่อนลบ key ที่ไม่ใช้)
+pnpm i18n:pull           # ดึงคำแปลล่าสุดลง src/i18n แล้ว commit
+```
+
+CLI ใช้ `TOLGEE_API_KEY` (project API key) จาก environment หรือ `pnpm exec tolgee login`
+
+### dev แบบแก้คำแปลบนหน้าเว็บ (ไม่บังคับ)
+
+ใส่ใน **`.env.development.local`** (ห้ามใส่ใน `.env` — Vite โหลด `.env` ตอน build production ด้วย):
+
+```bash
+VITE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VITE_APP_TOLGEE_API_KEY=<project API key>
+```
+
+แล้ว `pnpm dev` จะดึงคำแปลสดจาก Tolgee และ Alt+คลิกที่ข้อความเพื่อแก้ได้ ไม่ตั้ง = ใช้ JSON ใน repo
+production build ไม่มี key หรือ DevTools (`src/lib/i18n/tolgee.ts`)
+
+### เทสต์
+
+- `setupTests.ts` เตรียม instance ภาษาไทยไว้แล้ว เทสต์ที่ `render` เองหาด้วยข้อความไทยได้เลยไม่ต้องครอบ provider
+- อยากเทสต์ภาษาอังกฤษ: `renderWithProviders(<Page />, { language: "en" })`
+
 ## กติกา
 
 - **ห้ามแก้ `src/components/ui/*`** — เป็นของ shadcn CLI ถ้าอยากได้สไตล์อื่นให้ override ด้วย `className` ตรงจุดที่ใช้

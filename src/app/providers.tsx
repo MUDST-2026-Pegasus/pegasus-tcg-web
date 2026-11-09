@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthSessionSync } from "@/features/auth/auth.queries";
 import { createQueryClient } from "@/lib/api";
 import { env } from "@/lib/env";
+import { I18nProvider } from "@/lib/i18n";
 
 function AuthSessionSync() {
   useAuthSessionSync();
@@ -20,9 +21,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSessionSync />
-      <TooltipProvider>
-        <Toaster>{children}</Toaster>
-      </TooltipProvider>
+      <I18nProvider>
+        <TooltipProvider>
+          <Toaster>{children}</Toaster>
+        </TooltipProvider>
+      </I18nProvider>
       {env.isDev && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );

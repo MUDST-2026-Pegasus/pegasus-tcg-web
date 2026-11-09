@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
+  "projectId": 36508,
+  "format": "JSON_TOLGEE",
+  "patterns": [
+    "./src/{app,components,features,hooks,lib}/**/*.ts?(x)"
+  ],
+  "push": {
+    "files": [
+      {
+        "path": "./src/i18n/common/th.json",
+        "language": "th",
+        "namespace": "common"
+      },
+      {
+        "path": "./src/i18n/common/en.json",
+        "language": "en",
+        "namespace": "common"
+      },
+      {
+        "path": "./src/i18n/errors/th.json",
+        "language": "th",
+        "namespace": "errors"
+      },
+      {
+        "path": "./src/i18n/errors/en.json",
+        "language": "en",
+        "namespace": "errors"
+      },
+      {
+        "path": "./src/i18n/buyer/th.json",
+        "language": "th",
+        "namespace": "buyer"
+      },
+      {
+        "path": "./src/i18n/buyer/en.json",
+        "language": "en",
+        "namespace": "buyer"
+      },
+      {
+        "path": "./src/i18n/seller/th.json",
+        "language": "th",
+        "namespace": "seller"
+      },
+      {
+        "path": "./src/i18n/seller/en.json",
+        "language": "en",
+        "namespace": "seller"
+      },
+      {
+        "path": "./src/i18n/admin/th.json",
+        "language": "th",
+        "namespace": "admin"
+      },
+      {
+        "path": "./src/i18n/admin/en.json",
+        "language": "en",
+        "namespace": "admin"
+      }
+    ]
+  },
+  "pull": {
+    "path": "./src/i18n",
+    "fileStructureTemplate": "{namespace}/{languageTag}.{extension}"
+  }
+}

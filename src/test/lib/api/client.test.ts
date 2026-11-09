@@ -58,9 +58,24 @@ describe("api client", () => {
     
     expect(mockFetch).toHaveBeenCalledWith("http://mock/users", expect.objectContaining({
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", "Accept-Language": "th" },
     }));
     expect(result).toEqual({ user: "john" });
+  });
+
+  it("sends the current UI language as Accept-Language", async () => {
+    vi.mocked(session.isAccessTokenExpired).mockReturnValue(false);
+    mockFetch.mockResolvedValueOnce(createResponse(true, 200, { success: true, data: null }));
+    document.documentElement.lang = "en";
+    try {
+      await api.get("/users");
+    } finally {
+      document.documentElement.lang = "th";
+    }
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://mock/users",
+      expect.objectContaining({ headers: expect.objectContaining({ "Accept-Language": "en" }) }),
+    );
   });
 
   it("waits for session bootstrap before an authenticated request", async () => {
@@ -94,6 +109,7 @@ describe("api client", () => {
       expect.objectContaining({
         headers: {
           Accept: "application/json",
+          "Accept-Language": "th",
           Authorization: "Bearer fake-token",
         },
       })
@@ -111,7 +127,7 @@ describe("api client", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       "http://mock/public",
       expect.objectContaining({
-        headers: { Accept: "application/json" }, // No Authorization
+        headers: { Accept: "application/json", "Accept-Language": "th" }, // No Authorization
       })
     );
   });
