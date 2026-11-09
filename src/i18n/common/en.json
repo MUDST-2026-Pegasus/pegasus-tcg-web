@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "home": "Home",
+    "allProducts": "All products",
+    "newArrivals": "New arrivals",
+    "auction": "Auction",
+    "sale": "Sale",
+    "logoAria": "Pegasus TCG — back to home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "shop": "Shop",
+    "account": "Account",
+    "categories": "Shop categories",
+    "loginHint": "Log in to see your orders and collection",
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out",
+    "becomeSeller": "Become a seller",
+    "search": "Search",
+    "searchPlaceholder": "Search cards, sets or stores…",
+    "cart": "Cart",
+    "cartWithCount": "{count, plural, one {Cart, # item} other {Cart, # items}}"
+  }
+}

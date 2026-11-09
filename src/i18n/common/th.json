@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "home": "Home",
+    "allProducts": "All products",
+    "newArrivals": "New arrivals",
+    "auction": "Auction",
+    "sale": "Sale",
+    "logoAria": "Pegasus TCG — กลับหน้าแรก",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "shop": "SHOP",
+    "account": "ACCOUNT",
+    "categories": "Shop categories",
+    "loginHint": "เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ",
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out",
+    "becomeSeller": "Become a seller",
+    "search": "ค้นหา",
+    "searchPlaceholder": "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…",
+    "cart": "ตะกร้าสินค้า",
+    "cartWithCount": "ตะกร้าสินค้า มีสินค้า {count} ชิ้น"
+  }
+}

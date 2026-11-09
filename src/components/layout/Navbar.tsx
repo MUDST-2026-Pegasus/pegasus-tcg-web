@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/features/cart/cart.queries";
 import { useGameList } from "@/features/catalog/catalog.queries";
 import { useSales } from "@/features/sale/sale.queries";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 export function LanguageSwitch() {
@@ -51,11 +52,12 @@ export function LanguageSwitch() {
 }
 
 function Logo({ onClick }: { onClick?: () => void }) {
+  const { t } = useTranslate();
   return (
     <Link
       to="/"
       onClick={onClick}
-      aria-label="Pegasus TCG — กลับหน้าแรก"
+      aria-label={t("nav.logoAria", "Pegasus TCG — กลับหน้าแรก")}
       className="flex shrink-0 items-center gap-2"
     >
       <img
@@ -71,6 +73,7 @@ function Logo({ onClick }: { onClick?: () => void }) {
 }
 
 export function Navbar() {
+  const { t } = useTranslate();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -103,9 +106,9 @@ export function Navbar() {
   const onePieceSlug =
     games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
   const navLinks = [
-    { label: "Home", to: "/", active: location.pathname === "/" },
+    { label: t("nav.home", "Home"), to: "/", active: location.pathname === "/" },
     {
-      label: "All products",
+      label: t("nav.allProducts", "All products"),
       to: "/search",
       active: isSearch && !currentGame && !newest,
     },
@@ -120,14 +123,14 @@ export function Navbar() {
       active: isSearch && currentGame === onePieceSlug,
     },
     {
-      label: "New arrivals",
+      label: t("nav.newArrivals", "New arrivals"),
       to: "/search?sort=newest",
       active: isSearch && !currentGame && newest,
       icon: SparklesIcon,
     },
     // ระบบประมูล [TCG-636]
     {
-      label: "Auction",
+      label: t("nav.auction", "Auction"),
       to: "/auctions",
       active: location.pathname.startsWith("/auctions"),
       icon: GavelIcon,
@@ -136,7 +139,7 @@ export function Navbar() {
     ...(sales && sales.length > 0
       ? [
           {
-            label: "Sale",
+            label: t("nav.sale", "Sale"),
             to: "/sale",
             active: location.pathname.startsWith("/sale"),
             icon: PercentIcon,
@@ -189,7 +192,9 @@ export function Navbar() {
       variant="ghost"
       size="icon"
       aria-label={
-        cart ? `ตะกร้าสินค้า มีสินค้า ${quantity} ชิ้น` : "ตะกร้าสินค้า"
+        cart
+          ? t("nav.cartWithCount", "ตะกร้าสินค้า มีสินค้า {count} ชิ้น", { count: quantity })
+          : t("nav.cart", "ตะกร้าสินค้า")
       }
       className="relative size-10 shrink-0 overflow-visible md:order-first"
       nativeButton={false}
@@ -234,7 +239,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Open menu"
+                aria-label={t("nav.openMenu", "Open menu")}
                 className="size-10 shrink-0 md:hidden"
               />
             }
@@ -253,7 +258,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Close menu"
+                aria-label={t("nav.closeMenu", "Close menu")}
                 onClick={() => setDrawerOpen(false)}
               >
                 <XIcon className="size-5" />
@@ -283,7 +288,7 @@ export function Navbar() {
               ) : (
                 <>
                   <p className="mb-2 text-xs text-muted-foreground">
-                    เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ
+                    {t("nav.loginHint", "เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ")}
                   </p>
                   <div className="flex gap-2">
                     <Button
@@ -296,7 +301,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      Log in
+                      {t("nav.login", "Log in")}
                     </Button>
                     <Button
                       variant="outline"
@@ -309,7 +314,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      Sign up
+                      {t("nav.signup", "Sign up")}
                     </Button>
                   </div>
                 </>
@@ -317,7 +322,7 @@ export function Navbar() {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
               <div className="px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                SHOP
+                {t("nav.shop", "SHOP")}
               </div>
               {navLinks.map(({ label, to, active, icon: Icon }) => (
                 <Link
@@ -339,7 +344,7 @@ export function Navbar() {
               {!isLoading && isAuthenticated && (
                 <>
                   <div className="mt-6 px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                    ACCOUNT
+                    {t("nav.account", "ACCOUNT")}
                   </div>
                   {links.map(({ label, to }) => (
                     <Link
@@ -367,7 +372,7 @@ export function Navbar() {
                   }}
                 >
                   <LogOutIcon className="size-4" />
-                  Log out
+                  {t("nav.logout", "Log out")}
                 </Button>
               </div>
             )}
@@ -382,11 +387,11 @@ export function Navbar() {
           <SearchIcon className="size-[18px] shrink-0 text-muted-foreground" />
           <input
             ref={searchRef}
-            aria-label="ค้นหา"
+            aria-label={t("nav.search", "ค้นหา")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={blurSearch}
-            placeholder="ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…"
+            placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           <kbd className="rounded border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground group-focus-within:hidden">
@@ -406,16 +411,16 @@ export function Navbar() {
         <SearchIcon className="size-[18px] text-muted-foreground" />
         <input
           ref={mobileSearchRef}
-          aria-label="ค้นหา"
+          aria-label={t("nav.search", "ค้นหา")}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={blurSearch}
-          placeholder="ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…"
+          placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
           className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
         />
       </form>
       <nav
-        aria-label="Shop categories"
+        aria-label={t("nav.categories", "Shop categories")}
         className="h-11 overflow-x-auto border-t border-border [scrollbar-width:none] md:h-11"
       >
         <div className="mx-auto flex h-full min-w-max max-w-[1440px] items-center gap-1 px-3 md:px-6 lg:px-8">
@@ -428,7 +433,7 @@ export function Navbar() {
               <StoreIcon className="size-4" />
               {sellerLink.to === "/seller"
                 ? sellerLink.label
-                : "Become a seller"}
+                : t("nav.becomeSeller", "Become a seller")}
             </Link>
           )}
         </div>

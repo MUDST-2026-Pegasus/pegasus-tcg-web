@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/site-favicon.png" />
@@ -32,6 +32,13 @@
       </div>
     </div>
     <script>
+      // ภาษาที่ผู้ใช้เลือกไว้ (key เดียวกับ LanguageStorage ของ Tolgee) — ตั้งก่อน React mount [TCG-545]
+      (() => {
+        let lang = "th";
+        try { lang = localStorage.getItem("__tolgee_currentLanguage") === "en" ? "en" : "th"; } catch {}
+        document.documentElement.lang = lang;
+        if (lang === "en") document.getElementById("pegasus-splash").setAttribute("aria-label", "Opening PEGASUS TCG");
+      })();
       (() => {
         const splash = document.getElementById("pegasus-splash");
         const started = performance.now();

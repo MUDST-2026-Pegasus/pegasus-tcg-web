@@ -1,0 +1,15 @@
+{
+  "notFound": {
+    "eyebrow": "ERROR 404 · PAGE NOT FOUND",
+    "title": "We couldn't find that page",
+    "body1": "This card may have moved, been removed, or the link may be mistyped.",
+    "body2": "Try searching again, or start over from the home page.",
+    "search": "Search cards, products or stores",
+    "home": "Back to home",
+    "allProducts": "Browse all products",
+    "quickLinks": "Quick links",
+    "orGoTo": "Or go to",
+    "cart": "Cart",
+    "about": "About us"
+  }
+}

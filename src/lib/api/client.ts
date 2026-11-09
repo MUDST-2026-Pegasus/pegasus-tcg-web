@@ -165,6 +165,8 @@ async function fetchJson(
 ): Promise<RawResponse> {
   const headers: Record<string, string> = {
     Accept: "application/json",
+    // ภาษา UI ปัจจุบัน (I18nProvider ตั้ง <html lang> ไว้) — BE ยังไม่ใช้ เตรียมไว้ [TCG-545]
+    "Accept-Language": document.documentElement.lang === "en" ? "en" : "th",
     ...init.headers,
   };
 

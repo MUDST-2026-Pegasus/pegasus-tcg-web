@@ -16,3 +16,9 @@ if (!window.matchMedia) {
     }),
   });
 }
+
+// i18n: เทสต์เดิมที่หาด้วยข้อความไทยผ่านได้โดยไม่ต้องครอบ provider [TCG-545]
+import { prepareTestTolgee } from "@/test/i18n";
+
+await prepareTestTolgee();
+document.documentElement.lang = "th";

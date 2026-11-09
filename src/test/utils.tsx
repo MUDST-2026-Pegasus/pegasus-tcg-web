@@ -2,6 +2,10 @@ import type { ReactElement, ReactNode } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { TolgeeProvider } from '@tolgee/react';
+
+import type { Language } from '@/lib/i18n';
+import { testTolgee } from '@/test/i18n';
 
 export const createTestQueryClient = () =>
   new QueryClient({
@@ -17,14 +21,16 @@ export const createTestQueryClient = () =>
 
 export function renderWithProviders(
   ui: ReactElement,
-  { route = '/', ...options }: Omit<RenderOptions, 'wrapper'> & { route?: string } = {}
+  { route = '/', language = 'th', ...options }: Omit<RenderOptions, 'wrapper'> & { route?: string; language?: Language } = {}
 ) {
   const testQueryClient = createTestQueryClient();
   window.history.pushState({}, 'Test page', route);
 
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={testQueryClient}>
-      <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+      <TolgeeProvider tolgee={testTolgee(language)} fallback={null}>
+        <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
+      </TolgeeProvider>
     </QueryClientProvider>
   );
 
