@@ -25,6 +25,7 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from "@/features/auth/auth.schema";
+import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 export function RegisterForm() {
@@ -89,18 +90,19 @@ export function RegisterForm() {
     }
   });
 
-  const activeError = googleSignIn.isError
-    ? googleSignIn.error
-    : registerAccount.isError
-      ? registerAccount.error
-      : null;
-
-  const formAlert = activeError
+  const formAlert = googleSignIn.isError
     ? getAuthErrorAlert(
-        activeError,
+        googleSignIn.error,
         "Could not create your account. Please try again.",
       )
-    : null;
+    : registerAccount.isError
+      ? {
+          description: getErrorMessage(
+            registerAccount.error,
+            "Could not create your account. Please try again.",
+          ),
+        }
+      : null;
 
   return (
     <form className="flex w-full flex-col gap-6" onSubmit={onSubmit} noValidate>

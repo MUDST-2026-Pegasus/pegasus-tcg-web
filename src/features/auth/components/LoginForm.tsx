@@ -16,6 +16,7 @@ import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import { loginSchema, type LoginFormValues } from "@/features/auth/auth.schema";
+import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 export function LoginForm() {
@@ -62,15 +63,19 @@ export function LoginForm() {
     }
   });
 
-  const activeError = googleSignIn.isError
-    ? googleSignIn.error
+  const formAlert = googleSignIn.isError
+    ? getAuthErrorAlert(
+        googleSignIn.error,
+        "Could not sign you in. Please try again.",
+      )
     : login.isError
-      ? login.error
+      ? {
+          description: getErrorMessage(
+            login.error,
+            "Could not sign you in. Please try again.",
+          ),
+        }
       : null;
-
-  const formAlert = activeError
-    ? getAuthErrorAlert(activeError, "Could not sign you in. Please try again.")
-    : null;
 
   return (
     <form className="flex w-full flex-col gap-5" onSubmit={onSubmit} noValidate>

@@ -124,11 +124,6 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
       }
     >
       <UserSummary user={user} />
-      {updateRoles.isError ? (
-        <p role="alert" className="rounded-[10px] bg-[#fbe9e8] px-3 py-2 text-[11px] leading-4 text-[#b42318]">
-          {userErrorMessage(updateRoles.error, "ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง")}
-        </p>
-      ) : null}
       <ul className="flex flex-col gap-2">
         {ROLE_ROWS.map(({ role, description, locked }) => {
           const changed = changes.some((change) => change.role === role);

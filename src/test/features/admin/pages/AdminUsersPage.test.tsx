@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as usersApi from "@/features/admin/users.api";
 import type { AdminUser } from "@/features/admin/users.types";
 import { AdminUsersPage } from "@/features/admin/pages/AdminUsersPage";
+import { toast } from "@/components/ui/toast";
 import { ApiError, type PageResponse } from "@/lib/api";
 import { renderWithProviders, screen, userEvent, waitFor, within } from "@/test/utils";
 
@@ -265,8 +266,9 @@ describe("AdminUsersPage", () => {
       await waitFor(() => expect(usersApi.grantRole).toHaveBeenCalledWith(1, "ADMIN"));
     });
 
-    it("shows clear alert message when granting role fails with ROLE_REQUIRES_PASSWORD (409)", async () => {
+    it("shows error toast when granting role fails with ROLE_REQUIRES_PASSWORD (409)", async () => {
       mockApi();
+      const toastSpy = vi.spyOn(toast, "add").mockImplementation(vi.fn());
       vi.mocked(usersApi.grantRole).mockRejectedValue(
         new ApiError({
           status: 409,
@@ -282,11 +284,14 @@ describe("AdminUsersPage", () => {
       await user.click(within(dialog).getByRole("switch", { name: "ทีมซัพพอร์ต" }));
       await user.click(within(dialog).getByRole("button", { name: "บันทึก" }));
 
-      expect(
-        await within(dialog).findByText(
-          "บัญชีนี้ใช้การเข้าสู่ระบบด้วย Google อย่างเดียว ต้องตั้งรหัสผ่านก่อนจึงจะให้สิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้",
-        ),
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(toastSpy).toHaveBeenCalledWith({
+          type: "error",
+          title: "ทำรายการไม่สำเร็จ",
+          description:
+            "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้",
+        }),
+      );
     });
   });
 

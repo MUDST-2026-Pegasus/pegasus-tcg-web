@@ -150,6 +150,36 @@ describe('RegisterForm', () => {
     });
   });
 
+  it('shows standard API message and field error when password registration fails with EMAIL_ALREADY_USED', async () => {
+    const emailConflict = new ApiError({
+      status: 409,
+      code: 'EMAIL_ALREADY_USED',
+      message: 'Email address is already registered',
+    });
+    mockMutateAsync.mockRejectedValueOnce(emailConflict);
+    vi.spyOn(authQueries, 'useRegister').mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      reset: vi.fn(),
+      isError: true,
+      error: emailConflict,
+    } as unknown as ReturnType<typeof authQueries.useRegister>);
+
+    renderWithProviders(<RegisterForm />);
+
+    await userEvent.type(screen.getByLabelText(/username/i), 'testuser');
+    await userEvent.type(screen.getByLabelText(/display name/i), 'Test User');
+    await userEvent.type(screen.getByLabelText(/email/i), 'taken@example.com');
+    await userEvent.type(document.getElementById('password') as HTMLInputElement, 'password123');
+    await userEvent.type(document.getElementById('confirmPassword') as HTMLInputElement, 'password123');
+    await userEvent.click(document.getElementById('terms') as HTMLInputElement);
+    await userEvent.click(screen.getByRole('button', { name: /sign up/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Email address is already registered').length).toBeGreaterThanOrEqual(2);
+    });
+    expect(screen.queryByText(/this email can't be used/i)).not.toBeInTheDocument();
+  });
+
   it('hides Google button and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
     renderWithProviders(<RegisterForm />);

@@ -16,18 +16,7 @@ const GOOGLE_BUTTON_OPTIONS: GoogleButtonConfiguration = {
 };
 
 function getGoogleClientId(): string {
-  const configured = env.googleClientId;
-  if (configured) {
-    return configured;
-  }
-  if (
-    typeof window !== "undefined" &&
-    window.Cypress &&
-    window.google?.accounts?.id
-  ) {
-    return "cypress-google-client-id";
-  }
-  return "";
+  return env.googleClientId;
 }
 
 function hasGoogleIdentityServices(): boolean {
@@ -152,7 +141,9 @@ export function GoogleSignInButton({
       },
     });
     container.innerHTML = "";
-    googleId.renderButton(container, GOOGLE_BUTTON_OPTIONS);
+    const width =
+      container.clientWidth > 0 ? Math.min(container.clientWidth, 400) : 400;
+    googleId.renderButton(container, { ...GOOGLE_BUTTON_OPTIONS, width });
   }, [clientId, scriptReady, scriptFailed]);
 
   if (!clientId || scriptFailed || (!scriptReady && !isLoading)) {

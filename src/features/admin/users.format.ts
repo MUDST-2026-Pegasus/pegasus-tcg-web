@@ -114,7 +114,7 @@ export function userErrorMessage(error: unknown, fallback: string): string {
     return "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ";
   }
   if (hasErrorCode(error, "ROLE_REQUIRES_PASSWORD")) {
-    return "บัญชีนี้ใช้การเข้าสู่ระบบด้วย Google อย่างเดียว ต้องตั้งรหัสผ่านก่อนจึงจะให้สิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้";
+    return "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้";
   }
   return getErrorMessage(error, fallback);
 }
