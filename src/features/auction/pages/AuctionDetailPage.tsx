@@ -35,6 +35,7 @@ import { BidStatusBanner } from "../components/BidStatusBanner";
 import { ConfirmBidDialog } from "../components/ConfirmBidDialog";
 import { ConfirmBuyNowDialog } from "../components/ConfirmBuyNowDialog";
 import { SellerNote } from "../components/SellerNote";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale } from "@/lib/i18n";
 
 /** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) + สถานะ B3/B4 [TCG-629 · TCG-630] */
@@ -42,6 +43,7 @@ export function AuctionDetailPage() {
   const { auctionId } = useParams<{ auctionId: string }>();
   const id = auctionId && /^\d+$/.test(auctionId) ? Number(auctionId) : null;
   const auction = useAuction(id);
+  usePageTitle(auction.data?.item.card.productName);
 
   if (id === null || (auction.isError && auction.error instanceof ApiError && auction.error.status === 404)) {
     return (

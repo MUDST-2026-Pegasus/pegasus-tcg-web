@@ -220,6 +220,8 @@ export function recentOrders(dashboard: SellerDashboard): RecentOrders {
     emptyLabel: "ยังไม่มีคำสั่งซื้อ",
     items: dashboard.recentOrders.map((order) => ({
       id: order.sellerOrderId,
+      productName: order.firstItemName ?? "สินค้า",
+      imageUrl: order.firstImageUrl,
       number: order.sellerOrderNumber,
       buyer: order.buyerUsername,
       item: `${order.firstItemName ?? "สินค้า"} · ${count.format(order.itemCount)} ชิ้น`,
@@ -238,6 +240,7 @@ export function lowStock(dashboard: SellerDashboard): LowStock {
     count: listings.lowStockCount,
     items: listings.lowStock.map((listing) => ({
       listingId: listing.listingId,
+      imageUrl: listing.imageUrl,
       name: listing.productName,
       metaLabel: listing.lotLabel ? `${listing.lotLabel} · ${listing.conditionCode}` : null,
       remainingLabel: `เหลือ ${count.format(listing.quantityAvailable)} ชิ้น`,

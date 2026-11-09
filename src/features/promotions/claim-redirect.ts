@@ -19,7 +19,8 @@ export function authRedirectTarget(search: string, state: unknown, fallback = "/
   const next = safeNextPath(new URLSearchParams(search).get("next"));
   if (next) return next;
   const from = (state as FromState)?.from;
-  return from?.pathname ? `${from.pathname}${from.search ?? ""}` : fallback;
+  const fromPath = safeNextPath(from?.pathname);
+  return fromPath ? `${fromPath}${from?.search ?? ""}` : fallback;
 }
 
 /** Called once the buyer is signed in; the claim itself runs on the page they return to. */

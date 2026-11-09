@@ -110,5 +110,8 @@ export function userErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "USER_NOT_FOUND")) {
     return "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ";
   }
+  if (hasErrorCode(error, "ROLE_REQUIRES_PASSWORD")) {
+    return "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้";
+  }
   return getErrorMessage(error, fallback);
 }

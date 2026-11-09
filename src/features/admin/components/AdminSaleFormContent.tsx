@@ -40,7 +40,7 @@ import { useSale, useSaleCardSets, useSaveSale, useSaveSaleDraft, useScopePrevie
 import { type SaleFormErrors, getSaleErrors, getSaleLocks, slugify, toSaleInput, toSalePayload } from "../sales.schema";
 import type { AdminSale, AdminSaleInput, SaleScopePreviewInput } from "../sales.types";
 import { PromotionDialog } from "./PromotionDialog";
-import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "./PromotionFormControls";
+import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "@/features/promotions/shared/PromotionFormControls";
 import { SaleFormAside } from "./SaleFormAside";
 import { ChipPicker, Segmented, ToggleChips } from "./SaleFormControls";
 import { intlLocale } from "@/lib/i18n";

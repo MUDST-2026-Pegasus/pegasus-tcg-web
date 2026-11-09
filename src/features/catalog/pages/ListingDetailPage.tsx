@@ -75,11 +75,13 @@ import {
   ListingMarketHint,
 } from "../components/ListingDetailSections";
 import { cn } from "@/lib/utils";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export function ListingDetailPage() {
   const { listingId } = useParams<{ listingId: string }>();
   const id = Number(listingId);
   const query = useListingDetail(id);
+  usePageTitle(query.data?.listing.card.productName);
   const valid = !!listingId && Number.isSafeInteger(id) && id > 0;
   if (valid && query.isPending) return <ListingDetailSkeleton />;
   if (!valid || query.isError) {

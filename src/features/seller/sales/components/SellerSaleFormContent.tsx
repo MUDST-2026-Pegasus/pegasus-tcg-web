@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
-import { FormField } from "@/features/admin/components/PromotionFormControls";
+import { FormField } from "@/features/promotions/shared/PromotionFormControls";
 import { ChipPicker, Segmented } from "@/features/admin/components/SaleFormControls";
 import { PROMOTION_DANGER_BUTTON, PROMOTION_PAGE_CONTROLS } from "@/features/admin/promotions.styles";
 import { salePeriod } from "@/features/admin/sales.format";

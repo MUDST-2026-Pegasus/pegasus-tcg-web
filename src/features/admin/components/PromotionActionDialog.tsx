@@ -27,7 +27,7 @@ import {
 import type { AdminPromotion } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
 import { PROMOTION_DANGER_BUTTON } from "../promotions.styles";
-import { CheckRow } from "./PromotionFormControls";
+import { CheckRow } from "@/features/promotions/shared/PromotionFormControls";
 import { intlLocale } from "@/lib/i18n";
 
 const SUMMARY_BOX = "grid gap-1 rounded-md bg-muted px-3.5 py-2.5 text-xs";

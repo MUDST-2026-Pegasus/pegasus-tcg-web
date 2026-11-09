@@ -32,6 +32,7 @@ import { ProductAuctionBox } from "../components/ProductAuctionBox";
 import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale } from "@/lib/i18n";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
@@ -48,6 +49,7 @@ export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
 
   const productQuery = useProductDetail(productId);
+  usePageTitle(productQuery.data?.product.name);
 
   if (!productId) {
     return (

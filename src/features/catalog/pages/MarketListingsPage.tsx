@@ -26,11 +26,13 @@ function formatMarketPrice(amount: number, currency: string) {
 }
 
 import { RARITY_LABELS } from "@/lib/card-labels";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale } from "@/lib/i18n";
 
 export function MarketListingsPage() {
   const { productId } = useParams<{ productId: string }>();
   const productQuery = useProductDetail(productId);
+  usePageTitle(productQuery.data?.product.name && `ประกาศขาย ${productQuery.data.product.name}`);
 
   if (productQuery.isPending) {
     return <MarketListingsSkeleton />;

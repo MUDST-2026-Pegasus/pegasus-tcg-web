@@ -39,6 +39,7 @@ import {
   timelineSteps,
   toSellerAuctionRow,
 } from "./seller-auction-detail.format";
+import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale } from "@/lib/i18n";
 
 function parseAuctionId(value: string | undefined): number | null {
@@ -51,6 +52,7 @@ export function SellerAuctionDetailPage() {
   const { auctionId } = useParams();
   const id = parseAuctionId(auctionId);
   const auction = useSellerAuction(id);
+  usePageTitle(auction.data?.item.card.productName);
 
   // กดจากแถวล่าง ๆ ของตาราง S1 ไม่ให้เปิดมาค้างกลางหน้า
   useEffect(() => {

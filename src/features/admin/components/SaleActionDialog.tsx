@@ -13,7 +13,7 @@ import { saleErrorMessage, salePeriod } from "../sales.format";
 import { useDeleteSale, useEndSale, usePauseSale, useResumeSale } from "../sales.queries";
 import type { AdminSale } from "../sales.types";
 import { PromotionDialog } from "./PromotionDialog";
-import { CheckRow } from "./PromotionFormControls";
+import { CheckRow } from "@/features/promotions/shared/PromotionFormControls";
 import { intlLocale } from "@/lib/i18n";
 
 const SUMMARY_BOX = "grid gap-1.5 rounded-md bg-muted px-3.5 py-2.5 text-xs";

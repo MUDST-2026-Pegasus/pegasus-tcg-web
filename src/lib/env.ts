@@ -14,5 +14,10 @@ export const env = {
   pegasusStoreUsername:
     import.meta.env.VITE_PEGASUS_STORE_USERNAME || "pegasus_official",
 
+  /** Google OAuth 2.0 Web Client ID — ปล่อยว่างจะซ่อนปุ่ม Sign in with Google */
+  get googleClientId(): string {
+    return (import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "").trim();
+  },
+
   isDev: import.meta.env.DEV,
 } as const;

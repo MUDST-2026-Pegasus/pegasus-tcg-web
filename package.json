@@ -19,6 +19,7 @@
     "test:watch": "vitest --passWithNoTests",
     "test:e2e": "cypress run",
     "test:e2e:promotions": "cypress run --spec src/test/cypress/e2e/promotions-ledger.cy.ts --env runPromotions=true",
+    "test:e2e:auction": "bash scripts/test-auction-e2e.sh",
     "cyopen": "cypress open",
     "cyrun": "cypress run"
   },

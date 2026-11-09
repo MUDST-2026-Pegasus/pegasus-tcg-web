@@ -25,7 +25,7 @@ export const authRoutes: RouteObject = {
     </RedirectIfAuthenticated>
   ),
   children: [
-    { path: "login", element: <LoginPage /> },
-    { path: "register", element: <RegisterPage /> },
+    { path: "login", handle: { title: "เข้าสู่ระบบ" }, element: <LoginPage /> },
+    { path: "register", handle: { title: "สมัครสมาชิก" }, element: <RegisterPage /> },
   ],
 };

@@ -218,6 +218,10 @@ describe("sign-in to claim", () => {
     expect(authRedirectTarget("?next=%2Fcart", null)).toBe("/cart");
     expect(authRedirectTarget("?next=https%3A%2F%2Fevil.example", { from: { pathname: "/account/orders" } }))
       .toBe("/account/orders");
+    expect(authRedirectTarget("", { from: { pathname: "/account/orders", search: "?tab=completed" } }))
+      .toBe("/account/orders?tab=completed");
+    expect(authRedirectTarget("", { from: { pathname: "//evil.example", search: "?x=1" } }))
+      .toBe("/");
     expect(claimAuthUrl("/login", "/", 41)).toBe("/login?next=%2F&claim=41");
   });
 

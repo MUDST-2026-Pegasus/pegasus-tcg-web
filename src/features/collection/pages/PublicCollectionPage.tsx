@@ -9,6 +9,7 @@ import { useAuth } from "@/features/auth/auth.queries";
 import { PublicSellerReviews } from "@/features/finance/PublicSellerReviews";
 
 import { usePublicCollection } from "../collection.queries";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 export function PublicCollectionPage() {
   const { username = "" } = useParams();
@@ -18,6 +19,7 @@ export function PublicCollectionPage() {
   const cards = collection.data?.pages.flatMap((page) => page.items) ?? [];
   const total = collection.data?.pages[0]?.totalItems ?? 0;
   const name = isOwn ? user.displayName : username;
+  usePageTitle(name && `คอลเลกชันของ ${name}`);
   // The collection endpoint carries no owner profile, so only your own picture is known here.
   const avatarUrl = isOwn ? user.avatarUrl : null;
 

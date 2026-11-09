@@ -1,4 +1,3 @@
-import { ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { RecentOrders } from "../dashboard.types";
+import { ProductThumbnail } from "./ProductThumbnail";
 
 export function RecentOrdersCard({
   title,
@@ -45,9 +45,7 @@ export function RecentOrdersCard({
                 to={`/seller/orders/${order.id}`}
                 className="flex items-center gap-3.5 px-5 py-3 outline-none hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:ring-3 focus-visible:ring-ring/30"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
-                  <ImageIcon aria-hidden="true" className="size-3.5 text-gray-400" />
-                </div>
+                <ProductThumbnail imageUrl={order.imageUrl} name={order.productName} className="size-9" />
 
                 {/* เลขออเดอร์ยาว (PGS-YYYYMMDD-NNNNNN-S…) ต้องตัดได้ ไม่งั้นทับราคา */}
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
