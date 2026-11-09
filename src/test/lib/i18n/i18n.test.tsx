@@ -1,9 +1,12 @@
 import { act, render, screen } from "@testing-library/react";
-import { Suspense } from "react";
+import { StrictMode, Suspense } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { NotFoundPage } from "@/features/not-found/pages/NotFoundPage";
-import { createTolgee, formatDate, I18nProvider, useLanguage, useTranslate } from "@/lib/i18n";
+import { ApiError } from "@/lib/api/errors";
+import { createTolgee, formatDate, I18nProvider, translateError, useLanguage, useTranslate } from "@/lib/i18n";
+import { registerErrorTranslator } from "@/lib/i18n/errors";
+import { testTolgee } from "@/test/i18n";
 import { renderWithProviders } from "@/test/utils";
 
 const STORAGE_KEY = "__tolgee_currentLanguage";
@@ -31,6 +34,7 @@ function LazyNamespace() {
 }
 
 afterEach(() => {
+  registerErrorTranslator(testTolgee("th"));
   localStorage.removeItem(STORAGE_KEY);
   document.documentElement.lang = "th";
 });
@@ -87,5 +91,15 @@ describe("i18n setup", () => {
     const button = screen.getByRole("button", { name: "en" });
     await act(async () => button.click());
     expect(await screen.findByText("19 Oct 2026")).toBeInTheDocument();
+  });
+
+  it("translates API errors with the instance the provider runs, even under StrictMode", async () => {
+    const network = new ApiError({ status: 0, code: "NETWORK_ERROR", message: "Cannot reach the server." });
+    function NetworkError() {
+      return <p>{translateError(network, "fallback")}</p>;
+    }
+    registerErrorTranslator(null);
+    render(<StrictMode><I18nProvider><NetworkError /></I18nProvider></StrictMode>);
+    expect(await screen.findByText("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง")).toBeInTheDocument();
   });
 });

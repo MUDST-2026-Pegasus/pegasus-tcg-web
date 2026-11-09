@@ -16,8 +16,9 @@ import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import { loginSchema, type LoginFormValues } from "@/features/auth/auth.schema";
-import { getErrorMessage } from "@/lib/api";
+
 import { applyApiErrors } from "@/lib/form";
+import { translateError } from "@/lib/i18n";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export function LoginForm() {
       )
     : login.isError
       ? {
-          description: getErrorMessage(
+          description: translateError(
             login.error,
             "Could not sign you in. Please try again.",
           ),

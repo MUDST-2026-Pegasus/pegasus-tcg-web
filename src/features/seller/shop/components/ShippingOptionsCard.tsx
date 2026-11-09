@@ -10,7 +10,6 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
-import { getErrorMessage } from '@/lib/api';
 import { CARRIER_OPTIONS } from '../../shared/carriers';
 import { formatBaht } from '../../shared/seller.format';
 import { shopApi, shippingPayload } from '../shop.api';
@@ -19,6 +18,7 @@ import { shippingSchema } from '../shop.schema';
 import { extraFeeLabel, shippingDays } from '../shop.format';
 import type { ShippingOption, ShippingOptionPayload } from '../shop.types';
 import { ShopCard, ShopLoading, ShopError, shopFooter } from './ShopCard';
+import { translateError } from "@/lib/i18n";
 
 const blank: ShippingOptionPayload = { name: '', carrierCode: '', baseFee: 0, perItemFee: 0, freeThreshold: null, estDaysMin: null, estDaysMax: null, active: true, displayOrder: 0 };
 export function ShippingOptionsCard({ canPublish }: { canPublish: boolean }) {
@@ -37,7 +37,7 @@ export function ShippingOptionsCard({ canPublish }: { canPublish: boolean }) {
       client.setQueryData(shopKeys.shipping, action.type === 'reorder' ? action.options : previous?.map((o) => o.id === action.option.id ? { ...o, active: !o.active } : o));
       return { previous };
     },
-    onError: (error, _action, context) => { client.setQueryData(shopKeys.shipping, context?.previous); toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกตัวเลือกไม่สำเร็จ') }); },
+    onError: (error, _action, context) => { client.setQueryData(shopKeys.shipping, context?.previous); toast.add({ type: 'error', title: translateError(error, 'บันทึกตัวเลือกไม่สำเร็จ') }); },
     onSuccess: () => { toast.add({ type: 'success', title: 'บันทึกตัวเลือกการจัดส่งแล้ว' }); },
     onSettled: () => client.invalidateQueries({ queryKey: shopKeys.shipping }),
   });
@@ -70,7 +70,7 @@ function ShippingForm({ option, id, onClose }: { option: ShippingOptionPayload; 
   const form = useForm<ShippingOptionPayload>({ resolver: zodResolver(shippingSchema), defaultValues: option });
   const save = form.handleSubmit(async (values) => {
     try { if (id === undefined) await shopApi.create(values); else await shopApi.update(id, values); await client.invalidateQueries({ queryKey: shopKeys.shipping }); toast.add({ type: 'success', title: 'บันทึกตัวเลือกการจัดส่งแล้ว' }); onClose(); }
-    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') }); }
+    catch (error) { toast.add({ type: 'error', title: translateError(error, 'บันทึกไม่สำเร็จ') }); }
   });
   const numbers = [{ key: 'baseFee', label: 'ค่าส่งเริ่มต้น (บาท)', nullable: false }, { key: 'perItemFee', label: 'ต่อใบถัดไป (บาท)', nullable: false }, { key: 'freeThreshold', label: 'ส่งฟรีเมื่อยอดถึง (บาท)', nullable: true }, { key: 'estDaysMin', label: 'ระยะเวลาต่ำสุด (วัน)', nullable: true }, { key: 'estDaysMax', label: 'ระยะเวลาสูงสุด (วัน)', nullable: true }] as const;
   return <form className="space-y-4" onSubmit={save} noValidate><fieldset disabled={form.formState.isSubmitting} className="space-y-4"><div><label htmlFor="shipping-name" className="text-xs">ชื่อตัวเลือก *</label><Input id="shipping-name" maxLength={100} {...form.register('name')}/></div><div><label htmlFor="carrier" className="text-xs">ผู้ให้บริการ</label><Controller name="carrierCode" control={form.control} render={({ field }) => {

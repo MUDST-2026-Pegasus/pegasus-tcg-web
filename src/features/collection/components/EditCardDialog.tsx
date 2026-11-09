@@ -14,7 +14,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { getErrorMessage } from "@/lib/api";
 
 import { getCollectionVariants } from "../collection.api";
 import { payloadOf } from "../collection.payload";
@@ -22,6 +21,7 @@ import { clampQuantity, offeredVariants, resolveVariantId, type CardDraft } from
 import { useUpdateCollectionItem } from "../collection.queries";
 import type { CollectionItem } from "../collection.types";
 import { CardDetailsRow } from "./CardDetailsRow";
+import { translateError } from "@/lib/i18n";
 
 export function EditCardDialog({ item, onClose }: { item: CollectionItem | null; onClose: () => void }) {
   // Keep showing the card while the dialog animates shut, instead of an empty box.
@@ -80,7 +80,7 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
       });
       onClose();
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not save this card. Please try again."));
+      setError(translateError(cause, "Could not save this card. Please try again."));
     }
   };
 

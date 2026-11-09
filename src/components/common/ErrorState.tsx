@@ -10,8 +10,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
+import { translateError } from "@/lib/i18n";
 
 type ErrorStateProps = {
   /** error ที่ได้จาก query/mutation — ถ้าเป็น `ApiError` จะหยิบข้อความจาก backend มาแสดง */
@@ -50,7 +51,7 @@ export function ErrorState({
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
-          {getErrorMessage(error, fallbackMessage)}
+          {translateError(error, fallbackMessage)}
         </EmptyDescription>
       </EmptyHeader>
       {(onRetry || children) && (

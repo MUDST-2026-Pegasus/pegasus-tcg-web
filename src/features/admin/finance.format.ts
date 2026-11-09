@@ -1,10 +1,10 @@
 import { differenceInMinutes, format, formatDistanceToNowStrict } from "date-fns";
 
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { PayoutStatus, RefundStatus } from "./finance.types";
-import { currentLanguage, dateFnsLocale, formatDateTime, intlLocale } from "@/lib/i18n";
+import { currentLanguage, dateFnsLocale, formatDateTime, intlLocale, translateError } from "@/lib/i18n";
 
 /** "฿1,850.00" — ยอดในรายละเอียด */
 export function formatBaht(value: number): string {
@@ -126,7 +126,7 @@ export function financeErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "PAYMENT_STATE") || hasErrorCode(error, "PAYOUT_STATE")) {
     return "รายการนี้ถูกจัดการไปแล้ว ลองรีเฟรชคิว";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }
 
 /** กรองรายการด้วยคำค้น — เทียบแบบไม่สนตัวพิมพ์กับทุกข้อความที่ส่งมา */

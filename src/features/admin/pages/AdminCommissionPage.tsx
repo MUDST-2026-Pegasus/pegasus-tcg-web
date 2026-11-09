@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PanelSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage, isApiError } from "@/lib/api";
+import { isApiError } from "@/lib/api";
 import { useCategoryList, useGameList } from "@/features/catalog/catalog.queries";
 import { feeBreakdown } from "@/features/admin/commission-rule.form";
 import { CommissionCalcCard } from "@/features/admin/components/CommissionCalcCard";
@@ -15,7 +15,7 @@ import { CommissionRulesCard } from "@/features/admin/components/CommissionRules
 import type { CommissionCategory } from "@/features/admin/admin.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRuleInput } from "@/features/finance/after-sales.types";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 const blank = (): CommissionRuleInput => ({ scope: "GLOBAL", gameId: null, categoryId: null,
   sellerProfileId: null, ratePercent: 0, fixedFee: 0, minFee: null, maxFee: null,
@@ -108,7 +108,7 @@ export function AdminCommissionPage() {
       await refresh();
       toast.add({ type: "success", title: "บันทึกการตั้งค่าค่าคอมมิชชั่นแล้ว" });
     } catch (error) {
-      toast.add({ type: "error", title: "บันทึกไม่ครบทุกอัตรา", description: getErrorMessage(error, "กรุณาตรวจรายการแล้วลองอีกครั้ง") });
+      toast.add({ type: "error", title: "บันทึกไม่ครบทุกอัตรา", description: translateError(error, "กรุณาตรวจรายการแล้วลองอีกครั้ง") });
       await refresh();
     } finally { setBusy(false); }
   }

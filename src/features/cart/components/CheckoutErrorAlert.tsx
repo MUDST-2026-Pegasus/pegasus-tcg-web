@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api/errors";
+import { translateError } from "@/lib/i18n";
 
 interface CheckoutErrorAlertProps {
   title: string;
@@ -13,7 +14,7 @@ export function CheckoutErrorAlert({ title, error, actions }: CheckoutErrorAlert
       <p className="font-semibold">{title}</p>
       <p>
         {error instanceof ApiError
-          ? error.message
+          ? translateError(error, error.message)
           : "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"}
       </p>
       {actions.map(({ label, onClick }) => (

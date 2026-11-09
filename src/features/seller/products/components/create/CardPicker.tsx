@@ -14,7 +14,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBaht } from "@/features/seller/shared/seller.format";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 import {
@@ -33,6 +33,7 @@ import type {
   CatalogSearchItem,
   SelectedCard,
 } from "../../listing-form.types";
+import { translateError } from "@/lib/i18n";
 
 /** พิมพ์ค้างไว้ครู่หนึ่งค่อยค้น ไม่ยิงทุกตัวอักษร */
 const SEARCH_DELAY_MS = 350;
@@ -112,7 +113,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
       ) : search.data === undefined ? (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(search.error, "ค้นหาการ์ดไม่สำเร็จ")}{" "}
+            {translateError(search.error, "ค้นหาการ์ดไม่สำเร็จ")}{" "}
             <button
               type="button"
               className="cursor-pointer font-medium underline underline-offset-2"
@@ -255,7 +256,7 @@ function VariantChooser({
   if (detail.data === undefined) {
     return (
       <p className="px-3 pb-3 text-xs text-destructive">
-        {getErrorMessage(detail.error, "โหลดพิมพ์ของการ์ดนี้ไม่สำเร็จ")}
+        {translateError(detail.error, "โหลดพิมพ์ของการ์ดนี้ไม่สำเร็จ")}
       </p>
     );
   }
@@ -359,7 +360,7 @@ function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
         <p className="text-xs text-destructive">
           {hasErrorCode(lookup.error, "VARIANT_NOT_FOUND")
             ? `ไม่พบการ์ดที่มีรหัส "${submitted}" ในแคตตาล็อก`
-            : getErrorMessage(lookup.error, "ค้นด้วยรหัสไม่สำเร็จ")}
+            : translateError(lookup.error, "ค้นด้วยรหัสไม่สำเร็จ")}
         </p>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5">

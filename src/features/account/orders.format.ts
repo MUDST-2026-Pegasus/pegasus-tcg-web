@@ -2,7 +2,8 @@
  * Order status mappings and human-readable formatters for the buyer account portal.
  */
 
-import { getErrorMessage, isApiError, isNetworkError } from "@/lib/api";
+import { isApiError, isNetworkError } from "@/lib/api";
+import { translateError } from "@/lib/i18n";
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   PENDING_PAYMENT: "Pending Payment",
@@ -125,5 +126,5 @@ export function buyerOrderSummaryDownloadErrorMessage(error: unknown): string {
         if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
     }
   }
-  return getErrorMessage(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+  return translateError(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
 }

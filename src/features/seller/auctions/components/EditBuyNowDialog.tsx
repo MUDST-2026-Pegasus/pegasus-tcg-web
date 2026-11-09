@@ -17,6 +17,7 @@ import { ApiError } from "@/lib/api/errors";
 
 import { buyNowPriceIssue, issueMessage } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
+import { translateError } from "@/lib/i18n";
 
 type EditBuyNowDialogProps = {
   detail: SellerAuctionDetail;
@@ -55,7 +56,7 @@ export function EditBuyNowDialog({ detail, open, onOpenChange }: EditBuyNowDialo
           } else if (error instanceof ApiError && error.code === "BUY_NOW_BELOW_START") {
             setServerError("ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น");
           } else {
-            toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: error instanceof ApiError ? error.message : undefined });
+            toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: error instanceof ApiError ? translateError(error, error.message) : undefined });
           }
         },
       },

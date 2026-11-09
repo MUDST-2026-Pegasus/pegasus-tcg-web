@@ -11,6 +11,7 @@ import type { CartItemResponse } from "./cart.types";
 import type { PromotionSelection } from "./promotions.types";
 import type { CheckoutSellerGroup } from "./useShippingSelection";
 import type { CheckoutPayload } from "./useCheckoutSubmit";
+import { translateError } from "@/lib/i18n";
 
 export interface PromotionChange {
   previous: number;
@@ -151,7 +152,7 @@ export function useCheckoutErrorHandler({
           error.code === "INSUFFICIENT_STOCK"
             ? "สินค้าไม่เพียงพอ"
             : "สั่งซื้อไม่สำเร็จ",
-        description: error.message,
+        description: translateError(error, error.message),
         type: "error",
       });
     }

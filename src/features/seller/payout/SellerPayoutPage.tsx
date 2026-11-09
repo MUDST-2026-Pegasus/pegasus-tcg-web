@@ -8,7 +8,7 @@ import { toast } from "@/components/ui/toast";
 import { financeApi } from "@/features/finance/finance.api";
 import type { Payout, Wallet } from "@/features/finance/finance.types";
 import { dashboardKeys } from "@/features/seller/dashboard/dashboard.queries";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import { PayoutAccountCard } from "./components/PayoutAccountCard";
 import { PayoutBalance } from "./components/PayoutBalance";
 import { PayoutDetailSheet } from "./components/PayoutDetailSheet";
@@ -17,6 +17,7 @@ import { PayoutRequestDialog } from "./components/PayoutRequestDialog";
 import { PayoutTracker } from "./components/PayoutTracker";
 import { WalletLedger } from "./components/WalletLedger";
 import { money, PAYOUT_MINIMUM, validatePayoutAmount } from "./payout.format";
+import { translateError } from "@/lib/i18n";
 
 const activeStatuses = new Set(["REQUESTED", "APPROVED", "PROCESSING"]);
 const PAGE_SIZE = 20;
@@ -79,7 +80,7 @@ export function SellerPayoutPage() {
         const latestAmount = Number(latest.data?.withdrawable ?? withdrawable);
         setConflict(`ยอดถอนได้เปลี่ยนไปแล้ว กรุณาตรวจสอบจำนวนเงินอีกครั้ง · ยอดล่าสุดคือ ${money(latestAmount)}`);
       } else {
-        toast.add({ type: "error", title: "ขอถอนเงินไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
+        toast.add({ type: "error", title: "ขอถอนเงินไม่สำเร็จ", description: translateError(error, "กรุณาลองอีกครั้ง") });
         if (["VALIDATION_FAILED", "PAYOUT_BELOW_MINIMUM", "SELLER_NOT_VERIFIED", "PAYOUT_ACCOUNT_NOT_FOUND"].some((code) => hasErrorCode(error, code))) {
           void Promise.all([wallet.refetch(), payouts.refetch(), account.refetch()]);
         }

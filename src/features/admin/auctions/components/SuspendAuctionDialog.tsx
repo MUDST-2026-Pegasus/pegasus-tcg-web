@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useSuspendAuction } from "@/features/auction/auction.queries";
 import { ApiError } from "@/lib/api/errors";
+import { translateError } from "@/lib/i18n";
 
 export type SuspendTarget = { id: number; cardName: string; auctionNumber: string; bidCount: number };
 
@@ -33,7 +34,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) =>
-          toast.add({ type: "error", title: "ระงับประมูลไม่สำเร็จ", description: error instanceof ApiError ? error.message : undefined }),
+          toast.add({ type: "error", title: "ระงับประมูลไม่สำเร็จ", description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
       },
     );
   };

@@ -25,8 +25,9 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from "@/features/auth/auth.schema";
-import { getErrorMessage } from "@/lib/api";
+
 import { applyApiErrors } from "@/lib/form";
+import { translateError } from "@/lib/i18n";
 
 export function RegisterForm() {
   const navigate = useNavigate();
@@ -97,7 +98,7 @@ export function RegisterForm() {
       )
     : registerAccount.isError
       ? {
-          description: getErrorMessage(
+          description: translateError(
             registerAccount.error,
             "Could not create your account. Please try again.",
           ),

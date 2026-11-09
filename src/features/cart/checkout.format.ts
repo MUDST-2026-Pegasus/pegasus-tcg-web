@@ -1,5 +1,5 @@
 import type { AvailablePromotion } from "./promotions.types";
-import { dateTimeFormat, intlLocale } from "@/lib/i18n";
+import { dateTimeFormat, errorText, intlLocale } from "@/lib/i18n";
 
 export const checkoutMoney = (value: number) =>
   `฿${value.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
@@ -88,42 +88,22 @@ export function formatPromotionError(
     startsAt?: string | null;
   },
 ): string {
-  if (!code) return "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง";
+  const notFound = errorText("PROMO_NOT_FOUND") ?? "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง";
+  if (!code) return notFound;
   const cleanCode = code.trim().toUpperCase();
 
-  switch (cleanCode) {
-    case "PROMO_EXPIRED":
-      return "โค้ดหมดอายุแล้ว";
-    case "PROMO_MIN_SPEND_NOT_MET":
-      return context?.shortfall != null && context.shortfall > 0
-        ? `ซื้อสินค้าเพิ่มอีก ${checkoutMoney(context.shortfall)} เพื่อใช้โค้ดนี้`
-        : "ยอดซื้อยังไม่ถึงยอดขั้นต่ำเพื่อใช้โค้ดนี้";
-    case "PROMO_WRONG_SELLER":
-      return context?.sellerName
-        ? `โค้ดนี้เป็นของร้าน ${context.sellerName} — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น`
-        : "โค้ดนี้เป็นของร้านค้าอื่น — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น";
-    case "PROMO_USED_UP":
-      return "สิทธิ์ของโค้ดถูกใช้ครบแล้ว";
-    case "PROMO_USER_LIMIT_REACHED":
-      return "คุณใช้โค้ดนี้ครบจำนวนครั้งแล้ว";
-    case "PROMO_NOT_STARTED":
-      return context?.startsAt
-        ? `โค้ดใช้ได้ตั้งแต่วันที่ ${formatPromotionDate(context.startsAt)}`
-        : "โค้ดยังไม่เริ่มใช้งาน";
-    case "PROMO_NOT_APPLICABLE":
-      return "ไม่มีสินค้าในตะกร้าที่เข้าเงื่อนไขโค้ดนี้";
-    case "PROMO_NOT_CLAIMED":
-      return "โค้ดนี้ต้องเก็บก่อนใช้งาน";
-    case "PROMO_CLAIM_FULL":
-      return "โค้ดถูกเก็บครบสิทธิ์แล้ว";
-    case "PROMO_PAUSED":
-      return "โค้ดถูกระงับชั่วคราว";
-    case "PROMO_CHANGED":
-      return "ยอดชำระเปลี่ยนไป";
-    case "PROMO_NOT_FOUND":
-    default:
-      return "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง";
+  // ข้อความที่มีรายละเอียด (ยอด / ร้าน / วันที่) ใช้ key ใน errors:promo.* [TCG-547]
+  if (cleanCode === "PROMO_MIN_SPEND_NOT_MET" && context?.shortfall != null && context.shortfall > 0) {
+    return errorText("promo.minSpendShortfall", { amount: checkoutMoney(context.shortfall) }) ?? notFound;
   }
+  if (cleanCode === "PROMO_WRONG_SELLER" && context?.sellerName) {
+    return errorText("promo.wrongSellerNamed", { seller: context.sellerName }) ?? notFound;
+  }
+  if (cleanCode === "PROMO_NOT_STARTED" && context?.startsAt) {
+    return errorText("promo.startsAt", { date: formatPromotionDate(context.startsAt) }) ?? notFound;
+  }
+  // code ที่ยังไม่มีคำแปล (PROMO_* ตัวใหม่) ถือว่าไม่พบโค้ด เหมือนเดิม
+  return (cleanCode.startsWith("PROMO_") && errorText(cleanCode)) || notFound;
 }
 
 export function formatPromotionUnavailableReason(

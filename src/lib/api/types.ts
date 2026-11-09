@@ -12,6 +12,10 @@ export type ApiEnvelope<T> = {
 export type FieldViolation = {
   field: string;
   message: string;
+  /** ชื่อ constraint เช่น "NotBlank", "Size" — BE เริ่มส่งใน I18N-04 (TCG-548) */
+  code?: string;
+  /** ค่าของ constraint เช่น { max: 34 } */
+  params?: Record<string, unknown>;
 };
 
 /** ส่งมาใน `data` ตอน `success === false` */

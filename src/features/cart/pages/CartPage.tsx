@@ -26,6 +26,7 @@ import { AppliedCodeBox, AutoPickedNote, DroppedCodeNotice, PickCodeRow } from "
 import { CartCodePicker } from "../components/CartCodePicker";
 import { CartSellerGroup } from "../components/CartSellerGroup";
 import { useCartPromotions, type PromotionOwnerKey } from "../useCartPromotions";
+import { translateError } from "@/lib/i18n";
 
 type SellerGroup = {
   sellerId: number | null;
@@ -202,7 +203,7 @@ export function CartPage() {
       onError: (error) => {
         toast.add({
           title: "ยอมรับราคาใหม่ไม่สำเร็จ",
-          description: error instanceof ApiError ? error.message : "กรุณาลองอีกครั้ง",
+          description: error instanceof ApiError ? translateError(error, error.message) : "กรุณาลองอีกครั้ง",
           type: "error",
         });
       },
@@ -299,7 +300,7 @@ export function CartPage() {
           <div className="flex items-center gap-3 p-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div className="flex-1 text-sm font-medium">
-              {error instanceof ApiError ? error.message : "โหลดตะกร้าไม่สำเร็จ"}
+              {error instanceof ApiError ? translateError(error, error.message) : "โหลดตะกร้าไม่สำเร็จ"}
             </div>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               ลองใหม่

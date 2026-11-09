@@ -7,13 +7,13 @@ import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/auth.queries";
-import { getErrorMessage } from "@/lib/api";
 
 import { payloadOf } from "../collection.payload";
 import { useCollection, useRemoveCollectionItem, useUpdateCollectionItem } from "../collection.queries";
 import type { CollectionItem } from "../collection.types";
 import { AddCardsDialog } from "../components/AddCardsDialog";
 import { EditCardDialog } from "../components/EditCardDialog";
+import { translateError } from "@/lib/i18n";
 
 export function MyCollectionPage() {
   const { user } = useAuth();
@@ -33,7 +33,7 @@ export function MyCollectionPage() {
       await update.mutateAsync({ id: item.id, payload: payloadOf(item, { publicItem }) });
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not change visibility."));
+      setError(translateError(cause, "Could not change visibility."));
     }
   };
 
@@ -44,7 +44,7 @@ export function MyCollectionPage() {
       setRemoving(null);
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not remove this card."));
+      setError(translateError(cause, "Could not remove this card."));
     }
   };
 

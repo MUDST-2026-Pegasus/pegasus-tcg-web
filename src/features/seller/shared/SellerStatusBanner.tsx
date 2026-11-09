@@ -14,11 +14,12 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
 
 import { publishBlockedReason } from "./seller.format";
 import type { SellerProfile } from "./seller.types";
+import { translateError } from "@/lib/i18n";
 
 const TONE_CLASS = {
   danger: "border-red-200 bg-red-50 text-red-700",
@@ -81,7 +82,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
           </Button>
         }
       >
-        {getErrorMessage(error, "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง")}
+        {translateError(error, "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง")}
       </Banner>,
     );
   }

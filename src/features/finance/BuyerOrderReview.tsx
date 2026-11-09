@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/toast';
-import { getErrorMessage } from '@/lib/api';
 import { afterSalesApi } from './after-sales.api';
 import { RatingInput, ReviewStars } from './ReviewStars';
 import { reviewKeys } from './reviews.queries';
+import { translateError } from "@/lib/i18n";
 
 export function BuyerOrderReview({ orderId, status }: { orderId: number; status: string }) {
   const cache = useQueryClient();
@@ -25,7 +25,7 @@ export function BuyerOrderReview({ orderId, status }: { orderId: number; status:
       void cache.invalidateQueries({ queryKey: ['seller-dashboard'] });
       toast.add({ type: 'success', title: 'ส่งรีวิวแล้ว' });
     },
-    onError: (error) => { toast.add({ type: 'error', title: getErrorMessage(error, 'ส่งรีวิวไม่สำเร็จ') }); },
+    onError: (error) => { toast.add({ type: 'error', title: translateError(error, 'ส่งรีวิวไม่สำเร็จ') }); },
   });
   if (status !== 'COMPLETED') return null;
   if (review.isPending) return <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว"><TextLinesSkeleton lines={2} /></div>;

@@ -1,5 +1,5 @@
 import type { ProductCardData } from "@/components/common";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type {
   CardEdition,
@@ -67,7 +67,7 @@ export const CARD_FINISHES: CardFinish[] = [
 
 export { CARD_FINISH_LABEL } from "@/lib/card-labels";
 import { CARD_FINISH_LABEL, CARD_EDITION_LABEL } from "@/lib/card-labels";
-import { numberFormat } from "@/lib/i18n";
+import { numberFormat, translateError } from "@/lib/i18n";
 
 export const CARD_EDITIONS: CardEdition[] = [
   "NOT_APPLICABLE",
@@ -185,5 +185,5 @@ export function catalogErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ACCESS_DENIED")) {
     return "บัญชีนี้ไม่มีสิทธิ์แก้แคตตาล็อก";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

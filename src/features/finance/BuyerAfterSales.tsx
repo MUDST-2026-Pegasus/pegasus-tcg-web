@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import type { SellerOrderDetails } from "@/features/account/orders.types";
-import { getErrorMessage } from "@/lib/api";
 
 import { afterSalesApi } from "./after-sales.api";
 import { BuyerOrderReview } from "./BuyerOrderReview";
 import { BuyerReturnConfirmationDialog } from "./components/BuyerReturnConfirmationDialog";
 import { returnReasonLabel, returnStatusLabel } from "./after-sales.format";
+import { translateError } from "@/lib/i18n";
 
 const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "COUNTERFEIT", "OTHER"];
 
@@ -44,7 +44,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       toast.add({
         type: "error",
         title: "ดำเนินการไม่สำเร็จ",
-        description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+        description: translateError(error, "กรุณาลองอีกครั้ง"),
       });
     } finally {
       setBusy(false);

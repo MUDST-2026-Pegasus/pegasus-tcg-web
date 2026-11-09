@@ -1,4 +1,4 @@
-import { getErrorMessage, isApiError, isNetworkError } from "@/lib/api";
+import { isApiError, isNetworkError } from "@/lib/api";
 
 import type {
   AdminOrderSort,
@@ -11,6 +11,7 @@ import type {
   SellerOrderStatus,
   ShippingAddressSnapshot,
 } from "./orders.types";
+import { translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงค่าดิบจาก `/admin/orders` → ข้อความบนหน้า
@@ -229,5 +230,5 @@ export function adminOrderSummaryDownloadErrorMessage(error: unknown): string {
         if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
     }
   }
-  return getErrorMessage(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+  return translateError(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
 }

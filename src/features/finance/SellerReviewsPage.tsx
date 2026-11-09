@@ -9,12 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth/auth.queries";
 import { dashboardKeys, useSellerDashboard } from "@/features/seller/dashboard/dashboard.queries";
-import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
+import { hasErrorCode, isApiError } from "@/lib/api";
 import { afterSalesApi } from "./after-sales.api";
 import type { PublicReview } from "./after-sales.types";
 import { EmptyReviews, ReviewAside, ReviewCard, Stat } from "./SellerReviewComponents";
 import { canSendReply, filterReviews, reviewCounts, reviewRating, reviewTab, type ReviewTab } from "./reviews.format";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 const panel = "rounded-xl border border-border bg-card";
 const reviewKey = (username: string) => ["finance", "public-reviews", username] as const;
@@ -64,7 +64,7 @@ export function SellerReviewsPage() {
         toast.add({ type: "info", title: "ไม่พบรีวิวนี้", description: "รีวิวอาจถูกซ่อนหรือไม่ใช่ของร้านคุณ รายการจะรีเฟรชใหม่" });
         void reviews.refetch();
       } else if (isApiError(error) && error.status === 400) setReplyError(review.id);
-      else toast.add({ type: "error", title: "ตอบรีวิวไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
+      else toast.add({ type: "error", title: "ตอบรีวิวไม่สำเร็จ", description: translateError(error, "กรุณาลองอีกครั้ง") });
     } finally { setBusy(false); }
   }
 

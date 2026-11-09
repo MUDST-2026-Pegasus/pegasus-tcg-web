@@ -18,7 +18,7 @@ import { toast } from "@/components/ui/toast";
 import { useCardSetList, useGameList, useProductSearch } from "@/features/catalog/catalog.queries";
 import type { ProductSummaryDto } from "@/features/catalog/catalog.types";
 import { useFileUpload, type UploadItem } from "@/hooks/use-file-upload";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
 
 import { getCollectionVariants } from "../collection.api";
@@ -34,6 +34,7 @@ import {
 } from "../collection.picker";
 import { useAddCollectionItems } from "../collection.queries";
 import { CardDetailsRow, CardThumb, OptionSelect } from "./CardDetailsRow";
+import { translateError } from "@/lib/i18n";
 
 const PAGE_SIZE = 12;
 
@@ -165,7 +166,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     const failed: Record<number, string> = {};
     outcomes.forEach((outcome, index) => {
       if (outcome.status === "rejected") {
-        failed[rows[index].card.productId] = getErrorMessage(outcome.reason, "Could not add this card.");
+        failed[rows[index].card.productId] = translateError(outcome.reason, "Could not add this card.");
       }
     });
 

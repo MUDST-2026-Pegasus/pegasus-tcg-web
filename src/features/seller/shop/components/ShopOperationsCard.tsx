@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
-import { getErrorMessage } from '@/lib/api';
 import type { ShopSettings } from '../shop.types';
 import { shopSettingsSchema } from '../shop.schema';
 import { useShopSettings } from '../shop.queries';
 import { ShopCard, shopFooter } from './ShopCard';
+import { translateError } from "@/lib/i18n";
 
 export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
   const mutation = useShopSettings();
@@ -19,7 +19,7 @@ export function ShopOperationsCard({ settings }: { settings: ShopSettings }) {
   const values = useWatch({ control: form.control });
   const save = form.handleSubmit(async (data) => {
     try { const saved = await mutation.mutateAsync(data); form.reset({ handlingDays: saved.handlingDays, vacationMode: saved.vacationMode, autoAcceptOrders: saved.autoAcceptOrders }); toast.add({ type: 'success', title: 'บันทึกการตั้งค่าแล้ว' }); }
-    catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') }); }
+    catch (error) { toast.add({ type: 'error', title: translateError(error, 'บันทึกไม่สำเร็จ') }); }
   });
   const row = 'flex items-center justify-between gap-4 rounded-[9px] border border-muted bg-[#fafbfb] px-[14px] py-3';
   return <ShopCard title="การทำงานของร้าน" subtitle="กำหนดการเปิด-ปิดร้านและระยะเวลาจัดส่ง"><form className="space-y-4" onSubmit={save}>

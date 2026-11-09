@@ -4,7 +4,6 @@ import { MapPinPlus, Plus } from "lucide-react";
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage } from "@/lib/api";
 
 import { useAddresses, useSetDefaultAddress } from "../address.queries";
 import { MAX_ADDRESSES } from "../address.format";
@@ -13,6 +12,7 @@ import { AddressBookSkeleton } from "../components/AddressBookSkeleton";
 import { AddressCard } from "../components/AddressCard";
 import { AddressFormDialog } from "../components/AddressFormDialog";
 import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
+import { translateError } from "@/lib/i18n";
 
 /**
  * สมุดที่อยู่ — ACC-01 · ต่อ `/addresses` ครบทั้ง 5 กริยา
@@ -39,7 +39,7 @@ export function AddressBookPage() {
         toast.add({
           type: "error",
           title: "Could not set the default address",
-          description: getErrorMessage(error, "Please try again."),
+          description: translateError(error, "Please try again."),
         }),
     });
   };

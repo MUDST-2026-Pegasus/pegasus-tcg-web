@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { Verification, VerificationStatus } from "./verification.types";
-import { currentLanguage, formatDate, formatYear } from "@/lib/i18n";
+import { currentLanguage, formatDate, formatYear, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลง `Verification` ที่ backend ส่งมา → ชิ้นส่วนที่เอาไปโชว์ได้
@@ -119,5 +119,5 @@ export function verificationErrorMessage(
   if (hasErrorCode(error, "BANK_ACCOUNT_ALREADY_USED")) {
     return "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

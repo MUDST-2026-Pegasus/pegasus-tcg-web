@@ -1,10 +1,9 @@
 import { ConfirmDialog } from "@/components/common";
 import { Trash2 } from "lucide-react";
 
-import { getErrorMessage } from "@/lib/api";
-
 import { useDeleteAddress } from "../address.queries";
 import type { Address } from "../address.types";
+import { translateError } from "@/lib/i18n";
 
 type DeleteAddressDialogProps = {
   open: boolean;
@@ -58,7 +57,7 @@ export function DeleteAddressDialog({
       confirmLabel="Delete"
       cancelLabel="Cancel"
       isPending={deleteAddress.isPending}
-      error={deleteAddress.isError ? getErrorMessage(deleteAddress.error, "Could not delete this address.") : null}
+      error={deleteAddress.isError ? translateError(deleteAddress.error, "Could not delete this address.") : null}
       onConfirm={() => void onConfirm()}
     />
   );

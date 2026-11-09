@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 import { BANK_ITEMS, THAI_BANKS } from "../application.constants";
@@ -39,6 +39,7 @@ import type { Verification } from "../application.types";
 import { BankBookUpload } from "./BankBookUpload";
 import { Callout } from "./Callout";
 import { StepCard } from "./StepCard";
+import { translateError } from "@/lib/i18n";
 
 const LABEL_CLASS = "text-xs font-medium text-foreground/80";
 const INPUT_CLASS = "h-8 rounded-md border-input bg-background px-2.5";
@@ -182,7 +183,7 @@ export function SellerApplicationForm({
       });
       if (!attached) {
         setFormMessage(
-          getErrorMessage(error, "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"),
+          translateError(error, "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"),
         );
       }
     }
