@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { listingCardProps, saleHeadline, saleTerms } from "../sale.format";
 import { SALE_GRID_PAGE_SIZE, useSaleListings, useSales } from "../sale.queries";
 import type { PublicSale, SaleListingQuery, SaleSort } from "../sale.types";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const SORTS: Array<{ value: SaleSort; label: string }> = [
   { value: "discount_desc", label: "ลดมากสุด" },
@@ -72,6 +73,7 @@ export function SalePage() {
   const items = pages.flatMap((page) => page.page.items);
   const total = pages[0]?.page.totalItems ?? 0;
   const sale = pages[0]?.sale ?? null;
+  usePageTitle(sale?.name);
   const allCount = (sales.data ?? []).reduce((sum, item) => sum + item.listingCount, 0);
   const gameItems = useMemo(
     () => [{ value: ALL, label: "ทุกเกม" }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: game.name }))],

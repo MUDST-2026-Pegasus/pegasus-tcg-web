@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { BID_SIGNAL_LABEL, bidderMeta, canSuspend, detailFlags, formatBidSecond } from "./admin-auctions.format";
 import { RiskFlag } from "./components/RiskFlag";
 import { SuspendAuctionDialog } from "./components/SuspendAuctionDialog";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 function parseAuctionId(value: string | undefined): number | null {
   const id = Number(value);
@@ -38,6 +39,7 @@ export function AdminAuctionDetailPage() {
   const { auctionId } = useParams();
   const id = parseAuctionId(auctionId);
   const auction = useAdminAuction(id);
+  usePageTitle(auction.data?.item.card.productName);
 
   if (id === null || (auction.isError && auction.error instanceof ApiError && auction.error.status === 404)) {
     return (

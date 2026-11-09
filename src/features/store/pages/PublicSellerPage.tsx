@@ -29,6 +29,7 @@ import { AuctionCard } from "@/features/auction/components/AuctionCard";
 
 import { StoreTabs } from "../components/StoreTabs";
 import { calculatePositivePercent } from "../store.format";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 const PAGE_SIZE = 6;
 const cardClassName = "w-full [&_img]:object-contain";
@@ -123,6 +124,7 @@ function Storefront({ username }: { username: string }) {
   const from = searchParams.get("from");
   const backHref = from ? productHref(from) : "/products";
   const displayName = profile.data?.displayName || username;
+  usePageTitle(profile.data && displayName);
 
   const listingsTotal = listings.data?.totalItems;
   const collectionTotal = collection.data?.totalItems;

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { api, isApiError, type PageResponse } from "@/lib/api";
 import { CONDITION_LABELS, productHref } from "../catalog.mappers";
 import type { CardCondition } from "../catalog.types";
+import { usePageTitle } from "@/hooks/use-page-title";
 
 type PublicCollectionItem = {
   id: number;
@@ -47,6 +48,7 @@ export function CollectorProfilePage() {
   const location = useLocation();
   const state = location.state as CollectorNavigationState | null;
   const displayName = typeof state?.displayName === "string" && state.displayName.trim() ? state.displayName : username ?? "";
+  usePageTitle(displayName || undefined);
   const avatarUrl = typeof state?.avatarUrl === "string" ? state.avatarUrl : null;
   const fromSlug = searchParams.get("from");
   const backHref = fromSlug ? productHref(fromSlug) : "/products";

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { SearchIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -21,12 +21,6 @@ export function NotFoundPage() {
     { label: "ตะกร้าสินค้า", to: "/cart" },
     { label: "เกี่ยวกับเรา", to: "/about" },
   ];
-
-  useEffect(() => {
-    const previousTitle = document.title;
-    document.title = "ไม่พบหน้านี้ | Pegasus TCG";
-    return () => { document.title = previousTitle; };
-  }, []);
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
