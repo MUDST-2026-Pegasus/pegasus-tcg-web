@@ -264,6 +264,30 @@ describe("AdminUsersPage", () => {
       await user.click(within(confirm).getByRole("button", { name: "ตั้งเป็นผู้ดูแล" }));
       await waitFor(() => expect(usersApi.grantRole).toHaveBeenCalledWith(1, "ADMIN"));
     });
+
+    it("shows clear alert message when granting role fails with ROLE_REQUIRES_PASSWORD (409)", async () => {
+      mockApi();
+      vi.mocked(usersApi.grantRole).mockRejectedValue(
+        new ApiError({
+          status: 409,
+          code: "ROLE_REQUIRES_PASSWORD",
+          message: "Role requires password",
+        }),
+      );
+      renderWithProviders(<AdminUsersPage />, { route: "/admin/users" });
+
+      const { user, menu } = await openRowMenu("somchai_s");
+      await user.click(within(menu).getByRole("menuitem", { name: "จัดการบทบาท…" }));
+      const dialog = await screen.findByRole("alertdialog");
+      await user.click(within(dialog).getByRole("switch", { name: "ทีมซัพพอร์ต" }));
+      await user.click(within(dialog).getByRole("button", { name: "บันทึก" }));
+
+      expect(
+        await within(dialog).findByText(
+          "บัญชีนี้ใช้การเข้าสู่ระบบด้วย Google อย่างเดียว ต้องตั้งรหัสผ่านก่อนจึงจะให้สิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้",
+        ),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("add admin dialog", () => {

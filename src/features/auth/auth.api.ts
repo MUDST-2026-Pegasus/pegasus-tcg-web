@@ -6,6 +6,7 @@ import type {
   ChangePasswordPayload,
   DevTokenResponse,
   ForgotPasswordPayload,
+  GoogleSignInPayload,
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
@@ -22,6 +23,12 @@ export function register(payload: RegisterPayload): Promise<AuthSession> {
 
 export function login(payload: LoginPayload): Promise<AuthSession> {
   return api.post<AuthSession>("/auth/login", payload, PUBLIC);
+}
+
+export function googleSignIn({
+  credential,
+}: GoogleSignInPayload): Promise<AuthSession> {
+  return api.post<AuthSession>("/auth/google", { credential }, PUBLIC);
 }
 
 export function logout(): Promise<void> {

@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CircleAlert } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -15,20 +16,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Spinner } from "@/components/ui/spinner";
-import { useRegister } from "@/features/auth/auth.queries";
+import { getAuthErrorAlert } from "@/features/auth/auth.errors";
+import { useGoogleSignIn, useRegister } from "@/features/auth/auth.queries";
 import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/claim-redirect";
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
+import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import {
   registerSchema,
   type RegisterFormValues,
 } from "@/features/auth/auth.schema";
-import { getErrorMessage } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 export function RegisterForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const registerAccount = useRegister();
+  const googleSignIn = useGoogleSignIn();
+  const isGoogleSigningIn = Boolean(googleSignIn.isPending);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -46,10 +50,24 @@ export function RegisterForm() {
     control,
     handleSubmit,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = form;
 
+  const handleGoogleCredential = async (credential: string) => {
+    clearErrors();
+    registerAccount.reset?.();
+    try {
+      await googleSignIn.mutateAsync({ credential });
+      rememberPendingClaim(location.search);
+      navigate(authRedirectTarget(location.search, location.state), { replace: true });
+    } catch {
+      // Error is handled via googleSignIn.error state
+    }
+  };
+
   const onSubmit = handleSubmit(async (values) => {
+    googleSignIn.reset?.();
     try {
       // ไม่ส่ง roles = ได้ BUYER (ขอเป็น SELLER ที่หน้า become-a-seller)
       await registerAccount.mutateAsync({
@@ -71,20 +89,34 @@ export function RegisterForm() {
     }
   });
 
-  const formMessage = registerAccount.isError
-    ? getErrorMessage(
-        registerAccount.error,
+  const activeError = googleSignIn.isError
+    ? googleSignIn.error
+    : registerAccount.isError
+      ? registerAccount.error
+      : null;
+
+  const formAlert = activeError
+    ? getAuthErrorAlert(
+        activeError,
         "Could not create your account. Please try again.",
       )
     : null;
 
   return (
     <form className="flex w-full flex-col gap-6" onSubmit={onSubmit} noValidate>
-      {formMessage && (
+      {formAlert && (
         <Alert variant="destructive">
-          <AlertDescription>{formMessage}</AlertDescription>
+          <CircleAlert aria-hidden="true" />
+          {formAlert.title && <AlertTitle>{formAlert.title}</AlertTitle>}
+          <AlertDescription>{formAlert.description}</AlertDescription>
         </Alert>
       )}
+
+      <GoogleSignInButton
+        onCredential={handleGoogleCredential}
+        isLoading={isGoogleSigningIn}
+        disabled={isSubmitting}
+      />
 
       <FieldGroup>
         <Field data-invalid={Boolean(errors.username) || undefined}>
@@ -96,6 +128,7 @@ export function RegisterForm() {
             aria-invalid={Boolean(errors.username)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("username")}
+            disabled={isGoogleSigningIn}
           />
           <FieldError errors={[errors.username]} />
         </Field>
@@ -107,6 +140,7 @@ export function RegisterForm() {
             placeholder="Name other members will see"
             aria-invalid={Boolean(errors.displayName)}
             {...register("displayName")}
+            disabled={isGoogleSigningIn}
             className="h-12 rounded-lg border-border bg-background px-4"
           />
           <FieldError errors={[errors.displayName]} />
@@ -121,6 +155,7 @@ export function RegisterForm() {
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
+            disabled={isGoogleSigningIn}
           />
           <FieldError errors={[errors.email]} />
         </Field>
@@ -133,6 +168,7 @@ export function RegisterForm() {
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
+            disabled={isGoogleSigningIn}
           />
           {errors.password ? (
             <FieldError errors={[errors.password]} />
@@ -149,6 +185,7 @@ export function RegisterForm() {
             aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("confirmPassword")}
+            disabled={isGoogleSigningIn}
           />
           <FieldError errors={[errors.confirmPassword]} />
         </Field>
@@ -163,6 +200,7 @@ export function RegisterForm() {
                 checked={field.value ?? false}
                 onCheckedChange={(checked) => field.onChange(checked)}
                 onBlur={field.onBlur}
+                disabled={isGoogleSigningIn}
                 aria-invalid={Boolean(errors.acceptTerms)}
                 className="bg-card border-2 border-black-50 size-4.5"
               />
@@ -184,7 +222,7 @@ export function RegisterForm() {
         <FieldError errors={[errors.acceptTerms]} />
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isGoogleSigningIn}
           className="h-12 w-full rounded-lg text-base"
         >
           {isSubmitting && <Spinner />}

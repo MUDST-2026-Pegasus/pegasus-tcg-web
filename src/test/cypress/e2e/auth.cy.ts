@@ -110,4 +110,123 @@ describe('Authentication Flow', () => {
     // Should be redirected or show success
     cy.url().should('not.include', '/register');
   });
+
+  describe('Google Sign-In Flow', () => {
+    function stubGoogleGis(win: Cypress.AUTWindow, credential = 'mock-google-id-token') {
+      let callbackFn: ((res: { credential?: string }) => void) | undefined;
+      win.google = {
+        accounts: {
+          id: {
+            initialize(config) {
+              callbackFn = config.callback;
+            },
+            renderButton(parent) {
+              const btn = win.document.createElement('button');
+              btn.type = 'button';
+              btn.textContent = 'Continue with Google';
+              btn.setAttribute('data-cy', 'google-signin-trigger');
+              btn.addEventListener('click', () => {
+                callbackFn?.({ credential });
+              });
+              parent.appendChild(btn);
+            },
+          },
+        },
+      };
+    }
+
+    it('signs in with Google from the Login page and redirects to home', () => {
+      cy.intercept('POST', '**/auth/google', (req) => {
+        expect(req.body).to.deep.equal({ credential: 'mock-google-id-token' });
+        req.reply({
+          statusCode: 200,
+          body: {
+            success: true,
+            data: {
+              tokens: { accessToken: 'mock-google-access', tokenType: 'Bearer', expiresIn: 900, refreshExpiresIn: 86400 },
+              user: { id: 10, email: 'googleuser@gmail.com', username: 'user_google10', displayName: 'Google User', roles: ['BUYER'] },
+            },
+          },
+        });
+      }).as('googleAuthRequest');
+
+      cy.intercept('GET', '**/auth/me', {
+        statusCode: 200,
+        body: {
+          success: true,
+          data: { id: 10, email: 'googleuser@gmail.com', username: 'user_google10', displayName: 'Google User', roles: ['BUYER'] },
+        },
+      }).as('meRequest');
+
+      cy.visit('/login', {
+        onBeforeLoad(win) {
+          stubGoogleGis(win);
+        },
+      });
+
+      cy.contains('By continuing with Google, you agree to the Pegasus').should('be.visible');
+      cy.get('[data-cy="google-signin-trigger"]').click();
+
+      cy.wait('@googleAuthRequest');
+      cy.url().should('not.include', '/login');
+    });
+
+    it('signs in with Google from the Register page and redirects to home', () => {
+      cy.intercept('POST', '**/auth/google', {
+        statusCode: 200,
+        body: {
+          success: true,
+          data: {
+            tokens: { accessToken: 'mock-google-access', tokenType: 'Bearer', expiresIn: 900, refreshExpiresIn: 86400 },
+            user: { id: 11, email: 'newgoogle@gmail.com', username: 'user_google11', displayName: 'New Google User', roles: ['BUYER'] },
+          },
+        },
+      }).as('googleAuthRequest');
+
+      cy.intercept('GET', '**/auth/me', {
+        statusCode: 200,
+        body: {
+          success: true,
+          data: { id: 11, email: 'newgoogle@gmail.com', username: 'user_google11', displayName: 'New Google User', roles: ['BUYER'] },
+        },
+      }).as('meRequest');
+
+      cy.visit('/register', {
+        onBeforeLoad(win) {
+          stubGoogleGis(win);
+        },
+      });
+
+      cy.contains('By continuing with Google, you agree to the Pegasus').should('be.visible');
+      cy.get('[data-cy="google-signin-trigger"]').click();
+
+      cy.wait('@googleAuthRequest');
+      cy.url().should('not.include', '/register');
+    });
+
+    it('displays ACC-3 alert when Google Sign-In returns an error code', () => {
+      cy.intercept('POST', '**/auth/google', {
+        statusCode: 409,
+        body: {
+          success: false,
+          message: 'Account cannot be linked automatically',
+          data: {
+            code: 'GOOGLE_LINK_NOT_ALLOWED',
+          },
+        },
+      }).as('googleAuthError');
+
+      cy.visit('/login', {
+        onBeforeLoad(win) {
+          stubGoogleGis(win);
+        },
+      });
+
+      cy.get('[data-cy="google-signin-trigger"]').click();
+      cy.wait('@googleAuthError');
+
+      cy.contains('Please log in with your email and password').should('be.visible');
+      cy.contains("An account with this email already exists and can't be linked to Google automatically.").should('be.visible');
+    });
+  });
 });

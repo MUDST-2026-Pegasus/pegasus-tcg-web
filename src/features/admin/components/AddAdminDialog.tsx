@@ -118,6 +118,12 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
         />
       </InputGroup>
 
+      {changeRole.isError ? (
+        <p role="alert" className="rounded-[10px] bg-[#fbe9e8] px-3 py-2 text-[11px] leading-4 text-[#b42318]">
+          {userErrorMessage(changeRole.error, "ทำรายการไม่สำเร็จ ลองใหม่อีกครั้ง")}
+        </p>
+      ) : null}
+
       {!q ? (
         <p className="text-[10px] text-[#9aa5ad]">
           พิมพ์เพื่อค้นหา · แสดงสูงสุด {USER_SEARCH_SIZE} รายการ

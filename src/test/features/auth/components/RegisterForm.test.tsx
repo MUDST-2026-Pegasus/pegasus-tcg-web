@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import { AUTH_ERROR_MESSAGES } from '@/features/auth/auth.errors';
 import * as authQueries from '@/features/auth/auth.queries';
+import { ApiError, type ApiErrorCode } from '@/lib/api';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -16,14 +18,35 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 describe('RegisterForm', () => {
   const mockMutateAsync = vi.fn();
+  const mockGoogleMutateAsync = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    delete window.google;
+    document
+      .querySelectorAll('script[src="https://accounts.google.com/gsi/client"]')
+      .forEach((node) => node.remove());
+
     vi.spyOn(authQueries, 'useRegister').mockReturnValue({
       mutateAsync: mockMutateAsync,
+      reset: vi.fn(),
       isError: false,
       error: null,
     } as unknown as ReturnType<typeof authQueries.useRegister>);
+
+    vi.spyOn(authQueries, 'useGoogleSignIn').mockReturnValue({
+      mutateAsync: mockGoogleMutateAsync,
+      reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof authQueries.useGoogleSignIn>);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    delete window.google;
   });
 
   it('renders register form correctly', () => {
@@ -125,5 +148,100 @@ describe('RegisterForm', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
     });
+  });
+
+  it('hides Google button, consent text, and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
+    renderWithProviders(<RegisterForm />);
+
+    expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
+    expect(screen.queryByText(/by continuing with google/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
+  });
+
+  it('renders Google button, consent text, and "or" divider at the top of RegisterForm when configured', async () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
+    let capturedCallback: ((res: { credential?: string }) => void) | undefined;
+    window.google = {
+      accounts: {
+        id: {
+          initialize: vi.fn(({ callback }) => {
+            capturedCallback = callback;
+          }),
+          renderButton: vi.fn((container: HTMLElement) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'Continue with Google';
+            btn.onclick = () => capturedCallback?.({ credential: 'register-google-id-token' });
+            container.appendChild(btn);
+          }),
+        },
+      },
+    };
+
+    mockGoogleMutateAsync.mockResolvedValueOnce({
+      tokens: { accessToken: 'access-123', expiresIn: 900 },
+      user: { id: 2, email: 'newgoogle@example.com', roles: ['BUYER'] },
+    });
+
+    renderWithProviders(<RegisterForm />);
+
+    expect(screen.getByText(/by continuing with google, you agree to the pegasus/i)).toBeInTheDocument();
+    expect(screen.getByText('or')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
+
+    await waitFor(() => {
+      expect(mockGoogleMutateAsync).toHaveBeenCalledWith({ credential: 'register-google-id-token' });
+    });
+    expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
+  });
+
+  it('disables registration fields while Google Sign-In is pending', () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
+    window.google = {
+      accounts: {
+        id: {
+          initialize: vi.fn(),
+          renderButton: vi.fn(),
+        },
+      },
+    };
+
+    vi.spyOn(authQueries, 'useGoogleSignIn').mockReturnValue({
+      mutateAsync: mockGoogleMutateAsync,
+      reset: vi.fn(),
+      isPending: true,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof authQueries.useGoogleSignIn>);
+
+    renderWithProviders(<RegisterForm />);
+
+    expect(screen.getByText('Signing in with Google...')).toBeInTheDocument();
+    expect(screen.getByLabelText(/username/i)).toBeDisabled();
+    expect(screen.getByLabelText(/display name/i)).toBeDisabled();
+    expect(screen.getByLabelText(/email/i)).toBeDisabled();
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled();
+  });
+
+  it.each(
+    Object.entries(AUTH_ERROR_MESSAGES) as [
+      ApiErrorCode,
+      { title: string; description: string },
+    ][],
+  )('renders ACC-3 alert on RegisterForm for error code %s', (code, expected) => {
+    vi.spyOn(authQueries, 'useGoogleSignIn').mockReturnValue({
+      mutateAsync: mockGoogleMutateAsync,
+      reset: vi.fn(),
+      isPending: false,
+      isError: true,
+      error: new ApiError({ status: 400, code, message: 'Server error' }),
+    } as unknown as ReturnType<typeof authQueries.useGoogleSignIn>);
+
+    renderWithProviders(<RegisterForm />);
+
+    expect(screen.getByText(expected.title)).toBeInTheDocument();
+    expect(screen.getByText(expected.description)).toBeInTheDocument();
   });
 });

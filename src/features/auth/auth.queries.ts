@@ -20,6 +20,7 @@ import type {
   AuthUser,
   ChangePasswordPayload,
   ForgotPasswordPayload,
+  GoogleSignInPayload,
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
@@ -149,6 +150,10 @@ function useSessionMutation<TPayload>(
 
 export function useLogin() {
   return useSessionMutation<LoginPayload>(authApi.login);
+}
+
+export function useGoogleSignIn() {
+  return useSessionMutation<GoogleSignInPayload>(authApi.googleSignIn);
 }
 
 export function useRegister() {

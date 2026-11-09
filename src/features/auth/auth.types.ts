@@ -43,6 +43,10 @@ export type LoginPayload = {
   password: string;
 };
 
+export type GoogleSignInPayload = {
+  credential: string;
+};
+
 export type RegisterPayload = {
   email: string;
   username: string;
