@@ -136,8 +136,8 @@ export function weeklyStatCards(
       footnote: !hasData
         ? "ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก"
         : previous
-          ? `หักค่าธรรมเนียมระบบแล้ว (เทียบ ${formatReportBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
-          : "หักค่าธรรมเนียมระบบแล้ว",
+          ? `รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม (เทียบ ${formatReportBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
+          : "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม",
       bars: sparkBars(history.map((day) => day.netProfit)),
       accent: "primary",
     },
