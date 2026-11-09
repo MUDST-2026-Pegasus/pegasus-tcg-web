@@ -7,6 +7,7 @@ import type { BannedBidder } from "@/features/auction/auction.types";
 import { ApiError } from "@/lib/api/errors";
 
 import { formatDayMonth, formatDayMonthYear } from "../admin-auctions.format";
+import { translateError } from "@/lib/i18n";
 
 type LiftBanDialogProps = {
   bidder: BannedBidder | null;
@@ -28,7 +29,7 @@ export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialo
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) =>
-          toast.add({ type: "error", title: "ยกเลิกโทษไม่สำเร็จ", description: error instanceof ApiError ? error.message : undefined }),
+          toast.add({ type: "error", title: "ยกเลิกโทษไม่สำเร็จ", description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
       },
     );
   };

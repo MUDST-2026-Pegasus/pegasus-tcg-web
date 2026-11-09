@@ -1,11 +1,4 @@
-import {
-  api,
-  ApiError,
-  CLIENT_ERROR_CODES,
-  getErrorMessage,
-  hasErrorCode,
-  isNetworkError,
-} from "@/lib/api";
+import { api, ApiError, CLIENT_ERROR_CODES, hasErrorCode, isNetworkError } from "@/lib/api";
 
 import {
   describeTypes,
@@ -19,6 +12,7 @@ import type {
   PresignUploadResponse,
   UploadPurpose,
 } from "./upload.types";
+import { translateError } from "@/lib/i18n";
 
 /**
  * ไฟล์ไม่ผ่าน API ของเรา — ขอ presigned URL จาก `POST /uploads/presign` แล้ว PUT
@@ -191,5 +185,5 @@ export function uploadErrorMessage(
   if (isNetworkError(error)) {
     return "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่";
   }
-  return getErrorMessage(error, "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง");
+  return translateError(error, "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง");
 }

@@ -20,6 +20,7 @@ import { CheckoutAddressSummary } from "@/features/cart/components/CheckoutAddre
 import { useCheckoutAuction, useMyAuctions } from "../auction.queries";
 import { AuctionCountdown } from "./AuctionCountdown";
 import { AuctionOrderBadge } from "./AuctionOrderBadge";
+import { translateError } from "@/lib/i18n";
 
 /** ไปหน้าชำระเงินเดิม พร้อมเลขประมูลให้หน้านั้นแสดงป้าย */
 function paymentUrl(orderId: number, auctionNumber: string) {
@@ -123,14 +124,14 @@ export function AuctionCheckout({ auctionId }: { auctionId: number }) {
     }
     if (error.code === "AUCTION_CLOSED") {
       // เลยกำหนดชำระแล้ว — กลับไปดูสถานะในหน้าการประมูลของฉัน
-      toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: error.message, type: "error" });
+      toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: translateError(error, error.message), type: "error" });
       navigate("/account/auctions", { replace: true });
       return;
     }
     if (error.code === "CART_PRICE_CHANGED" || error.code === "PRICE_CHANGED") {
       void toPay.refetch();
     }
-    toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: error.message, type: "error" });
+    toast.add({ title: "สั่งซื้อไม่สำเร็จ", description: translateError(error, error.message), type: "error" });
   };
 
   const { item } = auction;

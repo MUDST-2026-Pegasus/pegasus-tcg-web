@@ -1,5 +1,5 @@
 import { formatBaht } from "@/features/seller/shared/seller.format";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type {
   CardCondition,
@@ -7,7 +7,7 @@ import type {
   ListingStatus,
   SellerListingSummary,
 } from "./products.types";
-import { numberFormat } from "@/lib/i18n";
+import { numberFormat, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยเรื่องตัวเลขที่ใช้ร่วมกันในหน้าลงขายสินค้าและหน้าเติมสต็อก
@@ -163,5 +163,5 @@ export function listingErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "SELLER_NOT_VERIFIED")) {
     return "ร้านยังไม่ผ่านการยืนยัน จึงแก้ประกาศไม่ได้";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

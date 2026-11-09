@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import { getErrorMessage } from "@/lib/api";
+
 import { applyApiErrors } from "@/lib/form";
 import type { AuthUser } from "@/features/auth/auth.types";
 
@@ -34,6 +34,7 @@ import {
   toUpdateProfilePayload,
   type EditProfileFormValues,
 } from "../profile.schema";
+import { translateError } from "@/lib/i18n";
 
 type EditProfileDialogProps = {
   open: boolean;
@@ -121,7 +122,7 @@ function EditProfileForm({
       {updateProfile.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(updateProfile.error, "Could not save profile changes.")}
+            {translateError(updateProfile.error, "Could not save profile changes.")}
           </AlertDescription>
         </Alert>
       )}

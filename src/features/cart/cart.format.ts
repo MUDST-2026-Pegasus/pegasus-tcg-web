@@ -1,5 +1,6 @@
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import type { AvailablePromotion } from "./promotions.types";
+import { translateError } from "@/lib/i18n";
 
 /** ข้อความเมื่อใส่ตะกร้าไม่สำเร็จ — ใช้ร่วมกันระหว่างหน้ารายละเอียดสินค้ากับหน้าประกาศขาย */
 export function addToCartErrorMessage(
@@ -12,7 +13,7 @@ export function addToCartErrorMessage(
   if (hasErrorCode(error, "INSUFFICIENT_STOCK")) {
     return "สินค้าเหลือไม่พอตามจำนวนที่เลือก กรุณาปรับจำนวนแล้วลองอีกครั้ง";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }
 
 /** The badge on a code row: usable collected codes first, then ones still to collect. */

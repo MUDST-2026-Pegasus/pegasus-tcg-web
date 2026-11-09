@@ -51,6 +51,8 @@ export function createTolgee({ language, live = true }: CreateTolgeeOptions = {}
     defaultNs: "common",
     ns: ["common", "errors"],
     staticData,
+    // ICU format พัง (เช่น param ขาด) — ค่าเริ่มต้นของ Tolgee คือคำว่า "invalid" ให้ใช้ default / key แทน
+    onFormatError: (_error, info) => info.defaultValue ?? info.key,
     apiUrl: apiKey ? DEV_API_URL : undefined,
     apiKey,
   });

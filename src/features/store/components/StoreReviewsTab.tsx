@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { ReviewStars } from "@/features/finance/ReviewStars";
 import type { PublicReview, PublicReviews } from "@/features/finance/after-sales.types";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
 import { formatReviewDate, getInitials } from "../store.format";
+import { translateError } from "@/lib/i18n";
 
 export type StoreReviewsTabProps = {
   summary: PublicReviews["summary"];
@@ -98,7 +99,7 @@ export function StoreReviewsTab({
     return (
       <div role="alert" className="rounded-2xl border border-border/80 bg-card p-8 text-center space-y-3">
         <p className="text-sm text-muted-foreground">
-          {getErrorMessage(error, "โหลดรีวิวไม่สำเร็จ")}
+          {translateError(error, "โหลดรีวิวไม่สำเร็จ")}
         </p>
         {onRetry && (
           <Button variant="outline" size="sm" onClick={onRetry}>

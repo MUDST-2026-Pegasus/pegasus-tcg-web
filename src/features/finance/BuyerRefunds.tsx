@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage } from "@/lib/api";
+
 import { financeApi } from "./finance.api";
 import type { Refund } from "./finance.types";
 import { refundMethodLabel, refundStatusLabel } from "./refund.format";
 import { refundKeys, useBuyerRefunds } from "./refunds.queries";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 function RefundDestination({ refund }: { refund: Refund }) {
   const queryClient = useQueryClient();
@@ -36,7 +36,7 @@ function RefundDestination({ refund }: { refund: Refund }) {
       setEditing(false);
       toast.add({ type: "success", title: "บันทึกบัญชีรับเงินคืนแล้ว" });
     } catch (error) {
-      toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: getErrorMessage(error, "กรุณาลองอีกครั้ง") });
+      toast.add({ type: "error", title: "บันทึกไม่สำเร็จ", description: translateError(error, "กรุณาลองอีกครั้ง") });
     } finally {
       setSaving(false);
       savingRef.current = false;

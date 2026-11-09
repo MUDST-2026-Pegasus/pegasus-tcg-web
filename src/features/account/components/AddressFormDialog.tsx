@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { getErrorMessage } from "@/lib/api";
+
 import { applyApiErrors } from "@/lib/form";
 
 import { useCreateAddress, useUpdateAddress } from "../address.queries";
@@ -33,6 +33,7 @@ import {
   type AddressFormValues,
 } from "../address.schema";
 import type { Address } from "../address.types";
+import { translateError } from "@/lib/i18n";
 
 type AddressFormDialogProps = {
   open: boolean;
@@ -123,7 +124,7 @@ function AddressForm({
       {failed && (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(failed, "Could not save this address.")}
+            {translateError(failed, "Could not save this address.")}
           </AlertDescription>
         </Alert>
       )}

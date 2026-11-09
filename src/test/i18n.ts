@@ -1,6 +1,7 @@
 import { GlobalContextPlugin, type TolgeeInstance } from "@tolgee/react";
 
 import { createTolgee, LANGUAGES, NAMESPACES, type Language } from "@/lib/i18n";
+import { registerErrorTranslator } from "@/lib/i18n/errors";
 
 /**
  * instance สำหรับเทสต์ต่อภาษา — ไม่ต่อ Tolgee, ไม่มี DevTools, โหลดทุก namespace ไว้ก่อน (ไม่ suspend)
@@ -17,6 +18,7 @@ export async function prepareTestTolgee() {
   }
   // เทสต์ที่ render เองโดยไม่ครอบ provider ใช้ภาษาไทย
   testTolgee("th").addPlugin(GlobalContextPlugin({ useSuspense: false }));
+  registerErrorTranslator(testTolgee("th"));
 }
 
 export function testTolgee(language: Language = "th"): TolgeeInstance {

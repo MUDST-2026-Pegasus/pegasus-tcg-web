@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import {
   countReviews,
@@ -24,7 +24,7 @@ import {
 import { FinanceStatStrip, type FinanceStat } from "./FinanceShared";
 import { ReviewModerationCard } from "./ReviewModerationCard";
 import { ReviewSellerCard } from "./ReviewSellerCard";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 const PAGE_SIZE = 10;
 const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"];
@@ -74,7 +74,7 @@ export function AdminReviewsContent() {
           toast.add({
             type: "error",
             title: "เปลี่ยนการแสดงรีวิวไม่สำเร็จ",
-            description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            description: translateError(error, "กรุณาลองอีกครั้ง"),
           }),
       },
     );

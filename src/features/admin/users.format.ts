@@ -1,8 +1,8 @@
-import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
+import { hasErrorCode, isApiError } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { AdminUser, RoleCode, UserStatus } from "./users.types";
-import { formatDate, intlLocale } from "@/lib/i18n";
+import { formatDate, intlLocale, translateError } from "@/lib/i18n";
 
 /** ตัวช่วยแปลงข้อมูลผู้ใช้จาก `/admin/users` → ข้อความบนตาราง ไม่มีการ log PII */
 
@@ -113,5 +113,5 @@ export function userErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ROLE_REQUIRES_PASSWORD")) {
     return "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

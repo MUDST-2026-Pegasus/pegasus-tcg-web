@@ -9,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/toast';
 import { useFileUpload } from '@/hooks/use-file-upload';
-import { getErrorMessage } from '@/lib/api';
 import type { AuthUser } from '@/features/auth/auth.types';
 import { initialsOf } from '@/features/account/account.format';
 import { editProfileSchema, toUpdateProfilePayload } from '@/features/account/profile.schema';
 import { useUpdateProfile } from '@/features/account/profile.queries';
 import { ShopCard, shopFooter } from './ShopCard';
+import { translateError } from "@/lib/i18n";
 
 const schema = editProfileSchema.pick({ displayName: true, phone: true }).extend({ phonePublic: z.boolean() });
 type ShopProfileValues = z.infer<typeof schema>;
@@ -71,7 +71,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
       reset(saved);
       toast.add({ type: 'success', title: 'บันทึกข้อมูลหน้าร้านแล้ว' });
     } catch (error) {
-      toast.add({ type: 'error', title: getErrorMessage(error, 'บันทึกไม่สำเร็จ') });
+      toast.add({ type: 'error', title: translateError(error, 'บันทึกไม่สำเร็จ') });
     }
   });
   return <>
@@ -130,7 +130,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
           <label htmlFor="shop-link" className="text-xs">ลิงก์หน้าร้าน</label>
           <div className="flex flex-wrap gap-2">
             <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-secondary px-3"><Input id="shop-link" readOnly value={url} className="min-w-0 border-0 bg-transparent px-0 text-xs shadow-none"/><Lock className="size-3 shrink-0 text-muted-foreground"/></div>
-            <Button type="button" variant="outline" size="sm" onClick={async () => { try { await navigator.clipboard.writeText(url); toast.add({ type: 'success', title: 'คัดลอกลิงก์แล้ว' }); } catch (error) { toast.add({ type: 'error', title: getErrorMessage(error, 'คัดลอกไม่สำเร็จ') }); } }}>คัดลอกลิงก์</Button>
+            <Button type="button" variant="outline" size="sm" onClick={async () => { try { await navigator.clipboard.writeText(url); toast.add({ type: 'success', title: 'คัดลอกลิงก์แล้ว' }); } catch (error) { toast.add({ type: 'error', title: translateError(error, 'คัดลอกไม่สำเร็จ') }); } }}>คัดลอกลิงก์</Button>
           </div>
           <p className="text-[10px] text-muted-foreground">แก้ไขไม่ได้ เพราะผูกกับ username ของบัญชี</p>
         </div>

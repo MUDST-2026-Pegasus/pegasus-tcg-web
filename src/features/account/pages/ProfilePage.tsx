@@ -25,7 +25,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/features/auth/auth.queries";
 import type { AuthUser } from "@/features/auth/auth.types";
-import { getErrorMessage } from "@/lib/api";
 
 import { initialsOf } from "../account.format";
 import { formatAddressLines } from "../address.format";
@@ -34,7 +33,7 @@ import type { Address } from "../address.types";
 import { formatOrderDateTime, orderStage } from "../order-stage";
 import { useBuyerOrders } from "../orders.queries";
 import { EditProfileDialog } from "../components/EditProfileDialog";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 function ProfileAvatar({
   initials,
@@ -192,7 +191,7 @@ function PrimaryAddressCard({
             Could not load your address
           </p>
           <p className="text-sm">
-            {getErrorMessage(error, "Please check your connection and try again.")}
+            {translateError(error, "Please check your connection and try again.")}
           </p>
         </CardContent>
         {onRetry && (

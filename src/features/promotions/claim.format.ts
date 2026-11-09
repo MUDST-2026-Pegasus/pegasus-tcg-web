@@ -1,9 +1,9 @@
 import { toast } from "@/components/ui/toast";
 import { checkoutMoney, formatPromotionError } from "@/features/cart/checkout.format";
-import { getErrorMessage, isApiError } from "@/lib/api";
+import { isApiError } from "@/lib/api";
 import type { ClaimableCode, PromotionTerms } from "./claim.types";
 import type { PromotionOwnerType } from "./order.types";
-import { dateTimeFormat, intlLocale } from "@/lib/i18n";
+import { dateTimeFormat, intlLocale, translateError } from "@/lib/i18n";
 
 export type ClaimTicketState = "claimable" | "claimed" | "soldOut";
 
@@ -91,7 +91,7 @@ export function formatClaimError(code: string | null | undefined): string {
 
 export function claimErrorMessage(error: unknown): string {
   if (isApiError(error) && error.code.startsWith("PROMO_")) return formatClaimError(error.code);
-  return getErrorMessage(error, "เก็บโค้ดไม่สำเร็จ ลองใหม่อีกครั้ง");
+  return translateError(error, "เก็บโค้ดไม่สำเร็จ ลองใหม่อีกครั้ง");
 }
 
 export async function copyPromotionCode(code: string) {

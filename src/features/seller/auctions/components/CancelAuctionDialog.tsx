@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/toast";
 import { useCancelAuction } from "@/features/auction/auction.queries";
 import type { SellerAuctionRow } from "@/features/auction/auction.types";
 import { ApiError } from "@/lib/api/errors";
+import { translateError } from "@/lib/i18n";
 
 type CancelAuctionDialogProps = {
   /** ประมูลที่จะยกเลิก — เก็บไว้แม้ปิดแล้ว เนื้อหาจะได้ไม่หายระหว่าง animation ปิด */
@@ -26,7 +27,7 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
           type: "error",
           // ข้อความ AUCTION_HAS_BIDS ตาม Figma S3-E
           title: error instanceof ApiError && error.code === "AUCTION_HAS_BIDS" ? "ยกเลิกไม่ได้ — มีผู้บิดแล้ว" : "ยกเลิกประมูลไม่สำเร็จ",
-          description: error instanceof ApiError ? error.message : undefined,
+          description: error instanceof ApiError ? translateError(error, error.message) : undefined,
         }),
     });
   };

@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { toast } from "@/components/ui/toast";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { toLocalInput } from "@/features/promotions/shared/promotionForm.dates";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 import { useCreateSellerPromotion, useUpdateSellerPromotion } from "../promotions.queries";
@@ -26,6 +26,7 @@ import {
   TextField,
 } from "./SellerPromotionFields";
 import { SellerPromotionPreview } from "./SellerPromotionPreview";
+import { translateError } from "@/lib/i18n";
 
 const newInput = (): SellerPromotionInput => ({
   code: "",
@@ -120,7 +121,7 @@ export function SellerPromotionForm({
           ? "กรุณายืนยันตัวตนผู้ขายก่อนสร้างโค้ด"
           : hasErrorCode(error, "PROMO_IN_USE")
             ? "โค้ดนี้มีลูกค้าใช้หรือเก็บแล้ว แก้ได้เฉพาะชื่อ วันสิ้นสุดที่ยาวขึ้น และจำนวนสิทธิ์ที่เพิ่มขึ้น"
-            : getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            : translateError(error, "กรุณาลองอีกครั้ง"),
         type: "error",
       });
     }

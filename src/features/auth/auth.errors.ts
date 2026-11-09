@@ -1,4 +1,5 @@
-import { getErrorMessage, isApiError, type ApiErrorCode } from "@/lib/api";
+import { isApiError, type ApiErrorCode } from "@/lib/api";
+import { translateError } from "@/lib/i18n";
 
 export type AuthErrorAlert = {
   title?: string;
@@ -62,6 +63,6 @@ export function getAuthErrorAlert(
     }
   }
   return {
-    description: getErrorMessage(error, fallback),
+    description: translateError(error, fallback),
   };
 }

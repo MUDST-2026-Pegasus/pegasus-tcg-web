@@ -1,4 +1,4 @@
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type {
   AttributeDataType,
@@ -6,7 +6,7 @@ import type {
   Game,
   GameAttribute,
 } from "./catalog.types";
-import { dateTimeFormat } from "@/lib/i18n";
+import { dateTimeFormat, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงข้อมูลเกม ฟิลด์ ชุด และหมวดหมู่ → ข้อความที่โชว์บนจอ
@@ -141,5 +141,5 @@ export function taxonomyErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ACCESS_DENIED")) {
     return "บัญชีนี้ไม่มีสิทธิ์แก้ข้อมูลเกม";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

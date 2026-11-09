@@ -10,7 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
+import { hasErrorCode, isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
   SCOPE_OPTIONS, STATUS_LABEL, blankDraft, conflictingRules, draftFromRule, draftToInput,
@@ -20,7 +20,7 @@ import {
 import type { CategoryDto, GameDto } from "@/features/catalog/catalog.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRule } from "@/features/finance/after-sales.types";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 /** popup เปิดได้ 2 แบบ: ดูรายการกฎทั้งหมด หรือเข้าฟอร์มเพิ่ม/แก้ไขกฎทันที */
 export type CommissionRuleDialogRequest =
@@ -62,7 +62,7 @@ function ruleErrorMessage(error: unknown) {
   if (hasErrorCode(error, "COMMISSION_RULE_NOT_FOUND")) return "กฎนี้ไม่มีอยู่ในระบบแล้ว";
   if (hasErrorCode(error, "COMMISSION_RULE_INVALID", "VALIDATION_FAILED")) return "ข้อมูลกฎไม่ถูกต้อง กรุณาตรวจอีกครั้ง";
   if (isApiError(error) && error.status === 403) return "บัญชีนี้ไม่มีสิทธิ์ ADMIN";
-  return getErrorMessage(error, "กรุณาลองอีกครั้ง");
+  return translateError(error, "กรุณาลองอีกครั้ง");
 }
 
 export function CommissionRuleDialog({

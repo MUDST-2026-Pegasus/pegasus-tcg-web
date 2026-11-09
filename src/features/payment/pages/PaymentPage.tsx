@@ -6,7 +6,7 @@ import { FormPageSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { getErrorMessage } from "@/lib/api";
+
 import { ordersApi } from "@/features/account/orders.api";
 import { cartKeys } from "@/features/cart/cart.queries";
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
@@ -16,7 +16,7 @@ import { AuctionOrderBadge } from "@/features/auction/components/AuctionOrderBad
 import { PaymentQrCard } from "../components/PaymentQrCard";
 import { PaymentSteps } from "../components/PaymentSteps";
 import { PaymentOrderSummary, type OrderItemSummaryData } from "../components/PaymentOrderSummary";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 function transferAccount(raw: string | undefined): Record<string, string> {
   try {
@@ -151,7 +151,7 @@ export function PaymentPage() {
       toast.add({
         type: "error",
         title: "ส่งหลักฐานไม่สำเร็จ",
-        description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+        description: translateError(error, "กรุณาลองอีกครั้ง"),
       });
     } finally {
       setIsSubmitting(false);
@@ -194,7 +194,7 @@ export function PaymentPage() {
     return (
       <div className="container mx-auto max-w-xl p-8 text-center">
         <p role="alert" className="text-destructive font-medium">
-          {getErrorMessage(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}
+          {translateError(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}
         </p>
         <Button className="mt-4" onClick={() => navigate("/account/orders")}>
           กลับไปประวัติคำสั่งซื้อ

@@ -4,7 +4,7 @@ import {
 } from "@/features/seller/shared/order-status";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
-import { getErrorMessage, hasErrorCode, isApiError, isNetworkError } from "@/lib/api";
+import { hasErrorCode, isApiError, isNetworkError } from "@/lib/api";
 
 import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
 
@@ -22,7 +22,7 @@ import type {
   ShippingAddressSnapshot,
   ShippingChoice,
 } from "./orders.types";
-import { dateTimeFormat as lazyDateTimeFormat } from "@/lib/i18n";
+import { dateTimeFormat as lazyDateTimeFormat, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงค่าดิบจาก `/sellers/me/orders` → ข้อความบนหน้าจัดการคำสั่งซื้อ
@@ -558,7 +558,7 @@ export function orderErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ORDER_NOT_FOUND")) {
     return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }
 
 export function orderSummaryDownloadErrorMessage(error: unknown): string {
@@ -577,5 +577,5 @@ export function orderSummaryDownloadErrorMessage(error: unknown): string {
         if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
     }
   }
-  return getErrorMessage(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+  return translateError(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
 }

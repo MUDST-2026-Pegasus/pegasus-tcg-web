@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/api/errors";
 
 import { formatAuctionDate, formatBaht } from "./auction.format";
+import { errorText, translateError } from "@/lib/i18n";
 
 /** ข้อความในแบนเนอร์ error (Figma B3-E) */
 export type AuctionErrorMessage = { title: string; detail: string };
@@ -33,7 +34,8 @@ export function auctionErrorMessage(error: unknown, context: ErrorContext): Auct
       }
       return {
         title: "ราคาต่ำกว่าขั้นต่ำ",
-        detail: `ต้องบิดอย่างน้อย ${formatBaht(minNextBid)} (ราคาปัจจุบัน + ${formatBaht(context.bidIncrement)})`,
+        // ยอดขั้นต่ำมาจาก details.minNextBid ของ API ผ่าน ICU param [TCG-547]
+        detail: errorText("BID_TOO_LOW", { minNextBid: formatBaht(minNextBid) }) ?? `ต้องบิดอย่างน้อย ${formatBaht(minNextBid)}`,
       };
     }
     case "NO_SHIPPING_ADDRESS":
@@ -56,7 +58,7 @@ export function auctionErrorMessage(error: unknown, context: ErrorContext): Auct
     case "IDEMPOTENCY_KEY_CONFLICT":
       return { title: "บิดไม่สำเร็จ", detail: "คำขอซ้ำกับครั้งก่อน ลองกดบิดใหม่อีกครั้ง" };
     default:
-      return { title: "บิดไม่สำเร็จ", detail: error.message };
+      return { title: "บิดไม่สำเร็จ", detail: translateError(error, error.message) };
   }
 }
 

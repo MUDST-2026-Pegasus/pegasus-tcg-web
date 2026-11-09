@@ -11,7 +11,7 @@ import { getMyListings, moveUnit } from "@/features/seller/products/products.api
 import { listingKeys } from "@/features/seller/products/products.queries";
 import type { ListingQuery, ListingStatus, SellerListingSummary } from "@/features/seller/products/products.types";
 import { ApiError } from "@/lib/api/errors";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 /** ประกาศที่รับการ์ดได้ — ผู้ซื้อเห็นก่อน (ACTIVE / SOLD_OUT) แล้วค่อยที่ยังพักไว้ */
 const TARGET_ORDER: ListingStatus[] = ["ACTIVE", "SOLD_OUT", "PAUSED", "DRAFT"];
@@ -71,7 +71,7 @@ export function ReturnToListingButton({ detail }: ReturnToListingButtonProps) {
       toast.add({
         type: "error",
         title: "นำกลับไปลงขายไม่สำเร็จ",
-        description: error instanceof ApiError ? error.message : "ลองใหม่อีกครั้ง",
+        description: error instanceof ApiError ? translateError(error, error.message) : "ลองใหม่อีกครั้ง",
       });
     },
   });

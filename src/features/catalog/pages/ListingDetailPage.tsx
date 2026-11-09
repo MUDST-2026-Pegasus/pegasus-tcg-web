@@ -19,7 +19,7 @@ import {
   editionLabel,
   rarityLabel,
 } from "@/lib/card-labels";
-import { getErrorMessage } from "@/lib/api";
+
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useState } from "react";
@@ -76,6 +76,7 @@ import {
 } from "../components/ListingDetailSections";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { translateError } from "@/lib/i18n";
 
 export function ListingDetailPage() {
   const { listingId } = useParams<{ listingId: string }>();
@@ -170,7 +171,7 @@ function ListingDetailContent({
     } catch (error) {
       toast.add({
         title: t.closeFailed,
-        description: getErrorMessage(error, t.closeFailed),
+        description: translateError(error, t.closeFailed),
         type: "error",
       });
     }

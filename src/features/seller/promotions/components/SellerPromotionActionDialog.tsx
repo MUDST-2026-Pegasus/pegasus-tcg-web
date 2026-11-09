@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { PROMOTION_DANGER_BUTTON } from "@/features/admin/promotions.styles";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import { useDeleteSellerPromotion, usePauseSellerPromotion, useResumeSellerPromotion } from "../promotions.queries";
 import { formatPromoDateTime, limitLabel, thaiDate } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
 import type { PromotionAction } from "./SellerPromotionCard";
+import { translateError } from "@/lib/i18n";
 
 const SUPPORT_EMAIL = "support@pegasus.gg";
 /**
@@ -67,7 +68,7 @@ function ActionDialog({
         title: "ทำรายการไม่สำเร็จ",
         description: hasErrorCode(error, "SELLER_NOT_VERIFIED")
           ? "กรุณายืนยันตัวตนผู้ขายก่อนทำรายการ"
-          : getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+          : translateError(error, "กรุณาลองอีกครั้ง"),
         type: "error",
       });
     }
