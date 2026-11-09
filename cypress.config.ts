@@ -3,7 +3,7 @@ import { defineConfig } from "cypress";
 export default defineConfig({
   e2e: {
     baseUrl: "http://localhost:5173",
-    specPattern: "src/test/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
+    specPattern: ["src/test/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}", "cypress/e2e/auction/*.cy.ts"],
     supportFile: "src/test/cypress/support/e2e.ts",
     fixturesFolder: "src/test/cypress/fixtures",
     viewportWidth: 1280,
@@ -11,6 +11,7 @@ export default defineConfig({
     video: false,
     setupNodeEvents(_on, config) {
       config.expose = config.expose || {};
+      config.expose.runAuction = config.env?.runAuction === true || config.env?.runAuction === "true";
       if (config.env?.runPromotions !== undefined) {
         config.expose.runPromotions = config.env.runPromotions;
       }
