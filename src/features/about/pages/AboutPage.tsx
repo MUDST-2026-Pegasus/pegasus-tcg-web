@@ -138,8 +138,8 @@ export function AboutPage() {
                           isSenior
                             ? "bg-linear-to-r from-amber-300 via-yellow-200 to-amber-400 text-amber-950 shadow-sm ring-1 ring-amber-500/50"
                             : ASSOCIATE_TITLE.test(title)
-                              ? "bg-linear-to-r from-slate-300 via-slate-100 to-slate-400 text-slate-800 shadow-sm ring-1 ring-slate-400/60"
-                              : "bg-linear-to-r from-sky-300 via-cyan-100 to-blue-300 text-blue-950 shadow-sm ring-1 ring-sky-500/50",
+                              ? "bg-linear-to-r from-orange-400 via-orange-200 to-orange-400 text-orange-950 shadow-sm ring-1 ring-orange-700/50"
+                              : "bg-linear-to-r from-stone-200 via-white to-zinc-300 text-zinc-800 shadow-sm ring-1 ring-zinc-400/60",
                         )}
                       >
                         {isSenior && (
