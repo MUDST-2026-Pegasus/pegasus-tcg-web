@@ -53,7 +53,7 @@ import {
   LockedSuffix,
   NumberInput,
   ToggleRow,
-} from "./PromotionFormControls";
+} from "@/features/promotions/shared/PromotionFormControls";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
 
 const SCOPE_OPTIONS: Array<{ value: AdminPromotionInput["scopeType"]; label: string }> = [

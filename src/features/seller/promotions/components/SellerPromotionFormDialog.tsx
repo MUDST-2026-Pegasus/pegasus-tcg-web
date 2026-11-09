@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "@/components/ui/toast";
-import { FormField, ToggleRow } from "@/features/admin/components/PromotionFormControls";
+import { FormField, ToggleRow } from "@/features/promotions/shared/PromotionFormControls";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
