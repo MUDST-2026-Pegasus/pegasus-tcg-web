@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router-dom";
 
 import { lazyPage } from "@/app/lazy-page";
+import { msg } from "@/lib/i18n";
 import { DashboardPageSkeleton, FormBodySkeleton } from "@/components/common/PageSkeletons";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { DashboardSkeleton } from "@/features/seller/dashboard/components/DashboardSkeleton";
@@ -43,28 +44,49 @@ export const sellerRoutes: RouteObject = {
     </RequireAuth>
   ),
   children: [
-    { index: true, handle: { title: "แดชบอร์ดผู้ขาย" }, element: <SellerDashboardPage /> },
-    { path: "shop", handle: { title: "ร้านของฉัน" }, element: <SellerShopPage /> },
-    { path: "products", handle: { title: "สินค้าของฉัน" }, element: <SellerProductsPage /> },
-    { path: "products/new", handle: { title: "เพิ่มสินค้า" }, element: <SellerProductCreatePage /> },
+    { index: true, handle: { title: msg("routes.title.seller.index", "แดชบอร์ดผู้ขาย") }, element: <SellerDashboardPage /> },
+    { path: "shop", handle: { title: msg("routes.title.seller.shop", "ร้านของฉัน") }, element: <SellerShopPage /> },
+    { path: "products", handle: { title: msg("routes.title.seller.products", "สินค้าของฉัน") }, element: <SellerProductsPage /> },
+    { path: "products/new", handle: { title: msg("routes.title.seller.productsNew", "เพิ่มสินค้า") }, element: <SellerProductCreatePage /> },
     {
-      path: "products/:productId/restock", handle: { title: "เติมสต็อก" },
+      path: "products/:productId/restock", handle: { title: msg("routes.title.seller.productsProductIdRestock", "เติมสต็อก") },
       element: <SellerProductRestockPage />,
     },
-    { path: "products/:productId/edit", handle: { title: "แก้ไขสินค้า" }, element: <SellerProductEditPage /> },
-    { path: "orders", handle: { title: "คำสั่งซื้อ" }, element: <SellerOrdersPage /> },
-    { path: "promotions", handle: { title: "โปรโมชัน" }, element: <SellerPromotionsPage /> },
+    { path: "products/:productId/edit", handle: { title: msg("routes.title.seller.productsProductIdEdit", "แก้ไขสินค้า") }, element: <SellerProductEditPage /> },
+    { path: "orders", handle: { title: msg("routes.title.seller.orders", "คำสั่งซื้อ") }, element: <SellerOrdersPage /> },
+    { path: "promotions", handle: { title: msg("routes.title.seller.promotions", "โปรโมชัน") }, element: <SellerPromotionsPage /> },
     // ลดราคาสินค้าของร้าน [TCG-682] — รายการอยู่ที่ /seller/promotions?tab=sales
-    { path: "sales/new", handle: { title: "สร้างการลดราคา" }, element: <SellerSaleFormPage /> },
-    { path: "sales/:id/edit", handle: { title: "แก้ไขการลดราคา" }, element: <SellerSaleFormPage /> },
-    { path: "orders/:orderId", handle: { title: "รายละเอียดคำสั่งซื้อ" }, element: <SellerOrderDetailPage /> },
-    { path: "payout", handle: { title: "การรับเงิน" }, element: <SellerPayoutPage /> },
-    { path: "verification", handle: { title: "ยืนยันตัวตน" }, element: <SellerVerificationPage /> },
-    { path: "returns", handle: { title: "คืนสินค้า" }, element: <SellerReturnsPage /> },
-    { path: "reviews", handle: { title: "รีวิว" }, element: <SellerReviewsPage /> },
-    { path: "auctions", handle: { title: "ประมูลของฉัน" }, element: <SellerAuctionsPage /> },
-    { path: "auctions/new", handle: { title: "สร้างประมูล" }, element: <SellerAuctionCreatePage /> },
-    { path: "auctions/:auctionId", handle: { title: "ประมูล" }, element: <SellerAuctionDetailPage /> },
-    { path: "logout", handle: { title: "ออกจากระบบ" }, element: <SellerLogoutPage /> },
+    { path: "sales/new", handle: { title: msg("routes.title.seller.salesNew", "สร้างการลดราคา") }, element: <SellerSaleFormPage /> },
+    { path: "sales/:id/edit", handle: { title: msg("routes.title.seller.salesIdEdit", "แก้ไขการลดราคา") }, element: <SellerSaleFormPage /> },
+    { path: "orders/:orderId", handle: { title: msg("routes.title.seller.ordersOrderId", "รายละเอียดคำสั่งซื้อ") }, element: <SellerOrderDetailPage /> },
+    { path: "payout", handle: { title: msg("routes.title.seller.payout", "การรับเงิน") }, element: <SellerPayoutPage /> },
+    { path: "verification", handle: { title: msg("routes.title.seller.verification", "ยืนยันตัวตน") }, element: <SellerVerificationPage /> },
+    { path: "returns", handle: { title: msg("routes.title.seller.returns", "คืนสินค้า") }, element: <SellerReturnsPage /> },
+    { path: "reviews", handle: { title: msg("routes.title.seller.reviews", "รีวิว") }, element: <SellerReviewsPage /> },
+    { path: "auctions", handle: { title: msg("routes.title.seller.auctions", "ประมูลของฉัน") }, element: <SellerAuctionsPage /> },
+    { path: "auctions/new", handle: { title: msg("routes.title.seller.auctionsNew", "สร้างประมูล") }, element: <SellerAuctionCreatePage /> },
+    { path: "auctions/:auctionId", handle: { title: msg("routes.title.seller.auctionsAuctionId", "ประมูล") }, element: <SellerAuctionDetailPage /> },
+    { path: "logout", handle: { title: msg("routes.title.seller.logout", "ออกจากระบบ") }, element: <SellerLogoutPage /> },
   ],
 };
+
+// key ของ msg() ด้านบน — ประกาศให้ tolgee CLI เห็น (msg ไม่ใช่ t) [TCG-550]
+// @tolgee-key {"key": "routes.title.seller.index", "ns": "common", "defaultValue": "แดชบอร์ดผู้ขาย"}
+// @tolgee-key {"key": "routes.title.seller.shop", "ns": "common", "defaultValue": "ร้านของฉัน"}
+// @tolgee-key {"key": "routes.title.seller.products", "ns": "common", "defaultValue": "สินค้าของฉัน"}
+// @tolgee-key {"key": "routes.title.seller.productsNew", "ns": "common", "defaultValue": "เพิ่มสินค้า"}
+// @tolgee-key {"key": "routes.title.seller.productsProductIdRestock", "ns": "common", "defaultValue": "เติมสต็อก"}
+// @tolgee-key {"key": "routes.title.seller.productsProductIdEdit", "ns": "common", "defaultValue": "แก้ไขสินค้า"}
+// @tolgee-key {"key": "routes.title.seller.orders", "ns": "common", "defaultValue": "คำสั่งซื้อ"}
+// @tolgee-key {"key": "routes.title.seller.promotions", "ns": "common", "defaultValue": "โปรโมชัน"}
+// @tolgee-key {"key": "routes.title.seller.salesNew", "ns": "common", "defaultValue": "สร้างการลดราคา"}
+// @tolgee-key {"key": "routes.title.seller.salesIdEdit", "ns": "common", "defaultValue": "แก้ไขการลดราคา"}
+// @tolgee-key {"key": "routes.title.seller.ordersOrderId", "ns": "common", "defaultValue": "รายละเอียดคำสั่งซื้อ"}
+// @tolgee-key {"key": "routes.title.seller.payout", "ns": "common", "defaultValue": "การรับเงิน"}
+// @tolgee-key {"key": "routes.title.seller.verification", "ns": "common", "defaultValue": "ยืนยันตัวตน"}
+// @tolgee-key {"key": "routes.title.seller.returns", "ns": "common", "defaultValue": "คืนสินค้า"}
+// @tolgee-key {"key": "routes.title.seller.reviews", "ns": "common", "defaultValue": "รีวิว"}
+// @tolgee-key {"key": "routes.title.seller.auctions", "ns": "common", "defaultValue": "ประมูลของฉัน"}
+// @tolgee-key {"key": "routes.title.seller.auctionsNew", "ns": "common", "defaultValue": "สร้างประมูล"}
+// @tolgee-key {"key": "routes.title.seller.auctionsAuctionId", "ns": "common", "defaultValue": "ประมูล"}
+// @tolgee-key {"key": "routes.title.seller.logout", "ns": "common", "defaultValue": "ออกจากระบบ"}

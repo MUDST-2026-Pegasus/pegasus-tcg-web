@@ -6,7 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
+import { dateTimeFormat, dayPickerLocale, useTranslate } from "@/lib/i18n";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 const HOURS = Array.from({ length: 24 }, (_, hour) => ({ value: pad(hour), label: pad(hour) }));
@@ -65,10 +65,11 @@ export function DateTimePicker({
   min,
   max,
   defaultTime = "00:00",
-  placeholder = mode === "date" ? "เลือกวัน" : "เลือกวันและเวลา",
+  placeholder,
   suffix,
   className,
 }: DateTimePickerProps) {
+  const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const selected = parse(value);
   const minDate = parse(min ?? "");
@@ -122,7 +123,7 @@ export function DateTimePicker({
         }
       >
         <CalendarIcon className="text-muted-foreground" aria-hidden />
-        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder}</span>
+        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder ?? (mode === "date" ? t("datePicker.pickDate", "เลือกวัน") : t("datePicker.pickDateTime", "เลือกวันและเวลา"))}</span>
         {suffix}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-0">
@@ -139,9 +140,9 @@ export function DateTimePicker({
         />
         {mode === "datetime" ? (
           <div className="flex items-center justify-center gap-2 border-t px-4 py-3 text-sm">
-            <span className="text-muted-foreground">เวลา</span>
+            <span className="text-muted-foreground">{t("datePicker.time", "เวลา")}</span>
             <TimeSelect
-              label="ชั่วโมง"
+              label={t("datePicker.hour", "ชั่วโมง")}
               items={HOURS}
               value={selected ? pad(selected.getHours()) : null}
               disabled={!selected}
@@ -149,14 +150,14 @@ export function DateTimePicker({
             />
             <span aria-hidden>:</span>
             <TimeSelect
-              label="นาที"
+              label={t("datePicker.minute", "นาที")}
               items={MINUTES}
               value={selected ? pad(selected.getMinutes()) : null}
               disabled={!selected}
               onChange={(next) => setTime("minute", next)}
             />
             <Button type="button" size="sm" className="ml-2" onClick={() => setOpen(false)}>
-              เสร็จ
+              {t("actions.done", "เสร็จ")}
             </Button>
           </div>
         ) : null}

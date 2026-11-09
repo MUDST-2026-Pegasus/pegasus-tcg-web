@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuctions } from "@/features/auction/auction.queries";
 import { AuctionCard } from "@/features/auction/components/AuctionCard";
+import { useTranslate } from "@/lib/i18n";
 
 /** จำนวนการ์ดในแถว Home */
 export const HOME_AUCTION_COUNT = 4;
@@ -13,12 +14,13 @@ export const HOME_AUCTION_COUNT = 4;
  * ไม่มีประมูลเปิด / โหลดไม่สำเร็จ → ไม่แสดงทั้ง section (หน้าแรกไม่ควรมีกล่อง error ของส่วนเสริม)
  */
 export function AuctionEndingSoonSection() {
+  const { t } = useTranslate("buyer");
   const query = useAuctions({ sort: "ENDING_SOON", size: HOME_AUCTION_COUNT });
   const auctions = query.data?.page.items ?? [];
   if (!query.data || auctions.length === 0) return null;
 
   return (
-    <section aria-label="ประมูลใกล้จบ" className="bg-secondary px-4 py-7 sm:px-6 lg:px-8">
+    <section aria-label={t("home.auctions.title", "ประมูลใกล้จบ")} className="bg-secondary px-4 py-7 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-[1216px] flex-col gap-[18px]">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-1">
@@ -26,8 +28,8 @@ export function AuctionEndingSoonSection() {
               <Gavel aria-hidden className="size-3.5" />
               AUCTION
             </span>
-            <h2 className="text-[28px] leading-8 font-semibold text-foreground">ประมูลใกล้จบ</h2>
-            <p className="text-xs text-muted-foreground">บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที</p>
+            <h2 className="text-[28px] leading-8 font-semibold text-foreground">{t("home.auctions.title", "ประมูลใกล้จบ")}</h2>
+            <p className="text-xs text-muted-foreground">{t("home.auctions.description", "บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที")}</p>
           </div>
           <Button
             variant="link"
@@ -36,7 +38,7 @@ export function AuctionEndingSoonSection() {
             nativeButton={false}
             render={<Link to="/auctions" />}
           >
-            ดูประมูลทั้งหมด
+            {t("home.auctions.viewAll", "ดูประมูลทั้งหมด")}
             <ArrowRight aria-hidden className="size-4" />
           </Button>
         </div>

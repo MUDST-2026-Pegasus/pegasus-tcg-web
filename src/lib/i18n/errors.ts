@@ -33,6 +33,18 @@ export function errorText(key: string, params?: Params): string | undefined {
   }
 }
 
+/**
+ * ข้อความใน namespace `errors` สำหรับโค้ดที่ไม่ใช่ component (เช่น lib/upload) — มีคำแปลใช้คำแปล
+ * ไม่มีใช้ defaultValue (แทน {param} ให้) ไม่คืน undefined [TCG-550]
+ * CLI หา key จาก errorMessage ไม่เจอ ต้องประกาศ `// @tolgee-key` ไว้ในไฟล์ที่ใช้
+ */
+export function errorMessage(key: string, defaultValue: string, params?: Params): string {
+  return (
+    errorText(key, params) ??
+    defaultValue.replace(/\{(\w+)\}/g, (match, name: string) => (params?.[name] != null ? String(params[name]) : match))
+  );
+}
+
 /** ค่าตัวเลข / ข้อความจาก `details` ของ API ส่งเข้า ICU params ได้เลย */
 function detailParams(details: Record<string, unknown>): Params {
   const params: Params = {};

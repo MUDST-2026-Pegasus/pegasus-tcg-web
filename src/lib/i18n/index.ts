@@ -23,4 +23,5 @@ export {
   TIME_ZONE,
 } from "@/lib/i18n/format";
 export { useFormat } from "@/lib/i18n/use-format";
-export { errorText, translateError, translateViolation, useErrorMessage } from "@/lib/i18n/errors";
+export { errorMessage, errorText, translateError, translateViolation, useErrorMessage } from "@/lib/i18n/errors";
+export { msg, useMessage, type Message } from "@/lib/i18n/message";

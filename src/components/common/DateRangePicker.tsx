@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
+import { dateTimeFormat, dayPickerLocale, useTranslate } from "@/lib/i18n";
 
 const monthCaption = dateTimeFormat({ month: "long", year: "numeric" });
 const dateLabel = dateTimeFormat({ day: "numeric", month: "short", year: "numeric" });
@@ -51,9 +51,10 @@ export function DateRangePicker({
   invalid,
   min,
   max,
-  placeholder = "เลือกช่วงวัน",
+  placeholder,
   className,
 }: DateRangePickerProps) {
+  const { t } = useTranslate();
   const [open, setOpen] = useState(false);
   const from = toDate(value.from);
   const minDate = toDate(min);
@@ -86,7 +87,7 @@ export function DateRangePicker({
         }
       >
         <CalendarIcon className="text-muted-foreground" aria-hidden />
-        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder}</span>
+        <span className={cn("flex-1 truncate", !text && "text-muted-foreground")}>{text ?? placeholder ?? t("datePicker.pickRange", "เลือกช่วงวัน")}</span>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-0">
         <Calendar
@@ -107,10 +108,10 @@ export function DateRangePicker({
             disabled={!value.from}
             onClick={() => onChange({ from: "", to: "" })}
           >
-            ล้าง
+            {t("actions.clear", "ล้าง")}
           </Button>
           <Button type="button" size="sm" onClick={() => setOpen(false)}>
-            เสร็จ
+            {t("actions.done", "เสร็จ")}
           </Button>
         </div>
       </PopoverContent>

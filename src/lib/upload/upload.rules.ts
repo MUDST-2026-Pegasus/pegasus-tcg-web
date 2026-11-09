@@ -1,4 +1,5 @@
 import type { UploadPurpose } from "./upload.types";
+import { errorMessage } from "@/lib/i18n";
 
 /**
  * กติกาชนิด/ขนาดไฟล์ของแต่ละ purpose — ลอกจาก `storage/UploadPurpose.java`
@@ -51,14 +52,14 @@ export function formatFileSize(bytes: number): string {
 export function describeTypes(rule: UploadRule): string {
   const labels = rule.contentTypes.map((type) => TYPE_LABELS[type] ?? type);
   return labels.length > 1
-    ? `${labels.slice(0, -1).join(", ")} หรือ ${labels.at(-1)}`
+    ? errorMessage("upload.typeList", "{list} หรือ {last}", { list: labels.slice(0, -1).join(", "), last: labels.at(-1) ?? "" })
     : labels.join("");
 }
 
 /** "JPG · PNG · WEBP · ไม่เกิน 5 MB" — บรรทัดใบ้ข้างช่องอัปโหลด */
 export function describeRule(rule: UploadRule): string {
   const labels = rule.contentTypes.map((type) => TYPE_LABELS[type] ?? type);
-  return [...labels, `ไม่เกิน ${formatFileSize(rule.maxBytes)}`].join(" · ");
+  return [...labels, errorMessage("upload.maxSize", "ไม่เกิน {max}", { max: formatFileSize(rule.maxBytes) })].join(" · ");
 }
 
 /** ค่า `accept` ของ `<input type="file">` */
@@ -75,13 +76,13 @@ export function isAllowedType(rule: UploadRule, contentType: string): boolean {
  */
 export function validateFile(file: File, rule: UploadRule): string | null {
   if (!isAllowedType(rule, file.type)) {
-    return `ไฟล์ "${file.name}" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ ${describeTypes(rule)}`;
+    return errorMessage("upload.unsupportedType", "ไฟล์ \"{name}\" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ {types}", { name: file.name, types: describeTypes(rule) });
   }
   if (file.size === 0) {
-    return `ไฟล์ "${file.name}" ว่างเปล่า ลองเลือกไฟล์ใหม่`;
+    return errorMessage("upload.empty", "ไฟล์ \"{name}\" ว่างเปล่า ลองเลือกไฟล์ใหม่", { name: file.name });
   }
   if (file.size > rule.maxBytes) {
-    return `ไฟล์ "${file.name}" ขนาด ${formatFileSize(file.size)} ใหญ่เกิน ${formatFileSize(rule.maxBytes)}`;
+    return errorMessage("upload.tooLargeWithSize", "ไฟล์ \"{name}\" ขนาด {size} ใหญ่เกิน {max}", { name: file.name, size: formatFileSize(file.size), max: formatFileSize(rule.maxBytes) });
   }
   return null;
 }

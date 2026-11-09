@@ -14,6 +14,7 @@ import { formatFileSize } from "@/lib/upload";
 import { cn } from "@/lib/utils";
 
 import { FileDropzone } from "./FileDropzone";
+import { useTranslate } from "@/lib/i18n";
 
 type FileUploadProps = {
   /** ผลของ `useFileUpload()` — state อยู่ที่ผู้เรียก component นี้แค่วาดให้ */
@@ -34,15 +35,16 @@ type FileUploadProps = {
 export function FileUpload({
   upload,
   id,
-  title = "ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์",
+  title,
   description,
   invalid,
   disabled,
   className,
 }: FileUploadProps) {
+  const { t } = useTranslate();
   const limit =
     upload.multiple && upload.maxFiles !== undefined
-      ? ` · สูงสุด ${upload.maxFiles} ไฟล์`
+      ? ` · ${t("upload.maxFiles", "สูงสุด {count} ไฟล์", { count: upload.maxFiles })}`
       : "";
 
   return (
@@ -57,7 +59,7 @@ export function FileUpload({
         className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed border-border bg-muted/30 p-5 text-center transition-colors hover:bg-muted/50 data-dragging:border-primary data-dragging:bg-primary/5 data-invalid:border-destructive data-invalid:bg-destructive/5"
       >
         <CloudUpload aria-hidden className="size-6 text-muted-foreground" />
-        <p className="text-xs font-medium text-foreground">{title}</p>
+        <p className="text-xs font-medium text-foreground">{title ?? t("upload.dropHere", "ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์")}</p>
         <p className="text-[11px] text-muted-foreground">
           {description ? `${description} · ` : ""}
           {upload.hint}
@@ -71,7 +73,7 @@ export function FileUpload({
           disabled={disabled}
           className="rounded-md px-2.5"
         >
-          เลือกไฟล์
+          {t("upload.chooseFile", "เลือกไฟล์")}
         </Button>
       </FileDropzone>
 
@@ -100,6 +102,7 @@ function FileUploadRow({
   onRemove: () => void;
   onRetry: () => void;
 }) {
+  const { t } = useTranslate();
   const percent = Math.round(item.progress * 100);
 
   return (
@@ -129,7 +132,7 @@ function FileUploadRow({
           <div className="flex items-center gap-2">
             <Progress
               value={percent}
-              aria-label={`กำลังอัปโหลด ${item.file.name}`}
+              aria-label={t("upload.uploading", "กำลังอัปโหลด {name}", { name: item.file.name })}
               className="flex-1 [&_[data-slot=progress-track]]:h-1.5"
             />
             <span className="text-[11px] text-muted-foreground tabular-nums">
@@ -140,7 +143,7 @@ function FileUploadRow({
         {item.status === "done" && (
           <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <CircleCheck aria-hidden className="size-3.5 text-primary" />
-            อัปโหลดแล้ว · {formatFileSize(item.file.size)}
+            {t("upload.uploaded", "อัปโหลดแล้ว · {size}", { size: formatFileSize(item.file.size) })}
           </p>
         )}
         {item.status === "error" && (
@@ -164,7 +167,7 @@ function FileUploadRow({
             onClick={onRetry}
           >
             <RotateCw data-icon="inline-start" />
-            ลองใหม่
+            {t("actions.retry", "ลองใหม่")}
           </Button>
         )}
         <Button
@@ -173,8 +176,8 @@ function FileUploadRow({
           size="icon-sm"
           aria-label={
             item.status === "uploading"
-              ? `ยกเลิกการอัปโหลด ${item.file.name}`
-              : `ลบ ${item.file.name}`
+              ? t("upload.cancelUpload", "ยกเลิกการอัปโหลด {name}", { name: item.file.name })
+              : t("upload.remove", "ลบ {name}", { name: item.file.name })
           }
           onClick={onRemove}
         >

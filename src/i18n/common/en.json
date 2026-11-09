@@ -1,24 +1,233 @@
 {
+  "account": {
+    "adminDashboard": "Admin Dashboard",
+    "becomeSeller": "Become a Seller",
+    "loadingAccount": "Loading account",
+    "loggedOut": "Logged out successfully",
+    "menu": "Account",
+    "myAccount": "My Account",
+    "myCollection": "My Collection",
+    "sellerDashboard": "Seller Dashboard"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "done": "Done",
+    "next": "Next",
+    "previous": "Previous",
+    "reload": "Reload",
+    "retry": "Retry"
+  },
+  "datePicker": {
+    "hour": "Hour",
+    "minute": "Minute",
+    "pickDate": "Pick a date",
+    "pickDateTime": "Select date and time",
+    "pickRange": "Select date range",
+    "time": "Time"
+  },
   "nav": {
-    "home": "Home",
-    "allProducts": "All products",
-    "newArrivals": "New arrivals",
-    "auction": "Auction",
-    "sale": "Sale",
-    "logoAria": "Pegasus TCG — back to home",
-    "openMenu": "Open menu",
-    "closeMenu": "Close menu",
-    "shop": "Shop",
     "account": "Account",
-    "categories": "Shop categories",
-    "loginHint": "Log in to see your orders and collection",
-    "login": "Log in",
-    "signup": "Sign up",
-    "logout": "Log out",
+    "allProducts": "All products",
+    "auction": "Auction",
     "becomeSeller": "Become a seller",
+    "cart": "Cart",
+    "cartWithCount": "{count, plural, one {Cart, # item} other {Cart, # items}}",
+    "categories": "Shop categories",
+    "closeMenu": "Close menu",
+    "home": "Home",
+    "login": "Log in",
+    "loginHint": "Log in to see your orders and collection",
+    "logoAria": "Pegasus TCG — back to home",
+    "logout": "Log out",
+    "newArrivals": "New arrivals",
+    "openMenu": "Open menu",
+    "sale": "Sale",
     "search": "Search",
     "searchPlaceholder": "Search cards, sets or stores…",
-    "cart": "Cart",
-    "cartWithCount": "{count, plural, one {Cart, # item} other {Cart, # items}}"
+    "shop": "Shop",
+    "signup": "Sign up"
+  },
+  "pagination": {
+    "pageOf": "Page {page} of {total}"
+  },
+  "routeError": {
+    "title": "There’s a problem with this page"
+  },
+  "routes": {
+    "loading": {
+      "addressBook": "Loading address book",
+      "auctionDetail": "Loading auction",
+      "auctionList": "Loading auctions",
+      "cart": "Loading cart",
+      "checkout": "Loading checkout page",
+      "collectorProfile": "Loading collector profile",
+      "listingDetail": "Loading listing",
+      "marketListings": "Loading listing",
+      "myAuctions": "Loading my auctions",
+      "myCollection": "Loading collection",
+      "myCoupons": "Loading my coupons",
+      "orderHistory": "Loading order history",
+      "payment": "Loading payment page",
+      "productDetail": "Loading product",
+      "profile": "Loading profile",
+      "publicCollection": "Loading collection",
+      "publicSeller": "Loading store",
+      "sale": "Loading sale products",
+      "searchResults": "Loading search results"
+    },
+    "title": {
+      "admin": {
+        "activityLog": "Activity log",
+        "auctions": "Manage auctions",
+        "auctionsAuctionId": "Auction",
+        "auctionsBannedBidders": "Banned bidders",
+        "cardAttributes": "Card attributes",
+        "catalog": "Manage catalog",
+        "commission": "Commission",
+        "index": "Admin overview",
+        "orders": "Orders",
+        "payments": "Verify payment slip",
+        "payouts": "Seller payouts",
+        "promotions": "Promotions",
+        "promotionsIdEdit": "Edit promotion",
+        "promotionsNew": "Create promotion",
+        "refunds": "Refunds",
+        "reportsWeeklyStockProfit": "Weekly Report",
+        "reviews": "Reviews",
+        "salesIdEdit": "Edit discount",
+        "salesNew": "Create sale",
+        "sellers": "Approve sellers",
+        "users": "Users"
+      },
+      "auth": {
+        "login": "Log in",
+        "register": "Sign up"
+      },
+      "error": "An error occurred",
+      "public": {
+        "about": "About us",
+        "accountCollection": "My collection",
+        "addresses": "Addresses",
+        "auctions": "Auction",
+        "auctions2": "My auctions",
+        "auctionsAuctionId": "Auction",
+        "becomeASeller": "Become a seller",
+        "cart": "Cart",
+        "checkout": "Payment",
+        "collectorsUsername": "Collectors",
+        "coupons": "My codes",
+        "index": "Home",
+        "listingsListingId": "Listing for sale",
+        "notFound": "Page not found",
+        "orders": "My Orders",
+        "payment": "Payment",
+        "paymentSuccess": "Payment successful",
+        "privacyPolicy": "Privacy Policy",
+        "productsProductId": "Product",
+        "productsProductIdListings": "Listing for sale",
+        "profile": "Profile",
+        "sale": "Sale items",
+        "saleSlug": "Sale items",
+        "search": "Search",
+        "termsOfService": "Terms of Service",
+        "usersUsername": "Collection",
+        "uUsername": "Store"
+      },
+      "seller": {
+        "auctions": "My auctions",
+        "auctionsAuctionId": "Auction",
+        "auctionsNew": "Create auction",
+        "index": "Seller Dashboard",
+        "logout": "Log out",
+        "orders": "Orders",
+        "ordersOrderId": "Order details",
+        "payout": "Payouts",
+        "products": "My products",
+        "productsNew": "Add product",
+        "productsProductIdEdit": "Edit product",
+        "productsProductIdRestock": "Restock",
+        "promotions": "Promotions",
+        "returns": "Returns",
+        "reviews": "Reviews",
+        "salesIdEdit": "Edit sale",
+        "salesNew": "Create sale",
+        "shop": "My shop",
+        "verification": "Identity Verification"
+      }
+    }
+  },
+  "sidebar": {
+    "admin": {
+      "groups": {
+        "catalog": "Catalog",
+        "finance": "Manage finances",
+        "operations": "Operations",
+        "overview": "Overview",
+        "system": "System",
+        "trust": "Trust"
+      },
+      "items": {
+        "activityLog": "Activity log",
+        "auctions": "Auctions",
+        "cardAttributes": "Games and card attributes",
+        "catalog": "Manage catalog",
+        "commission": "Commission",
+        "orders": "Order overview",
+        "payments": "Verify payment slips",
+        "payouts": "Seller payouts",
+        "platformOverview": "Platform overview",
+        "promotions": "Promotions & discount codes",
+        "refunds": "Refunds",
+        "reviews": "Reviews",
+        "sellerApproval": "Seller approval",
+        "users": "Users",
+        "weeklyReport": "Weekly stock/profit report"
+      }
+    },
+    "seller": {
+      "groups": {
+        "finance": "Finance",
+        "overview": "Overview",
+        "shop": "Shop"
+      },
+      "items": {
+        "auctions": "Auctions",
+        "dashboard": "Dashboard",
+        "orders": "Manage orders",
+        "payout": "Payout",
+        "products": "Manage products",
+        "promotions": "Shop discount codes",
+        "returns": "Return requests",
+        "reviews": "Shop reviews",
+        "shop": "Manage shop"
+      }
+    }
+  },
+  "states": {
+    "loadFailed": "Failed to load data",
+    "loading": {
+      "account": "Loading account",
+      "details": "Loading details",
+      "home": "Loading home page",
+      "homeData": "Loading home page data",
+      "login": "Loading login page...",
+      "page": "Loading page",
+      "profile": "Loading profile",
+      "register": "Loading sign-up page..."
+    },
+    "noData": "No data",
+    "notBuiltYet": "This page isn't built yet",
+    "tryAgainOrRefresh": "Try again or refresh this page",
+    "unknownCause": "Unknown cause"
+  },
+  "upload": {
+    "cancelUpload": "Cancel upload {name}",
+    "chooseFile": "Choose file",
+    "dropHere": "Drag and drop files here or click to select files",
+    "maxFiles": "Up to {count} files",
+    "remove": "Remove {name}",
+    "uploaded": "Uploaded · {size}",
+    "uploading": "Uploading {name}"
   }
 }
