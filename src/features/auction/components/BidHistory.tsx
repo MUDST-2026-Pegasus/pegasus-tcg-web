@@ -7,6 +7,7 @@ import { formatBaht, formatBidTime } from "../auction.format";
 import { useBidHistory } from "../auction.queries";
 import { AuctionStatusPill } from "./AuctionStatusPill";
 import { intlLocale } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 /** แสดงก่อนกี่แถว — กด "ดูทั้งหมด" เพื่อดูที่เหลือ */
 const PREVIEW_ROWS = 6;
@@ -57,7 +58,10 @@ export function BidHistory({ auctionId, bidCount, live }: BidHistoryProps) {
                 <p className="text-xs text-muted-foreground">{formatBidTime(bid.placedAt)}</p>
               </div>
               {live && index === 0 ? <AuctionStatusPill kind="Leading" label="สูงสุดตอนนี้" /> : null}
-              <span className="text-base font-bold tabular-nums">{formatBaht(bid.amount)}</span>
+              {bid.cancelled ? <AuctionStatusPill kind="Unsold" label="ยกเลิก" /> : null}
+              <span className={cn("text-base font-bold tabular-nums", bid.cancelled && "text-muted-foreground line-through")}>
+                {formatBaht(bid.amount)}
+              </span>
             </li>
           ))}
         </ol>
