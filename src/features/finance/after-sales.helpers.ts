@@ -1,4 +1,5 @@
 import type { SellerReturnItem, SellerReturnRequest } from "./after-sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 export type TabCategory = "action_required" | "awaiting_shipment" | "awaiting_refund" | "completed";
 
@@ -76,7 +77,7 @@ export function validatePartialRefundAmount(
     return { valid: false, error: "ยอดคืนเงินต้องมากกว่า 0 บาท" };
   }
   if (num >= grandTotal) {
-    return { valid: false, error: `ยอดคืนเงินบางส่วนต้องน้อยกว่ายอดรวมคำสั่งซื้อ (${grandTotal.toLocaleString("th-TH")} บาท)` };
+    return { valid: false, error: `ยอดคืนเงินบางส่วนต้องน้อยกว่ายอดรวมคำสั่งซื้อ (${grandTotal.toLocaleString(intlLocale())} บาท)` };
   }
 
   const parts = str.split(".");

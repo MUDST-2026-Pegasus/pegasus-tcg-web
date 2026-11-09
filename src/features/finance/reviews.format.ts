@@ -1,4 +1,5 @@
 import type { PublicReview } from "./after-sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 export type ReviewTab = "all" | "unreplied" | "replied";
 
@@ -33,7 +34,7 @@ export function reviewerInitials(username: string) {
 export function formatReviewDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat("th-TH-u-ca-buddhist", {
+  return new Intl.DateTimeFormat(intlLocale(), {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
     timeZone: "Asia/Bangkok", hour12: false,
   }).format(date).replace(/,?\s+(\d{2}:\d{2})$/, " · $1");

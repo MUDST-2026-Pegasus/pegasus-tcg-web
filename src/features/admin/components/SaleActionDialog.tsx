@@ -14,6 +14,7 @@ import { useDeleteSale, useEndSale, usePauseSale, useResumeSale } from "../sales
 import type { AdminSale } from "../sales.types";
 import { PromotionDialog } from "./PromotionDialog";
 import { CheckRow } from "./PromotionFormControls";
+import { intlLocale } from "@/lib/i18n";
 
 const SUMMARY_BOX = "grid gap-1.5 rounded-md bg-muted px-3.5 py-2.5 text-xs";
 const SUMMARY_ROW = "flex justify-between gap-3 text-muted-foreground [&>strong]:font-semibold [&>strong]:text-foreground";
@@ -88,7 +89,7 @@ function PausePlatformSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: 
       tone="warning"
       icon={<Pause />}
       title={`หยุด ${sale.name} ชั่วคราว?`}
-      description={`${sale.listingCount.toLocaleString("th-TH")} listing กลับเป็นราคาปกติภายใน 1 นาที จนกว่าจะเปิดอีกครั้ง · ออเดอร์ที่จ่ายแล้วไม่กระทบ`}
+      description={`${sale.listingCount.toLocaleString(intlLocale())} listing กลับเป็นราคาปกติภายใน 1 นาที จนกว่าจะเปิดอีกครั้ง · ออเดอร์ที่จ่ายแล้วไม่กระทบ`}
       actions={
         <>
           <Button variant="outline" disabled={pause.isPending} onClick={onClose}>
@@ -226,7 +227,7 @@ function EndSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void
       tone="warning"
       icon={<Square />}
       title={`จบ ${sale.name} ตอนนี้?`}
-      description={`${sale.listingCount.toLocaleString("th-TH")} listing กลับเป็นราคาปกติทันที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน” · ออเดอร์ที่จ่ายแล้วไม่กระทบ`}
+      description={`${sale.listingCount.toLocaleString(intlLocale())} listing กลับเป็นราคาปกติทันที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน” · ออเดอร์ที่จ่ายแล้วไม่กระทบ`}
       actions={
         <>
           <Button variant="outline" disabled={end.isPending} onClick={onClose}>
@@ -241,7 +242,7 @@ function EndSaleDialog({ sale, onClose }: { sale: AdminSale; onClose: () => void
       <div className={SUMMARY_BOX}>
         <p className={SUMMARY_ROW}>
           <span>ขายไปแล้ว</span>
-          <strong>{sale.soldUnits.toLocaleString("th-TH")} ชิ้น</strong>
+          <strong>{sale.soldUnits.toLocaleString(intlLocale())} ชิ้น</strong>
         </p>
         {sale.ownerType === "PLATFORM" ? (
           <p className={SUMMARY_ROW}>
@@ -310,7 +311,7 @@ function DeleteBlockedSaleDialog({ sale, onClose, onEnd }: { sale: AdminSale; on
       tone="info"
       icon={<Info />}
       title="ลบแคมเปญนี้ไม่ได้"
-      description={`แคมเปญมีออเดอร์แล้ว (ขายไป ${sale.soldUnits.toLocaleString("th-TH")} ชิ้น) ต้องเก็บไว้เพื่อบัญชีและการคืนเงิน${canEnd ? " · ใช้ “จบแคมเปญ” แทน" : ""}`}
+      description={`แคมเปญมีออเดอร์แล้ว (ขายไป ${sale.soldUnits.toLocaleString(intlLocale())} ชิ้น) ต้องเก็บไว้เพื่อบัญชีและการคืนเงิน${canEnd ? " · ใช้ “จบแคมเปญ” แทน" : ""}`}
       actions={
         <>
           <Button variant="outline" onClick={onClose}>

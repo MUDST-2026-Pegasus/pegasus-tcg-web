@@ -1,7 +1,6 @@
 import { Check } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { format, parseISO } from "date-fns";
-import { th } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,9 +17,10 @@ import {
   weekRangeLabel,
   weekStartOf,
 } from "../weekly-report.format";
+import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
 
 /** แคปชันปฏิทินเป็นปี พ.ศ. ให้ตรงกับช่วงสัปดาห์ที่แสดงทั้งหน้า */
-const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
+const monthCaption = dateTimeFormat({ month: "long", year: "numeric" });
 
 function FilterTrigger({ open, children, ...props }: { open: boolean; children: ReactNode; disabled?: boolean }) {
   return (
@@ -94,7 +94,7 @@ export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
           <Calendar
             mode="single"
             className="w-full"
-            locale={th}
+            locale={dayPickerLocale()}
             weekStartsOn={1}
             selected={parseISO(weekStart)}
             defaultMonth={parseISO(weekStart)}

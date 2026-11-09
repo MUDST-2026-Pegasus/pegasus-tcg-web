@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PAYMENT_PAGE_FIXTURE } from "@/features/payment/Payment.fixture";
+import { intlLocale } from "@/lib/i18n";
 
 function ProductThumbnail({
   imageUrl,
@@ -77,15 +78,15 @@ export function PaymentOrderSummary({
       ];
 
   const formattedSubtotal = hasRealItems && subtotal !== undefined
-    ? `THB ${Number(subtotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(subtotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.subtotal;
 
   const formattedShipping = hasRealItems && shippingTotal !== undefined
-    ? `THB ${Number(shippingTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(shippingTotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.shipping;
 
   const formattedTotal = hasRealItems && grandTotal !== undefined
-    ? `THB ${Number(grandTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(grandTotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.total;
 
   return (
@@ -123,7 +124,7 @@ export function PaymentOrderSummary({
                   </p>
                 )}
                 <p className="text-sm font-normal text-slate-900 mt-1.5">
-                  THB {Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString("th-TH")}
+                  THB {Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString(intlLocale())}
                   {item.quantity > 1 && (
                     <span className="text-xs text-slate-500 font-normal ml-1">
                       × {item.quantity}
@@ -144,11 +145,11 @@ export function PaymentOrderSummary({
           <>
             <div className="flex justify-between items-center">
               <span className="font-normal text-slate-600">ราคาสินค้า (ก่อนลด)</span>
-              <span className="font-normal text-slate-900">THB {Number((subtotal ?? 0) + saleDiscount).toLocaleString("th-TH")}</span>
+              <span className="font-normal text-slate-900">THB {Number((subtotal ?? 0) + saleDiscount).toLocaleString(intlLocale())}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-normal text-slate-600">ส่วนลดราคาสินค้า</span>
-              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString("th-TH")}</span>
+              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString(intlLocale())}</span>
             </div>
           </>
         ) : null}

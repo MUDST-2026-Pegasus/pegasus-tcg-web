@@ -2,9 +2,10 @@ import { initialsOf } from "@/features/account/account.format";
 import type { AuthUser } from "@/features/auth/auth.types";
 
 import type { SellerProfile, SellerStatus } from "./seller.types";
+import { numberFormat } from "@/lib/i18n";
 
-const bahtWhole = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-const bahtSatang = new Intl.NumberFormat("en-US", {
+const bahtWhole = numberFormat({ maximumFractionDigits: 0 });
+const bahtSatang = numberFormat({
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });

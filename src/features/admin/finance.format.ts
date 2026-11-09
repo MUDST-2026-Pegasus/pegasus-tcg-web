@@ -1,35 +1,38 @@
 import { differenceInMinutes, format, formatDistanceToNowStrict } from "date-fns";
-import { th } from "date-fns/locale";
 
 import { getErrorMessage, hasErrorCode } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { PayoutStatus, RefundStatus } from "./finance.types";
+import { currentLanguage, dateFnsLocale, formatDateTime, intlLocale } from "@/lib/i18n";
 
 /** "฿1,850.00" — ยอดในรายละเอียด */
 export function formatBaht(value: number): string {
-  return `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `฿${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** "฿1,850" — ยอดบนการ์ดคิว (ทศนิยมโผล่เฉพาะเมื่อมีสตางค์) */
 export function formatBahtShort(value: number): string {
-  return `฿${value.toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  return `฿${value.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 }
 
-/** "14 ต.ค. 2569 00:05" — date-fns ยังพิมพ์ ค.ศ. ต้องบวก 543 เอง */
+/** "14 ต.ค. 2569 00:05" / "14 Oct 2026, 00:05" */
 export function formatThaiDateTime(value: string): string {
-  const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${date.getFullYear() + 543} ${format(date, "HH:mm")}`;
+  return formatDateTime(value);
 }
 
 /** "14 ต.ค. 00:01" — ใต้ขั้นของ timeline ที่ปีไม่จำเป็น */
 export function formatThaiShortDateTime(value: string): string {
-  return format(new Date(value), "d MMM HH:mm", { locale: th });
+  return format(new Date(value), "d MMM HH:mm", { locale: dateFnsLocale() });
 }
 
 /** "3 นาทีที่แล้ว" */
 export function formatAgo(value: string): string {
-  return `${formatDistanceToNowStrict(new Date(value), { locale: th })}ที่แล้ว`;
+  const date = new Date(value);
+  // คงรูปไทยเดิม ("3 วันที่แล้ว") — date-fns th ใส่ suffix เป็น "ที่ผ่านมา"
+  return currentLanguage() === "th"
+    ? `${formatDistanceToNowStrict(date, { locale: dateFnsLocale("th") })}ที่แล้ว`
+    : formatDistanceToNowStrict(date, { locale: dateFnsLocale("en"), addSuffix: true });
 }
 
 /** เหลือเวลาไม่ถึง 15 นาทีก่อนหมดเวลาชำระ — ขึ้นป้ายเตือนบนการ์ดคิว */

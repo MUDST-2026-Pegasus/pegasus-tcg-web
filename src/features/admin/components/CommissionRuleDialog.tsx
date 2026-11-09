@@ -20,6 +20,7 @@ import {
 import type { CategoryDto, GameDto } from "@/features/catalog/catalog.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRule } from "@/features/finance/after-sales.types";
+import { intlLocale } from "@/lib/i18n";
 
 /** popup เปิดได้ 2 แบบ: ดูรายการกฎทั้งหมด หรือเข้าฟอร์มเพิ่ม/แก้ไขกฎทันที */
 export type CommissionRuleDialogRequest =
@@ -47,9 +48,9 @@ const STATUS_STYLE: Record<RuleStatus, string> = {
 };
 
 const baht = (value: number) =>
-  `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `฿${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+  new Date(iso).toLocaleString(intlLocale(), { dateStyle: "medium", timeStyle: "short" });
 const FIELD = "h-9 rounded-md border-border bg-card";
 const DECIMAL = /^\d*\.?\d*$/;
 const SIGNED_INTEGER = /^-?\d*$/;

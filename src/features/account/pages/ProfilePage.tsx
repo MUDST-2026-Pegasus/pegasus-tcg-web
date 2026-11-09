@@ -34,6 +34,7 @@ import type { Address } from "../address.types";
 import { formatOrderDateTime, orderStage } from "../order-stage";
 import { useBuyerOrders } from "../orders.queries";
 import { EditProfileDialog } from "../components/EditProfileDialog";
+import { intlLocale } from "@/lib/i18n";
 
 function ProfileAvatar({
   initials,
@@ -123,7 +124,7 @@ function OrderStatus() {
             </div>
             <div className="flex items-center justify-between gap-3 border-t pt-4">
               <span className="text-sm text-muted-foreground">Order total</span>
-              <span className="font-semibold">฿{latestOrder.grandTotal.toLocaleString()}</span>
+              <span className="font-semibold">฿{latestOrder.grandTotal.toLocaleString(intlLocale())}</span>
             </div>
             <Button variant="outline" nativeButton={false} className="w-full" render={<Link to={`/account/orders?orderId=${latestOrder.id}`} />}>
               View Order Details <ArrowRight data-icon="inline-end" />

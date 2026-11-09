@@ -35,6 +35,7 @@ import { BidStatusBanner } from "../components/BidStatusBanner";
 import { ConfirmBidDialog } from "../components/ConfirmBidDialog";
 import { ConfirmBuyNowDialog } from "../components/ConfirmBuyNowDialog";
 import { SellerNote } from "../components/SellerNote";
+import { intlLocale } from "@/lib/i18n";
 
 /** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) + สถานะ B3/B4 [TCG-629 · TCG-630] */
 export function AuctionDetailPage() {
@@ -64,7 +65,7 @@ export function AuctionDetailPage() {
 
 /** "1.2k" สำหรับยอดขายของร้าน */
 function compactCount(count: number): string {
-  return count >= 1000 ? `${(count / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })}k` : String(count);
+  return count >= 1000 ? `${(count / 1000).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}k` : String(count);
 }
 
 function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {

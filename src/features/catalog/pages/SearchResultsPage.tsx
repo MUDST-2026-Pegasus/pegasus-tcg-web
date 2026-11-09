@@ -66,6 +66,7 @@ import {
 } from "@/features/catalog/search.params";
 import { PriceTag, SaleBadge, isOnSale } from "@/components/sale";
 import { cn } from "@/lib/utils";
+import { intlLocale } from "@/lib/i18n";
 
 const TYPING_DELAY_MS = 300;
 const ALL_CATEGORIES = "all";
@@ -263,7 +264,7 @@ export function SearchResultsPage() {
             {lookupFailure
               ? ""
               : data && !waiting
-                ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
+                ? `${data.totalItems.toLocaleString(intlLocale())} ${data.totalItems === 1 ? "result" : "results"}`
                 : "Searching…"}
           </p>
           {data?.correctedQuery && !waiting ? (

@@ -67,6 +67,7 @@ export const CARD_FINISHES: CardFinish[] = [
 
 export { CARD_FINISH_LABEL } from "@/lib/card-labels";
 import { CARD_FINISH_LABEL, CARD_EDITION_LABEL } from "@/lib/card-labels";
+import { numberFormat } from "@/lib/i18n";
 
 export const CARD_EDITIONS: CardEdition[] = [
   "NOT_APPLICABLE",
@@ -101,8 +102,8 @@ export function variantLabel(variant: {
     .join(" / ");
 }
 
-const NUMBER = new Intl.NumberFormat("th-TH");
-const BAHT = new Intl.NumberFormat("th-TH", {
+const NUMBER = numberFormat();
+const BAHT = numberFormat({
   style: "currency",
   currency: "THB",
   maximumFractionDigits: 2,

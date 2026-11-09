@@ -1,15 +1,16 @@
 import type { PublicListingDto } from "./catalog.types";
+import { formatNumber, numberFormat } from "@/lib/i18n";
 
 type Seller = PublicListingDto["seller"];
 type Delivery = PublicListingDto["delivery"];
 
-const salesFormatter = new Intl.NumberFormat("en-US", {
+const salesFormatter = numberFormat({
   notation: "compact",
   maximumFractionDigits: 1,
 });
 
 export function formatListingPrice(amount: number): string {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(amount);
+  return formatNumber(amount, { maximumFractionDigits: 0 });
 }
 
 export function formatSellerReputation(seller?: Seller | null): string {

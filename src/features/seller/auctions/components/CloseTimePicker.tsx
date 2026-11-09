@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarIcon, ChevronDown, Clock } from "lucide-react";
-import { th } from "react-day-picker/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,12 +17,13 @@ import {
   shortcutCloseTime,
 } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
+import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 /** รายการเวลาทีละ 30 นาที 00:00–23:30 */
 const HALF_HOURS = Array.from({ length: 48 }, (_, index) => `${pad(Math.floor(index / 2))}:${index % 2 ? "30" : "00"}`);
 
-const monthCaption = new Intl.DateTimeFormat("th-TH", { month: "long", year: "numeric" });
+const monthCaption = dateTimeFormat({ month: "long", year: "numeric" });
 
 /** `YYYY-MM-DD` ↔ Date ของปฏิทิน (ปฏิทินคิดเป็นวันบนเครื่อง ใช้แค่ปี/เดือน/วัน) */
 function toDay(date: string): Date | undefined {
@@ -101,7 +101,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
             <div className="flex">
               <Calendar
                 mode="single"
-                locale={th}
+                locale={dayPickerLocale()}
                 selected={selected}
                 defaultMonth={selected ?? first}
                 disabled={first && last ? [{ before: first }, { after: last }] : undefined}

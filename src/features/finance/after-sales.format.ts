@@ -1,5 +1,5 @@
 import { formatDistanceToNowStrict } from "date-fns";
-import { th } from "date-fns/locale";
+import { currentLanguage, dateFnsLocale, intlLocale } from "@/lib/i18n";
 
 const returnStatusLabels: Record<string, string> = {
   REQUESTED: "รอคุณตัดสิน",
@@ -74,13 +74,13 @@ export const returnReasonLabel = (reason: string) => returnReasonLabels[reason] 
 /** Format amount to Thai Baht with comma and 2 decimals (e.g. ฿3,420.00) */
 export function formatBaht(value?: number | null): string {
   const num = typeof value === "number" && !isNaN(value) ? value : 0;
-  return `฿${num.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `฿${num.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Format amount to short Thai Baht without trailing zero decimals if integer (e.g. ฿3,420) */
 export function formatBahtShort(value?: number | null): string {
   const num = typeof value === "number" && !isNaN(value) ? value : 0;
-  return `฿${num.toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  return `฿${num.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 }
 
 /** Format date string to relative Thai time, e.g. "2 วันที่แล้ว", "3 ชม. ที่แล้ว" */
@@ -88,7 +88,10 @@ export function formatAgo(value: string): string {
   try {
     const d = new Date(value);
     if (isNaN(d.getTime())) return value;
-    return `${formatDistanceToNowStrict(d, { locale: th })}ที่แล้ว`;
+    // คงรูปไทยเดิม ("3 วันที่แล้ว") — date-fns th ใส่ suffix เป็น "ที่ผ่านมา"
+    return currentLanguage() === "th"
+      ? `${formatDistanceToNowStrict(d, { locale: dateFnsLocale("th") })}ที่แล้ว`
+      : formatDistanceToNowStrict(d, { locale: dateFnsLocale("en"), addSuffix: true });
   } catch {
     return value;
   }

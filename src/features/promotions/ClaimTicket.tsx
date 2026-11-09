@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { PromotionTicketFrame } from "./PromotionTicketFrame";
 import { claimTicketState } from "./claim.format";
 import type { ClaimableCode } from "./claim.types";
+import { intlLocale } from "@/lib/i18n";
 
 export type ClaimTicketData = Pick<
   ClaimableCode,
@@ -55,7 +56,7 @@ export function ClaimTicket({
   const footnote = state === "claimed"
     ? "ใช้ได้ในตะกร้า"
     : soldOut ? "ถูกเก็บครบแล้ว"
-      : promotion.remainingClaims == null ? "ไม่จำกัดจำนวน" : `เหลือ ${promotion.remainingClaims.toLocaleString("th-TH")} สิทธิ์`;
+      : promotion.remainingClaims == null ? "ไม่จำกัดจำนวน" : `เหลือ ${promotion.remainingClaims.toLocaleString(intlLocale())} สิทธิ์`;
 
   const stop = (handler?: () => void) => (event: MouseEvent) => {
     event.stopPropagation();

@@ -20,6 +20,7 @@ import { SellerAvatar } from "./SellerAvatar";
 import { RoleBadges } from "./UserBadges";
 import { UserDialog } from "./UserDialog";
 import { AdminRoleConfirmDialog } from "./UserRolesDialog";
+import { intlLocale } from "@/lib/i18n";
 
 const SEARCH_DELAY_MS = 300;
 
@@ -143,7 +144,7 @@ export function AddAdminDialog({ onClose }: { onClose: () => void }) {
       ) : (
         <>
           <p className="text-[10px] text-[#9aa5ad]">
-            ผลการค้นหา {results.totalItems.toLocaleString("th-TH")} บัญชี · แสดงสูงสุด{" "}
+            ผลการค้นหา {results.totalItems.toLocaleString(intlLocale())} บัญชี · แสดงสูงสุด{" "}
             {USER_SEARCH_SIZE} รายการ ค้นจากอีเมล / username / ชื่อที่แสดง
           </p>
           <RadioGroup

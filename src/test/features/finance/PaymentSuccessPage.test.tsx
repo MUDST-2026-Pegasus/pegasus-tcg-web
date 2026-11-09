@@ -35,7 +35,7 @@ describe("PaymentSuccessPage", () => {
     renderSuccess();
     expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
     expect(screen.getByText("Order Number: #ORD-99521")).toBeInTheDocument();
-    expect(screen.getByText("Oct 24, 2026 14:32")).toBeInTheDocument();
+    expect(screen.getByText("24 ต.ค. 2569 14:32")).toBeInTheDocument();
     expect(screen.getByText("QR", { exact: true })).toBeInTheDocument();
     expect(screen.getByText("3 TCG Booster Boxes")).toBeInTheDocument();
     expect(screen.getByText("THB 4,250.00")).toBeInTheDocument();

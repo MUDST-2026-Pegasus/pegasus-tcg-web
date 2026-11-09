@@ -12,6 +12,7 @@ import { useCountdown } from "@/features/auction/useCountdown";
 import { cn } from "@/lib/utils";
 
 import { formatHoursMinutes, sellerAuctionRowView, type CellTone, type RowAction } from "../auctions-table.format";
+import { intlLocale } from "@/lib/i18n";
 
 const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-muted-foreground";
 
@@ -64,7 +65,7 @@ export function AuctionsTable({ rows, serverTime, onCancel, isFetching, footer }
         return <span className={TONE[currentPrice.tone]}>{currentPrice.text}</span>;
       },
     },
-    { id: "bids", header: "บิด", meta: { headClassName: HEAD_CLASS, cellClassName: "text-sm font-semibold tabular-nums" }, cell: ({ row }) => row.original.bidCount.toLocaleString("th-TH") },
+    { id: "bids", header: "บิด", meta: { headClassName: HEAD_CLASS, cellClassName: "text-sm font-semibold tabular-nums" }, cell: ({ row }) => row.original.bidCount.toLocaleString(intlLocale()) },
     {
       id: "buyNow",
       header: "ซื้อทันที",

@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { SELLER_AUCTION_TABS, formatPercentChange, hoursUntil, totalAuctionCount } from "./auctions-table.format";
 import { AuctionsTable } from "./components/AuctionsTable";
 import { CancelAuctionDialog } from "./components/CancelAuctionDialog";
+import { intlLocale } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 
@@ -171,10 +172,10 @@ function KpiCards({ data }: { data: SellerAuctionPage }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Kpi label="กำลังประมูล" value={kpis.liveCount.toLocaleString("th-TH")} note={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`} />
+      <Kpi label="กำลังประมูล" value={kpis.liveCount.toLocaleString(intlLocale())} note={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`} />
       <Kpi
         label="รอผู้ชนะชำระเงิน"
-        value={kpis.awaitingPaymentCount.toLocaleString("th-TH")}
+        value={kpis.awaitingPaymentCount.toLocaleString(intlLocale())}
         valueClass="text-amber-800"
         note={kpis.nextPaymentDueAt ? `ครบกำหนดใน ${hoursUntil(kpis.nextPaymentDueAt, offset)} ชม.` : null}
       />

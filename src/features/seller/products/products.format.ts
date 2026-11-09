@@ -7,6 +7,7 @@ import type {
   ListingStatus,
   SellerListingSummary,
 } from "./products.types";
+import { numberFormat } from "@/lib/i18n";
 
 /**
  * ตัวช่วยเรื่องตัวเลขที่ใช้ร่วมกันในหน้าลงขายสินค้าและหน้าเติมสต็อก
@@ -74,6 +75,7 @@ export function groupThousands(value: string): string {
   if (value === "") return value;
 
   const [whole, fraction] = value.split(".");
+  // ไม่ขึ้นกับภาษา: จัดรูปตัวเลขในช่อง input ต้องคงที่ ("1,290") ไม่งั้น parse กลับไม่ได้
   const grouped = Number(whole || "0").toLocaleString("en-US");
   return fraction === undefined ? grouped : `${grouped}.${fraction}`;
 }
@@ -83,7 +85,7 @@ export function formatSignedBaht(amount: number): string {
   return amount < 0 ? `−${formatBaht(-amount)}` : formatBaht(amount);
 }
 
-const bahtWithSatang = new Intl.NumberFormat("en-US", {
+const bahtWithSatang = numberFormat({
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });

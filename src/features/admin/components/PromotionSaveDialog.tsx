@@ -19,6 +19,7 @@ import {
 import { changedPromotionFields, toPromotionInput } from "../promotions.schema";
 import type { AdminPromotion, AdminPromotionInput } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
+import { intlLocale } from "@/lib/i18n";
 
 type PromotionSaveDialogProps = {
   open: boolean;
@@ -130,7 +131,7 @@ function EditDialog({
       tone="info"
       icon={<Pencil />}
       title="บันทึกการเปลี่ยนแปลง?"
-      description={`${existing.code} ถูกใช้แล้ว ${existing.usedCount.toLocaleString("th-TH")} ครั้ง · ผู้ที่เก็บไว้ ${existing.claimedCount.toLocaleString("th-TH")} คนจะเห็นข้อมูลใหม่ทันที`}
+      description={`${existing.code} ถูกใช้แล้ว ${existing.usedCount.toLocaleString(intlLocale())} ครั้ง · ผู้ที่เก็บไว้ ${existing.claimedCount.toLocaleString(intlLocale())} คนจะเห็นข้อมูลใหม่ทันที`}
       footerNote="บันทึกใน Activity Log"
       actions={
         <>

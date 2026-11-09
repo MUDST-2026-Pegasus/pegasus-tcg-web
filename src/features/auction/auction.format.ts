@@ -2,6 +2,7 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
 import type { AdminAuctionRow, AdminAuctionTab, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
+import { dateTimeFormat, formatCountdown, intlLocale } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงค่าดิบของระบบประมูล → ข้อความบนหน้าจอ [TCG-627 · FE-1]
@@ -20,8 +21,6 @@ const DAY = 24 * HOUR;
 /** เหลือน้อยกว่านี้ ตัวนับเป็นสีแดง (ตรงกับกติกาต่อเวลา 2 นาที) */
 export const URGENT_THRESHOLD_MS = 2 * MINUTE;
 
-const pad = (n: number) => String(n).padStart(2, "0");
-
 /**
  * เวลาที่เหลือ เป็นข้อความบนตัวนับ
  * - มากกว่า 1 วัน → "1 วัน 04:12:36"
@@ -30,14 +29,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
  * - หมดแล้ว → "00:00"
  */
 export function formatRemaining(ms: number): string {
-  const safe = Math.max(0, Math.floor(ms / SECOND) * SECOND);
-  const days = Math.floor(safe / DAY);
-  const hours = Math.floor((safe % DAY) / HOUR);
-  const minutes = Math.floor((safe % HOUR) / MINUTE);
-  const seconds = Math.floor((safe % MINUTE) / SECOND);
-  if (days > 0) return `${days} วัน ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-  return `${pad(minutes)}:${pad(seconds)}`;
+  return formatCountdown(ms, { compact: true });
 }
 
 /**
@@ -55,7 +47,7 @@ export function remainingMs(target: string, offsetMs: number, now: number = Date
   return Date.parse(target) - (now + offsetMs);
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
+const dateTimeFormatter = dateTimeFormat({
   weekday: "short",
   day: "numeric",
   month: "short",
@@ -69,7 +61,7 @@ export function formatAuctionDateTime(iso: string): string {
   return dateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
 }
 
-const shortDateTimeFormatter = new Intl.DateTimeFormat("th-TH", {
+const shortDateTimeFormatter = dateTimeFormat({
   day: "numeric",
   month: "short",
   hour: "2-digit",
@@ -82,7 +74,7 @@ export function formatAuctionShortDateTime(iso: string): string {
   return shortDateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
 }
 
-const dayMonthFormatter = new Intl.DateTimeFormat("th-TH", {
+const dayMonthFormatter = dateTimeFormat({
   day: "numeric",
   month: "short",
   timeZone: "Asia/Bangkok",
@@ -93,12 +85,12 @@ export function formatAuctionDayMonth(iso: string): string {
   return dayMonthFormatter.format(new Date(iso));
 }
 
-const dateFormatter = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+const dateFormatter = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
   timeZone: "Asia/Bangkok",
-});
+}, { calendar: "gregory" });
 
 /** "29 พ.ย. 2026" — ปี ค.ศ. ตาม Figma (วันที่หมดโทษห้ามบิด) */
 export function formatAuctionDate(iso: string): string {
@@ -286,7 +278,7 @@ export function priceLabel(bidCount: number): string {
 
 /** "12 บิด" */
 export function formatBidCount(count: number): string {
-  return `${count.toLocaleString("th-TH")} บิด`;
+  return `${count.toLocaleString(intlLocale())} บิด`;
 }
 
 // ---------- แอดมิน [TCG-635] ----------

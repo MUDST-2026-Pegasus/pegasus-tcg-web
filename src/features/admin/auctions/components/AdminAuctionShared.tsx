@@ -5,13 +5,14 @@ import { Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { intlLocale } from "@/lib/i18n";
 
 /** การ์ดตัวเลขบนหัวหน้า A1 / A4 */
 export function AdminKpi({ label, value, valueClass }: { label: string; value: number; valueClass?: string }) {
   return (
     <Card className="gap-1 rounded-xl p-4 shadow-none">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={cn("text-2xl font-bold tabular-nums text-foreground", valueClass)}>{value.toLocaleString("th-TH")}</p>
+      <p className={cn("text-2xl font-bold tabular-nums text-foreground", valueClass)}>{value.toLocaleString(intlLocale())}</p>
     </Card>
   );
 }
@@ -43,7 +44,7 @@ export function AdminTabs<T extends string>({ label, tabs, active, counts, onCha
             )}
           >
             {tab.label}
-            {counts ? <span className="text-muted-foreground">{counts[tab.key].toLocaleString("th-TH")}</span> : null}
+            {counts ? <span className="text-muted-foreground">{counts[tab.key].toLocaleString(intlLocale())}</span> : null}
           </button>
         );
       })}

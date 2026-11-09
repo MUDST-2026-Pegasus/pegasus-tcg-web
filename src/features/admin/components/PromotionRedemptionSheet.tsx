@@ -17,6 +17,7 @@ import { PromotionPagination } from "@/features/promotions/PromotionPagination";
 
 import { usePromotion, useRedemptions } from "../promotions.queries";
 import { PromotionStatusPill, RedemptionStatusPill } from "./PromotionBadges";
+import { intlLocale } from "@/lib/i18n";
 
 type PromotionRedemptionSheetProps = {
   /** 0 = ปิด */
@@ -73,13 +74,13 @@ export function PromotionRedemptionSheet({ promotionId, page, onPageChange, onCl
           <div className="grid grid-cols-1 gap-3 px-6 pt-4 sm:grid-cols-3">
             <Metric
               label="ใช้ไปแล้ว"
-              value={`${data.usedCount.toLocaleString("th-TH")} / ${limitLabel(data.usageLimitTotal)}`}
-              caption={data.claimable ? `เก็บแล้ว ${data.claimedCount.toLocaleString("th-TH")} / ${limitLabel(data.claimLimit)}` : undefined}
+              value={`${data.usedCount.toLocaleString(intlLocale())} / ${limitLabel(data.usageLimitTotal)}`}
+              caption={data.claimable ? `เก็บแล้ว ${data.claimedCount.toLocaleString(intlLocale())} / ${limitLabel(data.claimLimit)}` : undefined}
             />
             <Metric
               label={data.ownerType === "PLATFORM" ? "ส่วนลดที่ Pegasus ออก" : "ส่วนลดที่ร้านออก"}
               value={formatBaht(data.discountTotal)}
-              caption={data.reservedOrders ? `รอชำระอีก ${data.reservedOrders.toLocaleString("th-TH")} ออเดอร์` : undefined}
+              caption={data.reservedOrders ? `รอชำระอีก ${data.reservedOrders.toLocaleString(intlLocale())} ออเดอร์` : undefined}
             />
             <Metric label="ยอดขายจากโค้ดนี้" value={formatBaht(data.salesTotal)} />
           </div>

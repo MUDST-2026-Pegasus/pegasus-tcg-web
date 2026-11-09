@@ -55,6 +55,7 @@ import {
   ToggleRow,
 } from "./PromotionFormControls";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
+import { intlLocale } from "@/lib/i18n";
 
 const SCOPE_OPTIONS: Array<{ value: AdminPromotionInput["scopeType"]; label: string }> = [
   { value: "ALL", label: "ทุกเกม" },
@@ -299,12 +300,12 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           <AlertDescription className="text-xs text-[#0058bc]">
             {locks.used ? (
               <>
-                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString("th-TH")} ครั้ง — ฟิลด์ที่มี{" "}
+                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString(intlLocale())} ครั้ง — ฟิลด์ที่มี{" "}
                 <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
               </>
             ) : (
               <>
-                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString("th-TH")} คน — “ต้องเก็บก่อนใช้” ล็อก
+                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString(intlLocale())} คน — “ต้องเก็บก่อนใช้” ล็อก
                 และจำนวนที่แจกเพิ่มได้อย่างเดียว
               </>
             )}
@@ -603,7 +604,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
                 htmlFor="promotion-usageLimitTotal"
                 label={
                   locks.used
-                    ? `จำนวนสิทธิ์ทั้งหมด (เพิ่มได้เท่านั้น ≥ ${usedLimitFloor.toLocaleString("th-TH")})`
+                    ? `จำนวนสิทธิ์ทั้งหมด (เพิ่มได้เท่านั้น ≥ ${usedLimitFloor.toLocaleString(intlLocale())})`
                     : "จำนวนสิทธิ์ทั้งหมด"
                 }
                 hint="เว้นว่าง = ไม่จำกัด"

@@ -14,6 +14,7 @@ import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountL
 import type { OrderItemDetails, SellerOrderDetails } from "@/features/account/orders.types";
 
 import { formatBaht, returnReasonLabel } from "../after-sales.format";
+import { intlLocale } from "@/lib/i18n";
 
 type BuyerReturnConfirmationDialogProps = {
   open: boolean;
@@ -31,7 +32,7 @@ function returnDeadline(value: string | null) {
   if (!value) return null;
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return null;
-  return new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+  return new Intl.DateTimeFormat(intlLocale({ calendar: "gregory" }), {
     day: "numeric",
     month: "short",
     year: "numeric",

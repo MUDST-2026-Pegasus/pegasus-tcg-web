@@ -3,6 +3,7 @@ import { checkoutMoney, formatPromotionError } from "@/features/cart/checkout.fo
 import { getErrorMessage, isApiError } from "@/lib/api";
 import type { ClaimableCode, PromotionTerms } from "./claim.types";
 import type { PromotionOwnerType } from "./order.types";
+import { dateTimeFormat, intlLocale } from "@/lib/i18n";
 
 export type ClaimTicketState = "claimable" | "claimed" | "soldOut";
 
@@ -11,13 +12,13 @@ export function claimTicketState(promotion: Pick<ClaimableCode, "claimed" | "rem
   return promotion.remainingClaims === 0 ? "soldOut" : "claimable";
 }
 
-const dateTime = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+const dateTime = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
-});
+}, { calendar: "gregory" });
 
 export function formatTermsDateTime(value: string): string {
   const date = new Date(value);
@@ -67,7 +68,7 @@ export function termsRows(terms: PromotionTerms): Array<{ label: string; value: 
   });
   rows.push({
     label: "สิทธิ์",
-    value: `${terms.usageLimitPerUser} ครั้งต่อบัญชี${terms.remainingClaims != null ? ` · เหลือ ${terms.remainingClaims.toLocaleString("th-TH")} สิทธิ์` : ""}`,
+    value: `${terms.usageLimitPerUser} ครั้งต่อบัญชี${terms.remainingClaims != null ? ` · เหลือ ${terms.remainingClaims.toLocaleString(intlLocale())} สิทธิ์` : ""}`,
   });
   if (terms.newBuyerOnly) {
     rows.push({ label: "ผู้ใช้", value: "เฉพาะผู้ซื้อใหม่ (คำสั่งซื้อแรก)" });

@@ -10,6 +10,7 @@ import { financeApi } from "./finance.api";
 import type { Refund } from "./finance.types";
 import { refundMethodLabel, refundStatusLabel } from "./refund.format";
 import { refundKeys, useBuyerRefunds } from "./refunds.queries";
+import { intlLocale } from "@/lib/i18n";
 
 function RefundDestination({ refund }: { refund: Refund }) {
   const queryClient = useQueryClient();
@@ -103,7 +104,7 @@ export function OrderRefunds({ salesOrderId }: { salesOrderId: number }) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="font-semibold text-foreground">
-                การคืนเงิน ฿{Number(refund.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
+                การคืนเงิน ฿{Number(refund.amount).toLocaleString(intlLocale(), { minimumFractionDigits: 2 })}
               </p>
               <p className="text-xs text-muted-foreground">
                 เหตุผล: {refund.reason} · {refundMethodLabel(refund.method)}

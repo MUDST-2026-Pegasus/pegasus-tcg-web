@@ -26,6 +26,7 @@ import {
 import { AdminKpi, AdminSearchBox, AdminTabs } from "./components/AdminAuctionShared";
 import { RiskFlag } from "./components/RiskFlag";
 import { SuspendAuctionDialog, type SuspendTarget } from "./components/SuspendAuctionDialog";
+import { intlLocale } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 
@@ -100,7 +101,7 @@ export function AdminAuctionsPage() {
             ส่งออก CSV
           </Button>
           <Button className="rounded-md px-2.5" nativeButton={false} render={<Link to="/admin/auctions/banned-bidders" />}>
-            ผู้ใช้ที่ห้ามบิด{bannedCount !== undefined ? ` (${bannedCount.toLocaleString("th-TH")})` : ""}
+            ผู้ใช้ที่ห้ามบิด{bannedCount !== undefined ? ` (${bannedCount.toLocaleString(intlLocale())})` : ""}
           </Button>
         </div>
       </div>

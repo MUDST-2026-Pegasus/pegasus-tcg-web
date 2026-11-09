@@ -1,13 +1,14 @@
 import type { AvailablePromotion } from "./promotions.types";
+import { dateTimeFormat, intlLocale } from "@/lib/i18n";
 
 export const checkoutMoney = (value: number) =>
-  `฿${value.toLocaleString("th-TH", { maximumFractionDigits: 2 })}`;
+  `฿${value.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 
-const dayMonthYear = new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
+const dayMonthYear = dateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
-});
+}, { calendar: "gregory" });
 
 export function formatPromotionDate(value: string): string {
   const date = new Date(value);

@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/common";
 import { formatBaht, formatBidTime } from "../auction.format";
 import { useBidHistory } from "../auction.queries";
 import { AuctionStatusPill } from "./AuctionStatusPill";
+import { intlLocale } from "@/lib/i18n";
 
 /** แสดงก่อนกี่แถว — กด "ดูทั้งหมด" เพื่อดูที่เหลือ */
 const PREVIEW_ROWS = 6;
@@ -28,7 +29,7 @@ export function BidHistory({ auctionId, bidCount, live }: BidHistoryProps) {
     <section id="bid-history" className="scroll-mt-24 rounded-2xl border bg-card p-5">
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold text-primary">{bidCount.toLocaleString("th-TH")} บิด</p>
+          <p className="text-xs font-semibold text-primary">{bidCount.toLocaleString(intlLocale())} บิด</p>
           <h2 className="text-lg font-bold">ประวัติการบิด</h2>
         </div>
         {!expanded && bids.length > PREVIEW_ROWS ? (

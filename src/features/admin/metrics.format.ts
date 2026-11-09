@@ -5,21 +5,12 @@ import type {
   MonthlySales,
   TopSeller,
 } from "./metrics.types";
+import { formatMonth, formatYear, monthStart } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงตัวเลขจาก `/admin/metrics/overview` → ของที่การ์ดบนหน้าภาพรวมโชว์
  * ไม่มี React — ทดสอบได้ตรง ๆ
  */
-
-const THAI_MONTH_SHORT = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
-];
-
-const THAI_MONTH_LONG = [
-  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
-];
 
 /** "2026-05" → { year: 2026, month: 5 } */
 function parseMonth(value: string): { year: number; month: number } {
@@ -29,13 +20,12 @@ function parseMonth(value: string): { year: number; month: number } {
 
 /** "2026-05" → "พ.ค." */
 export function thaiMonthShort(value: string): string {
-  return THAI_MONTH_SHORT[parseMonth(value).month - 1];
+  return formatMonth(value);
 }
 
 /** "2026-08" → "สิงหาคม 2569" (ปี พ.ศ.) */
 export function thaiMonthYear(value: string): string {
-  const { year, month } = parseMonth(value);
-  return `${THAI_MONTH_LONG[month - 1]} ${year + 543}`;
+  return `${formatMonth(value, "long")} ${formatYear(monthStart(value))}`;
 }
 
 /** ช่วงเดือนแบบสั้น — ปีเดียวกันเขียนปีครั้งเดียว: "ม.ค. – มิ.ย. 2569" */
@@ -43,9 +33,9 @@ export function thaiMonthRange(first: string, last: string): string {
   const a = parseMonth(first);
   const b = parseMonth(last);
   if (a.year === b.year) {
-    return `${thaiMonthShort(first)} – ${thaiMonthShort(last)} ${b.year + 543}`;
+    return `${thaiMonthShort(first)} – ${thaiMonthShort(last)} ${formatYear(monthStart(last))}`;
   }
-  return `${thaiMonthShort(first)} ${a.year + 543} – ${thaiMonthShort(last)} ${b.year + 543}`;
+  return `${thaiMonthShort(first)} ${formatYear(monthStart(first))} – ${thaiMonthShort(last)} ${formatYear(monthStart(last))}`;
 }
 
 export type Trend = "up" | "down" | "flat" | "new";

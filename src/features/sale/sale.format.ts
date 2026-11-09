@@ -3,8 +3,9 @@ import type { PublicListingDto } from "@/features/catalog/catalog.types";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS } from "@/features/catalog/catalog.mappers";
 
 import type { PublicSale } from "./sale.types";
+import { dateTimeFormat } from "@/lib/i18n";
 
-const dayMonth = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { day: "numeric", month: "short" });
+const dayMonth = dateTimeFormat({ day: "numeric", month: "short" }, { calendar: "gregory" });
 
 /** "ลด 10%" / "ลด ฿50" / "ลดสูงสุด 30%" (Flash) */
 export function saleDiscountText(sale: Pick<PublicSale, "discountType" | "discountValue" | "type">): string {

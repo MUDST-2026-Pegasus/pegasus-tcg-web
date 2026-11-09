@@ -8,6 +8,7 @@ import { formatAverage, type RatingSummary } from "../reviews.format";
 import type { ReviewSellerProfile } from "../reviews.types";
 import { ReviewStars } from "./ReviewStars";
 import { SellerAvatar } from "./SellerAvatar";
+import { intlLocale } from "@/lib/i18n";
 
 /**
  * การ์ดคะแนนผู้ขายทางซ้าย — ชื่อร้าน ค่าเฉลี่ย และการกระจาย 1–5 ดาว
@@ -56,7 +57,7 @@ export function ReviewSellerCard({
         <div className="flex flex-col gap-1">
           <ReviewStars rating={summary.average} starClassName="size-[15px]" />
           <p className="text-[11px] text-muted-foreground">
-            จาก {summary.count.toLocaleString("th-TH")} รีวิวที่แสดงอยู่
+            จาก {summary.count.toLocaleString(intlLocale())} รีวิวที่แสดงอยู่
           </p>
         </div>
       </div>

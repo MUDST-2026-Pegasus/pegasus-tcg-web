@@ -4,11 +4,11 @@ import { formatCount } from "./catalog.format";
 import {
   percentDelta,
   sparkBars,
-  thaiMonthShort,
   type Delta,
   type StatCardModel,
 } from "./metrics.format";
 import type { WeeklyReport, WeeklyStockStatus } from "./weekly-report.types";
+import { formatMonth, formatYear, intlLocale, monthStart } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -20,7 +20,7 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 /** 428500 → "฿428,500" ตามดีไซน์ ยอดที่มีสตางค์คงไว้ 2 ตำแหน่ง ตัวเลขจะได้ตรงกับ API */
 export function formatReportBaht(amount: number): string {
-  return new Intl.NumberFormat("th-TH", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency: "THB",
     minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
@@ -32,6 +32,7 @@ const toIso = (date: Date) => format(date, ISO_DATE);
 
 /** วันนี้ตามเวลาไทย ไม่ว่าเครื่องผู้ใช้จะตั้งเขตเวลาไหน */
 export function bangkokToday(now: Date = new Date()): string {
+  // ไม่ขึ้นกับภาษา: en-CA ได้รูป YYYY-MM-DD สำหรับส่ง API
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Bangkok",
     year: "numeric",
@@ -63,8 +64,8 @@ export function resolveWeekParam(value: string | null, today: string): string {
 }
 
 function splitDate(date: string) {
-  const [year, , day] = date.split("-").map(Number);
-  return { year, day, monthShort: thaiMonthShort(date.slice(0, 7)) };
+  const [, , day] = date.split("-").map(Number);
+  return { year: formatYear(monthStart(date.slice(0, 7))), day, monthShort: formatMonth(date.slice(0, 7)) };
 }
 
 /** "3 - 9 ส.ค. 2569" / "27 ก.ค. - 2 ส.ค. 2569" / "29 ธ.ค. 2568 - 4 ม.ค. 2569" */
@@ -72,12 +73,12 @@ export function weekRangeLabel(weekStart: string): string {
   const a = splitDate(weekStart);
   const b = splitDate(weekEnd(weekStart));
   if (a.year !== b.year) {
-    return `${a.day} ${a.monthShort} ${a.year + 543} - ${b.day} ${b.monthShort} ${b.year + 543}`;
+    return `${a.day} ${a.monthShort} ${a.year} - ${b.day} ${b.monthShort} ${b.year}`;
   }
   if (a.monthShort !== b.monthShort) {
-    return `${a.day} ${a.monthShort} - ${b.day} ${b.monthShort} ${b.year + 543}`;
+    return `${a.day} ${a.monthShort} - ${b.day} ${b.monthShort} ${b.year}`;
   }
-  return `${a.day} - ${b.day} ${b.monthShort} ${b.year + 543}`;
+  return `${a.day} - ${b.day} ${b.monthShort} ${b.year}`;
 }
 
 export type WeekOption = { weekStart: string; label: string; range: string };

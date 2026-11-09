@@ -24,6 +24,7 @@ import {
 import { FinanceStatStrip, type FinanceStat } from "./FinanceShared";
 import { ReviewModerationCard } from "./ReviewModerationCard";
 import { ReviewSellerCard } from "./ReviewSellerCard";
+import { intlLocale } from "@/lib/i18n";
 
 const PAGE_SIZE = 10;
 const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"];
@@ -176,7 +177,7 @@ export function AdminReviewsContent() {
           <section aria-label="รายการรีวิว" className="flex w-full min-w-0 flex-1 flex-col gap-3">
             <div className="flex items-center gap-2">
               <h2 className="flex-1 text-sm font-semibold text-foreground">
-                รีวิวของ {username} ({filtered.length.toLocaleString("th-TH")})
+                รีวิวของ {username} ({filtered.length.toLocaleString(intlLocale())})
               </h2>
               <p className="text-[11px] text-[#9aa5ad]">เรียงตาม: ใหม่ไปเก่า</p>
             </div>

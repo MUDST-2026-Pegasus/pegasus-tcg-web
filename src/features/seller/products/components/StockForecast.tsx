@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getVisiblePages } from "../utils/pagination";
+import { intlLocale } from "@/lib/i18n";
 
 type Forecast = {
   listingId: number;
@@ -25,7 +26,7 @@ function result(row: Forecast) {
   if (row.status === "OUT_OF_STOCK") return "หมดสต็อก";
   if (row.status === "NO_SALES") return "ยังไม่มีการขาย";
   if (row.daysRemaining == null || !row.estimatedStockoutDate) return "ข้อมูลยังไม่พอสำหรับคาดการณ์";
-  return `คาดว่าจะหมดใน ~${row.daysRemaining} วัน · ${new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" }).format(new Date(row.estimatedStockoutDate))}`;
+  return `คาดว่าจะหมดใน ~${row.daysRemaining} วัน · ${new Intl.DateTimeFormat(intlLocale(), { day: "numeric", month: "short", year: "numeric" }).format(new Date(row.estimatedStockoutDate))}`;
 }
 
 function useForecasts() {

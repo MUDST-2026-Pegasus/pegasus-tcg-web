@@ -25,6 +25,7 @@ import { AuctionCountdown } from "./AuctionCountdown";
 import { AuctionNotice } from "./AuctionNotice";
 import { AuctionStatusPill } from "./AuctionStatusPill";
 import { PriceSummary } from "./PriceSummary";
+import { intlLocale } from "@/lib/i18n";
 
 type BidPanelProps = {
   auction: AuctionDetail;
@@ -100,7 +101,7 @@ function PanelHeader({ auction, state }: { auction: AuctionDetail; state: BidPan
 function PriceBlock({ auction, state, onShowHistory }: { auction: AuctionDetail; state: BidPanelState; onShowHistory: () => void }) {
   let label = "ราคาบิดสูงสุดตอนนี้";
   let price = auction.currentPrice;
-  let sub: ReactNode = `${auction.bidCount.toLocaleString("th-TH")} บิด · ${auction.bidderCount.toLocaleString("th-TH")} ผู้บิด`;
+  let sub: ReactNode = `${auction.bidCount.toLocaleString(intlLocale())} บิด · ${auction.bidderCount.toLocaleString(intlLocale())} ผู้บิด`;
   let history = auction.bidCount > 0;
 
   switch (state) {
@@ -174,7 +175,7 @@ function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; 
             <Input
               id="bid-amount"
               inputMode="numeric"
-              value={Number.isFinite(amount) ? amount.toLocaleString("en-US") : ""}
+              value={Number.isFinite(amount) ? amount.toLocaleString("en-US") /* ไม่ขึ้นกับภาษา: ค่าในช่อง input ต้อง parse กลับได้ */ : ""}
               onChange={(event) => {
                 const digits = event.target.value.replace(/[^\d]/g, "");
                 setTyped(digits === "" ? Number.NaN : Number(digits));
@@ -191,7 +192,7 @@ function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; 
               className="h-11 rounded-full bg-background px-4 font-semibold"
               onClick={() => setTyped((Number.isFinite(amount) ? amount : auction.minNextBid) + step)}
             >
-              +{step.toLocaleString("en-US")}
+              +{step.toLocaleString(intlLocale())}
             </Button>
           ))}
         </div>

@@ -1,8 +1,9 @@
 import { formatSaleBaht, isOnSale, type ListingPricing } from "@/components/sale";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode, isApiError } from "@/lib/api";
+import { dateTimeFormat } from "@/lib/i18n";
 
-const clock = new Intl.DateTimeFormat("th-TH-u-ca-gregory", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const clock = dateTimeFormat({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" }, { calendar: "gregory" });
 
 /**
  * toast หลังเพิ่มลงตะกร้า (Figma SAL-M1 Buyer)

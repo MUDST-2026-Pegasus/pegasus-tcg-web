@@ -28,6 +28,7 @@ import {
 } from "../promotions.format";
 import type { AdminPromotion } from "../promotions.types";
 import { PromotionOwnerTag, PromotionStatusPill } from "./PromotionBadges";
+import { intlLocale } from "@/lib/i18n";
 
 export type PromotionRowAction = "copy" | "redemptions" | "pause" | "resume" | "delete";
 
@@ -104,7 +105,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
         return (
           <>
         <span className="block">
-          {promotion.usedCount.toLocaleString("th-TH")} / {limitLabel(promotion.usageLimitTotal)}
+          {promotion.usedCount.toLocaleString(intlLocale())} / {limitLabel(promotion.usageLimitTotal)}
         </span>
         <Progress
           aria-hidden
@@ -116,7 +117,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
         />
         {promotion.claimable ? (
           <span className={SUB_CLASS}>
-            เก็บแล้ว {promotion.claimedCount.toLocaleString("th-TH")} / {limitLabel(promotion.claimLimit)}
+            เก็บแล้ว {promotion.claimedCount.toLocaleString(intlLocale())} / {limitLabel(promotion.claimLimit)}
           </span>
         ) : null}
           </>

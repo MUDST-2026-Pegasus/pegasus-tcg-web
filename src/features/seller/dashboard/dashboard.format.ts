@@ -16,25 +16,16 @@ import type {
   TodoItem,
   TodoList,
 } from "./dashboard.types";
+import { dateTimeFormat, formatMonth, formatYear, monthStart, numberFormat } from "@/lib/i18n";
 
 /**
  * แปลงค่าดิบจาก `/sellers/me/dashboard` → ข้อความบนการ์ดแต่ละใบ
  * ไม่มี React — ทดสอบได้ตรง ๆ
  */
 
-const THAI_MONTH_SHORT = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
-];
+const count = numberFormat();
 
-const THAI_MONTH_LONG = [
-  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
-];
-
-const count = new Intl.NumberFormat("en-US");
-
-const todayFormat = new Intl.DateTimeFormat("th-TH", {
+const todayFormat = dateTimeFormat({
   weekday: "long",
   day: "numeric",
   month: "long",
@@ -42,20 +33,14 @@ const todayFormat = new Intl.DateTimeFormat("th-TH", {
   timeZone: "Asia/Bangkok",
 });
 
-function parseMonth(value: string): { year: number; month: number } {
-  const [year, month] = value.split("-").map(Number);
-  return { year, month };
-}
-
 /** "2026-10" → "ต.ค. 69" (ปี พ.ศ. สองหลัก) */
 export function thaiMonthShortYear(value: string): string {
-  const { year, month } = parseMonth(value);
-  return `${THAI_MONTH_SHORT[month - 1]} ${String(year + 543).slice(-2)}`;
+  return `${formatMonth(value)} ${formatYear(monthStart(value), { digits: "2-digit" })}`;
 }
 
 /** "2026-10" → "ตุลาคม" */
 export function thaiMonthLong(value: string): string {
-  return THAI_MONTH_LONG[parseMonth(value).month - 1];
+  return formatMonth(value, "long");
 }
 
 /**

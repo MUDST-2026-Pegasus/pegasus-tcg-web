@@ -20,6 +20,7 @@ import type { AdminSale, SaleStatus, SaleType } from "../sales.types";
 import { PromotionPageTabs } from "./PromotionPageTabs";
 import { SaleActionDialog, type SaleActionState } from "./SaleActionDialog";
 import { SaleTable, type SaleRowAction } from "./SaleTable";
+import { intlLocale } from "@/lib/i18n";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -115,12 +116,12 @@ export function AdminSalesContent() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="กำลังลดราคา"
-          value={((s?.activePlatformSales ?? 0) + (s?.activeSellerSales ?? 0)).toLocaleString("th-TH")}
+          value={((s?.activePlatformSales ?? 0) + (s?.activeSellerSales ?? 0)).toLocaleString(intlLocale())}
           note={`Pegasus ${s?.activePlatformSales ?? 0} · ร้านค้า ${s?.activeSellerSales ?? 0}`}
         />
         <KpiCard
           label="Listing ที่ลดอยู่ตอนนี้"
-          value={(s?.listingsOnSale ?? 0).toLocaleString("th-TH")}
+          value={(s?.listingsOnSale ?? 0).toLocaleString(intlLocale())}
           note="ทั้งแคมเปญ Pegasus และร้านลดเอง"
         />
         <KpiCard

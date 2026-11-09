@@ -11,6 +11,7 @@ import { checkoutMoney } from "@/features/cart/checkout.format";
 import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountLines";
 import { paymentMethodName, paymentSuccessDate } from "../payment-success.format";
 import "./payment-success.css";
+import { intlLocale } from "@/lib/i18n";
 
 const paidOrderStatuses = new Set(["PAID", "PARTIALLY_COMPLETED", "COMPLETED"]);
 
@@ -50,7 +51,7 @@ export function PaymentSuccessPage() {
   const productNames = [...new Set(items.map((item) => item.productName).filter(Boolean))];
   const itemDescription = productNames.length === 1 ? `${quantity} ${productNames[0]}` : `${quantity} items`;
   const amount = payment.data?.amount ?? order.data?.grandTotal;
-  const amountText = amount == null ? "—" : `${order.data?.currency ?? "THB"} ${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const amountText = amount == null ? "—" : `${order.data?.currency ?? "THB"} ${amount.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const hasOrderPromotions = (order.data?.discountTotal ?? 0) > 0
     || (order.data?.promotions?.length ?? 0) > 0
     || order.data?.sellerOrders.some((seller) => (seller.sellerDiscount ?? 0) > 0 || (seller.platformDiscount ?? 0) > 0) === true;

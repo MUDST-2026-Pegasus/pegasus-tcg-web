@@ -22,6 +22,7 @@ import type {
   ShippingAddressSnapshot,
   ShippingChoice,
 } from "./orders.types";
+import { dateTimeFormat as lazyDateTimeFormat } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงค่าดิบจาก `/sellers/me/orders` → ข้อความบนหน้าจัดการคำสั่งซื้อ
@@ -215,7 +216,7 @@ export function addressLines(address: ShippingAddressSnapshot | null): string[] 
 
 // ---------- เวลา ----------
 
-const dateTimeFormat = new Intl.DateTimeFormat("th-TH", {
+const dateTimeFormat = lazyDateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -224,7 +225,7 @@ const dateTimeFormat = new Intl.DateTimeFormat("th-TH", {
   timeZone: "Asia/Bangkok",
 });
 
-const dateFormat = new Intl.DateTimeFormat("th-TH", {
+const dateFormat = lazyDateTimeFormat({
   day: "numeric",
   month: "short",
   timeZone: "Asia/Bangkok",

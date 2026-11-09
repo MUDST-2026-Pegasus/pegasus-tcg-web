@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { VERIFICATION_STATUS_META } from "../verification.format";
 import { VERIFICATION_STATUSES } from "../verification.queries";
 import type { VerificationStatus } from "../verification.types";
+import { intlLocale } from "@/lib/i18n";
 
 type SellerApprovalStatsProps = {
   counts: Record<VerificationStatus, number>;
@@ -78,7 +79,7 @@ export function SellerApprovalStats({
                   isActive ? "text-foreground" : "text-[#414755]",
                 )}
               >
-                {counts[status].toLocaleString("th-TH")}
+                {counts[status].toLocaleString(intlLocale())}
               </p>
             )}
           </button>
