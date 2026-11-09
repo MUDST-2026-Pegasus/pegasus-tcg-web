@@ -39,10 +39,23 @@ export function errorText(key: string, params?: Params): string | undefined {
  * CLI หา key จาก errorMessage ไม่เจอ ต้องประกาศ `// @tolgee-key` ไว้ในไฟล์ที่ใช้
  */
 export function errorMessage(key: string, defaultValue: string, params?: Params): string {
-  return (
-    errorText(key, params) ??
-    defaultValue.replace(/\{(\w+)\}/g, (match, name: string) => (params?.[name] != null ? String(params[name]) : match))
-  );
+  return translate("errors", key, defaultValue, params);
+}
+
+/**
+ * แปลจาก namespace ใดก็ได้ นอก component (ค่าคงที่ระดับ module ที่อ่านตอน render เช่น getter ใน lib/card-labels)
+ * ไม่มีคำแปลใช้ defaultValue — ต้องประกาศ `// @tolgee-key` ไว้ในไฟล์ที่ใช้ [TCG-550]
+ */
+export function translate(ns: string, key: string, defaultValue: string, params?: Params): string {
+  if (instance) {
+    try {
+      const text = instance.t({ key, ns, params, orEmpty: true, noWrap: true });
+      if (text && text !== key) return text;
+    } catch {
+      /* ใช้ default */
+    }
+  }
+  return defaultValue.replace(/\{(\w+)\}/g, (match, name: string) => (params?.[name] != null ? String(params[name]) : match));
 }
 
 /** ค่าตัวเลข / ข้อความจาก `details` ของ API ส่งเข้า ICU params ได้เลย */

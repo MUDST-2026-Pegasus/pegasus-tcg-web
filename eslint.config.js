@@ -16,14 +16,16 @@ const I18N_GUARDED = [
   'src/components/layout/**/*.{ts,tsx}',
   'src/components/common/**/*.{ts,tsx}',
   'src/lib/nav-config.ts',
+  'src/lib/card-labels.ts',
+  'src/lib/condition-description.ts',
   'src/lib/upload/**/*.{ts,tsx}',
   'src/app/routes/**/*.{ts,tsx}',
   'src/features/home/**/*.{ts,tsx}',
   'src/features/about/**/*.{ts,tsx}',
 ]
 const THAI = '/[\\u0E00-\\u0E7F]/'
-// default ของ t() (อาร์กิวเมนต์ใด ๆ ของ t / errorText / errorMessage / msg) ยกเว้นไว้ — นอกนั้นเจอไทยแล้ว error
-const T_CALL = "CallExpression[callee.name=/^(t|errorText|errorMessage|msg)$/]"
+// default ของ t() (อาร์กิวเมนต์ใด ๆ ของ t / errorText / errorMessage / msg / translate) ยกเว้นไว้ — นอกนั้นเจอไทยแล้ว error
+const T_CALL = "CallExpression[callee.name=/^(t|errorText|errorMessage|msg|translate)$/]"
 const thaiMessage = 'ข้อความไทย hardcode — ใช้ t("<page>.<section>.<element>", "ข้อความเดิม") (ดู CONTRIBUTING: ข้อความ / หลายภาษา)'
 
 export default defineConfig([

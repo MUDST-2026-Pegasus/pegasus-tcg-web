@@ -18,6 +18,22 @@
     "reload": "Reload",
     "retry": "Retry"
   },
+  "cardLabels": {
+    "edition": {
+      "notApplicable": "Not specified"
+    },
+    "finish": {
+      "notApplicable": "None (sealed product / accessory)"
+    }
+  },
+  "condition": {
+    "dmg": "Damaged",
+    "hp": "Heavily played",
+    "lp": "Lightly played",
+    "mp": "Moderately played",
+    "nm": "Near mint",
+    "sealed": "Factory sealed"
+  },
   "datePicker": {
     "hour": "Hour",
     "minute": "Minute",
