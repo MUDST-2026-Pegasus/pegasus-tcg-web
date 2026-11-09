@@ -26,6 +26,7 @@ import { ApiError } from "@/lib/api";
 import { useAuction } from "../auction.queries";
 import type { AuctionDetail, BidPlaced } from "../auction.types";
 import { resolveBidPanelState } from "../bid-panel.state";
+import { useCountdown } from "../useCountdown";
 import { AuctionRules } from "../components/AuctionRules";
 import { BidHistory } from "../components/BidHistory";
 import { BidPanel } from "../components/BidPanel";
@@ -74,7 +75,9 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
   const [lastBid, setLastBid] = useState<BidPlaced | null>(null);
-  const panelState = resolveBidPanelState(auction);
+  // นับถอยหลังเองด้วย: ถึง 0 แล้วปิดช่องบิดทันที ไม่ต้องรอ job ปิดประมูลเปลี่ยนสถานะ
+  const remaining = useCountdown(auction.status === "LIVE" ? auction.endsAt : null, auction.serverTime);
+  const panelState = resolveBidPanelState(auction, undefined, remaining === 0);
   // คุณสมบัติ/ท่าโจมตีดึงจากแคตตาล็อก — โหลดไม่ได้ก็ซ่อนแถวล่างไป ไม่ให้หน้าประมูลพัง
   const product = useProductDetail(item.card.productSlug);
 
@@ -119,7 +122,10 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
             </div>
 
             <SellerNote note={auction.sellerNote} />
-            <BidStatusBanner auction={auction} lastBid={lastBid} onBid={setConfirmAmount} />
+            {/* หมดเวลาแล้ว: ซ่อนแบนเนอร์ที่มีปุ่ม "บิดอีกครั้ง" จนกว่าสถานะจะเปลี่ยน */}
+            {panelState !== "CLOSING" ? (
+              <BidStatusBanner auction={auction} lastBid={lastBid} onBid={setConfirmAmount} />
+            ) : null}
             <BidPanel
               auction={auction}
               state={panelState}

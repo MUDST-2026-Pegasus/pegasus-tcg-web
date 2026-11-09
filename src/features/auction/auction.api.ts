@@ -72,7 +72,7 @@ function mock<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), MOCK_DELAY_MS));
 }
 
-function newIdempotencyKey(): string {
+export function newIdempotencyKey(): string {
   return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `idemp-${Date.now()}`;
@@ -156,7 +156,7 @@ export function getBidHistory(id: number, page = 0, size = 20): Promise<BidHisto
 
 /**
  * บิดแล้วถอนไม่ได้ — error ที่ต้องรับ: BID_TOO_LOW, AUCTION_CLOSED, BIDDING_BANNED, OWN_AUCTION, NO_SHIPPING_ADDRESS, EMAIL_NOT_VERIFIED
- * ส่ง `Idempotency-Key` ใหม่ทุกครั้งที่กดยืนยัน กันเน็ตกระตุกแล้วบิดซ้ำ [TCG-630]
+ * ส่ง `Idempotency-Key` เดิมเมื่อกดยืนยันซ้ำที่ราคาเดิม (เช่น เน็ตกระตุก) จะได้ผลบิดเดิม ไม่ใช่ error [TCG-630]
  * BE ส่งผลบิดเดิมกลับถ้า key ซ้ำ (BE-4 · TCG-617)
  */
 export function placeBid(id: number, payload: PlaceBidRequest, idempotencyKey: string = newIdempotencyKey()): Promise<BidPlaced> {

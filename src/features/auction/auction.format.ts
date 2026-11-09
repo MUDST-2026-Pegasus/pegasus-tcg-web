@@ -1,8 +1,20 @@
 import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
-import type { AdminAuctionRow, AdminAuctionTab, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
+import type { AdminAuctionRow, AdminAuctionTab, AuctionDetail, AuctionRules, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
 import { dateTimeFormat, formatCountdown, intlLocale } from "@/lib/i18n";
+
+/** กติกาตอนที่ BE ยังไม่ส่ง `rules` มา (fixture / mock) */
+export const DEFAULT_AUCTION_RULES: AuctionRules = { paymentHours: 24, strikeLimit: 3, banDays: 30 };
+
+export function auctionRules(auction: Pick<AuctionDetail, "rules">): AuctionRules {
+  return auction.rules ?? DEFAULT_AUCTION_RULES;
+}
+
+/** "24 ชม." หรือ "30 นาที" เมื่อแอดมินตั้งไว้ไม่ถึงชั่วโมง */
+export function formatPaymentWindow(hours: number): string {
+  return hours >= 1 ? `${Number(hours.toFixed(2))} ชม.` : `${Math.round(hours * 60)} นาที`;
+}
 
 /**
  * ตัวช่วยแปลงค่าดิบของระบบประมูล → ข้อความบนหน้าจอ [TCG-627 · FE-1]

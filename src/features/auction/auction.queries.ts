@@ -75,9 +75,12 @@ export function useAuction(id: number | null, options: { poll?: boolean } = {}) 
     queryKey: auctionKeys.detail(id ?? 0),
     queryFn: () => auctionApi.getAuction(id ?? 0),
     enabled: id !== null,
-    // ดึงใหม่เฉพาะตอนประมูลยังเปิด จบแล้วไม่มีอะไรเปลี่ยนเอง
+    // ดึงใหม่ตอนยังเปิด และตอนรอชำระ (ผู้ชนะจ่าย → SOLD / ไม่จ่าย → UNSOLD) · สถานะอื่นไม่เปลี่ยนเองแล้ว
     refetchInterval: (query) =>
-      options.poll === false || (query.state.data && query.state.data.status !== "LIVE") ? false : AUCTION_POLL_MS,
+      options.poll === false ||
+      (query.state.data && query.state.data.status !== "LIVE" && query.state.data.status !== "AWAITING_PAYMENT")
+        ? false
+        : AUCTION_POLL_MS,
     // 404 คือคำตอบ ลองซ้ำก็ได้ผลเดิม
     retry: false,
   });
@@ -130,7 +133,8 @@ function refreshBuyerViews(queryClient: QueryClient, auctionId: number) {
 export function usePlaceBid(auctionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PlaceBidRequest) => auctionApi.placeBid(auctionId, payload),
+    mutationFn: ({ payload, idempotencyKey }: { payload: PlaceBidRequest; idempotencyKey?: string }) =>
+      auctionApi.placeBid(auctionId, payload, idempotencyKey),
     onSettled: () => refreshBuyerViews(queryClient, auctionId),
   });
 }

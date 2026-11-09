@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 
 import { EMAIL_NOT_VERIFIED_MESSAGE } from "../auction.errors";
 import {
+  auctionRules,
   BID_SHORTCUTS,
   canSubmitBid,
   clockOffset,
@@ -15,6 +16,7 @@ import {
   formatAuctionShortDateTime,
   formatBaht,
   formatBidCount,
+  formatPaymentWindow,
   pillForStatus,
   remainingMs,
   type AuctionPillKind,
@@ -67,6 +69,8 @@ export function BidPanel({ auction, state, onBid, onBuyNow, onShowHistory }: Bid
 /** ป้าย (+ ข้อความแทน) ของกล่องที่จบแล้ว ตาม B4-D/E/F/G */
 function endedPill(auction: AuctionDetail, state: BidPanelState): { kind: AuctionPillKind; label?: string } | null {
   switch (state) {
+    case "CLOSING":
+      return { kind: "Ended", label: "หมดเวลา · กำลังสรุปผล" };
     case "AWAITING_PAYMENT":
       return { kind: "AwaitingPayment", label: "จบแล้ว · รอชำระ" };
     case "SOLD":
@@ -153,6 +157,12 @@ function PriceBlock({ auction, state, onShowHistory }: { auction: AuctionDetail;
 /** กล่องบิดปกติ (B2) + ปุ่มซื้อทันทีตอนยังไม่มีบิด (B3-B) */
 function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; state: BidPanelState; onBid: (amount: number) => void; onBuyNow: () => void }) {
   const [typed, setTyped] = useState<number | null>(null);
+  // ขั้นต่ำขยับ (เราหรือคนอื่นบิด) และค่าที่พิมพ์ต่ำกว่าขั้นต่ำใหม่ → กลับไปเดินตามขั้นต่ำ ไม่ต้องลบพิมพ์ใหม่เอง
+  const [seenMin, setSeenMin] = useState(auction.minNextBid);
+  if (seenMin !== auction.minNextBid) {
+    setSeenMin(auction.minNextBid);
+    if (typed !== null && !(typed >= auction.minNextBid)) setTyped(null);
+  }
   const amount = typed ?? auction.minNextBid;
   const valid = canSubmitBid(amount, auction.minNextBid, auction.status === "LIVE");
 
@@ -177,7 +187,8 @@ function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; 
               inputMode="numeric"
               value={Number.isFinite(amount) ? amount.toLocaleString("en-US") /* ไม่ขึ้นกับภาษา: ค่าในช่อง input ต้อง parse กลับได้ */ : ""}
               onChange={(event) => {
-                const digits = event.target.value.replace(/[^\d]/g, "");
+                // ไม่เกิน 9 หลัก (< 1 พันล้าน) กันพิมพ์เลขยาวจนเกินค่าที่ส่งได้
+                const digits = event.target.value.replace(/[^\d]/g, "").slice(0, 9);
                 setTyped(digits === "" ? Number.NaN : Number(digits));
               }}
               aria-invalid={!valid}
@@ -202,7 +213,7 @@ function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; 
         </Button>
         <p className="flex items-center gap-1.5 text-xs text-amber-800">
           <AlertTriangle aria-hidden className="size-3.5" />
-          บิดแล้วถอนไม่ได้ · ถ้าชนะต้องชำระภายใน 24 ชม.
+          บิดแล้วถอนไม่ได้ · ถ้าชนะต้องชำระภายใน {formatPaymentWindow(auctionRules(auction).paymentHours)}
         </p>
       </div>
 
@@ -276,12 +287,21 @@ function StateBody({ auction, state }: { auction: AuctionDetail; state: BidPanel
             tone="red"
             icon={<Ban />}
             title={auction.viewer?.bannedUntil ? `คุณถูกห้ามบิดถึง ${formatAuctionDate(auction.viewer.bannedUntil)}` : "คุณถูกห้ามบิด"}
-            detail="ไม่ชำระเงินหลังชนะครบ 3 ครั้ง · ยังซื้อสินค้าปกติได้"
+            detail={`ไม่ชำระเงินหลังชนะครบ ${auctionRules(auction).strikeLimit} ครั้ง · ยังซื้อสินค้าปกติได้`}
           />
           <Button className={`${wide} bg-slate-100 text-muted-foreground`} disabled>
             บิด
           </Button>
         </div>
+      );
+    case "CLOSING":
+      return (
+        <AuctionNotice
+          tone="slate"
+          icon={<Clock />}
+          title="หมดเวลาประมูลแล้ว"
+          detail="ระบบกำลังสรุปผู้ชนะ หน้านี้จะอัปเดตเองในไม่ช้า"
+        />
       );
     case "AWAITING_PAYMENT":
       return (
@@ -289,7 +309,7 @@ function StateBody({ auction, state }: { auction: AuctionDetail; state: BidPanel
           tone="slate"
           icon={<Clock />}
           title="ประมูลนี้ปิดรับบิดแล้ว"
-          detail="ถ้าผู้ชนะไม่ชำระใน 24 ชม. ประมูลจะถูกยกเลิก และการ์ดกลับเข้าสต็อกผู้ขาย"
+          detail={`ถ้าผู้ชนะไม่ชำระใน ${formatPaymentWindow(auctionRules(auction).paymentHours)} ประมูลจะถูกยกเลิก และการ์ดกลับเข้าสต็อกผู้ขาย`}
         />
       );
     case "SOLD":
@@ -354,7 +374,7 @@ function WonPanel({ auction }: { auction: AuctionDetail }) {
         ชำระเงิน {formatBaht(total)}
       </Button>
       <p className="text-xs text-muted-foreground">
-        ใช้ขั้นตอนชำระเงินเดิม (โอน + แนบสลิป / PromptPay) · ไม่ชำระใน 24 ชม. คำสั่งซื้อถูกยกเลิก และถูกบันทึกไม่ชำระ 1 ครั้ง
+        ใช้ขั้นตอนชำระเงินเดิม (โอน + แนบสลิป / PromptPay) · ไม่ชำระใน {formatPaymentWindow(auctionRules(auction).paymentHours)} คำสั่งซื้อถูกยกเลิก และถูกบันทึกไม่ชำระ 1 ครั้ง
       </p>
     </section>
   );
