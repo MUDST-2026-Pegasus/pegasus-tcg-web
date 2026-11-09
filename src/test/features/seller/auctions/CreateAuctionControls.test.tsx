@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -36,17 +36,18 @@ describe("CloseTimePicker shortcuts", () => {
     expect(screen.getByText(/ปิด จ\. 2 พ\.ย\. 2026 เวลา 21:00 น\. \(อีก 3 วัน 7 ชม\.\)/)).toBeInTheDocument();
   });
 
-  it("normalises a typed time on blur", async () => {
+  it("picks the time by scrolling the wheel", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<CloseTimePicker date="2026-11-02" time="21:00" now={NOW} onChange={onChange} />);
 
-    const input = screen.getByRole("textbox", { name: "เวลาปิดประมูล" });
-    await user.clear(input);
-    await user.type(input, "2115");
-    await user.tab();
+    await user.click(screen.getByRole("button", { name: "เวลาปิดประมูล" }));
+    const minutes = await screen.findByRole("listbox", { name: "นาที" });
+    // แถวละ 36px — เลื่อนให้แถว 15 มาอยู่ตรงกลาง
+    minutes.scrollTop = 15 * 36;
+    fireEvent.scroll(minutes);
 
-    expect(onChange).toHaveBeenLastCalledWith({ date: "2026-11-02", time: "21:15" });
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith({ date: "2026-11-02", time: "21:15" }));
   });
 });
 
