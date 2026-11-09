@@ -137,6 +137,8 @@ export type AuctionBid = {
   mine: boolean;
   amount: number;
   placedAt: string;
+  /** ถูกยกเลิกเพราะแอดมินระงับประมูล — ยังแสดงในประวัติแต่ขีดฆ่า */
+  cancelled?: boolean;
 };
 
 /** การ์ดประมูลหนึ่งใบในหน้ารวม (B1) */

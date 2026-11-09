@@ -6,6 +6,8 @@ import { AdminCommissionPage } from "@/features/admin/pages/AdminCommissionPage"
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import { ApiError } from "@/lib/api";
 import { useCategoryList, useGameList } from "@/features/catalog/catalog.queries";
+import * as auditApi from "@/features/admin/audit.api";
+import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   commissionRules: vi.fn(), commissionRule: vi.fn(), createCommissionRule: vi.fn(),
@@ -13,6 +15,7 @@ vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   defaultCommissionRate: vi.fn(), updateDefaultCommissionRate: vi.fn(),
 } }));
 vi.mock("@/features/catalog/catalog.queries", () => ({ useGameList: vi.fn(), useCategoryList: vi.fn() }));
+vi.mock("@/features/admin/audit.api", () => ({ getAuditLogs: vi.fn(), getAuditSummary: vi.fn() }));
 
 const globalRule = { id: 1, scope: "GLOBAL" as const, gameId: null, categoryId: null,
   sellerProfileId: null, ratePercent: 5, fixedFee: 0, minFee: null, maxFee: null,
@@ -184,5 +187,40 @@ describe("admin commission settings", () => {
     expect(await within(dialog).findByText("ไม่พบร้านค้ารหัสนี้")).toBeTruthy();
     await user.click(within(dialog).getByRole("radio", { name: "เกม" }));
     expect(within(dialog).queryByText("ไม่พบร้านค้ารหัสนี้")).toBeNull();
+  }, POPUP_TIMEOUT);
+
+  it("opens the change history of rules and the default rate from the audit log", async () => {
+    const user = userEvent.setup();
+    vi.mocked(useGameList).mockReturnValue({ isSuccess: true, data: [] } as never);
+    vi.mocked(useCategoryList).mockReturnValue({ isSuccess: true, data: [] } as never);
+    vi.mocked(afterSalesApi.defaultCommissionRate).mockResolvedValue({ key: "commission.default_rate", value: "5.0", description: "", updatedBy: null });
+    vi.mocked(afterSalesApi.commissionRules).mockResolvedValue([]);
+    const actor = { userId: 7, username: "admin_kant", displayName: "Kant" };
+    vi.mocked(auditApi.getAuditLogs).mockImplementation(async (params) => ({
+      items: params.targetType?.[0] === "SETTING"
+        ? [{ id: 2, occurredAt: "2026-11-09T09:00:00Z", actor, action: "SETTING_UPDATED", targetType: "SETTING",
+            targetId: "commission.default_rate", summary: "Changed setting commission.default_rate",
+            metadata: { before: 5, after: 7 }, ipAddress: null }]
+        : [{ id: 1, occurredAt: "2026-11-08T09:00:00Z", actor, action: "COMMISSION_RULE_CREATED", targetType: "COMMISSION_RULE",
+            targetId: "3", summary: "Created commission rule #3", metadata: {}, ipAddress: null }],
+      page: 0, size: 20, totalItems: 1, totalPages: 1,
+    }));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><MemoryRouter><AdminCommissionPage /></MemoryRouter></QueryClientProvider>);
+
+    // ยังไม่เปิด = ยังไม่ยิง
+    expect(auditApi.getAuditLogs).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "ดูประวัติการแก้ไข" }));
+
+    const sheet = await screen.findByRole("dialog", { name: "ประวัติการแก้ไขค่าคอมมิชชั่น" });
+    expect(await within(sheet).findByText("ค่าคอมมิชชั่นพื้นฐาน · 5 → 7")).toBeTruthy();
+    expect(within(sheet).getByText("เพิ่มกฎค่าคอมมิชชั่น")).toBeTruthy();
+    expect(auditApi.getAuditLogs).toHaveBeenCalledWith(expect.objectContaining({
+      targetType: ["SETTING"], targetId: "commission.default_rate" }));
+    expect(auditApi.getAuditLogs).toHaveBeenCalledWith(expect.objectContaining({ targetType: ["COMMISSION_RULE"] }));
+
+    await user.click(within(sheet).getByRole("button", { name: /แก้ไขการตั้งค่าระบบ/ }));
+    const detail = await screen.findByRole("dialog", { name: "รายละเอียดกิจกรรม" });
+    expect(within(detail).getByText("ค่าคอมมิชชั่นพื้นฐาน", { exact: false })).toBeTruthy();
   }, POPUP_TIMEOUT);
 });

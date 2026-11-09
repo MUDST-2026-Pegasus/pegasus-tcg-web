@@ -83,6 +83,17 @@ export function shortcutCloseTime(now: number, hours: number): { date: string; t
   return bangkokParts(target);
 }
 
+/** เวลาปิดที่ตั้งไว้ให้ตอนเปิดฟอร์ม: อย่างน้อย 1 ชม. 15 นาที ปัดขึ้นเป็นทุก 15 นาที
+ *  (เผื่อเวลากรอกฟอร์มไว้ ไม่ให้ต่ำกว่าขั้นต่ำ 1 ชม. ตอนกดเปิด) เช่น 22:07 → 23:30 */
+export const DEFAULT_CLOSE_LEAD_MS = HOUR + 15 * MINUTE;
+const DEFAULT_CLOSE_STEP_MS = 15 * MINUTE;
+
+export function defaultCloseTime(now: number): { closeDate: string; closeTime: string } {
+  const target = Math.ceil((now + DEFAULT_CLOSE_LEAD_MS) / DEFAULT_CLOSE_STEP_MS) * DEFAULT_CLOSE_STEP_MS;
+  const { date, time } = bangkokParts(target);
+  return { closeDate: date, closeTime: time };
+}
+
 /** วันแรกและวันสุดท้ายที่ปฏิทินให้เลือก (`YYYY-MM-DD` ตามปฏิทินไทย) */
 export function closeDateRange(now: number): { first: string; last: string } {
   return {

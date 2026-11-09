@@ -8,6 +8,7 @@ import {
   closeAtMs,
   closeDateRange,
   createAuctionErrorIssue,
+  defaultCloseTime,
   emptyAuctionForm,
   formatCloseDate,
   formatCloseDuration,
@@ -136,6 +137,17 @@ describe("close time helpers", () => {
     [168, "2026-11-06", "14:00"],
   ])("shortcut +%s hours", (hours, date, time) => {
     expect(shortcutCloseTime(NOW, hours)).toEqual({ date, time });
+  });
+
+  it.each([
+    ["14:00", "15:15"],
+    ["14:07", "15:30"],
+    ["14:15", "15:30"],
+    ["23:00", "00:15"],
+  ])("default close time from %s is %s (≥ 1 ชม. 15 นาที, ทีละ 15 นาที)", (from, closeTime) => {
+    const now = Date.parse(`2026-10-30T${from}:00+07:00`);
+    expect(defaultCloseTime(now).closeTime).toBe(closeTime);
+    expect(closeAtMs(defaultCloseTime(now).closeDate, closeTime)! - now).toBeGreaterThanOrEqual(75 * MINUTE);
   });
 
   it("rounds a shortcut up to the next minute", () => {

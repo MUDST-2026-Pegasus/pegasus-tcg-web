@@ -55,23 +55,18 @@ describe('Core Admin Portal Flow', () => {
     ],
   };
 
-  const mockVerificationQueue = {
+  const mockRecentActivity = {
     items: [
       {
         id: 1,
-        sellerProfileId: 5,
-        status: 'SUBMITTED',
-        legalFirstName: 'สมชาย',
-        legalLastName: 'รักการ์ด',
-        bankCode: 'KBANK',
-        bankName: 'กสิกรไทย',
-        bankAccountNumber: '1234567890',
-        bankBookImageKey: 'key-sample-image',
-        bankBookImageUrl: null,
-        submittedAt: '2026-10-14T10:00:00Z',
-        reviewedBy: null,
-        reviewedAt: null,
-        rejectionReason: null,
+        occurredAt: '2026-10-14T10:00:00Z',
+        actor: { userId: 1, username: 'admin_kant', displayName: 'Kant' },
+        action: 'SELLER_VERIFICATION_APPROVED',
+        targetType: 'SELLER_VERIFICATION',
+        targetId: '1',
+        summary: 'Approved seller verification #1',
+        metadata: { sellerProfileId: 5 },
+        ipAddress: null,
       },
     ],
     totalItems: 1,
@@ -116,19 +111,19 @@ describe('Core Admin Portal Flow', () => {
       },
     }).as('getOverview');
 
-    cy.intercept('GET', '**/api/v1/admin/verifications*', {
+    cy.intercept('GET', '**/api/v1/admin/audit-logs*', {
       statusCode: 200,
       body: {
         success: true,
-        data: mockVerificationQueue,
+        data: mockRecentActivity,
       },
-    }).as('getVerificationsQueue');
+    }).as('getRecentActivity');
 
     visitWithRole('/admin', mockAdminUser);
 
     cy.wait('@getMe');
     cy.wait('@getOverview');
-    cy.wait('@getVerificationsQueue');
+    cy.wait('@getRecentActivity');
 
     // Page title and headers
     cy.contains('h1', 'ภาพรวมแพลตฟอร์ม').should('be.visible');
@@ -146,8 +141,8 @@ describe('Core Admin Portal Flow', () => {
     cy.contains('ร้านค้าที่ทำยอดขายสูงสุด').should('be.visible');
     cy.contains('cardmaster').should('be.visible');
     cy.contains('สัดส่วนยอดขายตามเกม').should('be.visible');
-    cy.contains('คำขอเปิดร้านที่รอตรวจ').should('be.visible');
-    cy.contains('สมชาย รักการ์ด').should('be.visible');
+    cy.contains('กิจกรรมล่าสุด').should('be.visible');
+    cy.contains('admin_kant').should('be.visible');
   });
 
   it('guards admin route and redirects non-admin users to home', () => {

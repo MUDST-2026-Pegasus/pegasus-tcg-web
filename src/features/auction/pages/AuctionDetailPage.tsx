@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Heart } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { ErrorState } from "@/components/common";
@@ -12,7 +11,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { CONDITION_LABELS } from "@/features/catalog/catalog.mappers";
 import { useProductDetail } from "@/features/catalog/catalog.queries";
 import {
@@ -129,11 +127,6 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
               onBuyNow={() => setBuyNowOpen(true)}
               onShowHistory={showHistory}
             />
-            {/* ยังไม่มี API ติดตามการประมูล — ปุ่มแสดงตามแบบไว้ก่อน */}
-            <Button type="button" variant="outline" className="h-11 w-full rounded-full bg-card font-semibold">
-              <Heart aria-hidden />
-              ติดตามการประมูลนี้
-            </Button>
             <TrustStrip />
           </div>
         </section>
