@@ -16,9 +16,11 @@ COPY . .
 # .env is not in the build context (.dockerignore): pass Vite values as build
 # args. Empty = the API on the page's own origin (/api), as behind the Ingress.
 ARG VITE_API_BASE_URL=
+ARG VITE_GOOGLE_CLIENT_ID=
 ARG VITE_FARO_URL=
 ARG VITE_APP_VERSION=dev
 ARG VITE_APP_ENV=production
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 RUN pnpm run build
 
 FROM nginx:alpine

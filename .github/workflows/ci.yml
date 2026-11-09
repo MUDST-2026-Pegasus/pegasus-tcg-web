@@ -79,6 +79,7 @@ jobs:
         run: pnpm build
         env:
           VITE_FARO_URL: ${{ vars.VITE_FARO_URL || (github.ref_name == 'main' && 'https://pegasus-tcg.gameinwza.com/collect' || 'https://pegasus-dev.gameinwza.com/collect') }}
+          VITE_GOOGLE_CLIENT_ID: ${{ github.ref_name == 'main' && vars.VITE_GOOGLE_CLIENT_ID_PROD || vars.VITE_GOOGLE_CLIENT_ID_DEV }}
           VITE_APP_VERSION: ${{ github.sha }}
           VITE_APP_ENV: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
 
