@@ -33,3 +33,5 @@ QA/
 # Test Reports
 .vitest/
 test-results/
+coverage/
+

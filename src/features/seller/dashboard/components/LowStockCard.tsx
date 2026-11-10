@@ -1,4 +1,3 @@
-import { ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import type { LowStock, StockSeverity } from "../dashboard.types";
+import { ProductThumbnail } from "./ProductThumbnail";
+import { useTranslate } from "@/lib/i18n";
 
 const PILL_COLOR: Record<StockSeverity, string> = {
   critical: "bg-[#fdecea] text-[#d0342c]",
@@ -15,6 +16,7 @@ const PILL_COLOR: Record<StockSeverity, string> = {
 
 /** แต่ละแถวพาไปหน้าเติมสต็อกของประกาศนั้นตรง ๆ */
 export function LowStockCard({ title, subtitle, count, items, actionLabel, actionTo, emptyLabel }: LowStock) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0 lg:w-80">
       <div className="flex items-start justify-between gap-2 px-5 pt-4 pb-3.5">
@@ -24,7 +26,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
         </div>
         {count > 0 && (
           <Badge className="h-auto shrink-0 rounded-full bg-[#fdf0dd] px-2 py-[3px] text-xs text-[#b45309]">
-            {count} รายการ
+            {t("dashboard.lowStock.count", "{count} รายการ", { count })}
           </Badge>
         )}
       </div>
@@ -39,9 +41,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
                 to={`/seller/products/${item.listingId}/restock`}
                 className="flex min-w-0 items-center gap-3 px-5 py-3 outline-none hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:ring-3 focus-visible:ring-ring/30"
               >
-                <div className="flex size-[34px] shrink-0 items-center justify-center rounded-md bg-secondary">
-                  <ImageIcon aria-hidden="true" className="size-3.5 text-gray-400" />
-                </div>
+                <ProductThumbnail imageUrl={item.imageUrl} name={item.name} className="size-[34px]" />
                 <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
                   <p className="truncate text-xs font-semibold text-foreground" title={item.name}>{item.name}</p>
                   {item.metaLabel && <p className="truncate text-xs text-gray-400">{item.metaLabel}</p>}

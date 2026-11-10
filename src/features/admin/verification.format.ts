@@ -1,25 +1,20 @@
 import { format } from "date-fns";
-import { th } from "date-fns/locale";
 
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { Verification, VerificationStatus } from "./verification.types";
+import { currentLanguage, formatDate, formatYear, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลง `Verification` ที่ backend ส่งมา → ชิ้นส่วนที่เอาไปโชว์ได้
  * ไม่มีอะไรที่แตะ PII นอกจากจัดรูปให้อ่านง่าย — ไม่มีการ log
  */
 
-/** locale ไทยของ date-fns ยังพิมพ์ปี ค.ศ. ต้องบวกเป็น พ.ศ. เอง */
-function buddhistYear(date: Date): number {
-  return date.getFullYear() + 543;
-}
-
 /** "14 ก.ย. 2569 · 10:24 น." */
 export function formatThaiDateTime(value: string): string {
   const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${buddhistYear(date)} · ${format(date, "HH:mm")} น.`;
+  return `${formatDate(date)} · ${format(date, "HH:mm")}${currentLanguage() === "th" ? " น." : ""}`;
 }
 
 export type VerificationStatusMeta = {
@@ -101,7 +96,7 @@ export function formatBankAccount(accountNumber: string): string {
 
 /** "APP-2569-0842" — เลขคำขอ นำหน้าด้วยปี พ.ศ. ที่ยื่น */
 export function formatApplicationNumber(verification: Verification): string {
-  const year = buddhistYear(new Date(verification.submittedAt));
+  const year = formatYear(verification.submittedAt, {}, "th"); // เลขคำขอใช้ พ.ศ. เสมอไม่ว่าภาษาไหน
   return `APP-${year}-${String(verification.id).padStart(4, "0")}`;
 }
 
@@ -124,5 +119,5 @@ export function verificationErrorMessage(
   if (hasErrorCode(error, "BANK_ACCOUNT_ALREADY_USED")) {
     return "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง";
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }

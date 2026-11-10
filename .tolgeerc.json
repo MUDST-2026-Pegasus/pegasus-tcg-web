@@ -1,0 +1,98 @@
+{
+  "$schema": "https://docs.tolgee.io/cli-schema.json",
+  "apiUrl": "https://pegasus-tolgee.thanaboat.com",
+  "projectId": 2,
+  "format": "JSON_TOLGEE",
+  "defaultNamespace": "common",
+  "patterns": [
+    "./src/{app,components,features,hooks,lib}/**/*.ts?(x)"
+  ],
+  "push": {
+    "files": [
+      {
+        "path": "./src/i18n/common/th.json",
+        "language": "th",
+        "namespace": "common"
+      },
+      {
+        "path": "./src/i18n/common/en.json",
+        "language": "en",
+        "namespace": "common"
+      },
+      {
+        "path": "./src/i18n/errors/th.json",
+        "language": "th",
+        "namespace": "errors"
+      },
+      {
+        "path": "./src/i18n/errors/en.json",
+        "language": "en",
+        "namespace": "errors"
+      },
+      {
+        "path": "./src/i18n/buyer/th.json",
+        "language": "th",
+        "namespace": "buyer"
+      },
+      {
+        "path": "./src/i18n/buyer/en.json",
+        "language": "en",
+        "namespace": "buyer"
+      },
+      {
+        "path": "./src/i18n/seller/th.json",
+        "language": "th",
+        "namespace": "seller"
+      },
+      {
+        "path": "./src/i18n/seller/en.json",
+        "language": "en",
+        "namespace": "seller"
+      },
+      {
+        "path": "./src/i18n/admin/th.json",
+        "language": "th",
+        "namespace": "admin"
+      },
+      {
+        "path": "./src/i18n/admin/en.json",
+        "language": "en",
+        "namespace": "admin"
+      },
+      {
+        "path": "./src/i18n/promotions/th.json",
+        "language": "th",
+        "namespace": "promotions"
+      },
+      {
+        "path": "./src/i18n/promotions/en.json",
+        "language": "en",
+        "namespace": "promotions"
+      },
+      {
+        "path": "./src/i18n/sale/th.json",
+        "language": "th",
+        "namespace": "sale"
+      },
+      {
+        "path": "./src/i18n/sale/en.json",
+        "language": "en",
+        "namespace": "sale"
+      },
+      {
+        "path": "./src/i18n/auction/th.json",
+        "language": "th",
+        "namespace": "auction"
+      },
+      {
+        "path": "./src/i18n/auction/en.json",
+        "language": "en",
+        "namespace": "auction"
+      }
+    ]
+  },
+  "pull": {
+    "path": "./src/i18n",
+    "fileStructureTemplate": "{namespace}/{languageTag}.{extension}"
+  }
+}

@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import type { AdminCommissionData } from "@/features/admin/admin.types";
+import { useTranslate } from "@/lib/i18n";
 
 type CommissionDefaultRateCardProps = AdminCommissionData["defaultRate"];
 type EditableProps = { onChange?: (value: string) => void };
@@ -20,6 +21,7 @@ export function CommissionDefaultRateCard({
   max,
   onChange,
 }: CommissionDefaultRateCardProps & EditableProps) {
+  const { t } = useTranslate("admin");
   // ตำแหน่งของ handle เป็นเปอร์เซ็นต์ของความกว้างแถบ
   const percent = Math.min(100, (parseFloat(value) / max) * 100);
 
@@ -32,7 +34,7 @@ export function CommissionDefaultRateCard({
 
       <div className="flex items-center gap-4">
         <div className="flex w-[105px] items-baseline gap-1 rounded-[10px] border border-border bg-[#fafbfb] px-[18px] py-3.5">
-          {onChange ? <input aria-label="อัตราค่าคอมมิชชั่น (%)" type="number" min="0" max="100" step="0.001"
+          {onChange ? <input aria-label={t("commission.default.input", "อัตราค่าคอมมิชชั่น (%)")} type="number" min="0" max="100" step="0.001"
             value={value} onChange={(event) => onChange(event.target.value)}
             className="w-[50px] shrink-0 appearance-none bg-transparent text-[30px] leading-none font-bold tracking-[-0.8px] text-foreground outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
             : <span className="text-[32px] leading-none font-bold text-foreground">{value}</span>}

@@ -1,10 +1,9 @@
 name: Cypress E2E Tests
 
 on:
-  push:
-    branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
+  workflow_call:
 
 concurrency:
   group: e2e-${{ github.workflow }}-${{ github.ref }}
@@ -18,6 +17,10 @@ jobs:
     name: Cypress E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -35,9 +38,7 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
+      # Restore before install: the cypress postinstall downloads the binary.
       - name: Cache Cypress binary
         uses: actions/cache@v4
         with:
@@ -46,6 +47,10 @@ jobs:
           restore-keys: |
             cypress-cache-${{ runner.os }}-
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # No-op when the cached binary matches; covers a cache miss.
       - name: Install Cypress binary
         run: pnpm exec cypress install
 
@@ -54,6 +59,7 @@ jobs:
         env:
           # Keep unmocked calls off the preview server, as before same-origin builds.
           VITE_API_BASE_URL: http://localhost:8080
+          VITE_GOOGLE_CLIENT_ID: cypress-google-client-id
 
       - name: Start Vite Preview Server
         run: pnpm preview --port 5173 &
@@ -64,13 +70,22 @@ jobs:
         run: npx wait-on http://localhost:5173
 
       - name: Run Cypress E2E Tests
-        run: pnpm exec cypress run --browser chrome --headless
+        run: pnpm exec cypress run --browser chrome --headless --reporter junit --reporter-options "mochaFile=test-results/e2e-[hash].xml"
+
+      - name: Publish Cypress E2E Test Results
+        if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          check_name: FE E2E (Cypress)
+          files: test-results/e2e-*.xml
+          comment_mode: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && 'always' || 'off' }}
 
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
-          path: cypress/screenshots/
+          path: src/test/cypress/screenshots/
           if-no-files-found: ignore
           retention-days: 7

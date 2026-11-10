@@ -1,3 +1,5 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
+import type { OrderItemSale } from "@/components/sale";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
 
@@ -7,7 +9,8 @@ import type { AppliedPromotion } from "@/features/promotions/order.types";
 // `dto/OrderStatusHistoryResponse.java` และ `dto/ShipOrderRequest.java`
 // ถ้าฝั่งนั้นแก้ ส่วนนี้ต้องแก้ตาม — ค่าดิบทั้งหมด ข้อความไปจัดใน orders.format.ts
 
-export type OrderItem = {
+/** มี `listPrice` / `saleDiscount` (OrderItemSale) เมื่อแถวได้ราคาลด (SAL-05) */
+export type OrderItem = OrderItemSale & {
   id: number;
   listingId: number | null;
   catalogVariantId: number;
@@ -101,8 +104,20 @@ export type OrderBuyer = {
   avatarUrl: string | null;
 };
 
+/** ตัวเลือกการจัดส่งที่ผู้ซื้อเลือก ตาม snapshot ตอน checkout (`SellerOrderViews.ShippingChoice`) */
+export type ShippingChoice = {
+  /** `null` = ร้านลบตัวเลือกนี้ไปแล้ว */
+  optionId: number | null;
+  name: string;
+  /** `null` = ตัวเลือกนี้ไม่ผูกบริษัทขนส่ง */
+  carrierCode: string | null;
+  fee: number;
+  estDaysMin: number | null;
+  estDaysMax: number | null;
+};
+
 /** หนึ่งแถวในหน้ารายการ */
-export type SellerOrderSummary = {
+export type SellerOrderSummary = OrderAuctionSource & {
   order: SellerOrderDetails;
   /** เลขออเดอร์ของผู้ซื้อ `PGS-…` — ผู้ซื้อทักมาด้วยเลขนี้ */
   orderNumber: string;
@@ -113,6 +128,8 @@ export type SellerOrderSummary = {
   /** JSON ของที่อยู่ตอนสั่ง แปลงด้วย `parseShippingAddress()` */
   shippingAddressSnapshot: string | null;
   buyerNote: string | null;
+  /** `null` = ออเดอร์ก่อนมี snapshot */
+  shippingChoice: ShippingChoice | null;
 };
 
 /** `payment.method` */

@@ -45,6 +45,12 @@ export type OverviewStats = {
   commission: CommissionStat;
   /** เงินที่ Pegasus จ่ายชดเชยร้านแทนโค้ด Pegasus (ledger `PROMO_SUBSIDY`) นับตามวันที่ปล่อยเงิน */
   promotionCost: MoneyStat;
+  /** เงินที่ Pegasus จ่ายร้านแทนส่วนลดแคมเปญ (ledger `SALE_SUBSIDY`) [TCG-680] */
+  saleSubsidy: MoneyStat | null;
+  /** ประมูลที่กำลังเปิดอยู่ตอนนี้ ไม่มียอดเทียบ */
+  liveAuctions: number;
+  /** ยอดขายจากประมูล 30 วันล่าสุด ไม่มียอดเทียบ */
+  auctionSalesLast30Days: number;
 };
 
 export type MonthlySales = {

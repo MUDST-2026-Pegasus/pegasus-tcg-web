@@ -1,10 +1,11 @@
-import { api, type PageResponse } from "@/lib/api";
+import { api, type FileDownload, type PageResponse } from "@/lib/api";
 
 import type {
   AdminOrderDetail,
   AdminOrderListParams,
   AdminOrderSummary,
   OrderBoard,
+  SellerOrderStatus,
 } from "./orders.types";
 
 /**
@@ -38,4 +39,27 @@ export function getAdminOrders(
 
 export function getAdminOrder(sellerOrderId: number): Promise<AdminOrderDetail> {
   return api.get<AdminOrderDetail>(`/admin/orders/${sellerOrderId}`);
+}
+
+/**
+ * CSV คำสั่งซื้อย่อยที่สร้างใน [from, to) ตามสถานะที่เลือก (ว่าง = ทุกสถานะ) [TCG-747/749]
+ * เกิน 20,000 แถว backend ตอบ 400 `EXPORT_TOO_LARGE` · ไฟล์มีชื่อผู้ซื้อ ห้าม log
+ */
+export function downloadAdminOrdersCsv(params: {
+  from: string;
+  to: string;
+  statuses: SellerOrderStatus[];
+}): Promise<FileDownload> {
+  return api.download("/admin/orders/export", {
+    query: {
+      from: params.from,
+      to: params.to,
+      status: params.statuses.length ? params.statuses.join(",") : undefined,
+    },
+    headers: { Accept: "text/csv, application/json" },
+  });
+}
+
+export function downloadAdminOrderSummary(sellerOrderId: number): Promise<FileDownload> {
+  return api.download(`/admin/orders/${sellerOrderId}/summary.pdf`);
 }

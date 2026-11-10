@@ -114,7 +114,7 @@ describe("OrderHistoryPage", () => {
         email: "buyer@example.com",
         displayName: "Test Buyer",
         roles: ["BUYER"],
-        avatarUrl: null,
+        avatarUrl: null, bannerUrl: null,
         phone: null,
         bio: null,
         status: "ACTIVE",

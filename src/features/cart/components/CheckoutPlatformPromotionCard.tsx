@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { PromotionCodeForm } from "@/features/promotions/PromotionCodeForm";
 import { checkoutMoney, formatPromotionRuleSummary } from "../checkout.format";
 import type { AvailablePromotion } from "../promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 interface CheckoutPlatformPromotionCardProps {
   selectedCode: string | null;
@@ -33,13 +34,14 @@ export function CheckoutPlatformPromotionCard({
   onRemoveCode,
   onOpenPicker,
 }: CheckoutPlatformPromotionCardProps) {
+  const { t } = useTranslate("promotions");
   return (
     <Card className={CHECKOUT_CARD_CLASS}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">โค้ดส่วนลด Pegasus</h2>
+        <h2 className="text-sm font-semibold">{t("cart.checkoutPlatformPromotionCard.h2", "โค้ดส่วนลด Pegasus")}</h2>
         <Button type="button" variant="link" className="h-auto p-0 text-[13px]"
           onClick={onOpenPicker}>
-          ดูโค้ดทั้งหมด ({availableCount})
+          {t("cart.checkoutPlatformPromotionCard.button", "ดูโค้ดทั้งหมด (")}{availableCount})
         </Button>
       </div>
 
@@ -65,7 +67,7 @@ export function CheckoutPlatformPromotionCard({
             <Button
               type="button"
               variant="ghost"
-              aria-label="นำโค้ด Pegasus ออก"
+              aria-label={t("cart.checkoutPlatformPromotionCard.ariaLabel", "นำโค้ด Pegasus ออก")}
               className="size-5 rounded-full p-0 text-muted-foreground"
               onClick={onRemoveCode}
             >
@@ -75,10 +77,10 @@ export function CheckoutPlatformPromotionCard({
         </div>
       )}
 
-      <PromotionCodeForm id="pegasus-code" label="กรอกโค้ด Pegasus"
+      <PromotionCodeForm id="pegasus-code" label={t("cart.checkoutPlatformPromotionCard.label", "กรอกโค้ด Pegasus")}
         showLabel={false} value={typedCode} onChange={onTypedCodeChange}
         onSubmit={onApplyTypedCode} error={error} loading={loading}
-        placeholder="กรอกโค้ดอื่น" />
+        placeholder={t("cart.checkoutPlatformPromotionCard.placeholder", "กรอกโค้ดอื่น")} />
     </Card>
   );
 }

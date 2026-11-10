@@ -5,21 +5,12 @@ import type {
   MonthlySales,
   TopSeller,
 } from "./metrics.types";
+import { formatMonth, formatYear, monthStart, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงตัวเลขจาก `/admin/metrics/overview` → ของที่การ์ดบนหน้าภาพรวมโชว์
  * ไม่มี React — ทดสอบได้ตรง ๆ
  */
-
-const THAI_MONTH_SHORT = [
-  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
-  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
-];
-
-const THAI_MONTH_LONG = [
-  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
-];
 
 /** "2026-05" → { year: 2026, month: 5 } */
 function parseMonth(value: string): { year: number; month: number } {
@@ -29,13 +20,12 @@ function parseMonth(value: string): { year: number; month: number } {
 
 /** "2026-05" → "พ.ค." */
 export function thaiMonthShort(value: string): string {
-  return THAI_MONTH_SHORT[parseMonth(value).month - 1];
+  return formatMonth(value);
 }
 
 /** "2026-08" → "สิงหาคม 2569" (ปี พ.ศ.) */
 export function thaiMonthYear(value: string): string {
-  const { year, month } = parseMonth(value);
-  return `${THAI_MONTH_LONG[month - 1]} ${year + 543}`;
+  return `${formatMonth(value, "long")} ${formatYear(monthStart(value))}`;
 }
 
 /** ช่วงเดือนแบบสั้น — ปีเดียวกันเขียนปีครั้งเดียว: "ม.ค. – มิ.ย. 2569" */
@@ -43,9 +33,9 @@ export function thaiMonthRange(first: string, last: string): string {
   const a = parseMonth(first);
   const b = parseMonth(last);
   if (a.year === b.year) {
-    return `${thaiMonthShort(first)} – ${thaiMonthShort(last)} ${b.year + 543}`;
+    return `${thaiMonthShort(first)} – ${thaiMonthShort(last)} ${formatYear(monthStart(last))}`;
   }
-  return `${thaiMonthShort(first)} ${a.year + 543} – ${thaiMonthShort(last)} ${b.year + 543}`;
+  return `${thaiMonthShort(first)} ${formatYear(monthStart(first))} – ${thaiMonthShort(last)} ${formatYear(monthStart(last))}`;
 }
 
 export type Trend = "up" | "down" | "flat" | "new";
@@ -60,8 +50,12 @@ export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
     return value === 0 ? null : { label: "ใหม่", trend: "new" };
   }
-  const change = ((value - previous) / previous) * 100;
-  const rounded = Math.round(change * 10) / 10;
+  return percentDelta(((value - previous) / previous) * 100);
+}
+
+/** % ที่คำนวณไว้แล้ว → ป้ายบนการ์ด: ขึ้นเขียว ลงแดง ศูนย์เป็นเทา */
+export function percentDelta(percent: number): Delta {
+  const rounded = Number.isFinite(percent) ? Math.round(percent * 10) / 10 : 0;
   if (rounded === 0) {
     return { label: "0.0%", trend: "flat" };
   }
@@ -206,4 +200,37 @@ export function gameShareHeadline(shares: GameShare[]): string | null {
     ? leader.percent.toString()
     : leader.percent.toFixed(1);
   return `${leader.gameName ?? "ไม่ระบุเกม"} ครองส่วนแบ่ง ${percent}%`;
+}
+
+// @tolgee-key {"key":"overview.export.gmv","ns":"admin","defaultValue":"ยอดขายรวม (GMV)"}
+// @tolgee-key {"key":"overview.export.newSellers","ns":"admin","defaultValue":"ผู้ขายรายใหม่"}
+// @tolgee-key {"key":"overview.export.activeListings","ns":"admin","defaultValue":"ประกาศขายที่เปิดอยู่"}
+// @tolgee-key {"key":"overview.export.commission","ns":"admin","defaultValue":"ค่าคอมมิชชัน"}
+// @tolgee-key {"key":"overview.export.promotionCost","ns":"admin","defaultValue":"ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)"}
+// @tolgee-key {"key":"overview.export.saleSubsidy","ns":"admin","defaultValue":"ส่วนลดแคมเปญ"}
+// @tolgee-key {"key":"overview.export.liveAuctions","ns":"admin","defaultValue":"ประมูลที่กำลังเปิด"}
+// @tolgee-key {"key":"overview.export.auctionSales","ns":"admin","defaultValue":"ยอดขายจากประมูล (30 วัน)"}
+
+/**
+ * แถวของไฟล์ "ส่งออกรายงาน" หน้าภาพรวม [TCG-749] — ตัวเลขดิบของเดือนที่หน้าแสดง ไม่จัดรูปแบบ
+ * ค่าที่ไม่มียอดเทียบ (ประกาศที่เปิดขาย, ประมูล) เว้น `previous` ว่าง
+ */
+export function overviewCsvRows(overview: AdminOverview): (string | number | null)[][] {
+  const s = overview.stats;
+  return [
+    ["metric", "value", "previous"],
+    [translate("admin", "overview.export.gmv", "ยอดขายรวม (GMV)"), s.gmv.value, s.gmv.previous],
+    [translate("admin", "overview.export.newSellers", "ผู้ขายรายใหม่"), s.newSellers.value, s.newSellers.previous],
+    [translate("admin", "overview.export.activeListings", "ประกาศขายที่เปิดอยู่"), s.activeListings.value, null],
+    [translate("admin", "overview.export.commission", "ค่าคอมมิชชัน"), s.commission.value, s.commission.previous],
+    [translate("admin", "overview.export.promotionCost", "ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)"), s.promotionCost.value, s.promotionCost.previous],
+    [translate("admin", "overview.export.saleSubsidy", "ส่วนลดแคมเปญ"), s.saleSubsidy?.value ?? 0, s.saleSubsidy?.previous ?? 0],
+    [translate("admin", "overview.export.liveAuctions", "ประมูลที่กำลังเปิด"), s.liveAuctions, null],
+    [translate("admin", "overview.export.auctionSales", "ยอดขายจากประมูล (30 วัน)"), s.auctionSalesLast30Days, null],
+  ];
+}
+
+/** "2026-10" → admin-overview-2026-10.csv */
+export function overviewCsvFilename(overview: AdminOverview): string {
+  return `admin-overview-${overview.period.month}.csv`;
 }

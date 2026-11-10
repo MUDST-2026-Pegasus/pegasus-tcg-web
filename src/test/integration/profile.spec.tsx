@@ -49,7 +49,7 @@ describe("Profile Integration", () => {
       username: "old_master",
       bio: null,
       phone: null,
-      avatarUrl: null,
+      avatarUrl: null, bannerUrl: null,
       status: "ACTIVE" as const,
       lastLoginAt: null
     };

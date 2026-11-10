@@ -1,15 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { Package } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 import { formatBaht } from "../../after-sales.format";
 import type { SellerReturnRequest } from "../../after-sales.types";
@@ -35,18 +26,16 @@ export function ConfirmReceiptModal({
   if (!item) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg text-foreground">
-            <Package className="size-5 text-primary" />
-            ยืนยันการได้รับสินค้าคืน
-          </DialogTitle>
-          <DialogDescription>
-            คำขอ RT-{item.id} · คำสั่งซื้อย่อย {item.sellerOrderNumber}
-          </DialogDescription>
-        </DialogHeader>
-
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Package}
+      title="ยืนยันการได้รับสินค้าคืน"
+      description={`คำขอ RT-${item.id} · คำสั่งซื้อย่อย ${item.sellerOrderNumber}`}
+      confirmLabel="ยืนยันรับสินค้าและปล่อยเงินคืน"
+      isPending={loading}
+      onConfirm={onConfirm}
+    >
         <div className="space-y-3.5 py-2 text-sm">
           <div className="rounded-lg bg-muted/50 p-3.5 space-y-2 border border-border">
             <p className="text-foreground">
@@ -69,19 +58,6 @@ export function ConfirmReceiptModal({
             เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ
           </p>
         </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <DialogClose render={<Button variant="outline" disabled={loading} />}>
-            ยกเลิก
-          </DialogClose>
-          <Button
-            disabled={loading}
-            onClick={onConfirm}
-          >
-            {loading ? "กำลังบันทึก..." : "ยืนยันรับสินค้าและปล่อยเงินคืน"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </ConfirmDialog>
   );
 }

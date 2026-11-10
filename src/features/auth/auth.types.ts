@@ -20,6 +20,7 @@ export type AuthUser = {
   phone: string | null;
   phonePublic?: boolean;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   status: UserStatus;
   roles: RoleCode[];
   createdAt: string;
@@ -41,6 +42,10 @@ export type AuthSession = {
 export type LoginPayload = {
   email: string;
   password: string;
+};
+
+export type GoogleSignInPayload = {
+  credential: string;
 };
 
 export type RegisterPayload = {

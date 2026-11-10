@@ -1,3 +1,4 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
 
 /**
@@ -7,6 +8,8 @@ import type { AppliedPromotion } from "@/features/promotions/order.types";
  * ค่าทุกตัวเป็นค่าดิบ (เงินเป็น number, เวลาเป็น ISO string, สถานะเป็นโค้ด)
  * การแปลงเป็นข้อความอยู่ที่ `orders.format.ts`
  */
+
+import type { OrderItemSale } from "@/components/sale";
 
 /** `model/SellerOrderStatus.java` */
 export type SellerOrderStatus =
@@ -60,7 +63,7 @@ export type OrderTracking = {
 };
 
 /** หนึ่งแถว = seller_order หนึ่งใบ (ส่วนของผู้ขายหนึ่งคนในคำสั่งซื้อ) */
-export type AdminOrderSummary = {
+export type AdminOrderSummary = OrderAuctionSource & {
   sellerOrderId: number;
   sellerOrderNumber: string;
   salesOrderId: number;
@@ -113,7 +116,8 @@ export type AdminOrderListParams = {
 
 // ---------- รายละเอียด (ลอกจาก SellerOrderDetailsResponse) ----------
 
-export type OrderItemDetail = {
+/** มี `listPrice` / `saleDiscount` (OrderItemSale) เมื่อแถวได้ราคาลด (SAL-05) */
+export type OrderItemDetail = OrderItemSale & {
   id: number;
   listingId: number | null;
   catalogVariantId: number;

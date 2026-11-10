@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import type { PromotionOwnerType } from "./order.types";
+import { useTranslate } from "@/lib/i18n";
 
 type PromotionOwnerTagProps = {
   owner: PromotionOwnerType;
@@ -10,6 +11,7 @@ type PromotionOwnerTagProps = {
 
 /** Shared code-owner badge: admin list colours, or the O1 order tags (black Pegasus, teal shop). */
 export function PromotionOwnerTag({ owner, tone = "admin" }: PromotionOwnerTagProps) {
+  const { t } = useTranslate("promotions");
   const style = tone === "order"
     ? owner === "PLATFORM"
       ? "bg-foreground text-background"
@@ -20,7 +22,7 @@ export function PromotionOwnerTag({ owner, tone = "admin" }: PromotionOwnerTagPr
 
   return (
     <Badge className={cn("h-5 rounded px-2 text-[11px] font-semibold", style)}>
-      {owner === "PLATFORM" ? "Pegasus" : "โค้ดร้าน"}
+      {owner === "PLATFORM" ? "Pegasus" : t("buyer.promotionOwnerTag.badge", "โค้ดร้าน")}
     </Badge>
   );
 }

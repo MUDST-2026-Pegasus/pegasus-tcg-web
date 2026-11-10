@@ -74,6 +74,7 @@ async function refreshAfterClaim(queryClient: ReturnType<typeof useQueryClient>)
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: promotionKeys.all }),
     queryClient.invalidateQueries({ queryKey: ["checkout-promotions"] }),
+    queryClient.invalidateQueries({ queryKey: ["checkout-promo-preview"] }),
   ]);
 }
 

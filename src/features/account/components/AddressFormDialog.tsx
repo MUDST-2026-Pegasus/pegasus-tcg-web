@@ -21,18 +21,19 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { getErrorMessage } from "@/lib/api";
+
 import { applyApiErrors } from "@/lib/form";
 
 import { useCreateAddress, useUpdateAddress } from "../address.queries";
 import {
-  addressSchema,
+  useAddressSchema,
   EMPTY_ADDRESS_FORM,
   toAddressForm,
   toAddressPayload,
   type AddressFormValues,
 } from "../address.schema";
 import type { Address } from "../address.types";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type AddressFormDialogProps = {
   open: boolean;
@@ -54,6 +55,7 @@ export function AddressFormDialog({
   address,
   onSaved,
 }: AddressFormDialogProps) {
+  const { t } = useTranslate("buyer");
   const isEdit = address !== undefined;
 
   return (
@@ -61,10 +63,10 @@ export function AddressFormDialog({
       <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Address" : "Add New Address"}
+            {isEdit ? t("account.address.form.editTitle", "Edit Address") : t("account.address.form.addTitle", "Add New Address")}
           </DialogTitle>
           <DialogDescription>
-            Saved addresses show up at checkout, so you only type this once.
+            {t("account.address.form.description", "Saved addresses show up at checkout, so you only type this once.")}
           </DialogDescription>
         </DialogHeader>
         <AddressForm
@@ -87,9 +89,11 @@ function AddressForm({
   address?: Address;
   onSaved: (address: Address) => void;
 }) {
+  const { t } = useTranslate("buyer");
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
 
+  const schema = useAddressSchema();
   const {
     register,
     control,
@@ -97,7 +101,7 @@ function AddressForm({
     setError,
     formState: { errors, isSubmitting },
   } = useForm<AddressFormValues>({
-    resolver: zodResolver(addressSchema),
+    resolver: zodResolver(schema),
     defaultValues: address ? toAddressForm(address) : EMPTY_ADDRESS_FORM,
   });
 
@@ -123,17 +127,17 @@ function AddressForm({
       {failed && (
         <Alert variant="destructive">
           <AlertDescription>
-            {getErrorMessage(failed, "Could not save this address.")}
+            {translateError(failed, t("account.address.form.failed", "Could not save this address."))}
           </AlertDescription>
         </Alert>
       )}
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.label) || undefined}>
-          <FieldLabel htmlFor="label">Label</FieldLabel>
+          <FieldLabel htmlFor="label">{t("account.address.field.label", "Label")}</FieldLabel>
           <Input
             id="label"
-            placeholder="Home, Office, …"
+            placeholder={t("account.address.form.labelPlaceholder", "Home, Office, …")}
             aria-invalid={Boolean(errors.label)}
             {...register("label")}
           />
@@ -141,7 +145,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.recipientName) || undefined}>
-          <FieldLabel htmlFor="recipientName">Recipient name</FieldLabel>
+          <FieldLabel htmlFor="recipientName">{t("account.address.field.recipientName", "Recipient name")}</FieldLabel>
           <Input
             id="recipientName"
             autoComplete="name"
@@ -152,7 +156,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.phone) || undefined}>
-          <FieldLabel htmlFor="phone">Phone number</FieldLabel>
+          <FieldLabel htmlFor="phone">{t("account.address.field.phone", "Phone number")}</FieldLabel>
           <Input
             id="phone"
             inputMode="tel"
@@ -165,11 +169,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line1) || undefined}>
-          <FieldLabel htmlFor="line1">Address line 1</FieldLabel>
+          <FieldLabel htmlFor="line1">{t("account.address.field.line1", "Address line 1")}</FieldLabel>
           <Input
             id="line1"
             autoComplete="address-line1"
-            placeholder="House number, street"
+            placeholder={t("account.address.form.line1Placeholder", "House number, street")}
             aria-invalid={Boolean(errors.line1)}
             {...register("line1")}
           />
@@ -177,11 +181,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line2) || undefined}>
-          <FieldLabel htmlFor="line2">Address line 2</FieldLabel>
+          <FieldLabel htmlFor="line2">{t("account.address.field.line2", "Address line 2")}</FieldLabel>
           <Input
             id="line2"
             autoComplete="address-line2"
-            placeholder="Building, floor, room"
+            placeholder={t("account.address.form.line2Placeholder", "Building, floor, room")}
             aria-invalid={Boolean(errors.line2)}
             {...register("line2")}
           />
@@ -190,7 +194,7 @@ function AddressForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.subdistrict) || undefined}>
-            <FieldLabel htmlFor="subdistrict">Subdistrict</FieldLabel>
+            <FieldLabel htmlFor="subdistrict">{t("account.address.field.subdistrict", "Subdistrict")}</FieldLabel>
             <Input
               id="subdistrict"
               aria-invalid={Boolean(errors.subdistrict)}
@@ -200,7 +204,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.district) || undefined}>
-            <FieldLabel htmlFor="district">District</FieldLabel>
+            <FieldLabel htmlFor="district">{t("account.address.field.district", "District")}</FieldLabel>
             <Input
               id="district"
               aria-invalid={Boolean(errors.district)}
@@ -210,7 +214,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.province) || undefined}>
-            <FieldLabel htmlFor="province">Province</FieldLabel>
+            <FieldLabel htmlFor="province">{t("account.address.field.province", "Province")}</FieldLabel>
             <Input
               id="province"
               autoComplete="address-level1"
@@ -221,7 +225,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.postalCode) || undefined}>
-            <FieldLabel htmlFor="postalCode">Postal code</FieldLabel>
+            <FieldLabel htmlFor="postalCode">{t("account.address.field.postalCode", "Postal code")}</FieldLabel>
             <Input
               id="postalCode"
               inputMode="numeric"
@@ -250,18 +254,18 @@ function AddressForm({
             )}
           />
           <FieldLabel htmlFor="defaultShipping" className="font-normal">
-            Use as my default shipping address
+            {t("account.address.form.default", "Use as my default shipping address")}
           </FieldLabel>
         </Field>
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          Cancel
+          {t("account.orders.cancel", "Cancel")}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {address ? "Save changes" : "Add address"}
+          {address ? t("account.address.form.save", "Save changes") : t("account.address.form.add", "Add address")}
         </Button>
       </DialogFooter>
     </form>

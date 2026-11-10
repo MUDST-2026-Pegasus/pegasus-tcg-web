@@ -75,6 +75,12 @@ export function useSellerOrder(id: number | null) {
   });
 }
 
+export function useDownloadOrderSummary() {
+  return useMutation({
+    mutationFn: (id: number) => ordersApi.downloadSellerOrderSummary(id),
+  });
+}
+
 /**
  * หลังเปลี่ยนสถานะ: ใบนี้ใช้ผลที่ backend ส่งกลับมาเลย ไม่ต้องยิงซ้ำ
  * ส่วนรายการ / ตัวเลขบนชิป / แดชบอร์ด ล้างทิ้งให้ดึงใหม่ เพราะออเดอร์ย้ายแท็บแล้ว

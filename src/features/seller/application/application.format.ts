@@ -1,21 +1,17 @@
 import { addBusinessDays, format } from "date-fns";
-import { th } from "date-fns/locale";
+import { currentLanguage, formatDate, formatYear } from "@/lib/i18n";
 
 /** locale ไทยของ date-fns ยังพิมพ์ปี ค.ศ. ต้องบวกเป็น พ.ศ. เอง */
-function buddhistYear(date: Date): number {
-  return date.getFullYear() + 543;
-}
-
 /** "14 ก.ย. 2569" */
 export function formatThaiDate(value: string | Date): string {
-  const date = new Date(value);
-  return `${format(date, "d MMM", { locale: th })} ${buddhistYear(date)}`;
+  return formatDate(value);
 }
 
 /** "14 ก.ย. 2569 · 10:24 น." */
 export function formatThaiDateTime(value: string | Date): string {
   const date = new Date(value);
-  return `${formatThaiDate(date)} · ${format(date, "HH:mm")} น.`;
+  // eslint-disable-next-line no-restricted-syntax -- คำต่อท้ายเวลาเฉพาะภาษาไทย
+  return `${formatThaiDate(date)} · ${format(date, "HH:mm")}${currentLanguage() === "th" ? " น." : ""}`;
 }
 
 /** ทีมงานรับปากไว้ 1 วันทำการ — ข้ามเสาร์อาทิตย์ แต่ยังไม่รู้จักวันหยุดนักขัตฤกษ์ */
@@ -25,7 +21,7 @@ export function expectedDecisionDate(submittedAt: string): Date {
 
 /** "APP-2569-0842" — id ของคำขอ นำหน้าด้วยปี พ.ศ. ที่ส่ง */
 export function formatApplicationNumber(id: number, submittedAt: string): string {
-  const year = buddhistYear(new Date(submittedAt));
+  const year = formatYear(submittedAt, {}, "th"); // เลขคำขอใช้ พ.ศ. เสมอไม่ว่าภาษาไหน
   return `APP-${year}-${String(id).padStart(4, "0")}`;
 }
 

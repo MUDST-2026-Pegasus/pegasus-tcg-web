@@ -6,11 +6,13 @@ import {
   ImageIcon,
   MapIcon,
   MessageSquareText,
+  Send,
   ShoppingBag,
   Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,6 +36,7 @@ import {
   deadlineLabel,
   formatAgo,
   itemMeta,
+  listCarrierChipLabel,
   orderErrorMessage,
   parseShippingAddress,
   paymentStateOf,
@@ -44,6 +47,7 @@ import { useAcceptOrder } from "../orders.queries";
 import type { SellerOrderSummary } from "../orders.types";
 
 import { ShipmentForm } from "./ShipmentForm";
+import { useTranslate } from "@/lib/i18n";
 
 const PAYMENT_TEXT: Record<PaymentState, string> = {
   paid: "text-[#12805c]",
@@ -51,6 +55,16 @@ const PAYMENT_TEXT: Record<PaymentState, string> = {
   refunded: "text-gray-400",
   cancelled: "text-gray-400",
 };
+
+/** บอกขนส่งที่ผู้ซื้อเลือก ให้ผู้ขายแยกกองพัสดุได้โดยไม่ต้องกางการ์ด */
+function CarrierChip({ label }: { label: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1 rounded-md bg-[#f0f7fc] px-1.5 py-0.5 text-[10px] font-medium text-primary">
+      <Send aria-hidden="true" className="size-2.5" />
+      {label}
+    </span>
+  );
+}
 
 type OrderCardProps = {
   summary: SellerOrderSummary;
@@ -65,7 +79,8 @@ type OrderCardProps = {
  * ฟอร์มเลขพัสดุอยู่ใน panel ที่ไม่ถูก unmount ตอนพับ ค่าที่กรอกจึงไม่หาย
  */
 export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
-  const { order, buyer } = summary;
+  const { t } = useTranslate("seller");
+  const { order, buyer, shippingChoice } = summary;
   const accept = useAcceptOrder();
   const [now] = useState(() => new Date());
   // Collapsible อ่าน defaultOpen ครั้งเดียว — รับออเดอร์/ส่งของแล้วลำดับในรายการเปลี่ยน
@@ -83,14 +98,14 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
       onSuccess: () =>
         toast.add({
           type: "success",
-          title: "รับออเดอร์แล้ว",
-          description: `${order.sellerOrderNumber} · แพ็คแล้วกรอกเลขพัสดุได้เลย`,
+          title: t("orders.accept.success", "รับออเดอร์แล้ว"),
+          description: t("orders.accept.successDescription", "{orderNumber} · แพ็คแล้วกรอกเลขพัสดุได้เลย", { orderNumber: order.sellerOrderNumber }),
         }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "รับออเดอร์ไม่สำเร็จ",
-          description: orderErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("orders.accept.failed", "รับออเดอร์ไม่สำเร็จ"),
+          description: orderErrorMessage(error, t("orders.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   }
@@ -112,6 +127,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
               >
                 {order.sellerOrderNumber}
               </Link>
+              <AuctionSourcePill order={summary} basePath="/seller/auctions" />
               {urgentLabel ? (
                 <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-xs text-[#b45309]">
                   {urgentLabel}
@@ -119,13 +135,14 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
               ) : null}
               {order.status === "PREPARING" ? (
                 <Badge className="h-5 rounded-full bg-[#e6f4f2] px-2 text-xs text-teal-600">
-                  กำลังแพ็ค
+                  {t("orders.card.packing", "กำลังแพ็ค")}
                 </Badge>
               ) : null}
             </div>
             <div className="flex min-w-0 items-center gap-1.5 text-xs">
               <span className="truncate text-gray-500">{buyer.username}</span>
-              <span className="shrink-0 text-gray-400">· สั่ง{formatAgo(order.createdAt, now)}</span>
+              <span className="shrink-0 text-gray-400">{t("orders.card.orderedAgo", "· สั่ง{ago}", { ago: formatAgo(order.createdAt, now) })}</span>
+              {shippingChoice ? <CarrierChip label={listCarrierChipLabel(shippingChoice)} /> : null}
             </div>
           </div>
 
@@ -140,7 +157,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
           </div>
 
           <CollapsibleTrigger
-            aria-label={`แสดงรายการสินค้าของ ${order.sellerOrderNumber}`}
+            aria-label={t("orders.card.showItems", "แสดงรายการสินค้าของ {orderNumber}", { orderNumber: order.sellerOrderNumber })}
             className="group flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md outline-none after:absolute after:inset-0 focus-visible:ring-3 focus-visible:ring-ring/30"
           >
             <ChevronDown
@@ -182,9 +199,16 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-secondary">
                   <ShoppingBag aria-hidden="true" className="size-4 text-slate-500" />
                 </div>
-                <p className="flex-1 text-xs font-medium text-foreground">ค่าจัดส่ง</p>
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <p className="truncate text-xs font-medium text-foreground">
+                    {shippingChoice
+                      ? t("orders.card.shippingWithName", "ค่าจัดส่ง · {name}", { name: shippingChoice.name })
+                      : t("orders.card.shipping", "ค่าจัดส่ง")}
+                  </p>
+                  {shippingChoice ? <CarrierChip label={listCarrierChipLabel(shippingChoice)} /> : null}
+                </div>
                 <p className="shrink-0 text-xs font-medium text-gray-700">
-                  {order.shippingFee > 0 ? formatBaht(order.shippingFee) : "ส่งฟรี"}
+                  {order.shippingFee > 0 ? formatBaht(order.shippingFee) : t("orders.card.freeShipping", "ส่งฟรี")}
                 </p>
               </li>
             </ul>
@@ -192,7 +216,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             <div className="flex flex-col gap-1.5 rounded-lg bg-neutral-50 p-3.5">
               <div className="flex items-center gap-1.5">
                 <MapIcon aria-hidden="true" className="size-4 text-slate-500" />
-                <p className="text-xs font-semibold text-gray-700">ที่อยู่จัดส่ง</p>
+                <p className="text-xs font-semibold text-gray-700">{t("orders.card.address", "ที่อยู่จัดส่ง")}</p>
               </div>
               <p className="text-xs leading-4 text-gray-500">{address.join(" · ")}</p>
               {summary.buyerNote ? (
@@ -218,10 +242,14 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
                       onClick={handleAccept}
                     >
                       {accept.isPending ? <Spinner /> : null}
-                      รับออเดอร์
+                      {t("orders.accept.action", "รับออเดอร์")}
                     </Button>
                   ) : null}
-                  <ShipmentForm orderId={order.id} orderNumber={order.sellerOrderNumber} />
+                  <ShipmentForm
+                    orderId={order.id}
+                    orderNumber={order.sellerOrderNumber}
+                    shippingChoice={shippingChoice}
+                  />
                 </div>
               </div>
             ) : null}
@@ -229,7 +257,7 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             {shipment ? (
               <div className="flex items-center gap-1.5 text-xs">
                 <Truck aria-hidden="true" className="size-4 text-slate-500" />
-                <span className="font-semibold text-gray-700">เลขพัสดุ</span>
+                <span className="font-semibold text-gray-700">{t("orders.shipping.tracking", "เลขพัสดุ")}</span>
                 <span className="text-gray-500">
                   {shipment.carrierName} · {shipment.trackingNumber}
                 </span>
@@ -237,14 +265,14 @@ export function OrderCard({ summary, defaultOpen = false }: OrderCardProps) {
             ) : null}
 
             {order.cancelReason ? (
-              <p className="text-xs text-gray-500">เหตุผลที่ยกเลิก: {order.cancelReason}</p>
+              <p className="text-xs text-gray-500">{t("orders.card.cancelReason", "เหตุผลที่ยกเลิก: {reason}", { reason: order.cancelReason })}</p>
             ) : null}
 
             <Link
               to={detailPath}
               className="inline-flex items-center gap-0.5 self-end rounded-sm text-xs font-medium text-teal-600 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/30"
             >
-              ดูรายละเอียดคำสั่งซื้อ
+              {t("orders.card.viewDetail", "ดูรายละเอียดคำสั่งซื้อ")}
               <ChevronRight aria-hidden="true" className="size-3.5" />
             </Link>
           </div>

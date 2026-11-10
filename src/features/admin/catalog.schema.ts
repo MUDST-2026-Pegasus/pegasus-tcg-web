@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { useTranslate } from "@/lib/i18n";
+
 import { CARD_EDITIONS, CARD_FINISHES, PRODUCT_TYPES } from "./catalog.format";
 import type {
   AttributeValue,
@@ -12,6 +14,9 @@ import type {
   ProductType,
   VariantPayload,
 } from "./catalog.types";
+
+/** t ของ namespace admin — schema เป็น factory ที่รับ t ข้อความ validation จึงตามภาษาปัจจุบัน [TCG-556] */
+export type AdminT = ReturnType<typeof useTranslate<"admin">>["t"];
 
 /**
  * ฟอร์มสินค้า — กติกาตั้งให้ตรงกับ Bean Validation ใน `dto/ProductRequest.java`
@@ -30,27 +35,28 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 export function attributeProblem(
   attribute: GameAttribute,
   text: string,
+  translate: AdminT,
 ): string | null {
   const value = text.trim();
   if (value === "") {
-    return attribute.required ? `ต้องระบุ ${attribute.label}` : null;
+    return attribute.required ? translate("catalog.validation.attributeRequired", "ต้องระบุ {label}", { label: attribute.label }) : null;
   }
 
   switch (attribute.dataType) {
     case "NUMBER":
       return Number.isFinite(Number(value))
         ? null
-        : `${attribute.label} ต้องเป็นตัวเลข`;
+        : translate("catalog.validation.attributeNumber", "{label} ต้องเป็นตัวเลข", { label: attribute.label });
     case "BOOLEAN":
       return value === "true" || value === "false"
         ? null
-        : "เลือกใช่หรือไม่ใช่";
+        : translate("catalog.validation.attributeBoolean", "เลือกใช่หรือไม่ใช่");
     case "DATE":
-      return DATE_PATTERN.test(value) ? null : "วันที่ไม่ถูกต้อง";
+      return DATE_PATTERN.test(value) ? null : translate("catalog.validation.invalidDate", "วันที่ไม่ถูกต้อง");
     case "ENUM":
       return attribute.options.includes(value)
         ? null
-        : "เลือกจากตัวเลือกที่มีเท่านั้น";
+        : translate("catalog.validation.attributeEnum", "เลือกจากตัวเลือกที่มีเท่านั้น");
     case "STRING":
       return null;
   }
@@ -72,27 +78,27 @@ function toAttributeValue(
   }
 }
 
-export function productSchema(registry: GameAttribute[]) {
+export function productSchema(registry: GameAttribute[], translate: AdminT) {
   return z.object({
-    gameId: z.string().min(1, "เลือกเกม"),
-    categoryId: z.string().min(1, "เลือกหมวดหมู่"),
+    gameId: z.string().min(1, translate("catalog.validation.gameRequired", "เลือกเกม")),
+    categoryId: z.string().min(1, translate("catalog.validation.categoryRequired", "เลือกหมวดหมู่")),
     /** `""` = ไม่ระบุชุด (อุปกรณ์เสริมไม่อยู่ในชุดไหน) */
     cardSetId: z.string(),
     productType: z.enum(PRODUCT_TYPES),
     name: z
       .string()
       .trim()
-      .min(1, "กรอกชื่อสินค้า")
-      .max(255, "ชื่อต้องไม่เกิน 255 ตัวอักษร"),
-    nameLocal: z.string().trim().max(255, "ชื่อต้องไม่เกิน 255 ตัวอักษร"),
+      .min(1, translate("catalog.validation.nameRequired", "กรอกชื่อสินค้า"))
+      .max(255, translate("catalog.validation.nameMax", "ชื่อต้องไม่เกิน {max} ตัวอักษร", { max: 255 })),
+    nameLocal: z.string().trim().max(255, translate("catalog.validation.nameMax", "ชื่อต้องไม่เกิน {max} ตัวอักษร", { max: 255 })),
     /** ใช้เฉพาะตอนสร้าง — ว่างไว้ backend สร้างจากชื่อกับเลขการ์ดให้ */
     slug: z
       .string()
       .trim()
-      .max(120, "slug ต้องไม่เกิน 120 ตัวอักษร")
-      .regex(/^[a-z0-9-]*$/, "ใช้ได้แค่ a-z ตัวเล็ก ตัวเลข และขีดกลาง (-)"),
-    cardNumber: z.string().trim().max(32, "เลขการ์ดต้องไม่เกิน 32 ตัวอักษร"),
-    rarityCode: z.string().trim().max(32, "รหัสความหายากต้องไม่เกิน 32 ตัวอักษร"),
+      .max(120, translate("catalog.validation.slugMax", "slug ต้องไม่เกิน {max} ตัวอักษร", { max: 120 }))
+      .regex(/^[a-z0-9-]*$/, translate("catalog.validation.slugPattern", "ใช้ได้แค่ a-z ตัวเล็ก ตัวเลข และขีดกลาง (-)")),
+    cardNumber: z.string().trim().max(32, translate("catalog.validation.cardNumberMax", "เลขการ์ดต้องไม่เกิน {max} ตัวอักษร", { max: 32 })),
+    rarityCode: z.string().trim().max(32, translate("catalog.validation.rarityMax", "รหัสความหายากต้องไม่เกิน {max} ตัวอักษร", { max: 32 })),
     description: z.string().trim(),
     // ช่องที่ยังไม่เคยแตะเป็น undefined (สินค้าเก่าไม่มีคีย์นั้น) — ถือเป็นค่าว่าง
     attributes: z
@@ -102,6 +108,7 @@ export function productSchema(registry: GameAttribute[]) {
           const problem = attributeProblem(
             attribute,
             values[attribute.attrKey] ?? "",
+            translate,
           );
           if (problem) {
             context.addIssue({
@@ -195,13 +202,13 @@ export function toProductPayload(
 }
 
 /** ท้ายข้อความของ `ProductAttributeValidator` → ข้อความไทย */
-const BACKEND_ATTRIBUTE_PROBLEMS: [RegExp, (label: string) => string][] = [
-  [/^is required for this game$/, (label) => `ต้องระบุ ${label}`],
-  [/^must be a number$/, (label) => `${label} ต้องเป็นตัวเลข`],
-  [/^must be true or false$/, () => "เลือกใช่หรือไม่ใช่"],
-  [/^must be text$/, (label) => `${label} ต้องเป็นข้อความ`],
-  [/^must be a date/, () => "วันที่ไม่ถูกต้อง"],
-  [/^must be one of/, () => "เลือกจากตัวเลือกที่มีเท่านั้น"],
+const BACKEND_ATTRIBUTE_PROBLEMS: [RegExp, (label: string, translate: AdminT) => string][] = [
+  [/^is required for this game$/, (label, translate) => translate("catalog.validation.attributeRequired", "ต้องระบุ {label}", { label })],
+  [/^must be a number$/, (label, translate) => translate("catalog.validation.attributeNumber", "{label} ต้องเป็นตัวเลข", { label })],
+  [/^must be true or false$/, (_, translate) => translate("catalog.validation.attributeBoolean", "เลือกใช่หรือไม่ใช่")],
+  [/^must be text$/, (label, translate) => translate("catalog.validation.attributeString", "{label} ต้องเป็นข้อความ", { label })],
+  [/^must be a date/, (_, translate) => translate("catalog.validation.invalidDate", "วันที่ไม่ถูกต้อง")],
+  [/^must be one of/, (_, translate) => translate("catalog.validation.attributeEnum", "เลือกจากตัวเลือกที่มีเท่านั้น")],
 ];
 
 /**
@@ -212,6 +219,7 @@ const BACKEND_ATTRIBUTE_PROBLEMS: [RegExp, (label: string) => string][] = [
 export function splitAttributeProblems(
   message: string,
   registry: GameAttribute[],
+  translate: AdminT,
 ): { fields: { key: string; message: string }[]; unmatched: string[] } {
   const fields: { key: string; message: string }[] = [];
   const unmatched: string[] = [];
@@ -225,12 +233,12 @@ export function splitAttributeProblems(
       continue;
     }
     const rest = problem.slice(attribute.attrKey.length + 1);
-    const translate = BACKEND_ATTRIBUTE_PROBLEMS.find(([pattern]) =>
+    const describe = BACKEND_ATTRIBUTE_PROBLEMS.find(([pattern]) =>
       pattern.test(rest),
     )?.[1];
     fields.push({
       key: attribute.attrKey,
-      message: translate ? translate(attribute.label) : problem,
+      message: describe ? describe(attribute.label, translate) : problem,
     });
   }
 
@@ -244,24 +252,25 @@ export function splitAttributeProblems(
  * `imageUrl` ไม่มีช่องในฟอร์ม (รูปจัดการที่แท็บรูปภาพ) แต่ PUT เขียนทับทั้งแถว
  * จึงส่งค่าเดิมกลับไปเสมอใน `toVariantPayload`
  */
-export const variantSchema = z.object({
+export const variantSchema = (translate: AdminT) =>
+  z.object({
   languageCode: z
     .string()
     .trim()
-    .regex(/^[A-Za-z]{2,10}$/, "ใส่รหัสภาษา 2–10 ตัวอักษร เช่น EN, JP, TH"),
+    .regex(/^[A-Za-z]{2,10}$/, translate("catalog.validation.languageCode", "ใส่รหัสภาษา 2–10 ตัวอักษร เช่น EN, JP, TH")),
   finish: z.enum(CARD_FINISHES),
   edition: z.enum(CARD_EDITIONS),
-  printingNote: z.string().trim().max(100, "หมายเหตุต้องไม่เกิน 100 ตัวอักษร"),
+  printingNote: z.string().trim().max(100, translate("catalog.validation.printingNoteMax", "หมายเหตุต้องไม่เกิน {max} ตัวอักษร", { max: 100 })),
   sku: z
     .string()
     .trim()
-    .max(64, "SKU ต้องไม่เกิน 64 ตัวอักษร")
-    .regex(/^[A-Za-z0-9_-]*$/, "ใช้ได้แค่ตัวอักษร ตัวเลข ขีดกลาง และขีดล่าง"),
-  barcode: z.string().trim().max(64, "บาร์โค้ดต้องไม่เกิน 64 ตัวอักษร"),
+    .max(64, translate("catalog.validation.skuMax", "SKU ต้องไม่เกิน {max} ตัวอักษร", { max: 64 }))
+    .regex(/^[A-Za-z0-9_-]*$/, translate("catalog.validation.skuPattern", "ใช้ได้แค่ตัวอักษร ตัวเลข ขีดกลาง และขีดล่าง")),
+  barcode: z.string().trim().max(64, translate("catalog.validation.barcodeMax", "บาร์โค้ดต้องไม่เกิน {max} ตัวอักษร", { max: 64 })),
   active: z.boolean(),
 });
 
-export type VariantFormValues = z.infer<typeof variantSchema>;
+export type VariantFormValues = z.infer<ReturnType<typeof variantSchema>>;
 
 /** การ์ดเดี่ยวเริ่มที่ Normal ส่วนของซีล/อุปกรณ์ไม่มี finish */
 export function emptyVariantForm(productType: ProductType): VariantFormValues {
@@ -315,7 +324,8 @@ export function toVariantPayload(
  * ทุกช่องเก็บเป็นข้อความ — `damage` แปลงเป็นตัวเลข และ `energyCost`
  * แยกด้วยจุลภาคตอนส่ง (`toCardEffectsPayload`)
  */
-export const cardEffectsSchema = z.object({
+export const cardEffectsSchema = (translate: AdminT) =>
+  z.object({
   effects: z
     .array(
       z.object({
@@ -323,34 +333,34 @@ export const cardEffectsSchema = z.object({
         name: z
           .string()
           .trim()
-          .min(1, "ใส่ชื่อ")
-          .max(120, "ชื่อต้องไม่เกิน 120 ตัวอักษร"),
+          .min(1, translate("catalog.validation.effectNameRequired", "ใส่ชื่อ"))
+          .max(120, translate("catalog.validation.nameMax", "ชื่อต้องไม่เกิน {max} ตัวอักษร", { max: 120 })),
         effectText: z
           .string()
           .trim()
-          .max(2000, "คำอธิบายต้องไม่เกิน 2000 ตัวอักษร"),
+          .max(2000, translate("catalog.validation.effectTextMax", "คำอธิบายต้องไม่เกิน {max} ตัวอักษร", { max: 2000 })),
         damage: z
           .string()
           .trim()
-          .regex(/^\d{0,6}$/, "ใส่ตัวเลข 0 ขึ้นไป หรือเว้นว่าง"),
+          .regex(/^\d{0,6}$/, translate("catalog.validation.damage", "ใส่ตัวเลข 0 ขึ้นไป หรือเว้นว่าง")),
         energyCost: z
           .string()
           .trim()
           .refine(
             (value) => splitEnergy(value).length <= 10,
-            "พลังงานไม่เกิน 10 ตัว",
+            translate("catalog.validation.energyCount", "พลังงานไม่เกิน {max} ตัว", { max: 10 }),
           )
           .refine(
             (value) => splitEnergy(value).every((energy) => energy.length <= 20),
-            "ชื่อพลังงานแต่ละตัวต้องไม่เกิน 20 ตัวอักษร",
+            translate("catalog.validation.energyNameMax", "ชื่อพลังงานแต่ละตัวต้องไม่เกิน {max} ตัวอักษร", { max: 20 }),
           ),
-        sourceUrl: z.string().trim().max(500, "ลิงก์ต้องไม่เกิน 500 ตัวอักษร"),
+        sourceUrl: z.string().trim().max(500, translate("catalog.validation.sourceUrlMax", "ลิงก์ต้องไม่เกิน {max} ตัวอักษร", { max: 500 })),
       }),
     )
-    .max(30, "ไม่เกิน 30 รายการต่อการ์ด"),
+    .max(30, translate("catalog.validation.effectsMax", "ไม่เกิน {max} รายการต่อการ์ด", { max: 30 })),
 });
 
-export type CardEffectsFormValues = z.infer<typeof cardEffectsSchema>;
+export type CardEffectsFormValues = z.infer<ReturnType<typeof cardEffectsSchema>>;
 
 export type CardEffectFormValues = CardEffectsFormValues["effects"][number];
 
@@ -406,3 +416,30 @@ export function toCardEffectsPayload(
 export function toCardEffectField(field: string): string {
   return field.replace(/\[(\d+)\]/g, ".$1");
 }
+
+// @tolgee-key {"key": "catalog.validation.attributeRequired", "ns": "admin", "defaultValue": "ต้องระบุ {label}"}
+// @tolgee-key {"key": "catalog.validation.attributeNumber", "ns": "admin", "defaultValue": "{label} ต้องเป็นตัวเลข"}
+// @tolgee-key {"key": "catalog.validation.attributeBoolean", "ns": "admin", "defaultValue": "เลือกใช่หรือไม่ใช่"}
+// @tolgee-key {"key": "catalog.validation.invalidDate", "ns": "admin", "defaultValue": "วันที่ไม่ถูกต้อง"}
+// @tolgee-key {"key": "catalog.validation.attributeEnum", "ns": "admin", "defaultValue": "เลือกจากตัวเลือกที่มีเท่านั้น"}
+// @tolgee-key {"key": "catalog.validation.gameRequired", "ns": "admin", "defaultValue": "เลือกเกม"}
+// @tolgee-key {"key": "catalog.validation.categoryRequired", "ns": "admin", "defaultValue": "เลือกหมวดหมู่"}
+// @tolgee-key {"key": "catalog.validation.nameRequired", "ns": "admin", "defaultValue": "กรอกชื่อสินค้า"}
+// @tolgee-key {"key": "catalog.validation.nameMax", "ns": "admin", "defaultValue": "ชื่อต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.slugMax", "ns": "admin", "defaultValue": "slug ต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.slugPattern", "ns": "admin", "defaultValue": "ใช้ได้แค่ a-z ตัวเล็ก ตัวเลข และขีดกลาง (-)"}
+// @tolgee-key {"key": "catalog.validation.cardNumberMax", "ns": "admin", "defaultValue": "เลขการ์ดต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.rarityMax", "ns": "admin", "defaultValue": "รหัสความหายากต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.attributeString", "ns": "admin", "defaultValue": "{label} ต้องเป็นข้อความ"}
+// @tolgee-key {"key": "catalog.validation.languageCode", "ns": "admin", "defaultValue": "ใส่รหัสภาษา 2–10 ตัวอักษร เช่น EN, JP, TH"}
+// @tolgee-key {"key": "catalog.validation.printingNoteMax", "ns": "admin", "defaultValue": "หมายเหตุต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.skuMax", "ns": "admin", "defaultValue": "SKU ต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.skuPattern", "ns": "admin", "defaultValue": "ใช้ได้แค่ตัวอักษร ตัวเลข ขีดกลาง และขีดล่าง"}
+// @tolgee-key {"key": "catalog.validation.barcodeMax", "ns": "admin", "defaultValue": "บาร์โค้ดต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.effectNameRequired", "ns": "admin", "defaultValue": "ใส่ชื่อ"}
+// @tolgee-key {"key": "catalog.validation.effectTextMax", "ns": "admin", "defaultValue": "คำอธิบายต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.damage", "ns": "admin", "defaultValue": "ใส่ตัวเลข 0 ขึ้นไป หรือเว้นว่าง"}
+// @tolgee-key {"key": "catalog.validation.energyCount", "ns": "admin", "defaultValue": "พลังงานไม่เกิน {max} ตัว"}
+// @tolgee-key {"key": "catalog.validation.energyNameMax", "ns": "admin", "defaultValue": "ชื่อพลังงานแต่ละตัวต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.sourceUrlMax", "ns": "admin", "defaultValue": "ลิงก์ต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "catalog.validation.effectsMax", "ns": "admin", "defaultValue": "ไม่เกิน {max} รายการต่อการ์ด"}

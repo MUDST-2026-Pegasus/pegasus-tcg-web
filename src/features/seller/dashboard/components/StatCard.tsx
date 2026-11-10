@@ -1,4 +1,5 @@
-import { Clock, type LucideIcon, ShoppingBag, Star, Wallet } from "lucide-react";
+import { Clock, Gavel, type LucideIcon, ShoppingBag, Star, Wallet } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,8 @@ const ICONS: Record<StatKind, LucideIcon> = {
   escrow: Clock,
   rating: Star,
   withdrawable: Wallet,
+  auctionsLive: Gavel,
+  auctionsAwaiting: Clock,
 };
 
 const ICON_BG: Record<StatAccent, string> = {
@@ -26,11 +29,16 @@ const ICON_COLOR: Record<StatAccent, string> = {
   green: "text-[#12805c]",
 };
 
-export function StatCard({ id, accent, label, value, footnote }: StatCardData) {
+export function StatCard({ id, accent, label, value, footnote, to }: StatCardData) {
   const Icon = ICONS[id];
 
-  return (
-    <Card className="min-w-48 flex-1 gap-3 rounded-xl border border-border p-4 shadow-none ring-0">
+  const card = (
+    <Card
+      className={cn(
+        "min-w-48 flex-1 gap-3 rounded-xl border border-border p-4 shadow-none ring-0",
+        to && "h-full transition-colors hover:border-primary/40",
+      )}
+    >
       <div className="flex items-center gap-2.5">
         <div
           className={cn(
@@ -46,5 +54,11 @@ export function StatCard({ id, accent, label, value, footnote }: StatCardData) {
       <p className="text-xl font-bold text-foreground">{value}</p>
       <p className="text-xs text-gray-400">{footnote}</p>
     </Card>
+  );
+  if (!to) return card;
+  return (
+    <Link to={to} className="flex min-w-48 flex-1 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      {card}
+    </Link>
   );
 }

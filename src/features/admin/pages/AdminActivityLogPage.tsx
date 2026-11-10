@@ -1,5 +1,5 @@
-import { PagePlaceholder } from "@/components/common/PagePlaceholder";
+import { AdminActivityLogContent } from "@/features/admin/components/AdminActivityLogContent";
 
 export function AdminActivityLogPage() {
-  return <PagePlaceholder title="บันทึกกิจกรรม" figmaNode="432:6476" />;
+  return <AdminActivityLogContent />;
 }

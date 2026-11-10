@@ -1,3 +1,4 @@
+import type { OrderAuctionSource } from "@/features/auction/auction.types";
 import type { AppliedPromotion } from "@/features/promotions/order.types";
 
 export interface OrderItemDetails {
@@ -50,6 +51,7 @@ export interface SellerOrderDetails {
   salesOrderId: number;
   sellerProfileId: number;
   sellerName?: string | null;
+  sellerUsername?: string | null;
   sellerOrderNumber: string;
   status: string;
   itemsSubtotal: number;
@@ -77,7 +79,8 @@ export interface SellerOrderDetails {
   promotionsRestoredOnCancel?: boolean;
 }
 
-export interface OrderDetails {
+/** `source` / `auctionId` / `auctionNumber` มาจาก OrderAuctionSource [TCG-636] */
+export interface OrderDetails extends OrderAuctionSource {
   id: number;
   orderNumber: string;
   buyerId: number;
@@ -86,6 +89,8 @@ export interface OrderDetails {
   itemsSubtotal: number;
   shippingTotal: number;
   discountTotal: number;
+  /** ส่วนลดราคาสินค้า (ราคาลด) แยกจากโค้ด (SAL-05) — `itemsSubtotal` เป็นยอดหลังลดแล้ว */
+  saleDiscountTotal?: number | null;
   grandTotal: number;
   shippingAddressId: number | null;
   shippingAddressSnapshot: string | null;
@@ -115,6 +120,26 @@ export interface PageResponse<T> {
   totalPages: number;
   first?: boolean;
   last?: boolean;
+}
+
+export interface ReorderItemDto {
+  orderItemId: number;
+  catalogVariantId: number;
+  productSlug: string;
+  productName: string;
+  variantLabel: string;
+  rarity?: string;
+  imageUrl?: string;
+  originalCondition: string;
+  originalPrice: number;
+  originalQuantity: number;
+  originalSellerName?: string;
+}
+
+export interface ReorderItemsResponse {
+  orderId: number;
+  orderNumber: string;
+  items: ReorderItemDto[];
 }
 
 export interface ReorderListingInfo {

@@ -4,18 +4,15 @@ import { MapPinPlus, Plus } from "lucide-react";
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { useAuth } from "@/features/auth/auth.queries";
-import { getErrorMessage } from "@/lib/api";
 
-import { toSidebarUser } from "../account.format";
 import { useAddresses, useSetDefaultAddress } from "../address.queries";
 import { MAX_ADDRESSES } from "../address.format";
 import type { Address } from "../address.types";
-import { AccountSidebar } from "../components/AccountSidebar";
 import { AddressBookSkeleton } from "../components/AddressBookSkeleton";
 import { AddressCard } from "../components/AddressCard";
 import { AddressFormDialog } from "../components/AddressFormDialog";
 import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 /**
  * สมุดที่อยู่ — ACC-01 · ต่อ `/addresses` ครบทั้ง 5 กริยา
@@ -29,7 +26,7 @@ import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
  * - ทุก mutation `invalidateQueries` ให้เอง รายการจึงอัปเดตโดยไม่ต้อง reload
  */
 export function AddressBookPage() {
-  const { user } = useAuth();
+  const { t } = useTranslate("buyer");
   const addresses = useAddresses();
   const setDefault = useSetDefaultAddress();
 
@@ -42,39 +39,37 @@ export function AddressBookPage() {
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "Could not set the default address",
-          description: getErrorMessage(error, "Please try again."),
+          title: t("account.address.setDefaultFailed", "Could not set the default address"),
+          description: translateError(error, t("account.orders.tryAgain", "Please try again.")),
         }),
     });
   };
 
   return (
-    <div className="min-h-[720px] bg-muted/60 px-4 py-10 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={toSidebarUser(user)} />
+    <>
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-semibold">Address Book</h1>
+            <h1 className="text-3xl font-semibold">{t("account.nav.addresses", "Address Book")}</h1>
             <Button disabled={(addresses.data?.length ?? 0) >= MAX_ADDRESSES} onClick={() => setEditing("new")}>
-              <Plus data-icon="inline-start" /> Add New Address
+              <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
             </Button>
           </div>
 
           <QueryBoundary
             query={addresses}
             loading={<AddressBookSkeleton />}
-            errorTitle="Could not load your addresses"
-            errorMessage="Check your connection and try again."
-            errorRetryLabel="Try again"
+            errorTitle={t("account.address.loadFailed", "Could not load your addresses")}
+            errorMessage={t("account.address.loadFailedHint", "Check your connection and try again.")}
+            errorRetryLabel={t("account.profile.tryAgain", "Try again")}
             isEmpty={(items) => items.length === 0}
             empty={
               <EmptyState
                 icon={MapPinPlus}
-                title="No saved addresses yet"
-                description="Save a shipping destination now and checkout will be one step shorter."
+                title={t("account.address.empty", "No saved addresses yet")}
+                description={t("account.address.emptyHint", "Save a shipping destination now and checkout will be one step shorter.")}
               >
                 <Button onClick={() => setEditing("new")}>
-                  <Plus data-icon="inline-start" /> Add New Address
+                  <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
                 </Button>
               </EmptyState>
             }
@@ -102,16 +97,15 @@ export function AddressBookPage() {
                   <span className="flex size-12 items-center justify-center rounded-full border">
                     <MapPinPlus />
                   </span>
-                  <span className="text-lg font-semibold">Add New Address</span>
+                  <span className="text-lg font-semibold">{t("account.address.addNew", "Add New Address")}</span>
                   <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
-                    Save a new shipping destination for faster checkout.
+                    {t("account.address.addNewHint", "Save a new shipping destination for faster checkout.")}
                   </span>
                 </Button>}
               </div>
             )}
           </QueryBoundary>
         </div>
-      </div>
 
       <AddressFormDialog
         open={editing !== null}
@@ -123,6 +117,6 @@ export function AddressBookPage() {
         onOpenChange={(open) => !open && setDeleting(null)}
         address={deleting ?? undefined}
       />
-    </div>
+    </>
   );
 }

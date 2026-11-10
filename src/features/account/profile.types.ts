@@ -13,4 +13,5 @@ export type UpdateProfilePayload = {
   phonePublic?: boolean;
   bio?: string | null;
   avatarUrl?: string | null;
+  bannerUrl?: string | null;
 };

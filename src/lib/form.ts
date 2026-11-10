@@ -1,6 +1,7 @@
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
 import { isApiError } from "@/lib/api";
+import { translateError, translateViolation } from "@/lib/i18n";
 
 /**
  * ย้าย `violations` ไปแปะที่ช่องกรอก ส่วน error ที่ไม่มี violations ต้องบอกทางผ่าน `codeToField`
@@ -24,13 +25,13 @@ export function applyApiErrors<TValues extends FieldValues>(
   for (const violation of error.violations) {
     const field = (options?.fieldMap?.[violation.field] ??
       violation.field) as Path<TValues>;
-    setError(field, { type: "server", message: violation.message });
+    setError(field, { type: "server", message: translateViolation(violation) });
     attached = true;
   }
 
   const mapped = options?.codeToField?.[error.code];
   if (!attached && mapped) {
-    setError(mapped, { type: "server", message: error.message });
+    setError(mapped, { type: "server", message: translateError(error, error.message) });
     attached = true;
   }
 

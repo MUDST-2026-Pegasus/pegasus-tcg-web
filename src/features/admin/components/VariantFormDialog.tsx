@@ -50,6 +50,7 @@ import {
   type VariantFormValues,
 } from "../catalog.schema";
 import type { CatalogProduct, CatalogVariant } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type VariantFormDialogProps = {
   open: boolean;
@@ -83,14 +84,14 @@ export function VariantFormDialog({
   product,
   variant,
 }: VariantFormDialogProps) {
+  const { t } = useTranslate("admin");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{variant ? "แก้ไข variant" : "เพิ่ม variant"}</DialogTitle>
+          <DialogTitle>{variant ? t("catalog.variants.editTitle", "แก้ไข variant") : t("catalog.variants.addShort", "เพิ่ม variant")}</DialogTitle>
           <DialogDescription>
-            หนึ่ง variant = หนึ่งแบบที่ซื้อขายจริง เช่น ภาษาอังกฤษ Foil กับภาษาญี่ปุ่นปกติ
-            คือคนละ variant ประกาศขายและราคากลางผูกกับ variant
+            {t("catalog.variants.description", "หนึ่ง variant = หนึ่งแบบที่ซื้อขายจริง เช่น ภาษาอังกฤษ Foil กับภาษาญี่ปุ่นปกติ คือคนละ variant ประกาศขายและราคากลางผูกกับ variant")}
           </DialogDescription>
         </DialogHeader>
         <VariantForm
@@ -113,6 +114,7 @@ function VariantForm({
   variant?: CatalogVariant;
   onSaved: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveVariant = useSaveVariant(product.id);
 
   const {
@@ -122,7 +124,7 @@ function VariantForm({
     setError,
     formState: { errors, isSubmitting },
   } = useForm<VariantFormValues>({
-    resolver: zodResolver(variantSchema),
+    resolver: zodResolver(variantSchema(t)),
     defaultValues: variant
       ? toVariantForm(variant)
       : emptyVariantForm(product.productType),
@@ -136,7 +138,7 @@ function VariantForm({
       });
       toast.add({
         type: "success",
-        title: variant ? "บันทึก variant แล้ว" : "เพิ่ม variant แล้ว",
+        title: variant ? t("catalog.variants.saved", "บันทึก variant แล้ว") : t("catalog.variants.added", "เพิ่ม variant แล้ว"),
       });
       onSaved();
     } catch (error) {
@@ -153,7 +155,7 @@ function VariantForm({
         setError("root.server", {
           message: catalogErrorMessage(
             error,
-            "บันทึก variant ไม่สำเร็จ ลองใหม่อีกครั้ง",
+            t("catalog.variants.saveFailed", "บันทึก variant ไม่สำเร็จ ลองใหม่อีกครั้ง"),
           ),
         });
       }
@@ -171,7 +173,7 @@ function VariantForm({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field data-invalid={Boolean(errors.languageCode) || undefined}>
-            <FieldLabel htmlFor="languageCode">ภาษา</FieldLabel>
+            <FieldLabel htmlFor="languageCode">{t("catalog.variants.language", "ภาษา")}</FieldLabel>
             <Input
               id="languageCode"
               maxLength={10}
@@ -256,16 +258,16 @@ function VariantForm({
         </div>
 
         <Field data-invalid={Boolean(errors.printingNote) || undefined}>
-          <FieldLabel htmlFor="printingNote">หมายเหตุการพิมพ์</FieldLabel>
+          <FieldLabel htmlFor="printingNote">{t("catalog.variants.printingNote", "หมายเหตุการพิมพ์")}</FieldLabel>
           <Input
             id="printingNote"
             maxLength={100}
-            placeholder="เช่น Alt Art, Full Art — ว่างไว้ถ้าเป็นใบปกติ"
+            placeholder={t("catalog.variants.printingNotePlaceholder", "เช่น Alt Art, Full Art — ว่างไว้ถ้าเป็นใบปกติ")}
             aria-invalid={Boolean(errors.printingNote)}
             {...register("printingNote")}
           />
           <FieldDescription className="text-xs">
-            เป็นส่วนหนึ่งของตัวตน variant ไม่ใช่คำอธิบาย
+            {t("catalog.variants.printingNoteHint", "เป็นส่วนหนึ่งของตัวตน variant ไม่ใช่คำอธิบาย")}
           </FieldDescription>
           <FieldError errors={[errors.printingNote]} />
         </Field>
@@ -276,25 +278,25 @@ function VariantForm({
             <Input
               id="sku"
               maxLength={64}
-              placeholder="ว่างไว้ ระบบสร้างให้"
+              placeholder={t("catalog.variants.skuPlaceholder", "ว่างไว้ ระบบสร้างให้")}
               className="uppercase"
               aria-invalid={Boolean(errors.sku)}
               {...register("sku")}
             />
             <FieldDescription className="text-xs">
               {variant
-                ? "ลบให้ว่าง = คง SKU เดิม"
-                : "สร้างจากเกม ชุด เลขการ์ด ภาษา และ finish"}
+                ? t("catalog.variants.skuEditHint", "ลบให้ว่าง = คง SKU เดิม")
+                : t("catalog.variants.skuHint", "สร้างจากเกม ชุด เลขการ์ด ภาษา และ finish")}
             </FieldDescription>
             <FieldError errors={[errors.sku]} />
           </Field>
 
           <Field data-invalid={Boolean(errors.barcode) || undefined}>
-            <FieldLabel htmlFor="barcode">บาร์โค้ด</FieldLabel>
+            <FieldLabel htmlFor="barcode">{t("catalog.variants.barcode", "บาร์โค้ด")}</FieldLabel>
             <Input
               id="barcode"
               maxLength={64}
-              placeholder="ไม่บังคับ"
+              placeholder={t("catalog.form.optional", "ไม่บังคับ")}
               aria-invalid={Boolean(errors.barcode)}
               {...register("barcode")}
             />
@@ -316,18 +318,18 @@ function VariantForm({
             )}
           />
           <FieldLabel htmlFor="variantActive" className="font-normal">
-            เปิดใช้งาน — ปิดแล้วผู้ขายลงขาย variant นี้เพิ่มไม่ได้
+            {t("catalog.variants.activeHint", "เปิดใช้งาน — ปิดแล้วผู้ขายลงขาย variant นี้เพิ่มไม่ได้")}
           </FieldLabel>
         </Field>
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {variant ? "บันทึก" : "เพิ่ม variant"}
+          {variant ? t("catalog.form.save", "บันทึก") : t("catalog.variants.addShort", "เพิ่ม variant")}
         </Button>
       </DialogFooter>
     </form>

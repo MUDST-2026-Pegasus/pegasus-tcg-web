@@ -1,0 +1,720 @@
+{
+  "admin": {
+    "action": {
+      "close": "Close",
+      "delete": {
+        "description": "No orders use this price yet. Deleted sales can't be restored",
+        "failed": "Couldn't delete",
+        "success": "{name} deleted",
+        "title": "Delete “{name}”?"
+      },
+      "deleteBlocked": {
+        "description": "This campaign already has orders ({count} sold) and must be kept for accounting and refunds{hint}",
+        "end": "End campaign instead",
+        "endHint": " · use “End campaign” instead",
+        "title": "This campaign can't be deleted"
+      },
+      "end": {
+        "confirm": "End campaign",
+        "description": "{count} listings return to their regular price immediately · buyers with these items in their cart will see “Price changed” · paid orders are not affected",
+        "failed": "Couldn't end the campaign",
+        "sold": "Sold",
+        "subsidy": "Subsidized",
+        "success": "{name} ended",
+        "title": "End {name} now?"
+      },
+      "noReason": "Not specified",
+      "pause": {
+        "confirm": "Pause campaign",
+        "description": "{count} listings return to their regular price within 1 minute until resumed · paid orders are not affected",
+        "failed": "Couldn't pause the campaign",
+        "success": "{name} paused",
+        "title": "Pause {name}?"
+      },
+      "pauseShop": {
+        "confirm": "Pause sale",
+        "description": "The shop funds this discount and admins can't edit it · once paused, the shop sees this reason and can contact the team",
+        "failed": "Couldn't pause the sale",
+        "footer": "Recorded in the Activity Log",
+        "notified": " · shop notified",
+        "notify": "Email the shop",
+        "reason": "Reason (visible to the shop) *",
+        "reasonPlaceholder": "e.g. The sale price looks unusually low, please check it",
+        "success": "“{name}” paused{notified}",
+        "title": "Pause “{name}” by {shop}?"
+      },
+      "pieces": "{count} pcs",
+      "resume": {
+        "description": "Eligible listings get the sale price back within 1 minute",
+        "failed": "Couldn't resume the campaign",
+        "period": "Period",
+        "reason": "Pause reason",
+        "success": "{name} resumed",
+        "title": "Resume {name}?"
+      },
+      "unlimited": "Unlimited"
+    },
+    "aside": {
+      "buyerPays": "Buyer pays",
+      "campaignFallback": "Campaign",
+      "cap": " (cap {amount})",
+      "commission": "Commission (on list price)",
+      "discountFixed": "Discount {amount}/pc",
+      "discountPercent": "Discount {percent}%{cap}",
+      "listPrice": "List price",
+      "preview": "Preview as buyers see it",
+      "sample": "Sample calculation (listing {price} · commission {percent}%)",
+      "sellerReceives": "Shop receives",
+      "subsidy": "Pegasus subsidy (SALE_SUBSIDY)",
+      "summary": "Summary"
+    },
+    "badge": {
+      "cardSet": "Card set sale"
+    },
+    "controls": {
+      "loading": "Loading…",
+      "minLength": "Type at least {min} characters",
+      "noResults": "No results",
+      "remove": "Remove {label}",
+      "search": "Search…"
+    },
+    "discount": {
+      "fixedOff": "{amount} off/pc",
+      "fixedPrice": "New price per item",
+      "maxPerUnit": "Up to {amount}/pc",
+      "perRow": "Set per row",
+      "percent": "{percent}% off",
+      "shopPays": "Shop-funded"
+    },
+    "draftPauseReason": "Draft — not open yet",
+    "duration": {
+      "days": "Lasts {days} days",
+      "hours": "Lasts {hours} hours"
+    },
+    "errors": {
+      "categoryNotFound": "The selected category was deleted. Please choose again",
+      "gameNotFound": "The selected game was deleted. Please choose again",
+      "inUse": "The campaign has orders and can't be deleted (SALE_IN_USE) — use “End campaign” instead",
+      "invalid": "Campaign data is invalid (SALE_INVALID) — after orders exist you can only edit the name, end date, budget (increase) and quota (increase)",
+      "notFound": "This campaign no longer exists. Try reloading the page",
+      "overlap": "Listings overlap with another sale in the same period (SALE_OVERLAP)",
+      "paused": "The campaign was paused by the team",
+      "setNotFound": "The selected card set was deleted. Please choose again",
+      "slugTaken": "This campaign link is already in use. Try another"
+    },
+    "field": {
+      "endsAt": "end date",
+      "perBuyerLimit": "Per-buyer limit",
+      "perListingQuota": "Quota per listing",
+      "startsAt": "start date"
+    },
+    "form": {
+      "backToList": "Back to sales",
+      "banner": "Banner (optional)",
+      "bannerCurrent": "Current banner",
+      "bannerHint": "Used on /sale/{slug} · 1200×300 recommended",
+      "bannerUpload": "Upload a 1200×300 image",
+      "breadcrumb": {
+        "create": "Create campaign",
+        "edit": "Edit {name}",
+        "sales": "Product sales"
+      },
+      "budget": "Maximum subsidy budget",
+      "budgetHint": "When reservations reach the budget → the campaign ends itself (budget exhausted) · empty = unlimited",
+      "budgetIncreaseOnly": "Maximum subsidy budget (increase only)",
+      "conditions": "Card condition (optional)",
+      "conditionsAria": "Card condition",
+      "conditionsHint": "None selected = all conditions",
+      "confirm": {
+        "budget": "Subsidy budget",
+        "listings": "Eligible listings now",
+        "listingsValue": "{count} from {shops} shops",
+        "saveDescription": "Listings on sale will be repriced within 1 minute · buyers with these items in their cart will see “Price changed”",
+        "saveTitle": "Save changes to {name}?",
+        "schedule": "Schedule",
+        "scheduleDescription": "Eligible listings switch to the sale price automatically at the start time",
+        "scheduleTitle": "Schedule {name}?"
+      },
+      "discard": {
+        "confirm": "Discard changes",
+        "description": "Campaign changes aren't saved. Leaving now will lose everything",
+        "stay": "Stay",
+        "title": "Discard changes?"
+      },
+      "discount": "Discount",
+      "discountAria": "Discount",
+      "discountFixed": "Fixed amount per item",
+      "discountFixedHint": "Baht per item · sale price can't go below ฿1",
+      "discountPercent": "Percentage",
+      "discountPrefix": "ลด",
+      "discountType": "Discount type",
+      "durationPrefix": "Lasts",
+      "endsAt": "Ends",
+      "endsAtHint": "Must be after the start",
+      "excludeSellers": "Exclude shops (optional)",
+      "homeBanner": "Show banner on the home page",
+      "homeBannerHint": "Category sale banners below the Flash Sale strip · ordered by position",
+      "homeFlash": "Show on the home page (Flash Sale strip)",
+      "homeFlashHint": "One Flash Sale at a time · shown as “Coming soon” 24 h before it starts",
+      "homeSort": "Home page banner position",
+      "homeSortHint": "Lower numbers show first",
+      "lockNote": "After orders exist: only name, end date, budget (increase), quota (increase), pause/end can change",
+      "locked": {
+        "after": "can't be edited · budget and quota can only increase",
+        "before": "This campaign has orders ({count} sold) — fields marked",
+        "icon": "padlock"
+      },
+      "lockedIcon": "Locked",
+      "maxPerUnit": "Maximum discount per item",
+      "maxPerUnitHint": "High-priced cards won't be discounted more than this · empty = unlimited",
+      "minPrice": "Minimum price per item",
+      "minPriceHint": "Listings below this price don't join",
+      "name": "Campaign name",
+      "perBuyer": "Per-buyer limit",
+      "perBuyerHint": "Exceeding → SALE_BUYER_LIMIT_REACHED · empty = unlimited",
+      "perBuyerSuffix": "pcs / listing",
+      "pieces": "pcs",
+      "preview": {
+        "failed": "Couldn't count eligible listings",
+        "loading": "Counting eligible listings…",
+        "result": "{count} listings from {shops} shops eligible now · total before discount {total}"
+      },
+      "quota": "Quota per listing",
+      "quotaHint": "Once sold out, that listing returns to its regular price",
+      "quotaIncreaseOnly": "Quota per listing (increase only)",
+      "save": "Save",
+      "saveDraft": "Save draft",
+      "schedule": "Schedule campaign",
+      "scope": {
+        "add": "Add {noun}",
+        "all": "All products",
+        "cardSet": "Card set",
+        "category": "Category"
+      },
+      "scopeLabel": "Product scope",
+      "searchShop": "Search shops…",
+      "section": {
+        "budget": "5. Budget & display",
+        "discount": "3. Discount",
+        "period": "4. Period & quota",
+        "periodDescription": "Sale prices start/end automatically (checked every minute)",
+        "periodFlash": "Flash Sales can last up to 72 hours · sale prices start/end automatically (checked every minute)",
+        "scope": "2. Product scope",
+        "scopeDescription": "LISTED listings that match every condition get the sale price automatically (auctions excluded)",
+        "type": "1. Campaign type"
+      },
+      "sellerSaleReadOnly": "Admins can't edit shop sales (they can pause them with a reason)",
+      "shopFallback": "Shop #{id}",
+      "slug": "Campaign link",
+      "slugHint": "a–z 0–9 and - · used as /sale/{slug}",
+      "startsAt": "Starts",
+      "subtitle": "Pegasus funds the discount · shops receive the full list price",
+      "summary": {
+        "budget": "Budget {budget}{home}",
+        "cap": " up to {amount}/pc",
+        "home": " · shown on home page",
+        "lowerWins": "Listings already on a shop sale use the lower price",
+        "percent": "{percent}% off{cap}",
+        "quota": "Quota {quota}/listing · {limit}/buyer"
+      },
+      "title": {
+        "edit": "Edit sale campaign"
+      },
+      "toast": {
+        "createFailed": "Couldn't create the campaign",
+        "draftSaved": "Draft saved — the campaign is paused and not open yet",
+        "saveFailed": "Couldn't save",
+        "saved": "Changes saved",
+        "scheduled": "{name} scheduled"
+      },
+      "type": "Campaign type",
+      "typeCategory": "Category / card set sale",
+      "typeCategoryHint": "Discount by game, category or card set over several days",
+      "typeFlashHint": "Short, ≤ 72 h · quota per listing · countdown on the home page"
+    },
+    "list": {
+      "create": "Create sale campaign",
+      "empty": {
+        "description": "Create a Flash Sale or category sale — buyers see the discounted price immediately without a code",
+        "title": "No campaigns in this tab yet"
+      },
+      "kpi": {
+        "active": "Active sales",
+        "activeNote": "Pegasus {platform} · shops {seller}",
+        "listings": "Listings on sale now",
+        "listingsNote": "Both Pegasus campaigns and shop sales",
+        "revenue": "Revenue from sale prices (30 days)",
+        "revenueNote": "Amount buyers paid in paid orders",
+        "subsidy": "Pegasus subsidy (30 days)",
+        "subsidyNote": "SALE_SUBSIDY · separate from code costs"
+      },
+      "loadFailed": "Couldn't load campaigns",
+      "loading": "Loading campaigns...",
+      "nextPage": "Next page",
+      "note": "Pegasus campaigns: shops receive the full list price and Pegasus subsidizes the discount on escrow release (SALE_SUBSIDY) · when reservations reach the budget → the campaign ends itself (budget exhausted) · Shop sales: the shop pays, admins can't edit but can pause with a reason · each listing uses one sale price at a time (lowest wins), and discount codes still stack",
+      "pageN": "Page {page}",
+      "pagination": "Sale campaign pages",
+      "prevPage": "Previous page",
+      "range": "Showing {from}–{to} of {total} campaigns",
+      "search": "Search campaigns",
+      "searchPlaceholder": "Search campaigns / shops",
+      "statusFilter": "Filter by status",
+      "subtitle": "Discount products directly — buyers see the discounted price immediately without a code · Flash Sale / category sale / shop sale oversight",
+      "title": "Promotions & sales",
+      "typeFilter": "Sale type"
+    },
+    "menu": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "end": "End now",
+      "pause": "Pause",
+      "pauseShop": "Pause shop sale",
+      "resume": "Resume",
+      "viewPage": "View campaign page"
+    },
+    "period": {
+      "clockIn": "{clock} · in {days} days",
+      "daysLeft": "{days} days left",
+      "ended": "Ended",
+      "endedEarly": "Ended early",
+      "pausedByAdmin": "Paused by admin{reason}",
+      "pausedByShop": "Paused by shop",
+      "soldOut": "Quota sold out",
+      "startsIn": "Starts in {days} days"
+    },
+    "retry": "Try again",
+    "scope": {
+      "all": "All games",
+      "category": "Category",
+      "count": "{prefix} {count} items",
+      "game": "Game",
+      "listings": "Selected listings",
+      "set": "Set",
+      "shop": "All shop products"
+    },
+    "scopeDetail": {
+      "allConditions": "All conditions",
+      "minPrice": "Price ≥ {price}",
+      "noAuction": "Auctions excluded",
+      "noQuota": "No quota limit",
+      "perBuyer": "{limit} pcs/buyer",
+      "quota": "Quota {quota}/listing"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "BUDGET_EXHAUSTED": "Budget exhausted",
+      "ENDED": "Ended",
+      "PAUSED": "Paused",
+      "SCHEDULED": "Scheduled",
+      "SOLD_OUT": "Sold out"
+    },
+    "subtitle": {
+      "home": "{link} · home page",
+      "noPage": "No campaign page"
+    },
+    "table": {
+      "actions": "Actions",
+      "allSoldOut": "All listings sold out",
+      "budget": "Budget / sold",
+      "budgetExhausted": "Ended because the budget ran out",
+      "campaign": "Campaign",
+      "discount": "Discount",
+      "joined": "{count} listings joined",
+      "manage": "Manage {name}",
+      "noBudget": "— (no budget)",
+      "period": "Period",
+      "scope": "Scope",
+      "sold": "{count} sold",
+      "status": "Status",
+      "type": "Type"
+    },
+    "tabs": {
+      "all": "All"
+    },
+    "tryAgain": "Please try again",
+    "type": {
+      "all": "All types",
+      "category": "Category sale",
+      "shop": "Shop"
+    },
+    "validation": {
+      "budgetBelowUsed": "The budget can't be lower than the amount already subsidized",
+      "budgetIncreaseOnly": "After orders exist, the budget can only increase",
+      "budgetPositive": "The budget must be more than ฿0",
+      "budgetUnlimited": "This campaign has no budget limit — a budget can't be added after orders exist",
+      "countInt": "{label} must be a whole number",
+      "countMin": "{label} must be at least {min}",
+      "countNumber": "Enter {label} as a number",
+      "dateRequired": "Please choose the {label}",
+      "discountRequired": "Enter a discount",
+      "endBeforeStart": "The end must be after the start",
+      "endInFuture": "The end date must be in the future",
+      "flashMaxHours": "A Flash Sale can last at most {hours} hours",
+      "flashQuotaRequired": "A Flash Sale needs a quota per listing",
+      "maxChars": "Up to {max} characters",
+      "nameRequired": "Please enter a campaign name",
+      "nonNegative": "Can't be negative",
+      "number": "Enter a number",
+      "percentRange": "The percentage must be a whole number from {min}–{max}",
+      "positive": "Must be more than ฿0",
+      "quotaIncreaseOnly": "After orders exist, the quota can only increase",
+      "scopeRequired": "Select at least one item",
+      "slugFormat": "Only a–z, 0–9 and - (can't start or end with -)",
+      "slugMax": "Up to {max} characters",
+      "slugMin": "The link must be at least {min} characters",
+      "sortNonNegative": "Position can't be negative"
+    }
+  },
+  "badge": {
+    "flash": "⚡ FLASH SALE",
+    "pegasus": "Pegasus discount",
+    "shop": "Shop discount"
+  },
+  "breakdown": {
+    "adminTotals": "SALE_SUBSIDY {platform} · shop-funded {seller} · posted to the ledger on escrow release",
+    "commissionNote": "Commission: Pegasus-discounted items are charged on the list price · shop-discounted items on the discounted price",
+    "label": "Sale prices in the order",
+    "listPaid": "List price / buyer paid",
+    "platform": "Product discount · Pegasus{name}",
+    "platformSeller": "Pegasus subsidy (paid on escrow release)",
+    "shop": "Product discount · shop{name}",
+    "shopSeller": "Shop-funded discount",
+    "title": "Sale prices in this order"
+  },
+  "card": {
+    "flashSoldOut": "Flash price sold out",
+    "left": "{left} left",
+    "progress": "{sold}/{quota} sold · {left} left",
+    "soldOut": "Sold out",
+    "upcoming": "⚡ Coming soon"
+  },
+  "countdown": {
+    "endsIn": "Ends in",
+    "endsInAria": "Ends in {time}",
+    "startsIn": "Starts in",
+    "startsInAria": "Starts in {time}"
+  },
+  "discount": {
+    "fixedOff": "{amount} off",
+    "fixedPrice": "Special price",
+    "percent": "{percent}% off",
+    "upToPercent": "Up to {percent}% off"
+  },
+  "featured": {
+    "bannerTerms": "Prices already discounted on product pages, no code needed · {until} · discount codes still stack",
+    "listLabel": "Flash Sale products",
+    "shopNow": "Shop now →",
+    "viewAll": "View all"
+  },
+  "headline": "{discount} on everything in the campaign",
+  "hero": {
+    "ended": "{name} has ended · prices are back to regular",
+    "endedLink": "See other discounted products on the SALE page",
+    "endedShort": "Ended",
+    "endedToast": "{name} has ended",
+    "endedToastHint": "See other discounted products on the SALE page",
+    "endsIn": "Ends in",
+    "pegasus": "Pegasus campaign",
+    "shop": "Shop",
+    "shopName": " · shop {name}",
+    "startsIn": "Starts in",
+    "status": "Status"
+  },
+  "notify": {
+    "added": {
+      "description": "Added {name} at {price} · this price is valid until {time}; pay before the stock reservation expires",
+      "title": "Added to cart at the Flash price"
+    },
+    "buyerLimit": "The Flash price is limited to {limit} per buyer · item {next} is charged the regular price {price}"
+  },
+  "page": {
+    "breadcrumb": {
+      "home": "Home"
+    },
+    "empty": {
+      "campaign": "This campaign has no discounted products yet",
+      "filter": "No products match your filters"
+    },
+    "filter": {
+      "allConditions": "All conditions",
+      "allGames": "All games",
+      "condition": "Condition",
+      "game": "Game",
+      "minDiscount": "{value}%+ off"
+    },
+    "loadFailed": "Couldn't load sale products",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "range": "Showing 1–{shown} of {total}",
+    "sort": {
+      "aria": "Sort by",
+      "discount": "Biggest discount",
+      "ending": "Ending soon",
+      "label": "Sort:",
+      "price": "Lowest price"
+    },
+    "subtitle": "All prices already discounted, no code needed",
+    "tabAll": "All {count}",
+    "tabUpcoming": " · coming soon",
+    "tabs": "Sale campaigns"
+  },
+  "price": {
+    "apply": "Apply",
+    "clear": "Clear",
+    "filter": "Price",
+    "filterActive": "Price: {min}–{max}",
+    "listAria": "Regular price {price}",
+    "max": "Maximum price",
+    "maxPlaceholder": "Max",
+    "min": "Minimum price",
+    "minPlaceholder": "Min"
+  },
+  "priceChanged": {
+    "accept": "Accept new prices",
+    "description": "A sale ended while the items were in your cart",
+    "newTotal": "New total",
+    "remove": "Remove from cart",
+    "title": "Some prices have changed",
+    "unavailable": "Unavailable"
+  },
+  "priceLocked": {
+    "aSale": "a sale",
+    "attempted": "New price",
+    "current": "Current price",
+    "description": "{name} is in {sale}{until} · you can lower the price, but raise it only after the campaign ends so the strikethrough price stays honest",
+    "ok": "OK",
+    "ownerShop": " (shop)",
+    "title": "Price can't be raised during a sale",
+    "until": " until {date}"
+  },
+  "quota": {
+    "buyAtList": "Buy at regular price",
+    "description": "The sale quota{salePrice} for {name} is used up · you can still buy at the regular price{listPrice}",
+    "remove": "Remove",
+    "thisProduct": "this product",
+    "title": "Flash Sale price is sold out"
+  },
+  "seller": {
+    "action": {
+      "adminPaused": {
+        "description": "Reason: {reason} · fix the price and ask the team to resume it",
+        "noReason": "Not specified",
+        "title": "The team paused “{name}”"
+      },
+      "close": "Close",
+      "contact": "Contact the team",
+      "delete": {
+        "confirm": "Delete",
+        "failed": "Couldn't delete",
+        "noOrders": "No orders use this price yet. Deleted sales can't be restored",
+        "scheduled": "Not started and no orders yet. Deleted sales can't be restored",
+        "success": "“{name}” deleted",
+        "title": "Delete “{name}”?"
+      },
+      "end": {
+        "confirm": "End now",
+        "description": "{count} listings return to their regular price immediately · {sold} already sold are not affected",
+        "failed": "Couldn't end the sale",
+        "success": "“{name}” ended",
+        "title": "End “{name}” now?"
+      },
+      "inUse": "This sale has orders and can't be deleted — ending it early instead",
+      "pause": {
+        "confirm": "Pause",
+        "description": "{count} listings return to their regular price until resumed",
+        "failed": "Couldn't pause",
+        "success": "“{name}” paused",
+        "title": "Pause “{name}”?"
+      },
+      "resume": {
+        "confirm": "Resume",
+        "description": "Listings get the sale price back within 1 minute",
+        "failed": "Couldn't resume",
+        "success": "“{name}” resumed",
+        "title": "Resume “{name}”?"
+      }
+    },
+    "discount": {
+      "fixedOff": "{amount} off/pc",
+      "fixedPrice": "New price per item",
+      "perRow": "Set per row",
+      "percent": "{percent}% off",
+      "percentRange": "{min}–{max}% off",
+      "shopPays": "Shop-funded"
+    },
+    "errors": {
+      "inUse": "This sale has orders and can't be deleted — use “End early” instead",
+      "invalid": "Sale data is invalid. Check each row's price again",
+      "notFound": "This sale no longer exists. Try reloading the page",
+      "notVerified": "Your shop isn't verified yet, so you can't discount products",
+      "overlap": "A listing is already in another sale in the same period (SALE_OVERLAP) — remove it from that sale first",
+      "paused": "The team paused this sale and you can't resume it yourself — contact the team"
+    },
+    "form": {
+      "addCategory": "Add category",
+      "breadcrumb": {
+        "create": "Create sale",
+        "edit": "Edit sale"
+      },
+      "bulk": {
+        "apply": "Apply to selected",
+        "aria": "Discount percentage for all selected rows",
+        "label": "Set all selected rows:"
+      },
+      "discard": {
+        "confirm": "Discard changes",
+        "description": "This sale isn't saved. Leaving now will lose everything",
+        "stay": "Stay",
+        "title": "Discard changes?"
+      },
+      "discountAria": "Discount",
+      "discountFixed": "Fixed amount per item",
+      "discountPercent": "Percentage",
+      "discountType": "Discount type",
+      "endsAt": "Ends",
+      "errors": {
+        "categoryRequired": "Select at least one category",
+        "discountRequired": "Enter a discount",
+        "endBeforeStart": "The end must be after the start",
+        "fixedPositive": "Must be more than ฿0",
+        "nameRequired": "Please enter a name",
+        "percentRange": "The percentage must be between 1–90"
+      },
+      "hintFixed": "Baht per item · sale price can't go below ฿1",
+      "hintPercent": "1–90% · auctions excluded",
+      "loadFailed": "Couldn't load data",
+      "loading": "Loading...",
+      "name": "Name (not shown to buyers)",
+      "nameAria": "Sale name",
+      "preview": {
+        "commission": "Commission (on sale price)",
+        "net": "You receive",
+        "sample": "Example: {name} (commission {percent}%)",
+        "shopDiscount": "Shop-funded discount",
+        "title": "What buyers see"
+      },
+      "save": "Save",
+      "saveFix": "Save (fix {count} rows first)",
+      "scope": "Products on sale",
+      "scopeCategory": "Categories",
+      "scopeListings": "Selected listings",
+      "search": "Search your listings",
+      "section": {
+        "info": "1. Sale details",
+        "items": "2. Products on sale"
+      },
+      "selectOne": "Select at least 1 listing",
+      "startsAt": "Starts",
+      "subtitle": "Your shop funds the discount · commission is charged on the discounted price",
+      "summary": {
+        "fixRows": "Fix {count} rows before saving",
+        "lockAll": "Participating listings can't be priced higher during this period",
+        "lockSelected": "These {count} listings can't be priced higher during this period",
+        "range": " · {range} off",
+        "title": "Summary"
+      },
+      "table": {
+        "empty": "No active listings yet",
+        "inAuction": "In an auction — can't be selected",
+        "noMatch": "No listings match your search",
+        "percent": "Off",
+        "price": "Current price",
+        "salePrice": "Sale price",
+        "salePriceFor": "Sale price for {name}",
+        "select": "Select {name}",
+        "selectAll": "Select all",
+        "selected": "{selected} of {total} listings selected · auction listings can't be selected",
+        "stock": "Stock"
+      },
+      "toast": {
+        "created": "Sale “{name}” set up",
+        "failed": "Couldn't save",
+        "updated": "Sale saved"
+      },
+      "verifyFirst": "Your shop must be verified before you can discount products"
+    },
+    "list": {
+      "columns": {
+        "actions": "Actions",
+        "discount": "Discount",
+        "items": "Products",
+        "period": "Period",
+        "sale": "Sale",
+        "status": "Status"
+      },
+      "empty": {
+        "description": "Discount your products — buyers see the new price immediately without a code",
+        "title": "No sales yet"
+      },
+      "kpi": {
+        "active": "Active sales",
+        "discount": "Shop-funded discounts (30 days)",
+        "discountNote": "Commission is charged on the discounted price",
+        "listings": "Listings on sale",
+        "listingsNote": "With your shop's sale prices",
+        "revenue": "Revenue from sale prices (30 days)",
+        "revenueNote": "Amount buyers paid in paid orders",
+        "scheduled": "{count} scheduled"
+      },
+      "loadFailed": "Couldn't load sales",
+      "loading": "Loading sales...",
+      "manage": "Manage {name}",
+      "menu": {
+        "edit": "Edit",
+        "endEarly": "End early",
+        "pauseReason": "See why the team paused it"
+      },
+      "note": "Strikethrough price = current listing price · listings in a scheduled or active sale can't be priced higher · each listing uses one sale price at a time; if it's also in a Pegasus campaign, buyers see the lower price · discount codes still stack",
+      "page": "Page {page} / {total}",
+      "pagination": "Sale pages",
+      "sold": "{count} sold",
+      "subtitle": "Discount products so buyers see the new price immediately, no code needed · your shop funds the discount",
+      "verifyFirst": "Your shop must be verified first"
+    },
+    "pegasus": {
+      "description": "Pegasus funds the discount · you receive the full list price · these listings can't be priced higher during the campaign (lowering is fine)",
+      "item": "{name} · {percent}% off",
+      "loading": "Loading…",
+      "locked": "Price locked",
+      "title": "Your products in Pegasus campaigns",
+      "until": "Until {date}"
+    },
+    "period": {
+      "daysLeft": "{days} days left",
+      "ended": "Ended",
+      "paused": "Paused",
+      "pausedByTeam": "Paused by the team",
+      "startsIn": "Starts in {days} days"
+    },
+    "retry": "Try again",
+    "row": {
+      "campaignLower": "the campaign price is lower",
+      "missing": "Enter a sale price",
+      "notLower": "The sale price must be lower than the current price",
+      "other": " another",
+      "overlap": "Already in{name} sale in the same period → SALE_OVERLAP, remove it from that sale first",
+      "platform": "In campaign {name} ({price}) · {who} → buyers see {buyerSees}",
+      "tooLow": "The sale price can't be below ฿1",
+      "yoursLower": "your price is lower"
+    },
+    "scope": {
+      "categories": "{count} categories",
+      "listings": "{count} listings selected",
+      "shop": "All shop products"
+    },
+    "tabs": {
+      "codes": "Shop discount codes",
+      "label": "Shop promotion types",
+      "sales": "Product sales"
+    },
+    "title": "Shop promotions",
+    "tryAgain": "Please try again"
+  },
+  "terms": {
+    "limited": "Limited quantity",
+    "maxPerUnit": "Up to {amount} per item",
+    "perBuyer": "{limit} per buyer per product",
+    "stackable": "Discount codes still stack"
+  },
+  "until": "Until {date}"
+}

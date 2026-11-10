@@ -3,9 +3,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as authApi from "@/features/auth/auth.api";
-import { useLogin } from "@/features/auth/auth.queries";
+import { authKeys, useGoogleSignIn, useLogin } from "@/features/auth/auth.queries";
 import { cartApi } from "@/features/cart/cart.api";
-import { clearCartSession, getCartSession, setCartSession } from "@/lib/api";
+import { clearCartSession, getCartSession, getSession, setCartSession } from "@/lib/api";
 import { createTestQueryClient } from "@/test/utils";
 
 describe("guest cart merge on login", () => {
@@ -54,5 +54,23 @@ describe("guest cart merge on login", () => {
     });
 
     expect(getCartSession()).toBe("guest-session-id");
+  });
+
+  it("merges the guest cart, saves session, and updates /auth/me cache after successful Google Sign-In", async () => {
+    setCartSession("guest-google-session");
+    const googleSignInSpy = vi.spyOn(authApi, "googleSignIn").mockResolvedValue(session as never);
+    const mergeCart = vi.spyOn(cartApi, "mergeCart").mockResolvedValue({ items: [] } as never);
+    const { queryClient, wrapper } = setup();
+    const { result } = renderHook(() => useGoogleSignIn(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ credential: "google-id-token" });
+    });
+
+    expect(googleSignInSpy.mock.calls[0]?.[0]).toEqual({ credential: "google-id-token" });
+    expect(getSession()?.accessToken).toBe("access");
+    expect(queryClient.getQueryData(authKeys.me())).toEqual(session.user);
+    expect(mergeCart).toHaveBeenCalledOnce();
+    expect(getCartSession()).toBeNull();
   });
 });

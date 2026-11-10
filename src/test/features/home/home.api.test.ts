@@ -1,9 +1,16 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getPublicProfile } from "@/features/home/home.api";
+import { getPublicProfile, getRecommendedShops } from "@/features/home/home.api";
 import { api, ApiError } from "@/lib/api";
 
 afterEach(() => vi.restoreAllMocks());
+
+it("loads recommended shops without authentication", async () => {
+  const get = vi.spyOn(api, "get").mockResolvedValueOnce([]);
+
+  await expect(getRecommendedShops()).resolves.toEqual([]);
+  expect(get).toHaveBeenCalledWith("/home/recommended-shops", { auth: false });
+});
 
 describe("getPublicProfile", () => {
   it("uses the public profile endpoint when available", async () => {
@@ -21,7 +28,7 @@ describe("getPublicProfile", () => {
       .mockRejectedValueOnce(new ApiError({ status: 401, code: "UNAUTHORIZED", message: "Unauthorized" }))
       .mockResolvedValueOnce({ items: [{ seller }] });
 
-    await expect(getPublicProfile("cardvault")).resolves.toEqual(seller);
+    await expect(getPublicProfile("cardvault")).resolves.toEqual({ ...seller, bannerUrl: null });
     expect(get).toHaveBeenNthCalledWith(2, "/u/cardvault/listings", {
       auth: false, signal: undefined, query: { sort: "newest", size: 1, page: 0 },
     });

@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
 import * as ordersApi from "./orders.api";
 import type { AdminOrderListParams } from "./orders.types";
@@ -47,5 +47,12 @@ export function useAdminOrder(sellerOrderId: number | null) {
     queryKey: adminOrderKeys.detail(sellerOrderId ?? 0),
     queryFn: () => ordersApi.getAdminOrder(sellerOrderId as number),
     enabled: sellerOrderId !== null,
+  });
+}
+
+export function useDownloadAdminOrderSummary() {
+  return useMutation({
+    mutationFn: (sellerOrderId: number) =>
+      ordersApi.downloadAdminOrderSummary(sellerOrderId),
   });
 }

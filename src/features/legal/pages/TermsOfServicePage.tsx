@@ -1,7 +1,9 @@
 import { FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const sections = [
+type TermsSection = { id: string; title: string; content: string; rules?: string[] };
+
+const sections: TermsSection[] = [
   {
     id: "01",
     title: "Introduction",
@@ -29,6 +31,20 @@ const sections = [
   },
   {
     id: "06",
+    title: "Auctions",
+    content: "Auctions on PEGASUS follow these rules:",
+    // กติกาจาก Epic TCG-612 [TCG-636]
+    rules: [
+      "Bids cannot be withdrawn. You confirm every bid before it is placed.",
+      "Extended bidding: a bid in the last 2 minutes resets the timer to 2 minutes, with no limit on extensions.",
+      "Buy now: the seller can turn it on or change its price until the first bid. After that, the Buy now option is removed.",
+      "The winner must pay within 24 hours through the regular checkout, at the winning price.",
+      "If the winner does not pay in time, the order and the auction are cancelled, the card returns to the seller's stock, and the winner receives one non-payment strike.",
+      "Three non-payment strikes ban the user from bidding for 30 days. Regular purchases are still allowed.",
+    ],
+  },
+  {
+    id: "07",
     title: "Limitation of Liability",
     content: "PEGASUS is not liable for indirect, incidental, or consequential damages arising from use of our services or products purchased through the platform.",
   },
@@ -143,6 +159,13 @@ export function TermsOfServicePage() {
                   <p className="mt-4 leading-relaxed text-muted-foreground">
                     {section.content}
                   </p>
+                  {section.rules ? (
+                    <ol className="mt-3 list-decimal space-y-1.5 pl-5 leading-relaxed text-muted-foreground">
+                      {section.rules.map((rule) => (
+                        <li key={rule}>{rule}</li>
+                      ))}
+                    </ol>
+                  ) : null}
                   {index < sections.length - 1 && (
                     <hr className="mt-10 border-border/60" />
                   )}

@@ -38,6 +38,7 @@ import {
   type GameFormValues,
 } from "../taxonomy.schema";
 import { LogoUploadField } from "./LogoUploadField";
+import { useTranslate } from "@/lib/i18n";
 
 type GameFormDialogProps = {
   open: boolean;
@@ -60,15 +61,16 @@ export function GameFormDialog({
   game,
   onSaved,
 }: GameFormDialogProps) {
+  const { t } = useTranslate("admin");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{game ? `แก้ไขเกม ${game.name}` : "เพิ่มเกม"}</DialogTitle>
+          <DialogTitle>{game ? t("cardAttributes.gameForm.editTitle", "แก้ไขเกม {name}", { name: game.name }) : t("cardAttributes.games.addShort", "เพิ่มเกม")}</DialogTitle>
           <DialogDescription>
             {game
-              ? "เปลี่ยนชื่อ รหัส หรือโลโก้ได้ตลอด slug ในลิงก์หน้าร้านตั้งได้ครั้งเดียวตอนสร้าง"
-              : "เกมใหม่จะมีหมวดกลาง (Single cards, Sealed, Accessories) ให้ใช้ทันที แล้วค่อยเพิ่มฟิลด์และชุดการ์ด"}
+              ? t("cardAttributes.gameForm.editDescription", "เปลี่ยนชื่อ รหัส หรือโลโก้ได้ตลอด slug ในลิงก์หน้าร้านตั้งได้ครั้งเดียวตอนสร้าง")
+              : t("cardAttributes.gameForm.addDescription", "เกมใหม่จะมีหมวดกลาง (Single cards, Sealed, Accessories) ให้ใช้ทันที แล้วค่อยเพิ่มฟิลด์และชุดการ์ด")}
           </DialogDescription>
         </DialogHeader>
         <GameForm
@@ -91,6 +93,7 @@ function GameForm({
   game?: Game;
   onSaved: (game: Game) => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveGame = useSaveGame();
 
   const {
@@ -101,7 +104,7 @@ function GameForm({
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<GameFormValues>({
-    resolver: zodResolver(gameSchema),
+    resolver: zodResolver(gameSchema(t)),
     defaultValues: toGameForm(game),
   });
 
@@ -120,7 +123,7 @@ function GameForm({
       });
       toast.add({
         type: "success",
-        title: game ? "บันทึกข้อมูลเกมแล้ว" : `เพิ่มเกม ${saved.name} แล้ว`,
+        title: game ? t("cardAttributes.gameForm.saved", "บันทึกข้อมูลเกมแล้ว") : t("cardAttributes.gameForm.added", "เพิ่มเกม {name} แล้ว", { name: saved.name }),
       });
       onSaved(saved);
     } catch (error) {
@@ -133,7 +136,7 @@ function GameForm({
       }
       if (!applyApiErrors(error, setError)) {
         setError("root.server", {
-          message: taxonomyErrorMessage(error, "บันทึกเกมไม่สำเร็จ ลองใหม่อีกครั้ง"),
+          message: taxonomyErrorMessage(error, t("cardAttributes.gameForm.saveFailed", "บันทึกเกมไม่สำเร็จ ลองใหม่อีกครั้ง")),
         });
       }
     }
@@ -149,11 +152,11 @@ function GameForm({
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.name) || undefined}>
-          <FieldLabel htmlFor="gameName">ชื่อเกม *</FieldLabel>
+          <FieldLabel htmlFor="gameName">{t("cardAttributes.gameForm.name", "ชื่อเกม *")}</FieldLabel>
           <Input
             id="gameName"
             maxLength={100}
-            placeholder="เช่น Pokémon"
+            placeholder={t("cardAttributes.gameForm.namePlaceholder", "เช่น Pokémon")}
             aria-invalid={Boolean(errors.name)}
             {...register("name")}
           />
@@ -161,11 +164,11 @@ function GameForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.nameLocal) || undefined}>
-          <FieldLabel htmlFor="gameNameLocal">ชื่อภาษาไทย</FieldLabel>
+          <FieldLabel htmlFor="gameNameLocal">{t("cardAttributes.form.nameLocal", "ชื่อภาษาไทย")}</FieldLabel>
           <Input
             id="gameNameLocal"
             maxLength={100}
-            placeholder="เช่น โปเกมอน"
+            placeholder={t("cardAttributes.gameForm.nameLocalPlaceholder", "เช่น โปเกมอน")}
             aria-invalid={Boolean(errors.nameLocal)}
             {...register("nameLocal")}
           />
@@ -174,18 +177,18 @@ function GameForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.code) || undefined}>
-            <FieldLabel htmlFor="gameCode">รหัสเกม *</FieldLabel>
+            <FieldLabel htmlFor="gameCode">{t("cardAttributes.gameForm.code", "รหัสเกม *")}</FieldLabel>
             <Input
               id="gameCode"
               maxLength={32}
-              placeholder="เช่น POKEMON"
+              placeholder={t("cardAttributes.gameForm.codePlaceholder", "เช่น POKEMON")}
               autoCapitalize="characters"
               className="uppercase"
               aria-invalid={Boolean(errors.code)}
               {...register("code")}
             />
             <FieldDescription className="text-xs">
-              A-Z 0-9 _ · ใช้ขึ้นต้น SKU ของการ์ด
+              {t("cardAttributes.gameForm.codeHint", "A-Z 0-9 _ · ใช้ขึ้นต้น SKU ของการ์ด")}
             </FieldDescription>
             <FieldError errors={[errors.code]} />
           </Field>
@@ -195,13 +198,13 @@ function GameForm({
             <Input
               id="gameSlug"
               maxLength={100}
-              placeholder="เว้นว่าง = สร้างจากชื่อ"
+              placeholder={t("cardAttributes.form.slugPlaceholder", "เว้นว่าง = สร้างจากชื่อ")}
               disabled={Boolean(game)}
               aria-invalid={Boolean(errors.slug)}
               {...register("slug")}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
+              {t("cardAttributes.form.setOnce", "ตั้งได้ครั้งเดียวตอนสร้าง")}
             </FieldDescription>
             <FieldError errors={[errors.slug]} />
           </Field>
@@ -211,7 +214,7 @@ function GameForm({
           data-invalid={Boolean(errors.displayOrder) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="gameOrder">ลำดับการแสดง</FieldLabel>
+          <FieldLabel htmlFor="gameOrder">{t("cardAttributes.form.displayOrder", "ลำดับการแสดง")}</FieldLabel>
           <Input
             id="gameOrder"
             inputMode="numeric"
@@ -223,7 +226,7 @@ function GameForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-          <FieldLabel htmlFor="gameLogo">โลโก้</FieldLabel>
+          <FieldLabel htmlFor="gameLogo">{t("cardAttributes.form.logo", "โลโก้")}</FieldLabel>
           <LogoUploadField
             upload={upload}
             id="gameLogo"
@@ -248,9 +251,9 @@ function GameForm({
             )}
           />
           <FieldContent>
-            <FieldLabel htmlFor="gameActive">แสดงบนหน้าร้าน</FieldLabel>
+            <FieldLabel htmlFor="gameActive">{t("cardAttributes.games.showOnStore", "แสดงบนหน้าร้าน")}</FieldLabel>
             <FieldDescription className="text-xs">
-              ปิดไว้ก่อนได้ถ้ายังเตรียมฟิลด์และชุดการ์ดไม่เสร็จ
+              {t("cardAttributes.gameForm.activeHint", "ปิดไว้ก่อนได้ถ้ายังเตรียมฟิลด์และชุดการ์ดไม่เสร็จ")}
             </FieldDescription>
           </FieldContent>
         </Field>
@@ -258,13 +261,13 @@ function GameForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {game ? "บันทึก" : "เพิ่มเกม"}
+          {game ? t("cardAttributes.form.save", "บันทึก") : t("cardAttributes.games.addShort", "เพิ่มเกม")}
         </Button>
       </DialogFooter>
     </form>

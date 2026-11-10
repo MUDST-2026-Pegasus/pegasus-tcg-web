@@ -11,7 +11,9 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { PriceTag, SaleBadge, isOnSale } from "@/components/sale";
 import { formatPrice } from "@/features/catalog/catalog.mappers";
+import { FeaturedSalesSection } from "@/features/sale/components/FeaturedSalesSection";
 import {
   FeaturedSkeleton,
   GamesSkeleton,
@@ -27,6 +29,7 @@ import {
   useHeroSlides,
   useNewReleases,
   usePegasusPicks,
+  useRecommendedShops,
   useTrending,
 } from "@/features/home/home.queries";
 import type {
@@ -39,7 +42,10 @@ import type {
 import { ClaimTicketRail } from "@/features/promotions/ClaimTicketRail";
 import { useFeaturedPromotions } from "@/features/promotions/claim.queries";
 import { env } from "@/lib/env";
+import { AuctionEndingSoonSection } from "./AuctionEndingSoonSection";
+import { ShopCard, ShopCardSkeleton } from "./ShopCard";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 const DEFAULT_CAROUSEL_INTERVAL_MS = 7500;
 const HERO_CAROUSEL_INTERVAL_MS = 4000;
@@ -143,10 +149,11 @@ type SectionHeaderProps = {
 
 function SectionHeader({
   title,
-  actionLabel = "View All",
+  actionLabel,
   actionHref,
   description,
 }: SectionHeaderProps) {
+  const { t } = useTranslate("buyer");
   return (
     <div
       className={cn(
@@ -172,7 +179,7 @@ function SectionHeader({
           nativeButton={false}
           render={<Link to={actionHref} />}
         >
-          {actionLabel}
+          {actionLabel ?? t("home.sections.viewAll", "View All")}
         </Button>
       ) : null}
     </div>
@@ -186,13 +193,15 @@ function HomeProductCard({
   product: HomeProduct;
   rank?: number;
 }) {
-  const price = formatPrice(product.price);
+  const { t } = useTranslate("buyer");
+  const onSale = isOnSale(product.pricing);
+  const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.price);
 
   return (
     <div className="relative h-[260px] min-w-0">
       <Link
         to={product.href}
-        aria-label={`${product.name} ราคา ${price}`}
+        aria-label={t("home.productAria", "{name} ราคา {price}", { name: product.name, price })}
         className="block h-full w-full cursor-pointer rounded-xl text-left outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <ItemCard
@@ -200,10 +209,18 @@ function HomeProductCard({
           imageAlt={product.imageAlt}
           badge={product.type}
           title={product.name}
-          price={price}
+          price={onSale ? undefined : price}
+          footer={onSale ? <PriceTag pricing={product.pricing} /> : undefined}
           className="h-full w-full [&_img]:object-contain"
         />
       </Link>
+      {onSale && product.pricing ? (
+        <SaleBadge
+          type={product.pricing.sale?.type === "FLASH_SALE" ? "flash" : "percent"}
+          percent={product.pricing.discountPercent}
+          className="absolute top-6 right-7"
+        />
+      ) : null}
       {rank ? (
         <Badge className="absolute top-2.5 left-2.5 size-[22px] rounded-full bg-foreground p-0 text-[10px] text-background">
           {rank}
@@ -274,13 +291,14 @@ function CompactFeature({
 }
 
 function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
+  const { t } = useTranslate("buyer");
   const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
     slides.length,
     HERO_CAROUSEL_INTERVAL_MS,
   );
 
   return (
-    <section aria-label="โปรโมชั่นแนะนำ" className="overflow-hidden bg-background">
+    <section aria-label={t("home.hero.aria", "โปรโมชั่นแนะนำ")} className="overflow-hidden bg-background">
       <Carousel
         setApi={setApi}
         opts={{ align: "start", loop: slides.length > 1, slidesToScroll: 1 }}
@@ -306,8 +324,8 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         <CarouselPagination
           ids={slides.map((slide) => slide.id)}
           current={current}
-          label="เลือกโปรโมชั่น"
-          itemLabel="ไปยังโปรโมชั่น"
+          label={t("home.hero.pagination", "เลือกโปรโมชั่น")}
+          itemLabel={t("home.hero.goTo", "ไปยังโปรโมชั่น")}
           onSelect={scrollTo}
           className="my-2.5"
         />
@@ -317,6 +335,7 @@ function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 }
 
 function NewReleases({ products }: { products: HomeProduct[] }) {
+  const { t } = useTranslate("buyer");
   return (
     <section
       className="bg-secondary px-4 py-7 sm:px-6 lg:h-[642px] lg:px-8"
@@ -324,7 +343,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="new-releases-title">
-          <SectionHeader title="New Releases" actionHref="/search?sort=newest" />
+          <SectionHeader title={t("home.sections.newReleases", "New Releases")} actionHref="/search?sort=newest" />
         </div>
         <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
           {products.map((product) => (
@@ -337,6 +356,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
 }
 
 function BrowseByGame({ games }: { games: GameCategory[] }) {
+  const { t } = useTranslate("buyer");
   return (
     <section
       className="bg-background px-4 py-7 sm:px-6 lg:h-[260px] lg:px-8"
@@ -344,7 +364,7 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title="Shop by Game" actionHref="/search" />
+          <SectionHeader title={t("home.sections.shopByGame", "Shop by Game")} actionHref="/search" />
         </div>
         <div className="-mx-1 mt-[14px] -mb-1 flex gap-4 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
@@ -436,6 +456,7 @@ function FeaturedCategories({
 }: {
   categories: ProductCategory[];
 }) {
+  const { t } = useTranslate("buyer");
   const { current, scrollTo, setApi, setIsPaused } = useHomeCarousel(
     categories.length,
   );
@@ -447,7 +468,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title="Featured" />
+          <SectionHeader title={t("home.sections.featured", "Featured")} />
         </div>
         <Carousel
           setApi={setApi}
@@ -498,8 +519,8 @@ function FeaturedCategories({
         <CarouselPagination
           ids={categories.map((category) => category.id)}
           current={current}
-          label="เลือกหมวดหมู่สินค้า"
-          itemLabel="ไปยังหมวดหมู่"
+          label={t("home.featured.pagination", "เลือกหมวดหมู่สินค้า")}
+          itemLabel={t("home.featured.goTo", "ไปยังหมวดหมู่")}
           onSelect={scrollTo}
           className="mt-2.5"
         />
@@ -509,6 +530,7 @@ function FeaturedCategories({
 }
 
 function ExploreGrid({ products }: { products: HomeProduct[] }) {
+  const { t } = useTranslate("buyer");
   return (
     <section
       className="bg-secondary px-4 py-7 sm:px-6 lg:h-[638px] lg:px-8"
@@ -517,8 +539,8 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
           <SectionHeader
-            title="More to Explore"
-            actionLabel="more"
+            title={t("home.sections.explore", "More to Explore")}
+            actionLabel={t("home.sections.more", "more")}
             actionHref="/search"
           />
         </div>
@@ -543,6 +565,7 @@ function SectionError({
   title: string;
   query: { error: unknown; refetch: () => unknown };
 }) {
+  const { t } = useTranslate("buyer");
   return (
     <section
       aria-label={title}
@@ -551,7 +574,7 @@ function SectionError({
       <div className="mx-auto max-w-[1216px]">
         <ErrorState
           error={query.error}
-          title={`โหลด ${title} ไม่สำเร็จ`}
+          title={t("home.sectionError", "โหลด {title} ไม่สำเร็จ", { title })}
           onRetry={() => query.refetch()}
           className="min-h-0 bg-background py-10"
         />
@@ -564,16 +587,28 @@ function SectionError({
 
 /** โหลดไม่ขึ้นหรือยังไม่มีสไลด์ ก็ยังมีสไลด์ตั้งต้น หน้าแรกจะไม่เริ่มด้วยช่องว่าง */
 function HeroSection() {
+  const { t } = useTranslate("buyer");
   const { data, isPending } = useHeroSlides();
 
   if (isPending) {
     return <HeroSkeleton />;
   }
-  return <HeroCarousel slides={data?.length ? data : [FALLBACK_HERO_SLIDE]} />;
+  // ข้อความของสไลด์ตั้งต้นแปลที่นี่ (ค่าคงที่ใน home.mappers แปลเองไม่ได้)
+  const fallback = {
+    ...FALLBACK_HERO_SLIDE,
+    eyebrow: t("home.hero.fallback.eyebrow", "NEW FROM PEGASUS"),
+    title: t("home.hero.fallback.title", "FRESH CARDS.\nREADY TO PLAY."),
+    description: t("home.hero.fallback.description", "Discover the newest singles and sealed releases from verified sellers."),
+    imageAlt: t("home.hero.fallback.imageAlt", "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ"),
+    primaryAction: { label: t("home.hero.fallback.primary", "Shop New Releases"), href: "/search?sort=newest" },
+    secondaryAction: { label: t("home.hero.fallback.secondary", "Explore Cards"), href: "/search" },
+  };
+  return <HeroCarousel slides={data?.length ? data : [fallback]} />;
 }
 
 /** H1 "โค้ดส่วนลด" — ไม่มีโค้ดหรือโหลดไม่ขึ้นก็ซ่อนทั้ง section ไม่ให้กินที่หน้าแรก */
 function PromotionsSection() {
+  const { t } = useTranslate("buyer");
   const query = useFeaturedPromotions();
 
   if (!query.data?.length) return null;
@@ -585,9 +620,9 @@ function PromotionsSection() {
       <div className="mx-auto max-w-[1216px]">
         <div id="home-promotions-title">
           <SectionHeader
-            title="โค้ดส่วนลด"
-            description="กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้"
-            actionLabel="ดูโค้ดของฉัน"
+            title={t("home.promotions.title", "โค้ดส่วนลด")}
+            description={t("home.promotions.description", "กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้")}
+            actionLabel={t("home.promotions.myCodes", "ดูโค้ดของฉัน")}
             actionHref="/account/coupons"
           />
         </div>
@@ -598,54 +633,88 @@ function PromotionsSection() {
 }
 
 function NewReleasesSection() {
+  const { t } = useTranslate("buyer");
   const query = useNewReleases();
 
   if (query.isPending) return <ProductGridSkeleton />;
-  if (query.isError) return <SectionError title="New Releases" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.newReleases", "New Releases")} query={query} />;
   if (query.data.length === 0) return null;
   return <NewReleases products={query.data} />;
 }
 
 function GamesSection() {
+  const { t } = useTranslate("buyer");
   const query = useGames();
 
   if (query.isPending) return <GamesSkeleton />;
-  if (query.isError) return <SectionError title="Shop by Game" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.shopByGame", "Shop by Game")} query={query} />;
   if (query.data.length === 0) return null;
   return <BrowseByGame games={query.data} />;
 }
 
+export function RecommendedShopsSection() {
+  const { t } = useTranslate("buyer");
+  const query = useRecommendedShops();
+  if (query.isError || (!query.isPending && !query.data?.length)) return null;
+
+  return (
+    <section aria-label={t("home.shops.title", "ร้านค้าแนะนำ")} className="min-w-0 overflow-hidden bg-secondary px-4 py-7 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1216px] min-w-0">
+        <SectionHeader title={t("home.shops.title", "ร้านค้าแนะนำ")} description={t("home.shops.description", "ร้านที่ยืนยันตัวตนแล้ว จัดอันดับจากรีวิวของผู้ซื้อ")} />
+        <Carousel opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }} className="mt-[18px] min-w-0">
+          <CarouselContent className="cursor-grab pl-4 pr-4 pt-1 pb-6 active:cursor-grabbing">
+            {query.isPending
+              ? [0, 1, 2, 3].map((index) => (
+                  <CarouselItem key={index} className="basis-[296px]">
+                    <ShopCardSkeleton />
+                  </CarouselItem>
+                ))
+              : query.data?.map((shop) => (
+                  <CarouselItem key={shop.username} className="basis-[296px]">
+                    <ShopCard shop={shop} />
+                  </CarouselItem>
+                ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+    </section>
+  );
+}
+
 function TrendingSection() {
+  const { t } = useTranslate("buyer");
   const query = useTrending();
 
   if (query.isPending) return <ProductRailSkeleton />;
-  if (query.isError) return <SectionError title="Trending Now" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.trending", "Trending Now")} query={query} />;
   if (query.data.length === 0) return null;
   return (
-    <ProductRail title="Trending Now" actionHref="/search" products={query.data} />
+    <ProductRail title={t("home.sections.trending", "Trending Now")} actionHref="/search" products={query.data} />
   );
 }
 
 function FeaturedSection() {
+  const { t } = useTranslate("buyer");
   const query = useFeaturedCategories();
 
   if (query.isPending) return <FeaturedSkeleton />;
-  if (query.isError) return <SectionError title="Featured" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.featured", "Featured")} query={query} />;
   if (query.data.length === 0) return null;
   return <FeaturedCategories categories={query.data} />;
 }
 
 function PegasusPicksSection() {
+  const { t } = useTranslate("buyer");
   const query = usePegasusPicks();
 
   if (query.isPending) return <ProductRailSkeleton description />;
-  if (query.isError) return <SectionError title="Pegasus Picks" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.pegasusPicks", "Pegasus Picks")} query={query} />;
   if (query.data.length === 0) return null;
   return (
     <ProductRail
-      title="Pegasus Picks"
-      description="Curated, verified, and shipped by Pegasus."
-      actionLabel="Shop Pegasus"
+      title={t("home.sections.pegasusPicks", "Pegasus Picks")}
+      description={t("home.picks.description", "Curated, verified, and shipped by Pegasus.")}
+      actionLabel={t("home.picks.action", "Shop Pegasus")}
       actionHref={`/u/${encodeURIComponent(env.pegasusStoreUsername)}`}
       products={query.data}
     />
@@ -653,10 +722,11 @@ function PegasusPicksSection() {
 }
 
 function ExploreSection() {
+  const { t } = useTranslate("buyer");
   const query = useExploreMore();
 
   if (query.isPending) return <ProductGridSkeleton explore />;
-  if (query.isError) return <SectionError title="More to Explore" query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.explore", "More to Explore")} query={query} />;
   if (query.data.length === 0) return null;
   return <ExploreGrid products={query.data} />;
 }
@@ -665,10 +735,15 @@ export function HomeContent() {
   return (
     <div className="bg-secondary font-sans">
       <HeroSection />
+      {/* Flash Sale + แบนเนอร์ลดทั้งหมวด (TCG-683) — เหนือแถบโค้ดส่วนลด (PRM-H1) */}
+      <FeaturedSalesSection />
       <PromotionsSection />
       <NewReleasesSection />
       <GamesSection />
+      <RecommendedShopsSection />
       <TrendingSection />
+      {/* ระบบประมูล [TCG-636] */}
+      <AuctionEndingSoonSection />
       <FeaturedSection />
       <PegasusPicksSection />
       <ExploreSection />

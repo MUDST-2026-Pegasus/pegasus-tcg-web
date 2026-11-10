@@ -47,6 +47,7 @@ import {
   type CardEffectsFormValues,
 } from "../catalog.schema";
 import type { CardEffect, CardEffectType } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 const EFFECT_TYPE_ITEMS: { value: CardEffectType; label: string }[] = [
   { value: "ATTACK", label: "Attack" },
@@ -69,14 +70,15 @@ export function CatalogCardEffectEditor({
   productId,
   onClose,
 }: CatalogCardEffectEditorProps) {
+  const { t } = useTranslate("admin");
   const effects = useCardEffects(productId);
 
   return (
     <QueryBoundary
       query={effects}
       loading={<EffectEditorSkeleton />}
-      errorTitle="โหลด Abilities & Attacks ไม่สำเร็จ"
-      errorMessage="ลองใหม่อีกครั้ง หรือตรวจการเชื่อมต่อ"
+      errorTitle={t("catalog.effects.loadFailed", "โหลด Abilities & Attacks ไม่สำเร็จ")}
+      errorMessage={t("catalog.effects.loadFailedHint", "ลองใหม่อีกครั้ง หรือตรวจการเชื่อมต่อ")}
     >
       {(saved) => (
         <EffectForm productId={productId} saved={saved} onClose={onClose} />
@@ -94,6 +96,7 @@ function EffectForm({
   saved: CardEffect[];
   onClose: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveEffects = useSaveCardEffects(productId);
 
   const {
@@ -104,7 +107,7 @@ function EffectForm({
     reset,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<CardEffectsFormValues>({
-    resolver: zodResolver(cardEffectsSchema),
+    resolver: zodResolver(cardEffectsSchema(t)),
     defaultValues: toCardEffectsForm(saved),
   });
 
@@ -120,7 +123,7 @@ function EffectForm({
       );
       // ค่าที่ backend เก็บจริง (ตัดช่องว่าง เรียงลำดับใหม่) กลายเป็นค่าตั้งต้นใหม่
       reset(toCardEffectsForm(stored));
-      toast.add({ type: "success", title: "บันทึก Abilities & Attacks แล้ว" });
+      toast.add({ type: "success", title: t("catalog.effects.saved", "บันทึก Abilities & Attacks แล้ว") });
     } catch (error) {
       // violation มาเป็น `effects[2].name` — แปลงเป็นชื่อช่องของฟอร์มก่อนแปะ
       if (isApiError(error) && error.violations.length > 0) {
@@ -135,7 +138,7 @@ function EffectForm({
       setError("root.server", {
         message: catalogErrorMessage(
           error,
-          "บันทึก Abilities & Attacks ไม่สำเร็จ ลองใหม่อีกครั้ง",
+          t("catalog.effects.saveFailed", "บันทึก Abilities & Attacks ไม่สำเร็จ ลองใหม่อีกครั้ง"),
         ),
       });
     }
@@ -161,7 +164,7 @@ function EffectForm({
 
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
-            เรียงตามลำดับบนการ์ด · ภาษาอังกฤษ
+            {t("catalog.effects.hint", "เรียงตามลำดับบนการ์ด · ภาษาอังกฤษ")}
           </p>
           <Button
             type="button"
@@ -169,15 +172,15 @@ function EffectForm({
             className="rounded-md px-2.5"
             onClick={() => append(emptyCardEffectForm())}
           >
-            + เพิ่มรายการ
+            {t("catalog.effects.add", "+ เพิ่มรายการ")}
           </Button>
         </div>
 
         {fields.length === 0 ? (
           <EmptyState
             icon={Sparkles}
-            title="ยังไม่มี Abilities & Attacks"
-            description="เพิ่มความสามารถ ท่าโจมตี หรือกฎพิเศษของการ์ด เพื่อแสดงในหน้าสินค้า"
+            title={t("catalog.effects.emptyTitle", "ยังไม่มี Abilities & Attacks")}
+            description={t("catalog.effects.emptyDescription", "เพิ่มความสามารถ ท่าโจมตี หรือกฎพิเศษของการ์ด เพื่อแสดงในหน้าสินค้า")}
             className="min-h-60"
           />
         ) : (
@@ -200,11 +203,11 @@ function EffectForm({
 
       <div className="flex items-center justify-end gap-2 border-t border-border px-6 py-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          ปิด
+          {t("catalog.form.close", "ปิด")}
         </Button>
         <Button type="submit" disabled={isSubmitting || !isDirty}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          บันทึก
+          {t("catalog.form.save", "บันทึก")}
         </Button>
       </div>
     </form>
@@ -228,6 +231,7 @@ function EffectRow({
   onMove: (to: number) => void;
   onRemove: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const effectType = useWatch({ control, name: `effects.${index}.effectType` });
   const fieldErrors = errors.effects?.[index];
   const id = (name: string) => `effects-${index}-${name}`;
@@ -250,7 +254,7 @@ function EffectRow({
               }}
             >
               <SelectTrigger
-                aria-label={`ประเภทรายการที่ ${index + 1}`}
+                aria-label={t("catalog.effects.typeOf", "ประเภทรายการที่ {n}", { n: index + 1 })}
                 className="w-32"
                 onBlur={field.onBlur}
               >
@@ -273,7 +277,7 @@ function EffectRow({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`เลื่อนรายการที่ ${index + 1} ขึ้น`}
+            aria-label={t("catalog.effects.moveUp", "เลื่อนรายการที่ {n} ขึ้น", { n: index + 1 })}
             disabled={index === 0}
             onClick={() => onMove(index - 1)}
           >
@@ -283,7 +287,7 @@ function EffectRow({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`เลื่อนรายการที่ ${index + 1} ลง`}
+            aria-label={t("catalog.effects.moveDown", "เลื่อนรายการที่ {n} ลง", { n: index + 1 })}
             disabled={index === count - 1}
             onClick={() => onMove(index + 1)}
           >
@@ -293,7 +297,7 @@ function EffectRow({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`ลบรายการที่ ${index + 1}`}
+            aria-label={t("catalog.effects.remove", "ลบรายการที่ {n}", { n: index + 1 })}
             onClick={onRemove}
           >
             <Trash2 />
@@ -304,7 +308,7 @@ function EffectRow({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
           <Field data-invalid={Boolean(fieldErrors?.name) || undefined}>
-            <FieldLabel htmlFor={id("name")}>ชื่อ</FieldLabel>
+            <FieldLabel htmlFor={id("name")}>{t("catalog.effects.name", "ชื่อ")}</FieldLabel>
             <Input
               id={id("name")}
               maxLength={120}
@@ -317,7 +321,7 @@ function EffectRow({
 
           {effectType === "ATTACK" && (
             <Field data-invalid={Boolean(fieldErrors?.damage) || undefined}>
-              <FieldLabel htmlFor={id("damage")}>ดาเมจ</FieldLabel>
+              <FieldLabel htmlFor={id("damage")}>{t("catalog.effects.damage", "ดาเมจ")}</FieldLabel>
               <Input
                 id={id("damage")}
                 inputMode="numeric"
@@ -332,7 +336,7 @@ function EffectRow({
 
         {effectType === "ATTACK" && (
           <Field data-invalid={Boolean(fieldErrors?.energyCost) || undefined}>
-            <FieldLabel htmlFor={id("energyCost")}>พลังงานที่ใช้</FieldLabel>
+            <FieldLabel htmlFor={id("energyCost")}>{t("catalog.effects.energyCost", "พลังงานที่ใช้")}</FieldLabel>
             <Input
               id={id("energyCost")}
               placeholder="Grass, Lightning, Metal"
@@ -340,14 +344,14 @@ function EffectRow({
               {...register(`effects.${index}.energyCost`)}
             />
             <FieldDescription>
-              คั่นด้วยจุลภาค ตามลำดับบนการ์ด
+              {t("catalog.effects.energyHint", "คั่นด้วยจุลภาค ตามลำดับบนการ์ด")}
             </FieldDescription>
             <FieldError errors={[fieldErrors?.energyCost]} />
           </Field>
         )}
 
         <Field data-invalid={Boolean(fieldErrors?.effectText) || undefined}>
-          <FieldLabel htmlFor={id("effectText")}>คำอธิบาย</FieldLabel>
+          <FieldLabel htmlFor={id("effectText")}>{t("catalog.form.description", "คำอธิบาย")}</FieldLabel>
           <Textarea
             id={id("effectText")}
             rows={3}
@@ -358,7 +362,7 @@ function EffectRow({
         </Field>
 
         <Field data-invalid={Boolean(fieldErrors?.sourceUrl) || undefined}>
-          <FieldLabel htmlFor={id("sourceUrl")}>ลิงก์แหล่งที่มา</FieldLabel>
+          <FieldLabel htmlFor={id("sourceUrl")}>{t("catalog.effects.sourceUrl", "ลิงก์แหล่งที่มา")}</FieldLabel>
           <Input
             id={id("sourceUrl")}
             type="url"

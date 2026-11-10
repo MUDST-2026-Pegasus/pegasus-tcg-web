@@ -8,6 +8,7 @@ import type { PageResponse } from "@/lib/api";
 import { renderWithProviders } from "@/test/utils";
 
 vi.mock("@/features/admin/catalog.api", () => ({
+  getCardListings: vi.fn(() => new Promise(() => {})),
   getGames: vi.fn(),
   getGameAttributes: vi.fn(),
   getCardSets: vi.fn(),
@@ -48,6 +49,9 @@ const mockProducts: ProductSummary[] = [
     variantCount: 2,
     lowestPrice: 150,
     listingCount: 3,
+    sellerCount: 2,
+    availableQuantity: 9,
+    blockedListingCount: 1,
   },
 ];
 

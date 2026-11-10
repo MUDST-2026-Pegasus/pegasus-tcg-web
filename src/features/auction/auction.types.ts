@@ -16,8 +16,6 @@ import type { ListingCard } from "@/features/seller/products/products.types";
 //   POST   /auctions/:id/bids                PlaceBidRequest               → BidPlaced (201)
 //   POST   /auctions/:id/buy-now                                           → AuctionWin
 //   POST   /auctions/:id/checkout            AuctionCheckoutRequest        → CheckoutResponse   (header Idempotency-Key)
-//   POST   /auctions/:id/second-chance/accept                              → AuctionWin
-//   POST   /auctions/:id/second-chance/decline                             → null
 //   GET    /me/auctions                      ?tab&page&size                → MyAuctionPage
 //   GET    /sellers/me/auctions              ?status&q&page&size           → SellerAuctionPage
 //   GET    /sellers/me/auctions/eligible-units ?q&gameId&condition&page&size → EligibleUnitPage
@@ -25,7 +23,6 @@ import type { ListingCard } from "@/features/seller/products/products.types";
 //   GET    /sellers/me/auctions/:id                                        → SellerAuctionDetail
 //   PATCH  /sellers/me/auctions/:id          UpdateAuctionRequest          → SellerAuctionDetail
 //   POST   /sellers/me/auctions/:id/cancel                                 → SellerAuctionDetail
-//   POST   /sellers/me/auctions/:id/decision SellerDecisionRequest         → SellerAuctionDetail
 //   GET    /admin/auctions                   ?tab&q&page&size              → AdminAuctionPage
 //   GET    /admin/auctions/:id                                             → AdminAuctionDetail
 //   POST   /admin/auctions/:id/suspend       SuspendAuctionRequest         → AdminAuctionDetail
@@ -38,8 +35,6 @@ import type { ListingCard } from "@/features/seller/products/products.types";
 export type AuctionStatus =
   | "LIVE"
   | "AWAITING_PAYMENT"
-  | "AWAITING_SELLER_DECISION"
-  | "OFFERED_TO_SECOND"
   | "SOLD"
   | "UNSOLD"
   | "CANCELLED"
@@ -48,22 +43,18 @@ export type AuctionStatus =
 /** `model/BidStatus.java` — บิดถอนไม่ได้ ถูกยกเลิกได้อย่างเดียวตอนแอดมินระงับ */
 export type BidStatus = "ACTIVE" | "CANCELLED";
 
-/** `model/AuctionOfferStatus.java` — ข้อเสนอให้ผู้บิดอันดับ 2 */
-export type AuctionOfferStatus = "PENDING" | "ACCEPTED" | "DECLINED" | "EXPIRED";
-
 /** `model/AuctionViewerState.java` — สถานะของผู้ใช้คนนี้ในประมูล (คำนวณทุกครั้ง ไม่ได้เก็บ) */
 export type AuctionViewerState =
   | "LEADING"
   | "OUTBID"
   | "WON_AWAITING_PAYMENT"
-  | "SECOND_CHANCE"
   | "WON"
   | "LOST";
 
 /**
  * error code ของระบบประมูล (`exception/ErrorCode.java`) พร้อมข้อความใน Figma AUC-B3-E / S3-E
  * - `AUCTION_NOT_FOUND` 404
- * - `AUCTION_CLOSED` 409 — ประมูลจบแล้ว / เลยเวลาชำระหรือเลือกแล้ว
+ * - `AUCTION_CLOSED` 409 — ประมูลจบแล้ว / เลยเวลาชำระแล้ว
  * - `BID_TOO_LOW` 409 — "ราคาต่ำกว่าขั้นต่ำ" หรือ "มีคนบิดก่อนคุณ" (`details.minNextBid`, `details.currentPrice`)
  * - `BIDDING_BANNED` 403 — "ถูกห้ามบิดถึง …" (`details.bannedUntil`)
  * - `OWN_AUCTION` 403 — "บิดประมูลของตัวเองไม่ได้"
@@ -74,8 +65,6 @@ export type AuctionViewerState =
  * - `AUCTION_END_TOO_FAR` 400 — "เวลาปิดไกลเกินไป"
  * - `BUY_NOW_BELOW_START` 400 — "ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น"
  * - `UNIT_NOT_AVAILABLE` 409 — "การ์ดใบนี้ไม่ว่าง"
- * - `NO_SECOND_BIDDER` 409 — ไม่มีผู้บิดอันดับ 2
- * - `OFFER_EXPIRED` 409 — ข้อเสนอหมดเวลาแล้ว
  *
  * ใช้ของเดิมด้วย: `EMAIL_NOT_VERIFIED` ("ยังไม่ได้ยืนยันอีเมล"), `SELLER_NOT_VERIFIED` ("ร้านยังไม่ผ่านการยืนยัน")
  */
@@ -91,9 +80,7 @@ export type AuctionErrorCode =
   | "AUCTION_END_TOO_SOON"
   | "AUCTION_END_TOO_FAR"
   | "BUY_NOW_BELOW_START"
-  | "UNIT_NOT_AVAILABLE"
-  | "NO_SECOND_BIDDER"
-  | "OFFER_EXPIRED";
+  | "UNIT_NOT_AVAILABLE";
 
 /** เหตุที่บิดไม่ได้ใน `Viewer.blockers` */
 export type BidBlocker = "EMAIL_NOT_VERIFIED" | "NO_SHIPPING_ADDRESS" | "BIDDING_BANNED" | "OWN_AUCTION";
@@ -104,11 +91,17 @@ export type BidBlocker = "EMAIL_NOT_VERIFIED" | "NO_SHIPPING_ADDRESS" | "BIDDING
 export type AuctionFilter = "ENDING_SOON" | "BUY_NOW" | "NO_BIDS" | "NEW";
 export type AuctionSort = "ENDING_SOON" | "NEWEST" | "PRICE_ASC" | "PRICE_DESC" | "MOST_BIDS";
 /** แท็บในหน้า "การประมูลของฉัน" ฝั่งผู้ซื้อ (W1) */
-export type MyAuctionTab = "ALL" | "BIDDING" | "TO_PAY" | "SECOND_CHANCE" | "WON" | "LOST";
+export type MyAuctionTab = "ALL" | "BIDDING" | "TO_PAY" | "WON" | "LOST";
 
 export type AuctionListParams = {
   filter?: AuctionFilter;
   gameId?: number;
+  /** ประมูลของการ์ดรุ่นนี้ (กล่องในหน้ารายละเอียดสินค้า) [TCG-636] */
+  variantId?: number;
+  /**
+   * ประมูลของร้านนี้ (แท็บ "ประมูล" ในหน้าร้าน) — หน้าร้านรู้แค่ username [TCG-636]
+   */
+  sellerUsername?: string;
   q?: string;
   sort?: AuctionSort;
   page?: number;
@@ -144,6 +137,8 @@ export type AuctionBid = {
   mine: boolean;
   amount: number;
   placedAt: string;
+  /** ถูกยกเลิกเพราะแอดมินระงับประมูล — ยังแสดงในประวัติแต่ขีดฆ่า */
+  cancelled?: boolean;
 };
 
 /** การ์ดประมูลหนึ่งใบในหน้ารวม (B1) */
@@ -169,16 +164,6 @@ export type AuctionPage = {
   serverTime: string;
 };
 
-/** ข้อเสนอจากผู้ขายเมื่อผู้ใช้เป็นผู้บิดอันดับ 2 (B3-G) */
-export type SecondChanceOffer = {
-  amount: number;
-  shippingFee: number;
-  /** amount + shippingFee */
-  total: number;
-  status: AuctionOfferStatus;
-  expiresAt: string;
-};
-
 /** ผู้ใช้ที่ล็อกอินอยู่ยืนตรงไหนในประมูลนี้ (B3-D/E/F) — `null` ถ้าเป็น guest */
 export type AuctionViewer = {
   /** `null` = ยังไม่เคยบิด */
@@ -191,8 +176,6 @@ export type AuctionViewer = {
   bannedUntil: string | null;
   /** มากับ `WON_AWAITING_PAYMENT` */
   paymentDueAt: string | null;
-  /** มากับ `SECOND_CHANCE` */
-  offer: SecondChanceOffer | null;
 };
 
 /** หน้ารายละเอียดประมูล (B2) */
@@ -228,8 +211,20 @@ export type AuctionDetail = {
   /** ใหม่สุดก่อน ไม่เกิน 5 รายการ — ทั้งหมดอยู่ที่ `/auctions/:id/bids` */
   recentBids: AuctionBid[];
   viewer: AuctionViewer | null;
+  /**
+   * ชื่อผู้ชนะแบบปิดบัง ("n***t") — B4-D "ผู้ชนะ n***t · 12 บิด" · `null` = ยังไม่มีผู้ชนะ (ซ่อน)
+   */
+  winnerAlias?: string | null;
+  /**
+   * เหตุผลที่แอดมินระงับ — B4-G "เหตุผล: …" · มาเฉพาะ SUSPENDED ไม่งั้น `null` (ซ่อน)
+   */
+  suspendReason?: string | null;
+  /** กติกาปัจจุบันที่แอดมินตั้ง — ไม่มี (fixture เก่า) ใช้ `DEFAULT_AUCTION_RULES` */
+  rules?: AuctionRules;
   serverTime: string;
 };
+
+export type AuctionRules = { paymentHours: number; strikeLimit: number; banDays: number };
 
 export type BidHistory = {
   page: PageResponse<AuctionBid>;
@@ -253,7 +248,7 @@ export type BidPlaced = {
   serverTime: string;
 };
 
-/** ได้สิทธิ์ซื้อแล้ว ต้องชำระใน 24 ชม. ผ่าน `POST /auctions/:id/checkout` — มาจากซื้อทันทีหรือรับข้อเสนออันดับ 2 */
+/** ได้สิทธิ์ซื้อแล้ว ต้องชำระใน 24 ชม. ผ่าน `POST /auctions/:id/checkout` — มาจากซื้อทันที */
 export type AuctionWin = {
   auctionId: number;
   auctionNumber: string;
@@ -284,17 +279,18 @@ export type MyAuction = {
   state: AuctionViewerState;
   /** บิดสูงสุดตอนยังเปิด / ราคาปิดเมื่อจบ */
   currentPrice: number;
-  /** บิดสูงสุดของผู้ใช้ — กรณี SECOND_CHANCE คือราคาที่เสนอ */
+  /** บิดสูงสุดของผู้ใช้ */
   myHighestBid: number;
-  shippingFee: number;
-  /** ราคา + ค่าส่ง — มากับ WON_AWAITING_PAYMENT และ SECOND_CHANCE */
+  /** `null` = ร้านไม่มีตัวเลือกจัดส่งที่เปิดอยู่ (ชำระไม่ได้จนกว่าร้านจะตั้ง) */
+  shippingFee: number | null;
+  /** ราคา + ค่าส่ง — มากับ WON_AWAITING_PAYMENT */
   totalDue: number | null;
   /** มาตอนยังเปิด ใช้กับปุ่ม "บิด ฿X" */
   minNextBid: number | null;
   /** ยังเปิดและเคยต่อเวลาแล้ว → "ต่อเวลาอยู่" */
   extended: boolean;
   endsAt: string;
-  /** กำหนดชำระ (WON_AWAITING_PAYMENT) หรือเวลาตอบข้อเสนอ (SECOND_CHANCE) */
+  /** กำหนดชำระ (WON_AWAITING_PAYMENT) */
   deadline: string | null;
   /** มีเมื่อกด checkout แล้ว */
   orderId: number | null;
@@ -307,6 +303,11 @@ export type MyAuctionPage = {
   unpaidStrikes: number;
   strikeLimit: number;
   bannedUntil: string | null;
+  /**
+   * ชื่อการ์ดของครั้งล่าสุดที่ไม่ชำระ — ใช้ในแบนเนอร์ B3-H "{การ์ด} · คำสั่งซื้อถูกยกเลิกแล้ว"
+   * `null` / ไม่ส่งมา = ซ่อนชื่อการ์ด
+   */
+  lastStrikeCardName?: string | null;
   serverTime: string;
 };
 
@@ -338,7 +339,7 @@ export type SellerAuctionRow = {
   buyNowAvailable: boolean;
   status: AuctionStatus;
   endsAt: string;
-  /** กำหนดชำระ / เวลาที่ผู้ขายต้องเลือก / เวลาที่อันดับ 2 ต้องตอบ แล้วแต่สถานะ */
+  /** กำหนดชำระ (AWAITING_PAYMENT) */
   deadline: string | null;
   /** มีเมื่อมีคำสั่งซื้อแล้ว → ปุ่ม "ดูคำสั่งซื้อ" */
   orderId: number | null;
@@ -400,46 +401,25 @@ export type UpdateAuctionRequest = {
   sellerNote: string | null;
 };
 
-export type DecisionChoice = "OFFER_TO_SECOND" | "RELIST";
-/** body ของ `POST /sellers/me/auctions/:id/decision` */
-export type SellerDecisionRequest = { choice: DecisionChoice };
-
-export type SecondBidder = {
-  bidderAlias: string;
-  amount: number;
-  /** รายรับถ้าขายให้อันดับ 2 หลังหักค่าคอม */
-  estimatedPayout: number;
-};
-
-/** ผู้ชนะไม่จ่าย รอผู้ขายเลือก (S3-H, S4b) — ไม่เลือกภายใน `decideBy` การ์ดกลับเข้าสต็อก */
-export type PendingDecision = {
-  winnerAlias: string;
-  winningBid: number;
-  cancelledOrderNumber: string;
-  decideBy: string;
-  /** `null` = มีผู้บิดคนเดียว → ปุ่ม "เสนอขายให้อันดับ 2" กดไม่ได้ */
-  secondBidder: SecondBidder | null;
-};
-
-export type SentOffer = {
-  bidderAlias: string;
-  amount: number;
-  status: AuctionOfferStatus;
-  expiresAt: string;
-};
-
-/** รายละเอียดประมูลฝั่งผู้ขาย (S4, S4b) */
+/** รายละเอียดประมูลฝั่งผู้ขาย (S4) */
 export type SellerAuctionDetail = {
   id: number;
   auctionNumber: string;
   status: AuctionStatus;
   item: AuctionItem;
   unitLabel: string;
+  /** การ์ดใบนี้ในสต็อก — ใช้ตอน "ประมูลใหม่" · `null` = การ์ดไม่อยู่แล้ว [TCG-639] */
+  unitUid: string | null;
   startingPrice: number;
   bidIncrement: number;
   currentPrice: number;
   bidCount: number;
   bidderCount: number;
+  /**
+   * คนที่กดติดตามประมูลนี้ — การ์ด "ผู้ติดตาม" ใน S4 [TCG-634]
+   * ระบบติดตามประมูลยังไม่มีใน BE จึงยังไม่ส่งมา · ไม่ส่ง = ซ่อนการ์ด [TCG-637]
+   */
+  watcherCount?: number;
   /** ราคาปัจจุบันหลังหักค่าคอม */
   estimatedPayout: number;
   /** เท่าการขายปกติ เช่น 5 */
@@ -459,11 +439,11 @@ export type SellerAuctionDetail = {
   firstBidAt: string | null;
   winnerAlias: string | null;
   paymentDueAt: string | null;
-  decision: PendingDecision | null;
-  offer: SentOffer | null;
   orderId: number | null;
   /** ใหม่สุดก่อน ชื่อปิดบัง */
   bids: AuctionBid[];
+  /** เหตุผลที่แอดมินระงับ — มาเฉพาะ SUSPENDED ไม่งั้น `null` [TCG-640] */
+  suspendReason: string | null;
   serverTime: string;
 };
 
@@ -478,14 +458,21 @@ export type AdminAuctionKpis = {
   live: number;
   endingWithinHour: number;
   awaitingPayment: number;
-  offeredToSecond: number;
   suspendedLast30Days: number;
+  /**
+   * ยอดขายจากประมูล 30 วัน — ภาพรวมแพลตฟอร์มของแอดมิน [TCG-636 · TCG-640]
+   */
+  soldLast30Days: number;
 };
 
 export type AdminAuctionRow = {
   id: number;
   auctionNumber: string;
   cardName: string;
+  /**
+   * รูปในคอลัมน์ "การ์ด / รหัส" ของ A1 [TCG-635 · TCG-640]
+   */
+  cardImageUrl: string | null;
   shopName: string;
   sellerUsername: string;
   currentPrice: number;
@@ -506,6 +493,12 @@ export type AdminAuctionPage = {
   kpis: AdminAuctionKpis;
   /** แบนเนอร์เหนือตาราง */
   flaggedCount: number;
+  /**
+   * แบนเนอร์ A1 แยกนับ "ถูกรายงาน" กับ "รูปแบบบิดผิดปกติ" [TCG-635]
+   * BE ยังเป็น 0 จนกว่าจะมีระบบรายงานและกฎตรวจจับ — แบนเนอร์จึงไม่ขึ้น [TCG-640]
+   */
+  reportedCount: number;
+  suspiciousCount: number;
   serverTime: string;
 };
 
@@ -595,3 +588,18 @@ export type BannedBidderPage = {
 
 /** body ของ `POST /admin/auctions/banned-bidders/:userId/lift` (ไม่บังคับ) */
 export type LiftBiddingBanRequest = { reason: string | null };
+
+// ---------- คำสั่งซื้อที่มาจากการประมูล [TCG-636] ----------
+
+/** `sales_order.source` — `CART` = ซื้อปกติ, `AUCTION` = ชนะประมูล / ซื้อทันที */
+export type OrderSource = "CART" | "AUCTION";
+
+/**
+ * ช่องที่ BE ส่งมากับคำสั่งซื้อ (`OrderDetailsResponse`, `SellerOrderViews.Summary`, `AdminOrderViews.Summary`)
+ * ไม่บังคับ — API เก่าไม่ส่งมา ถือว่าเป็น `CART`
+ */
+export type OrderAuctionSource = {
+  source?: OrderSource | null;
+  auctionId?: number | null;
+  auctionNumber?: string | null;
+};

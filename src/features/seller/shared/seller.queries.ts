@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import * as sellerApi from "./seller.api";
 import { publishBlockedReason } from "./seller.format";
+import { translate } from "@/lib/i18n";
 
 export const sellerKeys = {
   all: ["seller"] as const,
@@ -35,7 +36,7 @@ export function usePublishPermission(): PublishPermission {
   if (profile === undefined) {
     return {
       canPublish: false,
-      reason: isError ? "โหลดสถานะร้านไม่สำเร็จ" : "กำลังตรวจสอบสถานะร้าน",
+      reason: isError ? translate("seller", "publishBlocked.loadFailed", "โหลดสถานะร้านไม่สำเร็จ") : translate("seller", "publishBlocked.checking", "กำลังตรวจสอบสถานะร้าน"),
     };
   }
   return {
@@ -43,3 +44,7 @@ export function usePublishPermission(): PublishPermission {
     reason: publishBlockedReason(profile),
   };
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-554]
+// @tolgee-key {"key": "publishBlocked.loadFailed", "ns": "seller", "defaultValue": "โหลดสถานะร้านไม่สำเร็จ"}
+// @tolgee-key {"key": "publishBlocked.checking", "ns": "seller", "defaultValue": "กำลังตรวจสอบสถานะร้าน"}

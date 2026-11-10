@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 
 import {
   countReviews,
@@ -24,6 +24,7 @@ import {
 import { FinanceStatStrip, type FinanceStat } from "./FinanceShared";
 import { ReviewModerationCard } from "./ReviewModerationCard";
 import { ReviewSellerCard } from "./ReviewSellerCard";
+import { intlLocale, translateError } from "@/lib/i18n";
 
 const PAGE_SIZE = 10;
 const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"];
@@ -73,7 +74,7 @@ export function AdminReviewsContent() {
           toast.add({
             type: "error",
             title: "เปลี่ยนการแสดงรีวิวไม่สำเร็จ",
-            description: getErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            description: translateError(error, "กรุณาลองอีกครั้ง"),
           }),
       },
     );
@@ -176,7 +177,7 @@ export function AdminReviewsContent() {
           <section aria-label="รายการรีวิว" className="flex w-full min-w-0 flex-1 flex-col gap-3">
             <div className="flex items-center gap-2">
               <h2 className="flex-1 text-sm font-semibold text-foreground">
-                รีวิวของ {username} ({filtered.length.toLocaleString("th-TH")})
+                รีวิวของ {username} ({filtered.length.toLocaleString(intlLocale())})
               </h2>
               <p className="text-[11px] text-[#9aa5ad]">เรียงตาม: ใหม่ไปเก่า</p>
             </div>

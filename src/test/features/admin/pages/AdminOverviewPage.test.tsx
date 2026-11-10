@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 
+import * as auditApi from "@/features/admin/audit.api";
 import * as metricsApi from "@/features/admin/metrics.api";
 import type { AdminOverview } from "@/features/admin/metrics.types";
 import { AdminOverviewPage } from "@/features/admin/pages/AdminOverviewPage";
@@ -8,6 +9,11 @@ import { renderWithProviders } from "@/test/utils";
 
 vi.mock("@/features/admin/metrics.api", () => ({
   getOverview: vi.fn(),
+}));
+
+vi.mock("@/features/admin/audit.api", () => ({
+  getAuditLogs: vi.fn(),
+  getAuditSummary: vi.fn(),
 }));
 
 function mockOverviewData(overrides: Partial<AdminOverview["stats"]> = {}): AdminOverview {
@@ -30,6 +36,9 @@ function mockOverviewData(overrides: Partial<AdminOverview["stats"]> = {}): Admi
         averageRatePercent: 3,
       },
       promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
+      saleSubsidy: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
+      liveAuctions: 0,
+      auctionSalesLast30Days: 0,
       ...overrides,
     },
     monthlySales: [
@@ -52,6 +61,25 @@ function mockOverviewData(overrides: Partial<AdminOverview["stats"]> = {}): Admi
 describe("AdminOverviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(auditApi.getAuditLogs).mockResolvedValue({
+      items: [
+        {
+          id: 1,
+          occurredAt: new Date().toISOString(),
+          actor: { userId: 7, username: "admin_kant", displayName: "Kant" },
+          action: "SELLER_VERIFICATION_APPROVED",
+          targetType: "SELLER_VERIFICATION",
+          targetId: "12",
+          summary: "Approved seller verification #12",
+          metadata: {},
+          ipAddress: null,
+        },
+      ],
+      page: 0,
+      size: 5,
+      totalItems: 1,
+      totalPages: 1,
+    });
   });
 
   it("renders page header and stat cards with formatted values", async () => {
@@ -71,6 +99,13 @@ describe("AdminOverviewPage", () => {
     // Top sellers
     expect(screen.getByText("cardmaster")).toBeInTheDocument();
     expect(screen.getByText("dragontcg")).toBeInTheDocument();
+
+    // กิจกรรมล่าสุด — 5 รายการล่าสุดจาก audit log
+    expect(screen.getByText("กิจกรรมล่าสุด")).toBeInTheDocument();
+    expect(await screen.findByText("admin_kant")).toBeInTheDocument();
+    expect(screen.getByText("อนุมัติคำขอเปิดร้าน · คำขอเปิดร้าน #12")).toBeInTheDocument();
+    expect(auditApi.getAuditLogs).toHaveBeenCalledWith({ page: 0, size: 5 });
+    expect(screen.getByRole("link", { name: "ดูบันทึกกิจกรรมทั้งหมด" })).toHaveAttribute("href", "/admin/activity-log");
   });
 
   it("renders error boundary state when metrics query fails", async () => {

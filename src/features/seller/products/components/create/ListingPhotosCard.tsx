@@ -23,6 +23,7 @@ import {
   type ListingFormValues,
 } from "../../listing-form.schema";
 import type { ListingPhoto } from "../../products.types";
+import { useTranslate } from "@/lib/i18n";
 
 type ListingPhotosCardProps = {
   form: UseFormReturn<ListingFormValues>;
@@ -43,6 +44,7 @@ export function ListingPhotosCard({
   upload,
   existing = [],
 }: ListingPhotosCardProps) {
+  const { t } = useTranslate("seller");
   const imageKeys = useWatch({ control: form.control, name: "imageKeys" });
   const { errors, isSubmitted } = useFormState({ control: form.control });
   const error = errors.imageKeys;
@@ -75,10 +77,9 @@ export function ListingPhotosCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-foreground">รูปการ์ดจริง</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("products.create.photos.title", "รูปการ์ดจริง")}</h2>
         <p className="text-xs text-gray-500">
-          ถ่ายใบที่จะส่งจริง หน้า-หลัง และมุมที่มีตำหนิ · รูปแรกเป็นรูปหลักบนหน้าประกาศ ·
-          สูงสุด {MAX_LISTING_PHOTOS} รูป
+          {t("products.create.photos.subtitle", "ถ่ายใบที่จะส่งจริง หน้า-หลัง และมุมที่มีตำหนิ · รูปแรกเป็นรูปหลักบนหน้าประกาศ · สูงสุด {max} รูป", { max: MAX_LISTING_PHOTOS })}
         </p>
       </div>
 
@@ -99,7 +100,7 @@ export function ListingPhotosCard({
                   {src ? (
                     <img
                       src={src}
-                      alt={`รูปที่ ${index + 1}`}
+                      alt={t("products.create.photos.alt", "รูปที่ {number}", { number: index + 1 })}
                       className="size-full object-cover"
                     />
                   ) : (
@@ -109,7 +110,7 @@ export function ListingPhotosCard({
                   )}
                   {isPrimary ? (
                     <Badge className="absolute top-1.5 left-1.5 rounded-full">
-                      รูปหลัก
+                      {t("products.create.photos.main", "รูปหลัก")}
                     </Badge>
                   ) : null}
                 </div>
@@ -123,13 +124,13 @@ export function ListingPhotosCard({
                     onClick={() => makePrimary(key)}
                   >
                     <Star data-icon="inline-start" />
-                    {isPrimary ? "รูปหลัก" : "ตั้งเป็นหลัก"}
+                    {isPrimary ? t("products.create.photos.main", "รูปหลัก") : t("products.create.photos.setMain", "ตั้งเป็นหลัก")}
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`เอารูปที่ ${index + 1} ออก`}
+                    aria-label={t("products.create.photos.remove", "เอารูปที่ {number} ออก", { number: index + 1 })}
                     className="text-destructive hover:text-destructive"
                     onClick={() => removeKey(key)}
                   >
@@ -162,7 +163,7 @@ export function ListingPhotosCard({
                     <div className="flex items-center gap-2">
                       <Progress
                         value={percent}
-                        aria-label={`กำลังอัปโหลด ${item.file.name}`}
+                        aria-label={t("products.create.photos.uploading", "กำลังอัปโหลด {name}", { name: item.file.name })}
                         className="flex-1 [&_[data-slot=progress-track]]:h-1.5"
                       />
                       <span className="text-[11px] text-muted-foreground tabular-nums">
@@ -185,7 +186,7 @@ export function ListingPhotosCard({
                     onClick={() => upload.retry(item.id)}
                   >
                     <RotateCw data-icon="inline-start" />
-                    ลองใหม่
+                    {t("actions.retry", "ลองใหม่", { ns: "common" })}
                   </Button>
                 ) : null}
                 <Button
@@ -194,8 +195,8 @@ export function ListingPhotosCard({
                   size="icon-sm"
                   aria-label={
                     item.status === "uploading"
-                      ? `ยกเลิกการอัปโหลด ${item.file.name}`
-                      : `เอา ${item.file.name} ออก`
+                      ? t("products.create.photos.cancelUpload", "ยกเลิกการอัปโหลด {name}", { name: item.file.name })
+                      : t("products.create.photos.removeFile", "เอา {name} ออก", { name: item.file.name })
                   }
                   onClick={() => upload.remove(item.id)}
                 >
@@ -219,8 +220,8 @@ export function ListingPhotosCard({
         <CloudUpload aria-hidden className="size-6 text-muted-foreground" />
         <p className="text-xs font-medium text-foreground">
           {isFull
-            ? `ครบ ${MAX_LISTING_PHOTOS} รูปแล้ว เอารูปเดิมออกก่อนถ้าจะเพิ่ม`
-            : "ลากรูปมาวางที่นี่ หรือ คลิกเพื่อเลือกรูป"}
+            ? t("products.create.photos.full", "ครบ {max} รูปแล้ว เอารูปเดิมออกก่อนถ้าจะเพิ่ม", { max: MAX_LISTING_PHOTOS })
+            : t("products.create.photos.drop", "ลากรูปมาวางที่นี่ หรือ คลิกเพื่อเลือกรูป")}
         </p>
         <p className="text-[11px] text-muted-foreground">{upload.hint}</p>
         <Button
@@ -230,7 +231,7 @@ export function ListingPhotosCard({
           disabled={isFull}
           className="rounded-md px-2.5"
         >
-          เลือกรูป
+          {t("products.create.photos.choose", "เลือกรูป")}
         </Button>
       </FileDropzone>
 

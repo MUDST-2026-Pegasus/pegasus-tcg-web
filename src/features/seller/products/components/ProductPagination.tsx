@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 /** จำนวนปุ่มเลขหน้าที่โชว์พร้อมกัน — หน้าปัจจุบันอยู่กลางเท่าที่ทำได้ */
 const WINDOW = 5;
@@ -34,17 +35,18 @@ export function ProductPagination({
   disabled,
   onPageChange,
 }: ProductPaginationProps) {
+  const { t } = useTranslate("seller");
   const from = rowsOnPage === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = (page - 1) * pageSize + rowsOnPage;
 
   return (
     <div className="flex items-center justify-between gap-4 border-t border-muted px-5 py-3.5">
       <p className="text-xs text-gray-500">
-        แสดง {from}–{to} จาก {totalItems} รายการ
+        {t("products.pagination.range", "แสดง {from}–{to} จาก {total} รายการ", { from, to, total: totalItems })}
       </p>
 
       {totalPages > 1 ? (
-        <nav aria-label="เปลี่ยนหน้า" className="flex items-center gap-1.5">
+        <nav aria-label={t("products.pagination.label", "เปลี่ยนหน้า")} className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -52,7 +54,7 @@ export function ProductPagination({
             disabled={disabled || page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
+            {t("actions.previous", "ก่อนหน้า", { ns: "common" })}
           </Button>
 
           {pageWindow(page, totalPages).map((number) => (
@@ -80,7 +82,7 @@ export function ProductPagination({
             disabled={disabled || page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
+            {t("actions.next", "ถัดไป", { ns: "common" })}
           </Button>
         </nav>
       ) : null}

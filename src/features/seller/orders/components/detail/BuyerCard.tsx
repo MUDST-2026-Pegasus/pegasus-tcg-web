@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 
 import { initialsOf } from "../../orders.format";
 import type { OrderBuyer } from "../../orders.types";
+import { useTranslate } from "@/lib/i18n";
 
 type BuyerCardProps = {
   buyer: OrderBuyer;
@@ -16,9 +17,10 @@ type BuyerCardProps = {
 
 /** ยังไม่มีแชท — ลิงก์ไปหน้าคอลเลกชันสาธารณะของผู้ซื้อแทน */
 export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-xs font-medium text-gray-500">ผู้ซื้อ</p>
+      <p className="text-xs font-medium text-gray-500">{t("orderDetail.buyer.title", "ผู้ซื้อ")}</p>
 
       <div className="flex items-center gap-2.5">
         <Avatar className="size-9">
@@ -33,14 +35,16 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
           </p>
           <p className="text-[10px] text-gray-400">
             @{buyer.username} ·{" "}
-            {orderCount > 1 ? `ซื้อจากร้านคุณ ${orderCount} ครั้ง` : "ลูกค้าใหม่ของร้าน"}
+            {orderCount > 1
+              ? t("orderDetail.buyer.orderCount", "ซื้อจากร้านคุณ {count} ครั้ง", { count: orderCount })
+              : t("orderDetail.buyer.new", "ลูกค้าใหม่ของร้าน")}
           </p>
         </div>
       </div>
 
       {note ? (
         <p className="rounded-lg bg-neutral-50 p-3 text-xs leading-4 text-gray-700">
-          หมายเหตุจากผู้ซื้อ: {note}
+          {t("orderDetail.buyer.note", "หมายเหตุจากผู้ซื้อ: {note}", { note })}
         </p>
       ) : null}
 
@@ -48,10 +52,10 @@ export function BuyerCard({ buyer, orderCount, note }: BuyerCardProps) {
         variant="outline"
         size="sm"
         className="w-full rounded-md px-2.5"
-        render={<Link to={`/users/${buyer.username}`} />}
+        render={<Link to={`/u/${buyer.username}`} />}
         nativeButton={false}
       >
-        ดูโปรไฟล์ผู้ซื้อ
+        {t("orderDetail.buyer.viewProfile", "ดูโปรไฟล์ผู้ซื้อ")}
       </Button>
     </Card>
   );

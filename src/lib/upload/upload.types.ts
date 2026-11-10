@@ -22,7 +22,9 @@ export type UploadPurpose =
   /** รูปหน้าสมุดบัญชีตอนสมัครผู้ขาย — ผู้สมัครยังไม่มี role SELLER จึงไม่ล็อก role */
   | "SELLER_VERIFICATION"
   /** รูปภาพอวตารโปรไฟล์ของผู้ใช้ */
-  | "AVATAR_IMAGE";
+  | "AVATAR_IMAGE"
+  /** รูปแบนเนอร์ร้านของผู้ขาย */
+  | "SHOP_BANNER";
 
 /** body ของ `POST /uploads/presign` */
 export type PresignUploadPayload = {

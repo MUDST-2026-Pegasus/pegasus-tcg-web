@@ -1,4 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import * as auctionApi from "./auction.api";
 import type {
@@ -15,7 +15,6 @@ import type {
   MyAuctionTab,
   PlaceBidRequest,
   SellerAuctionDetail,
-  SellerDecisionRequest,
   SuspendAuctionRequest,
   UpdateAuctionRequest,
 } from "./auction.types";
@@ -29,7 +28,7 @@ export const auctionKeys = {
   // public / ผู้ซื้อ
   lists: () => [...auctionKeys.all, "list"] as const,
   list: (params: AuctionListParams) =>
-    [...auctionKeys.lists(), params.filter ?? "ALL", params.gameId ?? 0, params.q ?? "", params.sort ?? "ENDING_SOON", params.page ?? 0, params.size ?? 20] as const,
+    [...auctionKeys.lists(), params.filter ?? "ALL", params.gameId ?? 0, params.variantId ?? 0, params.sellerUsername ?? "", params.q ?? "", params.sort ?? "ENDING_SOON", params.page ?? 0, params.size ?? 20] as const,
   details: () => [...auctionKeys.all, "detail"] as const,
   detail: (id: number) => [...auctionKeys.details(), id] as const,
   bids: (id: number, page: number) => [...auctionKeys.detail(id), "bids", page] as const,
@@ -59,9 +58,11 @@ export const AUCTION_POLL_MS = 5_000;
 
 // ---------- public / ผู้ซื้อ ----------
 
-export function useAuctions(params: AuctionListParams = {}) {
+/** @param options.enabled `false` = ยังไม่พร้อมยิง เช่น รอรายชื่อเกมไปแปลง slug */
+export function useAuctions(params: AuctionListParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: auctionKeys.list(params),
+    enabled: options.enabled ?? true,
     queryFn: () => auctionApi.getAuctions(params),
     placeholderData: keepPreviousData,
     staleTime: 0,
@@ -74,15 +75,39 @@ export function useAuction(id: number | null, options: { poll?: boolean } = {}) 
     queryKey: auctionKeys.detail(id ?? 0),
     queryFn: () => auctionApi.getAuction(id ?? 0),
     enabled: id !== null,
-    refetchInterval: options.poll === false ? false : AUCTION_POLL_MS,
+    // ดึงใหม่ตอนยังเปิด และตอนรอชำระ (ผู้ชนะจ่าย → SOLD / ไม่จ่าย → UNSOLD) · สถานะอื่นไม่เปลี่ยนเองแล้ว
+    refetchInterval: (query) =>
+      options.poll === false ||
+      (query.state.data && query.state.data.status !== "LIVE" && query.state.data.status !== "AWAITING_PAYMENT")
+        ? false
+        : AUCTION_POLL_MS,
     // 404 คือคำตอบ ลองซ้ำก็ได้ผลเดิม
     retry: false,
   });
 }
 
-export function useBidHistory(id: number | null, page = 0) {
+/** ประมูลที่เปิดอยู่ของการ์ดรุ่นนี้ — กล่องในหน้ารายละเอียดสินค้า (หลายรุ่น = รวมทุกรุ่น) [TCG-636] */
+export function useVariantAuctions(variantIds: number[]) {
+  return useQueries({
+    queries: variantIds.map((variantId) => {
+      const params: AuctionListParams = { variantId, sort: "ENDING_SOON" };
+      return { queryKey: auctionKeys.list(params), queryFn: () => auctionApi.getAuctions(params) };
+    }),
+    combine: (results) => ({
+      auctions: results.flatMap((result) => result.data?.page.items ?? []),
+      total: results.reduce((sum, result) => sum + (result.data?.page.totalItems ?? 0), 0),
+      serverTime: results.find((result) => result.data)?.data?.serverTime,
+    }),
+  });
+}
+
+/**
+ * @param bidCount จำนวนบิดจากรายละเอียดที่ poll อยู่ — เปลี่ยนเมื่อไรดึงประวัติใหม่
+ * ให้คนที่ถูกบิดแซงเห็นบิดใหม่ในรายการด้วย ไม่ใช่แค่ราคา [TCG-638]
+ */
+export function useBidHistory(id: number | null, page = 0, bidCount?: number) {
   return useQuery({
-    queryKey: auctionKeys.bids(id ?? 0, page),
+    queryKey: [...auctionKeys.bids(id ?? 0, page), bidCount ?? null] as const,
     queryFn: () => auctionApi.getBidHistory(id ?? 0, page),
     enabled: id !== null,
     placeholderData: keepPreviousData,
@@ -108,7 +133,8 @@ function refreshBuyerViews(queryClient: QueryClient, auctionId: number) {
 export function usePlaceBid(auctionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PlaceBidRequest) => auctionApi.placeBid(auctionId, payload),
+    mutationFn: ({ payload, idempotencyKey }: { payload: PlaceBidRequest; idempotencyKey?: string }) =>
+      auctionApi.placeBid(auctionId, payload, idempotencyKey),
     onSettled: () => refreshBuyerViews(queryClient, auctionId),
   });
 }
@@ -134,22 +160,6 @@ export function useCheckoutAuction(auctionId: number) {
   });
 }
 
-export function useAcceptSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.acceptSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
-export function useDeclineSecondChance(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => auctionApi.declineSecondChance(auctionId),
-    onSettled: () => refreshBuyerViews(queryClient, auctionId),
-  });
-}
-
 // ---------- ผู้ขาย ----------
 
 export function useSellerAuctions(params: SellerAuctionListParams = {}) {
@@ -171,9 +181,11 @@ export function useSellerAuction(id: number | null, options: { poll?: boolean } 
   });
 }
 
-export function useEligibleUnits(params: EligibleUnitParams = {}) {
+/** @param options.enabled `false` = ยังไม่ต้องยิง เช่น รอรู้การ์ดของประมูลเดิมก่อน */
+export function useEligibleUnits(params: EligibleUnitParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: auctionKeys.eligibleUnits(params),
+    enabled: options.enabled ?? true,
     queryFn: () => auctionApi.getEligibleUnits(params),
     placeholderData: keepPreviousData,
   });
@@ -207,14 +219,6 @@ export function useCancelAuction(auctionId: number) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => auctionApi.cancelAuction(auctionId),
-    onSuccess: (detail) => settleSeller(queryClient, detail),
-  });
-}
-
-export function useDecideAuction(auctionId: number) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: SellerDecisionRequest) => auctionApi.decideAuction(auctionId, payload),
     onSuccess: (detail) => settleSeller(queryClient, detail),
   });
 }

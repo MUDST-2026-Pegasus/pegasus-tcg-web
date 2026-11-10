@@ -1,3 +1,4 @@
+import type { ListingPricing } from "@/components/sale";
 import type {
   ProductSummaryDto,
 } from "@/features/catalog/catalog.types";
@@ -7,6 +8,7 @@ export type PublicProfileDto = {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   phone?: string | null;
 };
 
@@ -51,6 +53,8 @@ export type HomeProduct = {
   type: string;
   /** null = ตอนนี้ไม่มีใครขาย */
   price: number | null;
+  /** ราคาที่มีผล (SAL-04) — มีการลดแสดงเป็น PriceTag */
+  pricing?: ListingPricing | null;
   image?: string;
   imageAlt: string;
   href: string;
@@ -82,4 +86,16 @@ export type TrendingProductDto = {
   rank: number;
   unitsSold: number;
   product: ProductSummaryDto;
+};
+
+/** `RecommendedShopResponse` — `GET /home/recommended-shops` */
+export type RecommendedShopDto = {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  ratingAvg: number;
+  ratingCount: number;
+  activeListingCount: number;
+  previews: { listingId: number; imageUrl: string | null }[];
 };

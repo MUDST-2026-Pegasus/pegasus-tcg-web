@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
+import { DateTimePicker } from "@/components/common";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ import {
   type CardSetFormValues,
 } from "../taxonomy.schema";
 import { LogoUploadField } from "./LogoUploadField";
+import { useTranslate } from "@/lib/i18n";
 
 type CardSetFormDialogProps = {
   open: boolean;
@@ -55,15 +57,16 @@ export function CardSetFormDialog({
   game,
   cardSet,
 }: CardSetFormDialogProps) {
+  const { t } = useTranslate("admin");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {cardSet ? `แก้ไขชุด ${cardSet.code}` : `เพิ่มชุดการ์ด · ${game.name}`}
+            {cardSet ? t("cardAttributes.setForm.editTitle", "แก้ไขชุด {code}", { code: cardSet.code }) : t("cardAttributes.setForm.addTitle", "เพิ่มชุดการ์ด · {game}", { game: game.name })}
           </DialogTitle>
           <DialogDescription>
-            ชุดการ์ดใช้จัดกลุ่มการ์ดตามรุ่นที่วางจำหน่าย และเป็นตัวกรองในหน้าแคตตาล็อก
+            {t("cardAttributes.setForm.description", "ชุดการ์ดใช้จัดกลุ่มการ์ดตามรุ่นที่วางจำหน่าย และเป็นตัวกรองในหน้าแคตตาล็อก")}
           </DialogDescription>
         </DialogHeader>
         <CardSetForm
@@ -86,6 +89,7 @@ function CardSetForm({
   cardSet?: CardSet;
   onSaved: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveCardSet = useSaveCardSet(game.id);
 
   const {
@@ -96,7 +100,7 @@ function CardSetForm({
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CardSetFormValues>({
-    resolver: zodResolver(cardSetSchema),
+    resolver: zodResolver(cardSetSchema(t)),
     defaultValues: toCardSetForm(cardSet),
   });
 
@@ -115,7 +119,7 @@ function CardSetForm({
       });
       toast.add({
         type: "success",
-        title: cardSet ? "บันทึกชุดการ์ดแล้ว" : `เพิ่มชุด ${saved.code} แล้ว`,
+        title: cardSet ? t("cardAttributes.setForm.saved", "บันทึกชุดการ์ดแล้ว") : t("cardAttributes.setForm.added", "เพิ่มชุด {code} แล้ว", { code: saved.code }),
       });
       onSaved();
     } catch (error) {
@@ -128,7 +132,7 @@ function CardSetForm({
       }
       if (!applyApiErrors(error, setError)) {
         setError("root.server", {
-          message: taxonomyErrorMessage(error, "บันทึกชุดการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง"),
+          message: taxonomyErrorMessage(error, t("cardAttributes.setForm.saveFailed", "บันทึกชุดการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง")),
         });
       }
     }
@@ -145,43 +149,53 @@ function CardSetForm({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.code) || undefined}>
-            <FieldLabel htmlFor="setCode">รหัสชุด *</FieldLabel>
+            <FieldLabel htmlFor="setCode">{t("cardAttributes.setForm.code", "รหัสชุด *")}</FieldLabel>
             <Input
               id="setCode"
               maxLength={32}
-              placeholder="เช่น SV9"
+              placeholder={t("cardAttributes.setForm.codePlaceholder", "เช่น SV9")}
               autoCapitalize="characters"
               className="uppercase"
               aria-invalid={Boolean(errors.code)}
               {...register("code")}
             />
             <FieldDescription className="text-xs">
-              A-Z 0-9 . - _ · ห้ามซ้ำในเกมนี้
+              {t("cardAttributes.setForm.codeHint", "A-Z 0-9 . - _ · ห้ามซ้ำในเกมนี้")}
             </FieldDescription>
             <FieldError errors={[errors.code]} />
           </Field>
 
           <Field data-invalid={Boolean(errors.releaseDate) || undefined}>
-            <FieldLabel htmlFor="setRelease">วันวางจำหน่าย</FieldLabel>
-            <Input
-              id="setRelease"
-              type="date"
-              aria-invalid={Boolean(errors.releaseDate)}
-              {...register("releaseDate")}
+            <FieldLabel htmlFor="setRelease">{t("cardAttributes.sets.col.release", "วันวางจำหน่าย")}</FieldLabel>
+            <Controller
+              control={control}
+              name="releaseDate"
+              render={({ field }) => (
+                <DateTimePicker
+                  id="setRelease"
+                  mode="date"
+                  invalid={Boolean(errors.releaseDate)}
+                  value={field.value ?? ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    field.onBlur();
+                  }}
+                />
+              )}
             />
             <FieldDescription className="text-xs">
-              ใส่วันในอนาคตได้
+              {t("cardAttributes.setForm.releaseHint", "ใส่วันในอนาคตได้")}
             </FieldDescription>
             <FieldError errors={[errors.releaseDate]} />
           </Field>
         </div>
 
         <Field data-invalid={Boolean(errors.name) || undefined}>
-          <FieldLabel htmlFor="setName">ชื่อชุด *</FieldLabel>
+          <FieldLabel htmlFor="setName">{t("cardAttributes.setForm.name", "ชื่อชุด *")}</FieldLabel>
           <Input
             id="setName"
             maxLength={150}
-            placeholder="เช่น Battle Partners"
+            placeholder={t("cardAttributes.setForm.namePlaceholder", "เช่น Battle Partners")}
             aria-invalid={Boolean(errors.name)}
             {...register("name")}
           />
@@ -189,11 +203,11 @@ function CardSetForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.nameLocal) || undefined}>
-          <FieldLabel htmlFor="setNameLocal">ชื่อภาษาไทย</FieldLabel>
+          <FieldLabel htmlFor="setNameLocal">{t("cardAttributes.form.nameLocal", "ชื่อภาษาไทย")}</FieldLabel>
           <Input
             id="setNameLocal"
             maxLength={150}
-            placeholder="ไม่บังคับ"
+            placeholder={t("cardAttributes.form.optional", "ไม่บังคับ")}
             aria-invalid={Boolean(errors.nameLocal)}
             {...register("nameLocal")}
           />
@@ -204,11 +218,11 @@ function CardSetForm({
           data-invalid={Boolean(errors.totalCards) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="setTotal">จำนวนการ์ดในชุด</FieldLabel>
+          <FieldLabel htmlFor="setTotal">{t("cardAttributes.sets.totalCards", "จำนวนการ์ดในชุด")}</FieldLabel>
           <Input
             id="setTotal"
             inputMode="numeric"
-            placeholder="เช่น 100"
+            placeholder={t("cardAttributes.setForm.totalPlaceholder", "เช่น 100")}
             aria-invalid={Boolean(errors.totalCards)}
             {...register("totalCards")}
           />
@@ -216,7 +230,7 @@ function CardSetForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.logoUrl) || undefined}>
-          <FieldLabel htmlFor="setLogo">โลโก้</FieldLabel>
+          <FieldLabel htmlFor="setLogo">{t("cardAttributes.form.logo", "โลโก้")}</FieldLabel>
           <LogoUploadField
             upload={upload}
             id="setLogo"
@@ -230,13 +244,13 @@ function CardSetForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {cardSet ? "บันทึก" : "เพิ่มชุดการ์ด"}
+          {cardSet ? t("cardAttributes.form.save", "บันทึก") : t("cardAttributes.sets.addShort", "เพิ่มชุดการ์ด")}
         </Button>
       </DialogFooter>
     </form>

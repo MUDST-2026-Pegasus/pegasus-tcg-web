@@ -1,15 +1,7 @@
+import { DataTable, type DataTableColumn } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +10,7 @@ import type { RestockCalculation } from "../../restock.calc";
 import { formatThaiDate } from "../../restock.calc";
 import { useStockIns } from "../../restock.queries";
 import type { RestockData, RestockDraft, RestockLot } from "../../restock.types";
+import { useTranslate } from "@/lib/i18n";
 
 const HEAD_CLASS = "h-auto px-3 py-2.5 text-xs font-medium text-gray-500";
 const CELL_CLASS = "px-3 py-3 text-xs";
@@ -38,7 +31,7 @@ type RestockHistoryCardProps = RestockData["history"] & {
 export function RestockHistoryCard({
   title,
   exportLabel,
-  columns,
+  columns: labels,
   newBadgeLabel,
   emptyLabel,
   errorLabel,
@@ -49,6 +42,7 @@ export function RestockHistoryCard({
   draft,
   result,
 }: RestockHistoryCardProps) {
+  const { t } = useTranslate("seller");
   const pendingLot: RestockLot | null = result.isValid
     ? {
         id: "pending",
@@ -73,14 +67,46 @@ export function RestockHistoryCard({
   const receivedCount = (firstPage?.receivedTotal ?? 0) + pendingQuantity;
   const soldCount = firstPage?.soldTotal ?? 0;
 
+  const errorNotice = (
+    <div role="alert" className="flex flex-col items-center gap-2 text-xs text-gray-500">
+      {errorLabel}
+      <Button variant="outline" size="sm" className="rounded-md px-2.5" onClick={() => void stockIns.refetch()}>
+        {t("restock.retry", "ลองอีกครั้ง")}
+      </Button>
+    </div>
+  );
+
+  const tableColumns: DataTableColumn<RestockLot>[] = [
+    {
+      id: "receivedAt",
+      header: labels.receivedAt,
+      meta: { headClassName: cn(HEAD_CLASS, "pl-5"), cellClassName: cn(CELL_CLASS, "pl-5 text-gray-700") },
+      cell: ({ row: { original: lot } }) => (
+        <div className="flex items-center gap-2">
+          {formatThaiDate(lot.receivedAt)}
+          {lot === pendingLot ? <Badge className="h-5 rounded-[5px] bg-emerald-50 px-2 text-xs text-teal-600">{newBadgeLabel}</Badge> : null}
+        </div>
+      ),
+    },
+    { id: "quantity", header: labels.quantity, meta: { headClassName: HEAD_CLASS, cellClassName: cn(CELL_CLASS, "font-medium text-emerald-700") }, cell: ({ row }) => `+${row.original.quantity} ${unit}` },
+    { id: "unitCost", header: labels.unitCost, meta: { headClassName: HEAD_CLASS, cellClassName: cn(CELL_CLASS, "text-gray-700") }, cell: ({ row }) => formatBaht(row.original.unitCost) },
+    { id: "totalCost", header: labels.totalCost, meta: { headClassName: HEAD_CLASS, cellClassName: cn(CELL_CLASS, "font-medium text-foreground") }, cell: ({ row }) => formatBaht(row.original.totalCost) },
+    { id: "source", header: labels.source, meta: { headClassName: HEAD_CLASS, cellClassName: cn(CELL_CLASS, "text-gray-500") }, cell: ({ row }) => row.original.sourceLabel },
+    {
+      id: "average",
+      header: labels.averageCostAfter,
+      meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: cn(CELL_CLASS, "pr-5 font-semibold text-foreground") },
+      cell: ({ row }) => (row.original.averageCostAfter === null ? "—" : formatBaht(row.original.averageCostAfter)),
+    },
+  ];
+
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3.5">
         <div className="flex flex-col gap-[3px]">
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <p className="text-xs text-gray-500">
-            {lotCount} ล็อต · รับเข้าสะสม {receivedCount} {unit} · ขายไปแล้ว{" "}
-            {soldCount} {unit}
+            {t("restock.history.summary", "{lots} ล็อต · รับเข้าสะสม {received} {unit} · ขายไปแล้ว {sold} {unit}", { lots: lotCount, received: receivedCount, sold: soldCount, unit })}
           </p>
         </div>
 
@@ -89,96 +115,18 @@ export function RestockHistoryCard({
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-y border-muted bg-neutral-50 hover:bg-neutral-50">
-            <TableHead className={cn(HEAD_CLASS, "pl-5")}>
-              {columns.receivedAt}
-            </TableHead>
-            <TableHead className={HEAD_CLASS}>{columns.quantity}</TableHead>
-            <TableHead className={HEAD_CLASS}>{columns.unitCost}</TableHead>
-            <TableHead className={HEAD_CLASS}>{columns.totalCost}</TableHead>
-            <TableHead className={HEAD_CLASS}>{columns.source}</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              {columns.averageCostAfter}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody className="[&_tr]:border-muted">
-          {stockIns.isPending ? <HistorySkeletonRows /> : null}
-
-          {stockIns.isError ? (
-            <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={6} className="py-6 text-center text-xs text-gray-500">
-                <div role="alert" className="flex flex-col items-center gap-2">
-                  {errorLabel}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-md px-2.5"
-                    onClick={() => void stockIns.refetch()}
-                  >
-                    ลองอีกครั้ง
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ) : null}
-
-          {stockIns.isSuccess && rows.length === 0 ? (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={6}
-                className="py-6 text-center text-xs text-gray-400"
-              >
-                {emptyLabel}
-              </TableCell>
-            </TableRow>
-          ) : null}
-
-          {rows.map((lot) => {
-            const isPending = lot === pendingLot;
-
-            return (
-              <TableRow
-                key={lot.id}
-                className={cn(isPending && "bg-gray-50 hover:bg-gray-50")}
-              >
-                <TableCell className={cn(CELL_CLASS, "pl-5 text-gray-700")}>
-                  <div className="flex items-center gap-2">
-                    {formatThaiDate(lot.receivedAt)}
-                    {isPending ? (
-                      <Badge className="h-5 rounded-[5px] bg-emerald-50 px-2 text-xs text-teal-600">
-                        {newBadgeLabel}
-                      </Badge>
-                    ) : null}
-                  </div>
-                </TableCell>
-                <TableCell
-                  className={cn(CELL_CLASS, "font-medium text-emerald-700")}
-                >
-                  +{lot.quantity} {unit}
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "text-gray-700")}>
-                  {formatBaht(lot.unitCost)}
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "font-medium text-foreground")}>
-                  {formatBaht(lot.totalCost)}
-                </TableCell>
-                <TableCell className={cn(CELL_CLASS, "text-gray-500")}>
-                  {lot.sourceLabel}
-                </TableCell>
-                <TableCell
-                  className={cn(CELL_CLASS, "pr-5 font-semibold text-foreground")}
-                >
-                  {lot.averageCostAfter === null ? "—" : formatBaht(lot.averageCostAfter)}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={tableColumns}
+        data={rows}
+        getRowId={(lot) => String(lot.id)}
+        isLoading={stockIns.isPending}
+        emptyMessage={stockIns.isError ? errorNotice : <span className="text-xs text-gray-400">{emptyLabel}</span>}
+        headerRowClassName="border-y border-muted bg-neutral-50 hover:bg-neutral-50"
+        bodyClassName="[&_tr]:border-muted"
+        rowClassName={(lot) => cn(lot === pendingLot && "bg-gray-50 hover:bg-gray-50")}
+      />
+      {/* มีล็อตที่กำลังกรอกอยู่ ตารางไม่ว่าง แต่ประวัติยังโหลดไม่ขึ้น */}
+      {stockIns.isError && rows.length > 0 ? <div className="border-t border-muted py-6 text-center">{errorNotice}</div> : null}
 
       {stockIns.hasNextPage ? (
         <div className="flex justify-center border-t border-muted px-5 py-3">
@@ -194,19 +142,5 @@ export function RestockHistoryCard({
         </div>
       ) : null}
     </Card>
-  );
-}
-
-function HistorySkeletonRows() {
-  return (
-    <>
-      {[0, 1, 2].map((row) => (
-        <TableRow key={row} aria-hidden="true" className="hover:bg-transparent">
-          <TableCell colSpan={6} className="px-5 py-3">
-            <Skeleton className="h-4 w-full rounded-md" />
-          </TableCell>
-        </TableRow>
-      ))}
-    </>
   );
 }

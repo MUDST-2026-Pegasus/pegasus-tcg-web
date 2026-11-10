@@ -18,6 +18,10 @@ jobs:
     name: Lint / Type Check / Tests / Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -41,29 +45,84 @@ jobs:
           # This job never runs Cypress, so skip its binary download.
           CYPRESS_INSTALL_BINARY: 0
 
+      # ESLint, tsc (tsbuildinfo) and Vite/Vitest caches all live here.
+      - name: Cache tool outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.cache
+            node_modules/.tmp
+            node_modules/.vite
+          key: tools-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            tools-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+            tools-${{ runner.os }}-
+
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
+
+      # i18n [TCG-549]: warning ของ extractor ขึ้นเป็น annotation, key ที่โค้ดใช้ต้อง pull เข้า JSON แล้ว,
+      # en ที่ขาดเป็น warning (I18N_STRICT=1 ใน I18N-21 = fail) — ไม่ต่อ Tolgee ไม่ใช้ API key
+      - name: i18n extract check
+        run: pnpm i18n:extract-check
+
+      - name: i18n check
+        run: pnpm i18n:check
 
       - name: Type check
         run: pnpm exec tsc -b --noEmit
 
       - name: Run Unit Tests
-        run: pnpm test:unit
+        run: pnpm test:unit --coverage
 
       - name: Run Integration Tests
         run: pnpm test:integration
+
+      - name: Publish Unit & Integration Test Results
+        if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          check_name: FE Unit + Integration
+          files: |
+            test-results/unit.xml
+            test-results/integration.xml
+          comment_mode: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'off' || 'always' }}
+
+      - name: Report Vitest Coverage
+        if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: FE Unit Coverage
+          file-coverage-mode: changes
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-results
-          path: test-results/
+          path: |
+            test-results/
+            coverage/
           if-no-files-found: ignore
           retention-days: 7
 
       - name: Build
         run: pnpm build
+        env:
+          VITE_FARO_URL: ${{ vars.VITE_FARO_URL || (github.ref_name == 'main' && 'https://pegasus-tcg.gameinwza.com/collect' || 'https://pegasus-dev.gameinwza.com/collect') }}
+          VITE_GOOGLE_CLIENT_ID: ${{ github.ref_name == 'main' && vars.VITE_GOOGLE_CLIENT_ID_PROD || vars.VITE_GOOGLE_CLIENT_ID_DEV }}
+          VITE_APP_VERSION: ${{ github.sha }}
+          VITE_APP_ENV: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+
+      # build ไม่ใช้ Tolgee API key — กันไว้ถ้ามีคนเผลอใส่ (project key ขึ้นต้นด้วย tgpak_) [TCG-549]
+      - name: Check bundle has no Tolgee key
+        run: |
+          if grep -rlE 'tg(pak|pat)_[A-Za-z0-9]' dist; then
+            echo "::error::Tolgee API key found in dist/ — read it only under import.meta.env.DEV (src/lib/i18n/tolgee.ts)"
+            exit 1
+          fi
 
       - name: Upload built site
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
@@ -74,9 +133,18 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  e2e:
+    name: Cypress E2E
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    uses: ./.github/workflows/e2e-cypress.yml
+
   publish:
     name: Publish web image
-    needs: quality
+    needs: [quality, e2e]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -112,6 +180,8 @@ jobs:
         with:
           context: image
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ env.IMAGE }}:sha-${{ github.sha }}
             ${{ env.IMAGE }}:${{ github.ref_name == 'main' && 'latest' || 'develop' }}

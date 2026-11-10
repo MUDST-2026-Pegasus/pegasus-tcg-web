@@ -1,6 +1,8 @@
+/* eslint-disable no-restricted-syntax -- ข้อมูล mock แทนข้อความจาก backend / ผู้ใช้ (หมายเหตุผู้ขาย, เหตุผลของแอดมิน) ไม่ใช่ข้อความ UI */
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,
+  AdminAuctionRow,
   AuctionBid,
   AuctionDetail,
   AuctionItem,
@@ -25,8 +27,10 @@ import type {
 // เวลาคิดจากตอนโหลดไฟล์ ตัวนับถอยหลังจึงเดินได้จริง
 // ใบที่ตั้งใจให้เห็นแต่ละสถานะ:
 //   142 LIVE มีบิด ต่อเวลาแล้ว · 150 LIVE ยังไม่มีบิด ซื้อทันทีได้ · 151 LIVE เหลือไม่ถึง 2 นาที
-//   117 AWAITING_PAYMENT · 119 AWAITING_SELLER_DECISION · 128 OFFERED_TO_SECOND
+//   117 AWAITING_PAYMENT
 //   133 SOLD · 126 UNSOLD · 140 CANCELLED · 98 SUSPENDED
+//   ฝั่งผู้ขาย S4 เพิ่ม: 121 UNSOLD ผู้ชนะไม่ชำระ · 158 ขายด้วยซื้อทันที รอชำระ
+// กล่องบิด B4 อื่น ๆ (guest / ร้านตัวเอง / ห้ามบิด / ไม่มีที่อยู่) ดูด้วย `withViewer` ด้านล่าง
 
 const NOW = Date.now();
 const SECOND = 1000;
@@ -149,7 +153,7 @@ const CHARIZARD_DETAIL: AuctionDetail = {
   extensionCount: 3,
   shippingFee: SHIPPING,
   recentBids: CHARIZARD_BIDS.slice(0, 5),
-  viewer: { state: "LEADING", myHighestBid: 8450, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+  viewer: { state: "LEADING", myHighestBid: 8450, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   serverTime: serverTime(),
 };
 
@@ -177,7 +181,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(3 * DAY + 4 * HOUR),
     extensionCount: 0,
     recentBids: [],
-    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   },
   151: {
     ...CHARIZARD_DETAIL,
@@ -194,7 +198,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(102 * SECOND),
     originalEndsAt: at(-6 * MINUTE),
     extensionCount: 4,
-    viewer: { state: "OUTBID", myHighestBid: 15000, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: "OUTBID", myHighestBid: 15000, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
   },
   117: {
     ...CHARIZARD_DETAIL,
@@ -210,31 +214,8 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(-6 * HOUR),
     originalEndsAt: at(-6 * HOUR),
     extensionCount: 0,
-    viewer: { state: "WON_AWAITING_PAYMENT", myHighestBid: 6100, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: at(18 * HOUR), offer: null },
-  },
-  128: {
-    ...CHARIZARD_DETAIL,
-    id: 128,
-    auctionNumber: "AUC-2026-0128",
-    status: "OFFERED_TO_SECOND",
-    item: I.mew,
-    currentPrice: 4800,
-    minNextBid: 4800,
-    bidCount: 14,
-    bidderCount: 6,
-    buyNowPrice: null,
-    endsAt: at(-2 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    extensionCount: 1,
-    viewer: {
-      state: "SECOND_CHANCE",
-      myHighestBid: 4650,
-      ownAuction: false,
-      blockers: [],
-      bannedUntil: null,
-      paymentDueAt: null,
-      offer: { amount: 4650, shippingFee: SHIPPING, total: 4700, status: "PENDING", expiresAt: at(20 * HOUR) },
-    },
+    viewer: { state: "WON_AWAITING_PAYMENT", myHighestBid: 6100, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: at(18 * HOUR) },
+    winnerAlias: "n***t",
   },
   133: {
     ...CHARIZARD_DETAIL,
@@ -250,7 +231,46 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
     endsAt: at(-4 * DAY),
     originalEndsAt: at(-4 * DAY),
     extensionCount: 0,
-    viewer: { state: "LOST", myHighestBid: 3900, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null },
+    viewer: { state: "LOST", myHighestBid: 3900, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
+  },
+  // B4-F ไม่มีผู้บิด
+  126: {
+    ...CHARIZARD_DETAIL,
+    id: 126,
+    auctionNumber: "AUC-2026-0126",
+    status: "UNSOLD",
+    item: I.blastoise,
+    sellerNote: null,
+    startingPrice: 4500,
+    currentPrice: 4500,
+    minNextBid: 4500,
+    bidCount: 0,
+    bidderCount: 0,
+    buyNowPrice: null,
+    endsAt: at(-5 * DAY),
+    originalEndsAt: at(-5 * DAY),
+    extensionCount: 0,
+    recentBids: [],
+    viewer: { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null },
+  },
+  // B4-G ถูกระงับ
+  98: {
+    ...CHARIZARD_DETAIL,
+    id: 98,
+    auctionNumber: "AUC-2026-0098",
+    status: "SUSPENDED",
+    item: I.rayquaza,
+    seller: AUCTION_SELLERS.rareCard,
+    currentPrice: 21500,
+    minNextBid: 21500,
+    bidCount: 41,
+    bidderCount: 9,
+    buyNowPrice: null,
+    endsAt: at(-6 * DAY),
+    originalEndsAt: at(-6 * DAY),
+    extensionCount: 0,
+    viewer: null,
+    suspendReason: "พบรูปแบบบิดผิดปกติ",
   },
 };
 
@@ -258,7 +278,7 @@ export const AUCTION_DETAIL_FIXTURES: Record<number, AuctionDetail> = {
 export function withViewer(id: number, viewer: Partial<NonNullable<AuctionDetail["viewer"]>> | null): AuctionDetail {
   const base = AUCTION_DETAIL_FIXTURES[id] ?? CHARIZARD_DETAIL;
   if (viewer === null) return { ...base, viewer: null };
-  const current = base.viewer ?? { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null, offer: null };
+  const current = base.viewer ?? { state: null, myHighestBid: null, ownAuction: false, blockers: [], bannedUntil: null, paymentDueAt: null };
   return { ...base, viewer: { ...current, ...viewer } };
 }
 
@@ -269,7 +289,6 @@ export const BID_HISTORY_FIXTURE: BidHistory = {
 
 const MY_AUCTIONS: MyAuction[] = [
   { id: 142, auctionNumber: "AUC-2026-0142", item: I.charizard, shopName: "CardVault BKK", bidCount: 12, state: "WON_AWAITING_PAYMENT", currentPrice: 8450, myHighestBid: 8450, shippingFee: SHIPPING, totalDue: 8500, minNextBid: null, extended: false, endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 40 * MINUTE), orderId: null },
-  { id: 128, auctionNumber: "AUC-2026-0128", item: I.mew, shopName: "PokeHub Thailand", bidCount: 14, state: "SECOND_CHANCE", currentPrice: 4800, myHighestBid: 4650, shippingFee: SHIPPING, totalDue: 4700, minNextBid: null, extended: false, endsAt: at(-2 * DAY), deadline: at(20 * HOUR), orderId: null },
   { id: 151, auctionNumber: "AUC-2026-0151", item: I.umbreon, shopName: "RareCard Station", bidCount: 27, state: "LEADING", currentPrice: 15200, myHighestBid: 15200, shippingFee: SHIPPING, totalDue: null, minNextBid: 15300, extended: false, endsAt: at(1 * DAY), deadline: null, orderId: null },
   { id: 139, auctionNumber: "AUC-2026-0139", item: I.rayquaza, shopName: "RareCard Station", bidCount: 41, state: "OUTBID", currentPrice: 21500, myHighestBid: 21000, shippingFee: SHIPPING, totalDue: null, minNextBid: 21600, extended: true, endsAt: at(2 * MINUTE), deadline: null, orderId: null },
   { id: 133, auctionNumber: "AUC-2026-0133", item: I.mewtwo, shopName: "CardVault BKK", bidCount: 18, state: "WON", currentPrice: 4200, myHighestBid: 4200, shippingFee: SHIPPING, totalDue: null, minNextBid: null, extended: false, endsAt: at(-4 * DAY), deadline: null, orderId: 10388 },
@@ -277,19 +296,35 @@ const MY_AUCTIONS: MyAuction[] = [
 ];
 
 export const MY_AUCTION_PAGE_FIXTURE: MyAuctionPage = {
-  page: { items: MY_AUCTIONS, page: 0, size: 20, totalItems: 15, totalPages: 1 },
-  tabCounts: { ALL: 15, BIDDING: 3, TO_PAY: 1, SECOND_CHANCE: 1, WON: 4, LOST: 6 },
+  page: { items: MY_AUCTIONS, page: 0, size: 20, totalItems: 14, totalPages: 1 },
+  tabCounts: { ALL: 14, BIDDING: 3, TO_PAY: 1, WON: 4, LOST: 6 },
   unpaidStrikes: 0,
   strikeLimit: STRIKE_LIMIT,
   bannedUntil: null,
+  lastStrikeCardName: null,
   serverTime: serverTime(),
+};
+
+/** W1 + B3-H: ไม่ชำระมาแล้ว 1 ครั้ง */
+export const MY_AUCTION_PAGE_STRIKE_FIXTURE: MyAuctionPage = {
+  ...MY_AUCTION_PAGE_FIXTURE,
+  unpaidStrikes: 1,
+  lastStrikeCardName: I.charizard.card.productName,
+};
+
+/** W1 + B3-H: ครบ 3 ครั้ง ถูกห้ามบิด 30 วัน */
+export const MY_AUCTION_PAGE_BANNED_FIXTURE: MyAuctionPage = {
+  ...MY_AUCTION_PAGE_FIXTURE,
+  unpaidStrikes: 3,
+  bannedUntil: at(24 * DAY),
+  lastStrikeCardName: I.charizard.card.productName,
 };
 
 /** W1 ว่าง (AUC-E1) */
 export const MY_AUCTION_PAGE_EMPTY_FIXTURE: MyAuctionPage = {
   ...MY_AUCTION_PAGE_FIXTURE,
   page: { items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 },
-  tabCounts: { ALL: 0, BIDDING: 0, TO_PAY: 0, SECOND_CHANCE: 0, WON: 0, LOST: 0 },
+  tabCounts: { ALL: 0, BIDDING: 0, TO_PAY: 0, WON: 0, LOST: 0 },
 };
 
 // ---------- ผู้ขาย ----------
@@ -300,26 +335,24 @@ const SELLER_ROWS: SellerAuctionRow[] = [
   { id: 151, auctionNumber: "AUC-2026-0151", item: I.umbreon, unitLabel: "U-0870", startingPrice: 5000, currentPrice: 15200, bidCount: 27, buyNowPrice: null, buyNowAvailable: false, status: "LIVE", endsAt: at(1 * DAY), deadline: null, orderId: null },
   { id: 155, auctionNumber: "AUC-2026-0155", item: I.gengar, unitLabel: "U-0641", startingPrice: 6000, currentPrice: 8200, bidCount: 5, buyNowPrice: null, buyNowAvailable: false, status: "LIVE", endsAt: at(6 * HOUR), deadline: null, orderId: null },
   { id: 117, auctionNumber: "AUC-2026-0117", item: I.lugia, unitLabel: "U-0912", startingPrice: 3000, currentPrice: 6100, bidCount: 9, buyNowPrice: null, buyNowAvailable: false, status: "AWAITING_PAYMENT", endsAt: at(-6 * HOUR), deadline: at(18 * HOUR + 22 * MINUTE), orderId: 10377 },
-  { id: 119, auctionNumber: "AUC-2026-0119", item: I.espeon, unitLabel: "U-0655", startingPrice: 2500, currentPrice: 7900, bidCount: 11, buyNowPrice: null, buyNowAvailable: false, status: "AWAITING_SELLER_DECISION", endsAt: at(-2 * DAY), deadline: at(47 * HOUR + 12 * MINUTE), orderId: null },
-  { id: 128, auctionNumber: "AUC-2026-0128", item: I.mew, unitLabel: "U-0702", startingPrice: 1500, currentPrice: 4800, bidCount: 14, buyNowPrice: null, buyNowAvailable: false, status: "OFFERED_TO_SECOND", endsAt: at(-2 * DAY), deadline: at(20 * HOUR + 5 * MINUTE), orderId: null },
   { id: 133, auctionNumber: "AUC-2026-0133", item: I.mewtwo, unitLabel: "U-0533", startingPrice: 500, currentPrice: 4200, bidCount: 18, buyNowPrice: null, buyNowAvailable: false, status: "SOLD", endsAt: at(-4 * DAY), deadline: null, orderId: 10388 },
   { id: 126, auctionNumber: "AUC-2026-0126", item: I.blastoise, unitLabel: "U-0590", startingPrice: 4500, currentPrice: 4500, bidCount: 0, buyNowPrice: null, buyNowAvailable: false, status: "UNSOLD", endsAt: at(-5 * DAY), deadline: null, orderId: null },
+  // ผู้ชนะไม่ชำระ → UNSOLD ที่มีบิด ("ไม่มีผู้ชำระ") [TCG-632]
+  { id: 121, auctionNumber: "AUC-2026-0121", item: I.espeon, unitLabel: "U-0702", startingPrice: 3000, currentPrice: 5200, bidCount: 6, buyNowPrice: null, buyNowAvailable: false, status: "UNSOLD", endsAt: at(-3 * DAY), deadline: null, orderId: null },
   { id: 140, auctionNumber: "AUC-2026-0140", item: I.charizardEx, unitLabel: "U-1041", startingPrice: 900, currentPrice: 900, bidCount: 0, buyNowPrice: 1500, buyNowAvailable: false, status: "CANCELLED", endsAt: at(-1 * DAY), deadline: null, orderId: null },
 ];
 
 const STATUS_COUNTS: Record<AuctionStatus, number> = {
   LIVE: 4,
   AWAITING_PAYMENT: 1,
-  AWAITING_SELLER_DECISION: 1,
-  OFFERED_TO_SECOND: 1,
   SOLD: 1,
-  UNSOLD: 1,
+  UNSOLD: 2,
   CANCELLED: 1,
   SUSPENDED: 0,
 };
 
 export const SELLER_AUCTION_PAGE_FIXTURE: SellerAuctionPage = {
-  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 10, totalPages: 1 },
+  page: { items: SELLER_ROWS, page: 0, size: 20, totalItems: 9, totalPages: 1 },
   statusCounts: STATUS_COUNTS,
   kpis: {
     liveCount: 4,
@@ -356,11 +389,13 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   status: "LIVE",
   item: I.charizard,
   unitLabel: "U-0771",
+  unitUid: null,
   startingPrice: 2000,
   bidIncrement: 100,
   currentPrice: 8450,
   bidCount: 12,
   bidderCount: 7,
+  watcherCount: 34,
   estimatedPayout: 8027,
   commissionPercent: COMMISSION_PERCENT,
   buyNowPrice: 12000,
@@ -375,14 +410,35 @@ const SELLER_CHARIZARD: SellerAuctionDetail = {
   firstBidAt: at(-3 * DAY + 40 * MINUTE),
   winnerAlias: null,
   paymentDueAt: null,
-  decision: null,
-  offer: null,
   orderId: null,
-  bids: CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
+  // ผู้ขายเห็นบิดแรกสุดด้วย (แถวท้าย "· บิดแรก" ใน S4)
+  bids: [
+    ...CHARIZARD_BIDS.map((b) => ({ ...b, mine: false })),
+    { bidderAlias: "k***e", bidderInitials: "KE", mine: false, amount: 2000, placedAt: at(-3 * DAY + 40 * MINUTE) },
+  ],
+  suspendReason: null,
   serverTime: serverTime(),
 };
 
-/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 (142, 150), S4b (119), ส่งข้อเสนอแล้ว (128) */
+/** ประมูลที่จบแล้ว — ใช้เป็นฐานของใบ 117 / 133 / 121 / 126 / 140 / 158 */
+const SELLER_ENDED: SellerAuctionDetail = {
+  ...SELLER_CHARIZARD,
+  buyNowPrice: null,
+  buyNowAvailable: false,
+  sellerNote: null,
+  extensionCount: 0,
+  watcherCount: 0,
+};
+
+function endedBids(amounts: number[], lastAt: number): AuctionBid[] {
+  const aliases = ["s***j", "m***a", "t***n", "p***m", "k***e"];
+  return amounts.map((amount, index) => {
+    const alias = aliases[index % aliases.length];
+    return { bidderAlias: alias, bidderInitials: alias.slice(0, 1).toUpperCase() + alias.slice(-1).toUpperCase(), mine: false, amount, placedAt: at(lastAt - index * HOUR) };
+  });
+}
+
+/** รายละเอียดฝั่งผู้ขายแยกตาม id — S4 ทุกสถานะ (id ตรงกับแถวในตาราง S1) [TCG-634] */
 export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail> = {
   142: SELLER_CHARIZARD,
   150: {
@@ -395,6 +451,7 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
     currentPrice: 2400,
     bidCount: 0,
     bidderCount: 0,
+    watcherCount: 5,
     estimatedPayout: 2280,
     buyNowPrice: 3500,
     buyNowAvailable: true,
@@ -407,78 +464,160 @@ export const SELLER_AUCTION_DETAIL_FIXTURES: Record<number, SellerAuctionDetail>
     firstBidAt: null,
     bids: [],
   },
-  119: {
-    ...SELLER_CHARIZARD,
-    id: 119,
-    auctionNumber: "AUC-2026-0119",
-    status: "AWAITING_SELLER_DECISION",
-    item: I.espeon,
-    unitLabel: "U-0655",
-    startingPrice: 2500,
-    currentPrice: 7900,
-    bidCount: 11,
-    bidderCount: 5,
-    estimatedPayout: 7505,
-    buyNowPrice: null,
-    startedAt: at(-5 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    endsAt: at(-2 * DAY),
-    extensionCount: 0,
-    firstBidAt: at(-5 * DAY + 20 * MINUTE),
-    winnerAlias: "k***a",
-    decision: {
-      winnerAlias: "k***a",
-      winningBid: 7900,
-      cancelledOrderNumber: "ORD-10351",
-      decideBy: at(47 * HOUR + 12 * MINUTE),
-      secondBidder: { bidderAlias: "m***a", amount: 7600, estimatedPayout: 7220 },
-    },
+  // จบแล้ว รอผู้ชนะชำระ
+  117: {
+    ...SELLER_ENDED,
+    id: 117,
+    auctionNumber: "AUC-2026-0117",
+    status: "AWAITING_PAYMENT",
+    item: I.lugia,
+    unitLabel: "U-0912",
+    startingPrice: 3000,
+    currentPrice: 6100,
+    bidCount: 9,
+    bidderCount: 4,
+    watcherCount: 18,
+    estimatedPayout: 5795,
+    startedAt: at(-3 * DAY - 6 * HOUR),
+    originalEndsAt: at(-6 * HOUR),
+    endsAt: at(-6 * HOUR),
+    firstBidAt: at(-3 * DAY),
+    winnerAlias: "s***j",
+    paymentDueAt: at(18 * HOUR + 22 * MINUTE),
+    orderId: 10377,
+    bids: endedBids([6100, 5800, 5000, 4200, 3000], -6 * HOUR - 5 * MINUTE),
   },
-  128: {
-    ...SELLER_CHARIZARD,
-    id: 128,
-    auctionNumber: "AUC-2026-0128",
-    status: "OFFERED_TO_SECOND",
-    item: I.mew,
-    unitLabel: "U-0702",
-    startingPrice: 1500,
-    currentPrice: 4800,
-    bidCount: 14,
+  // ผู้ชนะชำระแล้ว
+  133: {
+    ...SELLER_ENDED,
+    id: 133,
+    auctionNumber: "AUC-2026-0133",
+    status: "SOLD",
+    item: I.mewtwo,
+    unitLabel: "U-0533",
+    startingPrice: 500,
+    currentPrice: 4200,
+    bidCount: 18,
     bidderCount: 6,
-    estimatedPayout: 4418,
-    buyNowPrice: null,
-    endsAt: at(-2 * DAY),
-    originalEndsAt: at(-2 * DAY),
-    extensionCount: 1,
-    winnerAlias: "s***p",
-    offer: { bidderAlias: "m***a", amount: 4650, status: "PENDING", expiresAt: at(20 * HOUR + 5 * MINUTE) },
+    watcherCount: 22,
+    estimatedPayout: 3990,
+    startedAt: at(-7 * DAY),
+    originalEndsAt: at(-4 * DAY),
+    endsAt: at(-4 * DAY),
+    firstBidAt: at(-7 * DAY + 2 * HOUR),
+    winnerAlias: "m***a",
+    orderId: 10388,
+    bids: endedBids([4200, 4000, 3500, 2800, 2000], -4 * DAY - 10 * MINUTE),
+  },
+  // ผู้ชนะไม่ชำระใน 24 ชม. → UNSOLD การ์ดกลับเข้าสต็อก
+  121: {
+    ...SELLER_ENDED,
+    id: 121,
+    auctionNumber: "AUC-2026-0121",
+    status: "UNSOLD",
+    item: I.espeon,
+    unitLabel: "U-0702",
+    startingPrice: 3000,
+    currentPrice: 5200,
+    bidCount: 6,
+    bidderCount: 3,
+    watcherCount: 11,
+    estimatedPayout: 4940,
+    startedAt: at(-6 * DAY),
+    originalEndsAt: at(-3 * DAY),
+    endsAt: at(-3 * DAY),
+    firstBidAt: at(-6 * DAY + 3 * HOUR),
+    winnerAlias: "k***a",
+    bids: endedBids([5200, 4800, 4100, 3600, 3000], -3 * DAY - 15 * MINUTE),
+  },
+  // หมดเวลาแบบไม่มีผู้บิด
+  126: {
+    ...SELLER_ENDED,
+    id: 126,
+    auctionNumber: "AUC-2026-0126",
+    status: "UNSOLD",
+    item: I.blastoise,
+    unitLabel: "U-0590",
+    startingPrice: 4500,
+    currentPrice: 4500,
+    bidCount: 0,
+    bidderCount: 0,
+    watcherCount: 3,
+    estimatedPayout: 4275,
+    startedAt: at(-8 * DAY),
+    originalEndsAt: at(-5 * DAY),
+    endsAt: at(-5 * DAY),
+    firstBidAt: null,
+    bids: [],
+  },
+  140: {
+    ...SELLER_ENDED,
+    id: 140,
+    auctionNumber: "AUC-2026-0140",
+    status: "CANCELLED",
+    item: I.charizardEx,
+    unitLabel: "U-1041",
+    startingPrice: 900,
+    currentPrice: 900,
+    bidCount: 0,
+    bidderCount: 0,
+    estimatedPayout: 855,
+    buyNowPrice: 1500,
+    startedAt: at(-2 * DAY),
+    originalEndsAt: at(-1 * DAY),
+    endsAt: at(-1 * DAY),
+    firstBidAt: null,
+    bids: [],
+  },
+  // ขายด้วยซื้อทันที (ไม่มีบิด แต่มีผู้ชนะ) รอผู้ซื้อชำระ — ไม่อยู่ในตาราง S1 เปิดจาก URL ตรง ๆ
+  158: {
+    ...SELLER_ENDED,
+    id: 158,
+    auctionNumber: "AUC-2026-0158",
+    status: "AWAITING_PAYMENT",
+    item: I.pikachu,
+    unitLabel: "U-0990",
+    startingPrice: 2400,
+    currentPrice: 3500,
+    bidCount: 0,
+    bidderCount: 0,
+    watcherCount: 7,
+    estimatedPayout: 3325,
+    buyNowPrice: 3500,
+    startedAt: at(-1 * DAY),
+    originalEndsAt: at(2 * DAY),
+    endsAt: at(-2 * HOUR),
+    firstBidAt: null,
+    winnerAlias: "p***m",
+    paymentDueAt: at(22 * HOUR),
+    orderId: 10391,
+    bids: [],
   },
 };
 
 // ---------- แอดมิน ----------
 
+const ADMIN_ROWS: AdminAuctionRow[] = [
+  { id: 139, auctionNumber: "AUC-2026-0139", cardName: "Rayquaza VMAX Alt Art", cardImageUrl: I.rayquaza.card.officialImageUrl, shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 21500, bidCount: 41, bidderCount: 9, status: "LIVE", endsAt: at(2 * MINUTE), deadline: null, signals: ["NEW_ACCOUNT_RAPID_BIDS", "SHARED_ADDRESS_WITH_SELLER"], reportCount: 0, suspendedAt: null },
+  { id: 142, auctionNumber: "AUC-2026-0142", cardName: "Charizard VMAX #020", cardImageUrl: I.charizard.card.officialImageUrl, shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 8450, bidCount: 12, bidderCount: 7, status: "AWAITING_PAYMENT", endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 41 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
+  { id: 155, auctionNumber: "AUC-2026-0155", cardName: "Pikachu Illustrator", cardImageUrl: I.pikachu.card.officialImageUrl, shopName: "newshop_99", sellerUsername: "newshop_99", currentPrice: 2000, bidCount: 0, bidderCount: 0, status: "LIVE", endsAt: at(6 * DAY), deadline: null, signals: ["REPORTED"], reportCount: 3, suspendedAt: null },
+  { id: 151, auctionNumber: "AUC-2026-0151", cardName: "Umbreon VMAX Alt Art", cardImageUrl: I.umbreon.card.officialImageUrl, shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 15200, bidCount: 27, bidderCount: 11, status: "LIVE", endsAt: at(18 * HOUR + 4 * MINUTE), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
+  { id: 133, auctionNumber: "AUC-2026-0133", cardName: "Mewtwo GX Rainbow", cardImageUrl: I.mewtwo.card.officialImageUrl, shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 4200, bidCount: 18, bidderCount: 6, status: "SOLD", endsAt: at(-4 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
+  { id: 98, auctionNumber: "AUC-2026-0098", cardName: "Gengar VMAX Alt Art", cardImageUrl: I.gengar.card.officialImageUrl, shopName: "fakecards_th", sellerUsername: "fakecards_th", currentPrice: 6000, bidCount: 3, bidderCount: 2, status: "SUSPENDED", endsAt: at(-6 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: at(-6 * DAY) },
+];
+
+/** ตาราง A1 — api กรองตามแท็บ/คำค้นจากรายการนี้ ตัวนับยังเป็นเลขตาม Figma */
 export const ADMIN_AUCTION_PAGE_FIXTURE: AdminAuctionPage = {
-  page: {
-    items: [
-      { id: 139, auctionNumber: "AUC-2026-0139", cardName: "Rayquaza VMAX Alt Art", shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 21500, bidCount: 41, bidderCount: 9, status: "LIVE", endsAt: at(2 * MINUTE), deadline: null, signals: ["NEW_ACCOUNT_RAPID_BIDS", "SHARED_ADDRESS_WITH_SELLER"], reportCount: 0, suspendedAt: null },
-      { id: 142, auctionNumber: "AUC-2026-0142", cardName: "Charizard VMAX #020", shopName: "CardVault BKK", sellerUsername: "cardvault_bkk", currentPrice: 8450, bidCount: 12, bidderCount: 7, status: "AWAITING_PAYMENT", endsAt: at(-20 * MINUTE), deadline: at(23 * HOUR + 41 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
-      { id: 155, auctionNumber: "AUC-2026-0155", cardName: "Pikachu Illustrator", shopName: "newshop_99", sellerUsername: "newshop_99", currentPrice: 2000, bidCount: 0, bidderCount: 0, status: "LIVE", endsAt: at(2 * DAY), deadline: null, signals: ["REPORTED"], reportCount: 3, suspendedAt: null },
-      { id: 151, auctionNumber: "AUC-2026-0151", cardName: "Umbreon VMAX Alt Art", shopName: "RareCard Station", sellerUsername: "rarecard_station", currentPrice: 15200, bidCount: 27, bidderCount: 11, status: "LIVE", endsAt: at(1 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: null },
-      { id: 128, auctionNumber: "AUC-2026-0128", cardName: "Mew ex SIR #232", shopName: "PokeHub Thailand", sellerUsername: "pokehub_th", currentPrice: 4800, bidCount: 14, bidderCount: 6, status: "OFFERED_TO_SECOND", endsAt: at(-2 * DAY), deadline: at(20 * HOUR + 5 * MINUTE), signals: [], reportCount: 0, suspendedAt: null },
-      { id: 98, auctionNumber: "AUC-2026-0098", cardName: "Gengar VMAX Alt Art", shopName: "fakecards_th", sellerUsername: "fakecards_th", currentPrice: 6000, bidCount: 3, bidderCount: 2, status: "SUSPENDED", endsAt: at(-6 * DAY), deadline: null, signals: [], reportCount: 0, suspendedAt: at(-6 * DAY) },
-    ],
-    page: 0,
-    size: 20,
-    totalItems: 1204,
-    totalPages: 61,
-  },
-  tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 12, ENDED: 1050, SUSPENDED: 2 },
-  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, offeredToSecond: 3, suspendedLast30Days: 2 },
+  page: { items: ADMIN_ROWS, page: 0, size: 20, totalItems: 1204, totalPages: 61 },
+  tabCounts: { ALL: 1204, FLAGGED: 2, LIVE: 128, AWAITING_PAYMENT: 9, ENDED: 1050, SUSPENDED: 14 },
+  kpis: { live: 128, endingWithinHour: 14, awaitingPayment: 9, suspendedLast30Days: 2, soldLast30Days: 486200 },
   flaggedCount: 2,
+  reportedCount: 1,
+  suspiciousCount: 1,
   serverTime: serverTime(),
 };
 
-export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = {
+const RAYQUAZA_ADMIN: AdminAuctionDetail = {
   id: 139,
   auctionNumber: "AUC-2026-0139",
   status: "LIVE",
@@ -511,6 +650,99 @@ export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = {
   serverTime: serverTime(),
 };
 
+/** ใบที่ไม่มีใน `ADMIN_AUCTION_DETAIL_FIXTURES` ใช้ใบนี้ */
+export const ADMIN_AUCTION_DETAIL_FIXTURE: AdminAuctionDetail = RAYQUAZA_ADMIN;
+
+/** รายละเอียด A3 แยกตาม id ตรงกับแถวในตาราง A1 [TCG-635] */
+export const ADMIN_AUCTION_DETAIL_FIXTURES: Record<number, AdminAuctionDetail> = {
+  139: RAYQUAZA_ADMIN,
+  // ถูกรายงาน ยังไม่มีบิด
+  155: {
+    ...RAYQUAZA_ADMIN,
+    id: 155,
+    auctionNumber: "AUC-2026-0155",
+    item: I.pikachu,
+    seller: { sellerProfileId: 31, shopName: "newshop_99", username: "newshop_99", verified: false, auctionCount: 2, suspensionCount: 0 },
+    startingPrice: 2000,
+    currentPrice: 2000,
+    bidCount: 0,
+    bidderCount: 0,
+    originalEndsAt: at(6 * DAY),
+    endsAt: at(6 * DAY),
+    extensionCount: 0,
+    sellerNote: null,
+    sellerNoteUpdatedAt: null,
+    signals: [{ signal: "REPORTED", message: "ผู้ใช้ 3 คนรายงานว่าการ์ดในรูปอาจเป็นของปลอม" }],
+    reportCount: 3,
+    bids: [],
+  },
+  // จบแล้ว รอผู้ชนะชำระ
+  142: {
+    ...RAYQUAZA_ADMIN,
+    id: 142,
+    auctionNumber: "AUC-2026-0142",
+    status: "AWAITING_PAYMENT",
+    item: I.charizard,
+    seller: { sellerProfileId: 5, shopName: "CardVault BKK", username: "cardvault_bkk", verified: true, auctionCount: 48, suspensionCount: 0 },
+    startingPrice: 2000,
+    currentPrice: 8450,
+    bidCount: 12,
+    bidderCount: 7,
+    buyNowPrice: 12000,
+    originalEndsAt: at(-1 * HOUR),
+    endsAt: at(-20 * MINUTE),
+    extensionCount: 3,
+    signals: [],
+    bids: [
+      { bidId: 7012, userId: 7, username: "somchai.j", memberSince: at(-365 * DAY), orderCount: 23, amount: 8450, placedAt: at(-22 * MINUTE), status: "ACTIVE", signals: [] },
+      { bidId: 7011, userId: 303, username: "mina.k", memberSince: at(-730 * DAY), orderCount: 61, amount: 8300, placedAt: at(-24 * MINUTE), status: "ACTIVE", signals: [] },
+    ],
+  },
+  // ไม่มีสัญญาณ
+  151: {
+    ...RAYQUAZA_ADMIN,
+    id: 151,
+    auctionNumber: "AUC-2026-0151",
+    item: I.umbreon,
+    currentPrice: 15200,
+    bidCount: 27,
+    bidderCount: 11,
+    originalEndsAt: at(18 * HOUR + 4 * MINUTE),
+    endsAt: at(18 * HOUR + 4 * MINUTE),
+    extensionCount: 0,
+    signals: [],
+    bids: [
+      { bidId: 6027, userId: 303, username: "mina.k", memberSince: at(-730 * DAY), orderCount: 61, amount: 15200, placedAt: at(-2 * HOUR), status: "ACTIVE", signals: [] },
+      { bidId: 6026, userId: 7, username: "somchai.j", memberSince: at(-365 * DAY), orderCount: 23, amount: 15000, placedAt: at(-3 * HOUR), status: "ACTIVE", signals: [] },
+    ],
+  },
+  // ถูกระงับ — บิดทั้งหมดถูกยกเลิก เหตุผลอยู่ในบันทึกของแอดมิน
+  98: {
+    ...RAYQUAZA_ADMIN,
+    id: 98,
+    auctionNumber: "AUC-2026-0098",
+    status: "SUSPENDED",
+    item: I.gengar,
+    seller: { sellerProfileId: 44, shopName: "fakecards_th", username: "fakecards_th", verified: true, auctionCount: 6, suspensionCount: 1 },
+    startingPrice: 3000,
+    currentPrice: 6000,
+    bidCount: 3,
+    bidderCount: 2,
+    originalEndsAt: at(-5 * DAY),
+    endsAt: at(-6 * DAY),
+    extensionCount: 0,
+    sellerNote: null,
+    sellerNoteUpdatedAt: null,
+    signals: [{ signal: "REPORTED", message: "ผู้ซื้อ 2 คนรายงานว่ารูปการ์ดคัดลอกมาจากร้านอื่น" }],
+    reportCount: 2,
+    bids: [
+      { bidId: 5003, userId: 304, username: "pond.p", memberSince: at(-90 * DAY), orderCount: 5, amount: 6000, placedAt: at(-6 * DAY - HOUR), status: "CANCELLED", signals: [] },
+      { bidId: 5002, userId: 305, username: "beam.t", memberSince: at(-400 * DAY), orderCount: 12, amount: 5500, placedAt: at(-6 * DAY - 2 * HOUR), status: "CANCELLED", signals: [] },
+    ],
+    actions: [{ action: "SUSPEND", adminName: "admin", reason: "รูปการ์ดคัดลอกจากร้านอื่น ผู้ขายไม่มีการ์ดใบนี้จริง", at: at(-6 * DAY) }],
+  },
+};
+
 const KANOK: BannedBidder = {
   userId: 401,
   username: "kanok.a",
@@ -527,18 +759,26 @@ const KANOK: BannedBidder = {
   ],
 };
 
+/** A4 ทุกแท็บรวมกัน — api แยกแท็บด้วย `matchesBanTab` ตัวนับยังเป็นเลขตาม Figma */
 export const BANNED_BIDDER_PAGE_FIXTURE: BannedBidderPage = {
   page: {
     items: [
+      // ห้ามบิดอยู่
       KANOK,
       { ...KANOK, userId: 402, username: "bid_master99", maskedEmail: "b***9@hotmail.com", memberSince: at(-30 * DAY), bannedUntil: at(26 * DAY), strikes: [{ auctionId: 114, auctionNumber: "AUC-2026-0114", at: at(-4 * DAY) }] },
       { ...KANOK, userId: 403, username: "pon.tcg", maskedEmail: "p***g@gmail.com", memberSince: at(-730 * DAY), bannedUntil: at(20 * DAY), strikes: [{ auctionId: 103, auctionNumber: "AUC-2026-0103", at: at(-10 * DAY) }] },
       { ...KANOK, userId: 404, username: "newbie_th", maskedEmail: "n***h@yahoo.com", memberSince: at(-14 * DAY), bannedUntil: at(17 * DAY), strikes: [{ auctionId: 99, auctionNumber: "AUC-2026-0099", at: at(-13 * DAY) }] },
       { ...KANOK, userId: 405, username: "collector.b", maskedEmail: "c***b@gmail.com", memberSince: at(-365 * DAY), bannedUntil: at(9 * DAY), strikes: [{ auctionId: 88, auctionNumber: "AUC-2026-0088", at: at(-21 * DAY) }] },
+      // ใกล้ถูกห้าม (2/3)
+      { ...KANOK, userId: 406, username: "jay.collect", maskedEmail: "j***t@gmail.com", memberSince: at(-120 * DAY), strikeCount: 2, bannedUntil: null, strikes: [{ auctionId: 118, auctionNumber: "AUC-2026-0118", at: at(-2 * DAY) }, { auctionId: 97, auctionNumber: "AUC-2026-0097", at: at(-15 * DAY) }] },
+      { ...KANOK, userId: 407, username: "mook.tcg", maskedEmail: "m***g@hotmail.com", memberSince: at(-60 * DAY), strikeCount: 2, bannedUntil: null, strikes: [{ auctionId: 116, auctionNumber: "AUC-2026-0116", at: at(-3 * DAY) }, { auctionId: 105, auctionNumber: "AUC-2026-0105", at: at(-9 * DAY) }] },
+      // ประวัติ: แอดมินยกเลิกโทษแล้ว / พ้นโทษแล้ว
+      { ...KANOK, userId: 408, username: "aom.s", maskedEmail: "a***s@gmail.com", memberSince: at(-500 * DAY), strikeCount: 0, bannedUntil: at(12 * DAY), liftedAt: at(-3 * DAY), strikes: [{ auctionId: 92, auctionNumber: "AUC-2026-0092", at: at(-20 * DAY) }] },
+      { ...KANOK, userId: 409, username: "tee.k", maskedEmail: "t***k@yahoo.com", memberSince: at(-300 * DAY), strikeCount: 0, bannedUntil: at(-5 * DAY), strikes: [{ auctionId: 71, auctionNumber: "AUC-2026-0071", at: at(-36 * DAY) }] },
     ],
     page: 0,
     size: 20,
-    totalItems: 5,
+    totalItems: 9,
     totalPages: 1,
   },
   tabCounts: { BANNED: 5, AT_RISK: 12, HISTORY: 41 },

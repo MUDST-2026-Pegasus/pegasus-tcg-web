@@ -1,3 +1,5 @@
+import type { ListingPricing } from "@/components/sale";
+
 // สิ่งที่ backend ส่งมาสำหรับ catalogue — ลอกจาก dto/*.java ถ้าฝั่งนั้นแก้ ต้องแก้ตาม
 // หน้าแรกกับหน้าค้นหาใช้ร่วมกัน
 
@@ -31,6 +33,8 @@ export type CardSetDto = {
   code: string;
   name: string;
   nameLocal: string | null;
+  releaseDate?: string | null;
+  totalCards?: number | null;
 };
 
 /** `CategoryResponse` — `GET /categories` */
@@ -62,6 +66,8 @@ export type ProductSummaryDto = {
   /** ราคาถูกสุดที่มีขายตอนนี้ (บาท) ในสภาพที่กรองไว้; null = ไม่มีใครขาย */
   lowestPrice: number | null;
   listingCount: number;
+  /** ราคาที่มีผลของ listing ถูกสุด (SAL-04) — `null`/ไม่มี = ไม่ลดราคา หรือ API เก่า */
+  pricing?: ListingPricing | null;
 };
 
 /** `ProductDetailResponse` — one product, its printings, and signed image URLs. */
@@ -142,10 +148,17 @@ export type PublicListingDto = {
     officialImageUrl: string | null;
   };
   condition: CardCondition;
+  gradingCompany?: string | null;
+  gradeValue?: number | null;
+  /** ราคาตั้งต้น (= ราคาขีดฆ่าเมื่อมีการลด) — ราคาที่ผู้ซื้อจ่ายอยู่ใน `pricing.salePrice` */
   price: number;
   currency: string;
   quantityAvailable: number;
   primaryPhotoUrl: string | null;
+  /** ราคาที่มีผล (SAL-04) — แสดงตามนี้อย่างเดียว ไม่คิดราคาลดเองที่ FE · API เก่าไม่ส่งมา */
+  pricing?: ListingPricing | null;
+  /** โควตาราคา Flash ทั้งหมดของ listing นี้ (มากับ `/sales/featured` และ `/sales/{slug}`) */
+  saleQuota?: number | null;
   seller: {
     username: string;
     displayName: string | null;
@@ -168,8 +181,33 @@ export type PublicListingDetailDto = {
     publicNote: string | null;
     gradingCompany: string | null;
     gradeValue: number | null;
+    status: "ACTIVE" | "SOLD_OUT";
+    publishedAt: string | null;
   };
   photoUrls: string[];
+  certNumber: string | null;
+  market: MarketStatDto | null;
+};
+
+/** Daily raw-card statistics returned by GET /listings/{id}. */
+export type MarketStatDto = {
+  statDate: string;
+  medianPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  p25Price: number | null;
+  p75Price: number | null;
+  activeListingCount: number;
+  soldQuantity30d: number;
+  sampleSize: number;
+};
+
+export type GameAttributeDto = {
+  id: number;
+  gameId: number;
+  attrKey: string;
+  label: string;
+  displayOrder: number;
 };
 
 /** A collector who has made at least one copy of this product public. */
@@ -181,6 +219,7 @@ export type ProductCollectorDto = {
 };
 
 export type ProductSort =
+  | "relevance"
   | "name"
   | "newest"
   | "cardNumber"

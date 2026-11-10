@@ -20,7 +20,7 @@ const mockUser: AuthUser = {
   status: "ACTIVE",
   phone: "0812345678",
   bio: "Trading card enthusiast",
-  avatarUrl: null,
+  avatarUrl: null, bannerUrl: null,
   createdAt: "2026-01-01T00:00:00Z",
   lastLoginAt: "2026-10-15T10:00:00Z",
 };
@@ -103,7 +103,7 @@ describe("ProfilePage", () => {
     await user.click(editBtn);
 
     expect(
-      await screen.findByText("Update your personal information and profile display."),
+      await screen.findByText(/Update your personal information/i),
     ).toBeInTheDocument();
   });
 

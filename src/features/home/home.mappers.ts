@@ -37,7 +37,8 @@ export const FALLBACK_HERO_SLIDE: HeroSlide = {
   description:
     "Discover the newest singles and sealed releases from verified sellers.",
   image: pegasusCampaignTable,
-  imageAlt: "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ",
+  // ข้อความแปลใน HeroSection (HomeContent) — ที่นี่เก็บไว้เป็นค่าตั้งต้นภาษาอังกฤษ
+  imageAlt: "Pegasus trading cards on display",
   theme: "campaign",
   primaryAction: { label: "Shop New Releases", href: "/search?sort=newest" },
   secondaryAction: { label: "Explore Cards", href: "/search" },
@@ -110,6 +111,7 @@ export function toHomeProduct(product: ProductSummaryDto): HomeProduct {
     name: product.name,
     type: PRODUCT_TYPE_LABELS[product.productType] ?? "Other",
     price: product.lowestPrice,
+    pricing: product.pricing ?? null,
     image: product.primaryImageUrl ?? undefined,
     imageAlt: product.name,
     href: productHref(product.slug),
@@ -127,6 +129,7 @@ export function listingToHomeProduct(listing: PublicListingDto): HomeProduct {
     name: listing.card.productName,
     type: CONDITION_LABELS[listing.condition] ?? listing.condition,
     price: listing.price,
+    pricing: listing.pricing ?? null,
     image: listing.primaryPhotoUrl ?? listing.card.officialImageUrl ?? undefined,
     imageAlt: listing.card.productName,
     href: productHref(listing.card.productSlug),

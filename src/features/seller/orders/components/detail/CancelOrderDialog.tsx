@@ -25,6 +25,7 @@ import {
   cancelOrderSchema,
   type CancelOrderValues,
 } from "../../orders.schema";
+import { useTranslate } from "@/lib/i18n";
 
 type CancelOrderDialogProps = {
   open: boolean;
@@ -46,14 +47,16 @@ export function CancelOrderDialog({
   orderNumber,
   paid,
 }: CancelOrderDialogProps) {
+  const { t } = useTranslate("seller");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>ยกเลิกคำสั่งซื้อ {orderNumber}</DialogTitle>
+          <DialogTitle>{t("orderDetail.cancel.dialogTitle", "ยกเลิกคำสั่งซื้อ {orderNumber}", { orderNumber })}</DialogTitle>
           <DialogDescription>
-            การ์ดในออเดอร์นี้จะกลับไปวางขายทันที
-            {paid ? " และระบบจะคืนเงินให้ผู้ซื้อ" : ""} — ทำย้อนกลับไม่ได้
+            {paid
+              ? t("orderDetail.cancel.descriptionPaid", "การ์ดในออเดอร์นี้จะกลับไปวางขายทันที และระบบจะคืนเงินให้ผู้ซื้อ — ทำย้อนกลับไม่ได้")
+              : t("orderDetail.cancel.description", "การ์ดในออเดอร์นี้จะกลับไปวางขายทันที — ทำย้อนกลับไม่ได้")}
           </DialogDescription>
         </DialogHeader>
 
@@ -64,6 +67,7 @@ export function CancelOrderDialog({
 }
 
 function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void }) {
+  const { t } = useTranslate("seller");
   const cancel = useCancelOrder();
 
   const {
@@ -79,7 +83,7 @@ function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void
   const onSubmit = handleSubmit(async (values) => {
     try {
       await cancel.mutateAsync({ id: orderId, payload: { reason: values.reason } });
-      toast.add({ type: "success", title: "ยกเลิกคำสั่งซื้อแล้ว" });
+      toast.add({ type: "success", title: t("orderDetail.cancel.success", "ยกเลิกคำสั่งซื้อแล้ว") });
       onClose();
     } catch (error) {
       // `reason` ตรงกับชื่อช่องอยู่แล้ว เคสอื่น (ส่งไปแล้ว / สลิปรอตรวจ) ขึ้นที่ Alert
@@ -92,18 +96,18 @@ function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void
       {cancel.isError && errors.reason === undefined ? (
         <Alert variant="destructive">
           <AlertDescription>
-            {orderErrorMessage(cancel.error, "ยกเลิกไม่สำเร็จ ลองใหม่อีกครั้ง")}
+            {orderErrorMessage(cancel.error, t("orderDetail.cancel.failed", "ยกเลิกไม่สำเร็จ ลองใหม่อีกครั้ง"))}
           </AlertDescription>
         </Alert>
       ) : null}
 
       <Field data-invalid={Boolean(errors.reason) || undefined}>
-        <FieldLabel htmlFor="cancel-reason">เหตุผลที่ยกเลิก</FieldLabel>
+        <FieldLabel htmlFor="cancel-reason">{t("orderDetail.cancel.reason", "เหตุผลที่ยกเลิก")}</FieldLabel>
         <Textarea
           id="cancel-reason"
           rows={4}
           maxLength={255}
-          placeholder="เช่น การ์ดเสียหายระหว่างแพ็ค ขออภัยในความไม่สะดวก"
+          placeholder={t("orderDetail.cancel.reasonPlaceholder", "เช่น การ์ดเสียหายระหว่างแพ็ค ขออภัยในความไม่สะดวก")}
           aria-invalid={Boolean(errors.reason)}
           {...register("reason")}
         />
@@ -112,11 +116,11 @@ function CancelForm({ orderId, onClose }: { orderId: number; onClose: () => void
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ไม่ยกเลิก
+          {t("orderDetail.cancel.keep", "ไม่ยกเลิก")}
         </DialogClose>
         <Button type="submit" variant="destructive" disabled={isSubmitting}>
           {isSubmitting ? <Spinner /> : null}
-          ยืนยันยกเลิก
+          {t("orderDetail.cancel.confirm", "ยืนยันยกเลิก")}
         </Button>
       </DialogFooter>
     </form>

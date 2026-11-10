@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from "react";
+import { DataTable, type DataTableColumn } from "@/components/common";
+import { useState, type ComponentProps, type ReactNode } from "react";
 
 import { Ellipsis, ImageIcon, PackagePlus, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -13,14 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 import { listingMeta } from "../products.format";
@@ -29,6 +22,7 @@ import type { SellerListingSummary } from "../products.types";
 
 import { ListingPriceCell } from "./ListingPriceCell";
 import { ListingStatusCell } from "./ListingStatusCell";
+import { useTranslate } from "@/lib/i18n";
 
 const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-gray-500";
 
@@ -93,124 +87,88 @@ export function ProductTable({
   isFetching,
   footer,
 }: ProductTableProps) {
+  const { t } = useTranslate("seller");
   const allSelected = rows.length > 0 && selectedIds.length === rows.length;
 
-  return (
-    <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
-      <Table
-        aria-busy={isFetching}
-        className={cn("transition-opacity", isFetching && "opacity-60")}
-      >
-        <TableHeader>
-          <TableRow className="border-y border-muted bg-neutral-50 hover:bg-neutral-50">
-            <TableHead className={cn(HEAD_CLASS, "w-8 pl-5")}>
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={onToggleAll}
-                aria-label="เลือกสินค้าทั้งหมดในหน้านี้"
-                className="size-3.5"
-              />
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-72")}>สินค้า</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>ราคาขาย</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-28")}>
-              ต้นทุนเฉลี่ย
-            </TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-28")}>พร้อมขาย</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-20")}>ติดจอง</TableHead>
-            <TableHead className={cn(HEAD_CLASS, "w-32")}>สถานะ</TableHead>
-            {/* คอลัมน์ปุ่มท้ายแถวไม่มีหัวตารางในดีไซน์ */}
-            <TableHead className={cn(HEAD_CLASS, "pr-5")}>
-              <span className="sr-only">ตัวเลือกเพิ่มเติม</span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody className="[&_tr]:border-muted">
-          {rows.map((row) => {
-            const isSelected = selectedIds.includes(row.id);
-            const name = row.card.productName;
-            const lowStock = isLowStock(row);
-
-            return (
-              <TableRow
-                key={row.id}
-                data-state={isSelected ? "selected" : undefined}
-                className={cn(isSelected && "bg-gray-50")}
-              >
-                <TableCell className="py-3 pl-5">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => onToggleRow(row.id)}
-                    aria-label={`เลือกสินค้า: ${name}`}
-                    className="size-3.5"
-                  />
-                </TableCell>
-
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
-                    <ListingThumb listing={row} />
-                    <div className="flex min-w-0 flex-col gap-[3px]">
-                      <p className="truncate text-xs font-medium text-foreground">
-                        {name}
-                      </p>
-                      <p className="truncate text-[10px] text-gray-400">
-                        {listingMeta(row)}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-
-                <TableCell className="py-3">
-                  <ListingPriceCell listing={row} readOnly={readOnly} />
-                </TableCell>
-
-                <TableCell className="py-3 text-xs text-gray-400">—</TableCell>
-
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-xs font-semibold",
-                        row.quantityAvailable === 0
-                          ? "text-[#d0342c]"
-                          : lowStock
-                            ? "text-[#b45309]"
-                            : "text-foreground",
-                      )}
-                    >
-                      {row.quantityAvailable}
-                    </span>
-                    <span className="text-[10px] text-gray-400">ใบ</span>
-                    {lowStock ? (
-                      <span className="text-[10px] font-medium text-[#b45309]">
-                        ใกล้หมด
-                      </span>
-                    ) : null}
-                  </div>
-                </TableCell>
-
-                <TableCell
-                  className={cn(
-                    "py-3 text-xs",
-                    row.quantityReserved > 0
-                      ? "text-gray-700"
-                      : "text-gray-400",
-                  )}
-                >
-                  {row.quantityReserved}
-                </TableCell>
-
-                <TableCell className="py-3">
-                  <ListingStatusCell listing={row} readOnly={readOnly} />
-                </TableCell>
-
-                <TableCell className="py-2 pr-5">
+  const columns: DataTableColumn<SellerListingSummary>[] = [
+    {
+      id: "select",
+      header: () => (
+        <Checkbox checked={allSelected} onCheckedChange={onToggleAll} aria-label={t("products.table.selectAll", "เลือกสินค้าทั้งหมดในหน้านี้")} className="size-3.5" />
+      ),
+      meta: { headClassName: cn(HEAD_CLASS, "w-8 pl-5"), cellClassName: "py-3 pl-5" },
+      cell: ({ row: { original: row } }) => (
+        <Checkbox
+          checked={selectedIds.includes(row.id)}
+          onCheckedChange={() => onToggleRow(row.id)}
+          aria-label={t("products.table.select", "เลือกสินค้า: {name}", { name: row.card.productName })}
+          className="size-3.5"
+        />
+      ),
+    },
+    {
+      id: "product",
+      header: t("products.table.product", "สินค้า"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-72"), cellClassName: "py-3" },
+      cell: ({ row: { original: row } }) => (
+        <div className="flex items-center gap-3">
+          <ListingThumb listing={row} />
+          <div className="flex min-w-0 flex-col gap-[3px]">
+            <p className="truncate text-xs font-medium text-foreground">{row.card.productName}</p>
+            <p className="truncate text-[10px] text-gray-400">{listingMeta(row)}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "price",
+      header: t("products.table.price", "ราคาขาย"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-32"), cellClassName: "py-3" },
+      cell: ({ row }) => <ListingPriceCell listing={row.original} readOnly={readOnly} />,
+    },
+    { id: "cost", header: t("products.table.averageCost", "ต้นทุนเฉลี่ย"), meta: { headClassName: cn(HEAD_CLASS, "w-28"), cellClassName: "py-3 text-xs text-gray-400" }, cell: () => "—" },
+    {
+      id: "available",
+      header: t("products.table.available", "พร้อมขาย"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-28"), cellClassName: "py-3" },
+      cell: ({ row: { original: row } }) => {
+        const lowStock = isLowStock(row);
+        return (
+          <div className="flex items-center gap-2">
+            <span className={cn("text-xs font-semibold", row.quantityAvailable === 0 ? "text-[#d0342c]" : lowStock ? "text-[#b45309]" : "text-foreground")}>
+              {row.quantityAvailable}
+            </span>
+            <span className="text-[10px] text-gray-400">{t("products.unit.card", "ใบ")}</span>
+            {lowStock ? <span className="text-[10px] font-medium text-[#b45309]">{t("products.table.lowStock", "ใกล้หมด")}</span> : null}
+          </div>
+        );
+      },
+    },
+    {
+      id: "reserved",
+      header: t("products.table.reserved", "ติดจอง"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-20"), cellClassName: "py-3 text-xs" },
+      cell: ({ row: { original: row } }) => <span className={row.quantityReserved > 0 ? "text-gray-700" : "text-gray-400"}>{row.quantityReserved}</span>,
+    },
+    {
+      id: "status",
+      header: t("products.table.status", "สถานะ"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-32"), cellClassName: "py-3" },
+      cell: ({ row }) => <ListingStatusCell listing={row.original} readOnly={readOnly} />,
+    },
+    {
+      // คอลัมน์ปุ่มท้ายแถวไม่มีหัวตารางในดีไซน์
+      id: "actions",
+      header: () => <span className="sr-only">{t("products.table.more", "ตัวเลือกเพิ่มเติม")}</span>,
+      meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: "py-2 pr-5" },
+      cell: ({ row: { original: row } }) => {
+        const name = row.card.productName;
+        return (
                   <div className="flex items-center justify-end gap-2">
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`แก้ไขสินค้า: ${name}`}
+                      aria-label={t("products.table.edit", "แก้ไขสินค้า: {name}", { name })}
                       className="rounded-md text-slate-500"
                       render={<Link to={`/seller/products/${row.id}/edit`} />}
                       nativeButton={false}
@@ -223,7 +181,7 @@ export function ProductTable({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={`ตัวเลือกเพิ่มเติม: ${name}`}
+                            aria-label={t("products.table.moreFor", "ตัวเลือกเพิ่มเติม: {name}", { name })}
                             className="rounded-md text-slate-500"
                           />
                         }
@@ -241,7 +199,7 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <PackagePlus />
-                          เติมสต็อก
+                          {t("products.actions.restock", "เติมสต็อก")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -251,17 +209,29 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <Trash2 />
-                          ลบสินค้า
+                          {t("products.actions.delete", "ลบสินค้า")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+        );
+      },
+    },
+  ];
+
+  return (
+    <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
+      <DataTable
+        columns={columns}
+        data={rows}
+        getRowId={(row) => String(row.id)}
+        aria-busy={isFetching}
+        tableClassName={cn("transition-opacity", isFetching && "opacity-60")}
+        headerRowClassName="border-y border-muted bg-neutral-50 hover:bg-neutral-50"
+        bodyClassName="[&_tr]:border-muted"
+        rowClassName={(row) => cn(selectedIds.includes(row.id) && "bg-gray-50")}
+        rowProps={(row) => ({ "data-state": selectedIds.includes(row.id) ? "selected" : undefined } as ComponentProps<"tr">)}
+      />
 
       {footer}
     </Card>

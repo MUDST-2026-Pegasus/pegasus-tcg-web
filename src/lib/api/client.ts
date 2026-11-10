@@ -27,6 +27,11 @@ export type RequestOptions = {
   credentials?: RequestCredentials;
 };
 
+export type FileDownload = {
+  blob: Blob;
+  filename: string | null;
+};
+
 type RequestInput = RequestOptions & {
   method: string;
   body?: unknown;
@@ -63,6 +68,84 @@ async function request<T>(path: string, input: RequestInput): Promise<T> {
   return unwrap<T>(response, path);
 }
 
+async function download(path: string, options: RequestOptions = {}): Promise<FileDownload> {
+  const { query, headers, signal, auth = true, credentials } = options;
+
+  if (auth) {
+    await bootstrapSession();
+    if (isAccessTokenExpired()) await refreshAccessToken();
+  }
+
+  const send = () => fetchFile(buildUrl(path, query), { headers, signal, auth, credentials });
+  let response = await send();
+
+  if (response.status === 401 && auth && getAccessToken()) {
+    const renewed = await refreshAccessToken();
+    if (renewed) response = await send();
+  }
+
+  if (!response.ok) {
+    return unwrap<FileDownload>({
+      status: response.status,
+      ok: false,
+      envelope: await readEnvelope(response),
+    }, path);
+  }
+
+  return {
+    blob: await response.blob(),
+    filename: responseFilename(response.headers.get("Content-Disposition")),
+  };
+}
+
+async function fetchFile(
+  url: string,
+  init: Pick<RequestOptions, "headers" | "signal" | "auth" | "credentials">,
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    Accept: "application/pdf",
+    ...init.headers,
+  };
+  const token = init.auth ? getAccessToken() : null;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    return await fetch(url, {
+      method: "GET",
+      headers,
+      signal: init.signal,
+      credentials: init.credentials,
+    });
+  } catch (cause) {
+    if (cause instanceof DOMException && cause.name === "AbortError") {
+      throw new ApiError({
+        status: 0,
+        code: CLIENT_ERROR_CODES.ABORTED,
+        message: "Request was cancelled",
+      });
+    }
+    throw new ApiError({
+      status: 0,
+      code: CLIENT_ERROR_CODES.NETWORK_ERROR,
+      message: "Cannot reach the server. Please check your connection and try again.",
+    });
+  }
+}
+
+function responseFilename(contentDisposition: string | null): string | null {
+  if (!contentDisposition) return null;
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(contentDisposition)?.[1];
+  const plain = /filename="([^"]+)"/i.exec(contentDisposition)?.[1]
+    ?? /filename=([^;]+)/i.exec(contentDisposition)?.[1];
+  const candidate = encoded ?? plain;
+  if (!candidate) return null;
+  try {
+    return decodeURIComponent(candidate.trim().replace(/^"|"$/g, ""));
+  } catch {
+    return candidate.trim().replace(/^"|"$/g, "");
+  }
+}
+
 type RawResponse = {
   status: number;
   ok: boolean;
@@ -82,6 +165,8 @@ async function fetchJson(
 ): Promise<RawResponse> {
   const headers: Record<string, string> = {
     Accept: "application/json",
+    // ภาษา UI ปัจจุบัน (I18nProvider ตั้ง <html lang> ไว้) — BE ยังไม่ใช้ เตรียมไว้ [TCG-545]
+    "Accept-Language": document.documentElement.lang === "en" ? "en" : "th",
     ...init.headers,
   };
 
@@ -201,4 +286,6 @@ export const api = {
 
   delete: <T>(path: string, options?: RequestOptions) =>
     request<T>(path, { ...options, method: "DELETE" }),
+
+  download,
 };

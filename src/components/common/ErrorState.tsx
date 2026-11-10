@@ -10,8 +10,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type ErrorStateProps = {
   /** error ที่ได้จาก query/mutation — ถ้าเป็น `ApiError` จะหยิบข้อความจาก backend มาแสดง */
@@ -35,29 +36,30 @@ type ErrorStateProps = {
  */
 export function ErrorState({
   error,
-  title = "โหลดข้อมูลไม่สำเร็จ",
-  fallbackMessage = "ลองใหม่อีกครั้ง หรือรีเฟรชหน้านี้",
+  title,
+  fallbackMessage,
   onRetry,
-  retryLabel = "ลองใหม่",
+  retryLabel,
   children,
   className,
 }: ErrorStateProps) {
+  const { t } = useTranslate();
   return (
     <Empty className={cn("min-h-[40svh] border", className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon" className="text-destructive">
           <TriangleAlert />
         </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyTitle>{title ?? t("states.loadFailed", "โหลดข้อมูลไม่สำเร็จ")}</EmptyTitle>
         <EmptyDescription>
-          {getErrorMessage(error, fallbackMessage)}
+          {translateError(error, fallbackMessage ?? t("states.tryAgainOrRefresh", "ลองใหม่อีกครั้ง หรือรีเฟรชหน้านี้"))}
         </EmptyDescription>
       </EmptyHeader>
       {(onRetry || children) && (
         <EmptyContent className="flex-row justify-center">
           {onRetry && (
             <Button variant="outline" onClick={onRetry}>
-              <RotateCw data-icon="inline-start" /> {retryLabel}
+              <RotateCw data-icon="inline-start" /> {retryLabel ?? t("actions.retry", "ลองใหม่")}
             </Button>
           )}
           {children}

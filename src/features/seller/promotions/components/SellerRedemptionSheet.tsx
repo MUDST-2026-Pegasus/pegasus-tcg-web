@@ -1,15 +1,46 @@
 import { Link } from "react-router-dom";
 import { ChartColumn } from "lucide-react";
 
+import { EmptyState, ErrorState, DataTable, type DataTableColumn } from "@/components/common";
+import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PromotionDialog } from "@/features/admin/components/PromotionDialog";
 import { RedemptionStatusPill } from "@/features/admin/components/PromotionBadges";
 
 import { useSellerRedemptions } from "../promotions.queries";
 import { discountLabel, formatPeriod, limitLabel, maskBuyer, minSpendLabel, money } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
-import { SellerPromotionPagination } from "./SellerPromotionPagination";
+import { PromotionPagination } from "@/features/promotions/PromotionPagination";
+import { useTranslate, translate } from "@/lib/i18n";
+
+// @tolgee-key {"key":"seller.sellerRedemptionSheet.header","ns":"promotions","defaultValue":"คำสั่งซื้อ"}
+// @tolgee-key {"key":"seller.sellerRedemptionSheet.header2","ns":"promotions","defaultValue":"ลูกค้า"}
+// @tolgee-key {"key":"seller.sellerRedemptionSheet.header3","ns":"promotions","defaultValue":"ส่วนลด"}
+// @tolgee-key {"key":"seller.sellerRedemptionSheet.header4","ns":"promotions","defaultValue":"สถานะ"}
+
+type RedemptionEntry = NonNullable<ReturnType<typeof useSellerRedemptions>["data"]>["items"][number];
+
+const REDEMPTION_COLUMNS: DataTableColumn<RedemptionEntry>[] = [
+  {
+    id: "order",
+    get header() { return translate("promotions", "seller.sellerRedemptionSheet.header", "คำสั่งซื้อ"); },
+    meta: { headClassName: "h-8 px-0", cellClassName: "px-0" },
+    cell: ({ row: { original: entry } }) =>
+      entry.sellerOrderNumber ? (
+        <Link
+          className="text-primary hover:underline"
+          to={entry.sellerOrderId ? `/seller/orders/${entry.sellerOrderId}` : `/seller/orders?q=${encodeURIComponent(entry.sellerOrderNumber)}`}
+        >
+          {entry.sellerOrderNumber}
+        </Link>
+      ) : (
+        "—"
+      ),
+  },
+  { id: "buyer", get header() { return translate("promotions", "seller.sellerRedemptionSheet.header2", "ลูกค้า"); }, meta: { headClassName: "h-8" }, cell: ({ row }) => maskBuyer(row.original.buyerDisplayName) },
+  { id: "amount", get header() { return translate("promotions", "seller.sellerRedemptionSheet.header3", "ส่วนลด"); }, meta: { headClassName: "h-8" }, cell: ({ row }) => money(row.original.amount) },
+  { id: "status", get header() { return translate("promotions", "seller.sellerRedemptionSheet.header4", "สถานะ"); }, meta: { headClassName: "h-8" }, cell: ({ row }) => <RedemptionStatusPill status={row.original.status} /> },
+];
 
 /**
  * การใช้โค้ด (Figma PRM-M2 SHEET) — ช่อง "ยอดขาย" ในบอร์ดยังไม่มีข้อมูลจาก backend จึงแสดงสามช่อง
@@ -26,6 +57,7 @@ export function SellerRedemptionSheet({
   onPageChange: (page: number) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslate("promotions");
   const redemptions = useSellerRedemptions(promotion?.id ?? null, page);
   if (!promotion) return null;
 
@@ -37,7 +69,7 @@ export function SellerRedemptionSheet({
       }}
       tone="teal"
       icon={<ChartColumn />}
-      title={`การใช้โค้ด ${promotion.code}`}
+      title={t("seller.sellerRedemptionSheet.title", "การใช้โค้ด {code}", { code: promotion.code })}
       description={`${discountLabel(promotion)} · ${minSpendLabel(promotion.minSpend)} · ${formatPeriod(
         promotion.startsAt,
         promotion.endsAt,
@@ -46,79 +78,43 @@ export function SellerRedemptionSheet({
       actions={
         <>
           <Button variant="outline" onClick={onClose}>
-            ปิด
+            {t("seller.sellerRedemptionSheet.button", "ปิด")}
           </Button>
           <Button render={<Link to="/seller/orders" />} nativeButton={false}>
-            ดูคำสั่งซื้อทั้งหมด
+            {t("seller.sellerRedemptionSheet.button2", "ดูคำสั่งซื้อทั้งหมด")}
           </Button>
         </>
       }
     >
       <div className="grid grid-cols-3 gap-2">
-        <Metric label="ใช้แล้ว" value={`${promotion.usedCount} / ${limitLabel(promotion.usageLimitTotal)}`} />
-        <Metric label="เก็บแล้ว" value={`${promotion.claimedCount} / ${limitLabel(promotion.claimLimit)}`} />
-        <Metric label="ร้านออกส่วนลด" value={money(promotion.discountTotal)} />
+        <Metric label={t("seller.sellerRedemptionSheet.label", "ใช้แล้ว")} value={`${promotion.usedCount} / ${limitLabel(promotion.usageLimitTotal)}`} />
+        <Metric label={t("seller.sellerRedemptionSheet.label2", "เก็บแล้ว")} value={`${promotion.claimedCount} / ${limitLabel(promotion.claimLimit)}`} />
+        <Metric label={t("seller.sellerRedemptionSheet.label3", "ร้านออกส่วนลด")} value={money(promotion.discountTotal)} />
       </div>
       <div className="min-w-0 overflow-x-auto">
-        {redemptions.isPending ? <p className="py-6 text-xs text-muted-foreground">กำลังโหลด...</p> : null}
-        {redemptions.isError ? (
-          <p role="alert" className="py-6 text-xs text-destructive">
-            โหลดประวัติไม่สำเร็จ
-            <Button variant="link" size="sm" onClick={() => void redemptions.refetch()}>
-              ลองอีกครั้ง
-            </Button>
-          </p>
+        {redemptions.isPending ? <TableSkeleton rows={4} columns={4} className="rounded-md" /> : null}
+        {redemptions.isError && !redemptions.data ? (
+          <ErrorState
+            error={redemptions.error}
+            title={t("seller.sellerRedemptionSheet.title2", "โหลดประวัติไม่สำเร็จ")}
+            onRetry={() => void redemptions.refetch()}
+            className="min-h-40"
+          />
         ) : null}
         {redemptions.data?.items.length === 0 ? (
-          <p className="py-6 text-xs text-muted-foreground">ยังไม่มีการใช้โค้ด</p>
+          <EmptyState title={t("seller.sellerRedemptionSheet.title3", "ยังไม่มีการใช้โค้ด")} className="min-h-40" />
         ) : null}
         {redemptions.data?.items.length ? (
-          <Table className="text-xs">
-            <TableHeader>
-              <TableRow className="text-[11px]">
-                <TableHead className="h-8 px-0">คำสั่งซื้อ</TableHead>
-                <TableHead className="h-8">ลูกค้า</TableHead>
-                <TableHead className="h-8">ส่วนลด</TableHead>
-                <TableHead className="h-8">สถานะ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {redemptions.data.items.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="px-0">
-                    {entry.sellerOrderNumber ? (
-                      <Link
-                        className="text-primary hover:underline"
-                        to={
-                          entry.sellerOrderId
-                            ? `/seller/orders/${entry.sellerOrderId}`
-                            : `/seller/orders?q=${encodeURIComponent(entry.sellerOrderNumber)}`
-                        }
-                      >
-                        {entry.sellerOrderNumber}
-                      </Link>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{maskBuyer(entry.buyerDisplayName)}</TableCell>
-                  <TableCell>{money(entry.amount)}</TableCell>
-                  <TableCell>
-                    <RedemptionStatusPill status={entry.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable columns={REDEMPTION_COLUMNS} data={redemptions.data.items} getRowId={(entry) => String(entry.id)} tableClassName="text-xs" headerRowClassName="text-[11px]" />
         ) : null}
       </div>
-      <SellerPromotionPagination
+      <PromotionPagination
         page={page}
         totalPages={redemptions.data?.totalPages ?? 0}
         onPageChange={onPageChange}
-        label="หน้าประวัติการใช้โค้ด"
+        label={t("seller.sellerRedemptionSheet.label4", "หน้าประวัติการใช้โค้ด")}
       />
-      <p className="text-[11px] text-muted-foreground">ชื่อลูกค้าถูกปิดบางส่วน · กดเลขคำสั่งซื้อเพื่อไปหน้ารายละเอียด</p>
+      <p className="text-[11px] text-muted-foreground">{t("seller.sellerRedemptionSheet.p", "ชื่อลูกค้าถูกปิดบางส่วน · กดเลขคำสั่งซื้อเพื่อไปหน้ารายละเอียด")}</p>
     </PromotionDialog>
   );
 }

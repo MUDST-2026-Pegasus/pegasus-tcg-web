@@ -65,13 +65,19 @@ export function useCheckoutPromotions({
     return () => window.clearTimeout(timer);
   }, [promotionSelection]);
 
+  // ราคาเปลี่ยน (เช่น โควตา Flash เต็มแล้วยอมรับราคาปกติ) ต้องคิดยอดใหม่ ไม่ใช่ใช้ยอดเดิมใน cache
+  const itemsKey = useMemo(
+    () => checkoutItems.map((item) => [item.id, item.quantity, item.currentPrice ?? item.unitPriceAtAdd]),
+    [checkoutItems],
+  );
+
   const promotionList = useCheckoutPromotionList(cartItemIds, {
-    userId, cartId, enabled: checkoutItems.length > 0 && !cartNeedsReview,
+    userId, cartId, enabled: checkoutItems.length > 0 && !cartNeedsReview, itemsKey,
   });
 
   const promoPreview = useCheckoutPromotionPreview({
     cartItemIds, shippingOptionBySeller, selection: debouncedSelection,
-    userId, cartId, enabled: shippingReady && debouncedSelection === promotionSelection,
+    userId, cartId, enabled: shippingReady && debouncedSelection === promotionSelection, itemsKey,
   });
 
   const preview = promoPreview.data;
@@ -219,3 +225,5 @@ export function useCheckoutPromotions({
     setCode,
   };
 }
+
+export type CheckoutPromotions = ReturnType<typeof useCheckoutPromotions>;

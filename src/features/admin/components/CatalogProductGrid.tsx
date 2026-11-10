@@ -1,8 +1,9 @@
 import { ProductCard } from "@/components/common";
 import { cn } from "@/lib/utils";
 
-import { productTitle, toProductCard } from "../catalog.format";
+import { formatCount, productTitle, toProductCard } from "../catalog.format";
 import type { ProductSummary } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogProductGridProps = {
   products: ProductSummary[];
@@ -13,7 +14,7 @@ type CatalogProductGridProps = {
 
 /**
  * ตารางการ์ดในแคตตาล็อก — ราคาบนการ์ดคือราคาถูกสุดที่มีคนขายตอนนี้
- * กดการ์ดเพื่อเปิดหน้าต่างแก้ไข
+ * กดการ์ดเพื่อเปิดหน้าต่างแก้ไข ชิปบนรูปบอกว่าขายอยู่กี่ร้าน เหลือกี่ใบ
  *
  * ดีไซน์เป็น 4 คอลัมน์ ใช้ grid แทนความกว้างตายตัว 224px
  * เพราะพอมี scrollbar พื้นที่จะหายไป ~15px แล้วตกเหลือ 3 ใบต่อแถว
@@ -23,6 +24,7 @@ export function CatalogProductGrid({
   isFetching,
   onSelect,
 }: CatalogProductGridProps) {
+  const { t } = useTranslate("admin");
   return (
     <ul
       aria-busy={isFetching || undefined}
@@ -35,18 +37,38 @@ export function CatalogProductGrid({
         <li key={product.id} className="relative">
           <button
             type="button"
-            aria-label={`แก้ไข ${productTitle(product)}`}
+            aria-label={t("catalog.products.edit", "แก้ไข {name}", { name: productTitle(product) })}
             onClick={() => onSelect(product)}
             className="block w-full cursor-pointer rounded-lg text-left transition-shadow outline-none hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <ProductCard product={toProductCard(product)} />
           </button>
-          {/* ไม่มี variant = ผู้ขายยังลงขายการ์ดใบนี้ไม่ได้ เตือนให้เห็นจากตาราง */}
-          {product.variantCount === 0 ? (
-            <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
-              ยังไม่มี variant
+          <div className="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap gap-1">
+            {/* ไม่มี variant = ผู้ขายยังลงขายการ์ดใบนี้ไม่ได้ เตือนให้เห็นจากตาราง */}
+            {product.variantCount === 0 ? (
+              <span className="rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
+                {t("catalog.products.noVariant", "ยังไม่มี variant")}
+              </span>
+            ) : null}
+            {/* นับเฉพาะที่ผู้ซื้อซื้อได้ตอนนี้ */}
+            <span
+              className={cn(
+                "rounded-full border border-border bg-card px-2 py-0.5 text-[11px] font-medium",
+                product.sellerCount === 0
+                  ? "text-muted-foreground"
+                  : "text-foreground",
+              )}
+            >
+              {product.sellerCount === 0
+                ? t("catalog.filters.noSeller", "ไม่มีร้านขาย")
+                : t("catalog.products.stock", "{shops} ร้าน · เหลือ {qty} ใบ", { shops: formatCount(product.sellerCount), qty: formatCount(product.availableQuantity) })}
             </span>
-          ) : null}
+            {product.blockedListingCount > 0 ? (
+              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">
+                {t("catalog.products.blocked", "ระงับ {count}", { count: formatCount(product.blockedListingCount) })}
+              </span>
+            ) : null}
+          </div>
         </li>
       ))}
     </ul>

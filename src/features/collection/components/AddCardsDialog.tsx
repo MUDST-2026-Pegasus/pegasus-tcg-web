@@ -18,7 +18,7 @@ import { toast } from "@/components/ui/toast";
 import { useCardSetList, useGameList, useProductSearch } from "@/features/catalog/catalog.queries";
 import type { ProductSummaryDto } from "@/features/catalog/catalog.types";
 import { useFileUpload, type UploadItem } from "@/hooks/use-file-upload";
-import { getErrorMessage } from "@/lib/api";
+
 import { cn } from "@/lib/utils";
 
 import { getCollectionVariants } from "../collection.api";
@@ -34,6 +34,7 @@ import {
 } from "../collection.picker";
 import { useAddCollectionItems } from "../collection.queries";
 import { CardDetailsRow, CardThumb, OptionSelect } from "./CardDetailsRow";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const PAGE_SIZE = 12;
 
@@ -55,6 +56,7 @@ export function AddCardsDialog({
 }
 
 function AddCardsForm({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslate("buyer");
   const [step, setStep] = useState<1 | 2>(1);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -165,15 +167,15 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     const failed: Record<number, string> = {};
     outcomes.forEach((outcome, index) => {
       if (outcome.status === "rejected") {
-        failed[rows[index].card.productId] = getErrorMessage(outcome.reason, "Could not add this card.");
+        failed[rows[index].card.productId] = translateError(outcome.reason, t("collection.add.failed", "Could not add this card."));
       }
     });
 
     const addedCount = outcomes.length - Object.keys(failed).length;
     if (addedCount > 0) {
       toast.add({
-        title: addedCount === 1 ? "1 card added" : `${addedCount} cards added`,
-        description: "They are now in your collection.",
+        title: t("collection.add.added", "{count, plural, =1 {# card added} other {# cards added}}", { count: addedCount }),
+        description: t("collection.add.addedHint", "They are now in your collection."),
         type: "success",
       });
     }
@@ -186,16 +188,16 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     setFailures(failed);
   };
 
-  const pickedLabel = picked.length === 1 ? "1 card selected" : `${picked.length} cards selected`;
+  const pickedLabel = t("collection.add.selected", "{count, plural, =1 {# card selected} other {# cards selected}}", { count: picked.length });
   const totalPages = results.data?.totalPages ?? 0;
 
   if (step === 1) {
     return (
       <>
         <DialogHeader>
-          <p className="text-xs text-muted-foreground">Step 1 of 2</p>
-          <DialogTitle>Choose cards</DialogTitle>
-          <DialogDescription>Pick the cards you own from the catalogue.</DialogDescription>
+          <p className="text-xs text-muted-foreground">{t("collection.add.step1", "Step 1 of 2")}</p>
+          <DialogTitle>{t("collection.add.chooseTitle", "Choose cards")}</DialogTitle>
+          <DialogDescription>{t("collection.add.chooseHint", "Pick the cards you own from the catalogue.")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -203,8 +205,8 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                aria-label="Search card name or number"
-                placeholder="Search card name or number..."
+                aria-label={t("collection.add.search", "Search card name or number")}
+                placeholder={t("collection.add.searchPlaceholder", "Search card name or number...")}
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
@@ -214,10 +216,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               />
             </div>
             <OptionSelect
-              label="Game"
+              label={t("collection.add.game", "Game")}
               value={gameId}
               options={(games.data ?? []).map((game) => ({ value: game.id, label: game.name }))}
-              placeholder="All games"
+              placeholder={t("collection.add.allGames", "All games")}
               clearable
               onChange={(next) => {
                 setGameId(next);
@@ -226,10 +228,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               }}
             />
             <OptionSelect
-              label="Set"
+              label={t("collection.add.set", "Set")}
               value={cardSetId}
               options={(cardSets.data ?? []).map((set) => ({ value: set.id, label: set.name }))}
-              placeholder={gameId === null ? "Choose a game first" : "All sets"}
+              placeholder={gameId === null ? t("collection.add.chooseGameFirst", "Choose a game first") : t("collection.add.allSets", "All sets")}
               clearable
               disabled={gameId === null}
               onChange={(next) => {
@@ -241,21 +243,21 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
 
           {results.isPending ? (
             <p role="status" className="py-10 text-center text-sm text-muted-foreground">
-              Loading cards...
+              {t("collection.add.loading", "Loading cards...")}
             </p>
           ) : results.isError ? (
             <div role="alert" className="flex flex-col items-center gap-3 py-10 text-sm">
-              <p className="text-destructive">Could not load the catalogue.</p>
+              <p className="text-destructive">{t("collection.add.loadFailed", "Could not load the catalogue.")}</p>
               <Button variant="outline" size="sm" onClick={() => void results.refetch()}>
-                Try again
+                {t("collection.tryAgain", "Try again")}
               </Button>
             </div>
           ) : results.data.items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">No matching cards.</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">{t("collection.add.noMatch", "No matching cards.")}</p>
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
-                {results.data.totalItems === 1 ? "1 card found" : `${results.data.totalItems} cards found`}
+                {t("collection.add.found", "{count, plural, =1 {# card found} other {# cards found}}", { count: results.data.totalItems })}
               </p>
               <ul
                 className={cn(
@@ -274,9 +276,9 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
                 ))}
               </ul>
               {totalPages > 1 && (
-                <nav aria-label="Catalogue pages" className="flex items-center justify-center gap-3">
+                <nav aria-label={t("collection.add.pages", "Catalogue pages")} className="flex items-center justify-center gap-3">
                   <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                    Previous
+                    {t("collection.previous", "Previous")}
                   </Button>
                   <span className="text-xs text-muted-foreground tabular-nums">
                     Page {page + 1} of {totalPages}
@@ -287,7 +289,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
                     disabled={page + 1 >= totalPages}
                     onClick={() => setPage(page + 1)}
                   >
-                    Next
+                    {t("collection.next", "Next")}
                   </Button>
                 </nav>
               )}
@@ -301,10 +303,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
           </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button variant="outline" onClick={onClose}>
-              Cancel
+              {t("collection.cancel", "Cancel")}
             </Button>
             <Button disabled={picked.length === 0} onClick={() => setStep(2)}>
-              Next
+              {t("collection.next", "Next")}
             </Button>
           </div>
         </DialogFooter>
@@ -315,16 +317,16 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <DialogHeader>
-        <p className="text-xs text-muted-foreground">Step 2 of 2</p>
-        <DialogTitle>Add details</DialogTitle>
+        <p className="text-xs text-muted-foreground">{t("collection.add.step2", "Step 2 of 2")}</p>
+        <DialogTitle>{t("collection.add.detailsTitle", "Add details")}</DialogTitle>
         <DialogDescription>
-          Choose the printing and condition of each card. A photo of your own card is optional.
+          {t("collection.add.detailsHint", "Choose the printing and condition of each card. A photo of your own card is optional.")}
         </DialogDescription>
       </DialogHeader>
 
       {rows.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
-          No cards selected. Go back to choose some.
+          {t("collection.add.noneSelected", "No cards selected. Go back to choose some.")}
         </p>
       ) : (
         <ul className="flex flex-col divide-y">
@@ -354,15 +356,15 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
       <DialogFooter className="sm:items-center sm:justify-between">
         <label className="flex items-center gap-2 text-sm">
           <Switch checked={publicItem} disabled={add.isPending} onCheckedChange={setPublicItem} />
-          Show on my public profile
+          {t("collection.add.showPublic", "Show on my public profile")}
         </label>
         <div className="flex flex-col-reverse gap-2 sm:flex-row">
           <Button variant="outline" disabled={add.isPending} onClick={() => setStep(1)}>
-            Back
+            {t("collection.back", "Back")}
           </Button>
           <Button disabled={!ready || add.isPending} onClick={() => void submit()}>
             {add.isPending ? <Spinner data-icon="inline-start" /> : null}
-            {rows.length === 1 ? "Add 1 card" : `Add ${rows.length} cards`}
+            {t("collection.add.submit", "{count, plural, =1 {Add # card} other {Add # cards}}", { count: rows.length })}
           </Button>
         </div>
       </DialogFooter>

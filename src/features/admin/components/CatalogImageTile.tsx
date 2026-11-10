@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 import type { CatalogImage } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogImageTileProps = {
   image: CatalogImage;
@@ -40,6 +41,7 @@ export function CatalogImageTile({
   onDelete,
   onExpired,
 }: CatalogImageTileProps) {
+  const { t } = useTranslate("admin");
   const [retriedUrl, setRetriedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -80,7 +82,7 @@ export function CatalogImageTile({
         ) : failedUrl === image.url ? (
           <div className="flex size-full flex-col items-center justify-center gap-2 p-3 text-center text-xs text-muted-foreground">
             <ImageOff className="size-5" aria-hidden />
-            โหลดรูปไม่สำเร็จ
+            {t("catalog.images.loadFailed", "โหลดรูปไม่สำเร็จ")}
             <Button
               type="button"
               variant="outline"
@@ -89,7 +91,7 @@ export function CatalogImageTile({
               onClick={refresh}
             >
               <RefreshCw data-icon="inline-start" />
-              ลองใหม่
+              {t("actions.retry", "ลองใหม่", { ns: "common" })}
             </Button>
           </div>
         ) : (
@@ -103,7 +105,7 @@ export function CatalogImageTile({
 
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
           {image.primary ? (
-            <Badge className="rounded-full">รูปหลัก</Badge>
+            <Badge className="rounded-full">{t("catalog.images.primary", "รูปหลัก")}</Badge>
           ) : null}
           {variantLabel ? (
             <Badge variant="secondary" className="rounded-full">
@@ -127,13 +129,13 @@ export function CatalogImageTile({
           ) : (
             <Star data-icon="inline-start" />
           )}
-          {image.primary ? "รูปหลักอยู่แล้ว" : "ตั้งเป็นรูปหลัก"}
+          {image.primary ? t("catalog.images.alreadyPrimary", "รูปหลักอยู่แล้ว") : t("catalog.images.makePrimary", "ตั้งเป็นรูปหลัก")}
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="ลบรูปนี้"
+          aria-label={t("catalog.images.delete", "ลบรูปนี้")}
           className="text-destructive hover:text-destructive"
           disabled={isBusy}
           onClick={onDelete}

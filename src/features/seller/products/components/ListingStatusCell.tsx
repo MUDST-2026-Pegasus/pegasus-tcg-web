@@ -1,18 +1,9 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState } from "react";
 
 import { Ban, ChevronDown, Pause, Play, type LucideIcon } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,19 +13,15 @@ import {
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-import { LISTING_STATUS_LABEL, listingErrorMessage } from "../products.format";
+import {
+  LISTING_STATUS_BADGE,
+  LISTING_STATUS_LABEL,
+  listingErrorMessage,
+} from "../products.format";
 import { useChangeListingStatus } from "../products.queries";
 import { activateBlockedReason, statusTargets } from "../products.rules";
 import type { ListingStatus, SellerListingSummary } from "../products.types";
-
-const STATUS_BADGE: Record<ListingStatus, string> = {
-  ACTIVE: "bg-[#e3f4ec] text-[#12805c]",
-  SOLD_OUT: "bg-[#fbe9e8] text-[#d0342c]",
-  PAUSED: "bg-[#fdf0dd] text-[#b45309]",
-  DRAFT: "bg-muted text-[#6b7280]",
-  DELISTED: "bg-secondary text-zinc-500",
-  BLOCKED: "bg-rose-100 text-rose-700",
-};
+import { useTranslate, translate } from "@/lib/i18n";
 
 const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 
@@ -42,9 +29,9 @@ const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 const TARGET_ACTION: Partial<
   Record<ListingStatus, { label: string; icon: LucideIcon }>
 > = {
-  ACTIVE: { label: "เปิดขาย", icon: Play },
-  PAUSED: { label: "พักการขาย", icon: Pause },
-  DELISTED: { label: "ปิดการขายถาวร…", icon: Ban },
+  ACTIVE: { get label() { return translate("seller", "products.actions.activate", "เปิดขาย"); }, icon: Play },
+  PAUSED: { get label() { return translate("seller", "products.actions.pause", "พักการขาย"); }, icon: Pause },
+  DELISTED: { get label() { return translate("seller", "products.actions.delistEllipsis", "ปิดการขายถาวร…"); }, icon: Ban },
 };
 
 type ListingStatusCellProps = {
@@ -64,6 +51,7 @@ export function ListingStatusCell({
   listing,
   readOnly,
 }: ListingStatusCellProps) {
+  const { t } = useTranslate("seller");
   const changeStatus = useChangeListingStatus();
   const [confirmDelist, setConfirmDelist] = useState(false);
 
@@ -72,7 +60,7 @@ export function ListingStatusCell({
 
   if (readOnly || targets.length === 0) {
     return (
-      <Badge className={cn(BADGE_CLASS, STATUS_BADGE[listing.status])}>
+      <Badge className={cn(BADGE_CLASS, LISTING_STATUS_BADGE[listing.status])}>
         {label}
       </Badge>
     );
@@ -85,15 +73,15 @@ export function ListingStatusCell({
         onSuccess: (updated) =>
           toast.add({
             type: "success",
-            title: "เปลี่ยนสถานะแล้ว",
+            title: t("products.statusCell.saved", "เปลี่ยนสถานะแล้ว"),
             // backend อาจย้ายไปที่อื่น เช่น เปิดขายประกาศที่ไม่เหลือการ์ดจะกลายเป็น SOLD_OUT
             description: `${listing.card.productName} · ${LISTING_STATUS_LABEL[updated.status]}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "เปลี่ยนสถานะไม่สำเร็จ",
-            description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("products.statusCell.failed", "เปลี่ยนสถานะไม่สำเร็จ"),
+            description: listingErrorMessage(error, t("products.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -106,13 +94,13 @@ export function ListingStatusCell({
           render={
             <button
               type="button"
-              aria-label={`เปลี่ยนสถานะ: ${listing.card.productName} (ตอนนี้${label})`}
+              aria-label={t("products.statusCell.change", "เปลี่ยนสถานะ: {name} (ตอนนี้{status})", { name: listing.card.productName, status: label })}
               className="cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
             />
           }
         >
           <Badge
-            className={cn(BADGE_CLASS, "gap-0.5", STATUS_BADGE[listing.status])}
+            className={cn(BADGE_CLASS, "gap-0.5", LISTING_STATUS_BADGE[listing.status])}
           >
             {label}
             <ChevronDown aria-hidden="true" className="size-3" />
@@ -149,33 +137,23 @@ export function ListingStatusCell({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={confirmDelist} onOpenChange={setConfirmDelist}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              ปิดการขาย “{listing.card.productName}” ถาวร?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่
-              การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ
-              ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้
-              “พักการขาย” แทน
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setConfirmDelist(false);
-                move("DELISTED");
-              }}
-            >
-              ปิดการขายถาวร
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={confirmDelist}
+        onOpenChange={setConfirmDelist}
+        variant="destructive"
+        title={t("products.delist.title", "ปิดการขาย “{name}” ถาวร?", { name: listing.card.productName })}
+        description={t("products.delist.description", "ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่ การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้ “พักการขาย” แทน")}
+        confirmLabel={t("products.actions.delist", "ปิดการขายถาวร")}
+        onConfirm={() => {
+          setConfirmDelist(false);
+          move("DELISTED");
+        }}
+      />
     </>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.actions.activate", "ns": "seller", "defaultValue": "เปิดขาย"}
+// @tolgee-key {"key": "products.actions.pause", "ns": "seller", "defaultValue": "พักการขาย"}
+// @tolgee-key {"key": "products.actions.delistEllipsis", "ns": "seller", "defaultValue": "ปิดการขายถาวร…"}

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { formatThaiDateTime } from "../application.format";
 import type { Verification } from "../application.types";
+import { useTranslate } from "@/lib/i18n";
 
 type StepState = "done" | "current" | "upcoming";
 
@@ -22,34 +23,35 @@ const MARK_CLASS: Record<StepState, string> = {
   upcoming: "bg-muted text-muted-foreground/75",
 };
 
-function buildSteps(verification: Verification): ProgressStep[] {
+function useProgressSteps(verification: Verification): ProgressStep[] {
+  const { t } = useTranslate("seller");
   const approved = verification.status === "APPROVED";
 
   return [
     {
-      title: "ส่งคำขอแล้ว",
+      title: t("application.progress.submitted", "ส่งคำขอแล้ว"),
       description: formatThaiDateTime(verification.submittedAt),
       state: "done",
     },
     approved
       ? {
-          title: "ตรวจสอบชื่อและบัญชีธนาคาร",
+          title: t("application.progress.review", "ตรวจสอบชื่อและบัญชีธนาคาร"),
           description: verification.reviewedAt
-            ? `ผ่านการตรวจสอบ ${formatThaiDateTime(verification.reviewedAt)}`
-            : "ผ่านการตรวจสอบ",
+            ? t("application.progress.approvedAt", "ผ่านการตรวจสอบ {date}", { date: formatThaiDateTime(verification.reviewedAt) })
+            : t("application.progress.approved", "ผ่านการตรวจสอบ"),
           state: "done",
         }
       : {
-          title: "ตรวจสอบชื่อและบัญชีธนาคาร",
-          description: "ปกติใช้เวลาไม่เกิน 1 วันทำการ",
+          title: t("application.progress.review", "ตรวจสอบชื่อและบัญชีธนาคาร"),
+          description: t("application.progress.reviewHint", "ปกติใช้เวลาไม่เกิน 1 วันทำการ"),
           state: "current",
-          badge: "กำลังตรวจสอบ",
+          badge: t("application.progress.reviewing", "กำลังตรวจสอบ"),
         },
     {
-      title: "เปิดร้านและลงขายได้ทันที",
+      title: t("application.progress.open", "เปิดร้านและลงขายได้ทันที"),
       description: approved
-        ? "ออกจากระบบแล้วเข้าสู่ระบบใหม่ เพื่อเริ่มใช้งานหลังบ้านผู้ขาย"
-        : "รอผลตรวจสอบ",
+        ? t("application.progress.relogin", "ออกจากระบบแล้วเข้าสู่ระบบใหม่ เพื่อเริ่มใช้งานหลังบ้านผู้ขาย")
+        : t("application.progress.waiting", "รอผลตรวจสอบ"),
       state: approved ? "current" : "upcoming",
     },
   ];
@@ -65,15 +67,17 @@ export function ApplicationProgressCard({
   id,
   verification,
 }: ApplicationProgressCardProps) {
+  const { t } = useTranslate("seller");
+  const steps = useProgressSteps(verification);
   return (
     <Card
       id={id}
       className="gap-4 rounded-xl border border-border p-5 shadow-none ring-0"
     >
-      <h2 className="text-sm font-semibold text-foreground">สถานะคำขอ</h2>
+      <h2 className="text-sm font-semibold text-foreground">{t("application.progress.title", "สถานะคำขอ")}</h2>
 
       <ol className="flex flex-col gap-4">
-        {buildSteps(verification).map((step, index) => (
+        {steps.map((step, index) => (
           <li key={step.title} className="flex items-start gap-3">
             <span
               className={cn(

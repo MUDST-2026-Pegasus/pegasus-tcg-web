@@ -12,17 +12,27 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 
-import type { ProductTab, ProductTarget } from "../catalog.filters";
+import {
+  CARD_LISTINGS_FIRST_PAGE,
+  type ProductTab,
+  type ProductTarget,
+} from "../catalog.filters";
 import { productTitle } from "../catalog.format";
-import { useAdminProduct, useDeleteProduct } from "../catalog.queries";
+import {
+  useAdminProduct,
+  useCardListings,
+  useDeleteProduct,
+} from "../catalog.queries";
 import type { CatalogProduct, Game } from "../catalog.types";
 
 import { CatalogCardEffectEditor } from "./CatalogCardEffectEditor";
 import { CatalogImageManager } from "./CatalogImageManager";
+import { CatalogListingsTab } from "./CatalogListingsTab";
 import { CatalogProductForm } from "./CatalogProductForm";
 import { CatalogProductSheetSkeleton } from "./CatalogSkeleton";
 import { CatalogVariantList } from "./CatalogVariantList";
 import { DeleteProductDialog } from "./DeleteProductDialog";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogProductSheetProps = {
   /** `null` = ปิด */
@@ -50,6 +60,7 @@ export function CatalogProductSheet({
   onCreated,
   onClose,
 }: CatalogProductSheetProps) {
+  const { t } = useTranslate("admin");
   // จำตัวล่าสุดไว้ระหว่างเลื่อนปิด ไม่งั้นเนื้อหาหายไปก่อนหน้าต่างจะออกพ้นจอ
   const [shown, setShown] = useState(target);
   if (target !== null && target !== shown) {
@@ -68,11 +79,10 @@ export function CatalogProductSheet({
           <>
             <SheetHeader className="pr-14">
               <SheetTitle className="text-lg font-semibold">
-                เพิ่มสินค้าใหม่
+                {t("catalog.sheet.addTitle", "เพิ่มสินค้าใหม่")}
               </SheetTitle>
               <SheetDescription>
-                เลือกเกมก่อน ช่องคุณสมบัติการ์ดจะเปลี่ยนตามเกม · variant
-                และรูปเพิ่มได้หลังบันทึก
+                {t("catalog.sheet.addDescription", "เลือกเกมก่อน ช่องคุณสมบัติการ์ดจะเปลี่ยนตามเกม · variant และรูปเพิ่มได้หลังบันทึก")}
               </SheetDescription>
             </SheetHeader>
             <CatalogProductForm
@@ -110,14 +120,17 @@ function EditProductPanel({
   games: Game[];
   onClose: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const detail = useAdminProduct(productId);
+  // ชื่อแท็บบอกจำนวนตั้งแต่ยังไม่ได้เปิดแท็บ — ใช้ก้อนเดียวกับหน้าแรกของแท็บ
+  const listings = useCardListings(productId, CARD_LISTINGS_FIRST_PAGE);
   const deleteProduct = useDeleteProduct();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleDelete = () => {
     deleteProduct.mutate(productId, {
       onSuccess: () => {
-        toast.add({ type: "success", title: "ลบสินค้าแล้ว" });
+        toast.add({ type: "success", title: t("catalog.products.deleted", "ลบสินค้าแล้ว") });
         setConfirmingDelete(false);
         onClose();
       },
@@ -128,8 +141,8 @@ function EditProductPanel({
     <QueryBoundary
       query={detail}
       loading={<CatalogProductSheetSkeleton />}
-      errorTitle="โหลดสินค้าไม่สำเร็จ"
-      errorMessage="สินค้านี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้"
+      errorTitle={t("catalog.sheet.loadFailed", "โหลดสินค้าไม่สำเร็จ")}
+      errorMessage={t("catalog.sheet.loadFailedHint", "สินค้านี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้")}
     >
       {({ product, variants, images }) => {
         const game = games.find((candidate) => candidate.id === product.gameId);
@@ -144,12 +157,12 @@ function EditProductPanel({
                 {productTitle(product)}
                 {!product.active ? (
                   <Badge variant="secondary" className="rounded-full">
-                    ปิดใช้งาน
+                    {t("catalog.status.inactive", "ปิดใช้งาน")}
                   </Badge>
                 ) : null}
               </SheetTitle>
               <SheetDescription>
-                {game?.name ?? "เกมที่ไม่รู้จัก"} · /{product.slug}
+                {game?.name ?? t("catalog.sheet.unknownGame", "เกมที่ไม่รู้จัก")} · /{product.slug}
               </SheetDescription>
             </SheetHeader>
 
@@ -158,13 +171,19 @@ function EditProductPanel({
               onValueChange={(next) => onTabChange(next as ProductTab)}
               className="min-h-0 flex-1 gap-4"
             >
-              {/* สี่แท็บกว้างกว่าจอมือถือ — เลื่อนข้างในแทนการล้นออกนอกหน้าต่าง */}
+              {/* ห้าแท็บกว้างกว่าจอมือถือ — เลื่อนข้างในแทนการล้นออกนอกหน้าต่าง */}
               <TabsList className="mx-6 max-w-[calc(100%-3rem)] justify-start overflow-x-auto [scrollbar-width:none]">
-                <TabsTrigger value="details">ข้อมูลสินค้า</TabsTrigger>
+                <TabsTrigger value="details">{t("catalog.sheet.tabs.details", "ข้อมูลสินค้า")}</TabsTrigger>
+                <TabsTrigger value="listings">
+                  {t("catalog.sheet.tabs.listings", "ร้านที่ขาย")}
+                  {listings.data
+                    ? ` (${listings.data.summary.listingCount})`
+                    : null}
+                </TabsTrigger>
                 <TabsTrigger value="variants">
                   Variant ({variants.length})
                 </TabsTrigger>
-                <TabsTrigger value="images">รูปภาพ ({images.length})</TabsTrigger>
+                <TabsTrigger value="images">{t("catalog.sheet.tabs.images", "รูปภาพ ({count})", { count: images.length })}</TabsTrigger>
                 {hasEffects && (
                   <TabsTrigger value="effects">Abilities &amp; Attacks</TabsTrigger>
                 )}
@@ -188,6 +207,14 @@ function EditProductPanel({
                   isPending={deleteProduct.isPending}
                   error={deleteProduct.error}
                   onConfirm={handleDelete}
+                />
+              </TabsContent>
+
+              <TabsContent value="listings" className="min-h-0 overflow-y-auto">
+                <CatalogListingsTab
+                  productId={product.id}
+                  productName={productTitle(product)}
+                  variants={variants}
                 />
               </TabsContent>
 

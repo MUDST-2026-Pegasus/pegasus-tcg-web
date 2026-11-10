@@ -1,13 +1,5 @@
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/common";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmShipDialogProps = {
   open: boolean;
@@ -16,6 +8,8 @@ type ConfirmShipDialogProps = {
   /** ชื่อขนส่งที่ผู้ซื้อจะเห็น เช่น "Flash Express" */
   carrierName: string;
   trackingNumber: string;
+  /** "ผู้ซื้อเลือก: …" เมื่อส่งด้วยขนส่งที่ไม่ตรงกับที่ผู้ซื้อเลือก */
+  buyerChoiceNote?: string | null;
   onConfirm: () => void;
 };
 
@@ -32,42 +26,36 @@ export function ConfirmShipDialog({
   orderNumber,
   carrierName,
   trackingNumber,
+  buyerChoiceNote,
   onConfirm,
 }: ConfirmShipDialogProps) {
+  const { t } = useTranslate("seller");
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>ยืนยันจัดส่ง {orderNumber}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            ระบบจะส่งเลขพัสดุนี้ให้ผู้ซื้อทันที หลังยืนยันแล้วยกเลิกคำสั่งซื้อไม่ได้
-            และแก้ขนส่งหรือเลขพัสดุไม่ได้
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <dl className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-gray-500">บริษัทขนส่ง</dt>
-            <dd className="font-medium text-foreground">{carrierName}</dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-gray-500">เลขพัสดุ</dt>
-            <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
-          </div>
-        </dl>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>กลับไปแก้</AlertDialogCancel>
-          <Button
-            onClick={() => {
-              onOpenChange(false);
-              onConfirm();
-            }}
-          >
-            ยืนยันจัดส่ง
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("orders.confirmShip.title", "ยืนยันจัดส่ง {orderNumber}?", { orderNumber })}
+      description={t("orders.confirmShip.description", "ระบบจะส่งเลขพัสดุนี้ให้ผู้ซื้อทันที หลังยืนยันแล้วยกเลิกคำสั่งซื้อไม่ได้ และแก้ขนส่งหรือเลขพัสดุไม่ได้")}
+      confirmLabel={t("orders.confirmShip.confirm", "ยืนยันจัดส่ง")}
+      cancelLabel={t("orders.confirmShip.back", "กลับไปแก้")}
+      onConfirm={() => {
+        onOpenChange(false);
+        onConfirm();
+      }}
+    >
+      <div className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
+        <dl className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-gray-500">{t("orders.shipping.carrier", "บริษัทขนส่ง")}</dt>
+          <dd className="font-medium text-foreground">{carrierName}</dd>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-gray-500">{t("orders.shipping.tracking", "เลขพัสดุ")}</dt>
+          <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
+        </div>
+      </dl>
+      {buyerChoiceNote ? <p className="text-[#b45309]">{buyerChoiceNote}</p> : null}
+      </div>
+    </ConfirmDialog>
   );
 }

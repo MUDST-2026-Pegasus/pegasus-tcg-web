@@ -58,4 +58,15 @@ describe("users.format", () => {
       "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้",
     );
   });
+
+  it("explains when granting a privileged role fails with ROLE_REQUIRES_PASSWORD", () => {
+    const error = new ApiError({
+      status: 409,
+      code: "ROLE_REQUIRES_PASSWORD",
+      message: "Role requires password",
+    });
+    expect(userErrorMessage(error, "ลองใหม่")).toBe(
+      "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้",
+    );
+  });
 });

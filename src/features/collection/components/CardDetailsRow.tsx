@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 import { MAX_QUANTITY, metaOf, variantLabelOf, type CardDraft, type PickedCard } from "../collection.picker";
 import type { CollectionVariant } from "../collection.types";
+import { useTranslate } from "@/lib/i18n";
 
 const CONDITION_OPTIONS = (Object.keys(CONDITION_LABELS) as CardCondition[]).map((condition) => ({
   value: condition,
@@ -131,6 +132,7 @@ export function CardDetailsRow({
   /** Left out where the row cannot be taken away, as when editing one card. */
   onRemove?: () => void;
 }) {
+  const { t } = useTranslate("buyer");
   const fileInput = useRef<HTMLInputElement>(null);
   const meta = metaOf(card);
   const pickPhoto = () => fileInput.current?.click();
@@ -156,20 +158,20 @@ export function CardDetailsRow({
 
         {variantsPending ? (
           <p role="status" className="text-xs text-muted-foreground">
-            Loading printings...
+            {t("collection.row.loadingPrintings", "Loading printings...")}
           </p>
         ) : variantsFailed ? (
           <Button variant="outline" size="sm" onClick={onRetryVariants}>
-            Retry printings
+            {t("collection.row.retryPrintings", "Retry printings")}
           </Button>
         ) : variants.length === 0 ? (
-          <p className="text-xs text-destructive">No printing available for this card.</p>
+          <p className="text-xs text-destructive">{t("collection.row.noPrinting", "No printing available for this card.")}</p>
         ) : (
           <OptionSelect
-            label={`Printing of ${card.name}`}
+            label={t("collection.row.printingOf", "Printing of {name}", { name: card.name })}
             value={variantId}
             options={variants.map((variant) => ({ value: variant.id, label: variantLabelOf(variant) }))}
-            placeholder="Choose printing"
+            placeholder={t("collection.row.choosePrinting", "Choose printing")}
             disabled={disabled}
             invalid={variantId === null}
             onChange={(next) => onChange({ variantId: next })}
@@ -177,17 +179,17 @@ export function CardDetailsRow({
         )}
 
         <OptionSelect
-          label={`Condition of ${card.name}`}
+          label={t("collection.row.conditionOf", "Condition of {name}", { name: card.name })}
           value={draft.condition}
           options={CONDITION_OPTIONS}
-          placeholder="Condition"
+          placeholder={t("collection.row.condition", "Condition")}
           disabled={disabled}
           onChange={(next) => onChange({ condition: next ?? draft.condition })}
         />
 
         <Input
           type="number"
-          aria-label={`Quantity of ${card.name}`}
+          aria-label={t("collection.row.quantityOf", "Quantity of {name}", { name: card.name })}
           min={1}
           max={MAX_QUANTITY}
           step={1}
@@ -201,7 +203,7 @@ export function CardDetailsRow({
             variant="ghost"
             size="icon-sm"
             disabled={disabled}
-            aria-label={`Remove ${card.name}`}
+            aria-label={t("collection.row.removeCard", "Remove {name}", { name: card.name })}
             onClick={onRemove}
           >
             <Trash2 />
@@ -216,7 +218,7 @@ export function CardDetailsRow({
           accept={accept}
           className="sr-only"
           tabIndex={-1}
-          aria-label={`Photo of ${card.name}`}
+          aria-label={t("collection.row.photoOf", "Photo of {name}", { name: card.name })}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) onPhoto(file);
@@ -224,15 +226,15 @@ export function CardDetailsRow({
           }}
         />
         {previewUrl && photo?.status !== "error" && (
-          <img src={previewUrl} alt={`Your photo of ${card.name}`} className="size-16 rounded-md border object-cover" />
+          <img src={previewUrl} alt={t("collection.row.yourPhotoOf", "Your photo of {name}", { name: card.name })} className="size-16 rounded-md border object-cover" />
         )}
         {photo?.status === "uploading" ? (
           <>
             <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
-              <Spinner /> Uploading {Math.round(photo.progress * 100)}%
+              <Spinner /> {t("collection.row.uploading", "Uploading {percent}%", { percent: Math.round(photo.progress * 100) })}
             </p>
             <Button variant="ghost" size="sm" onClick={onDropPhoto}>
-              Cancel
+              {t("collection.cancel", "Cancel")}
             </Button>
           </>
         ) : photo?.status === "error" ? (
@@ -241,33 +243,33 @@ export function CardDetailsRow({
               {photo.error}
             </p>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Choose another
+              <Upload data-icon="inline-start" /> {t("collection.row.chooseAnother", "Choose another")}
             </Button>
             <Button variant="ghost" size="sm" disabled={disabled} onClick={onDropPhoto}>
-              Dismiss
+              {t("collection.row.dismiss", "Dismiss")}
             </Button>
           </>
         ) : previewUrl ? (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Replace photo
+              <Upload data-icon="inline-start" /> {t("collection.row.replacePhoto", "Replace photo")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               disabled={disabled}
-              aria-label={`Remove photo of ${card.name}`}
+              aria-label={t("collection.row.removePhotoOf", "Remove photo of {name}", { name: card.name })}
               onClick={onDropPhoto}
             >
-              Remove
+              {t("collection.row.remove", "Remove")}
             </Button>
           </>
         ) : (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> Add photo
+              <Upload data-icon="inline-start" /> {t("collection.row.addPhoto", "Add photo")}
             </Button>
-            <p className="text-xs text-muted-foreground">Optional. Without one, the official card image is shown.</p>
+            <p className="text-xs text-muted-foreground">{t("collection.row.photoHint", "Optional. Without one, the official card image is shown.")}</p>
           </>
         )}
       </div>

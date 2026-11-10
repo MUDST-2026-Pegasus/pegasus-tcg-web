@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import type { SelectedCard } from "../../listing-form.types";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogCardSummaryProps = {
   title: string;
@@ -19,6 +20,7 @@ export function CatalogCardSummary({
   card,
   onChange,
 }: CatalogCardSummaryProps) {
+  const { t } = useTranslate("seller");
   const tags = [card.variantLabel, ...card.tags, card.sku];
 
   return (
@@ -33,7 +35,7 @@ export function CatalogCardSummary({
             className="rounded-md px-2.5"
             onClick={onChange}
           >
-            เปลี่ยนการ์ด
+            {t("products.create.summary.change", "เปลี่ยนการ์ด")}
           </Button>
         ) : null}
       </div>

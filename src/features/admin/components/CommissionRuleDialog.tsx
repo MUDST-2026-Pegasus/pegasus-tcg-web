@@ -2,6 +2,7 @@ import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowLeft, Pencil, Plus, Power, Trash2, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { DateTimePicker } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
@@ -9,7 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
-import { getErrorMessage, hasErrorCode, isApiError } from "@/lib/api";
+import { hasErrorCode, isApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
   SCOPE_OPTIONS, STATUS_LABEL, blankDraft, conflictingRules, draftFromRule, draftToInput,
@@ -19,6 +20,7 @@ import {
 import type { CategoryDto, GameDto } from "@/features/catalog/catalog.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRule } from "@/features/finance/after-sales.types";
+import { intlLocale, translateError, translate, useTranslate } from "@/lib/i18n";
 
 /** popup เปิดได้ 2 แบบ: ดูรายการกฎทั้งหมด หรือเข้าฟอร์มเพิ่ม/แก้ไขกฎทันที */
 export type CommissionRuleDialogRequest =
@@ -45,27 +47,30 @@ const STATUS_STYLE: Record<RuleStatus, string> = {
   INACTIVE: "bg-muted text-[#9aa5ad]",
 };
 
+// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
+const BAHT_SIGN = "฿";
 const baht = (value: number) =>
-  `฿${value.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  `${BAHT_SIGN}${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+  new Date(iso).toLocaleString(intlLocale(), { dateStyle: "medium", timeStyle: "short" });
 const FIELD = "h-9 rounded-md border-border bg-card";
 const DECIMAL = /^\d*\.?\d*$/;
 const SIGNED_INTEGER = /^-?\d*$/;
 
 function ruleErrorMessage(error: unknown) {
-  if (hasErrorCode(error, "GAME_NOT_FOUND")) return "ไม่พบเกมนี้ในระบบแล้ว";
-  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return "ไม่พบหมวดหมู่นี้ในระบบแล้ว";
-  if (hasErrorCode(error, "SELLER_NOT_FOUND")) return "ไม่พบร้านค้ารหัสนี้";
-  if (hasErrorCode(error, "COMMISSION_RULE_NOT_FOUND")) return "กฎนี้ไม่มีอยู่ในระบบแล้ว";
-  if (hasErrorCode(error, "COMMISSION_RULE_INVALID", "VALIDATION_FAILED")) return "ข้อมูลกฎไม่ถูกต้อง กรุณาตรวจอีกครั้ง";
-  if (isApiError(error) && error.status === 403) return "บัญชีนี้ไม่มีสิทธิ์ ADMIN";
-  return getErrorMessage(error, "กรุณาลองอีกครั้ง");
+  if (hasErrorCode(error, "GAME_NOT_FOUND")) return translate("admin", "commission.errors.gameNotFound", "ไม่พบเกมนี้ในระบบแล้ว");
+  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return translate("admin", "commission.errors.categoryNotFound", "ไม่พบหมวดหมู่นี้ในระบบแล้ว");
+  if (hasErrorCode(error, "SELLER_NOT_FOUND")) return translate("admin", "commission.errors.sellerNotFound", "ไม่พบร้านค้ารหัสนี้");
+  if (hasErrorCode(error, "COMMISSION_RULE_NOT_FOUND")) return translate("admin", "commission.errors.ruleNotFound", "กฎนี้ไม่มีอยู่ในระบบแล้ว");
+  if (hasErrorCode(error, "COMMISSION_RULE_INVALID", "VALIDATION_FAILED")) return translate("admin", "commission.errors.invalid", "ข้อมูลกฎไม่ถูกต้อง กรุณาตรวจอีกครั้ง");
+  if (isApiError(error) && error.status === 403) return translate("admin", "commission.errors.forbidden", "บัญชีนี้ไม่มีสิทธิ์ ADMIN");
+  return translateError(error, translate("admin", "commission.errors.retry", "กรุณาลองอีกครั้ง"));
 }
 
 export function CommissionRuleDialog({
   open, onOpenChange, request, rules, games, categories, onChanged,
 }: CommissionRuleDialogProps) {
+  const { t } = useTranslate("admin");
   const [view, setView] = useState<"list" | "form">(request.view);
   const [editing, setEditing] = useState<CommissionRule | null>(request.view === "form" ? request.rule : null);
   const [draft, setDraft] = useState<RuleDraft>(() => request.view !== "form" ? blankDraft()
@@ -77,16 +82,16 @@ export function CommissionRuleDialog({
   // error จาก backend (เช่นไม่พบร้านค้า) ผูกกับค่าที่ส่งไป — แก้ฟอร์มเมื่อไหร่ก็ล้างทิ้ง
   const changeDraft = (update: (old: RuleDraft) => RuleDraft) => { setServerErrors({}); setDraft(update); };
   const gameName = (id: number | null) => games.find((game) => game.id === id)?.name;
-  const categoryLabel = (category: CategoryDto) => `${gameName(category.gameId) ?? "ทุกเกม"} · ${category.name}`;
+  const categoryLabel = (category: CategoryDto) => `${gameName(category.gameId) ?? t("commission.rows.allGames", "ทุกเกม")} · ${category.name}`;
   const targetName = (rule: Pick<CommissionRule, "scope" | "gameId" | "categoryId" | "sellerProfileId">) => {
     switch (rule.scope) {
-      case "GLOBAL": return "ทั้งแพลตฟอร์ม";
-      case "GAME": return gameName(rule.gameId) ?? `เกม #${rule.gameId}`;
+      case "GLOBAL": return t("commission.scope.global", "ทั้งแพลตฟอร์ม");
+      case "GAME": return gameName(rule.gameId) ?? t("commission.target.game", "เกม #{id}", { id: rule.gameId });
       case "CATEGORY": {
         const category = categories.find((item) => item.id === rule.categoryId);
-        return category ? categoryLabel(category) : `หมวดหมู่ #${rule.categoryId}`;
+        return category ? categoryLabel(category) : t("commission.rows.categoryFallback", "หมวดหมู่ #{id}", { id: rule.categoryId });
       }
-      case "SELLER": return `ร้านค้า #${rule.sellerProfileId}`;
+      case "SELLER": return t("commission.target.seller", "ร้านค้า #{id}", { id: rule.sellerProfileId });
     }
   };
 
@@ -98,7 +103,7 @@ export function CommissionRuleDialog({
     setView("form");
   }
 
-  async function run(action: () => Promise<unknown>, success: string, failure = "บันทึกไม่สำเร็จ") {
+  async function run(action: () => Promise<unknown>, success: string, failure = t("refunds.steps.recordFailed", "บันทึกไม่สำเร็จ")) {
     setBusy(true);
     try {
       await action();
@@ -106,7 +111,7 @@ export function CommissionRuleDialog({
       toast.add({ type: "success", title: success });
       return true;
     } catch (error) {
-      if (hasErrorCode(error, "SELLER_NOT_FOUND")) setServerErrors({ target: "ไม่พบร้านค้ารหัสนี้" });
+      if (hasErrorCode(error, "SELLER_NOT_FOUND")) setServerErrors({ target: t("commission.errors.sellerNotFound", "ไม่พบร้านค้ารหัสนี้") });
       toast.add({ type: "error", title: failure, description: ruleErrorMessage(error) });
       return false;
     } finally {
@@ -122,18 +127,18 @@ export function CommissionRuleDialog({
     const input = draftToInput(draft);
     const saved = await run(
       () => editing ? afterSalesApi.updateCommissionRule(editing.id, input) : afterSalesApi.createCommissionRule(input),
-      editing ? `บันทึกกฎ #${editing.id} แล้ว` : "เพิ่มกฎค่าคอมมิชชั่นแล้ว",
+      editing ? t("commission.rules.saved", "บันทึกกฎ #{id} แล้ว", { id: editing.id }) : t("commission.rules.added", "เพิ่มกฎค่าคอมมิชชั่นแล้ว"),
     );
     if (saved) setView("list");
   }
 
   const setActive = (rule: CommissionRule, active: boolean) => active
     ? run(() => { const { id, ...input } = rule; return afterSalesApi.updateCommissionRule(id, { ...input, active: true }); },
-      `เปิดใช้งานกฎ #${rule.id} แล้ว`)
-    : run(() => afterSalesApi.deactivateCommissionRule(rule.id), `ปิดใช้งานกฎ #${rule.id} แล้ว`);
+      t("commission.rules.activated", "เปิดใช้งานกฎ #{id} แล้ว", { id: rule.id }))
+    : run(() => afterSalesApi.deactivateCommissionRule(rule.id), t("commission.rules.deactivated", "ปิดใช้งานกฎ #{id} แล้ว", { id: rule.id }));
   // ลบถาวร — คำสั่งซื้อเดิมเก็บอัตราและยอดค่าคอมที่คิดไว้ตอนสั่งซื้อ จึงไม่กระทบย้อนหลัง
   const remove = (rule: CommissionRule) =>
-    run(() => afterSalesApi.deleteCommissionRule(rule.id), `ลบกฎ #${rule.id} แล้ว`, "ลบไม่สำเร็จ");
+    run(() => afterSalesApi.deleteCommissionRule(rule.id), t("commission.rules.deleted", "ลบกฎ #{id} แล้ว", { id: rule.id }), t("commission.rules.deleteFailed", "ลบไม่สำเร็จ"));
   async function removeEditing() {
     if (editing && await remove(editing)) setView("list");
   }
@@ -168,6 +173,7 @@ type RuleListProps = {
 type PendingAction = { id: number; action: "deactivate" | "delete" };
 
 function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelete }: RuleListProps) {
+  const { t } = useTranslate("admin");
   const [scope, setScope] = useState<RuleScope | "ALL">("ALL");
   const [showInactive, setShowInactive] = useState(false);
   const [pending, setPending] = useState<PendingAction | null>(null);
@@ -182,33 +188,32 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
 
   return <>
     <div className="flex flex-col gap-1.5 border-b border-muted px-6 pt-6 pb-4 pr-14">
-      <DialogTitle className="text-lg font-bold text-foreground">กฎค่าคอมมิชชั่น</DialogTitle>
+      <DialogTitle className="text-lg font-bold text-foreground">{t("commission.rules.title", "กฎค่าคอมมิชชั่น")}</DialogTitle>
       <DialogDescription className="text-xs text-muted-foreground">
-        ตอนคิดค่าธรรมเนียม ระบบเลือกกฎที่เจาะจงที่สุด: ผู้ขาย › หมวดหมู่ › เกม › ทั้งแพลตฟอร์ม
-        ถ้าขอบเขตเท่ากัน ลำดับความสำคัญมากกว่าชนะ
+        {t("commission.rules.description", "ตอนคิดค่าธรรมเนียม ระบบเลือกกฎที่เจาะจงที่สุด: ผู้ขาย › หมวดหมู่ › เกม › ทั้งแพลตฟอร์ม ถ้าขอบเขตเท่ากัน ลำดับความสำคัญมากกว่าชนะ")}
       </DialogDescription>
     </div>
 
     <div className="flex flex-wrap items-center gap-2 px-6 py-3">
-      <div role="tablist" aria-label="กรองตามขอบเขต" className="flex flex-wrap gap-1.5">
+      <div role="tablist" aria-label={t("commission.rules.filter", "กรองตามขอบเขต")} className="flex flex-wrap gap-1.5">
         {(["ALL", ...SCOPE_OPTIONS.map((option) => option.value)] as const).map((value) => (
           <button key={value} type="button" role="tab" aria-selected={scope === value} onClick={() => setScope(value)}
             className={cn("rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               scope === value ? "border-foreground bg-foreground text-background" : "border-border text-[#414755] hover:bg-[#fafbfb]")}>
-            {value === "ALL" ? "ทั้งหมด" : scopeLabel(value)} <span className="opacity-60">{count(value)}</span>
+            {value === "ALL" ? t("commission.rules.all", "ทั้งหมด") : scopeLabel(value)} <span className="opacity-60">{count(value)}</span>
           </button>
         ))}
       </div>
       <label className="ml-auto flex items-center gap-2 text-xs text-[#414755]">
-        <Switch size="sm" checked={showInactive} onCheckedChange={setShowInactive} aria-label="แสดงกฎที่ปิดใช้งาน" />
-        แสดงกฎที่ปิดใช้งาน
+        <Switch size="sm" checked={showInactive} onCheckedChange={setShowInactive} aria-label={t("commission.rules.showInactive", "แสดงกฎที่ปิดใช้งาน")} />
+        {t("commission.rules.showInactive", "แสดงกฎที่ปิดใช้งาน")}
       </label>
-      <Button size="sm" className="rounded-md px-2.5" onClick={onAdd}><Plus />เพิ่มกฎ</Button>
+      <Button size="sm" className="rounded-md px-2.5" onClick={onAdd}><Plus />{t("commission.rules.add", "เพิ่มกฎ")}</Button>
     </div>
 
-    <ul className="min-h-[200px] flex-1 overflow-y-auto border-t border-muted" aria-label="รายการกฎค่าคอมมิชชั่น">
+    <ul className="min-h-[200px] flex-1 overflow-y-auto border-t border-muted" aria-label={t("commission.rules.list", "รายการกฎค่าคอมมิชชั่น")}>
       {visible.length === 0 && <li className="px-6 py-10 text-center text-sm text-muted-foreground">
-        ยังไม่มีกฎในมุมมองนี้ — ระบบจะใช้อัตราเริ่มต้นทั้งแพลตฟอร์ม
+        {t("commission.rules.empty", "ยังไม่มีกฎในมุมมองนี้ — ระบบจะใช้อัตราเริ่มต้นทั้งแพลตฟอร์ม")}
       </li>}
       {visible.map((rule) => {
         const status = ruleStatus(rule, now);
@@ -224,32 +229,32 @@ function RuleList({ rules, busy, targetName, onAdd, onEdit, onSetActive, onDelet
               <p className="text-xs text-[#414755] tabular-nums">
                 <strong className="font-semibold text-foreground">{rule.ratePercent}%</strong>
                 {rule.fixedFee > 0 && <> + {baht(rule.fixedFee)}</>}
-                {rule.minFee != null && <> · ขั้นต่ำ {baht(rule.minFee)}</>}
-                {rule.maxFee != null && <> · ขั้นสูง {baht(rule.maxFee)}</>}
-                {" · "}ลำดับ {rule.priority}
+                {rule.minFee != null && <> · {t("commission.rules.min", "ขั้นต่ำ {amount}", { amount: baht(rule.minFee) })}</>}
+                {rule.maxFee != null && <> · {t("commission.rules.max", "ขั้นสูง {amount}", { amount: baht(rule.maxFee) })}</>}
+                {" · "}{t("commission.rules.priority", "ลำดับ {n}", { n: rule.priority })}
               </p>
               <p className="text-[11px] text-[#9aa5ad]">
-                {dateTime(rule.effectiveFrom)} – {rule.effectiveTo ? dateTime(rule.effectiveTo) : "ไม่มีกำหนดสิ้นสุด"}
+                {dateTime(rule.effectiveFrom)} – {rule.effectiveTo ? dateTime(rule.effectiveTo) : t("commission.rules.noEnd", "ไม่มีกำหนดสิ้นสุด")}
               </p>
             </div>
 
             {pending?.id === rule.id
               ? <ConfirmBar busy={busy} onCancel={() => setPending(null)}
-                message={pending.action === "delete" ? "ลบกฎนี้ถาวร? กู้คืนไม่ได้" : "ปิดใช้งานกฎนี้?"}
+                message={pending.action === "delete" ? t("commission.rules.confirmDelete", "ลบกฎนี้ถาวร? กู้คืนไม่ได้") : t("commission.rules.confirmDeactivate", "ปิดใช้งานกฎนี้?")}
                 onConfirm={async () => {
                   const done = pending.action === "delete" ? await onDelete(rule) : await onSetActive(rule, false);
                   if (done) setPending(null);
                 }} />
               : <div className="flex items-center gap-1.5">
                 <Button size="sm" variant="outline" className="rounded-md px-2.5" disabled={busy}
-                  aria-label={`แก้ไขกฎ #${rule.id}`} onClick={() => onEdit(rule)}><Pencil />แก้ไข</Button>
+                  aria-label={t("commission.rules.edit", "แก้ไขกฎ #{id}", { id: rule.id })} onClick={() => onEdit(rule)}><Pencil />{t("commission.rules.editShort", "แก้ไข")}</Button>
                 {rule.active
                   ? <Button size="sm" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
-                    aria-label={`ปิดใช้งานกฎ #${rule.id}`} onClick={() => setPending({ id: rule.id, action: "deactivate" })}><Power />ปิด</Button>
+                    aria-label={t("commission.rules.deactivate", "ปิดใช้งานกฎ #{id}", { id: rule.id })} onClick={() => setPending({ id: rule.id, action: "deactivate" })}><Power />{t("commission.rules.off", "ปิด")}</Button>
                   : <Button size="sm" variant="ghost" className="rounded-md px-2.5" disabled={busy}
-                    aria-label={`เปิดใช้งานกฎ #${rule.id}`} onClick={() => void onSetActive(rule, true)}><Power />เปิด</Button>}
+                    aria-label={t("commission.rules.activate", "เปิดใช้งานกฎ #{id}", { id: rule.id })} onClick={() => void onSetActive(rule, true)}><Power />{t("commission.rules.on", "เปิด")}</Button>}
                 <Button size="icon-sm" variant="ghost" className="rounded-md text-destructive" disabled={busy}
-                  aria-label={`ลบกฎ #${rule.id}`} title="ลบกฎ" onClick={() => setPending({ id: rule.id, action: "delete" })}><Trash2 /></Button>
+                  aria-label={t("commission.rules.delete", "ลบกฎ #{id}", { id: rule.id })} title={t("commission.rules.deleteShort", "ลบกฎ")} onClick={() => setPending({ id: rule.id, action: "delete" })}><Trash2 /></Button>
               </div>}
           </li>
         );
@@ -279,6 +284,7 @@ type RuleFormProps = {
 function RuleForm({
   draft, setDraft, editing, rules, busy, errors, games, categories, categoryLabel, targetName, onBack, onSubmit, onDelete,
 }: RuleFormProps) {
+  const { t } = useTranslate("admin");
   const id = useId();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [samplePrice, setSamplePrice] = useState("1290");
@@ -300,12 +306,12 @@ function RuleForm({
   });
   const gameItems = [
     ...(draft.gameId != null && !games.some((game) => game.id === draft.gameId)
-      ? [{ value: String(draft.gameId), label: `เกม #${draft.gameId}` }] : []),
+      ? [{ value: String(draft.gameId), label: t("commission.target.game", "เกม #{id}", { id: draft.gameId }) }] : []),
     ...games.map((game) => ({ value: String(game.id), label: game.name })),
   ];
   const categoryItems = [
     ...(draft.categoryId != null && !categories.some((category) => category.id === draft.categoryId)
-      ? [{ value: String(draft.categoryId), label: `หมวดหมู่ #${draft.categoryId}` }] : []),
+      ? [{ value: String(draft.categoryId), label: t("commission.rows.categoryFallback", "หมวดหมู่ #{id}", { id: draft.categoryId }) }] : []),
     ...categories.map((category) => ({ value: String(category.id), label: categoryLabel(category) })),
   ];
 
@@ -314,21 +320,21 @@ function RuleForm({
       <div className="flex flex-col gap-1.5 border-b border-muted px-6 pt-5 pb-4 pr-14">
         <button type="button" onClick={onBack}
           className="flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-3.5" />กฎทั้งหมด
+          <ArrowLeft className="size-3.5" />{t("commission.form.back", "กฎทั้งหมด")}
         </button>
         <DialogTitle className="text-lg font-bold text-foreground">
-          {editing ? `แก้ไขกฎ #${editing.id}` : "เพิ่มกฎค่าคอมมิชชั่น"}
+          {editing ? t("commission.rules.edit", "แก้ไขกฎ #{id}", { id: editing.id }) : t("commission.form.addTitle", "เพิ่มกฎค่าคอมมิชชั่น")}
         </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground">
-          {editing ? "การแก้ไขมีผลกับคำสั่งซื้อที่สร้างหลังบันทึก คำสั่งซื้อเดิมไม่เปลี่ยน"
-            : "กำหนดอัตราแยกให้เกม หมวดหมู่ หรือผู้ขาย ระบบใช้อัตราเริ่มต้นกับส่วนที่ไม่มีกฎ"}
+          {editing ? t("commission.form.editDescription", "การแก้ไขมีผลกับคำสั่งซื้อที่สร้างหลังบันทึก คำสั่งซื้อเดิมไม่เปลี่ยน")
+            : t("commission.form.addDescription", "กำหนดอัตราแยกให้เกม หมวดหมู่ หรือผู้ขาย ระบบใช้อัตราเริ่มต้นกับส่วนที่ไม่มีกฎ")}
         </DialogDescription>
       </div>
 
       <div className="grid min-h-0 flex-1 gap-6 overflow-y-auto px-6 py-5 md:grid-cols-[minmax(0,1fr)_260px]">
         <div className="flex flex-col gap-5">
-          <Section title="ใช้กับ">
-            <div role="radiogroup" aria-label="ขอบเขต" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Section title={t("commission.form.scope", "ใช้กับ")}>
+            <div role="radiogroup" aria-label={t("commission.form.scopeLabel", "ขอบเขต")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {SCOPE_OPTIONS.map((option) => (
                 <button key={option.value} type="button" role="radio" aria-checked={draft.scope === option.value}
                   onClick={() => setDraft((old) => ({ ...old, scope: option.value }))}
@@ -343,11 +349,11 @@ function RuleForm({
             <p className="text-[11px] text-muted-foreground">{scopeHint}</p>
 
             {draft.scope === "GAME" && <Field className="gap-1.5" data-invalid={!!errors.target}>
-              <FieldLabel htmlFor={`${id}-game`} className="text-xs">เกม</FieldLabel>
+              <FieldLabel htmlFor={`${id}-game`} className="text-xs">{t("commission.scope.game", "เกม")}</FieldLabel>
               <Select value={draft.gameId == null ? null : String(draft.gameId)} items={gameItems}
                 onValueChange={(value) => update("gameId", value == null ? null : Number(value))}>
                 <SelectTrigger id={`${id}-game`} aria-invalid={!!errors.target} className={cn(FIELD, "w-full")}>
-                  <SelectValue placeholder="เลือกเกม" />
+                  <SelectValue placeholder={t("commission.form.chooseGame", "เลือกเกม")} />
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false}><SelectGroup>
                   {gameItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
@@ -357,11 +363,11 @@ function RuleForm({
             </Field>}
 
             {draft.scope === "CATEGORY" && <Field className="gap-1.5" data-invalid={!!errors.target}>
-              <FieldLabel htmlFor={`${id}-category`} className="text-xs">หมวดหมู่</FieldLabel>
+              <FieldLabel htmlFor={`${id}-category`} className="text-xs">{t("commission.scope.category", "หมวดหมู่")}</FieldLabel>
               <Select value={draft.categoryId == null ? null : String(draft.categoryId)} items={categoryItems}
                 onValueChange={(value) => update("categoryId", value == null ? null : Number(value))}>
                 <SelectTrigger id={`${id}-category`} aria-invalid={!!errors.target} className={cn(FIELD, "w-full")}>
-                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                  <SelectValue placeholder={t("commission.form.chooseCategory", "เลือกหมวดหมู่")} />
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false}><SelectGroup>
                   {categoryItems.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}
@@ -371,55 +377,55 @@ function RuleForm({
             </Field>}
 
             {draft.scope === "SELLER" && <Field className="gap-1.5" data-invalid={!!errors.target}>
-              <FieldLabel htmlFor={`${id}-seller`} className="text-xs">รหัสร้านค้า (seller profile ID)</FieldLabel>
+              <FieldLabel htmlFor={`${id}-seller`} className="text-xs">{t("commission.form.sellerId", "รหัสร้านค้า (seller profile ID)")}</FieldLabel>
               <InputGroup className={FIELD}>
                 <InputGroupAddon><InputGroupText>#</InputGroupText></InputGroupAddon>
-                <InputGroupInput id={`${id}-seller`} inputMode="numeric" placeholder="เช่น 12" aria-invalid={!!errors.target}
+                <InputGroupInput id={`${id}-seller`} inputMode="numeric" placeholder={t("commission.form.sellerIdPlaceholder", "เช่น 12")} aria-invalid={!!errors.target}
                   value={draft.sellerProfileId} onChange={typed("sellerProfileId", /^\d*$/)} />
               </InputGroup>
-              <FieldDescription className="text-[11px]">ดูรหัสได้จากหน้าคำสั่งซื้อหรือหน้าอนุมัติผู้ขาย</FieldDescription>
+              <FieldDescription className="text-[11px]">{t("commission.form.sellerIdHint", "ดูรหัสได้จากหน้าคำสั่งซื้อหรือหน้าอนุมัติผู้ขาย")}</FieldDescription>
               <FieldError className="text-xs">{errors.target}</FieldError>
             </Field>}
           </Section>
 
-          <Section title="อัตราและค่าธรรมเนียม">
+          <Section title={t("commission.form.rates", "อัตราและค่าธรรมเนียม")}>
             <div className="grid gap-4 sm:grid-cols-2">
-              <NumberField id={`${id}-rate`} label="อัตราค่าคอมมิชชั่น" suffix="%" placeholder="เช่น 5.0"
+              <NumberField id={`${id}-rate`} label={t("commission.form.rate", "อัตราค่าคอมมิชชั่น")} suffix="%" placeholder={t("commission.form.ratePlaceholder", "เช่น 5.0")}
                 value={draft.ratePercent} onChange={typed("ratePercent", DECIMAL)} error={errors.ratePercent}
-                hint="0–100% ทศนิยมได้ 3 ตำแหน่ง" />
-              <NumberField id={`${id}-fixed`} label="ค่าธรรมเนียมคงที่ต่อคำสั่งซื้อ" prefix="฿" placeholder="0.00"
+                hint={t("commission.form.rateHint", "0–100% ทศนิยมได้ 3 ตำแหน่ง")} />
+              <NumberField id={`${id}-fixed`} label={t("commission.form.fixedFee", "ค่าธรรมเนียมคงที่ต่อคำสั่งซื้อ")} prefix={BAHT_SIGN} placeholder="0.00"
                 value={draft.fixedFee} onChange={typed("fixedFee", DECIMAL)} error={errors.fixedFee}
-                hint="บวกเพิ่มจากส่วนเปอร์เซ็นต์ เว้นว่าง = 0" />
-              <NumberField id={`${id}-min`} label="เก็บขั้นต่ำ" prefix="฿" placeholder="ไม่กำหนด"
+                hint={t("commission.form.fixedFeeHint", "บวกเพิ่มจากส่วนเปอร์เซ็นต์ เว้นว่าง = 0")} />
+              <NumberField id={`${id}-min`} label={t("commission.form.minFee", "เก็บขั้นต่ำ")} prefix={BAHT_SIGN} placeholder={t("commission.form.unset", "ไม่กำหนด")}
                 value={draft.minFee} onChange={typed("minFee", DECIMAL)} error={errors.minFee} />
-              <NumberField id={`${id}-max`} label="เก็บสูงสุด" prefix="฿" placeholder="ไม่กำหนด"
+              <NumberField id={`${id}-max`} label={t("commission.form.maxFee", "เก็บสูงสุด")} prefix={BAHT_SIGN} placeholder={t("commission.form.unset", "ไม่กำหนด")}
                 value={draft.maxFee} onChange={typed("maxFee", DECIMAL)} error={errors.maxFee} />
             </div>
           </Section>
 
-          <Section title="ช่วงเวลาและลำดับ">
+          <Section title={t("commission.form.period", "ช่วงเวลาและลำดับ")}>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field className="gap-1.5" data-invalid={!!errors.effectiveFrom}>
-                <FieldLabel htmlFor={`${id}-from`} className="text-xs">เริ่มมีผล</FieldLabel>
-                <InputGroup className={FIELD}><InputGroupInput id={`${id}-from`} type="datetime-local"
-                  aria-invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
-                  onChange={(event) => update("effectiveFrom", event.target.value)} /></InputGroup>
+                <FieldLabel htmlFor={`${id}-from`} className="text-xs">{t("commission.form.from", "เริ่มมีผล")}</FieldLabel>
+                <DateTimePicker id={`${id}-from`} aria-label={t("commission.form.from", "เริ่มมีผล")} className={cn(FIELD, "hover:bg-card")}
+                  invalid={!!errors.effectiveFrom} value={draft.effectiveFrom}
+                  onChange={(value) => update("effectiveFrom", value)} />
                 <FieldError className="text-xs">{errors.effectiveFrom}</FieldError>
               </Field>
               <Field className="gap-1.5" data-invalid={!!errors.effectiveTo}>
-                <FieldLabel htmlFor={`${id}-to`} className="text-xs">สิ้นสุด</FieldLabel>
-                <InputGroup className={FIELD}><InputGroupInput id={`${id}-to`} type="datetime-local"
-                  aria-invalid={!!errors.effectiveTo} value={draft.effectiveTo}
-                  onChange={(event) => update("effectiveTo", event.target.value)} /></InputGroup>
-                <FieldDescription className="text-[11px]">เว้นว่าง = ใช้ต่อไปจนกว่าจะปิด</FieldDescription>
+                <FieldLabel htmlFor={`${id}-to`} className="text-xs">{t("commission.form.to", "สิ้นสุด")}</FieldLabel>
+                <DateTimePicker id={`${id}-to`} aria-label={t("commission.form.to", "สิ้นสุด")} className={cn(FIELD, "hover:bg-card")} defaultTime="23:59"
+                  invalid={!!errors.effectiveTo} min={draft.effectiveFrom} value={draft.effectiveTo}
+                  onChange={(value) => update("effectiveTo", value)} />
+                <FieldDescription className="text-[11px]">{t("commission.form.toHint", "เว้นว่าง = ใช้ต่อไปจนกว่าจะปิด")}</FieldDescription>
                 <FieldError className="text-xs">{errors.effectiveTo}</FieldError>
               </Field>
-              <NumberField id={`${id}-priority`} label="ลำดับความสำคัญ" placeholder="0"
+              <NumberField id={`${id}-priority`} label={t("commission.form.priority", "ลำดับความสำคัญ")} placeholder="0"
                 value={draft.priority} onChange={typed("priority", SIGNED_INTEGER)} error={errors.priority}
-                hint="ใช้ตัดสินเมื่อมีหลายกฎในขอบเขตเดียวกัน ค่ามากชนะ" />
+                hint={t("commission.form.priorityHint", "ใช้ตัดสินเมื่อมีหลายกฎในขอบเขตเดียวกัน ค่ามากชนะ")} />
               <Field orientation="horizontal" className="items-center gap-2.5 self-start pt-6">
-                <Switch id={`${id}-active`} aria-label="เปิดใช้งานกฎนี้" checked={draft.active} onCheckedChange={(checked) => update("active", checked)} />
-                <FieldLabel htmlFor={`${id}-active`} className="text-[13px] font-normal">เปิดใช้งานกฎนี้</FieldLabel>
+                <Switch id={`${id}-active`} aria-label={t("commission.form.active", "เปิดใช้งานกฎนี้")} checked={draft.active} onCheckedChange={(checked) => update("active", checked)} />
+                <FieldLabel htmlFor={`${id}-active`} className="text-[13px] font-normal">{t("commission.form.active", "เปิดใช้งานกฎนี้")}</FieldLabel>
               </Field>
             </div>
           </Section>
@@ -427,33 +433,31 @@ function RuleForm({
           {conflicts.length > 0 && <div role="status" className="flex gap-2 rounded-lg bg-[#fdf0dd] px-3 py-2.5 text-xs text-[#b45309]">
             <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
             <div>
-              มีกฎที่เปิดอยู่สำหรับ {targetName(conflicts[0])} ในช่วงเวลาเดียวกัน
-              ({conflicts.map((rule) => `#${rule.id} ${rule.ratePercent}% ลำดับ ${rule.priority}`).join(", ")})
-              — ระบบจะใช้กฎที่ลำดับสูงกว่า ถ้าเท่ากันใช้กฎที่สร้างทีหลัง
+              {t("commission.form.conflict", "มีกฎที่เปิดอยู่สำหรับ {target} ในช่วงเวลาเดียวกัน ({rules}) — ระบบจะใช้กฎที่ลำดับสูงกว่า ถ้าเท่ากันใช้กฎที่สร้างทีหลัง", { target: targetName(conflicts[0]), rules: conflicts.map((rule) => `#${rule.id} ${rule.ratePercent}% ${t("commission.rules.priority", "ลำดับ {n}", { n: rule.priority })}`).join(", ") })}
             </div>
           </div>}
         </div>
 
         <aside className="flex h-fit flex-col gap-3 rounded-xl bg-foreground p-5 text-background md:sticky md:top-0">
-          <p className="text-[13px] font-semibold">ตัวอย่างการคำนวณ</p>
+          <p className="text-[13px] font-semibold">{t("commission.preview.title", "ตัวอย่างการคำนวณ")}</p>
           <label className="flex items-center justify-between gap-3 text-xs text-[#9aa5ad]">
-            ราคาขาย
+            {t("commission.preview.price", "ราคาขาย")}
             <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-white">
-              ฿<input aria-label="ราคาขายตัวอย่าง" inputMode="decimal" value={samplePrice}
+              {BAHT_SIGN}<input aria-label={t("commission.preview.samplePrice", "ราคาขายตัวอย่าง")} inputMode="decimal" value={samplePrice}
                 onChange={(event) => DECIMAL.test(event.target.value) && setSamplePrice(event.target.value)}
                 className="w-20 bg-transparent text-right font-medium tabular-nums outline-none" />
             </span>
           </label>
           <dl className="flex flex-col gap-[11px] text-xs">
-            <PreviewRow label={`ค่าคอมมิชชั่น (${Number(draft.ratePercent) || 0}%)`} value={`− ${baht(preview.percentPart)}`} />
-            <PreviewRow label="ค่าธรรมเนียมคงที่" value={`− ${baht(preview.fixedFee)}`} />
-            {preview.clamped && <PreviewRow label={{ min: "ปรับขึ้นเป็นขั้นต่ำ", max: "ปรับลงเป็นขั้นสูงสุด", price: "ไม่เกินราคาขาย" }[preview.clamped]}
+            <PreviewRow label={t("commission.preview.commission", "ค่าคอมมิชชั่น ({rate}%)", { rate: Number(draft.ratePercent) || 0 })} value={`− ${baht(preview.percentPart)}`} />
+            <PreviewRow label={t("commission.preview.fixedFee", "ค่าธรรมเนียมคงที่")} value={`− ${baht(preview.fixedFee)}`} />
+            {preview.clamped && <PreviewRow label={{ min: t("commission.preview.clampMin", "ปรับขึ้นเป็นขั้นต่ำ"), max: t("commission.preview.clampMax", "ปรับลงเป็นขั้นสูงสุด"), price: t("commission.preview.clampPrice", "ไม่เกินราคาขาย") }[preview.clamped]}
               value={baht(preview.fee)} />}
-            <PreviewRow label="ค่าธรรมเนียมรวม" value={`− ${baht(preview.fee)}`} />
+            <PreviewRow label={t("commission.preview.totalFee", "ค่าธรรมเนียมรวม")} value={`− ${baht(preview.fee)}`} />
           </dl>
           <div className="h-px bg-[#2c3336]" />
           <div className="flex items-baseline justify-between gap-3">
-            <span className="text-[13px] font-medium">ผู้ขายได้รับ</span>
+            <span className="text-[13px] font-medium">{t("commission.preview.sellerNet", "ผู้ขายได้รับ")}</span>
             <span className="text-xl font-bold tracking-[-0.4px] tabular-nums">{baht(preview.sellerNet)}</span>
           </div>
         </aside>
@@ -462,14 +466,14 @@ function RuleForm({
       <div className="flex flex-wrap items-center justify-end gap-2 border-t border-muted px-6 py-4">
         {editing && <div className="mr-auto">
           {confirmDelete
-            ? <ConfirmBar busy={busy} message={`ลบกฎ #${editing.id} ถาวร? กู้คืนไม่ได้`}
+            ? <ConfirmBar busy={busy} message={t("commission.form.confirmDelete", "ลบกฎ #{id} ถาวร? กู้คืนไม่ได้", { id: editing.id })}
               onCancel={() => setConfirmDelete(false)} onConfirm={onDelete} />
             : <Button type="button" variant="ghost" className="rounded-md px-2.5 text-destructive" disabled={busy}
-              onClick={() => setConfirmDelete(true)}><Trash2 />ลบกฎ</Button>}
+              onClick={() => setConfirmDelete(true)}><Trash2 />{t("commission.rules.deleteShort", "ลบกฎ")}</Button>}
         </div>}
-        <Button type="button" variant="outline" className="rounded-md px-2.5" disabled={busy} onClick={onBack}>ยกเลิก</Button>
+        <Button type="button" variant="outline" className="rounded-md px-2.5" disabled={busy} onClick={onBack}>{t("actions.cancel", "ยกเลิก", { ns: "common" })}</Button>
         <Button type="submit" className="rounded-md px-2.5" disabled={busy}>
-          {busy ? "กำลังบันทึก..." : editing ? "บันทึกการแก้ไข" : "สร้างกฎ"}
+          {busy ? t("commission.form.saving", "กำลังบันทึก...") : editing ? t("commission.form.saveEdit", "บันทึกการแก้ไข") : t("commission.form.create", "สร้างกฎ")}
         </Button>
       </div>
     </form>
@@ -479,11 +483,12 @@ function RuleForm({
 function ConfirmBar({ message, busy, onCancel, onConfirm }: {
   message: string; busy: boolean; onCancel: () => void; onConfirm: () => Promise<unknown>;
 }) {
+  const { t } = useTranslate("admin");
   return <div className="flex items-center gap-2 rounded-lg bg-[#fdf0dd] px-3 py-1.5">
     <span className="text-xs text-[#b45309]">{message}</span>
-    <Button type="button" size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={onCancel}>ยกเลิก</Button>
+    <Button type="button" size="xs" variant="outline" className="rounded-md" disabled={busy} onClick={onCancel}>{t("actions.cancel", "ยกเลิก", { ns: "common" })}</Button>
     <Button type="button" size="xs" variant="destructive" className="rounded-md" disabled={busy}
-      onClick={() => void onConfirm()}>ยืนยัน</Button>
+      onClick={() => void onConfirm()}>{t("commission.form.confirm", "ยืนยัน")}</Button>
   </div>;
 }
 
@@ -520,3 +525,11 @@ function NumberField({ id, label, value, placeholder, prefix, suffix, hint, erro
     <FieldError className="text-xs">{error}</FieldError>
   </Field>;
 }
+
+// @tolgee-key {"key": "commission.errors.gameNotFound", "ns": "admin", "defaultValue": "ไม่พบเกมนี้ในระบบแล้ว"}
+// @tolgee-key {"key": "commission.errors.categoryNotFound", "ns": "admin", "defaultValue": "ไม่พบหมวดหมู่นี้ในระบบแล้ว"}
+// @tolgee-key {"key": "commission.errors.sellerNotFound", "ns": "admin", "defaultValue": "ไม่พบร้านค้ารหัสนี้"}
+// @tolgee-key {"key": "commission.errors.ruleNotFound", "ns": "admin", "defaultValue": "กฎนี้ไม่มีอยู่ในระบบแล้ว"}
+// @tolgee-key {"key": "commission.errors.invalid", "ns": "admin", "defaultValue": "ข้อมูลกฎไม่ถูกต้อง กรุณาตรวจอีกครั้ง"}
+// @tolgee-key {"key": "commission.errors.forbidden", "ns": "admin", "defaultValue": "บัญชีนี้ไม่มีสิทธิ์ ADMIN"}
+// @tolgee-key {"key": "commission.errors.retry", "ns": "admin", "defaultValue": "กรุณาลองอีกครั้ง"}

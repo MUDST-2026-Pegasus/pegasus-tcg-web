@@ -2,6 +2,7 @@ import { api, type PageResponse } from "@/lib/api";
 
 import type {
   CardSetDto,
+  GameAttributeDto,
   CategoryDto,
   GameDto,
   ProductQuery,
@@ -51,7 +52,10 @@ export function getProductDetail(idOrSlug: string, signal?: AbortSignal) {
 }
 
 export function getProductMarket(productId: number, signal?: AbortSignal) {
-  return api.get<ProductMarketDto[]>(`/catalog/products/${productId}/market`, { ...PUBLIC, signal });
+  return api.get<ProductMarketDto[]>(`/catalog/products/${productId}/market`, {
+    ...PUBLIC,
+    signal,
+  });
 }
 
 /** Read every page so condition counts and seller rows are complete. */
@@ -77,10 +81,17 @@ export async function getProductListings(
 }
 
 export function getListingDetail(id: number, signal?: AbortSignal) {
-  return api.get<PublicListingDetailDto>(`/listings/${id}`, { ...PUBLIC, signal });
+  return api.get<PublicListingDetailDto>(`/listings/${id}`, {
+    ...PUBLIC,
+    signal,
+  });
 }
 
-export function getProductCollectors(productId: number, page: number, signal?: AbortSignal) {
+export function getProductCollectors(
+  productId: number,
+  page: number,
+  signal?: AbortSignal,
+) {
   return api.get<PageResponse<ProductCollectorDto>>(
     `/catalog/products/${productId}/collectors`,
     { ...PUBLIC, signal, query: { page, size: 20 } },
@@ -91,5 +102,23 @@ export function getProductCardEffects(productId: number, signal?: AbortSignal) {
   return api.get<CatalogCardEffectDto[]>(
     `/catalog/products/${productId}/effects`,
     { ...PUBLIC, signal },
+  );
+}
+
+export function getGameAttributes(gameId: number, signal?: AbortSignal) {
+  return api.get<GameAttributeDto[]>(`/games/${gameId}/attributes`, {
+    ...PUBLIC,
+    signal,
+  });
+}
+
+export function getSellerListings(username: string, signal?: AbortSignal) {
+  return api.get<PageResponse<PublicListingDto>>(
+    `/u/${encodeURIComponent(username)}/listings`,
+    {
+      ...PUBLIC,
+      signal,
+      query: { page: 0, size: 6, sort: "newest" },
+    },
   );
 }

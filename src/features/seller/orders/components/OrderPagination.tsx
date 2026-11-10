@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useTranslate } from "@/lib/i18n";
 
 type OrderPaginationProps = {
   /** เริ่มที่ 1 */
@@ -17,15 +18,16 @@ export function OrderPagination({
   disabled,
   onPageChange,
 }: OrderPaginationProps) {
+  const { t } = useTranslate("seller");
   return (
     <div className="flex items-center justify-between gap-4 pt-1">
       <p className="text-xs text-gray-500">
-        ทั้งหมด {totalItems} คำสั่งซื้อ
-        {totalPages > 1 ? ` · หน้า ${page} จาก ${totalPages}` : null}
+        {t("orders.pagination.total", "ทั้งหมด {total} คำสั่งซื้อ", { total: totalItems })}
+        {totalPages > 1 ? t("orders.pagination.page", " · หน้า {page} จาก {totalPages}", { page, totalPages }) : null}
       </p>
 
       {totalPages > 1 ? (
-        <nav aria-label="เปลี่ยนหน้า" className="flex items-center gap-1.5">
+        <nav aria-label={t("orders.pagination.label", "เปลี่ยนหน้า")} className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -33,7 +35,7 @@ export function OrderPagination({
             disabled={disabled || page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
+            {t("actions.previous", "ก่อนหน้า", { ns: "common" })}
           </Button>
           <Button
             variant="outline"
@@ -42,7 +44,7 @@ export function OrderPagination({
             disabled={disabled || page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
+            {t("actions.next", "ถัดไป", { ns: "common" })}
           </Button>
         </nav>
       ) : null}

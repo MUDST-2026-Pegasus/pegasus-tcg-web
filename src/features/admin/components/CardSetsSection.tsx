@@ -10,6 +10,7 @@ import { useCardSetUsage, useDeleteCardSet } from "../taxonomy.queries";
 import { CardSetFormDialog } from "./CardSetFormDialog";
 import { CardSetTable } from "./CardSetTable";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import { useTranslate } from "@/lib/i18n";
 
 type CardSetsSectionProps = {
   game: Game;
@@ -23,6 +24,7 @@ type CardSetsSectionProps = {
  * หน้าต่างลบจึงนับการ์ดในชุดให้ดูก่อน และปิดปุ่มลบถ้ายังมีการ์ดอยู่
  */
 export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
+  const { t } = useTranslate("admin");
   const deleteCardSet = useDeleteCardSet(game.id);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -43,7 +45,7 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
     }
     deleteCardSet.mutate(deleteTarget.id, {
       onSuccess: () => {
-        toast.add({ type: "success", title: `ลบชุด ${deleteTarget.code} แล้ว` });
+        toast.add({ type: "success", title: t("cardAttributes.sets.deleted", "ลบชุด {code} แล้ว", { code: deleteTarget.code }) });
         setDeleteOpen(false);
       },
     });
@@ -79,44 +81,44 @@ export function CardSetsSection({ game, cardSets }: CardSetsSectionProps) {
       <ConfirmDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title={`ลบชุด ${deleteTarget?.code ?? ""} · ${deleteTarget?.name ?? ""}?`}
-        description="ลบแล้วกู้คืนไม่ได้ ชุดที่ยังมีการ์ดในแคตตาล็อกจะลบไม่ได้จนกว่าจะย้ายการ์ดไปชุดอื่น"
-        confirmLabel="ลบชุดการ์ด"
+        title={t("cardAttributes.sets.deleteTitle", "ลบชุด {code} · {name}?", { code: deleteTarget?.code ?? "", name: deleteTarget?.name ?? "" })}
+        description={t("cardAttributes.sets.deleteDescription", "ลบแล้วกู้คืนไม่ได้ ชุดที่ยังมีการ์ดในแคตตาล็อกจะลบไม่ได้จนกว่าจะย้ายการ์ดไปชุดอื่น")}
+        confirmLabel={t("cardAttributes.sets.deleteConfirm", "ลบชุดการ์ด")}
         isPending={deleteCardSet.isPending}
         confirmDisabled={usage.isPending || inUse}
         error={deleteCardSet.error}
-        errorFallback="ลบชุดการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง"
+        errorFallback={t("cardAttributes.sets.deleteFailed", "ลบชุดการ์ดไม่สำเร็จ ลองใหม่อีกครั้ง")}
         onConfirm={confirmDelete}
       >
         {deleteTarget && (
           <dl className="flex flex-col gap-2.5 rounded-lg border border-muted bg-[#fafbfb] px-4 py-3.5 text-xs">
             <SummaryRow
-              label="การ์ดในแคตตาล็อกที่อยู่ในชุดนี้"
+              label={t("cardAttributes.sets.usage", "การ์ดในแคตตาล็อกที่อยู่ในชุดนี้")}
               value={
                 usage.isPending
-                  ? "กำลังนับ…"
+                  ? t("cardAttributes.sets.counting", "กำลังนับ…")
                   : usage.isError
-                    ? "นับไม่สำเร็จ"
-                    : `${formatCount(usage.data ?? 0)} รายการ`
+                    ? t("cardAttributes.sets.countFailed", "นับไม่สำเร็จ")
+                    : t("cardAttributes.sets.items", "{count} รายการ", { count: formatCount(usage.data ?? 0) })
               }
             />
             <SummaryRow
-              label="จำนวนการ์ดในชุด"
+              label={t("cardAttributes.sets.totalCards", "จำนวนการ์ดในชุด")}
               value={
                 deleteTarget.totalCards === null
                   ? "—"
-                  : `${formatCount(deleteTarget.totalCards)} ใบ`
+                  : t("cardAttributes.sets.cards", "{count} ใบ", { count: formatCount(deleteTarget.totalCards) })
               }
             />
             <SummaryRow
-              label="วันวางจำหน่าย"
+              label={t("cardAttributes.sets.col.release", "วันวางจำหน่าย")}
               value={formatReleaseDate(deleteTarget.releaseDate) ?? "—"}
             />
           </dl>
         )}
         {inUse && (
           <p className="rounded-lg bg-[#fbe9e8] px-3 py-2.5 text-xs text-[#d0342c]">
-            ยังลบไม่ได้ — ย้ายการ์ด {formatCount(usage.data ?? 0)} รายการในหน้าจัดการแคตตาล็อกไปชุดอื่นก่อน
+            {t("cardAttributes.sets.inUse", "ยังลบไม่ได้ — ย้ายการ์ด {count} รายการในหน้าจัดการแคตตาล็อกไปชุดอื่นก่อน", { count: formatCount(usage.data ?? 0) })}
           </p>
         )}
       </ConfirmDeleteDialog>

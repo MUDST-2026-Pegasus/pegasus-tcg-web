@@ -1,15 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
+import { toast } from "@/components/ui/toast";
 import * as ordersApi from "@/features/admin/orders.api";
 import type { AdminOrderDetail } from "@/features/admin/orders.types";
 import { OrderDetailSheet } from "@/features/admin/components/OrderDetailSheet";
+import { ApiError } from "@/lib/api";
 import { renderWithProviders } from "@/test/utils";
+
+vi.mock("@/components/ui/toast", () => ({ toast: { add: vi.fn() } }));
 
 vi.mock("@/features/admin/orders.api", () => ({
   getOrderBoard: vi.fn(),
   getAdminOrders: vi.fn(),
   getAdminOrder: vi.fn(),
+  downloadAdminOrderSummary: vi.fn(),
 }));
 
 const detail: AdminOrderDetail = {
@@ -70,8 +76,18 @@ const detail: AdminOrderDetail = {
   payment: null,
 };
 
-describe("OrderDetailSheet promotion breakdown", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe("OrderDetailSheet", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: vi.fn(() => "blob:admin-order-summary"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: vi.fn(),
+    });
+  });
 
   it("shows one per-shop table row with split codes and the O1 payable/commission/net values", async () => {
     vi.mocked(ordersApi.getAdminOrder).mockResolvedValue(detail);
@@ -96,5 +112,62 @@ describe("OrderDetailSheet promotion breakdown", () => {
 
     expect(await screen.findByText("ค่าสินค้า")).toBeInTheDocument();
     expect(screen.queryByRole("table", { name: "ยอดเงินตามร้าน" })).not.toBeInTheDocument();
+  });
+
+  it("downloads the selected seller order PDF once and preserves its filename", async () => {
+    vi.mocked(ordersApi.getAdminOrder).mockResolvedValue(detail);
+    const pdf = new Blob(["%PDF-test"], { type: "application/pdf" });
+    let finish!: (value: Awaited<ReturnType<typeof ordersApi.downloadAdminOrderSummary>>) => void;
+    vi.mocked(ordersApi.downloadAdminOrderSummary).mockReturnValue(new Promise((resolve) => {
+      finish = resolve;
+    }));
+    let downloadedFilename = "";
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      downloadedFilename = this.download;
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
+
+    const button = await screen.findByRole("button", { name: "Download Order Summary (PDF)" });
+    await user.click(button);
+
+    expect(ordersApi.downloadAdminOrderSummary).toHaveBeenCalledOnce();
+    expect(ordersApi.downloadAdminOrderSummary).toHaveBeenCalledWith(12);
+    const loadingButton = screen.getByRole("button", { name: "กำลังสร้าง PDF..." });
+    expect(loadingButton).toBeDisabled();
+    await user.click(loadingButton);
+    expect(ordersApi.downloadAdminOrderSummary).toHaveBeenCalledOnce();
+
+    finish({ blob: pdf, filename: "order-summary-PGS-20261030-0123.pdf" });
+
+    await waitFor(() => expect(click).toHaveBeenCalledOnce());
+    expect(downloadedFilename).toBe("order-summary-PGS-20261030-0123.pdf");
+    expect(URL.createObjectURL).toHaveBeenCalledWith(pdf);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:admin-order-summary");
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({
+      type: "success",
+      title: "ดาวน์โหลด Order Summary แล้ว",
+    }));
+  });
+
+  it("shows an actionable error without creating a file when the order is missing", async () => {
+    vi.mocked(ordersApi.getAdminOrder).mockResolvedValue(detail);
+    vi.mocked(ordersApi.downloadAdminOrderSummary).mockRejectedValue(new ApiError({
+      status: 404,
+      code: "ORDER_NOT_FOUND",
+      message: "Order not found",
+    }));
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    const user = userEvent.setup();
+    renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
+
+    await user.click(await screen.findByRole("button", { name: "Download Order Summary (PDF)" }));
+
+    await waitFor(() => expect(toast.add).toHaveBeenCalledWith({
+      type: "error",
+      title: "ดาวน์โหลด Order Summary ไม่สำเร็จ",
+      description: "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว",
+    }));
+    expect(click).not.toHaveBeenCalled();
   });
 });

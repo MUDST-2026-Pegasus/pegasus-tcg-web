@@ -11,6 +11,11 @@ export const stockInKeys = {
     [...stockInKeys.all, variantId, condition] as const,
 };
 
+export const stockForecastKeys = {
+  all: [...listingKeys.all, "stock-forecast"] as const,
+  detail: (id: number) => [...stockForecastKeys.all, id] as const,
+};
+
 /**
  * ประวัติรับเข้าของการ์ดพิมพ์นี้ในสภาพนี้ — ทีละ 20 ล็อต กด "ดูเพิ่ม" ได้หน้าถัดไป
  * ยอดรับเข้า / ขายแล้วเป็นของทุกหน้า อ่านจากหน้าแรกได้เลย
@@ -39,6 +44,7 @@ export function useRestockListing() {
       Promise.all([
         invalidateListingViews(queryClient, listingKeys.detail(id)),
         queryClient.invalidateQueries({ queryKey: stockInKeys.all }),
+        queryClient.invalidateQueries({ queryKey: stockForecastKeys.detail(id) }),
       ]),
   });
 }

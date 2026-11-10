@@ -1,0 +1,1756 @@
+{
+  "application": {
+    "bankBook": {
+      "change": "Change file",
+      "choose": "Choose file",
+      "drop": "Drag an image here or click to choose a file",
+      "dropHint": "A screenshot of your banking app works too — no physical passbook needed",
+      "label": "Passbook page or banking app screenshot *",
+      "mustShow": "The image must clearly show",
+      "previewAlt": "Preview of the selected image",
+      "redactHint": "You may cover or cross out any unrelated information",
+      "remove": "Remove file",
+      "requirement": {
+        "accountName": "Account name (matching the name above)",
+        "accountNumber": "Account number",
+        "bankName": "Bank name or logo"
+      },
+      "uploaded": "Uploaded · {size}",
+      "uploading": "Uploading passbook image"
+    },
+    "banks": {
+      "BAAC": "Bank for Agriculture and Agricultural Cooperatives",
+      "BAY": "Bank of Ayudhya (Krungsri)",
+      "BBL": "Bangkok Bank",
+      "CIMBT": "CIMB Thai Bank",
+      "GHB": "Government Housing Bank",
+      "GSB": "Government Savings Bank",
+      "IBANK": "Islamic Bank of Thailand",
+      "ICBCT": "ICBC (Thai)",
+      "KBANK": "Kasikornbank",
+      "KKP": "Kiatnakin Phatra Bank",
+      "KTB": "Krungthai Bank",
+      "LHB": "Land and Houses Bank",
+      "SCB": "Siam Commercial Bank",
+      "TISCO": "TISCO Bank",
+      "TTB": "TMBThanachart Bank",
+      "UOBT": "UOB Thailand"
+    },
+    "details": {
+      "accountNumber": "Account number",
+      "bank": "Bank",
+      "edit": "Request changes",
+      "legalName": "Legal full name",
+      "title": "Submitted details"
+    },
+    "duration": "Takes less than 2 minutes",
+    "form": {
+      "acceptTerms": "I confirm that the information and documents submitted are true, and I accept the PEGASUS seller terms and privacy policy",
+      "accountHint": "Must be your own savings or current account",
+      "accountNumber": "Account number *",
+      "accountPlaceholder": "e.g. 123-4-56789-0",
+      "accountTaken": "This account number is already used by another seller",
+      "autosave": "Your draft is saved automatically",
+      "back": "Back",
+      "bank": "Bank *",
+      "bankHint": "All banks in Thailand are supported",
+      "bankPlaceholder": "Select a bank",
+      "firstName": "First name *",
+      "firstNameHint": "Spell it as shown in your passbook, without a title",
+      "firstNamePlaceholder": "Nattapong",
+      "imageInvalid": "The attached image can't be used. Please upload a new one",
+      "lastName": "Last name *",
+      "lastNameHint": "Must match the bank account name below",
+      "lastNamePlaceholder": "Pongsuwan",
+      "nameMatchWarning": "The bank account name must match the first and last name above, otherwise the application will be rejected",
+      "ownerHint": "Buyers will not see this information",
+      "ownerSection": "Account holder's legal name",
+      "payoutHint": "Used to transfer your sales to you",
+      "payoutSection": "Payout account",
+      "privacy": "Bank account details are encrypted and visible only to the review team. Buyers only see your shop name",
+      "rejectedHint": "Please check your details and submit again",
+      "rejectedTitle": "Your previous application was not approved",
+      "resubmit": "Resubmit account verification",
+      "submit": "Submit application",
+      "submitFailed": "Couldn't submit the application. Please try again",
+      "submitting": "Submitting…",
+      "uploading": "Uploading image…"
+    },
+    "loading": "Loading application",
+    "progress": {
+      "approved": "Approved",
+      "approvedAt": "Approved {date}",
+      "open": "Open your shop and start selling right away",
+      "relogin": "Sign out and sign in again to start using the seller center",
+      "review": "Name and bank account review",
+      "reviewHint": "Usually takes no more than 1 business day",
+      "reviewing": "In review",
+      "submitted": "Application submitted",
+      "title": "Application status",
+      "waiting": "Waiting for review"
+    },
+    "status": {
+      "home": "Back to home",
+      "mismatchHint": "If the account name doesn't match the name you entered, our team will email you to fix just that part — no need to reapply",
+      "view": "View application status"
+    },
+    "subtitle": "Just enter your legal name and payout account, then our team will review it within 1 business day",
+    "summary": {
+      "approvedAt": "Approved on",
+      "approvedTitle": "Your application has been approved",
+      "expected": "Expected result",
+      "expectedBy": "By {date}",
+      "number": "Application number",
+      "relogin": "Sign out and sign in again to start using the seller center",
+      "submittedAt": "Submitted on",
+      "submittedDescription": "We've received your legal name and payout account. Our team will review it and email you the result within 1 business day",
+      "submittedTitle": "Application submitted"
+    },
+    "title": "Become a seller",
+    "validation": {
+      "acceptTerms": "Please confirm your details and accept the terms before submitting",
+      "accountChars": "Only digits, hyphens (-) and spaces are allowed",
+      "accountMinDigits": "The account number must have at least 10 digits",
+      "accountRequired": "Please enter the account number",
+      "accountTooLong": "The account number is too long",
+      "bankBookRequired": "Please attach a passbook page or banking app screenshot",
+      "bankRequired": "Please select a bank",
+      "firstNameRequired": "Please enter your first name",
+      "firstNameTooLong": "First name can be at most 100 characters",
+      "lastNameRequired": "Please enter your last name",
+      "lastNameTooLong": "Last name can be at most 100 characters"
+    }
+  },
+  "banner": {
+    "cannotPublish": "You can't list items yet",
+    "checkConnection": "Check your connection and try again",
+    "loadFailed": "Couldn't load shop status",
+    "suspended": {
+      "description": "All listings are hidden from buyers, and you can't create or edit listings until an admin lifts the suspension",
+      "reason": "Reason: {reason} ·",
+      "title": "Your shop is suspended"
+    },
+    "vacation": {
+      "description": "Buyers won't see any of your listings until you turn off vacation mode. Each listing's status stays the same",
+      "title": "Vacation mode is on"
+    }
+  },
+  "dashboard": {
+    "actions": {
+      "createListing": "+ New listing",
+      "viewShop": "View shop"
+    },
+    "auctions": {
+      "awaitingPayment": "Awaiting winner payment",
+      "dueIn": "Due in {hours} h",
+      "live": "Live auctions",
+      "withBids": "{count} with bids"
+    },
+    "delta": {
+      "new": "New"
+    },
+    "greeting": "Hello, {name} 👋",
+    "loadFailed": "Couldn't load the dashboard",
+    "loading": "Loading dashboard",
+    "lowStock": {
+      "count": "{count} items",
+      "empty": "All items are well stocked",
+      "manage": "Go to product management",
+      "remaining": "{count} left",
+      "subtitle": "Listings with {count} or fewer left · lowest first",
+      "title": "Low stock",
+      "viewAll": "View all {count} items"
+    },
+    "productImageAlt": "Product image {name}",
+    "recentOrders": {
+      "empty": "No orders yet",
+      "item": "{name} · {count} pcs",
+      "product": "Product",
+      "title": "Recent orders",
+      "viewAll": "View all"
+    },
+    "sales": {
+      "description": "From {count} orders · average {average} per order",
+      "empty": "No paid orders this month yet",
+      "label": "{month} sales (excluding shipping)",
+      "monthly": "Monthly sales"
+    },
+    "stats": {
+      "escrow": {
+        "footnote": "Released when the buyer confirms receipt",
+        "label": "Pending release"
+      },
+      "listings": {
+        "label": "Active listings",
+        "none": "No new listings this month",
+        "thisMonth": "+{count} this month"
+      },
+      "rating": {
+        "count": "from {count} reviews",
+        "label": "Shop rating",
+        "none": "No reviews yet"
+      },
+      "withdrawable": {
+        "footnote": "Excludes withdrawals in progress",
+        "label": "Available to withdraw"
+      }
+    },
+    "subtitle": "Your shop overview · {date}",
+    "todo": {
+      "empty": "Nothing pending — your shop is all caught up",
+      "none": "Nothing pending",
+      "pack": {
+        "description": "{count} orders awaiting shipment",
+        "title": "Pack and ship orders"
+      },
+      "payment": {
+        "description": "{count} orders · cancelled automatically if not paid in time",
+        "title": "Orders awaiting buyer payment"
+      },
+      "pending": "{count} items pending",
+      "restock": {
+        "description": "{count} items with {threshold} or fewer cards left",
+        "title": "Restock low-stock items"
+      },
+      "returns": {
+        "description": "{count} requests awaiting your decision",
+        "title": "Respond to return requests"
+      },
+      "reviews": {
+        "description": "{count} reviews without a reply",
+        "title": "Reply to reviews"
+      },
+      "title": "To do today"
+    }
+  },
+  "listingForm": {
+    "condition": {
+      "DMG": "Clear creases, tears or stains",
+      "HP": "Heavy wear, with light creasing or bends",
+      "LP": "Light edge wear or minor scratches",
+      "MP": "Visible wear, whitened edges and scuffs",
+      "NM": "Minor flaws that are barely visible",
+      "SEALED": "Still sealed — a box, pack or deck sold as a whole"
+    },
+    "errors": {
+      "fileNotFound": "An image didn't finish uploading or is missing. Remove it and upload again",
+      "photoInUse": "An image is already used in another shop's listing. Remove it and upload your own",
+      "variantNotFound": "This printing is no longer in the catalog. Choose another card"
+    },
+    "field": {
+      "ceiling": "Maximum price",
+      "floor": "Minimum price",
+      "price": "Sale price",
+      "unitCost": "Cost per card"
+    },
+    "validation": {
+      "cardRequired": "Choose a card from the catalog first",
+      "ceilingBelowFloor": "The maximum price can't be lower than the minimum price",
+      "conditionRequired": "Choose the card condition",
+      "gradeRange": "Grade must be between {min}–{max} with at most 1 decimal place",
+      "gradingCompanyMax": "Grading company can be at most {max} characters",
+      "gradingCompanyRequired": "Enter the company that gave this grade, e.g. PSA, BGS, CGC",
+      "lotLabelMax": "Lot label can be at most {max} characters",
+      "moneyNonNegative": "{label} can't be negative",
+      "moneyPositive": "{label} must be greater than {min}",
+      "moneyRequired": "Enter {label}",
+      "moneyTooHigh": "{label} is too high",
+      "noteMax": "Description can be at most {max} characters",
+      "offsetNumber": "The offset must be a number, e.g. -5 or 3",
+      "offsetRange": "The offset must be between {min}% and {max}%",
+      "photosMax": "You can add up to {max} images",
+      "quantityRange": "Quantity must be between {min}–{max} cards at a time (you can restock later)",
+      "quantityRequired": "Enter the number of cards"
+    }
+  },
+  "logout": {
+    "title": "Sign out"
+  },
+  "orderDetail": {
+    "backToOrders": "Back to order management",
+    "buyer": {
+      "new": "New customer of your shop",
+      "note": "Note from buyer: {note}",
+      "orderCount": "Bought from your shop {count} times",
+      "title": "Buyer",
+      "viewProfile": "View buyer profile"
+    },
+    "buyerShipping": {
+      "eta": "· Buyer expects delivery in {days} days",
+      "paid": "Buyer paid {fee} shipping",
+      "title": "Buyer's shipping choice"
+    },
+    "cancel": {
+      "confirm": "Confirm cancellation",
+      "description": "Cards in this order will be listed for sale again immediately — this can't be undone",
+      "descriptionPaid": "Cards in this order will be listed for sale again immediately and the buyer will be refunded — this can't be undone",
+      "dialogTitle": "Cancel order {orderNumber}",
+      "failed": "Couldn't cancel. Please try again",
+      "keep": "Keep order",
+      "reason": "Cancellation reason",
+      "reasonPlaceholder": "e.g. The card was damaged while packing. Sorry for the inconvenience",
+      "success": "Order cancelled",
+      "title": "Cancel order"
+    },
+    "items": {
+      "count": "{pieces} cards · {lines} items",
+      "packed": "Packed: {name}",
+      "title": "Items",
+      "toPack": "Items to pack"
+    },
+    "money": {
+      "commission": "Commission {rate}% of {base}",
+      "customerPaid": "Customer paid",
+      "items": "Items subtotal",
+      "platformDiscount": "Pegasus discount subsidy",
+      "platformNote": "Pegasus codes don't reduce your shop's income — this amount is transferred to your shop wallet when funds are released",
+      "sellerReceives": "Shop receives",
+      "shipping": "Shipping",
+      "shippingWithCarrier": "Shipping · {carrier}",
+      "title": "Order amount"
+    },
+    "next": {
+      "cancelled": "{ordered} · Order cancelled",
+      "completed": "{ordered} · Buyer received the items, funds released to your shop",
+      "ordered": "Ordered {ago}",
+      "pendingPayment": "{ordered} · Awaiting buyer payment, cancelled automatically if not paid in time",
+      "refunded": "{ordered} · Buyer refunded",
+      "returnRequested": "{ordered} · Buyer requested a return, respond on the return requests page",
+      "returned": "{ordered} · Shop received the return, awaiting refund decision",
+      "shipped": "{ordered} · Shipped, awaiting buyer confirmation",
+      "toShip": "{ordered} · {shipBy} to keep your shop rating"
+    },
+    "notFound": {
+      "description": "This order may not exist or doesn't belong to your shop",
+      "title": "Order {orderId} not found"
+    },
+    "payment": {
+      "title": "Payment"
+    },
+    "pdf": {
+      "failed": "Couldn't download the Order Summary",
+      "generating": "Generating PDF...",
+      "success": "Order Summary downloaded"
+    },
+    "profit": {
+      "title": "Profit from this order"
+    },
+    "returns": {
+      "respond": "Respond to return request",
+      "view": "View return request"
+    },
+    "shipping": {
+      "address": "Recipient address",
+      "carrierRequired": "Carrier *",
+      "copied": "Copied",
+      "copy": "Copy",
+      "hint": "Enter the tracking number and press \"Confirm shipment\" — the buyer will receive it automatically",
+      "title": "Shipping details",
+      "tracking": "Tracking number",
+      "trackingPlaceholder": "e.g. TH2408xxxx91",
+      "trackingRequired": "Tracking number *"
+    },
+    "subtitle": "Buyer order {orderNumber} · {note}",
+    "timeline": "Timeline"
+  },
+  "orderStatus": {
+    "CANCELLED": "Cancelled",
+    "COMPLETED": "Completed",
+    "DELIVERED": "Delivered",
+    "PAID": "To pack",
+    "PENDING_PAYMENT": "Awaiting payment",
+    "PREPARING": "Packing",
+    "REFUNDED": "Refunded",
+    "RETURNED": "Returned",
+    "RETURN_REQUESTED": "Return requested",
+    "SHIPPED": "Shipped"
+  },
+  "orders": {
+    "accept": {
+      "action": "Accept order",
+      "failed": "Couldn't accept the order",
+      "success": "Order accepted",
+      "successDescription": "{orderNumber} · Pack it and enter the tracking number"
+    },
+    "address": {
+      "none": "No shipping address",
+      "phone": "Tel. {phone}"
+    },
+    "ago": {
+      "days": "{days} days ago",
+      "hours": "{hours} h ago",
+      "justNow": "just now",
+      "minutes": "{minutes} min ago"
+    },
+    "cancel": {
+      "reasonRequired": "Enter a reason — the buyer will see this message",
+      "reasonTooLong": "The reason must be at most 255 characters"
+    },
+    "card": {
+      "address": "Shipping address",
+      "cancelReason": "Cancellation reason: {reason}",
+      "freeShipping": "Free shipping",
+      "orderedAgo": "· Ordered {ago}",
+      "packing": "Packing",
+      "shipping": "Shipping fee",
+      "shippingWithName": "Shipping fee · {name}",
+      "showItems": "Show items of {orderNumber}",
+      "viewDetail": "View order details"
+    },
+    "carrier": {
+      "buyerChose": "Buyer chose: {name} ({carrier})",
+      "unspecified": "No carrier specified"
+    },
+    "carrierHint": {
+      "differs": "Differs from the buyer's choice ({carrier}) — the buyer will see the carrier you confirm",
+      "matches": "Pre-selected from the buyer's choice · change it if you ship with another carrier",
+      "unset": "This option has no carrier — choose the carrier you actually use before confirming"
+    },
+    "condition": {
+      "sealed": "Sealed"
+    },
+    "confirmShip": {
+      "back": "Go back and edit",
+      "confirm": "Confirm shipment",
+      "description": "The tracking number will be sent to the buyer immediately. After confirming, the order can't be cancelled and the carrier or tracking number can't be changed",
+      "title": "Confirm shipment of {orderNumber}?"
+    },
+    "deadline": {
+      "near": "Due soon",
+      "overdue": "Past ship-by date",
+      "shipBy": "Ship by {date}"
+    },
+    "empty": {
+      "search": "No orders match \"{search}\"",
+      "searchHint": "Try searching by order number or the buyer's username",
+      "tab": "No orders in {tab}"
+    },
+    "errors": {
+      "forbidden": "This account isn't allowed to download shop documents",
+      "network": "Can't connect to the server. Please check your internet and try again",
+      "notFound": "This order wasn't found in your shop",
+      "pdfFailed": "Couldn't download the PDF. Please try again",
+      "pdfServer": "PDF generation failed. Please try again",
+      "sessionExpired": "Your session has expired. Please sign in and try again",
+      "statusChanged": "The order status has changed. Refresh and try again",
+      "underReview": "This order's payment slip is awaiting admin review. You can cancel after the review"
+    },
+    "filter": {
+      "search": "Search orders",
+      "searchPlaceholder": "Order number or buyer name",
+      "sort": "Sort"
+    },
+    "loadFailed": "Couldn't load orders",
+    "loading": "Loading order history",
+    "money": {
+      "net": "Net profit",
+      "salesWithShipping": "Sales (incl. shipping)"
+    },
+    "monthly": {
+      "commission": "Commission",
+      "cost": "Cost of goods",
+      "title": "This month's performance"
+    },
+    "pagination": {
+      "label": "Change page",
+      "page": " · Page {page} of {totalPages}",
+      "total": "{total} orders in total"
+    },
+    "payment": {
+      "method": "Method",
+      "notPaid": "The buyer hasn't paid yet",
+      "paidAt": "Paid at",
+      "status": "Status"
+    },
+    "paymentAmount": {
+      "AWAITING_VERIFICATION": "Amount reported (whole order)",
+      "PENDING": "Amount due (whole order)",
+      "SUCCEEDED": "Amount paid (whole order)"
+    },
+    "paymentMethod": {
+      "BANK_TRANSFER": "Bank transfer",
+      "CASH_ON_DELIVERY": "Cash on delivery",
+      "MOCK_GATEWAY": "Test gateway",
+      "WALLET": "Wallet"
+    },
+    "paymentState": {
+      "cancelled": "Cancelled",
+      "paid": "Paid",
+      "pending": "Awaiting payment",
+      "refunded": "Cancelled / refunded"
+    },
+    "paymentStatus": {
+      "AWAITING_VERIFICATION": "Awaiting slip review",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "FAILED": "Failed",
+      "PENDING": "Awaiting payment",
+      "SUCCEEDED": "Paid"
+    },
+    "profit": {
+      "commission": "− Commission",
+      "cost": "− Cost of goods"
+    },
+    "ship": {
+      "failed": "Couldn't confirm shipment",
+      "failedHint": "Check the tracking number and try again",
+      "success": "Shipment confirmed"
+    },
+    "shipping": {
+      "carrier": "Carrier",
+      "carrierPlaceholder": "Select a carrier",
+      "carrierPlaceholderShort": "Select carrier",
+      "tracking": "Tracking number",
+      "trackingFor": "Tracking number for {orderNumber}",
+      "trackingPlaceholder": "Enter tracking number"
+    },
+    "shippingSteps": {
+      "accept": "Accept the order so the buyer knows you've started packing",
+      "confirm": "Press confirm shipment",
+      "pack": "Pack cards in a top loader",
+      "photo": "Take a photo before sealing the box",
+      "title": "Shipping steps",
+      "tracking": "Enter the carrier and tracking number"
+    },
+    "sort": {
+      "default": "Sort: most urgent first",
+      "newest": "Sort: newest first",
+      "oldest": "Sort: oldest first",
+      "totalDesc": "Sort: total high to low"
+    },
+    "subtitle": {
+      "counting": "Counting orders…",
+      "summary": "{toPack} orders to pack · {shipping} in transit · ship on time to keep your shop rating"
+    },
+    "tabs": {
+      "awaiting_pack": "To pack",
+      "awaiting_payment": "Awaiting payment",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "returns": "Returns",
+      "shipped": "In transit"
+    },
+    "timeline": {
+      "accepted": "You accepted the order · packing started",
+      "cancelled": "Order cancelled",
+      "cancelledWithReason": "Order cancelled · {reason}",
+      "completed": "Buyer received the items · funds released to your shop",
+      "delivered": "Parcel delivered to buyer",
+      "inProgress": "In progress",
+      "ordered": "Buyer placed the order",
+      "paid": "Buyer paid",
+      "refunded": "Buyer refunded",
+      "returnRequested": "Buyer requested a return",
+      "returnResolution": "Return request resolution",
+      "returned": "Shop received the return",
+      "shipped": "Parcel shipped and tracking number entered",
+      "waiting": "Pending"
+    },
+    "tip": {
+      "description": "Ship by your shop's ship-by date. Funds reach your shop account when the buyer confirms receipt or the period after shipping ends",
+      "title": "Tip"
+    },
+    "title": "Manage orders",
+    "tryAgain": "Please try again"
+  },
+  "payout": {
+    "account": {
+      "loadFailed": "Couldn't load payout account details",
+      "missing": "None yet",
+      "name": "Account name",
+      "none": "No verified payout account yet",
+      "notAvailable": "Not available yet",
+      "note": "Money is transferred only to this account. To use a new account, submit verification documents again",
+      "reverify": "Re-verify account",
+      "title": "Payout account",
+      "unknown": "Can't verify",
+      "verified": "Verified",
+      "verifiedAt": "Verified on",
+      "verify": "Verify identity and bank account"
+    },
+    "balance": {
+      "note": "Minimum {min} per request · the requested amount is reserved immediately and deducted from your wallet when the admin completes the transfer · if rejected or the transfer fails, the amount becomes withdrawable again",
+      "pending": "Awaiting buyer confirmation",
+      "pendingHint": "Becomes withdrawable when the order completes",
+      "reserved": "Reserved for payout requests",
+      "reservedHint": "{count} requests not yet transferred",
+      "wallet": "Wallet balance",
+      "walletHint": "Includes reserved amounts",
+      "withdraw": "Request payout",
+      "withdrawable": "Available to withdraw now",
+      "withdrawableHint": "Wallet balance − amount reserved for untransferred payout requests"
+    },
+    "blocked": {
+      "belowMinimum": "You need at least {min} available to submit a request",
+      "noAccount": "No payout account yet — complete identity and bank verification before requesting a payout",
+      "notLoaded": "Financial data hasn't fully loaded. Please try again",
+      "unverified": "Your shop status isn''t ''Verified'' yet — complete identity and bank verification before requesting a payout"
+    },
+    "detail": {
+      "amount": "Amount",
+      "approvedAt": "Approved on {date}",
+      "copyReference": "Copy reference number",
+      "description": "Details and progress of this payout request",
+      "failedTitle": "Why the transfer failed — no money was deducted",
+      "noReason": "No reason given",
+      "paidAt": "Transferred on {date}",
+      "paidDescription": "{amount} was deducted from your wallet when the admin recorded the transfer",
+      "paidTitle": "Transferred to your account",
+      "reference": " · Ref. {reference}",
+      "referenceCopied": "Reference number copied",
+      "referenceLabel": "Transfer reference",
+      "rejected": "{reason} · the amount is withdrawable again",
+      "rejectedTitle": "Reason from admin",
+      "requested": "Waiting for admin review",
+      "retry": "Request again",
+      "title": "Payout request #{id}"
+    },
+    "detailsLink": "Details ›",
+    "history": {
+      "columns": {
+        "date": "Requested on",
+        "detail": "Details",
+        "id": "No.",
+        "status": "Status"
+      },
+      "empty": "No payout requests yet",
+      "emptyHint": "Once you have at least {min} available, you can request a payout with the button above",
+      "filterAll": "Status: All",
+      "filterLabel": "Application status",
+      "loadFailed": "Couldn't load payout requests",
+      "summary": "{count} requests · {total} transferred in total",
+      "unavailableUnverified": "Couldn't load payout requests. Please try again once your seller account is verified",
+      "viewDetail": "View details",
+      "viewDetailLink": "View details ›"
+    },
+    "ledger": {
+      "columns": {
+        "amount": "Amount",
+        "balance": "Balance",
+        "date": "Date",
+        "reference": "Reference",
+        "type": "Entry"
+      },
+      "empty": "No wallet activity yet",
+      "loadFailed": "Couldn't load wallet activity",
+      "loading": "Loading entries...",
+      "range": "Showing {start}–{end} of {total}",
+      "subtitle": "Every change to your wallet balance, newest first · payout amounts appear here only after a successful transfer",
+      "type": {
+        "ADJUSTMENT": "Admin adjustment",
+        "PAYOUT_OUT": "Payout",
+        "PROMO_SUBSIDY": "Pegasus discount subsidy",
+        "REFUND_OUT": "Buyer refunds",
+        "SELLER_EARNING": "Order earnings"
+      }
+    },
+    "loadFailed": "Couldn't load data",
+    "loading": "Loading financial data",
+    "notReady": {
+      "description": "Please apply and verify your seller identity first",
+      "title": "Not ready for payouts yet"
+    },
+    "request": {
+      "all": "Withdraw all",
+      "amount": "Amount to withdraw",
+      "confirm": "Confirm payout of {amount}",
+      "conflict": "Your available amount has changed. Please check the amount again · latest balance is {amount}",
+      "decimals": "At most 2 decimal places",
+      "failed": "Couldn't request payout",
+      "remaining": "Available after this request",
+      "requested": "Requested amount",
+      "reservedNote": "The admin reviews and transfers manually · you can't cancel after submitting · if rejected or the transfer fails, the amount becomes withdrawable again",
+      "reservedTitle": "This amount will be reserved immediately",
+      "submitting": "Submitting…",
+      "success": "Payout request #{id} submitted",
+      "successDescription": "{amount} reserved, waiting for admin review",
+      "summary": "Available {withdrawable} · minimum {min} per request",
+      "transferTo": "Transfer to"
+    },
+    "retry": "Try again",
+    "status": {
+      "APPROVED": "Approved",
+      "FAILED": "Transfer failed",
+      "PAID": "Transferred",
+      "PROCESSING": "Transferring",
+      "REJECTED": "Rejected",
+      "REQUESTED": "In review"
+    },
+    "steps": {
+      "approved": "Admin approved",
+      "failed": "Transfer failed",
+      "paid": "Transferred",
+      "processing": "Transferring",
+      "rejected": "Rejected",
+      "requested": "Requested"
+    },
+    "subtitle": "Withdraw your sales to your verified bank account — the admin reviews and transfers manually",
+    "tabs": {
+      "payouts": "Payout requests",
+      "wallet": "Wallet activity"
+    },
+    "title": "Payout",
+    "tracker": {
+      "title": "Requests not yet transferred",
+      "total": "{total} reserved in total, not yet deducted from your wallet"
+    },
+    "tryAgain": "Please try again",
+    "validation": {
+      "format": "Enter the amount as a number with at most 2 decimal places",
+      "max": "Exceeds the available {max} — press ''Withdraw all'' to enter the maximum",
+      "min": "Minimum {min} per request",
+      "required": "Please enter an amount"
+    },
+    "verification": {
+      "back": "Back to payouts",
+      "inReview": "Request submitted · waiting for admin review",
+      "inReviewHint": "Your current account stays in use until the new request is approved",
+      "loadFailed": "Couldn't load verification details",
+      "subtitle": "Submit new account details for admin review. Once approved, your payout account will be updated",
+      "title": "Verify payout account"
+    }
+  },
+  "products": {
+    "actions": {
+      "activate": "List for sale",
+      "delete": "Delete product",
+      "delist": "Close listing permanently",
+      "delistEllipsis": "Close listing permanently…",
+      "pause": "Pause",
+      "restock": "Restock"
+    },
+    "bulk": {
+      "clear": "Clear selection of {count} items",
+      "failed": "{count} failed: {reason}",
+      "selected": "{count} selected",
+      "skipped": "{count} skipped (not applicable)",
+      "succeeded": "{count} succeeded",
+      "updating": "Updating…"
+    },
+    "bulkPrice": {
+      "adjust": "Adjust price",
+      "description": "Adjust {count} listings by the same percentage",
+      "example": "Example: {name} {price} →",
+      "hint": "Negative = lower price · rounded to satang · applies to every card on each listing",
+      "placeholder": "e.g. -10 or 5",
+      "skipped": " · skipping {count} listings with market pricing or already closed",
+      "submit": "Adjust price of {count} listings",
+      "title": "Edit prices in bulk"
+    },
+    "create": {
+      "actions": {
+        "back": "Back",
+        "draft": "Save draft",
+        "next": "Next: {step}",
+        "publish": "Publish now"
+      },
+      "condition": {
+        "hint": "Be accurate — misrepresented condition is the #1 cause of disputes",
+        "locked": "Condition can't be changed after listing. If it's wrong, create a new listing and close this one",
+        "title": "Card condition"
+      },
+      "details": {
+        "grade": "Grade",
+        "gradeHint": "0.5–10, leave empty if not graded",
+        "gradePlaceholder": "e.g. 10 or 9.5",
+        "gradingCompany": "Grading company",
+        "gradingCompanyPlaceholder": "e.g. PSA, BGS, CGC",
+        "lotHint": "For finding items in your own inventory; buyers don't see it",
+        "lotLabel": "Lot label",
+        "lotPlaceholder": "e.g. BOX-01",
+        "note": "Description for buyers",
+        "noteHint": "Up to 500 characters",
+        "notePlaceholder": "e.g. Kept in a top loader since opening, never played, photos of all 4 corners available...",
+        "subtitle": "Optional — helps buyers decide",
+        "title": "More details"
+      },
+      "duplicate": "Your listing #{id} already sells this card in the same condition — consider merging them into one listing",
+      "noCard": "No card selected yet",
+      "noPrice": "฿—",
+      "photos": {
+        "alt": "Image {number}",
+        "cancelUpload": "Cancel uploading {name}",
+        "choose": "Choose images",
+        "drop": "Drag images here or click to choose",
+        "full": "{max} images reached. Remove one before adding more",
+        "main": "Main image",
+        "remove": "Remove image {number}",
+        "removeFile": "Remove {name}",
+        "setMain": "Set as main",
+        "subtitle": "Photograph the actual card you'll ship, front and back, plus any flawed corners · the first image is the main image on the listing · up to {max} images",
+        "title": "Actual card photos",
+        "uploading": "Uploading {name}"
+      },
+      "picker": {
+        "choosePrinting": "Choose printing",
+        "fromPrice": "From {price}",
+        "minLength": "Type at least {min} characters to search",
+        "noResults": "No cards match \"{query}\" — try other words, search by SKU / barcode below, or ask an admin to add the card to the catalog",
+        "noVariants": "This card has no printings open for listing yet. Ask an admin to add a variant",
+        "or": "or",
+        "search": "Search the catalog",
+        "searchFailed": "Card search failed",
+        "searchPlaceholder": "e.g. Charizard ex or 006/197",
+        "skuFailed": "Code search failed",
+        "skuLabel": "SKU or barcode",
+        "skuNotFound": "No card with code \"{code}\" in the catalog",
+        "skuPlaceholder": "SKU or barcode, e.g. PKM-SV8A-025-EN-NORMAL",
+        "skuSearch": "Search by code",
+        "skuSearching": "Searching {code}…",
+        "subtitle": "Search by name or set number, then choose the printing (language / finish) that matches your card",
+        "title": "Choose a card from the catalog",
+        "use": "Use this card",
+        "variantCount": "{count} printings",
+        "variantInactive": "This printing is closed for sale",
+        "variantsFailed": "Couldn't load printings for this card",
+        "variantsLoading": "Loading printings for this card…"
+      },
+      "preview": "Preview as buyers see it",
+      "pricing": {
+        "addMoreAt": "Add more on the",
+        "auto": {
+          "ceiling": "Maximum price (THB) *",
+          "ceilingHint": "The price will never go above this",
+          "floor": "Minimum price (THB) *",
+          "floorHint": "The price will never go below this",
+          "hitCeiling": " — capped at your maximum",
+          "hitFloor": " — held at your minimum",
+          "how1": "Every night at 3 AM, the system finds the median price of active listings for this printing in the same condition",
+          "how2": "New price = median × (1 + offset %), never below your minimum or above your maximum",
+          "how3": "If the market has fewer than {min} cards listed, the price stays the same (the starting price)",
+          "how4": "Every automatic price change is recorded in the listing's price history",
+          "howTitle": "How automatic pricing works",
+          "notEnough": "The market has fewer than {min} cards listed right now. The price stays at the starting price until there's enough data",
+          "offset": "Offset from median (%)",
+          "offsetHint": "e.g. -5 = 5% below median · 0 = at median",
+          "preview": "If the market stays like now (median {median} from {count} listings), tonight's price will be {price}",
+          "previewLoading": "Checking market prices…",
+          "previewNeedsCard": "Choose a card and condition first to see a market price preview"
+        },
+        "available": "Available (cards)",
+        "commissionNote": "Commission is based on the platform's standard rate ({percent}%) — some categories may differ; the actual amount is in the order",
+        "costHint": "Cost is used to calculate profit in your reports. Buyers don't see it",
+        "editStockHint": "Quantity and cost come from the stock-in history. Add more on the restock page",
+        "market": {
+          "above": "{percent}% above median",
+          "below": "{percent}% below median",
+          "empty": "Nobody is selling this printing in this condition yet — yours will be the first listing",
+          "equal": "At median",
+          "high": "High {price}",
+          "low": "Low {price}",
+          "median": "Median {price}",
+          "title": "Compared with market prices ({count} active listings)"
+        },
+        "marketNow": "Current market median {median}",
+        "mode": {
+          "auto": "Automatic market pricing",
+          "autoHint": "The price follows the market median every night, within the limits you set",
+          "fixed": "Set my own price",
+          "fixedHint": "A fixed price you enter; change it any time"
+        },
+        "modeLabel": "Pricing mode",
+        "price": "Price per card (THB) *",
+        "quantity": "Quantity (cards) *",
+        "quantityHint": "Up to {max} cards at a time · stock is deducted automatically when sold",
+        "startPrice": "Starting price per card (THB) *",
+        "startPriceHint": "Used until the first automatic adjustment",
+        "summary": {
+          "commission": "− Commission ~{percent}%",
+          "cost": "− Cost",
+          "net": "= You receive per card",
+          "price": "Sale price",
+          "profit": "= Profit per card",
+          "total": "Total if all {quantity} cards sell",
+          "totalProfit": "Total profit if all {quantity} cards sell"
+        },
+        "title": "Price and quantity",
+        "unitCost": "Cost per card (THB) *",
+        "unitCostHint": "Not shown to buyers. Enter 0 if you didn't buy it"
+      },
+      "readiness": {
+        "autoPriceMissing": "Starting price and price range not set yet",
+        "cardDone": "Card chosen from the catalog",
+        "cardMissing": "No card chosen from the catalog yet",
+        "conditionDone": "Card condition set",
+        "conditionMissing": "Card condition not set yet",
+        "optional": " (optional)",
+        "photosDone": "{count} actual photos uploaded",
+        "photosMissing": "No actual photos uploaded yet",
+        "priceDone": "Price set",
+        "priceMissing": "Price not set yet",
+        "stockDone": "Quantity and cost set",
+        "stockMissing": "Quantity or cost not set yet",
+        "title": "Ready to list?"
+      },
+      "review": {
+        "autoOffset": "Market price, offset {percent}%",
+        "autoRange": "Range {floor}–{ceiling} · starting at {price}",
+        "card": "Card",
+        "condition": "Condition",
+        "edit": "Edit",
+        "grade": "Grade",
+        "lot": "Lot label",
+        "noPhotos": "No images yet (optional, but listings with real photos sell more easily)",
+        "note": "Description",
+        "photoCount": "{count} images",
+        "photos": "Images",
+        "price": "Price",
+        "quantity": "Quantity",
+        "quantityCost": "{quantity} cards · cost {cost} / card",
+        "subtitle": "\"Publish now\" makes the listing visible to buyers right away · \"Save draft\" adds the cards to your inventory without listing them; you can publish later from product management",
+        "title": "Review before listing"
+      },
+      "selectedCard": "Selected card",
+      "selectedCatalogCard": "Card selected from the catalog",
+      "steps": {
+        "card": "Choose card",
+        "photos": "Images",
+        "pricing": "Condition and price",
+        "review": "Review"
+      },
+      "subtitle": "Choose a card from the central catalog, then set your own condition, price and quantity",
+      "summary": {
+        "change": "Change card"
+      },
+      "tip": {
+        "description": "Pricing close to the median of active listings helps you sell faster. If your card is in better condition, price higher and include photos of every corner",
+        "title": "Pricing tip"
+      },
+      "title": "New listing",
+      "toast": {
+        "continueHint": "{reason} — continue on this page or publish from product management",
+        "drafted": "Draft saved",
+        "failed": "Couldn't create the listing. Please try again",
+        "publishFailed": "Saved as a draft, but publishing failed",
+        "published": "Listed for sale",
+        "stockFailed": "The listing was created, but adding cards to it failed"
+      }
+    },
+    "createListing": "+ New listing",
+    "delete": {
+      "confirm": "Delete permanently",
+      "description": "Deletion can't be undone. Buyers will no longer see this listing",
+      "failed": "Couldn't delete the listing",
+      "note": "Cards currently listed go back to your inventory and sales history stays in your reports. Consider \"Pause\" instead if you'll sell again",
+      "pauseInstead": "Pause instead",
+      "stock": "{available} available · {reserved} reserved",
+      "success": "Listing deleted",
+      "title": "Delete this product from your shop?"
+    },
+    "delist": {
+      "description": "A permanently closed listing can't be reopened; you'd need to create a new one. Listed cards go back to your inventory, and reserved cards return when their orders finish. To sell again later, use “Pause” instead",
+      "title": "Close “{name}” permanently?"
+    },
+    "edit": {
+      "blocked": {
+        "hint": " · Can't edit or delete. Contact the team to request a review",
+        "noReason": "No reason given",
+        "title": "An admin has blocked this listing"
+      },
+      "card": "Card in this listing",
+      "closed": "This listing is {status} and can no longer be edited",
+      "duplicate": {
+        "message": "Your listing #{id}{lot} already sells this card in the same condition — consider merging them into one listing",
+        "withPrice": "Your listing #{id}{lot} already sells this card in the same condition at the same price — consider merging them into one listing"
+      },
+      "loading": "Loading listing",
+      "save": "Save changes",
+      "subtitle": "Edit the price, details and images — condition can't change; add quantity through restocking",
+      "title": "Edit product",
+      "toast": {
+        "failed": "Could not save. Please try again",
+        "saved": "Changes saved"
+      }
+    },
+    "empty": {
+      "clearSearch": "Clear search",
+      "description": "List your first card and it will appear here",
+      "search": "No listings match \"{search}\"",
+      "searchAll": "Search all statuses",
+      "searchHint": "Searches card name, local-language name, card number, SKU and lot label",
+      "searchInStatus": "Searching only {status} — try other words or search all statuses",
+      "status": "No {status} listings",
+      "statusHint": "Try another status or view all",
+      "title": "No listings yet",
+      "viewAll": "View all"
+    },
+    "errors": {
+      "closed": "This listing is closed and can't be edited",
+      "noStock": "This listing has no cards yet. Restock before listing for sale",
+      "notFound": "This listing no longer exists; it may have been deleted",
+      "notVerified": "Your shop isn't verified yet, so listings can't be edited",
+      "reserved": "Cards are still reserved in open orders. Wait for the orders to finish",
+      "transition": "This listing can't change to that status, or it was just changed. The list will update itself",
+      "variantInactive": "This printing has been closed in the catalog and can't be listed again"
+    },
+    "filter": {
+      "all": "All",
+      "search": "Search products",
+      "searchPlaceholder": "Card name, card number, SKU, lot...",
+      "sort": "Sort",
+      "sortItem": "Sort: {sort}"
+    },
+    "forecast": {
+      "actions": "Actions",
+      "dialogDescription": "Per-product data · completed sales in the last 30 days · forecast from available quantity",
+      "dialogTitle": "All restock forecasts",
+      "empty": "No products in your shop yet",
+      "estimate": "Expected to sell out in ~{days} days · {date}",
+      "estimateStatus": "Forecast / status",
+      "filterInsufficient": "Not enough data",
+      "filterSoon": "Selling out soon",
+      "insufficient": "Not enough data to forecast",
+      "list": "Product forecasts",
+      "loadFailed": "Couldn't load forecasts",
+      "loading": "Loading forecasts…",
+      "noMatch": "No products match your search or filter",
+      "noSales": "No sales yet",
+      "outOfStock": "Out of stock",
+      "rowSummary": "{available} available · {sold} sold in 30 days",
+      "searchPlaceholder": "Search product name…",
+      "sold30": "Sold in 30 days",
+      "subtitle": "Showing the 2 items expected to sell out first · based on completed sales in the last 30 days",
+      "title": "Restock forecast",
+      "viewAll": "View all",
+      "viewProduct": "View product"
+    },
+    "importCsv": "Import CSV",
+    "loadFailed": "Couldn't load products",
+    "notFound": {
+      "back": "Back to product management",
+      "description": "This product may have been deleted or doesn't belong to your shop",
+      "title": "Product not found"
+    },
+    "pagination": {
+      "label": "Change page",
+      "range": "Showing {from}–{to} of {total}"
+    },
+    "pause": {
+      "failed": "Couldn't pause",
+      "success": "Paused"
+    },
+    "price": {
+      "appliesAll": "Applies to every card on this listing",
+      "auto": "Automatic",
+      "autoHint": "Market pricing, adjusted every night. Change the pricing method on the edit listing page",
+      "edit": "Edit price: {name}",
+      "failed": "Couldn't change the price",
+      "label": "Price per card (THB)",
+      "reverted": "The price was reverted. Please try again",
+      "save": "Save",
+      "saved": "Price updated"
+    },
+    "restock": {
+      "loading": "Loading product"
+    },
+    "rules": {
+      "deleteBlocked": "Listings blocked by an admin can't be deleted",
+      "deleteReserved": "{count} cards are reserved in open orders. You can delete after the orders finish",
+      "noStock": "This listing has no cards yet. Restock first",
+      "variantInactive": "This printing has been closed in the catalog"
+    },
+    "sort": {
+      "name": "Card name A → Z",
+      "newest": "Newest",
+      "price_asc": "Price low → high",
+      "price_desc": "Price high → low",
+      "stock_asc": "Stock low → high",
+      "stock_desc": "Stock high → low",
+      "updated": "Last updated"
+    },
+    "status": {
+      "ACTIVE": "Available",
+      "BLOCKED": "Blocked",
+      "DELISTED": "Listing closed",
+      "DRAFT": "Draft",
+      "PAUSED": "Paused",
+      "SOLD_OUT": "Sold out"
+    },
+    "statusCell": {
+      "change": "Change status: {name} (currently {status})",
+      "failed": "Couldn't change status",
+      "saved": "Status changed"
+    },
+    "subtitle": {
+      "counting": "Counting listings…",
+      "summary": "{total} listings in total · {active} available · {soldOut} sold out · {draft} drafts"
+    },
+    "table": {
+      "available": "Available",
+      "averageCost": "Average cost",
+      "edit": "Edit product: {name}",
+      "lowStock": "Low stock",
+      "more": "More options",
+      "moreFor": "More options: {name}",
+      "price": "Sale price",
+      "product": "Items",
+      "reserved": "Reserved",
+      "select": "Select product: {name}",
+      "selectAll": "Select all products on this page",
+      "status": "Status"
+    },
+    "title": "Manage products",
+    "tryAgain": "Please try again",
+    "unit": {
+      "card": "cards",
+      "pieces": "{count} pcs"
+    }
+  },
+  "publishBlocked": {
+    "checking": "Checking shop status",
+    "loadFailed": "Couldn't load shop status",
+    "notVerified": "You need to verify your seller identity before listing items",
+    "pending": "Waiting for an admin to review your identity documents. You can list items once approved",
+    "rejected": "Your identity documents were not approved. Resubmit and get approved before listing items",
+    "suspended": "Your shop is suspended. You can't create or edit listings until an admin lifts the suspension"
+  },
+  "restock": {
+    "actions": {
+      "cancelLabel": "Cancel",
+      "saveLabel": "Save stock-in"
+    },
+    "breadcrumb": {
+      "currentLabel": "Restock",
+      "rootLabel": "Manage products"
+    },
+    "calculation": {
+      "afterLabel": "New",
+      "beforeLabel": "Before",
+      "newAverageLabel": "New average cost per card",
+      "newLotLabel": "New lot",
+      "previousLotLabel": "Existing lots",
+      "title": "Weighted average cost calculation",
+      "totalLabel": "Total"
+    },
+    "forecast": {
+      "days": "~{days} days",
+      "empty": "No forecast data yet",
+      "insufficient": "Not enough sales data to forecast",
+      "loadFailed": "Couldn't load forecast data",
+      "loading": "Loading sales trend…",
+      "noSales": "No sales in the 30 days used for the calculation",
+      "note": "Use this to plan restocking · actual dates may change with sales, reservations and incoming stock",
+      "outOfStock": "Out of stock",
+      "remaining": "Estimated days left",
+      "sold30": "Sold in 30 days",
+      "stockout": "Expected sell-out",
+      "subtitle": "{name} · calculated on {date}",
+      "title": "Sales trend and expected sell-out date"
+    },
+    "form": {
+      "description": "Enter the quantity and total cost of this lot; the cost per card is calculated for you",
+      "noteLabel": "Notes",
+      "notePlaceholder": "e.g. Bought at TCG Expo booth B12, condition checked...",
+      "quantityLabel": "Quantity received (cards)",
+      "receivedAtLabel": "Received on",
+      "receivedAtPlaceholder": "Choose a date",
+      "referenceHelper": "Optional",
+      "referenceLabel": "Reference / receipt no.",
+      "sourceLabel": "Source",
+      "title": "Receive a new lot",
+      "totalCostHelper": "Including shipping and fees",
+      "totalCostLabel": "Total lot cost (THB)"
+    },
+    "history": {
+      "columns": {
+        "averageCostAfter": "Average cost after",
+        "quantity": "Quantity",
+        "receivedAt": "Date",
+        "source": "Source",
+        "totalCost": "Total cost",
+        "unitCost": "Cost/card"
+      },
+      "emptyLabel": "No stock-in history for this product yet",
+      "errorLabel": "Couldn't load stock-in history",
+      "exportLabel": "Export CSV",
+      "loadMoreLabel": "Load more",
+      "newBadgeLabel": "New",
+      "summary": "{lots} lots · {received} {unit} received in total · {sold} {unit} sold",
+      "title": "Stock-in history for this product"
+    },
+    "info": {
+      "description": "When lots are bought at different prices, the system uses a weighted average cost so profit reports reflect reality without tracking which lot each card came from",
+      "title": "Why use an average?"
+    },
+    "noteReference": "Ref. {reference}",
+    "product": {
+      "stockLabel": "Current stock",
+      "unit": "cards"
+    },
+    "profitWarning": {
+      "adjustPriceLabel": "Adjust sale price",
+      "description": "Average cost rises from {from} to {to}, reducing profit per card from {profitFrom} to {profitTo}. Consider changing the sale price to {price}",
+      "title": "Profit per card decreases"
+    },
+    "retry": "Try again",
+    "source": {
+      "box_break": "Box break, sold as singles",
+      "event": "TCG Expo event",
+      "individual": "Bought from an individual seller",
+      "other": "Other",
+      "other_shop": "Bought from another shop"
+    },
+    "subtitle": "Record received lots with cost — the weighted average cost is calculated automatically",
+    "summary": {
+      "averageCostLabel": "Average cost",
+      "newStockLabel": "New stock",
+      "profitPerUnitLabel": "New profit per card",
+      "sellingPriceLabel": "Current sale price",
+      "title": "Summary after saving"
+    },
+    "title": "Restock",
+    "toast": {
+      "failed": "Couldn't save the stock-in. Please try again",
+      "saved": "Received {quantity} {unit}"
+    },
+    "validation": {
+      "quantityMax": "You can receive at most {max} cards at a time. Split larger amounts into several lots"
+    }
+  },
+  "returnErrors": {
+    "defaultFallback": "Please try again",
+    "forbidden": "You do not have permission to perform this action",
+    "refundExceedsRefundable": "Refund amount cannot exceed the sub-order total",
+    "returnNotFound": "Return request not found",
+    "returnState": "The request status has changed or this action cannot be performed",
+    "validationFailed": "Invalid details. Please verify the amount and selected options"
+  },
+  "returnReason": {
+    "counterfeit": "Counterfeit item",
+    "damaged": "Damaged product",
+    "notAsDescribed": "Item not as described",
+    "notReceived": "Item not received",
+    "other": "Other reason",
+    "wrongItem": "Wrong item received"
+  },
+  "returnStatus": {
+    "approved": "Approved, awaiting refund",
+    "awaitingReturnShipment": "Awaiting buyer return shipment",
+    "closed": "Closed",
+    "inTransit": "Return in transit",
+    "other": "Other status",
+    "received": "Item received, awaiting refund",
+    "refunded": "Refunded",
+    "rejected": "Rejected",
+    "requested": "Awaiting decision"
+  },
+  "sellerReturns": {
+    "actions": {
+      "approveSuccessDesc": "Request RT-{id} amount {amount}",
+      "approveSuccessTitle": "Refund request approved",
+      "failedTitle": "Operation failed",
+      "receiveSuccessDesc": "Request RT-{id} received. Refund process will initiate",
+      "receiveSuccessTitle": "Return receipt confirmed",
+      "rejectSuccessDesc": "Request RT-{id} rejected. Escrow funds will be released according to original schedule",
+      "rejectSuccessTitle": "Return request rejected"
+    },
+    "card": {
+      "approvedAgo": "Approved {time}",
+      "buyerLabel": "Buyer:",
+      "buyerNoteLabel": "Buyer note:",
+      "cardAria": "Return request RT-{id}",
+      "createdAt": "Requested on {date}",
+      "evidenceHeader": "Evidence photos ({count} photos)",
+      "noEvidence": "No evidence attached to this request",
+      "partialRefundSubtext": "Partial refund {amount}",
+      "previewEvidenceAria": "Preview evidence image {index}",
+      "reasonLabel": "Reason:",
+      "refundAmountLabel": "Requested refund amount:",
+      "refundTypeFull": "Full refund",
+      "refundTypeLabel": "Return type:",
+      "refundTypePartial": "Partial refund",
+      "requestId": "Request RT-{id}",
+      "requestedAgo": "Requested {time}",
+      "subOrderLabel": "Sub-order:",
+      "subOrderTotalSubtext": "Sub-order total",
+      "viewSubOrderAria": "View sub-order #{id}"
+    },
+    "decision": {
+      "approveButton": "Approve refund {amount}",
+      "approveHint": "You can choose whether the buyer must return the item, or refund without return",
+      "fullRefund": "Full refund",
+      "fullRefundDesc": "{amount} · Equal to sub-order total",
+      "instruction": "Please review the evidence and reason from the buyer, then select an action below",
+      "outcomeFullRefund": "No payout from this order {shipBack, select, true {· Cards returned to stock upon receipt confirmation} other {}}",
+      "outcomePartialRefund": "Receive difference {amount} after platform commission",
+      "partialRefund": "Partial refund",
+      "partialRefundDesc": "Specify an amount less than {amount}",
+      "rejectButton": "Reject request",
+      "rejectHint": "If information is insufficient or does not meet terms, you can reject the request",
+      "shipBackDesc": "Turn off if return shipment is not required, e.g. buyer never received the item — refund is created immediately upon approval",
+      "shipBackLabel": "Require buyer to ship item back before refund",
+      "title": "Seller Decision",
+      "yourOutcome": "Your outcome: "
+    },
+    "emptyCategory": {
+      "desc": "When return requests in this status arrive, they will appear here automatically",
+      "title": "No requests in this category"
+    },
+    "emptySearchDesc": "Try searching with another request ID or order number, or clear search to see all",
+    "emptySearchTitle": "No return requests match your search",
+    "emptyTabDesc": "When new requests in this status arrive, they will appear here automatically",
+    "emptyTabTitle": "No requests in this status",
+    "errors": {
+      "defaultFallback": "Please try again",
+      "forbidden": "You do not have permission to perform this action",
+      "refundExceedsRefundable": "Refund amount cannot exceed the sub-order total",
+      "returnNotFound": "Return request not found",
+      "returnState": "The request status has changed or this action cannot be performed",
+      "validationFailed": "Invalid details. Please verify the amount and selected options"
+    },
+    "evidence": {
+      "alt": "Evidence {number}",
+      "caption": "Evidence {number}",
+      "clickToView": "Click image to view full size",
+      "openAria": "Open evidence {number}",
+      "title": "Evidence from buyer · {count} files",
+      "zoomAria": "Zoom evidence image {index}"
+    },
+    "field": {
+      "fullRefundRadio": "Full refund ({amount})",
+      "partialAmountAria": "Specify partial refund amount",
+      "partialAmountHint": "Must not exceed sub-order amount {amount}",
+      "partialAmountPlaceholder": "0.00",
+      "partialRefundRadio": "Partial refund",
+      "refundAmountLabel": "Refund amount"
+    },
+    "funds": {
+      "payoutDesc": "This amount will be released to your account if return is rejected, or difference after fees in case of partial refund",
+      "payoutLabel": "Seller payout:",
+      "shippingLabel": "Shipping fee:",
+      "subtotalLabel": "Subtotal:",
+      "title": "Funds held in Escrow",
+      "totalLabel": "Total order:",
+      "warning": "Funds in this order are temporarily held pending your decision"
+    },
+    "inTransit": {
+      "confirmReceiptButton": "Confirm item received",
+      "copyButton": "Copy",
+      "copyTrackingAria": "Copy tracking number",
+      "defaultReturnedCards": "Returned cards",
+      "expectedItemsPrefix": "· Expected items: ",
+      "instruction": "Please wait for delivery and inspect the item. Once received, click confirm below to initiate the refund",
+      "noTracking": "No tracking number",
+      "restockDesc": "All items received in good condition · Turn off if cards are damaged and cannot be resold",
+      "restockLabel": "Return cards to inventory",
+      "shippedAt": "Shipped on {date}",
+      "title": "Buyer has shipped the item return",
+      "toastCopied": "Tracking number copied",
+      "trackingCopied": "Tracking number copied",
+      "trackingLabel": "Tracking number:"
+    },
+    "loadFailed": "Failed to load return requests",
+    "loadFailedDesc": "Unable to retrieve requests list at this time",
+    "loadFailedHint": "Please check your connection and try again",
+    "loadFailedTitle": "Failed to load return requests",
+    "loadingAria": "Loading return requests",
+    "modals": {
+      "approve": {
+        "conditionNoShipBack": "⚡ No return shipment required — refund process starts immediately after approval",
+        "conditionShipBack": "✓ Buyer must ship item back before refund is issued, and you will inspect the package upon arrival",
+        "confirmButton": "Confirm refund approval {amount}",
+        "desc": "Select approval type and refund method for this request",
+        "financialImpactLabel": "Impact on your funds:",
+        "fullRefundType": "Full refund",
+        "impactFull": "No payout from this order",
+        "impactPartial": "Receive remaining ~{amount} (before commission)",
+        "partialRefundType": "Partial refund",
+        "refundToBuyerLabel": "Refund to buyer:",
+        "refundWithoutReturnHint": "System will initiate refund immediately. Recommended for heavily damaged items or when return shipping is uneconomical",
+        "refundWithoutReturnRadio": "Refund immediately without requiring return",
+        "returnConditionTitle": "Return shipment condition:",
+        "returnShipmentHint": "Buyer will have 3 business days to ship return and submit tracking. You will inspect the item before refund is issued",
+        "returnShipmentRadio": "Require buyer to ship item back before refund",
+        "shippingAddressDesc": "Buyer will ship the item back to this address. Please verify accuracy",
+        "shippingAddressHeader": "Return Shipping Address",
+        "subOrderTotalLabel": "Sub-order total:",
+        "submitButton": "Confirm approval",
+        "title": "Confirm refund request approval"
+      },
+      "confirmReceipt": {
+        "body": "You have inspected the package and received all returned items in full",
+        "checkboxAgree": "I agree to release refund of {amount} to the buyer",
+        "checkboxCondition": "I have received the returned item and inspected its condition",
+        "confirmButton": "Confirm receipt and release refund",
+        "desc": "Please inspect condition of returned item before confirming",
+        "footerNote": "เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ",
+        "refundAmountLabel": "Refund amount to buyer:",
+        "restockLabel": "Inventory restock:",
+        "restockNo": "Do not return to stock",
+        "restockYes": "Return cards to stock for resale",
+        "submitButton": "Confirm receipt and issue refund",
+        "title": "Confirm Receipt of Return RT-{id}",
+        "warning": "Once confirmed, the refund will be initiated immediately and this decision cannot be undone"
+      },
+      "evidence": {
+        "nextAria": "Next image",
+        "prevAria": "Previous image",
+        "title": "Return request evidence RT-{id} ({current}/{total})"
+      },
+      "evidencePreview": {
+        "fullAlt": "หลักฐานขนาดเต็ม {number}",
+        "thumbAlt": "หลักฐาน {number}",
+        "title": "หลักฐานจากผู้ซื้อ #{number} จาก {total} ไฟล์"
+      },
+      "policy": {
+        "closeButton": "Understood",
+        "contactTeam": "If you have questions or need assistance, contact our team 24/7",
+        "desc": "Terms and process for sellers when managing return requests",
+        "gotIt": "Understood",
+        "intro": "Pegasus TCG provides protection for both buyers and sellers with the following conditions:",
+        "rule1": "Buyers may request returns within 2 days after status becomes DELIVERED",
+        "rule2": "Sellers must decide within 3 business days, otherwise the request will be automatically approved",
+        "rule3": "If return shipment is required, buyer has 3 business days to ship and enter tracking",
+        "rule4": "Escrow funds remain on hold until the return request is resolved",
+        "rule5": "In case of dispute, the team will review evidence from both parties and make a final ruling",
+        "section1Body": "Buyers can submit return requests within the designated timeframe after order is marked delivered, before Escrow releases funds to the seller",
+        "section1Title": "1. Opening a Return Request",
+        "section2Body": "Sellers have the right to inspect photos or videos of card conditions and choose full refund, partial refund, or reject the request",
+        "section2Title": "2. Review and Evidence",
+        "section3Body": "If seller requests item return, buyer must ship and submit tracking number. Seller then inspects and confirms receipt to release refund",
+        "section3Title": "3. Return Shipment",
+        "section4Body": "Funds of orders with active return requests are held in Escrow until resolved. If rejected, funds are released according to original schedule",
+        "section4Title": "4. Financial Impact",
+        "title": "Return and Refund Policy"
+      },
+      "reject": {
+        "checkCarefully": "Please review evidence and messages from the buyer carefully before deciding to reject",
+        "confirmButton": "Confirm rejection",
+        "desc": "Please provide a detailed reason for rejecting this request. This will be shared with the buyer",
+        "explanationHeader": "Additional explanation to buyer (required)",
+        "explanationPlaceholder": "Provide more details to explain the decision to the buyer...",
+        "reasonAria": "Select rejection reason",
+        "reasonBuyerFault": "Damage caused by buyer usage",
+        "reasonConditionMatches": "Item matches condition described in listing",
+        "reasonExpired": "Return window has expired",
+        "reasonHeader": "Reason for rejection",
+        "reasonInvalidProof": "Unclear or insufficient evidence",
+        "reasonOther": "Other reason",
+        "reasonPlaceholder": "Select reason...",
+        "submitButton": "Confirm rejection",
+        "title": "Reject Return Request RT-{id}",
+        "warning": "Once rejected, this reason will be sent to the buyer, and Escrow funds will proceed according to terms",
+        "warning1": "Rejection cannot be cancelled or modified later",
+        "warning2": "Buyer will not be able to open another return request for this sub-order",
+        "warning3": "Escrow system will countdown to release payout to you on original schedule",
+        "warningTitle": "Important Warning:"
+      }
+    },
+    "pageSubtitle": "Manage return requests, approve/reject decisions, and confirm receipt of returned items",
+    "pageTitle": "Returns and Refunds Requests",
+    "pendingFunds": {
+      "fullRefundImpact": "No payout for this order",
+      "fullRefundLabel": "Full refund",
+      "impactTitle": "Impact on your payout when resolved",
+      "partialRefundImpact": "Receive remainder after commission",
+      "partialRefundLabel": "Partial refund",
+      "rejectImpact": "Receive full amount on schedule",
+      "rejectLabel": "Reject",
+      "subOrders": "{count} sub-orders",
+      "title": "Funds pending return resolution"
+    },
+    "policyButton": "Return policy",
+    "refundAmount": {
+      "label": "Refund amount",
+      "lockedHint": "Locked for full refund",
+      "preset25": "25% ({amount})",
+      "preset50": "50% ({amount})",
+      "presetReturnedCards": "By returned items value ({amount})",
+      "shortcuts": "Shortcuts:"
+    },
+    "searchClearAria": "Clear search",
+    "searchPlaceholder": "Search by request ID (RT-...) or sub-order number",
+    "sort": {
+      "ariaLabel": "Sort return requests",
+      "longestFirst": "Sort by: Longest waiting first",
+      "newestFirst": "Sort by: Newest first"
+    },
+    "status": {
+      "awaitingRefund": "Awaiting refund",
+      "awaitingShipment": "Awaiting buyer return",
+      "closed": "Closed",
+      "inTransit": "Return in transit",
+      "refunded": "Refund completed",
+      "rejected": "Rejected",
+      "requested": "Awaiting decision"
+    },
+    "statusCallout": {
+      "approved": "You approved the request. System is processing the refund",
+      "awaitingReturnShipment": "Waiting for buyer to ship returned item within 3 business days",
+      "closed": "This return request has been closed",
+      "received": "You confirmed receipt of the return. System is processing the refund",
+      "refunded": "System has completed the refund to the buyer",
+      "rejected": "You rejected this request. The order will proceed normally",
+      "title": "Current Status",
+      "trackingLabel": "Return tracking number:"
+    },
+    "steps": {
+      "step1Title": "Buyer submits request",
+      "step2Desc": "Approve or reject return request",
+      "step2Title": "Seller reviews request",
+      "step3Desc": "Buyer must ship back within the specified timeframe",
+      "step3Title": "Buyer ships item return",
+      "step4Title": "Seller inspects item",
+      "step5Desc": "System automatically processes the refund",
+      "step5Title": "Refund to buyer",
+      "title": "Return Process Steps"
+    },
+    "subtitle": "{count} requests waiting for your action · Order funds are held until resolved",
+    "summary": {
+      "itemsHeader": "Items in this request ({count} items)",
+      "itemsToReturn": "Items to return · {count} items",
+      "noItemsFound": "No items found in this request",
+      "priceLabel": "Price: {price}",
+      "qtyLabel": "Quantity: {qty} pcs",
+      "reasonFromBuyer": "Reason from buyer",
+      "returnQuantity": "{condition} · Returning {returned} of {ordered} cards",
+      "sellerPayoutAmount": "Seller payout amount: {amount}",
+      "sellerPayoutDesc": "After platform fee deduction",
+      "shippingAmount": "Shipping: {amount}",
+      "subtotalAmount": "Subtotal: {amount}",
+      "totalOrderAmount": "Total order amount: {amount}"
+    },
+    "tabs": {
+      "actionRequired": "Action required",
+      "awaitingRefund": "Awaiting refund",
+      "awaitingShipment": "Awaiting buyer return",
+      "completed": "Completed"
+    },
+    "title": "Return Requests",
+    "validation": {
+      "amountRequired": "Please specify refund amount",
+      "invalidNumber": "Please enter a valid number",
+      "maxTwoDecimals": "Refund amount cannot exceed 2 decimal places",
+      "mustBeLessThanTotal": "Partial refund must be less than order total ({total} Baht)",
+      "mustBePositive": "Refund amount must be greater than 0 Baht"
+    },
+    "warning": {
+      "desc": "Rejection is irreversible and buyer cannot open another request for this sub-order",
+      "title": "Inspect evidence before rejecting"
+    },
+    "warningWidget": {
+      "notice": "This request has no evidence attached. Please review carefully before deciding"
+    }
+  },
+  "sellerReviews": {
+    "aside": {
+      "filterAria": "Filter {score} stars {count} reviews",
+      "filterHint": "Click star bars to filter list",
+      "politeWarningDesc": "Replies are public to everyone and cannot be edited later",
+      "politeWarningTitle": "Respond to low rating reviews politely",
+      "ratingDistribution": "Rating distribution",
+      "reviewCount": "{count} reviews",
+      "rule1": "One reply per review · cannot be edited or deleted once submitted",
+      "rule2": "Store cannot edit, delete, or hide reviews",
+      "rule3": "1 review per COMPLETED sub-order only",
+      "rulesTitle": "Review Response Rules"
+    },
+    "card": {
+      "emptyError": "Please enter a reply before submitting",
+      "onceWarning": "One reply only · cannot be edited or deleted once submitted",
+      "repliedBadge": "Replied",
+      "replyButton": "Reply",
+      "replyFormLabel": "Reply to this review",
+      "replyHeader": "↩ Reply from your store",
+      "replyPlaceholder": "Type your store's reply...",
+      "sendButton": "Send reply",
+      "unrepliedBadge": "Unreplied",
+      "warningText": "Cannot be empty · cannot be edited or deleted once submitted"
+    },
+    "dialog": {
+      "backToEdit": "Back to edit",
+      "confirmSend": "Confirm send reply",
+      "desc": "The reply will be displayed publicly under {username}'s review and cannot be edited or deleted later",
+      "title": "Replies cannot be edited once sent",
+      "yourReply": "Your reply"
+    },
+    "empty": {
+      "description": "Buyers can review your store once orders are completed. New reviews will appear here",
+      "title": "No reviews yet",
+      "viewPublicStore": "View public store"
+    },
+    "loadReviewsFailed": "Failed to load reviews",
+    "noReviewsFiltered": "No reviews match this filter",
+    "ratingFilterAll": "All star ratings",
+    "ratingFilterAria": "Filter by star rating",
+    "showingAllCount": "Showing all {count} reviews · sorted by newest",
+    "stats": {
+      "averageRating": "Average rating",
+      "loadFailed": "Failed to load review summary",
+      "noReviewsYet": "No reviews yet",
+      "onlyVisibleCounted": "Only visible reviews are counted",
+      "outOfFiveStars": "out of 5 stars",
+      "summaryAria": "Review summary",
+      "thisMonth": "Reviews this month",
+      "totalReviews": "Total reviews",
+      "unreplied": "Unreplied",
+      "waitingForReply": "Awaiting store reply"
+    },
+    "subtitle": "View and respond to reviews from buyers · Store replies are public and can only be submitted once",
+    "tabs": {
+      "all": "All",
+      "filterAria": "Filter reviews",
+      "replied": "Replied",
+      "unreplied": "Unreplied"
+    },
+    "title": "Store Reviews",
+    "toast": {
+      "alreadyRepliedDesc": "Latest reply has been loaded",
+      "alreadyRepliedTitle": "This review has already been replied to",
+      "notFoundDesc": "Review may be hidden or does not belong to your store. The list will refresh",
+      "notFoundTitle": "Review not found",
+      "repliedSuccess": "Reply sent successfully",
+      "replyFailed": "Failed to send reply",
+      "tryAgainHint": "Please try again"
+    },
+    "viewPublicStore": "View public store"
+  },
+  "sellerStatus": {
+    "NOT_APPLIED": "Not yet applied as a seller",
+    "PENDING": "Identity documents under review",
+    "REJECTED": "Identity verification failed",
+    "SUSPENDED": "Shop suspended",
+    "VERIFIED": "Verified seller"
+  },
+  "shop": {
+    "loadFailed": "Couldn't load data",
+    "loading": "Loading",
+    "operations": {
+      "autoAccept": "Accept orders automatically",
+      "handlingDays": "Handling time (business days)",
+      "handlingDaysError": "Enter a whole number from 0–30 days",
+      "save": "Save settings",
+      "saved": "Settings saved",
+      "subtitle": "Set shop open/close status and handling time",
+      "title": "Shop operations",
+      "vacation": "Temporarily close shop",
+      "vacationConfirm": {
+        "confirm": "Close shop",
+        "description": "All items will be hidden once you save the settings. Paid orders still need to be shipped as usual",
+        "title": "Temporarily close shop?"
+      },
+      "vacationHint": "Hide all items and stop new orders · paid orders still need to be shipped as usual"
+    },
+    "preview": {
+      "authentic": "Authenticity guaranteed",
+      "handling": "Ships within {days} days",
+      "phone": "Phone number : {phone}",
+      "returns": "7-day returns",
+      "title": "Shop preview as buyers see it"
+    },
+    "profile": {
+      "avatar": "Shop profile picture",
+      "banner": "Shop banner",
+      "bannerAlt": "Shop banner {name}",
+      "bannerHint": "{hint} · Recommended 1920 × 480 px with key content centered",
+      "copyFailed": "Couldn't copy",
+      "copyLink": "Copy link",
+      "displayName": "Display name",
+      "link": "Shop link",
+      "linkCopied": "Link copied",
+      "linkHint": "Can't be edited because it's tied to your account username",
+      "noBanner": "No banner yet",
+      "pendingRemove": "Save to remove the image",
+      "phone": "Contact phone",
+      "phonePublic": "Show phone number on shop page",
+      "phonePublicOff": "Private · only you can see the phone number in your profile",
+      "phonePublicOn": "Public · shop visitors can see your phone number",
+      "remove": "Remove image",
+      "removeBanner": "Remove banner",
+      "save": "Save shop details",
+      "saved": "Shop details saved",
+      "subtitle": "Buyers see this on your shop page and everywhere your name appears",
+      "syncNote": "This uses the same details as your account profile — changes here also update your profile name and picture",
+      "title": "Shop details",
+      "unsaved": "New image not saved yet",
+      "uploadBanner": "Upload shop banner",
+      "uploadNew": "Upload new image",
+      "uploading": "Uploading…"
+    },
+    "saveFailed": "Couldn't save",
+    "shipping": {
+      "activate": "Enable {name}",
+      "add": "Add option",
+      "columns": {
+        "actions": "Actions",
+        "active": "Enabled",
+        "days": "Delivery time",
+        "fee": "Shipping fee",
+        "freeThreshold": "Free shipping from",
+        "name": "Name / carrier",
+        "order": "Order"
+      },
+      "days": "{days} days",
+      "daysMax": "Up to {max} days",
+      "daysMin": "From {min} days",
+      "daysRange": "{min}–{max} days",
+      "deactivate": "Disable {name}",
+      "dialog": {
+        "addTitle": "Add shipping option",
+        "description": "Set the shipping fee and delivery time buyers will see",
+        "editTitle": "Edit shipping option"
+      },
+      "edit": "Edit {name}",
+      "empty": "No shipping options yet",
+      "extraFee": "+ {fee} per additional card",
+      "form": {
+        "baseFee": "Base fee (THB)",
+        "carrier": "Carrier",
+        "daysMax": "Maximum delivery time (days)",
+        "daysMin": "Minimum delivery time (days)",
+        "freeThreshold": "Free shipping from (THB)",
+        "name": "Option name *",
+        "noCarrier": "Not specified",
+        "perItemFee": "Per additional card (THB)",
+        "save": "Save option"
+      },
+      "inactive": "Disabled",
+      "moveDown": "Move {name} down",
+      "moveUp": "Move {name} up",
+      "noExtraFee": "No extra charge per card",
+      "note": "Only verified shops (VERIFIED) can add new options · the eye icon disables an option; nothing is actually deleted",
+      "saved": "Shipping options saved",
+      "subtitle": "Buyers choose at checkout · shown in the order you set · disabled options are hidden from buyers",
+      "title": "Shipping options",
+      "toggleFailed": "Couldn't save the option"
+    },
+    "stats": {
+      "listings": "Items",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
+    "status": {
+      "active": "Shop is active",
+      "canPublish": "You can list items",
+      "submitVerification": "Submit identity documents",
+      "vacation": "Temporarily closed",
+      "vacationDescription": "Buyers won't see any of your items until you reopen the shop",
+      "verifiedAt": "Verified on {date}"
+    },
+    "subtitle": "Shop status, operations, shop details and shipping options",
+    "title": "Manage shop",
+    "validation": {
+      "daysOrder": "Maximum days can't be less than minimum days",
+      "minThreshold": "Minimum amount is 0.01 THB",
+      "nameRequired": "Please enter a name",
+      "twoDecimals": "Use at most 2 decimal places"
+    },
+    "verification": {
+      "bankAccount": "Bank account",
+      "bankAccountWith": "Bank account · {bank} {account}",
+      "bankBook": "Passbook page",
+      "legalName": "Full name as on ID card",
+      "status": {
+        "approved": "Verified",
+        "rejected": "Not verified",
+        "submitted": "Documents submitted",
+        "underReview": "In review"
+      },
+      "title": "Identity verification"
+    },
+    "viewShop": "View shop"
+  },
+  "sidebar": {
+    "title": "DASHBOARD"
+  }
+}

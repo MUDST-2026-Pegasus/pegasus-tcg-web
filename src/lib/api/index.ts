@@ -1,4 +1,4 @@
-export { api, type RequestOptions } from "./client";
+export { api, type FileDownload, type RequestOptions } from "./client";
 export { API_PREFIX, buildUrl, type QueryParams } from "./config";
 export {
   ApiError,
@@ -7,6 +7,7 @@ export {
   isApiError,
   isNetworkError,
 } from "./errors";
+export { fetchAllPages, MAX_PAGE_SIZE } from "./paging";
 export { createQueryClient } from "./query-client";
 export {
   clearSession,

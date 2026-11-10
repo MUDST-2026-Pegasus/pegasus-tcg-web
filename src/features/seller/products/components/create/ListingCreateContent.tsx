@@ -57,14 +57,15 @@ import { PricingCard } from "./PricingCard";
 import { PricingTipCard } from "./PricingTipCard";
 import { ReadinessCard, type ReadinessItem } from "./ReadinessCard";
 import { ReviewCard } from "./ReviewCard";
+import { useTranslate, translate } from "@/lib/i18n";
 
 const PRODUCTS_PATH = "/seller/products";
 
 const STEPS: CreateStep[] = [
-  { id: "card", label: "เลือกการ์ด" },
-  { id: "condition-price", label: "สภาพและราคา" },
-  { id: "photos", label: "รูปภาพ" },
-  { id: "review", label: "ตรวจสอบ" },
+  { id: "card", get label() { return translate("seller", "products.create.steps.card", "เลือกการ์ด"); } },
+  { id: "condition-price", get label() { return translate("seller", "products.create.steps.pricing", "สภาพและราคา"); } },
+  { id: "photos", get label() { return translate("seller", "products.create.steps.photos", "รูปภาพ"); } },
+  { id: "review", get label() { return translate("seller", "products.create.steps.review", "ตรวจสอบ"); } },
 ];
 const LAST_STEP = STEPS.length - 1;
 
@@ -79,7 +80,7 @@ function firstStepWithErrors(errors: FieldErrors<ListingFormValues>): number {
 function twinNote(listing: SellerListing): string | undefined {
   const twin = listing.similarListings[0];
   return twin
-    ? `ประกาศ #${twin.id} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่แล้ว — พิจารณารวมเป็นประกาศเดียว`
+    ? translate("seller", "products.create.duplicate", "ประกาศ #{id} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่แล้ว — พิจารณารวมเป็นประกาศเดียว", { id: twin.id })
     : undefined;
 }
 
@@ -91,6 +92,7 @@ function twinNote(listing: SellerListing): string | undefined {
  * ดู `useCreateListing` สำหรับกรณีที่สร้างแล้วแต่ขั้นหลังพลาด
  */
 export function ListingCreateContent() {
+  const { t } = useTranslate("seller");
   const navigate = useNavigate();
   const { canPublish, reason } = usePublishPermission();
   const createListing = useCreateListing();
@@ -158,7 +160,7 @@ export function ListingCreateContent() {
           });
           toast.add({
             type: "success",
-            title: publish ? "ลงขายแล้ว" : "บันทึกฉบับร่างแล้ว",
+            title: publish ? t("products.create.toast.published", "ลงขายแล้ว") : t("products.create.toast.drafted", "บันทึกฉบับร่างแล้ว"),
             description: twinNote(listing),
           });
           navigate(publish ? PRODUCTS_PATH : `${PRODUCTS_PATH}?status=DRAFT`);
@@ -169,9 +171,9 @@ export function ListingCreateContent() {
               type: "error",
               title:
                 error.step === "units"
-                  ? "สร้างประกาศแล้ว แต่ใส่การ์ดเข้าประกาศไม่สำเร็จ"
-                  : "บันทึกเป็นฉบับร่างแล้ว แต่เปิดขายไม่สำเร็จ",
-              description: `${listingFormErrorMessage(error.cause, "ลองใหม่อีกครั้ง")} — แก้ต่อได้ที่หน้านี้ หรือเปิดขายจากหน้าจัดการสินค้า`,
+                  ? t("products.create.toast.stockFailed", "สร้างประกาศแล้ว แต่ใส่การ์ดเข้าประกาศไม่สำเร็จ")
+                  : t("products.create.toast.publishFailed", "บันทึกเป็นฉบับร่างแล้ว แต่เปิดขายไม่สำเร็จ"),
+              description: t("products.create.toast.continueHint", "{reason} — แก้ต่อได้ที่หน้านี้ หรือเปิดขายจากหน้าจัดการสินค้า", { reason: listingFormErrorMessage(error.cause, t("products.tryAgain", "ลองใหม่อีกครั้ง")) }),
             });
             navigate(`${PRODUCTS_PATH}/${error.listing.id}/edit`);
             return;
@@ -185,7 +187,7 @@ export function ListingCreateContent() {
           setError("root.server", {
             message: listingFormErrorMessage(
               error,
-              "ลงประกาศไม่สำเร็จ ลองใหม่อีกครั้ง",
+              t("products.create.toast.failed", "ลงประกาศไม่สำเร็จ ลองใหม่อีกครั้ง"),
             ),
           });
         }
@@ -203,37 +205,37 @@ export function ListingCreateContent() {
     {
       id: "card",
       done: !issues.has("catalogVariantId"),
-      doneLabel: "เลือกการ์ดจากแคตตาล็อกแล้ว",
-      pendingLabel: "ยังไม่เลือกการ์ดจากแคตตาล็อก",
+      doneLabel: t("products.create.readiness.cardDone", "เลือกการ์ดจากแคตตาล็อกแล้ว"),
+      pendingLabel: t("products.create.readiness.cardMissing", "ยังไม่เลือกการ์ดจากแคตตาล็อก"),
     },
     {
       id: "condition",
       done: !issues.has("condition"),
-      doneLabel: "ระบุสภาพการ์ดแล้ว",
-      pendingLabel: "ยังไม่ระบุสภาพการ์ด",
+      doneLabel: t("products.create.readiness.conditionDone", "ระบุสภาพการ์ดแล้ว"),
+      pendingLabel: t("products.create.readiness.conditionMissing", "ยังไม่ระบุสภาพการ์ด"),
     },
     {
       id: "pricing",
       done: !["price", "autoPriceOffsetPercent", "autoPriceFloor", "autoPriceCeiling"].some(
         (path) => issues.has(path as keyof ListingFormValues),
       ),
-      doneLabel: "ตั้งราคาแล้ว",
+      doneLabel: t("products.create.readiness.priceDone", "ตั้งราคาแล้ว"),
       pendingLabel:
         values.pricingMode === "AUTO_MEDIAN"
-          ? "ยังไม่ได้ตั้งราคาเริ่มต้นและขอบเขตราคา"
-          : "ยังไม่ได้ตั้งราคา",
+          ? t("products.create.readiness.autoPriceMissing", "ยังไม่ได้ตั้งราคาเริ่มต้นและขอบเขตราคา")
+          : t("products.create.readiness.priceMissing", "ยังไม่ได้ตั้งราคา"),
     },
     {
       id: "stock",
       done: !issues.has("unitCost") && !issues.has("quantity"),
-      doneLabel: "ระบุจำนวนและต้นทุนแล้ว",
-      pendingLabel: "ยังไม่ระบุจำนวนหรือต้นทุน",
+      doneLabel: t("products.create.readiness.stockDone", "ระบุจำนวนและต้นทุนแล้ว"),
+      pendingLabel: t("products.create.readiness.stockMissing", "ยังไม่ระบุจำนวนหรือต้นทุน"),
     },
     {
       id: "photos",
       done: values.imageKeys.length > 0,
-      doneLabel: `อัปโหลดรูปจริงแล้ว ${values.imageKeys.length} รูป`,
-      pendingLabel: "ยังไม่อัปโหลดรูปจริง",
+      doneLabel: t("products.create.readiness.photosDone", "อัปโหลดรูปจริงแล้ว {count} รูป", { count: values.imageKeys.length }),
+      pendingLabel: t("products.create.readiness.photosMissing", "ยังไม่อัปโหลดรูปจริง"),
       optional: true,
     },
   ];
@@ -262,7 +264,7 @@ export function ListingCreateContent() {
         title={blockedReason}
         onClick={submit(false)}
       >
-        บันทึกฉบับร่าง
+        {t("products.create.actions.draft", "บันทึกฉบับร่าง")}
       </Button>
       <Button
         type="button"
@@ -273,7 +275,7 @@ export function ListingCreateContent() {
         onClick={submit(true)}
       >
         {formState.isSubmitting ? <Spinner data-icon="inline-start" /> : null}
-        ลงขายทันที
+        {t("products.create.actions.publish", "ลงขายทันที")}
       </Button>
     </>
   );
@@ -288,13 +290,13 @@ export function ListingCreateContent() {
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link to={PRODUCTS_PATH} />}>
-              จัดการสินค้า
+              {t("products.title", "จัดการสินค้า")}
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
             <BreadcrumbPage className="font-medium text-gray-700">
-              ลงขายสินค้าใหม่
+              {t("products.create.title", "ลงขายสินค้าใหม่")}
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -302,9 +304,9 @@ export function ListingCreateContent() {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">ลงขายสินค้าใหม่</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("products.create.title", "ลงขายสินค้าใหม่")}</h1>
           <p className="text-xs text-gray-500">
-            เลือกการ์ดจากแคตตาล็อกกลาง แล้วกำหนดสภาพ ราคา และจำนวนของคุณเอง
+            {t("products.create.subtitle", "เลือกการ์ดจากแคตตาล็อกกลาง แล้วกำหนดสภาพ ราคา และจำนวนของคุณเอง")}
           </p>
         </div>
 
@@ -316,7 +318,7 @@ export function ListingCreateContent() {
             render={<Link to={PRODUCTS_PATH} />}
             nativeButton={false}
           >
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           {submitButtons}
         </div>
@@ -340,7 +342,7 @@ export function ListingCreateContent() {
           {step === 0 ? (
             <>
               {card ? (
-                <CatalogCardSummary title="การ์ดที่เลือกอยู่" card={card} />
+                <CatalogCardSummary title={t("products.create.selectedCard", "การ์ดที่เลือกอยู่")} card={card} />
               ) : null}
               <CardPicker
                 onSelect={handleSelectCard}
@@ -352,7 +354,7 @@ export function ListingCreateContent() {
           {step === 1 && card ? (
             <>
               <CatalogCardSummary
-                title="การ์ดที่เลือกจากแคตตาล็อก"
+                title={t("products.create.selectedCatalogCard", "การ์ดที่เลือกจากแคตตาล็อก")}
                 card={card}
                 onChange={() => goTo(0)}
               />
@@ -390,7 +392,7 @@ export function ListingCreateContent() {
           <div className="flex items-center gap-1.5">
             <Eye aria-hidden="true" className="size-4 text-slate-500" />
             <p className="text-xs font-medium text-gray-500">
-              ตัวอย่างที่ผู้ซื้อจะเห็น
+              {t("products.create.preview", "ตัวอย่างที่ผู้ซื้อจะเห็น")}
             </p>
           </div>
 
@@ -400,8 +402,8 @@ export function ListingCreateContent() {
               product={{
                 id: "preview",
                 type: selectedCondition?.badgeLabel ?? "—",
-                title: card?.productName ?? "ยังไม่ได้เลือกการ์ด",
-                price: price === null ? "฿—" : formatBaht(price),
+                title: card?.productName ?? t("products.create.noCard", "ยังไม่ได้เลือกการ์ด"),
+                price: price === null ? t("products.create.noPrice", "฿—") : formatBaht(price),
                 image: previewImage,
                 imageAlt: card?.productName,
               }}
@@ -421,7 +423,7 @@ export function ListingCreateContent() {
                 className="rounded-md px-2.5"
                 onClick={() => goTo(step - 1)}
               >
-                ย้อนกลับ
+                {t("products.create.actions.back", "ย้อนกลับ")}
               </Button>
             ) : null}
             {step < LAST_STEP ? (
@@ -432,7 +434,7 @@ export function ListingCreateContent() {
                 disabled={step === 0 && card === null}
                 onClick={handleNext}
               >
-                ถัดไป: {STEPS[step + 1].label}
+                {t("products.create.actions.next", "ถัดไป: {step}", { step: STEPS[step + 1].label })}
               </Button>
             ) : (
               submitButtons
@@ -443,3 +445,10 @@ export function ListingCreateContent() {
     </form>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.create.steps.card", "ns": "seller", "defaultValue": "เลือกการ์ด"}
+// @tolgee-key {"key": "products.create.steps.pricing", "ns": "seller", "defaultValue": "สภาพและราคา"}
+// @tolgee-key {"key": "products.create.steps.photos", "ns": "seller", "defaultValue": "รูปภาพ"}
+// @tolgee-key {"key": "products.create.steps.review", "ns": "seller", "defaultValue": "ตรวจสอบ"}
+// @tolgee-key {"key": "products.create.duplicate", "ns": "seller", "defaultValue": "ประกาศ #{id} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่แล้ว — พิจารณารวมเป็นประกาศเดียว"}

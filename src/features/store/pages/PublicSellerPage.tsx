@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import { PriceTag, isOnSale } from "@/components/sale";
 import { EmptyState, ErrorState, ItemCard } from "@/components/common";
 import {
   HeadingSkeleton,
@@ -23,8 +24,13 @@ import { StorePagination } from "../components/StorePagination";
 import { StorePromotionStrip } from "../components/StorePromotionStrip";
 import { StoreReviewsSnippet } from "../components/StoreReviewsSnippet";
 import { StoreReviewsTab } from "../components/StoreReviewsTab";
+import { useAuctions } from "@/features/auction/auction.queries";
+import { AuctionCard } from "@/features/auction/components/AuctionCard";
+
 import { StoreTabs } from "../components/StoreTabs";
 import { calculatePositivePercent } from "../store.format";
+import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 const PAGE_SIZE = 6;
 const cardClassName = "w-full [&_img]:object-contain";
@@ -35,15 +41,17 @@ function retry(count: number, error: unknown) {
 }
 
 export function PublicSellerPage() {
+  const { t } = useTranslate("buyer");
   const { username } = useParams<{ username: string }>();
   return username ? (
     <Storefront key={username} username={username} />
   ) : (
-    <EmptyState title="ไม่พบชื่อผู้ขาย" />
+    <EmptyState title={t("store.missingUsername", "ไม่พบชื่อผู้ขาย")} />
   );
 }
 
 function Storefront({ username }: { username: string }) {
+  const { t } = useTranslate("buyer");
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [username]);
@@ -97,9 +105,13 @@ function Storefront({ username }: { username: string }) {
     (hasErrorCode(reviews.error, "SELLER_NOT_FOUND") ||
       (isApiError(reviews.error) && reviews.error.status === 404));
 
+  // 5. ประมูลที่เปิดอยู่ของร้าน — ไม่มีก็ไม่แสดงแท็บ [TCG-636]
+  const auctions = useAuctions({ sellerUsername: username, sort: "ENDING_SOON" });
+  const auctionsTotal = auctions.data?.page.totalItems ?? 0;
+
   // Determine active tab
   const rawTab = searchParams.get("tab");
-  const availableTabs = ["products", "collection", ...(isNonSeller ? [] : ["reviews"])];
+  const availableTabs = ["products", "collection", ...(auctionsTotal > 0 ? ["auctions"] : []), ...(isNonSeller ? [] : ["reviews"])];
   const activeTab = availableTabs.includes(rawTab ?? "") ? rawTab! : "products";
 
   const handleTabChange = (value: string) => {
@@ -115,6 +127,7 @@ function Storefront({ username }: { username: string }) {
   const from = searchParams.get("from");
   const backHref = from ? productHref(from) : "/products";
   const displayName = profile.data?.displayName || username;
+  usePageTitle(profile.data && displayName);
 
   const listingsTotal = listings.data?.totalItems;
   const collectionTotal = collection.data?.totalItems;
@@ -137,14 +150,14 @@ function Storefront({ username }: { username: string }) {
               <Link
                 to={backHref}
                 role="link"
-                aria-label={from ? "Back to product detail" : "Back to products"}
+                aria-label={from ? t("store.backToProduct", "Back to product detail") : t("store.backToProducts", "Back to products")}
               />
             }
           >
             <ArrowLeft className="mr-1.5 size-4" />
-            <span>กลับไปหน้ารายการสินค้า</span>
+            <span>{t("store.backToList", "กลับไปหน้ารายการสินค้า")}</span>
             <span className="sr-only">
-              {from ? "Back to product detail" : "Back to products"}
+              {from ? t("store.backToProduct", "Back to product detail") : t("store.backToProducts", "Back to products")}
             </span>
           </Button>
         </div>
@@ -153,7 +166,7 @@ function Storefront({ username }: { username: string }) {
           <div
             role="status"
             aria-busy="true"
-            aria-label="กำลังโหลดร้านค้า"
+            aria-label={t("store.loading", "กำลังโหลดร้านค้า")}
             className="flex flex-col gap-8"
           >
             <ProfileHeaderSkeleton />
@@ -162,7 +175,7 @@ function Storefront({ username }: { username: string }) {
           </div>
         ) : profile.isError ? (
           isApiError(profile.error) && profile.error.status === 404 ? (
-            <EmptyState title="ไม่พบผู้ขายรายนี้" />
+            <EmptyState title={t("store.notFound", "ไม่พบผู้ขายรายนี้")} />
           ) : (
             <ErrorState
               error={profile.error}
@@ -196,6 +209,7 @@ function Storefront({ username }: { username: string }) {
                 collectionTotal={collectionTotal}
                 ratingCount={ratingCount}
                 isNonSeller={isNonSeller}
+                auctionsTotal={auctionsTotal}
               />
 
               {/* Products Tab */}
@@ -214,20 +228,17 @@ function Storefront({ username }: { username: string }) {
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <h2 className="text-xl font-bold text-foreground">
-                        สินค้าที่วางขาย
+                        {t("store.listings", "สินค้าที่วางขาย")}
                       </h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        เลือกสินค้าเพื่อดูรายละเอียดและสั่งซื้อจาก {displayName}
+                        {t("store.listingsHint", "เลือกสินค้าเพื่อดูรายละเอียดและสั่งซื้อจาก {name}", { name: displayName })}
                       </p>
                     </div>
                     {listings.data && (
                       <p className="text-sm text-muted-foreground">
                         {listings.data.totalItems > 0
-                          ? `แสดง ${listingPage * PAGE_SIZE + 1}–${Math.min(
-                              (listingPage + 1) * PAGE_SIZE,
-                              listings.data.totalItems,
-                            )} จาก ${listings.data.totalItems} รายการ`
-                          : "แสดง 0 รายการ"}
+                          ? t("store.showingRange", "แสดง {from}–{to} จาก {total} รายการ", { from: listingPage * PAGE_SIZE + 1, to: Math.min((listingPage + 1) * PAGE_SIZE, listings.data.totalItems), total: listings.data.totalItems })
+                          : t("store.showingNone", "แสดง 0 รายการ")}
                       </p>
                     )}
                   </div>
@@ -236,7 +247,7 @@ function Storefront({ username }: { username: string }) {
                     <div
                       role="status"
                       aria-busy="true"
-                      aria-label="กำลังโหลดสินค้า"
+                      aria-label={t("product.loading", "กำลังโหลดสินค้า")}
                     >
                       <ItemGridSkeleton className={gridClassName} />
                     </div>
@@ -247,8 +258,8 @@ function Storefront({ username }: { username: string }) {
                     />
                   ) : listings.data.items.length === 0 ? (
                     <EmptyState
-                      title="ยังไม่มีประกาศขาย"
-                      description="ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่"
+                      title={t("store.noListings", "ยังไม่มีประกาศขาย")}
+                      description={t("store.noListingsHint", "ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่")}
                     />
                   ) : (
                     <div className={gridClassName} aria-busy={listings.isFetching}>
@@ -266,12 +277,13 @@ function Storefront({ username }: { username: string }) {
                           badge={
                             CONDITION_LABELS[listing.condition] ?? listing.condition
                           }
-                          price={new Intl.NumberFormat("th-TH", {
+                          price={isOnSale(listing.pricing) ? undefined : new Intl.NumberFormat(intlLocale(), {
                             style: "currency",
                             currency: listing.currency,
                             maximumFractionDigits: 2,
                             minimumFractionDigits: 0,
                           }).format(listing.price)}
+                          footer={isOnSale(listing.pricing) ? <PriceTag pricing={listing.pricing} /> : undefined}
                           className={cardClassName}
                         />
                       ))}
@@ -295,20 +307,17 @@ function Storefront({ username }: { username: string }) {
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                       <h2 className="text-xl font-bold text-foreground">
-                        คอลเลกชัน
+                        {t("store.collection", "คอลเลกชัน")}
                       </h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        การ์ดในคอลเลกชันสาธารณะของ {displayName} รายการเหล่านี้ไม่จำเป็นต้องวางขาย
+                        {t("store.collectionHint", "การ์ดในคอลเลกชันสาธารณะของ {name} รายการเหล่านี้ไม่จำเป็นต้องวางขาย", { name: displayName })}
                       </p>
                     </div>
                     {collection.data && (
                       <p className="text-sm text-muted-foreground">
                         {collection.data.totalItems > 0
-                          ? `แสดง ${collectionPage * PAGE_SIZE + 1}–${Math.min(
-                              (collectionPage + 1) * PAGE_SIZE,
-                              collection.data.totalItems,
-                            )} จาก ${collection.data.totalItems} รายการ`
-                          : "แสดง 0 รายการ"}
+                          ? t("store.showingRange", "แสดง {from}–{to} จาก {total} รายการ", { from: collectionPage * PAGE_SIZE + 1, to: Math.min((collectionPage + 1) * PAGE_SIZE, collection.data.totalItems), total: collection.data.totalItems })
+                          : t("store.showingNone", "แสดง 0 รายการ")}
                       </p>
                     )}
                   </div>
@@ -317,7 +326,7 @@ function Storefront({ username }: { username: string }) {
                     <div
                       role="status"
                       aria-busy="true"
-                      aria-label="กำลังโหลดคอลเลกชัน"
+                      aria-label={t("store.loadingCollection", "กำลังโหลดคอลเลกชัน")}
                     >
                       <ItemGridSkeleton className={gridClassName} />
                     </div>
@@ -327,7 +336,7 @@ function Storefront({ username }: { username: string }) {
                       onRetry={() => void collection.refetch()}
                     />
                   ) : collection.data.items.length === 0 ? (
-                    <EmptyState title="ยังไม่มีคอลเลกชันสาธารณะ" />
+                    <EmptyState title={t("store.noCollection", "ยังไม่มีคอลเลกชันสาธารณะ")} />
                   ) : (
                     <div className={gridClassName} aria-busy={collection.isFetching}>
                       {collection.data.items.map((item) => (
@@ -359,6 +368,17 @@ function Storefront({ username }: { username: string }) {
                   )}
                 </div>
               </TabsContent>
+
+              {/* Auctions Tab [TCG-636] */}
+              {auctions.data && auctionsTotal > 0 && (
+                <TabsContent value="auctions" className="outline-none">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {auctions.data.page.items.map((auction) => (
+                      <AuctionCard key={auction.id} auction={auction} serverTime={auctions.data.serverTime} />
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
 
               {/* Reviews Tab */}
               {!isNonSeller && (

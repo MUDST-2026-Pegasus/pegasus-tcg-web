@@ -49,6 +49,7 @@ import {
   toCategoryPayload,
   type CategoryFormValues,
 } from "../taxonomy.schema";
+import { useTranslate } from "@/lib/i18n";
 
 type CategoryFormDialogProps = {
   open: boolean;
@@ -77,17 +78,18 @@ export function CategoryFormDialog({
   category,
   imageUrl,
 }: CategoryFormDialogProps) {
+  const { t } = useTranslate("admin");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {category ? `แก้ไขหมวด ${category.name}` : "เพิ่มหมวดหมู่"}
+            {category ? t("cardAttributes.categoryForm.editTitle", "แก้ไขหมวด {name}", { name: category.name }) : t("cardAttributes.categories.addShort", "เพิ่มหมวดหมู่")}
           </DialogTitle>
           <DialogDescription>
             {category?.gameId === null
-              ? "หมวดนี้ใช้ร่วมกันทุกเกม แก้แล้วมีผลกับทุกเกม"
-              : "หมวดหมู่คือชั้นวางของสินค้า เช่น การ์ดเดี่ยว ของซีล อุปกรณ์เสริม ซ้อนได้หนึ่งชั้น"}
+              ? t("cardAttributes.categoryForm.sharedHint", "หมวดนี้ใช้ร่วมกันทุกเกม แก้แล้วมีผลกับทุกเกม")
+              : t("cardAttributes.categoryForm.description", "หมวดหมู่คือชั้นวางของสินค้า เช่น การ์ดเดี่ยว ของซีล อุปกรณ์เสริม ซ้อนได้หนึ่งชั้น")}
           </DialogDescription>
         </DialogHeader>
         <CategoryForm
@@ -116,6 +118,7 @@ function CategoryForm({
   imageUrl?: string;
   onSaved: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveCategory = useSaveCategory();
 
   const {
@@ -127,7 +130,7 @@ function CategoryForm({
     getValues,
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(categorySchema(t)),
     defaultValues: toCategoryForm(game.id, category),
   });
 
@@ -144,12 +147,12 @@ function CategoryForm({
     ? categories.some((item) => item.parentId === category.id)
     : false;
   const scopeItems = [
-    { value: String(game.id), label: `เฉพาะ ${game.name}` },
-    { value: ALL_GAMES, label: "ทุกเกม" },
+    { value: String(game.id), label: t("cardAttributes.categories.onlyGame", "เฉพาะ {game}", { game: game.name }) },
+    { value: ALL_GAMES, label: t("cardAttributes.categories.allGames", "ทุกเกม") },
   ];
   // หมวดแม่ได้เฉพาะระดับบนสุด ที่เป็นหมวดข้ามเกมหรือเกมเดียวกับหมวดนี้
   const parentItems = [
-    { value: NO_PARENT, label: "ไม่มี (ระดับบนสุด)" },
+    { value: NO_PARENT, label: t("cardAttributes.categoryForm.noParent", "ไม่มี (ระดับบนสุด)") },
     ...categories
       .filter(
         (item) =>
@@ -159,7 +162,7 @@ function CategoryForm({
       )
       .map((item) => ({
         value: String(item.id),
-        label: item.gameId === null ? `${item.name} (ทุกเกม)` : item.name,
+        label: item.gameId === null ? t("cardAttributes.categoryForm.parentShared", "{name} (ทุกเกม)", { name: item.name }) : item.name,
       })),
   ];
 
@@ -177,7 +180,7 @@ function CategoryForm({
       });
       toast.add({
         type: "success",
-        title: category ? "บันทึกหมวดหมู่แล้ว" : `เพิ่มหมวด ${saved.name} แล้ว`,
+        title: category ? t("cardAttributes.categoryForm.saved", "บันทึกหมวดหมู่แล้ว") : t("cardAttributes.categoryForm.added", "เพิ่มหมวด {name} แล้ว", { name: saved.name }),
       });
       onSaved();
     } catch (error) {
@@ -190,7 +193,7 @@ function CategoryForm({
       }
       if (!applyApiErrors(error, setError)) {
         setError("root.server", {
-          message: taxonomyErrorMessage(error, "บันทึกหมวดหมู่ไม่สำเร็จ ลองใหม่อีกครั้ง"),
+          message: taxonomyErrorMessage(error, t("cardAttributes.categoryForm.saveFailed", "บันทึกหมวดหมู่ไม่สำเร็จ ลองใหม่อีกครั้ง")),
         });
       }
     }
@@ -206,11 +209,11 @@ function CategoryForm({
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.name) || undefined}>
-          <FieldLabel htmlFor="categoryName">ชื่อหมวด *</FieldLabel>
+          <FieldLabel htmlFor="categoryName">{t("cardAttributes.categoryForm.name", "ชื่อหมวด *")}</FieldLabel>
           <Input
             id="categoryName"
             maxLength={100}
-            placeholder="เช่น Elite Trainer Box"
+            placeholder={t("cardAttributes.categoryForm.namePlaceholder", "เช่น Elite Trainer Box")}
             aria-invalid={Boolean(errors.name)}
             {...register("name")}
           />
@@ -219,11 +222,11 @@ function CategoryForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.code) || undefined}>
-            <FieldLabel htmlFor="categoryCode">รหัส *</FieldLabel>
+            <FieldLabel htmlFor="categoryCode">{t("cardAttributes.form.codeRequired", "รหัส *")}</FieldLabel>
             <Input
               id="categoryCode"
               maxLength={50}
-              placeholder="เช่น ETB"
+              placeholder={t("cardAttributes.categoryForm.codePlaceholder", "เช่น ETB")}
               autoCapitalize="characters"
               className="uppercase"
               aria-invalid={Boolean(errors.code)}
@@ -238,13 +241,13 @@ function CategoryForm({
             <Input
               id="categorySlug"
               maxLength={120}
-              placeholder="เว้นว่าง = สร้างจากชื่อ"
+              placeholder={t("cardAttributes.form.slugPlaceholder", "เว้นว่าง = สร้างจากชื่อ")}
               disabled={Boolean(category)}
               aria-invalid={Boolean(errors.slug)}
               {...register("slug")}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
+              {t("cardAttributes.form.setOnce", "ตั้งได้ครั้งเดียวตอนสร้าง")}
             </FieldDescription>
             <FieldError errors={[errors.slug]} />
           </Field>
@@ -252,7 +255,7 @@ function CategoryForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field>
-            <FieldLabel htmlFor="categoryScope">ใช้กับ *</FieldLabel>
+            <FieldLabel htmlFor="categoryScope">{t("cardAttributes.categoryForm.scope", "ใช้กับ *")}</FieldLabel>
             <Controller
               control={control}
               name="scope"
@@ -293,12 +296,12 @@ function CategoryForm({
               )}
             />
             <FieldDescription className="text-xs">
-              ตั้งได้ครั้งเดียวตอนสร้าง
+              {t("cardAttributes.form.setOnce", "ตั้งได้ครั้งเดียวตอนสร้าง")}
             </FieldDescription>
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="categoryParent">หมวดแม่</FieldLabel>
+            <FieldLabel htmlFor="categoryParent">{t("cardAttributes.categoryForm.parent", "หมวดแม่")}</FieldLabel>
             <Controller
               control={control}
               name="parentId"
@@ -332,8 +335,8 @@ function CategoryForm({
             />
             <FieldDescription className="text-xs">
               {hasChildren
-                ? "มีหมวดย่อยอยู่ จึงย้ายไปอยู่ใต้หมวดอื่นไม่ได้"
-                : "ซ้อนได้หนึ่งชั้น"}
+                ? t("cardAttributes.categoryForm.hasChildren", "มีหมวดย่อยอยู่ จึงย้ายไปอยู่ใต้หมวดอื่นไม่ได้")
+                : t("cardAttributes.categoryForm.oneLevel", "ซ้อนได้หนึ่งชั้น")}
             </FieldDescription>
           </Field>
         </div>
@@ -342,7 +345,7 @@ function CategoryForm({
           data-invalid={Boolean(errors.displayOrder) || undefined}
           className="sm:max-w-[160px]"
         >
-          <FieldLabel htmlFor="categoryOrder">ลำดับการแสดง</FieldLabel>
+          <FieldLabel htmlFor="categoryOrder">{t("cardAttributes.form.displayOrder", "ลำดับการแสดง")}</FieldLabel>
           <Input
             id="categoryOrder"
             inputMode="numeric"
@@ -354,7 +357,7 @@ function CategoryForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="categoryImage">รูปหมวด</FieldLabel>
+          <FieldLabel htmlFor="categoryImage">{t("cardAttributes.categoryForm.image", "รูปหมวด")}</FieldLabel>
           {showCurrentImage ? (
             <div className="flex items-center gap-3 rounded-lg border border-border p-2.5">
               <img
@@ -363,7 +366,7 @@ function CategoryForm({
                 className="size-14 rounded-md object-cover"
               />
               <p className="flex-1 text-xs text-muted-foreground">
-                รูปปัจจุบัน · แสดงเป็นไทล์ในหน้าแรก
+                {t("cardAttributes.categoryForm.currentImage", "รูปปัจจุบัน · แสดงเป็นไทล์ในหน้าแรก")}
               </p>
               <Button
                 type="button"
@@ -373,7 +376,7 @@ function CategoryForm({
                 onClick={() => setValue("imageKey", "", { shouldDirty: true })}
               >
                 <Trash2 data-icon="inline-start" />
-                เอารูปออก
+                {t("cardAttributes.form.removeImage", "เอารูปออก")}
               </Button>
             </div>
           ) : (
@@ -382,8 +385,8 @@ function CategoryForm({
               id="categoryImage"
               title={
                 imageKey !== "" && upload.items.length === 0
-                  ? "หมวดนี้มีรูปอยู่แล้ว (หมวดที่ปิดอยู่ดูตัวอย่างไม่ได้) — เลือกไฟล์ใหม่เพื่อเปลี่ยน"
-                  : "ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป"
+                  ? t("cardAttributes.categoryForm.imageHidden", "หมวดนี้มีรูปอยู่แล้ว (หมวดที่ปิดอยู่ดูตัวอย่างไม่ได้) — เลือกไฟล์ใหม่เพื่อเปลี่ยน")
+                  : t("cardAttributes.form.dropImage", "ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป")
               }
             />
           )}
@@ -403,9 +406,9 @@ function CategoryForm({
             )}
           />
           <FieldContent>
-            <FieldLabel htmlFor="categoryActive">เปิดใช้งาน</FieldLabel>
+            <FieldLabel htmlFor="categoryActive">{t("cardAttributes.categories.col.active", "เปิดใช้งาน")}</FieldLabel>
             <FieldDescription className="text-xs">
-              ปิดแล้วเลือกหมวดนี้ให้การ์ดใหม่ไม่ได้ การ์ดเดิมยังอยู่ในหมวดนี้
+              {t("cardAttributes.categoryForm.activeHint", "ปิดแล้วเลือกหมวดนี้ให้การ์ดใหม่ไม่ได้ การ์ดเดิมยังอยู่ในหมวดนี้")}
             </FieldDescription>
           </FieldContent>
         </Field>
@@ -413,13 +416,13 @@ function CategoryForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting || upload.isUploading}>
           {(isSubmitting || upload.isUploading) && (
             <Spinner data-icon="inline-start" />
           )}
-          {category ? "บันทึก" : "เพิ่มหมวดหมู่"}
+          {category ? t("cardAttributes.form.save", "บันทึก") : t("cardAttributes.categories.addShort", "เพิ่มหมวดหมู่")}
         </Button>
       </DialogFooter>
     </form>

@@ -51,7 +51,8 @@ export type TodoList = {
   emptyLabel: string;
 };
 
-export type StatKind = "listings" | "escrow" | "rating" | "withdrawable";
+/** `auctionsLive` / `auctionsAwaiting` = ตัวเลขประมูล [TCG-636] */
+export type StatKind = "listings" | "escrow" | "rating" | "withdrawable" | "auctionsLive" | "auctionsAwaiting";
 
 export type StatAccent = "primary" | "violet" | "amber" | "green";
 
@@ -61,10 +62,14 @@ export type StatCardData = {
   label: string;
   value: string;
   footnote: string;
+  /** ทั้งการ์ดเป็นลิงก์ (ตัวเลขประมูลไป `/seller/auctions`) */
+  to?: string;
 };
 
 export type OrderRow = {
   id: number;
+  productName: string;
+  imageUrl: string | null;
   number: string;
   buyer: string;
   item: string;
@@ -84,6 +89,7 @@ export type StockSeverity = "critical" | "warning";
 
 export type LowStockItem = {
   listingId: number;
+  imageUrl: string | null;
   name: string;
   metaLabel: string | null;
   remainingLabel: string;
@@ -156,6 +162,7 @@ export type DashboardMonthSummary = {
 
 export type LowStockListing = {
   listingId: number;
+  imageUrl: string | null;
   productName: string;
   lotLabel: string | null;
   conditionCode: string;
@@ -189,6 +196,7 @@ export type DashboardWallet = {
 
 export type RecentOrder = {
   sellerOrderId: number;
+  firstImageUrl: string | null;
   sellerOrderNumber: string;
   buyerUsername: string;
   buyerDisplayName: string | null;

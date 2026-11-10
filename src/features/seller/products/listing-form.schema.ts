@@ -8,6 +8,7 @@ import type {
 } from "./listing-form.types";
 import { toNumber } from "./products.format";
 import type { ListingPricePayload, SellerListing } from "./products.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ฟอร์มลงขาย / แก้ประกาศ — ตั้งกติกาให้ตรงกับ Bean Validation ใน `dto/ListingRequest.java`,
@@ -40,16 +41,16 @@ const baseSchema = z.object({
   gradingCompany: z
     .string()
     .trim()
-    .max(20, "ชื่อบริษัทเกรดต้องไม่เกิน 20 ตัวอักษร"),
+    .max(20, { error: () => translate("seller", "listingForm.validation.gradingCompanyMax", "ชื่อบริษัทเกรดต้องไม่เกิน {max} ตัวอักษร", { max: 20 }) }),
   gradeValue: z.string(),
-  lotLabel: z.string().trim().max(60, "ป้ายล็อตต้องไม่เกิน 60 ตัวอักษร"),
+  lotLabel: z.string().trim().max(60, { error: () => translate("seller", "listingForm.validation.lotLabelMax", "ป้ายล็อตต้องไม่เกิน {max} ตัวอักษร", { max: 60 }) }),
   publicNote: z
     .string()
     .trim()
-    .max(500, "รายละเอียดต้องไม่เกิน 500 ตัวอักษร"),
+    .max(500, { error: () => translate("seller", "listingForm.validation.noteMax", "รายละเอียดต้องไม่เกิน {max} ตัวอักษร", { max: 500 }) }),
   imageKeys: z
     .array(z.string())
-    .max(MAX_LISTING_PHOTOS, `ใส่รูปได้สูงสุด ${MAX_LISTING_PHOTOS} รูป`),
+    .max(MAX_LISTING_PHOTOS, { error: () => translate("seller", "listingForm.validation.photosMax", "ใส่รูปได้สูงสุด {max} รูป", { max: MAX_LISTING_PHOTOS }) }),
 });
 
 export type ListingFormValues = z.infer<typeof baseSchema>;
@@ -65,18 +66,18 @@ function moneyIssue(
 ): Issue | null {
   const value = toNumber(text);
   if (value === null) {
-    return options.required ? { path, message: `กรอก${label}` } : null;
+    return options.required ? { path, message: translate("seller", "listingForm.validation.moneyRequired", "กรอก{label}", { label }) } : null;
   }
   if (options.allowZero ? value < 0 : value <= 0) {
     return {
       path,
       message: options.allowZero
-        ? `${label}ต้องไม่ติดลบ`
-        : `${label}ต้องมากกว่า 0`,
+        ? translate("seller", "listingForm.validation.moneyNonNegative", "{label}ต้องไม่ติดลบ", { label })
+        : translate("seller", "listingForm.validation.moneyPositive", "{label}ต้องมากกว่า {min}", { label, min: 0 }),
     };
   }
   if (value > MAX_MONEY) {
-    return { path, message: `${label}สูงเกินไป` };
+    return { path, message: translate("seller", "listingForm.validation.moneyTooHigh", "{label}สูงเกินไป", { label }) };
   }
   return null;
 }
@@ -91,27 +92,27 @@ export function listingIssues(
   if (mode === "create" && values.catalogVariantId === null) {
     issues.push({
       path: "catalogVariantId",
-      message: "เลือกการ์ดจากแคตตาล็อกก่อน",
+      message: translate("seller", "listingForm.validation.cardRequired", "เลือกการ์ดจากแคตตาล็อกก่อน"),
     });
   }
   if (values.condition === null) {
-    issues.push({ path: "condition", message: "เลือกสภาพการ์ด" });
+    issues.push({ path: "condition", message: translate("seller", "listingForm.validation.conditionRequired", "เลือกสภาพการ์ด") });
   }
 
   // AUTO_MEDIAN ก็ต้องมีราคา — เป็นราคาจนกว่างานกลางคืนจะขยับครั้งแรก
-  issues.push(moneyIssue(values.price, "price", "ราคาขาย", { required: true }));
+  issues.push(moneyIssue(values.price, "price", translate("seller", "listingForm.field.price", "ราคาขาย"), { required: true }));
 
   if (values.pricingMode === "AUTO_MEDIAN") {
     const offset = toNumber(values.autoPriceOffsetPercent.replace(/^-$/, ""));
     if (values.autoPriceOffsetPercent !== "" && offset === null) {
       issues.push({
         path: "autoPriceOffsetPercent",
-        message: "ส่วนต่างต้องเป็นตัวเลข เช่น -5 หรือ 3",
+        message: translate("seller", "listingForm.validation.offsetNumber", "ส่วนต่างต้องเป็นตัวเลข เช่น -5 หรือ 3"),
       });
     } else if (offset !== null && (offset < -99.99 || offset > 999.99)) {
       issues.push({
         path: "autoPriceOffsetPercent",
-        message: "ส่วนต่างต้องอยู่ระหว่าง -99.99% ถึง 999.99%",
+        message: translate("seller", "listingForm.validation.offsetRange", "ส่วนต่างต้องอยู่ระหว่าง {min}% ถึง {max}%", { min: "-99.99", max: "999.99" }),
       });
     }
 
@@ -119,13 +120,13 @@ export function listingIssues(
     const floorIssue = moneyIssue(
       values.autoPriceFloor,
       "autoPriceFloor",
-      "ราคาต่ำสุด",
+      translate("seller", "listingForm.field.floor", "ราคาต่ำสุด"),
       { required: true },
     );
     const ceilingIssue = moneyIssue(
       values.autoPriceCeiling,
       "autoPriceCeiling",
-      "ราคาสูงสุด",
+      translate("seller", "listingForm.field.ceiling", "ราคาสูงสุด"),
       { required: true },
     );
     issues.push(floorIssue, ceilingIssue);
@@ -135,21 +136,21 @@ export function listingIssues(
     if (!floorIssue && !ceilingIssue && floor !== null && ceiling !== null && floor > ceiling) {
       issues.push({
         path: "autoPriceCeiling",
-        message: "ราคาสูงสุดต้องไม่ต่ำกว่าราคาต่ำสุด",
+        message: translate("seller", "listingForm.validation.ceilingBelowFloor", "ราคาสูงสุดต้องไม่ต่ำกว่าราคาต่ำสุด"),
       });
     }
   }
 
   if (mode === "create") {
     issues.push(
-      moneyIssue(values.unitCost, "unitCost", "ต้นทุนต่อใบ", {
+      moneyIssue(values.unitCost, "unitCost", translate("seller", "listingForm.field.unitCost", "ต้นทุนต่อใบ"), {
         required: true,
         allowZero: true,
       }),
     );
     const quantity = toNumber(values.quantity);
     if (quantity === null) {
-      issues.push({ path: "quantity", message: "กรอกจำนวนการ์ด" });
+      issues.push({ path: "quantity", message: translate("seller", "listingForm.validation.quantityRequired", "กรอกจำนวนการ์ด") });
     } else if (
       !Number.isInteger(quantity) ||
       quantity < 1 ||
@@ -157,7 +158,7 @@ export function listingIssues(
     ) {
       issues.push({
         path: "quantity",
-        message: `จำนวนต้องอยู่ระหว่าง 1–${MAX_UNITS_PER_STOCK_IN} ใบต่อครั้ง (เติมเพิ่มได้ทีหลัง)`,
+        message: translate("seller", "listingForm.validation.quantityRange", "จำนวนต้องอยู่ระหว่าง {min}–{max} ใบต่อครั้ง (เติมเพิ่มได้ทีหลัง)", { min: 1, max: MAX_UNITS_PER_STOCK_IN }),
       });
     }
   }
@@ -167,13 +168,13 @@ export function listingIssues(
     if (grade < 0.5 || grade > 10 || !Number.isInteger(grade * 10)) {
       issues.push({
         path: "gradeValue",
-        message: "เกรดต้องอยู่ระหว่าง 0.5–10 ทศนิยมไม่เกิน 1 ตำแหน่ง",
+        message: translate("seller", "listingForm.validation.gradeRange", "เกรดต้องอยู่ระหว่าง {min}–{max} ทศนิยมไม่เกิน 1 ตำแหน่ง", { min: "0.5", max: 10 }),
       });
     } else if (values.gradingCompany.trim() === "") {
       // `ListingService.requireGradingConsistent`
       issues.push({
         path: "gradingCompany",
-        message: "ใส่บริษัทที่ให้เกรดนี้ด้วย เช่น PSA, BGS, CGC",
+        message: translate("seller", "listingForm.validation.gradingCompanyRequired", "ใส่บริษัทที่ให้เกรดนี้ด้วย เช่น PSA, BGS, CGC"),
       });
     }
   }
@@ -357,3 +358,26 @@ export function detailsChanged(
     next.imageKeys.some((key, index) => key !== keys[index])
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "listingForm.validation.gradingCompanyMax", "ns": "seller", "defaultValue": "ชื่อบริษัทเกรดต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "listingForm.validation.lotLabelMax", "ns": "seller", "defaultValue": "ป้ายล็อตต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "listingForm.validation.noteMax", "ns": "seller", "defaultValue": "รายละเอียดต้องไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "listingForm.validation.photosMax", "ns": "seller", "defaultValue": "ใส่รูปได้สูงสุด {max} รูป"}
+// @tolgee-key {"key": "listingForm.validation.moneyRequired", "ns": "seller", "defaultValue": "กรอก{label}"}
+// @tolgee-key {"key": "listingForm.validation.moneyNonNegative", "ns": "seller", "defaultValue": "{label}ต้องไม่ติดลบ"}
+// @tolgee-key {"key": "listingForm.validation.moneyPositive", "ns": "seller", "defaultValue": "{label}ต้องมากกว่า {min}"}
+// @tolgee-key {"key": "listingForm.validation.moneyTooHigh", "ns": "seller", "defaultValue": "{label}สูงเกินไป"}
+// @tolgee-key {"key": "listingForm.validation.cardRequired", "ns": "seller", "defaultValue": "เลือกการ์ดจากแคตตาล็อกก่อน"}
+// @tolgee-key {"key": "listingForm.validation.conditionRequired", "ns": "seller", "defaultValue": "เลือกสภาพการ์ด"}
+// @tolgee-key {"key": "listingForm.field.price", "ns": "seller", "defaultValue": "ราคาขาย"}
+// @tolgee-key {"key": "listingForm.validation.offsetNumber", "ns": "seller", "defaultValue": "ส่วนต่างต้องเป็นตัวเลข เช่น -5 หรือ 3"}
+// @tolgee-key {"key": "listingForm.validation.offsetRange", "ns": "seller", "defaultValue": "ส่วนต่างต้องอยู่ระหว่าง {min}% ถึง {max}%"}
+// @tolgee-key {"key": "listingForm.field.floor", "ns": "seller", "defaultValue": "ราคาต่ำสุด"}
+// @tolgee-key {"key": "listingForm.field.ceiling", "ns": "seller", "defaultValue": "ราคาสูงสุด"}
+// @tolgee-key {"key": "listingForm.validation.ceilingBelowFloor", "ns": "seller", "defaultValue": "ราคาสูงสุดต้องไม่ต่ำกว่าราคาต่ำสุด"}
+// @tolgee-key {"key": "listingForm.field.unitCost", "ns": "seller", "defaultValue": "ต้นทุนต่อใบ"}
+// @tolgee-key {"key": "listingForm.validation.quantityRequired", "ns": "seller", "defaultValue": "กรอกจำนวนการ์ด"}
+// @tolgee-key {"key": "listingForm.validation.quantityRange", "ns": "seller", "defaultValue": "จำนวนต้องอยู่ระหว่าง {min}–{max} ใบต่อครั้ง (เติมเพิ่มได้ทีหลัง)"}
+// @tolgee-key {"key": "listingForm.validation.gradeRange", "ns": "seller", "defaultValue": "เกรดต้องอยู่ระหว่าง {min}–{max} ทศนิยมไม่เกิน 1 ตำแหน่ง"}
+// @tolgee-key {"key": "listingForm.validation.gradingCompanyRequired", "ns": "seller", "defaultValue": "ใส่บริษัทที่ให้เกรดนี้ด้วย เช่น PSA, BGS, CGC"}

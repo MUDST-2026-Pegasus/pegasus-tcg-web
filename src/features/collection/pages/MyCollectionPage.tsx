@@ -2,21 +2,21 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 
-import { ItemCard, QueryBoundary } from "@/components/common";
+import { ConfirmDialog, ItemCard, QueryBoundary } from "@/components/common";
 import { ItemGridSkeleton } from "@/components/common/PageSkeletons";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/features/auth/auth.queries";
-import { getErrorMessage } from "@/lib/api";
 
 import { payloadOf } from "../collection.payload";
 import { useCollection, useRemoveCollectionItem, useUpdateCollectionItem } from "../collection.queries";
 import type { CollectionItem } from "../collection.types";
 import { AddCardsDialog } from "../components/AddCardsDialog";
 import { EditCardDialog } from "../components/EditCardDialog";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export function MyCollectionPage() {
+  const { t } = useTranslate("buyer");
   const { user } = useAuth();
   const collection = useCollection();
   const update = useUpdateCollectionItem();
@@ -34,7 +34,7 @@ export function MyCollectionPage() {
       await update.mutateAsync({ id: item.id, payload: payloadOf(item, { publicItem }) });
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not change visibility."));
+      setError(translateError(cause, t("collection.mine.visibilityFailed", "Could not change visibility.")));
     }
   };
 
@@ -45,7 +45,7 @@ export function MyCollectionPage() {
       setRemoving(null);
       setError("");
     } catch (cause) {
-      setError(getErrorMessage(cause, "Could not remove this card."));
+      setError(translateError(cause, t("collection.mine.removeFailed", "Could not remove this card.")));
     }
   };
 
@@ -54,16 +54,16 @@ export function MyCollectionPage() {
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1440px]">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 className="text-3xl font-bold">My Collection</h1><p className="mt-1 text-muted-foreground">{total} cards in your collection.</p></div>
+        <div><h1 className="text-3xl font-bold">{t("collection.mine.title", "My Collection")}</h1><p className="mt-1 text-muted-foreground">{t("collection.mine.total", "{count} cards in your collection.", { count: total })}</p></div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>View public profile</Button>
-          <Button variant="outline" render={<Link to="/account/profile" />}>My Account</Button>
-          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> Add Card</Button>
+          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>{t("collection.mine.viewPublic", "View public profile")}</Button>
+          <Button variant="outline" render={<Link to="/account/profile" />}>{t("collection.mine.account", "My Account")}</Button>
+          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> {t("collection.mine.addCard", "Add Card")}</Button>
         </div>
       </div>
       {error ? <p role="alert" className="mb-4 text-sm text-destructive">{error}</p> : null}
-      <QueryBoundary query={collection} errorTitle="Could not load your collection" errorRetryLabel="Try again"
-        loading={<div role="status" aria-busy="true" aria-label="Loading your collection"><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
+      <QueryBoundary query={collection} errorTitle={t("collection.mine.loadFailed", "Could not load your collection")} errorRetryLabel={t("collection.tryAgain", "Try again")}
+        loading={<div role="status" aria-busy="true" aria-label={t("collection.mine.loading", "Loading your collection")}><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
         {() => <>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
@@ -71,13 +71,13 @@ export function MyCollectionPage() {
               className="w-full [&_img]:object-contain"
               footer={<div className="flex w-full items-center justify-between gap-2">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={item.publicItem} disabled={update.isPending}
-                  onCheckedChange={(checked) => void togglePublic(item, checked)} aria-label={`Make ${item.card.productName} public`} />
-                  {item.publicItem ? "Public" : "Private"}</label>
-                <div className="flex"><Button variant="ghost" size="icon" aria-label={`Edit ${item.card.productName}`} onClick={() => setEditing(item)}><Pencil /></Button>
-                  <Button variant="ghost" size="icon" aria-label={`Remove ${item.card.productName}`} onClick={() => setRemoving(item)}><Trash2 /></Button></div>
+                  onCheckedChange={(checked) => void togglePublic(item, checked)} aria-label={t("collection.mine.makePublic", "Make {name} public", { name: item.card.productName })} />
+                  {item.publicItem ? t("collection.mine.public", "Public") : t("collection.mine.private", "Private")}</label>
+                <div className="flex"><Button variant="ghost" size="icon" aria-label={t("collection.mine.editCard", "Edit {name}", { name: item.card.productName })} onClick={() => setEditing(item)}><Pencil /></Button>
+                  <Button variant="ghost" size="icon" aria-label={t("collection.row.removeCard", "Remove {name}", { name: item.card.productName })} onClick={() => setRemoving(item)}><Trash2 /></Button></div>
               </div>} />)}
-          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No cards yet. Add your first card from the catalogue.</p>}
-          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>Load more</Button></div> : null}
+          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.mine.empty", "No cards yet. Add your first card from the catalogue.")}</p>}
+          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "Load more")}</Button></div> : null}
         </>}
       </QueryBoundary>
     </div>
@@ -86,12 +86,8 @@ export function MyCollectionPage() {
 
     <EditCardDialog item={editing} onClose={() => setEditing(null)} />
 
-    <AlertDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}>
-      <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Remove card?</AlertDialogTitle>
-        <AlertDialogDescription>Remove this card from your collection?</AlertDialogDescription></AlertDialogHeader>
-        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button variant="destructive" disabled={remove.isPending} onClick={() => void deleteCard()}>Remove Card</Button></AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}
+      variant="destructive" title={t("collection.mine.removeTitle", "Remove card?")} description={t("collection.mine.removeConfirm", "Remove this card from your collection?")}
+      confirmLabel={t("collection.mine.removeAction", "Remove Card")} cancelLabel={t("collection.cancel", "Cancel")} isPending={remove.isPending} onConfirm={() => void deleteCard()} />
   </main>;
 }

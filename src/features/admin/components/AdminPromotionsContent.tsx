@@ -1,14 +1,40 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Info, Plus, Search, TicketPercent } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Plus,
+  Search,
+  TicketPercent,
+} from "lucide-react";
 
+import { ErrorState } from "@/components/common";
+import { TableSkeleton } from "@/components/common/PageSkeletons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
 import { useAdminGames } from "../catalog.queries";
@@ -27,22 +53,41 @@ import {
   usePromotions,
 } from "../promotions.queries";
 import { PROMOTION_PAGE_CONTROLS } from "../promotions.styles";
-import type { AdminPromotion, PromotionOwnerType, PromotionStatus } from "../promotions.types";
-import { PromotionActionDialog, type PromotionActionState } from "./PromotionActionDialog";
+import type {
+  AdminPromotion,
+  PromotionOwnerType,
+  PromotionStatus,
+} from "../promotions.types";
+import {
+  PromotionActionDialog,
+  type PromotionActionState,
+} from "./PromotionActionDialog";
 import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
+import { PromotionPageTabs } from "./PromotionPageTabs";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
+import { intlLocale, translate, useTranslate } from "@/lib/i18n";
 
-const OWNER_FILTERS: Array<{ value: PromotionOwnerType | null; label: string }> = [
-  { value: null, label: "ทุกเจ้าของ" },
+// @tolgee-key {"key":"admin.adminPromotionsContent.label","ns":"promotions","defaultValue":"ทุกเจ้าของ"}
+// @tolgee-key {"key":"admin.adminPromotionsContent.label2","ns":"promotions","defaultValue":"ร้านค้า"}
+
+const OWNER_FILTERS: Array<{
+  value: PromotionOwnerType | null;
+  label: string;
+}> = [
+  { value: null, get label() { return translate("promotions", "admin.adminPromotionsContent.label", "ทุกเจ้าของ"); } },
   { value: "PLATFORM", label: "Pegasus" },
-  { value: "SELLER", label: "ร้านค้า" },
+  { value: "SELLER", get label() { return translate("promotions", "admin.adminPromotionsContent.label2", "ร้านค้า"); } },
 ];
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-/** หน้า /admin/promotions (Figma PRM-A1) — filter แท็บ หน้า และ sheet อยู่ใน URL ทั้งหมด */
+/**
+ * แท็บ "โค้ดส่วนลด" ของ /admin/promotions (Figma PRM-A1) — filter แท็บ หน้า และ sheet อยู่ใน URL ทั้งหมด
+ * แท็บ "ลดราคาสินค้า" (`?tab=sales`) อยู่ที่ `AdminSalesContent`
+ */
 export function AdminPromotionsContent() {
+  const { t } = useTranslate("promotions");
   const [params, setParams] = useSearchParams();
   const owner = params.get("owner") as PromotionOwnerType | null;
   const status = params.get("status") as PromotionStatus | null;
@@ -71,13 +116,21 @@ export function AdminPromotionsContent() {
   const scopeNames = useMemo<ScopeNames>(
     () => ({
       games: new Map((games.data ?? []).map((game) => [game.id, game.name])),
-      categories: new Map((categories.data ?? []).map((category) => [category.id, category.name])),
+      categories: new Map(
+        (categories.data ?? []).map((category) => [category.id, category.name]),
+      ),
     }),
     [games.data, categories.data],
   );
-  const homeIds = useMemo(() => currentHomeIds(platform.data ?? []), [platform.data]);
+  const homeIds = useMemo(
+    () => currentHomeIds(platform.data ?? []),
+    [platform.data],
+  );
 
-  const updateParams = (changes: Record<string, string | null>, resetPage = true) => {
+  const updateParams = (
+    changes: Record<string, string | null>,
+    resetPage = true,
+  ) => {
     const next = new URLSearchParams(params);
     for (const [key, value] of Object.entries(changes)) {
       if (value) next.set(key, value);
@@ -89,7 +142,10 @@ export function AdminPromotionsContent() {
 
   useEffect(() => {
     if (search.trim() === q) return;
-    const timer = window.setTimeout(() => updateParams({ q: search.trim() || null }), SEARCH_DEBOUNCE_MS);
+    const timer = window.setTimeout(
+      () => updateParams({ q: search.trim() || null }),
+      SEARCH_DEBOUNCE_MS,
+    );
     return () => window.clearTimeout(timer);
     // updateParams อ่าน params ล่าสุดทุกครั้ง ไม่ต้องอยู่ใน deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,17 +153,25 @@ export function AdminPromotionsContent() {
 
   const onRowAction = (kind: PromotionRowAction, promotion: AdminPromotion) => {
     if (kind === "copy") {
-      void navigator.clipboard
-        ?.writeText(promotion.code)
-        .then(() => toast.add({ title: `คัดลอก ${promotion.code} แล้ว`, type: "success" }));
+      void navigator.clipboard?.writeText(promotion.code).then(() =>
+        toast.add({
+          title: t("admin.adminPromotionsContent.title", "คัดลอก {code} แล้ว", { code: promotion.code }),
+          type: "success",
+        }),
+      );
       return;
     }
     if (kind === "redemptions") {
-      updateParams({ promo: String(promotion.id), redemptionPage: null }, false);
+      updateParams(
+        { promo: String(promotion.id), redemptionPage: null },
+        false,
+      );
       return;
     }
     // รู้อยู่แล้วว่ามีคนเก็บ/ใช้ ไม่ต้องให้พิมพ์ยืนยันก่อนค่อยบอกว่าลบไม่ได้
-    const blocked = kind === "delete" && (promotion.usedCount > 0 || promotion.claimedCount > 0);
+    const blocked =
+      kind === "delete" &&
+      (promotion.usedCount > 0 || promotion.claimedCount > 0);
     setAction({ kind: blocked ? "blocked" : kind, promotion });
   };
 
@@ -116,61 +180,112 @@ export function AdminPromotionsContent() {
   const totalPages = Math.max(1, list.data?.page.totalPages ?? 1);
   const counts = list.data?.statusCounts;
   const firstPage = Math.max(0, Math.min(page - 1, totalPages - 3));
-  const pageNumbers = Array.from({ length: Math.min(3, totalPages) }, (_, index) => firstPage + index);
+  const pageNumbers = Array.from(
+    { length: Math.min(3, totalPages) },
+    (_, index) => firstPage + index,
+  );
   const change = summary.data?.redemptionsChangePercent;
-  const costShare = summary.data ? percentOf(summary.data.platformDiscountCost30d, summary.data.gmv30d) : null;
-  const orderShare = summary.data ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d) : null;
+  const costShare = summary.data
+    ? percentOf(summary.data.platformDiscountCost30d, summary.data.gmv30d)
+    : null;
+  const orderShare = summary.data
+    ? percentOf(summary.data.ordersWithCodes30d, summary.data.paidOrders30d)
+    : null;
 
   return (
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; โค้ดส่วนลด</h1>
-          <p className="text-sm text-muted-foreground">สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง</p>
+          <h1 className="text-2xl font-black">{t("admin.adminPromotionsContent.h1", "โปรโมชั่น & ลดราคา")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {t("admin.adminPromotionsContent.p", "สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง")}
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="px-2.5" disabled={!platform.data} onClick={() => setHomeOpen(true)}>
-            จัดลำดับหน้าแรก
+          <Button
+            variant="outline"
+            size="sm"
+            className="px-2.5"
+            disabled={!platform.data}
+            onClick={() => setHomeOpen(true)}
+          >
+            {t("admin.adminPromotionsContent.button", "จัดลำดับหน้าแรก")}
           </Button>
-          <Button size="sm" className="px-2.5" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+          <Button
+            size="sm"
+            className="px-2.5"
+            render={<Link to="/admin/promotions/new" />}
+            nativeButton={false}
+          >
             <Plus />
-            สร้างโค้ด Pegasus
+            {t("admin.adminPromotionsContent.button2", "สร้างโค้ด Pegasus")}
           </Button>
         </div>
       </header>
 
+      <PromotionPageTabs value="codes" />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="โค้ดที่ใช้งานอยู่"
-          value={((summary.data?.activePlatformCodes ?? 0) + (summary.data?.activeSellerCodes ?? 0)).toLocaleString("th-TH")}
-          note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
+          label={t("admin.adminPromotionsContent.label3", "โค้ดที่ใช้งานอยู่")}
+          value={(
+            (summary.data?.activePlatformCodes ?? 0) +
+            (summary.data?.activeSellerCodes ?? 0)
+          ).toLocaleString(intlLocale())}
+          note={t("admin.adminPromotionsContent.note", "Pegasus {value} · ร้านค้า {value2}", { value: summary.data?.activePlatformCodes ?? 0, value2: summary.data?.activeSellerCodes ?? 0 })}
         />
         <KpiCard
-          label="ใช้โค้ด (30 วัน)"
-          value={(summary.data?.redemptions30d ?? 0).toLocaleString("th-TH")}
-          note={change == null ? "ยังไม่มีข้อมูลเดือนก่อน" : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`}
-          tone={change == null || change === 0 ? undefined : change > 0 ? "up" : "down"}
+          label={t("admin.adminPromotionsContent.label4", "ใช้โค้ด (30 วัน)")}
+          value={(summary.data?.redemptions30d ?? 0).toLocaleString(intlLocale())}
+          note={
+            change == null
+              ? t("admin.adminPromotionsContent.note2", "ยังไม่มีข้อมูลเดือนก่อน")
+              : t("admin.adminPromotionsContent.note3", "{value}{change}% จากเดือนก่อน", { value: change > 0 ? "+" : "", change })
+          }
+          tone={
+            change == null || change === 0
+              ? undefined
+              : change > 0
+                ? "up"
+                : "down"
+          }
         />
         <KpiCard
-          label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
+          label={t("admin.adminPromotionsContent.label5", "ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)")}
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          note={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={costShare ? t("admin.adminPromotionsContent.note4", "{costShare} ของ GMV", { costShare }) : t("admin.adminPromotionsContent.note5", "ยังไม่มียอดขายใน 30 วัน")}
         />
         <KpiCard
-          label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
+          label={t("admin.adminPromotionsContent.label6", "ยอดขายจากออเดอร์ที่ใช้โค้ด")}
           value={formatBaht(summary.data?.salesWithCodes30d)}
-          note={orderShare ? `${orderShare} ของออเดอร์ทั้งหมด` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={
+            orderShare
+              ? t("admin.adminPromotionsContent.note6", "{orderShare} ของออเดอร์ทั้งหมด", { orderShare })
+              : t("admin.adminPromotionsContent.note5", "ยังไม่มียอดขายใน 30 วัน")
+          }
         />
       </div>
 
       <Card className="gap-0 overflow-hidden rounded-[12px] border border-border p-0 shadow-none ring-0">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <Tabs className="w-fit max-w-full" value={status ?? "ALL"} onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}>
-            <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]">
+          <Tabs
+            className="w-fit max-w-full"
+            value={status ?? "ALL"}
+            onValueChange={(value) =>
+              updateParams({ status: value === "ALL" ? null : String(value) })
+            }
+          >
+            <TabsList
+              aria-label={t("admin.adminPromotionsContent.ariaLabel", "กรองตามสถานะ")}
+              className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]"
+            >
               {STATUS_TABS.map((tab) => {
                 const count =
                   tab.value == null
-                    ? Object.values(counts ?? {}).reduce((sum, value) => sum + value, 0)
+                    ? Object.values(counts ?? {}).reduce(
+                        (sum, value) => sum + value,
+                        0,
+                      )
                     : (counts?.[tab.value] ?? 0);
                 return (
                   <TabsTrigger
@@ -179,27 +294,38 @@ export function AdminPromotionsContent() {
                     className="h-auto gap-1.5 rounded-sm border-0! px-2.5 py-1.5 text-[13px] text-muted-foreground data-active:font-semibold data-active:shadow-xs"
                   >
                     {tab.label}
-                    <span className="text-[11px] font-semibold text-[#9aa5ad]">{count}</span>
+                    <span className="text-[11px] font-semibold text-[#9aa5ad]">
+                      {count}
+                    </span>
                   </TabsTrigger>
                 );
               })}
             </TabsList>
           </Tabs>
           <div className="flex flex-wrap items-center gap-3">
-            <div role="group" aria-label="เจ้าของโค้ด" className="flex overflow-hidden rounded-sm border">
+            <ToggleGroup
+              aria-label={t("admin.adminPromotionsContent.ariaLabel2", "เจ้าของโค้ด")}
+              spacing={0}
+              variant="outline"
+              size="sm"
+              value={[owner ?? "ALL"]}
+              onValueChange={(next: string[]) => {
+                const value = next[0];
+                if (!value) return;
+                updateParams({ owner: value === "ALL" ? null : value });
+              }}
+              className="overflow-hidden rounded-sm"
+            >
               {OWNER_FILTERS.map((filter) => (
-                <Button
+                <ToggleGroupItem
                   key={filter.label}
-                  size="sm"
-                  variant="ghost"
-                  className="rounded-none! px-3 text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
-                  aria-pressed={owner === filter.value}
-                  onClick={() => updateParams({ owner: filter.value })}
+                  value={filter.value ?? "ALL"}
+                  className="rounded-sm text-[13px] text-[#414755] aria-pressed:bg-[#f0f7fc] aria-pressed:text-[#0058bc]"
                 >
                   {filter.label}
-                </Button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             <form
               role="search"
               className="w-[220px] max-w-full"
@@ -214,8 +340,8 @@ export function AdminPromotionsContent() {
                 </InputGroupAddon>
                 <InputGroupInput
                   className="text-[13px] md:text-[13px]"
-                  aria-label="ค้นหาโค้ด"
-                  placeholder="ค้นหาโค้ด / แคมเปญ / ร้าน"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel3", "ค้นหาโค้ด")}
+                  placeholder={t("admin.adminPromotionsContent.placeholder", "ค้นหาโค้ด / แคมเปญ / ร้าน")}
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
@@ -224,14 +350,20 @@ export function AdminPromotionsContent() {
           </div>
         </div>
 
-        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">กำลังโหลดโค้ด...</p> : null}
-        {list.isError ? (
-          <p role="alert" className="p-6 text-sm text-destructive">
-            โหลดโค้ดไม่สำเร็จ{" "}
-            <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void list.refetch()}>
-              ลองอีกครั้ง
-            </Button>
-          </p>
+        {list.isPending ? (
+          <TableSkeleton
+            rows={5}
+            columns={6}
+            className="mx-5 mb-5 rounded-md"
+          />
+        ) : null}
+        {list.isError && !list.data ? (
+          <ErrorState
+            error={list.error}
+            title={t("admin.adminPromotionsContent.title2", "โหลดโค้ดไม่สำเร็จ")}
+            onRetry={() => void list.refetch()}
+            className="m-5 min-h-48"
+          />
         ) : null}
         {list.data && rows.length === 0 ? (
           <Empty className="m-5 border border-dashed">
@@ -239,86 +371,135 @@ export function AdminPromotionsContent() {
               <EmptyMedia variant="icon">
                 <TicketPercent />
               </EmptyMedia>
-              <EmptyTitle>ยังไม่มีโค้ดในแท็บนี้</EmptyTitle>
-              <EmptyDescription>สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ</EmptyDescription>
+              <EmptyTitle>{t("admin.adminPromotionsContent.emptyTitle", "ยังไม่มีโค้ดในแท็บนี้")}</EmptyTitle>
+              <EmptyDescription>
+                {t("admin.adminPromotionsContent.emptyDescription", "สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ")}
+              </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button size="sm" render={<Link to="/admin/promotions/new" />} nativeButton={false}>
+              <Button
+                size="sm"
+                render={<Link to="/admin/promotions/new" />}
+                nativeButton={false}
+              >
                 <Plus />
-                สร้างโค้ด Pegasus
+                {t("admin.adminPromotionsContent.button2", "สร้างโค้ด Pegasus")}
               </Button>
             </EmptyContent>
           </Empty>
         ) : null}
         {rows.length > 0 ? (
-          <PromotionTable promotions={rows} scopeNames={scopeNames} now={now} onAction={onRowAction} />
+          <PromotionTable
+            promotions={rows}
+            scopeNames={scopeNames}
+            now={now}
+            onAction={onRowAction}
+          />
         ) : null}
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–{page * PROMOTION_PAGE_SIZE + rows.length} จาก{" "}
-            {totalItems} โค้ด
+            {t("admin.adminPromotionsContent.span", "แสดง")} {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–
+            {page * PROMOTION_PAGE_SIZE + rows.length} {t("admin.adminPromotionsContent.span2", "จาก")} {totalItems} {t("admin.adminPromotionsContent.span3", "โค้ด")}
           </span>
-          <nav aria-label="หน้ารายการโปรโมชั่น" className="flex items-center gap-2">
-            <Button
-              size="icon-sm"
-              className="size-7 text-[13px] text-[#414755]"
-              variant="outline"
-              aria-label="หน้าก่อนหน้า"
-              disabled={page === 0}
-              onClick={() => updateParams({ page: String(page - 1) }, false)}
-            >
-              ‹
-            </Button>
-            {pageNumbers.map((number) => (
-              <Button
-                key={number}
-                size="icon-sm"
-                className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
-                variant={number === page ? "default" : "outline"}
-                aria-current={number === page ? "page" : undefined}
-                aria-label={`หน้า ${number + 1}`}
-                onClick={() => updateParams({ page: number ? String(number) : null }, false)}
-              >
-                {number + 1}
-              </Button>
-            ))}
-            <Button
-              size="icon-sm"
-              className="size-7 text-[13px] text-[#414755]"
-              variant="outline"
-              aria-label="หน้าถัดไป"
-              disabled={page + 1 >= totalPages}
-              onClick={() => updateParams({ page: String(page + 1) }, false)}
-            >
-              ›
-            </Button>
-          </nav>
+          <Pagination aria-label={t("admin.adminPromotionsContent.ariaLabel4", "หน้ารายการโปรโมชั่น")} className="mx-0 w-auto">
+            <PaginationContent className="gap-2">
+              <PaginationItem>
+                <Button
+                  size="icon-sm"
+                  className="size-7 text-[13px] text-[#414755]"
+                  variant="outline"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel5", "หน้าก่อนหน้า")}
+                  disabled={page === 0}
+                  onClick={() =>
+                    updateParams({ page: String(page - 1) }, false)
+                  }
+                >
+                  <ChevronLeft />
+                </Button>
+              </PaginationItem>
+              {pageNumbers.map((number) => (
+                <PaginationItem key={number}>
+                  <Button
+                    size="icon-sm"
+                    className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
+                    variant={number === page ? "default" : "outline"}
+                    aria-current={number === page ? "page" : undefined}
+                    aria-label={t("admin.adminPromotionsContent.ariaLabel6", "หน้า {value}", { value: number + 1 })}
+                    onClick={() =>
+                      updateParams(
+                        { page: number ? String(number) : null },
+                        false,
+                      )
+                    }
+                  >
+                    {number + 1}
+                  </Button>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <Button
+                  size="icon-sm"
+                  className="size-7 text-[13px] text-[#414755]"
+                  variant="outline"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel7", "หน้าถัดไป")}
+                  disabled={page + 1 >= totalPages}
+                  onClick={() =>
+                    updateParams({ page: String(page + 1) }, false)
+                  }
+                >
+                  <ChevronRight />
+                </Button>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </Card>
 
       <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] px-4 py-3.5 text-[#956019]">
         <Info />
         <AlertDescription className="text-[13px] text-[#956019]">
-          โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล
-          (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
+          {t("admin.adminPromotionsContent.alertDescription", "โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow")}
         </AlertDescription>
       </Alert>
 
-      <PromotionActionDialog action={action} homeIds={homeIds} now={now} onChange={setAction} />
-      <PromotionHomeOrderDialog open={homeOpen} onOpenChange={setHomeOpen} promotions={platform.data ?? []} />
+      <PromotionActionDialog
+        action={action}
+        homeIds={homeIds}
+        now={now}
+        onChange={setAction}
+      />
+      <PromotionHomeOrderDialog
+        open={homeOpen}
+        onOpenChange={setHomeOpen}
+        promotions={platform.data ?? []}
+      />
       <PromotionRedemptionSheet
         promotionId={promoId}
         page={redemptionPage}
-        onPageChange={(next) => updateParams({ redemptionPage: next ? String(next) : null }, false)}
-        onClose={() => updateParams({ promo: null, redemptionPage: null }, false)}
+        onPageChange={(next) =>
+          updateParams({ redemptionPage: next ? String(next) : null }, false)
+        }
+        onClose={() =>
+          updateParams({ promo: null, redemptionPage: null }, false)
+        }
       />
     </main>
   );
 }
 
 /** การ์ดตัวเลขบนหัวหน้า (Figma PRM-A1 KPIs) — ป้ายเทา ตัวเลขหนา และบรรทัดเล็กใต้ตัวเลข */
-function KpiCard({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "up" | "down" }) {
+function KpiCard({
+  label,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note: string;
+  tone?: "up" | "down";
+}) {
   return (
     <Card className="min-w-0 gap-1.5 rounded-[12px] border border-border px-5 py-4 shadow-none ring-0">
       <p className="text-xs text-muted-foreground">{label}</p>

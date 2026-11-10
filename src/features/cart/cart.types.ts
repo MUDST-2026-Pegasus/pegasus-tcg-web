@@ -1,3 +1,5 @@
+import type { ListingPricing } from "@/components/sale";
+
 export interface CartItemResponse {
   id: number;
   cartId: number;
@@ -20,6 +22,8 @@ export interface CartItemResponse {
   sellerUsername?: string | null;
   imageUrl: string | null;
   productId: number | null;
+  /** ราคาที่มีผลตอนนี้ (SAL-04) — `listPrice` ขีดฆ่า + `salePrice` · ไม่บอกว่าใครออกเงิน */
+  pricing?: ListingPricing | null;
 }
 
 export interface CartResponse {

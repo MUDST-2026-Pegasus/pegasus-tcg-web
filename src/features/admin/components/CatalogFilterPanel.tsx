@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { formatCount } from "../catalog.format";
 import type { CatalogCounts } from "../catalog.queries";
 import type { CardSet, Game } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 const ALL_SETS = "all";
 
@@ -37,6 +38,7 @@ export function CatalogFilterPanel({
   activeSetId,
   onSetChange,
 }: CatalogFilterPanelProps) {
+  const { t } = useTranslate("admin");
   const activeGames = games.filter((game) => game.active).length;
   const retiredGames = games.length - activeGames;
 
@@ -45,10 +47,10 @@ export function CatalogFilterPanel({
       {/* รายชื่อเกม */}
       <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
         <div className="flex flex-col gap-0.5 px-4 pt-4 pb-3">
-          <p className="text-sm font-semibold text-foreground">เกมทั้งหมด</p>
+          <p className="text-sm font-semibold text-foreground">{t("catalog.games.all", "เกมทั้งหมด")}</p>
           <p className="text-[11px] text-muted-foreground">
-            {activeGames} เกมที่เปิดใช้งาน
-            {retiredGames > 0 ? ` · ปิดแล้ว ${retiredGames}` : ""}
+            {t("catalog.games.activeCount", "{count} เกมที่เปิดใช้งาน", { count: activeGames })}
+            {retiredGames > 0 ? ` · ${t("catalog.games.retiredCount", "ปิดแล้ว {count}", { count: retiredGames })}` : ""}
           </p>
         </div>
 
@@ -91,7 +93,7 @@ export function CatalogFilterPanel({
                     </span>
                     {!game.active ? (
                       <span className="shrink-0 text-[10px] text-[#9aa5ad]">
-                        ปิดแล้ว
+                        {t("catalog.games.retired", "ปิดแล้ว")}
                       </span>
                     ) : null}
                   </span>
@@ -113,7 +115,7 @@ export function CatalogFilterPanel({
       {/* กรองตามชุด */}
       <Card className="gap-3 rounded-xl border border-border p-4 shadow-none ring-0">
         <p className="text-[13px] font-semibold text-foreground">
-          กรองตามชุด (Set)
+          {t("catalog.sets.filterTitle", "กรองตามชุด (Set)")}
         </p>
         {/* ไม่ใช้ QueryBoundary — ErrorState สูงครึ่งจอ ใหญ่เกินกล่องแคบ ๆ นี้ */}
         {cardSets.isPending ? (
@@ -124,20 +126,20 @@ export function CatalogFilterPanel({
           </div>
         ) : cardSets.data === undefined ? (
           <p className="text-xs text-muted-foreground">
-            โหลดรายชื่อชุดไม่สำเร็จ{" "}
+            {t("catalog.sets.loadFailed", "โหลดรายชื่อชุดไม่สำเร็จ")}{" "}
             <button
               type="button"
               onClick={() => cardSets.refetch()}
               className="cursor-pointer font-medium text-[#0058bc] underline-offset-2 hover:underline"
             >
-              ลองใหม่
+              {t("actions.retry", "ลองใหม่", { ns: "common" })}
             </button>
           </p>
         ) : cardSets.data.length === 0 ? (
-          <p className="text-xs text-muted-foreground">เกมนี้ยังไม่มีชุดการ์ด</p>
+          <p className="text-xs text-muted-foreground">{t("catalog.sets.empty", "เกมนี้ยังไม่มีชุดการ์ด")}</p>
         ) : (
           <RadioGroup
-            aria-label="กรองตามชุด"
+            aria-label={t("catalog.sets.filter", "กรองตามชุด")}
             value={activeSetId === null ? ALL_SETS : String(activeSetId)}
             onValueChange={(value) =>
               onSetChange(value === ALL_SETS ? null : Number(value))
@@ -146,7 +148,7 @@ export function CatalogFilterPanel({
             // py-2 เผื่อพื้นที่กดของ radio (after:-inset-y-2) ไม่งั้นล้นแล้วกล่องเลื่อนเอง
             className="-my-2 max-h-72 gap-[9px] overflow-x-hidden overflow-y-auto py-2"
           >
-            <SetOption id="card-set-all" value={ALL_SETS} label="ทุกชุด" />
+            <SetOption id="card-set-all" value={ALL_SETS} label={t("catalog.sets.all", "ทุกชุด")} />
             {cardSets.data.map((set) => (
               <SetOption
                 key={set.id}
@@ -162,11 +164,11 @@ export function CatalogFilterPanel({
 
       {/* ตัวเลขสรุป */}
       <div className="flex flex-col gap-1.5 rounded-xl bg-[#e8f1fc] p-4 text-[#0058bc]">
-        <p className="text-[11px] font-medium">สินค้าในแคตตาล็อก</p>
+        <p className="text-[11px] font-medium">{t("catalog.games.productTotal", "สินค้าในแคตตาล็อก")}</p>
         <p className="text-2xl font-bold tracking-[-0.5px]">
           {counts.total === undefined ? "…" : formatCount(counts.total)}
         </p>
-        <p className="text-[11px]">ทุกเกมรวมกัน นับรวมที่ปิดใช้งาน</p>
+        <p className="text-[11px]">{t("catalog.games.productTotalHint", "ทุกเกมรวมกัน นับรวมที่ปิดใช้งาน")}</p>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ShoppingCart, ChevronRight, Sparkles, PackageCheck, Truck, ShieldCheck, BadgeCheck, Minus, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
 
-import { DetailPageSkeleton, ListRowsSkeleton, TextLinesSkeleton } from "@/components/common/PageSkeletons";
+import { DetailPageSkeleton, ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,71 +19,52 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/features/auth/auth.queries";
 import { addToCartErrorMessage } from "@/features/cart/cart.format";
+import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
 import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { effectivePrice } from "@/components/sale";
+import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
+import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
+import { CardAttributesCard, CardEffectsCard, ProductBadges, ProductGallery, TrustStrip } from "../components/ProductDetailSections";
 import { ListingSeller } from "../ListingSeller";
-import { formatListingDelivery, formatListingPrice } from "../listing.format";
-import { useGameList, useProductCardEffects, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
+import { ProductAuctionBox } from "../components/ProductAuctionBox";
+import { formatListingDelivery } from "../listing.format";
+import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+import { usePageTitle } from "@/hooks/use-page-title";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
 const ALL_VARIANTS = "all";
 
 function formatPrice(amount: number, currency = "THB") {
-  return new Intl.NumberFormat("th-TH", {
+  return new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency,
   }).format(amount);
 }
 
-function ProductImage({
-                        src,
-                        alt,
-                        className,
-                      }: {
-  src: string;
-  alt: string;
-  className?: string;
-}) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return (
-        <div className="flex min-h-24 items-center justify-center p-4 text-center text-sm text-muted-foreground">
-          โหลดรูปไม่ได้ กรุณาลองโหลดข้อมูลใหม่
-        </div>
-    );
-  }
-
-  return (
-      <img
-          src={src}
-          alt={alt}
-          className={className}
-          onError={() => setFailed(true)}
-      />
-  );
-}
-
 export function ProductDetailPage() {
+  const { t } = useTranslate("buyer");
   const { productId } = useParams<{ productId: string }>();
 
   const productQuery = useProductDetail(productId);
+  usePageTitle(productQuery.data?.product.name);
 
   if (!productId) {
     return (
         <div className="p-8 text-center">
-          <h1 className="text-xl font-bold">ไม่พบรหัสสินค้า</h1>
+          <h1 className="text-xl font-bold">{t("product.missingId", "ไม่พบรหัสสินค้า")}</h1>
           <Link to="/products" className="mt-4 inline-block underline">
-            กลับหน้ารายการสินค้า
+            {t("product.backToList", "กลับหน้ารายการสินค้า")}
           </Link>
         </div>
     );
   }
 
   if (productQuery.isPending) {
-    return <DetailPageSkeleton label="กำลังโหลดสินค้า" />;
+    return <DetailPageSkeleton label={t("product.loading", "กำลังโหลดสินค้า")} />;
   }
 
   if (productQuery.isError) {
@@ -94,24 +75,24 @@ export function ProductDetailPage() {
     return (
         <div role="alert" className="space-y-4 p-8 text-center">
           <h1 className="text-xl font-bold">
-            {notFound ? "ไม่พบสินค้านี้" : "โหลดสินค้าไม่สำเร็จ"}
+            {notFound ? t("product.notFound", "ไม่พบสินค้านี้") : t("product.loadFailed", "โหลดสินค้าไม่สำเร็จ")}
           </h1>
 
           <p className="text-muted-foreground">
             {notFound
-                ? "สินค้านี้อาจถูกนำออก หรือ URL ไม่ถูกต้อง"
-                : "กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"}
+                ? t("product.notFoundHint", "สินค้านี้อาจถูกนำออก หรือ URL ไม่ถูกต้อง")
+                : t("product.loadFailedHint", "กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง")}
           </p>
 
           {!notFound && (
               <Button onClick={() => void productQuery.refetch()}>
-                ลองใหม่
+                {t("actions.retry", "ลองใหม่", { ns: "common" })}
               </Button>
           )}
 
           <div>
             <Link to="/products" className="underline">
-              กลับหน้ารายการสินค้า
+              {t("product.backToList", "กลับหน้ารายการสินค้า")}
             </Link>
           </div>
         </div>
@@ -137,13 +118,18 @@ function ProductDetailContent({
   refreshing: boolean;
   onRefresh: () => void;
 }) {
+  const { t } = useTranslate("buyer");
   const { product, variants, images } = data;
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
-  const itemLabel = product.productType === "SINGLE_CARD" ? "cards" : "items";
+  const miniCart = useMiniCart();
+  const itemCount = (count: number) =>
+    product.productType === "SINGLE_CARD"
+      ? t("product.cardCount", "{count, plural, =1 {# card} other {# cards}}", { count })
+      : t("product.itemCount", "{count, plural, =1 {# item} other {# items}}", { count });
   const variantItems = [
-    { value: ALL_VARIANTS, label: "All variants" },
+    { value: ALL_VARIANTS, label: t("product.allVariants", "All variants") },
     ...variants.map((variant) => ({
       value: String(variant.id),
       label: [variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / "),
@@ -165,11 +151,9 @@ function ProductDetailContent({
   const listingsQuery = useProductListings(product.id);
   const marketQuery = useProductMarket(product.id);
   const collectorsQuery = useProductCollectors(product.id, collectorPage);
-  const effectsQuery = useProductCardEffects(product.id);
   const gamesQuery = useGameList();
 
   const listings = listingsQuery.data ?? [];
-  const effects = effectsQuery.data ?? [];
 
   const gallery = [...images]
       .filter(
@@ -184,11 +168,7 @@ function ProductDetailContent({
               a.sortOrder - b.sortOrder,
       );
 
-  const currentImage =
-      gallery.find((image) => image.id === selectedImageId) ??
-      gallery[0];
-
-  const variantListings = selectedVariant
+    const variantListings = selectedVariant
       ? listings.filter(
           (listing) =>
               listing.card.variantId === Number(selectedVariant),
@@ -217,19 +197,6 @@ function ProductDetailContent({
   const visibleListings = filteredListings.slice(0, listingPreviewLimit);
   const hasMoreListings = filteredListings.length > listingPreviewLimit;
 
-  const attributes = product.attributes ?? {};
-  const displayAttribute = (key: string) => {
-    const value = attributes[key];
-    return typeof value === "string" || typeof value === "number" ? String(value) : "—";
-  };
-  const attributeRows = [
-    ["Card number", product.cardNumber || "—"],
-    ["Rarity", product.rarityCode || "—"],
-    ["Card type", displayAttribute("card_type")],
-    ["Stage", displayAttribute("stage")],
-    ["HP", displayAttribute("hp")],
-    ["Artist", displayAttribute("artist")],
-  ];
   const conditionOptions: CardCondition[] = product.productType === "SINGLE_CARD"
       ? [...new Set<CardCondition>(["NM", "LP", "MP", ...availableConditions])]
       : availableConditions;
@@ -247,24 +214,23 @@ function ProductDetailContent({
   const availableQuantity = filteredListings.reduce((sum, row) => sum + row.quantityAvailable, 0);
   const hasListings = filteredListings.length > 0;
 
-  async function addListingToCart(listingId: number, amount: number) {
+  async function addListingToCart(listingId: number, amount: number, trigger?: HTMLElement) {
+    const opening = miniCart.capture(listingId, trigger);
     try {
       await addCartItem.mutateAsync({ listingId, quantity: amount });
-      toast.add({
-        title: "เพิ่มลงรถเข็นแล้ว",
-        description: `เพิ่มสินค้า ${amount} ${amount === 1 ? itemLabel.slice(0, -1) : itemLabel}`,
-        type: "success",
-      });
+      const added = listings.find((item) => item.id === listingId);
+      miniCart.open(opening);
+      if (added) notifyAddedAtSalePrice(added.card.productName, amount, added.pricing);
       return true;
     } catch (error) {
-      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
+      toast.add({ title: t("product.addToCartFailed", "เพิ่มลงรถเข็นไม่สำเร็จ"), description: addToCartErrorMessage(error), type: "error" });
       return false;
     }
   }
 
-  async function handleAddToCart() {
+  async function handleAddToCart(trigger?: HTMLElement) {
     if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
-    await addListingToCart(purchasableListing.id, selectedQuantity);
+    await addListingToCart(purchasableListing.id, selectedQuantity, trigger);
   }
 
   async function handleBuyNow() {
@@ -294,8 +260,8 @@ function ProductDetailContent({
       navigate(`/checkout?${params.toString()}`);
     } catch (error) {
       toast.add({
-        title: "ซื้อสินค้าไม่สำเร็จ",
-        description: addToCartErrorMessage(error, "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง"),
+        title: t("product.buyFailed", "ซื้อสินค้าไม่สำเร็จ"),
+        description: addToCartErrorMessage(error, t("product.buyFailedHint", "ดำเนินการซื้อไม่สำเร็จ กรุณาลองอีกครั้ง")),
         type: "error",
       });
     } finally {
@@ -316,43 +282,30 @@ function ProductDetailContent({
   return (
     <div className="flex-1 bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-8 sm:px-6 lg:py-10">
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Home</Link>
+        <nav aria-label={t("product.breadcrumb", "Breadcrumb")} className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-primary">{t("nav.home", "Home", { ns: "common" })}</Link>
           <ChevronRight className="size-4" />
-          <Link to="/products" className="hover:text-primary">Products</Link>
+          <Link to="/products" className="hover:text-primary">{t("product.products", "Products")}</Link>
           <ChevronRight className="size-4" />
           {gameName && <><span>{gameName}</span><ChevronRight className="size-4" /></>}
           <span className="font-medium text-foreground">{product.name}</span>
         </nav>
 
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1.03fr)_minmax(390px,.97fr)] lg:gap-12">
-          <div className={`grid min-w-0 gap-4 ${gallery.length > 0 ? "sm:grid-cols-[78px_minmax(0,1fr)]" : "sm:grid-cols-1"}`}>
-            {gallery.length > 0 && <div className="order-2 flex gap-3 overflow-x-auto sm:order-1 sm:flex-col">
-              {gallery.map((image, index) => (
-                <button key={image.id} type="button" onClick={() => setSelectedImageId(image.id)}
-                  aria-label={`ดูรูปสินค้าที่ ${index + 1}`} aria-pressed={currentImage?.id === image.id}
-                  className={`flex aspect-[3/4] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-card p-1.5 transition sm:w-full ${currentImage?.id === image.id ? "border-primary shadow-sm" : "border-transparent hover:border-primary/40"}`}>
-                  <ProductImage key={image.url} src={image.url} alt={image.altText ?? product.name} className="h-full w-full object-contain" />
-                </button>
-              ))}
-            </div>}
-            <div className="order-1 flex min-h-[500px] flex-col items-center justify-center gap-4 rounded-2xl border bg-card p-8 shadow-sm sm:order-2 lg:min-h-[620px]">
-              {currentImage ? (
-                <ProductImage key={currentImage.url} src={currentImage.url} alt={currentImage.altText ?? product.name}
-                  className="max-h-[560px] w-full object-contain drop-shadow-[0_18px_24px_rgba(24,24,27,0.22)]" />
-              ) : <p className="text-center text-sm text-muted-foreground">ยังไม่มีรูปสินค้า</p>}
-              {!currentImage && <Button variant="ghost" size="sm" onClick={onRefresh} disabled={refreshing} className="text-sm text-muted-foreground">
-                {refreshing ? "กำลังโหลด..." : "โหลดรูปใหม่"}
-              </Button>}
-            </div>
-          </div>
+          <ProductGallery
+            images={gallery.map((image) => ({ id: image.id, url: image.url, alt: image.altText ?? product.name }))}
+            selectedId={selectedImageId}
+            onSelect={(id) => setSelectedImageId(Number(id))}
+            emptyAction={
+              <Button variant="ghost" size="sm" onClick={onRefresh} disabled={refreshing} className="text-sm text-muted-foreground">
+                {refreshing ? t("product.refreshing", "กำลังโหลด...") : t("product.reloadImages", "โหลดรูปใหม่")}
+              </Button>
+            }
+          />
 
           <div className="flex min-w-0 flex-col gap-6">
             <div>
-              <div className="mb-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">{gameName ?? PRODUCT_TYPE_LABELS[product.productType]}</span>
-                {product.rarityCode && <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">{product.rarityCode}</span>}
-              </div>
+              <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
               <p className="mt-2 min-h-6 text-muted-foreground">{[product.nameLocal, product.cardNumber].filter(Boolean).join(" · ") || "—"}</p>
             </div>
@@ -360,26 +313,26 @@ function ProductDetailContent({
             <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div><p className="text-sm font-medium text-muted-foreground">Market price</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
-                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`}</span>last 30 days</div>
+                  <div><p className="text-sm font-medium text-muted-foreground">{t("product.marketPrice", "Market price")}</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
+                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}%`}</span>{t("product.last30Days", "last 30 days")}</div>
                 </div>
-                {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)</p>}
+                {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">{t("product.lowSampleDetail", "ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)")}</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
-                  <div><span className="block text-xs text-muted-foreground">Last sold</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">Listed from</span><strong>{listingsReady && firstListing ? formatPrice(firstListing.price, firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">Available</span><strong>{listingsReady ? `${availableQuantity} ${itemLabel}` : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.lastSold", "Last sold")}</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.listedFrom", "Listed from")}</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price), firstListing.currency) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.available", "Available")}</span><strong>{listingsReady ? itemCount(availableQuantity) : "—"}</strong></div>
                 </div>
               </CardContent>
             </Card>
 
             <div>
-              <p className="mb-3 font-bold">Select variant</p>
+              <p className="mb-3 font-bold">{t("product.selectVariant", "Select variant")}</p>
               <Select
                 items={variantItems}
                 value={selectedVariant || ALL_VARIANTS}
                 onValueChange={(value) => changeVariant(!value || value === ALL_VARIANTS ? "" : value)}
               >
-                <SelectTrigger aria-label="Select variant" className="h-12 w-full rounded-xl border-border bg-card px-4">
+                <SelectTrigger aria-label={t("product.selectVariant", "Select variant")} className="h-12 w-full rounded-xl border-border bg-card px-4">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -394,10 +347,10 @@ function ProductDetailContent({
 
             <div>
               <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="font-bold">Select condition</h2>
-                {effectiveCondition && <button type="button" onClick={() => changeCondition("")} className="text-sm font-semibold text-primary hover:underline">All conditions</button>}
+                <h2 className="font-bold">{t("product.selectCondition", "Select condition")}</h2>
+                {effectiveCondition && <button type="button" onClick={() => changeCondition("")} className="text-sm font-semibold text-primary hover:underline">{t("product.allConditions", "All conditions")}</button>}
               </div>
-              <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label="Select condition">
+              <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label={t("product.selectCondition", "Select condition")}>
                 {conditionOptions.map((condition) => {
                   const offer = variantListings.find((row) => row.condition === condition);
                   const enabled = Boolean(offer) && listingsReady;
@@ -408,26 +361,26 @@ function ProductDetailContent({
                       className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-card p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
                       <span className="text-sm font-bold">{condition}</span>
                       <span className="text-xs text-muted-foreground">{CONDITION_LABELS[condition]}</span>
-                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(offer.price, offer.currency) : "—"}</span>
+                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price), offer.currency) : "—"}</span>
                     </button>
                   );
                 })}
               </div>
-              {listingsQuery.isPending && <p role="status" className="mt-2 text-[13px] text-muted-foreground">กำลังโหลดราคา...</p>}
-              {listingsQuery.isError && <p role="alert" className="mt-2 text-[13px] text-muted-foreground">โหลดราคาไม่สำเร็จ</p>}
+              {listingsQuery.isPending && <p role="status" className="mt-2 text-[13px] text-muted-foreground">{t("product.loadingPrice", "กำลังโหลดราคา...")}</p>}
+              {listingsQuery.isError && <p role="alert" className="mt-2 text-[13px] text-muted-foreground">{t("product.priceFailed", "โหลดราคาไม่สำเร็จ")}</p>}
             </div>
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold">Quantity</p>
-                <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? `${availableForSelectedListing} available from ${purchasableListing?.seller.displayName || purchasableListing?.seller.username}` : "Out of stock"}</p>
+                <p className="text-sm font-semibold">{t("product.quantity", "Quantity")}</p>
+                <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? t("product.availableFrom", "{count} available from {seller}", { count: availableForSelectedListing, seller: (purchasableListing?.seller.displayName || purchasableListing?.seller.username) ?? "" }) : t("product.outOfStock", "Out of stock")}</p>
               </div>
               <div className="flex items-center rounded-lg border bg-card">
-                <Button type="button" variant="ghost" size="icon" aria-label="ลดจำนวนสินค้า" disabled={!purchasableListing || selectedQuantity <= 1 || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.max(1, selectedQuantity - 1) })}>
+                <Button type="button" variant="ghost" size="icon" aria-label={t("product.decreaseQuantity", "ลดจำนวนสินค้า")} disabled={!purchasableListing || selectedQuantity <= 1 || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.max(1, selectedQuantity - 1) })}>
                   <Minus className="size-4" />
                 </Button>
-                <span aria-live="polite" aria-label={`จำนวน ${selectedQuantity}`} className="min-w-10 text-center text-sm font-semibold">{selectedQuantity}</span>
-                <Button type="button" variant="ghost" size="icon" aria-label="เพิ่มจำนวนสินค้า" disabled={!purchasableListing || selectedQuantity >= availableForSelectedListing || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.min(availableForSelectedListing, selectedQuantity + 1) })}>
+                <span aria-live="polite" aria-label={t("product.quantityValue", "จำนวน {count}", { count: selectedQuantity })} className="min-w-10 text-center text-sm font-semibold">{selectedQuantity}</span>
+                <Button type="button" variant="ghost" size="icon" aria-label={t("product.increaseQuantity", "เพิ่มจำนวนสินค้า")} disabled={!purchasableListing || selectedQuantity >= availableForSelectedListing || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.min(availableForSelectedListing, selectedQuantity + 1) })}>
                   <Plus className="size-4" />
                 </Button>
               </div>
@@ -435,35 +388,36 @@ function ProductDetailContent({
             <div className="grid grid-cols-2 gap-3">
               <Button type="button" className="h-14 text-base font-bold shadow-md" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing || isAuthLoading} onClick={() => void handleBuyNow()}>
                 {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? "Out of Stock" : isAuthLoading ? "Loading…" : "Buy now"}{purchasableListing ? ` · ${formatPrice(purchasableListing.price, purchasableListing.currency)}` : ""}
+                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "Out of Stock") : isAuthLoading ? t("product.loadingButton", "Loading…") : t("product.buyNow", "Buy now")}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price), purchasableListing.currency)}` : ""}
               </Button>
-              <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={() => void handleAddToCart()}>
+              <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={(event) => void handleAddToCart(event.currentTarget)}>
                 {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? "Out of Stock" : "Add to cart"}
+                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "Out of Stock") : t("product.addToCart", "Add to cart")}
               </Button>
             </div>
-            <div className="grid grid-cols-3 divide-x rounded-2xl border bg-card px-2 py-4 text-center">
-              <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Tracked shipping</p></div>
-              <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Buyer protection</p></div>
-              <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Verified sellers</p></div>
-            </div>
+            {/* มีประมูลการ์ดรุ่นนี้เปิดอยู่ [TCG-636] */}
+            <ProductAuctionBox
+              variantIds={selectedVariant ? [Number(selectedVariant)] : variants.map((variant) => variant.id)}
+              productName={product.name}
+            />
+            <TrustStrip />
           </div>
         </section>
 
         <section className="min-w-0 rounded-2xl border bg-card p-5 shadow-sm sm:p-7">
           <div className="mb-6">
-            <div><p className="text-sm font-semibold text-primary">{listingsReady ? `${availableQuantity} available` : "— available"}</p><h2 className="mt-1 text-2xl font-bold">Market listings</h2></div>
+            <div><p className="text-sm font-semibold text-primary">{listingsReady ? t("product.availableCount", "{count} available", { count: availableQuantity }) : t("product.availableUnknown", "— available")}</p><h2 className="mt-1 text-2xl font-bold">{t("product.marketListings", "Market listings")}</h2></div>
           </div>
-          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={4} /></div> : listingsQuery.isError ? (
-            <div role="alert" className="space-y-3 py-8 text-center"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
-          ) : !hasListings ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีผู้ขายสำหรับตัวเลือกนี้</p> : (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label={t("product.loadingListings", "กำลังโหลดประกาศขาย")}><ListRowsSkeleton rows={4} /></div> : listingsQuery.isError ? (
+            <div role="alert" className="space-y-3 py-8 text-center"><p>{t("product.listingsFailed", "โหลดประกาศขายไม่สำเร็จ")}</p><Button onClick={() => void listingsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button></div>
+          ) : !hasListings ? <p className="py-12 text-center text-sm text-muted-foreground">{t("product.noSellers", "ยังไม่มีผู้ขายสำหรับตัวเลือกนี้")}</p> : (
             <div className="divide-y">
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid gap-4 py-5 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,.8fr)_minmax(0,.9fr)_auto] sm:items-center">
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
-                  <div><span className="block text-xs text-muted-foreground">Condition</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">Delivery</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><strong className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]">{formatListingPrice(listing.price)}</strong><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={() => void addListingToCart(listing.id, 1)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.condition", "Condition")}</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.delivery", "Delivery")}</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={(event) => void addListingToCart(listing.id, 1, event.currentTarget)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : t("product.add", "Add")}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "more")}</Button></div>
                 </article>
               ))}
             </div>
@@ -476,7 +430,7 @@ function ProductDetailContent({
                 <div className="h-4 w-1/6 rounded bg-muted-foreground/30" />
               </div>
               <div className="relative -mt-3 flex justify-center bg-gradient-to-t from-white via-white to-transparent px-3 pt-3">
-                <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">View all</Link>
+                <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{t("product.viewAll", "View all")}</Link>
               </div>
             </div>
           )}
@@ -488,14 +442,14 @@ function ProductDetailContent({
             <p className="text-xs leading-4 text-muted-foreground">People who have made this {product.productType === "SINGLE_CARD" ? "card" : "product"} public · {collectorsQuery.data?.totalItems ?? "—"} collectors</p>
           </div>
           {collectorsQuery.isPending ? (
-            <div role="status" aria-busy="true" aria-label="กำลังโหลดนักสะสม"><ListRowsSkeleton rows={3} /></div>
+            <div role="status" aria-busy="true" aria-label={t("product.loadingCollectors", "กำลังโหลดนักสะสม")}><ListRowsSkeleton rows={3} /></div>
           ) : collectorsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center">
-              <p>โหลดรายชื่อนักสะสมไม่สำเร็จ</p>
-              <Button onClick={() => void collectorsQuery.refetch()}>ลองใหม่</Button>
+              <p>{t("product.collectorsFailed", "โหลดรายชื่อนักสะสมไม่สำเร็จ")}</p>
+              <Button onClick={() => void collectorsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button>
             </div>
           ) : collectorsQuery.data.items.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีนักสะสมที่เปิดการ์ดใบนี้เป็นสาธารณะ</p>
+            <p className="py-12 text-center text-sm text-muted-foreground">{t("product.noCollectors", "ยังไม่มีนักสะสมที่เปิดการ์ดใบนี้เป็นสาธารณะ")}</p>
           ) : (
             <div className="divide-y">
               {collectorsQuery.data.items.map((collector) => (
@@ -507,59 +461,29 @@ function ProductDetailContent({
                     </Avatar>
                     <div className="min-w-0">
                       <h3 className="truncate text-sm font-semibold leading-5">{collector.displayName || collector.username}</h3>
-                      <p className="truncate text-xs leading-4 text-muted-foreground">@{collector.username} · {collector.quantity} {collector.quantity === 1 ? itemLabel.slice(0, -1) : itemLabel}</p>
+                      <p className="truncate text-xs leading-4 text-muted-foreground">@{collector.username} · {itemCount(collector.quantity)}</p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    <Badge variant="secondary">In catalog</Badge>
-                    <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>View profile</Button>
+                    <Badge variant="secondary">{t("product.inCatalog", "In catalog")}</Badge>
+                    <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>{t("product.viewProfile", "View profile")}</Button>
                   </div>
                 </article>
               ))}
             </div>
           )}
           {collectorsQuery.data && collectorsQuery.data.totalPages > 1 && (
-            <nav aria-label="หน้านักสะสม" className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
-              <Button variant="outline" disabled={collectorPage === 0} onClick={() => setCollectorPage(collectorPage - 1)}>ก่อนหน้า</Button>
+            <nav aria-label={t("product.collectorPagination", "หน้านักสะสม")} className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
+              <Button variant="outline" disabled={collectorPage === 0} onClick={() => setCollectorPage(collectorPage - 1)}>{t("actions.previous", "ก่อนหน้า", { ns: "common" })}</Button>
               <span className="text-[13px]">{collectorPage + 1} / {collectorsQuery.data.totalPages}</span>
-              <Button variant="outline" disabled={collectorPage + 1 >= collectorsQuery.data.totalPages} onClick={() => setCollectorPage(collectorPage + 1)}>ถัดไป</Button>
+              <Button variant="outline" disabled={collectorPage + 1 >= collectorsQuery.data.totalPages} onClick={() => setCollectorPage(collectorPage + 1)}>{t("actions.next", "ถัดไป", { ns: "common" })}</Button>
             </nav>
           )}
         </section>
 
         <section className="grid gap-6 lg:grid-cols-2">
-          <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />Card attributes</h2>
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">{attributeRows.map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 break-words font-semibold">{value}</dd></div>)}</dl>
-            {product.description && <p className="mt-5 whitespace-pre-wrap border-t pt-4 text-sm leading-relaxed text-muted-foreground">{product.description}</p>}
-          </CardContent></Card>
-          {product.productType === "SINGLE_CARD" && (
-            <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-              <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />Abilities &amp; Attacks</h2>
-              {effectsQuery.isPending ? (
-                <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>
-              ) : effectsQuery.isError ? (
-                <div role="alert" className="space-y-2 text-sm"><p>โหลดความสามารถการ์ดไม่สำเร็จ</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>ลองใหม่</Button></div>
-              ) : effects.length === 0 ? (
-                <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลความสามารถและท่าโจมตีของการ์ดใบนี้</p>
-              ) : (
-                <div className="divide-y">
-                  {effects.map((effect, index) => (
-                    <div key={`${effect.effectType}-${effect.displayOrder}-${index}`} className="py-4 first:pt-0 last:pb-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary">{effect.effectType === "ABILITY" ? "Ability" : effect.effectType === "ATTACK" ? "Attack" : "Rule"}</Badge>
-                        <h3 className="font-semibold">{effect.name}</h3>
-                        {effect.damage !== null && <strong className="ml-auto text-lg">{effect.damage}</strong>}
-                      </div>
-                      {effect.energyCost.length > 0 && <p className="mt-2 text-xs text-muted-foreground">Energy: {effect.energyCost.join(" · ")}</p>}
-                      {effect.effectText && <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{effect.effectText}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-            </CardContent></Card>
-          )}
+          <CardAttributesCard product={product} />
+          {product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.id} />}
         </section>
       </main>
     </div>

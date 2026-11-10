@@ -64,23 +64,34 @@ import {
   type SearchFilters,
   type SearchSort,
 } from "@/features/catalog/search.params";
+import { PriceTag, SaleBadge, isOnSale } from "@/components/sale";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 const TYPING_DELAY_MS = 300;
 const ALL_CATEGORIES = "all";
 
 function SearchProductCard({ product }: { product: ProductSummaryDto }) {
-  const price = formatPrice(product.lowestPrice);
+  const { t } = useTranslate("buyer");
+  const onSale = isOnSale(product.pricing);
+  const price = formatPrice(onSale && product.pricing ? product.pricing.salePrice : product.lowestPrice);
 
   return (
     <Link
       to={productHref(product.slug)}
-      aria-label={`${product.name} ราคา ${price}`}
+      aria-label={t("search.productAria", "{name} ราคา {price}", { name: product.name, price })}
       className="block rounded-[11px] outline-none transition-[filter] hover:drop-shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <Card className="h-[231px] gap-3 rounded-[11px] py-[15px] shadow-none ring-1 ring-foreground/5">
         <CardContent className="px-[19px]">
-          <div className="h-[92px] overflow-hidden rounded-lg bg-muted">
+          <div className="relative h-[92px] overflow-hidden rounded-lg bg-muted">
+            {onSale && product.pricing ? (
+              <SaleBadge
+                type={product.pricing.sale?.type === "FLASH_SALE" ? "flash" : "percent"}
+                percent={product.pricing.discountPercent}
+                className="absolute top-1.5 left-1.5"
+              />
+            ) : null}
             {product.primaryImageUrl ? (
               <img
                 src={product.primaryImageUrl}
@@ -93,21 +104,21 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
         </CardContent>
         <CardHeader className="gap-2 px-[19px]">
           <Badge variant="secondary" className="h-4 rounded-full px-2 text-[9px]">
-            {PRODUCT_TYPE_LABELS[product.productType] ?? "Other"}
+            {PRODUCT_TYPE_LABELS[product.productType] ?? t("search.typeOther", "Other")}
           </Badge>
           <CardTitle className="line-clamp-2 h-[37px] text-xs leading-[18px] font-semibold">
             {product.name}
           </CardTitle>
         </CardHeader>
         <CardFooter className="mt-auto px-[19px]">
-          <p
+          {onSale ? <PriceTag pricing={product.pricing} size="sm" /> : <p
             className={cn(
               "text-base leading-[22px] font-semibold",
               product.lowestPrice === null ? "text-muted-foreground" : "text-primary",
             )}
           >
             {price}
-          </p>
+          </p>}
         </CardFooter>
       </Card>
     </Link>
@@ -145,8 +156,19 @@ function toggle<T>(list: T[], value: T): T[] {
 }
 
 export function SearchResultsPage() {
+  const { t } = useTranslate("buyer");
   const [params, setParams] = useSearchParams();
   const filters = readFilters(params);
+
+  const sortLabels: Record<SearchSort, string> = {
+    relevance: t("search.sort.relevance", "Most relevant"),
+    featured: t("search.sort.featured", "Featured"),
+    newest: t("search.sort.newest", "Newest"),
+    price_asc: t("search.sort.priceAsc", "Price: Low to High"),
+    price_desc: t("search.sort.priceDesc", "Price: High to Low"),
+    name: t("search.sort.name", "Name: A to Z"),
+  };
+  const sorts = SEARCH_SORTS.map((value) => ({ value, label: sortLabels[value] }));
 
   const games = useGameList();
   const categories = useCategoryList();
@@ -183,7 +205,9 @@ export function SearchResultsPage() {
   // เรียก update ของ render ล่าสุดเสมอ
   const commitQuery = useEffectEvent((next: string) => {
     // replace: ไม่ต้องกด back ย้อนทีละคำที่เคยพิมพ์
-    update({ q: next }, { replace: true });
+    const defaultSort = filters.q ? "relevance" : "featured";
+    update({ q: next, sort: filters.sort === defaultSort ? (next ? "relevance" : "featured") : filters.sort },
+      { replace: true });
   });
   useEffect(() => {
     const next = searchInput.trim();
@@ -240,34 +264,37 @@ export function SearchResultsPage() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-[21px] px-[21px] pt-8 pb-14">
         <Breadcrumb>
           <BreadcrumbList className="text-[12px]">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("nav.home", "Home", { ns: "common" })}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Search Results</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>{t("search.breadcrumb", "Search Results")}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <header className="flex flex-col gap-[7px] border-b border-border pb-[22px]">
-          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">
-            {filters.q ? <>Search results for &quot;{filters.q}&quot;</> : "All products"}
-          </h1>
+          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">{t("search.title", "All products")}</h1>
           <p className="text-[12px] leading-[18px] text-muted-foreground" aria-live="polite">
             {lookupFailure
               ? ""
               : data && !waiting
-                ? `${data.totalItems.toLocaleString("en-US")} ${data.totalItems === 1 ? "result" : "results"}`
-                : "Searching…"}
+                ? t("search.resultCount", "{count, plural, =1 {# result} other {# results}}", { count: data.totalItems })
+                : t("search.searching", "Searching…")}
           </p>
+          {data?.correctedQuery && !waiting ? (
+            <p className="text-sm text-primary" aria-live="polite">
+              Showing results for “{data.correctedQuery}” · You searched “{filters.q}”
+            </p>
+          ) : null}
         </header>
 
         <div className="grid items-start gap-[28px] pt-[7px] lg:grid-cols-[228px_minmax(0,1fr)]">
-          <aside className="flex flex-col gap-[28px]" aria-label="Search filters">
+          <aside className="flex flex-col gap-[28px]" aria-label={t("search.filters", "Search filters")}>
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Game</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.game", "Game")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {games.isPending ? (
                   Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-40" />)
                 ) : games.isError ? (
-                  <p className="text-sm text-muted-foreground">โหลดรายชื่อเกมไม่สำเร็จ</p>
+                  <p className="text-sm text-muted-foreground">{t("search.gamesFailed", "โหลดรายชื่อเกมไม่สำเร็จ")}</p>
                 ) : (
                   games.data.map((game) => {
                     const id = `game-${game.slug}`;
@@ -290,13 +317,13 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Category</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.category", "Category")}</FieldLegend>
               {categories.isPending ? (
                 <div className="flex flex-col gap-3">
                   {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-32" />)}
                 </div>
               ) : categories.isError ? (
-                <p className="text-sm text-muted-foreground">โหลดหมวดหมู่ไม่สำเร็จ</p>
+                <p className="text-sm text-muted-foreground">{t("search.categoriesFailed", "โหลดหมวดหมู่ไม่สำเร็จ")}</p>
               ) : (
                 <RadioGroup
                   value={filters.category ?? ALL_CATEGORIES}
@@ -306,7 +333,7 @@ export function SearchResultsPage() {
                 >
                   <Field orientation="horizontal">
                     <RadioGroupItem id="category-all" value={ALL_CATEGORIES} />
-                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">All categories</FieldLabel>
+                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">{t("search.allCategories", "All categories")}</FieldLabel>
                   </Field>
                   {orderedCategories(categories.data).map(({ category, child }) => {
                     const id = `category-${category.slug}`;
@@ -324,24 +351,24 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Price Range</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.priceRange", "Price Range")}</FieldLegend>
               <form onSubmit={applyPrice} className="flex flex-col gap-3">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Minimum price" placeholder="฿ Min" value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.minPrice", "Minimum price")} placeholder={t("search.minPlaceholder", "฿ Min")} value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
                   <span className="text-muted-foreground">-</span>
-                  <Input type="number" inputMode="numeric" min="0" aria-label="Maximum price" placeholder="฿ Max" value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.maxPrice", "Maximum price")} placeholder={t("search.maxPlaceholder", "฿ Max")} value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
                 </div>
                 {priceRangeInvalid ? (
-                  <p role="alert" className="text-xs text-destructive">ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด</p>
+                  <p role="alert" className="text-xs text-destructive">{t("search.priceRangeInvalid", "ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด")}</p>
                 ) : null}
-                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>Apply Filter</Button>
+                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>{t("search.applyFilter", "Apply Filter")}</Button>
               </form>
             </FieldSet>
 
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">Condition</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("product.condition", "Condition")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {SEARCH_CONDITIONS.map((condition: CardCondition) => {
                   const id = `condition-${condition.toLowerCase()}`;
@@ -371,7 +398,7 @@ export function SearchResultsPage() {
                 onCheckedChange={() => update({ inStock: !filters.inStock })}
                 className="rounded-none"
               />
-              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">In stock only</FieldLabel>
+              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">{t("search.inStockOnly", "In stock only")}</FieldLabel>
             </Field>
 
             {filtered ? (
@@ -381,35 +408,35 @@ export function SearchResultsPage() {
                 className="w-full rounded-md"
                 onClick={clearFilters}
               >
-                Clear filters
+                {t("search.clearFilters", "Clear filters")}
               </Button>
             ) : null}
           </aside>
 
-          <section className="min-w-0" aria-label="Search results">
+          <section className="min-w-0" aria-label={t("search.results", "Search results")}>
             <div className="mb-[21px] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full sm:max-w-[341px]">
                 <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
-                  aria-label="Search products"
-                  placeholder="Search cards, sets or card numbers"
+                  aria-label={t("search.inputLabel", "Search products")}
+                  placeholder={t("search.inputPlaceholder", "Search cards, sets or card numbers")}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
                   className="rounded-md border-border bg-background pl-10"
                 />
               </div>
               <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-                <span>Sort by:</span>
+                <span>{t("search.sortBy", "Sort by:")}</span>
                 <Select
                   value={filters.sort}
                   onValueChange={(value) => update({ sort: (value ?? "featured") as SearchSort })}
-                  items={SEARCH_SORTS}
+                  items={sorts}
                 >
                   <SelectTrigger className="w-48 rounded-md border-border bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {SEARCH_SORTS.map((sort) => (
+                      {sorts.map((sort) => (
                         <SelectItem key={sort.value} value={sort.value}>{sort.label}</SelectItem>
                       ))}
                     </SelectGroup>
@@ -421,7 +448,7 @@ export function SearchResultsPage() {
             {lookupFailure ? (
               <ErrorState
                 error={lookupFailure.error}
-                title="โหลดตัวกรองไม่สำเร็จ"
+                title={t("search.filtersFailed", "โหลดตัวกรองไม่สำเร็จ")}
                 onRetry={() => lookupFailure.refetch()}
               />
             ) : !ready ? (
@@ -430,17 +457,17 @@ export function SearchResultsPage() {
               <QueryBoundary
                 query={results}
                 loading={<ResultsSkeleton />}
-                errorTitle="ค้นหาไม่สำเร็จ"
+                errorTitle={t("search.failed", "ค้นหาไม่สำเร็จ")}
                 isEmpty={(page) => page.items.length === 0}
                 empty={
                   <EmptyState
                     icon={SearchIcon}
-                    title={filters.q ? `No products match "${filters.q}"` : "No products found"}
-                    description={filtered ? "Try removing a filter or two." : undefined}
+                    title={filters.q ? t("search.noMatch", "No products match \"{query}\"", { query: filters.q }) : t("search.empty", "No products found")}
+                    description={filtered ? t("search.emptyHint", "Try removing a filter or two.") : undefined}
                   >
                     {filtered ? (
                       <Button type="button" variant="outline" onClick={clearFilters}>
-                        Clear filters
+                        {t("search.clearFilters", "Clear filters")}
                       </Button>
                     ) : null}
                   </EmptyState>

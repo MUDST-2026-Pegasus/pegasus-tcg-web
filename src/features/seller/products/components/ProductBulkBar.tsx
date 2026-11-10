@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
+import { useTranslate } from "@/lib/i18n";
 
 type ProductBulkBarProps = {
   selectedCount: number;
@@ -30,23 +31,24 @@ export function ProductBulkBar({
   onActivate,
   onPause,
 }: ProductBulkBarProps) {
+  const { t } = useTranslate("seller");
   const disabled = readOnly || isPending;
   const actions = [
     {
       id: "reprice",
-      label: "แก้ไขราคาพร้อมกัน",
+      label: t("products.bulkPrice.title", "แก้ไขราคาพร้อมกัน"),
       count: eligible.reprice,
       onClick: onReprice,
     },
     {
       id: "activate",
-      label: "เปิดขาย",
+      label: t("products.actions.activate", "เปิดขาย"),
       count: eligible.activate,
       onClick: onActivate,
     },
     {
       id: "pause",
-      label: "พักการขาย",
+      label: t("products.actions.pause", "พักการขาย"),
       count: eligible.pause,
       onClick: onPause,
     },
@@ -57,16 +59,16 @@ export function ProductBulkBar({
       <Checkbox
         checked
         disabled={isPending}
-        aria-label={`ล้างการเลือก ${selectedCount} รายการ`}
+        aria-label={t("products.bulk.clear", "ล้างการเลือก {count} รายการ", { count: selectedCount })}
         onCheckedChange={onClear}
       />
       <p className="text-xs font-medium text-teal-600">
-        เลือกแล้ว {selectedCount} รายการ
+        {t("products.bulk.selected", "เลือกแล้ว {count} รายการ", { count: selectedCount })}
       </p>
       {isPending ? (
         <span className="flex items-center gap-1.5 text-xs text-teal-700">
           <Spinner className="size-3.5" />
-          กำลังอัปเดต…
+          {t("products.bulk.updating", "กำลังอัปเดต…")}
         </span>
       ) : null}
 

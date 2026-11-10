@@ -18,6 +18,7 @@ import { hasErrorCode } from "@/lib/api";
 import { OrderDetailContent } from "./components/detail/OrderDetailContent";
 import { OrderDetailSkeleton } from "./components/detail/OrderDetailSkeleton";
 import { useSellerOrder } from "./orders.queries";
+import { useTranslate } from "@/lib/i18n";
 
 function parseOrderId(value: string | undefined): number | null {
   const id = Number(value);
@@ -25,6 +26,7 @@ function parseOrderId(value: string | undefined): number | null {
 }
 
 export function SellerOrderDetailPage() {
+  const { t } = useTranslate("seller");
   const { orderId } = useParams();
   const id = parseOrderId(orderId);
   const order = useSellerOrder(id);
@@ -42,8 +44,8 @@ export function SellerOrderDetailPage() {
           <EmptyMedia variant="icon">
             <SearchXIcon />
           </EmptyMedia>
-          <EmptyTitle>ไม่พบคำสั่งซื้อ {orderId}</EmptyTitle>
-          <EmptyDescription>คำสั่งซื้อนี้อาจไม่มีอยู่ หรือไม่ได้เป็นของร้านคุณ</EmptyDescription>
+          <EmptyTitle>{t("orderDetail.notFound.title", "ไม่พบคำสั่งซื้อ {orderId}", { orderId })}</EmptyTitle>
+          <EmptyDescription>{t("orderDetail.notFound.description", "คำสั่งซื้อนี้อาจไม่มีอยู่ หรือไม่ได้เป็นของร้านคุณ")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button
@@ -53,7 +55,7 @@ export function SellerOrderDetailPage() {
             render={<Link to="/seller/orders" />}
             nativeButton={false}
           >
-            กลับไปหน้าจัดการคำสั่งซื้อ
+            {t("orderDetail.backToOrders", "กลับไปหน้าจัดการคำสั่งซื้อ")}
           </Button>
         </EmptyContent>
       </Empty>
@@ -61,7 +63,7 @@ export function SellerOrderDetailPage() {
   }
 
   return (
-    <QueryBoundary query={order} loading={<OrderDetailSkeleton />} errorTitle="โหลดคำสั่งซื้อไม่สำเร็จ">
+    <QueryBoundary query={order} loading={<OrderDetailSkeleton />} errorTitle={t("orders.loadFailed", "โหลดคำสั่งซื้อไม่สำเร็จ")}>
       {/* key ตามเลขออเดอร์ — สลับไปออเดอร์อื่นแล้วค่าที่กรอกค้างไว้ต้องล้าง */}
       {(detail) => <OrderDetailContent key={detail.summary.order.id} detail={detail} />}
     </QueryBoundary>

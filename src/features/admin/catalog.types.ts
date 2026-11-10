@@ -1,3 +1,5 @@
+import type { PageResponse } from "@/lib/api";
+
 /**
  * ลอกมาจาก `pegasus-tcg-api` ถ้าฝั่งนั้นแก้ ไฟล์นี้ต้องแก้ตาม
  * - สิ่งที่ backend ส่งกลับ: `model/Game.java`, `GameAttribute.java`, `CardSet.java`,
@@ -10,6 +12,21 @@
  * enum ซ้ำกับ `features/catalog/catalog.types.ts` บางตัว แต่แยกไว้เป็นของ admin เอง
  * จะได้ไม่ผูกหน้าร้านกับหลังบ้านเข้าด้วยกัน — คนละเจ้าของ คนละวงจร
  */
+
+/** `model/listing/ListingStatus.java` */
+export type ListingStatus =
+  | "DRAFT"
+  | "ACTIVE"
+  | "PAUSED"
+  | "SOLD_OUT"
+  | "DELISTED"
+  | "BLOCKED";
+
+/** `model/catalog/CardCondition.java` */
+export type CardCondition = "NM" | "LP" | "MP" | "HP" | "DMG" | "SEALED";
+
+/** `model/pricing/PricingMode.java` */
+export type PricingMode = "MANUAL" | "AUTO_MEDIAN";
 
 /** `model/ProductType.java` */
 export type ProductType =
@@ -134,6 +151,11 @@ export type ProductSummary = {
   /** ราคาถูกสุดที่มีคนขายตอนนี้ (บาท) — `null` = ยังไม่มีใครขาย */
   lowestPrice: number | null;
   listingCount: number;
+  /** ร้านที่ผู้ซื้อซื้อได้ตอนนี้ — ไม่นับร้านปิดหรือประกาศที่พัก/ถูกระงับ */
+  sellerCount: number;
+  /** ใบที่ผู้ซื้อซื้อได้ตอนนี้ */
+  availableQuantity: number;
+  blockedListingCount: number;
 };
 
 /** `model/CatalogProduct.java` — ผลของ POST/PUT และ `product` ใน `ProductDetail` */
@@ -238,6 +260,82 @@ export type AdminProductQuery = {
   sort?: ProductSort;
   /** ค่าเริ่มต้น false = รวมสินค้าที่ปิดใช้งาน */
   activeOnly?: boolean;
+  saleStatus?: AdminSaleStatus;
+  page: number;
+  size: number;
+};
+
+/** `model/catalog/AdminSaleStatus.java` */
+export type AdminSaleStatus = "HAS_SELLER" | "NO_SELLER" | "HAS_BLOCKED";
+
+/** `AdminCardListingResponse.java` — ประกาศของการ์ดหนึ่งใบจากทุกร้าน */
+export type AdminCardListing = {
+  id: number;
+  /** ชื่อ variant หาจาก `ProductDetail.variants` */
+  catalogVariantId: number;
+  condition: CardCondition;
+  gradingCompany: string | null;
+  gradeValue: number | null;
+  price: number;
+  /** ราคาที่ผู้ซื้อจ่ายตอนมีแคมเปญ — `null` = ไม่มีแคมเปญอยู่ */
+  salePrice: number | null;
+  saleEndsAt: string | null;
+  pricingMode: PricingMode;
+  quantityAvailable: number;
+  quantityReserved: number;
+  quantityTotal: number;
+  status: ListingStatus;
+  lotLabel: string | null;
+  publicNote: string | null;
+  publishedAt: string | null;
+  updatedAt: string;
+  /** ผู้ซื้อซื้อได้ตอนนี้ไหม — ACTIVE แต่ร้านปิดก็ซื้อไม่ได้ */
+  purchasable: boolean;
+  seller: {
+    sellerProfileId: number;
+    userId: number;
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    status: string;
+    onVacation: boolean;
+    accountActive: boolean;
+    /** `null` = ร้านยังไม่มีคะแนน */
+    ratingAvg: number | null;
+    ratingCount: number;
+  };
+  /** `null` = ไม่ได้ถูกระงับ */
+  block: {
+    reason: string;
+    blockedByUsername: string | null;
+    blockedAt: string;
+    /** `null` = ถูกระงับก่อนมีการเก็บข้อมูลนี้ */
+    fromStatus: ListingStatus | null;
+  } | null;
+};
+
+/** สรุปทั้งการ์ด ไม่เปลี่ยนตามตัวกรอง */
+export type AdminCardListingSummary = {
+  shopCount: number;
+  listingCount: number;
+  availableQuantity: number;
+  availableShops: number;
+  reservedQuantity: number;
+  pausedQuantity: number;
+  blockedQuantity: number;
+  blockedListingCount: number;
+  closedShopQuantity: number;
+};
+
+export type AdminCardListingPage = {
+  listings: PageResponse<AdminCardListing>;
+  summary: AdminCardListingSummary;
+};
+
+export type AdminCardListingQuery = {
+  q?: string;
+  variantId?: number;
+  status?: ListingStatus;
   page: number;
   size: number;
 };

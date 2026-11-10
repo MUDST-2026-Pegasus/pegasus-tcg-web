@@ -1,5 +1,6 @@
 import { Store, User } from "lucide-react";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -37,8 +38,12 @@ export function OrderColumnCard({
       className="flex w-full flex-col gap-3 rounded-[10px] border border-muted bg-background p-3 text-left shadow-none transition-colors hover:border-[#d5dbdd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
     >
       <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="truncate font-medium text-foreground">
-          {order.sellerOrderNumber}
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-medium text-foreground">
+            {order.sellerOrderNumber}
+          </span>
+          {/* การ์ดทั้งใบเป็นปุ่มอยู่แล้ว ป้ายจึงไม่เป็นลิงก์ — ลิงก์อยู่ใน sheet รายละเอียด */}
+          <AuctionSourcePill order={order} link={false} />
         </span>
         <span className="shrink-0 font-medium text-foreground">
           {formatBaht(order.grandTotal)}

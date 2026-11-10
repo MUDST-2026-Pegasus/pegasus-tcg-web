@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode } from "@/lib/api";
 import { applyApiErrors } from "@/lib/form";
 
 import { BANK_ITEMS, THAI_BANKS } from "../application.constants";
@@ -39,6 +39,7 @@ import type { Verification } from "../application.types";
 import { BankBookUpload } from "./BankBookUpload";
 import { Callout } from "./Callout";
 import { StepCard } from "./StepCard";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const LABEL_CLASS = "text-xs font-medium text-foreground/80";
 const INPUT_CLASS = "h-8 rounded-md border-input bg-background px-2.5";
@@ -76,6 +77,7 @@ export function SellerApplicationForm({
   mode = "application",
   returnTo,
 }: SellerApplicationFormProps) {
+  const { t } = useTranslate("seller");
   const navigate = useNavigate();
   const location = useLocation();
   const submitVerification = useSubmitVerification();
@@ -156,7 +158,7 @@ export function SellerApplicationForm({
       if (hasErrorCode(error, "BANK_ACCOUNT_ALREADY_USED")) {
         setError("bankAccountNumber", {
           type: "server",
-          message: "เลขบัญชีนี้ถูกใช้สมัครกับผู้ขายรายอื่นแล้ว",
+          message: t("application.form.accountTaken", "เลขบัญชีนี้ถูกใช้สมัครกับผู้ขายรายอื่นแล้ว"),
         });
         return;
       }
@@ -173,7 +175,7 @@ export function SellerApplicationForm({
         bankBook.clear();
         setError("bankBookImageKey", {
           type: "server",
-          message: "รูปที่แนบใช้ไม่ได้ กรุณาอัปโหลดรูปใหม่อีกครั้ง",
+          message: t("application.form.imageInvalid", "รูปที่แนบใช้ไม่ได้ กรุณาอัปโหลดรูปใหม่อีกครั้ง"),
         });
         return;
       }
@@ -182,7 +184,7 @@ export function SellerApplicationForm({
       });
       if (!attached) {
         setFormMessage(
-          getErrorMessage(error, "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"),
+          translateError(error, t("application.form.submitFailed", "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง")),
         );
       }
     }
@@ -193,10 +195,10 @@ export function SellerApplicationForm({
       {rejection && (
         <Alert variant="destructive" className="rounded-xl">
           <TriangleAlert />
-          <AlertTitle>คำขอครั้งก่อนไม่ผ่านการตรวจสอบ</AlertTitle>
+          <AlertTitle>{t("application.form.rejectedTitle", "คำขอครั้งก่อนไม่ผ่านการตรวจสอบ")}</AlertTitle>
           <AlertDescription>
             {rejection.rejectionReason ??
-              "กรุณาตรวจสอบข้อมูลแล้วส่งคำขออีกครั้ง"}
+              t("application.form.rejectedHint", "กรุณาตรวจสอบข้อมูลแล้วส่งคำขออีกครั้ง")}
           </AlertDescription>
         </Alert>
       )}
@@ -209,8 +211,8 @@ export function SellerApplicationForm({
 
       <StepCard
         step={1}
-        title="ชื่อจริงของเจ้าของบัญชี"
-        hint="ผู้ซื้อจะไม่เห็นข้อมูลส่วนนี้"
+        title={t("application.form.ownerSection", "ชื่อจริงของเจ้าของบัญชี")}
+        hint={t("application.form.ownerHint", "ผู้ซื้อจะไม่เห็นข้อมูลส่วนนี้")}
       >
         <div className="grid gap-5 sm:grid-cols-2">
           <Field
@@ -218,18 +220,18 @@ export function SellerApplicationForm({
             className="gap-1.75"
           >
             <FieldLabel htmlFor="legalFirstName" className={LABEL_CLASS}>
-              ชื่อจริง *
+              {t("application.form.firstName", "ชื่อจริง *")}
             </FieldLabel>
             <Input
               id="legalFirstName"
               autoComplete="given-name"
-              placeholder="ณัฐพงศ์"
+              placeholder={t("application.form.firstNamePlaceholder", "ณัฐพงศ์")}
               aria-invalid={Boolean(errors.legalFirstName)}
               className={INPUT_CLASS}
               {...register("legalFirstName")}
             />
             <FieldHint error={errors.legalFirstName}>
-              สะกดตามหน้าสมุดบัญชี ไม่ต้องใส่คำนำหน้า
+              {t("application.form.firstNameHint", "สะกดตามหน้าสมุดบัญชี ไม่ต้องใส่คำนำหน้า")}
             </FieldHint>
           </Field>
           <Field
@@ -237,18 +239,18 @@ export function SellerApplicationForm({
             className="gap-1.75"
           >
             <FieldLabel htmlFor="legalLastName" className={LABEL_CLASS}>
-              นามสกุลจริง *
+              {t("application.form.lastName", "นามสกุลจริง *")}
             </FieldLabel>
             <Input
               id="legalLastName"
               autoComplete="family-name"
-              placeholder="พงษ์สุวรรณ"
+              placeholder={t("application.form.lastNamePlaceholder", "พงษ์สุวรรณ")}
               aria-invalid={Boolean(errors.legalLastName)}
               className={INPUT_CLASS}
               {...register("legalLastName")}
             />
             <FieldHint error={errors.legalLastName}>
-              ต้องตรงกับชื่อบัญชีธนาคารด้านล่าง
+              {t("application.form.lastNameHint", "ต้องตรงกับชื่อบัญชีธนาคารด้านล่าง")}
             </FieldHint>
           </Field>
         </div>
@@ -256,8 +258,8 @@ export function SellerApplicationForm({
 
       <StepCard
         step={2}
-        title="บัญชีรับเงิน"
-        hint="ใช้โอนยอดขายให้คุณ"
+        title={t("application.form.payoutSection", "บัญชีรับเงิน")}
+        hint={t("application.form.payoutHint", "ใช้โอนยอดขายให้คุณ")}
         className="gap-4.5"
       >
         <div className="grid gap-5 sm:grid-cols-2">
@@ -266,7 +268,7 @@ export function SellerApplicationForm({
             className="gap-1.75"
           >
             <FieldLabel htmlFor="bankCode" className={LABEL_CLASS}>
-              ธนาคาร *
+              {t("application.form.bank", "ธนาคาร *")}
             </FieldLabel>
             <Controller
               control={control}
@@ -284,7 +286,7 @@ export function SellerApplicationForm({
                     onBlur={field.onBlur}
                     className="w-full rounded-md border-input bg-background pr-2 pl-2.5"
                   >
-                    <SelectValue placeholder="เลือกธนาคาร" />
+                    <SelectValue placeholder={t("application.form.bankPlaceholder", "เลือกธนาคาร")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -299,7 +301,7 @@ export function SellerApplicationForm({
               )}
             />
             <FieldHint error={errors.bankCode}>
-              รองรับธนาคารในประเทศไทยทุกแห่ง
+              {t("application.form.bankHint", "รองรับธนาคารในประเทศไทยทุกแห่ง")}
             </FieldHint>
           </Field>
           <Field
@@ -307,19 +309,19 @@ export function SellerApplicationForm({
             className="gap-1.75"
           >
             <FieldLabel htmlFor="bankAccountNumber" className={LABEL_CLASS}>
-              เลขที่บัญชี *
+              {t("application.form.accountNumber", "เลขที่บัญชี *")}
             </FieldLabel>
             <Input
               id="bankAccountNumber"
               inputMode="numeric"
               autoComplete="off"
-              placeholder="เช่น 123-4-56789-0"
+              placeholder={t("application.form.accountPlaceholder", "เช่น 123-4-56789-0")}
               aria-invalid={Boolean(errors.bankAccountNumber)}
               className={INPUT_CLASS}
               {...register("bankAccountNumber")}
             />
             <FieldHint error={errors.bankAccountNumber}>
-              ต้องเป็นบัญชีออมทรัพย์หรือกระแสรายวันของคุณเอง
+              {t("application.form.accountHint", "ต้องเป็นบัญชีออมทรัพย์หรือกระแสรายวันของคุณเอง")}
             </FieldHint>
           </Field>
         </div>
@@ -331,7 +333,7 @@ export function SellerApplicationForm({
         />
 
         <Callout tone="warning" icon={TriangleAlert}>
-          ชื่อบัญชีธนาคารต้องตรงกับชื่อ-นามสกุลที่กรอกด้านบน มิฉะนั้นคำขอจะถูกปฏิเสธ
+          {t("application.form.nameMatchWarning", "ชื่อบัญชีธนาคารต้องตรงกับชื่อ-นามสกุลที่กรอกด้านบน มิฉะนั้นคำขอจะถูกปฏิเสธ")}
         </Callout>
       </StepCard>
 
@@ -360,8 +362,7 @@ export function SellerApplicationForm({
             htmlFor="acceptTerms"
             className="text-[11px] font-normal text-foreground/80"
           >
-            ข้าพเจ้ายืนยันว่าข้อมูลและเอกสารที่ส่งเป็นความจริง
-            และยอมรับเงื่อนไขผู้ขายกับนโยบายความเป็นส่วนตัวของ PEGASUS
+            {t("application.form.acceptTerms", "ข้าพเจ้ายืนยันว่าข้อมูลและเอกสารที่ส่งเป็นความจริง และยอมรับเงื่อนไขผู้ขายกับนโยบายความเป็นส่วนตัวของ PEGASUS")}
           </FieldLabel>
         </Field>
         <FieldError errors={[errors.acceptTerms]} className="pl-6.75 text-xs" />
@@ -375,10 +376,10 @@ export function SellerApplicationForm({
           onClick={handleBack}
           className="h-8.5 rounded-sm px-2.5"
         >
-          ย้อนกลับ
+          {t("application.form.back", "ย้อนกลับ")}
         </Button>
         <p className="ml-auto text-[11px] text-muted-foreground/75">
-          ระบบบันทึกฉบับร่างให้อัตโนมัติ
+          {t("application.form.autosave", "ระบบบันทึกฉบับร่างให้อัตโนมัติ")}
         </p>
         <Button
           type="submit"
@@ -387,16 +388,15 @@ export function SellerApplicationForm({
         >
           {(isSubmitting || bankBook.isUploading) && <Spinner />}
           {isSubmitting
-            ? "กำลังส่งคำขอ…"
+            ? t("application.form.submitting", "กำลังส่งคำขอ…")
             : bankBook.isUploading
-              ? "กำลังอัปโหลดรูป…"
-              : mode === "payout-account" ? "ส่งยืนยันบัญชีใหม่" : "ส่งคำขอสมัคร"}
+              ? t("application.form.uploading", "กำลังอัปโหลดรูป…")
+              : mode === "payout-account" ? t("application.form.resubmit", "ส่งยืนยันบัญชีใหม่") : t("application.form.submit", "ส่งคำขอสมัคร")}
         </Button>
       </div>
 
       <Callout tone="info" icon={Lock}>
-        ข้อมูลบัญชีธนาคารถูกเข้ารหัสและเห็นได้เฉพาะทีมตรวจสอบ
-        ผู้ซื้อจะเห็นเพียงชื่อร้านของคุณเท่านั้น
+        {t("application.form.privacy", "ข้อมูลบัญชีธนาคารถูกเข้ารหัสและเห็นได้เฉพาะทีมตรวจสอบ ผู้ซื้อจะเห็นเพียงชื่อร้านของคุณเท่านั้น")}
       </Callout>
     </form>
   );

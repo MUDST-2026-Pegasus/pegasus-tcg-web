@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner";
 
 import { formatAddressLines } from "../address.format";
 import type { Address } from "../address.types";
+import { useTranslate } from "@/lib/i18n";
 
 type AddressCardProps = {
   address: Address;
@@ -32,6 +33,7 @@ export function AddressCard({
   onSetDefault,
   isSettingDefault = false,
 }: AddressCardProps) {
+  const { t } = useTranslate("buyer");
   return (
     <Card
       data-default={address.defaultShipping}
@@ -44,7 +46,7 @@ export function AddressCard({
         </CardTitle>
         {address.defaultShipping && (
           <CardAction>
-            <Badge>DEFAULT</Badge>
+            <Badge>{t("account.address.defaultBadge", "DEFAULT")}</Badge>
           </CardAction>
         )}
       </CardHeader>
@@ -67,7 +69,7 @@ export function AddressCard({
       <CardFooter className="justify-between gap-3">
         <div className="flex gap-1">
           <Button variant="link" size="sm" onClick={() => onEdit(address)}>
-            <Pencil data-icon="inline-start" /> Edit
+            <Pencil data-icon="inline-start" /> {t("account.address.edit", "Edit")}
           </Button>
           <Separator orientation="vertical" />
           <Button
@@ -75,7 +77,7 @@ export function AddressCard({
             size="sm"
             onClick={() => onDelete(address)}
           >
-            <Trash2 data-icon="inline-start" /> Delete
+            <Trash2 data-icon="inline-start" /> {t("account.address.delete", "Delete")}
           </Button>
         </div>
         {!address.defaultShipping && (
@@ -86,7 +88,7 @@ export function AddressCard({
             onClick={() => onSetDefault(address)}
           >
             {isSettingDefault && <Spinner data-icon="inline-start" />}
-            Set as Default
+            {t("account.address.setDefault", "Set as Default")}
           </Button>
         )}
       </CardFooter>

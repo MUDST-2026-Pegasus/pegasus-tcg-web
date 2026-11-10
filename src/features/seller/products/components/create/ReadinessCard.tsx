@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 export type ReadinessItem = {
   id: string;
@@ -14,10 +15,14 @@ export type ReadinessItem = {
 
 type ReadinessCardProps = {
   items: ReadinessItem[];
+  /** หน้าเปิดประมูลใช้ "พร้อมเปิดประมูลหรือยัง" */
+  title?: string;
 };
 
 /** "พร้อมลงขายหรือยัง" — คำนวณจากค่าในฟอร์ม ติ๊กเองไม่ได้ */
-export function ReadinessCard({ items }: ReadinessCardProps) {
+export function ReadinessCard({ items, title }: ReadinessCardProps) {
+  const { t } = useTranslate("seller");
+  title ??= t("products.create.readiness.title", "พร้อมลงขายหรือยัง");
   const required = items.filter((item) => !item.optional);
   const doneCount = required.filter((item) => item.done).length;
   const isAllDone = doneCount === required.length;
@@ -25,7 +30,7 @@ export function ReadinessCard({ items }: ReadinessCardProps) {
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-foreground">พร้อมลงขายหรือยัง</p>
+        <p className="text-xs font-semibold text-foreground">{title}</p>
         <Badge
           className={cn(
             "h-5 rounded-full px-2 text-xs",
@@ -55,7 +60,7 @@ export function ReadinessCard({ items }: ReadinessCardProps) {
               )}
             >
               {item.done ? item.doneLabel : item.pendingLabel}
-              {item.optional && !item.done ? " (ไม่บังคับ)" : ""}
+              {item.optional && !item.done ? t("products.create.readiness.optional", " (ไม่บังคับ)") : ""}
             </p>
           </li>
         ))}

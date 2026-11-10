@@ -13,6 +13,7 @@ import {
 import { isSessionBootstrapping } from "@/lib/api/session";
 import { cartApi } from "@/features/cart/cart.api";
 import { toast } from "@/components/ui/toast";
+import { errorMessage } from "@/lib/i18n";
 
 import * as authApi from "./auth.api";
 import type {
@@ -20,6 +21,7 @@ import type {
   AuthUser,
   ChangePasswordPayload,
   ForgotPasswordPayload,
+  GoogleSignInPayload,
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
@@ -122,8 +124,8 @@ async function syncGuestCartOnLogin(queryClient: ReturnType<typeof useQueryClien
     } catch {
       // Keep the session key so a transient failure does not orphan the guest cart.
       toast.add({
-        title: "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ",
-        description: "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
+        title: errorMessage("cart.mergeFailed.title", "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ"),
+        description: errorMessage("cart.mergeFailed.description", "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่"),
         type: "error",
       });
     } finally {
@@ -149,6 +151,10 @@ function useSessionMutation<TPayload>(
 
 export function useLogin() {
   return useSessionMutation<LoginPayload>(authApi.login);
+}
+
+export function useGoogleSignIn() {
+  return useSessionMutation<GoogleSignInPayload>(authApi.googleSignIn);
 }
 
 export function useRegister() {
@@ -186,3 +192,7 @@ export function useResetPassword() {
     mutationFn: (payload: ResetPasswordPayload) => authApi.resetPassword(payload),
   });
 }
+
+// key ของ errorMessage() ด้านบน — ประกาศให้ tolgee CLI เห็น
+// @tolgee-key {"key": "cart.mergeFailed.title", "ns": "errors", "defaultValue": "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ"}
+// @tolgee-key {"key": "cart.mergeFailed.description", "ns": "errors", "defaultValue": "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่"}

@@ -1,5 +1,6 @@
+import { ConfirmDialog } from "@/components/common";
 import { useState, useMemo, useRef, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronUp,
@@ -14,8 +15,9 @@ import {
 } from "lucide-react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { getListingDetail } from "@/features/catalog/catalog.api";
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { ProductRowsSkeleton } from "@/components/common/PageSkeletons";
-import { AccountSidebar } from "@/features/account/components/AccountSidebar";
 import { CancelOrderConfirmationDialog } from "@/features/account/components/CancelOrderConfirmationDialog";
 import { ReorderPreviewModal } from "@/features/account/components/ReorderPreviewModal";
 import { OrderDetailsModal } from "@/features/account/components/OrderDetailsModal";
@@ -29,27 +31,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { downloadBlob } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/errors";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { refundKeys, useBuyerRefunds } from "@/features/finance/refunds.queries";
 import { reviewKeys } from "@/features/finance/reviews.queries";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
-import { useAuth } from "@/features/auth/auth.queries";
 import { ordersApi } from "../orders.api";
-import { useBuyerOrders } from "../orders.queries";
+import { useBuyerOrders, useDownloadBuyerOrderSummary } from "../orders.queries";
 import type { OrderDetails, OrderItemDetails } from "../orders.types";
+import { buyerOrderSummaryDownloadErrorMessage } from "../orders.format";
 import {
   canBuyerCancel,
   firstTracking,
@@ -59,17 +54,17 @@ import {
 } from "../order-stage";
 
 import {
-  toSidebarUser,
-} from "../account.format";
-import {
   ORDER_FILTER_TABS,
   matchesOrderFilter,
   type OrderFilterTab,
 } from "../order-filter";
+import { formatDate, useTranslate } from "@/lib/i18n";
+import { checkoutMoney } from "@/features/cart/checkout.format";
 
 export { OrderDetailsModal };
 
 export function OrderHistoryPage() {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const linkedOrderId = Number(searchParams.get("orderId"));
@@ -80,7 +75,6 @@ export function OrderHistoryPage() {
     retry: false,
   });
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   const { data: ordersData, isLoading, error, refetch } = useBuyerOrders(0, 50, true);
   const refunds = useBuyerRefunds();
@@ -97,8 +91,6 @@ export function OrderHistoryPage() {
   const [activeFilter, setActiveFilter] = useState<OrderFilterTab>("ALL");
   const [reorderOrderId, setReorderOrderId] = useState<number | null>(null);
   const detailOrder = selectedOrderForDetails ?? linkedOrder.data;
-
-  const sidebarUser = toSidebarUser(user);
 
   const orders: OrderDetails[] = useMemo(() => {
     if (Array.isArray(ordersData)) return ordersData;
@@ -133,15 +125,15 @@ export function OrderHistoryPage() {
         .map((promotion) => promotion.code)
         .filter(Boolean);
       toast.add({
-        title: `คำสั่งซื้อ ${order.orderNumber} หมดเวลาชำระ`,
+        title: t("account.orders.timedOut", "คำสั่งซื้อ {number} หมดเวลาชำระ", { number: order.orderNumber }),
         description: order.promotionsRestoredOnCancel && codeNames.length
-          ? `คืนสิทธิ์ ${codeNames.join(", ")} แล้ว`
-          : "คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+          ? t("account.orders.codesRestored", "คืนสิทธิ์ {codes} แล้ว", { codes: codeNames.join(", ") })
+          : t("account.orders.autoCancelled", "คำสั่งซื้อถูกยกเลิกอัตโนมัติ"),
         type: "warning",
       });
     }
     previousStatuses.current = new Map(orders.map((order) => [order.id, order.status]));
-  }, [orders, ordersData]);
+  }, [orders, ordersData, t]);
 
   const tabCounts = useMemo(() => {
     const counts: Record<OrderFilterTab, number> = {
@@ -216,8 +208,8 @@ export function OrderHistoryPage() {
     try {
       await ordersApi.cancelOrder(orderId, reason ?? "Buyer requested cancellation");
       toast.add({
-        title: "Order Cancelled",
-        description: "Your order has been cancelled successfully.",
+        title: t("account.orders.cancelled", "Order Cancelled"),
+        description: t("account.orders.cancelledHint", "Your order has been cancelled successfully."),
         type: "success",
       });
       setIsCancelModalOpen(false);
@@ -227,11 +219,11 @@ export function OrderHistoryPage() {
       queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     } catch (err) {
       toast.add({
-        title: "Cancellation Failed",
+        title: t("account.orders.cancelFailed", "Cancellation Failed"),
         description:
           err instanceof ApiError
             ? err.message
-            : "Could not cancel this order. Please try again.",
+            : t("account.orders.cancelFailedHint", "Could not cancel this order. Please try again."),
         type: "error",
       });
     } finally {
@@ -245,11 +237,11 @@ export function OrderHistoryPage() {
       const updated = await ordersApi.confirmReceived(orderId);
       setSelectedOrderForDetails((current) => (current && current.id === orderId ? updated : current));
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.add({ title: "Receipt confirmed", description: "Your order has been updated.", type: "success" });
+      toast.add({ title: t("account.orders.receiptConfirmed", "Receipt confirmed"), description: t("account.orders.receiptConfirmedHint", "Your order has been updated."), type: "success" });
     } catch (err) {
       toast.add({
-        title: "Could not confirm receipt",
-        description: err instanceof ApiError ? err.message : "Please try again.",
+        title: t("account.orders.receiptFailed", "Could not confirm receipt"),
+        description: err instanceof ApiError ? err.message : t("account.orders.tryAgain", "Please try again."),
         type: "error",
       });
     } finally {
@@ -258,28 +250,26 @@ export function OrderHistoryPage() {
   };
 
   return (
-    <div className="min-h-[956px] bg-muted/60 px-4 py-8 font-sans sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <AccountSidebar user={sidebarUser} />
+    <>
 
         <div className="flex min-w-0 flex-col gap-4">
           {refunds.isError && (
             <p role="alert" className="rounded-xl border bg-card p-3 text-sm text-destructive">
-              โหลดข้อมูลการคืนเงินไม่สำเร็จ{" "}
-              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>ลองใหม่</Button>
+              {t("account.orders.refundsFailed", "โหลดข้อมูลการคืนเงินไม่สำเร็จ")}{" "}
+              <Button variant="link" size="sm" className="px-0" onClick={() => void refunds.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button>
             </p>
           )}
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Order History</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("account.orders.title", "Order History")}</h1>
             <p className="text-sm text-muted-foreground">
-              {orders.length} order{orders.length !== 1 ? "s" : ""} placed
+              {t("account.orders.count", "{count, plural, =1 {# order} other {# orders}} placed", { count: orders.length })}
             </p>
           </div>
 
           {/* Status Filter Tab Bar */}
           <div
             role="tablist"
-            aria-label="Order status filter"
+            aria-label={t("account.orders.filterAria", "Order status filter")}
             className="flex flex-wrap items-center gap-2 pb-1"
           >
             {ORDER_FILTER_TABS.map((tab) => {
@@ -316,16 +306,16 @@ export function OrderHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div role="status" aria-busy="true" aria-label="Loading orders">
+            <div role="status" aria-busy="true" aria-label={t("account.orders.loading", "Loading orders")}>
               <ProductRowsSkeleton />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 p-6">
               <p className="text-sm text-destructive font-medium">
-                Failed to load orders.
+                {t("account.orders.loadFailed", "Failed to load orders.")}
               </p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                Try Again
+                {t("account.orders.retry", "Try Again")}
               </Button>
             </div>
           ) : orders.length === 0 ? (
@@ -334,12 +324,12 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground">No orders yet</p>
+                <p className="text-lg font-semibold text-foreground">{t("account.orders.empty", "No orders yet")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Once you purchase cards, your orders will appear here.
+                  {t("account.orders.emptyHint", "Once you purchase cards, your orders will appear here.")}
                 </p>
               </div>
-              <Button onClick={() => navigate("/products")}>Start Shopping</Button>
+              <Button onClick={() => navigate("/products")}>{t("account.orders.startShopping", "Start Shopping")}</Button>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 text-center p-6">
@@ -347,13 +337,13 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-base font-semibold text-foreground">No orders found</p>
+                <p className="text-base font-semibold text-foreground">{t("account.orders.noMatch", "No orders found")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  There are no orders matching the selected status.
+                  {t("account.orders.noMatchHint", "There are no orders matching the selected status.")}
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setActiveFilter("ALL")}>
-                View all orders
+                {t("account.orders.viewAll", "View all orders")}
               </Button>
             </div>
           ) : (
@@ -372,7 +362,6 @@ export function OrderHistoryPage() {
             ))
           )}
         </div>
-      </div>
 
       {/* Custom Cancel Order Confirmation Dialog */}
       <CancelOrderConfirmationDialog
@@ -412,30 +401,22 @@ export function OrderHistoryPage() {
         />
       )}
 
-      <AlertDialog open={!!confirmTarget} onOpenChange={(open) => !open && setConfirmTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm receipt?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="border-t pt-4">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button
-              type="button"
-              onClick={() => {
-                const target = confirmTarget;
-                setConfirmTarget(null);
-                if (target) void handleConfirmReceived(target.id);
-              }}
-            >
-              Confirm receipt
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+      <ConfirmDialog
+        open={!!confirmTarget}
+        onOpenChange={(open) => {
+          if (!open) setConfirmTarget(null);
+        }}
+        title={t("account.orders.confirmTitle", "Confirm receipt?")}
+        description={t("account.orders.confirmDescription", "Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.")}
+        confirmLabel={t("account.orders.confirmAction", "Confirm receipt")}
+        cancelLabel={t("account.orders.cancel", "Cancel")}
+        onConfirm={() => {
+          const target = confirmTarget;
+          setConfirmTarget(null);
+          if (target) void handleConfirmReceived(target.id);
+        }}
+      />
+    </>
   );
 }
 
@@ -458,7 +439,11 @@ function OrderCardItem({
   isCancelling: boolean;
   isConfirming: boolean;
 }) {
+  const { t } = useTranslate("buyer");
   const [expanded, setExpanded] = useState(false);
+  const downloadSummary = useDownloadBuyerOrderSummary();
+  const navigate = useNavigate();
+  const [loadingSeller, setLoadingSeller] = useState(false);
 
   const { stage, label, badgeClassName } = orderStage(order);
   const canCancel = canBuyerCancel(order);
@@ -482,17 +467,34 @@ function OrderCardItem({
     (so) => so.items ?? [],
   );
   const firstItem = allItems[0];
+  const firstSeller = (order.sellerOrders ?? []).find((seller) => seller.items?.length);
   const otherItems = allItems.slice(1);
 
   const placedDate = order.placedAt
-    ? new Date(order.placedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? formatDate(order.placedAt)
     : "Recent";
 
-  const formatPrice = (amount: number) => `฿${amount.toLocaleString()}`;
+  const formatPrice = (amount: number) => checkoutMoney(amount);
+
+  function handleDownloadSummary() {
+    downloadSummary.mutate(order.id, {
+      onSuccess: ({ blob, filename }) => {
+        const downloadFilename = filename ?? `order-summary-${order.orderNumber}.pdf`;
+        downloadBlob(blob, downloadFilename);
+        toast.add({
+          type: "success",
+          title: t("account.orders.downloaded", "ดาวน์โหลด Order Summary แล้ว"),
+          description: downloadFilename,
+        });
+      },
+      onError: (error) =>
+        toast.add({
+          type: "error",
+          title: t("account.orders.downloadFailed", "ดาวน์โหลด Order Summary ไม่สำเร็จ"),
+          description: buyerOrderSummaryDownloadErrorMessage(error),
+        }),
+    });
+  }
 
   return (
     <Card
@@ -507,6 +509,8 @@ function OrderCardItem({
           <div>
             <p className="text-xs text-muted-foreground font-medium">ORDER ID</p>
             <p className="font-semibold text-sm">{order.orderNumber}</p>
+            {/* มาจากการประมูล [TCG-636] */}
+            <AuctionSourcePill order={order} className="mt-1" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground font-medium">DATE</p>
@@ -536,27 +540,50 @@ function OrderCardItem({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-              Card Art
+              {t("account.orders.cardArt", "Card Art")}
             </div>
           )}
         </div>
 
         <div className="min-w-0">
           <CardTitle className="text-lg font-semibold truncate">
-            {firstItem?.productName || "Pegasus TCG Card"}
+            {firstItem?.productName || t("account.orders.cardFallback", "Pegasus TCG Card")}
           </CardTitle>
           <p className="mt-1 text-sm text-muted-foreground truncate">
             {[firstItem?.variantLabel, firstItem?.condition]
               .filter(Boolean)
               .join(" • ")}
-            {firstItem && ` • Qty: ${firstItem.quantity}`}
+            {firstItem && t("account.orders.qtySuffix", " • Qty: {count}", { count: firstItem.quantity })}
           </p>
-          {order.sellerOrders?.[0]?.sellerName && (
+          {firstSeller?.sellerName && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              Seller:{" "}
-              <span className="text-foreground font-medium">
-                {order.sellerOrders[0].sellerName}
-              </span>
+              {t("account.orders.seller", "Seller:")}{" "}
+              {firstSeller.sellerUsername ? (
+                <Link className="text-foreground font-medium hover:underline focus-visible:underline" to={`/u/${encodeURIComponent(firstSeller.sellerUsername)}`}>
+                  {firstSeller.sellerName}
+                </Link>
+              ) : firstItem?.listingId ? (
+                <button
+                  type="button"
+                  className="text-foreground font-medium hover:underline focus-visible:underline cursor-pointer"
+                  disabled={loadingSeller}
+                  onClick={async () => {
+                    setLoadingSeller(true);
+                    try {
+                      const listing = await getListingDetail(firstItem.listingId!);
+                      navigate(`/u/${encodeURIComponent(listing.listing.seller.username)}`);
+                    } catch {
+                      toast.add({ type: "error", title: t("account.orders.shopOpenFailed", "ไม่สามารถเปิดหน้าร้านได้"), description: t("account.orders.shopNotFound", "ไม่พบข้อมูลร้านค้าสำหรับสินค้านี้") });
+                    } finally {
+                      setLoadingSeller(false);
+                    }
+                  }}
+                >
+                  {firstSeller.sellerName}
+                </button>
+              ) : (
+                <span className="text-foreground font-medium">{firstSeller.sellerName}</span>
+              )}
             </p>
           )}
 
@@ -566,7 +593,7 @@ function OrderCardItem({
               onClick={() => setExpanded(!expanded)}
               className="mt-2 flex items-center gap-1 text-sm text-primary font-medium hover:underline cursor-pointer"
             >
-              <span>+ {otherItems.length} other item{otherItems.length > 1 ? "s" : ""}</span>
+              <span>{t("account.orders.otherItems", "+ {count, plural, =1 {# other item} other {# other items}}", { count: otherItems.length })}</span>
               {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
             </button>
           )}
@@ -608,7 +635,7 @@ function OrderCardItem({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{item.productName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")} • Qty: {item.quantity}
+                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")}{t("account.orders.qtySuffix", " • Qty: {count}", { count: item.quantity })}
                 </p>
               </div>
               <div className="text-sm font-semibold">
@@ -624,8 +651,18 @@ function OrderCardItem({
       <CardFooter className="flex flex-wrap justify-between gap-3 rounded-none border-t bg-[#faf9fe] px-4 py-3">
         <div>
           {stage === "COMPLETED" && (
-            <Button type="button" variant="link" size="sm" className="px-0">
-              Download Invoice <Download data-icon="inline-end" />
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="px-0"
+              disabled={downloadSummary.isPending}
+              aria-busy={downloadSummary.isPending}
+              aria-label={downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "Download Order Summary (PDF)")}
+              onClick={handleDownloadSummary}
+            >
+              {downloadSummary.isPending ? <Spinner /> : <Download data-icon="inline-end" />}
+              {downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "Download Order Summary (PDF)")}
             </Button>
           )}
           {canCancel && (
@@ -636,14 +673,14 @@ function OrderCardItem({
               onClick={onCancelOrder}
               disabled={isCancelling}
             >
-              {isCancelling ? "Cancelling..." : "Cancel Order"}
+              {isCancelling ? t("account.orders.cancelling", "Cancelling...") : t("account.orders.cancelOrder", "Cancel Order")}
             </Button>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
-            View Details
+            {t("account.orders.viewDetails", "View Details")}
           </Button>
           {stage === "COMPLETED" && (
             <Button
@@ -653,22 +690,22 @@ function OrderCardItem({
               className="bg-[#006699] hover:bg-[#005580] text-white px-4 py-2 rounded-full font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <RotateCw className="size-3.5" />
-              Reorder
+              {t("account.orders.reorder", "Reorder")}
             </Button>
           )}
           {stage === "AWAITING_PAYMENT" && (
             <Button type="button" size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
-              Pay Now
+              {t("account.orders.payNow", "Pay Now")}
             </Button>
           )}
           {stage === "IN_TRANSIT" && (
             <Button type="button" size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
-              {isConfirming ? "Confirming..." : "Confirm Received"}
+              {isConfirming ? t("account.orders.confirming", "Confirming...") : t("account.orders.confirmReceived", "Confirm Received")}
             </Button>
           )}
           {canReview && (
             <Button type="button" size="sm" onClick={onViewDetails} className="rounded-full">
-              Write a Review
+              {t("account.orders.writeReview", "Write a Review")}
             </Button>
           )}
         </div>
@@ -693,25 +730,26 @@ function StageHint({
   tracking: { carrier: string; trackingNumber: string } | null;
   cancelReason: string | null;
 }) {
+  const { t } = useTranslate("buyer");
   const base = "mt-2 flex items-center gap-1 text-xs font-semibold";
   switch (stage) {
     case "AWAITING_PAYMENT":
       return (
         <p className={cn(base, "text-[#ff9500]")}>
-          <TriangleAlert className="size-3.5" /> Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically
+          <TriangleAlert className="size-3.5" /> {t("account.orders.hint.awaitingPayment", "Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically")}
         </p>
       );
     case "PAYMENT_REVIEW":
       return (
         <p className={cn(base, "text-amber-700")}>
-          <Clock className="size-3.5" /> Slip received — we are verifying your payment
+          <Clock className="size-3.5" /> {t("account.orders.hint.paymentReview", "Slip received — we are verifying your payment")}
         </p>
       );
     case "PREPARING":
       return (
         <p className={cn(base, "text-muted-foreground")}>
-          <Package className="size-3.5" /> Seller is preparing your order
-          {canCancel && cancellableUntil && ` • Cancel before ${formatOrderDateTime(cancellableUntil)}`}
+          <Package className="size-3.5" /> {t("account.orders.hint.preparing", "Seller is preparing your order")}
+          {canCancel && cancellableUntil && t("account.orders.hint.cancelBefore", " • Cancel before {date}", { date: formatOrderDateTime(cancellableUntil) })}
         </p>
       );
     case "IN_TRANSIT":
@@ -723,12 +761,12 @@ function StageHint({
               className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1"
             />
             <span className="text-[10px] font-medium text-muted-foreground">
-              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : "In Transit"}
+              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : t("account.orders.hint.inTransit", "In Transit")}
             </span>
           </div>
           {autoCompleteAt && (
             <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Truck className="size-3" /> Auto-confirms on {formatOrderDateTime(autoCompleteAt)} unless you request a return
+              <Truck className="size-3" /> {t("account.orders.hint.autoConfirm", "Auto-confirms on {date} unless you request a return", { date: formatOrderDateTime(autoCompleteAt) })}
             </p>
           )}
         </div>
@@ -736,23 +774,23 @@ function StageHint({
     case "RETURN_IN_PROGRESS":
       return (
         <p className={cn(base, "text-orange-700")}>
-          <RotateCcw className="size-3.5" /> Return in progress — payment to the seller is on hold until it is settled
+          <RotateCcw className="size-3.5" /> {t("account.orders.hint.returnInProgress", "Return in progress — payment to the seller is on hold until it is settled")}
         </p>
       );
     case "COMPLETED":
       return (
         <p className={cn(base, "text-emerald-700")}>
-          <CircleCheck className="size-3.5" /> Delivered — cards added to your collection
+          <CircleCheck className="size-3.5" /> {t("account.orders.hint.completed", "Delivered — cards added to your collection")}
         </p>
       );
     case "CANCELLED":
       return cancelReason ? (
-        <p className={cn(base, "text-muted-foreground")}>Cancelled: {cancelReason}</p>
+        <p className={cn(base, "text-muted-foreground")}>{t("account.orders.hint.cancelled", "Cancelled: {reason}", { reason: cancelReason })}</p>
       ) : null;
     case "REFUNDED":
       return (
         <p className={cn(base, "text-violet-700")}>
-          <RotateCcw className="size-3.5" /> Refund issued — track the transfer in the refund panel below
+          <RotateCcw className="size-3.5" /> {t("account.orders.hint.refunded", "Refund issued — track the transfer in the refund panel below")}
         </p>
       );
   }

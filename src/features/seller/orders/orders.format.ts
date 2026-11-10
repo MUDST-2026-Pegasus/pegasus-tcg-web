@@ -4,9 +4,11 @@ import {
 } from "@/features/seller/shared/order-status";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 import type { SellerOrderStatus } from "@/features/seller/shared/seller.types";
-import { getErrorMessage, hasErrorCode } from "@/lib/api";
+import { hasErrorCode, isApiError, isNetworkError } from "@/lib/api";
 
 import type { DashboardMonthSummary } from "@/features/seller/dashboard/dashboard.types";
+
+import { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
 
 import type {
   OrderItem,
@@ -18,7 +20,9 @@ import type {
   SellerOrderDetails,
   SellerOrderSort,
   ShippingAddressSnapshot,
+  ShippingChoice,
 } from "./orders.types";
+import { dateTimeFormat as lazyDateTimeFormat, translateError, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงค่าดิบจาก `/sellers/me/orders` → ข้อความบนหน้าจัดการคำสั่งซื้อ
@@ -51,12 +55,12 @@ export const RETURNS_PATH = "/seller/returns";
 
 /** เรียงตามลำดับงานของร้าน แต่ละสถานะจริงอยู่ในแท็บเดียวเท่านั้น */
 export const ORDER_TABS: OrderTabMeta[] = [
-  { id: "awaiting_pack", label: "รอแพ็ค", statuses: TO_PACK_STATUSES, sort: "PAID_OLDEST" },
-  { id: "awaiting_payment", label: "รอชำระ", statuses: ["PENDING_PAYMENT"], sort: "OLDEST" },
-  { id: "shipped", label: "กำลังจัดส่ง", statuses: ["SHIPPED", "DELIVERED"], sort: "SHIPPED_NEWEST" },
-  { id: "completed", label: "สำเร็จ", statuses: ["COMPLETED"], sort: "COMPLETED_NEWEST" },
-  { id: "returns", label: "คืนสินค้า", statuses: RETURN_STATUSES, sort: "NEWEST" },
-  { id: "cancelled", label: "ยกเลิก", statuses: ["CANCELLED"], sort: "NEWEST" },
+  { id: "awaiting_pack", get label() { return translate("seller", "orders.tabs.awaiting_pack", "รอแพ็ค"); }, statuses: TO_PACK_STATUSES, sort: "PAID_OLDEST" },
+  { id: "awaiting_payment", get label() { return translate("seller", "orders.tabs.awaiting_payment", "รอชำระ"); }, statuses: ["PENDING_PAYMENT"], sort: "OLDEST" },
+  { id: "shipped", get label() { return translate("seller", "orders.tabs.shipped", "กำลังจัดส่ง"); }, statuses: ["SHIPPED", "DELIVERED"], sort: "SHIPPED_NEWEST" },
+  { id: "completed", get label() { return translate("seller", "orders.tabs.completed", "สำเร็จ"); }, statuses: ["COMPLETED"], sort: "COMPLETED_NEWEST" },
+  { id: "returns", get label() { return translate("seller", "orders.tabs.returns", "คืนสินค้า"); }, statuses: RETURN_STATUSES, sort: "NEWEST" },
+  { id: "cancelled", get label() { return translate("seller", "orders.tabs.cancelled", "ยกเลิก"); }, statuses: ["CANCELLED"], sort: "NEWEST" },
 ];
 
 /** ค่าใน URL ที่ไม่รู้จัก (หรือไม่มี) กลับไปแท็บแรก */
@@ -79,21 +83,21 @@ export function countOf(counts: SellerOrderCounts | undefined, statuses: SellerO
  */
 export function ordersSubtitle(counts: SellerOrderCounts | undefined): string {
   if (counts === undefined) {
-    return "กำลังนับออเดอร์…";
+    return translate("seller", "orders.subtitle.counting", "กำลังนับออเดอร์…");
   }
   const toPack = countOf(counts, TO_PACK_STATUSES);
   const shipping = countOf(counts, ["SHIPPED", "DELIVERED"]);
-  return `${toPack} ออเดอร์รอแพ็ค · ${shipping} กำลังจัดส่ง · จัดส่งให้ทันกำหนดเพื่อรักษาคะแนนร้าน`;
+  return translate("seller", "orders.subtitle.summary", "{toPack} ออเดอร์รอแพ็ค · {shipping} กำลังจัดส่ง · จัดส่งให้ทันกำหนดเพื่อรักษาคะแนนร้าน", { toPack, shipping });
 }
 
 /** "default" = ใช้ลำดับของแท็บนั้น */
 export type SortChoice = "default" | "NEWEST" | "OLDEST" | "TOTAL_DESC";
 
 export const SORT_OPTIONS: { value: SortChoice; label: string }[] = [
-  { value: "default", label: "เรียง: ด่วนที่สุดก่อน" },
-  { value: "NEWEST", label: "เรียง: ใหม่สุดก่อน" },
-  { value: "OLDEST", label: "เรียง: เก่าสุดก่อน" },
-  { value: "TOTAL_DESC", label: "เรียง: ยอดสูง-ต่ำ" },
+  { value: "default", get label() { return translate("seller", "orders.sort.default", "เรียง: ด่วนที่สุดก่อน"); } },
+  { value: "NEWEST", get label() { return translate("seller", "orders.sort.newest", "เรียง: ใหม่สุดก่อน"); } },
+  { value: "OLDEST", get label() { return translate("seller", "orders.sort.oldest", "เรียง: เก่าสุดก่อน"); } },
+  { value: "TOTAL_DESC", get label() { return translate("seller", "orders.sort.totalDesc", "เรียง: ยอดสูง-ต่ำ"); } },
 ];
 
 export function sortOf(value: string | null): SortChoice {
@@ -104,6 +108,51 @@ export function sortOf(value: string | null): SortChoice {
 
 /** `carrierCode` ที่ส่งไปกับ `ShipOrderRequest` — ชื่อที่ผู้ซื้อเห็นคือ `label` */
 export { CARRIER_OPTIONS, carrierLabel } from "../shared/carriers";
+
+/** ขนส่งที่ผู้ซื้อเลือก เฉพาะที่อยู่ในรายการให้เลือก รหัสอื่นถือว่าเลือกแทนให้ไม่ได้ */
+export function buyerCarrierCode(choice: ShippingChoice | null): string | null {
+  const code = choice?.carrierCode;
+  return code && CARRIER_OPTIONS.some((option) => option.value === code) ? code : null;
+}
+
+/** ค่าเริ่มต้นของช่องขนส่ง — `""` คือให้ผู้ขายเลือกเอง ออเดอร์ที่ไม่มี snapshot ใช้ตัวแรกตามเดิม */
+export function defaultCarrier(choice: ShippingChoice | null): string {
+  return choice ? (buyerCarrierCode(choice) ?? "") : CARRIER_OPTIONS[0].value;
+}
+
+export type CarrierMatch = "matches" | "differs" | "unset" | null;
+
+/** ค่าในช่องขนส่งเทียบกับที่ผู้ซื้อเลือก — `null` คือไม่มีอะไรต้องบอกผู้ขาย */
+export function carrierMatch(choice: ShippingChoice | null, carrier: string): CarrierMatch {
+  if (!choice) return null;
+  const buyerCode = buyerCarrierCode(choice);
+  if (buyerCode === null) return carrier === "" ? "unset" : null;
+  return carrier === buyerCode ? "matches" : "differs";
+}
+
+/** chip ในกล่องการจัดส่งที่ผู้ซื้อเลือก */
+export function buyerCarrierChipLabel(choice: ShippingChoice): string {
+  return choice.carrierCode ? carrierLabel(choice.carrierCode) : translate("seller", "orders.carrier.unspecified", "ไม่ระบุขนส่ง");
+}
+
+/** chip ในหน้ารายการ — ตัวเลือกที่ไม่ผูกขนส่งแสดงชื่อตัวเลือกแทน */
+export function listCarrierChipLabel(choice: ShippingChoice): string {
+  return choice.carrierCode ? carrierLabel(choice.carrierCode) : choice.name;
+}
+
+/** "1–2" หรือ "1" — `null` เมื่อร้านไม่ได้ระบุ */
+export function estDaysLabel(min: number | null, max: number | null): string | null {
+  if (min === null && max === null) return null;
+  if (min === null || max === null || min === max) return String(min ?? max);
+  return `${min}–${max}`;
+}
+
+/** บรรทัดใน dialog ยืนยันจัดส่ง — เฉพาะตอนส่งด้วยขนส่งที่ไม่ตรงกับที่ผู้ซื้อเลือก */
+export function buyerChoiceNote(choice: ShippingChoice | null, match: CarrierMatch): string | null {
+  return choice && match === "differs"
+    ? translate("seller", "orders.carrier.buyerChose", "ผู้ซื้อเลือก: {name} ({carrier})", { name: choice.name, carrier: buyerCarrierChipLabel(choice) })
+    : null;
+}
 
 /** ส่งได้ทั้งจาก PAID (ข้ามการกดรับ) และ PREPARING */
 export function canShip(status: SellerOrderStatus): boolean {
@@ -151,7 +200,7 @@ export function parseShippingAddress(snapshot: string | null): ShippingAddressSn
 /** ชื่อ / บ้านเลขที่ / ตำบล-อำเภอ-จังหวัด-รหัส / เบอร์ — ข้ามบรรทัดที่ว่าง */
 export function addressLines(address: ShippingAddressSnapshot | null): string[] {
   if (!address) {
-    return ["ไม่มีที่อยู่จัดส่ง"];
+    return [translate("seller", "orders.address.none", "ไม่มีที่อยู่จัดส่ง")];
   }
   const street = [address.line1, address.line2].filter(Boolean).join(" ");
   const area = [address.subdistrict, address.district, address.province, address.postalCode]
@@ -161,13 +210,13 @@ export function addressLines(address: ShippingAddressSnapshot | null): string[] 
     address.recipientName,
     street,
     area,
-    address.phone ? `โทร ${address.phone}` : undefined,
+    address.phone ? translate("seller", "orders.address.phone", "โทร {phone}", { phone: address.phone }) : undefined,
   ].filter((line): line is string => Boolean(line));
 }
 
 // ---------- เวลา ----------
 
-const dateTimeFormat = new Intl.DateTimeFormat("th-TH", {
+const dateTimeFormat = lazyDateTimeFormat({
   day: "numeric",
   month: "short",
   year: "numeric",
@@ -176,7 +225,7 @@ const dateTimeFormat = new Intl.DateTimeFormat("th-TH", {
   timeZone: "Asia/Bangkok",
 });
 
-const dateFormat = new Intl.DateTimeFormat("th-TH", {
+const dateFormat = lazyDateTimeFormat({
   day: "numeric",
   month: "short",
   timeZone: "Asia/Bangkok",
@@ -190,11 +239,11 @@ export function formatDateTime(iso: string): string {
 /** "เมื่อสักครู่", "เมื่อ 2 ชม. ที่แล้ว", "เมื่อ 3 วันที่แล้ว" */
 export function formatAgo(iso: string, now: Date = new Date()): string {
   const minutes = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 60_000));
-  if (minutes < 1) return "เมื่อสักครู่";
-  if (minutes < 60) return `เมื่อ ${minutes} นาทีที่แล้ว`;
+  if (minutes < 1) return translate("seller", "orders.ago.justNow", "เมื่อสักครู่");
+  if (minutes < 60) return translate("seller", "orders.ago.minutes", "เมื่อ {minutes} นาทีที่แล้ว", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `เมื่อ ${hours} ชม. ที่แล้ว`;
-  return `เมื่อ ${Math.floor(hours / 24)} วันที่แล้ว`;
+  if (hours < 24) return translate("seller", "orders.ago.hours", "เมื่อ {hours} ชม. ที่แล้ว", { hours });
+  return translate("seller", "orders.ago.days", "เมื่อ {days} วันที่แล้ว", { days: Math.floor(hours / 24) });
 }
 
 /** เหลือน้อยกว่านี้ก่อนเลยกำหนดส่ง การ์ดขึ้นกรอบสีส้ม */
@@ -213,14 +262,14 @@ export function deadlineLabel(
     return null;
   }
   const left = new Date(shipBy).getTime() - now.getTime();
-  if (left < 0) return "เลยกำหนดส่ง";
-  if (left < NEAR_DEADLINE_MS) return "ใกล้เกินกำหนด";
+  if (left < 0) return translate("seller", "orders.deadline.overdue", "เลยกำหนดส่ง");
+  if (left < NEAR_DEADLINE_MS) return translate("seller", "orders.deadline.near", "ใกล้เกินกำหนด");
   return null;
 }
 
 /** "ต้องจัดส่งภายใน 15 ต.ค." */
 export function shipByLabel(shipBy: string): string {
-  return `ต้องจัดส่งภายใน ${dateFormat.format(new Date(shipBy))}`;
+  return translate("seller", "orders.deadline.shipBy", "ต้องจัดส่งภายใน {date}", { date: dateFormat.format(new Date(shipBy)) });
 }
 
 // ---------- การชำระเงิน ----------
@@ -245,26 +294,26 @@ export function paymentStateOf(status: SellerOrderStatus, paidAt: string | null)
 }
 
 export const PAYMENT_STATE_LABEL: Record<PaymentState, string> = {
-  paid: "ชำระแล้ว",
-  pending: "รอชำระ",
-  refunded: "ยกเลิก / คืนเงิน",
-  cancelled: "ยกเลิก",
+  get paid() { return translate("seller", "orders.paymentState.paid", "ชำระแล้ว"); },
+  get pending() { return translate("seller", "orders.paymentState.pending", "รอชำระ"); },
+  get refunded() { return translate("seller", "orders.paymentState.refunded", "ยกเลิก / คืนเงิน"); },
+  get cancelled() { return translate("seller", "orders.paymentState.cancelled", "ยกเลิก"); },
 };
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
-  BANK_TRANSFER: "โอนผ่านธนาคาร",
-  MOCK_GATEWAY: "ช่องทางทดสอบ",
-  WALLET: "กระเป๋าเงิน",
-  CASH_ON_DELIVERY: "เก็บเงินปลายทาง",
+  get BANK_TRANSFER() { return translate("seller", "orders.paymentMethod.BANK_TRANSFER", "โอนผ่านธนาคาร"); },
+  get MOCK_GATEWAY() { return translate("seller", "orders.paymentMethod.MOCK_GATEWAY", "ช่องทางทดสอบ"); },
+  get WALLET() { return translate("seller", "orders.paymentMethod.WALLET", "กระเป๋าเงิน"); },
+  get CASH_ON_DELIVERY() { return translate("seller", "orders.paymentMethod.CASH_ON_DELIVERY", "เก็บเงินปลายทาง"); },
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentRecordStatus, string> = {
-  PENDING: "รอชำระ",
-  AWAITING_VERIFICATION: "รอแอดมินตรวจสลิป",
-  SUCCEEDED: "ชำระสำเร็จ",
-  FAILED: "ไม่สำเร็จ",
-  CANCELLED: "ยกเลิก",
-  EXPIRED: "หมดเวลา",
+  get PENDING() { return translate("seller", "orders.paymentStatus.PENDING", "รอชำระ"); },
+  get AWAITING_VERIFICATION() { return translate("seller", "orders.paymentStatus.AWAITING_VERIFICATION", "รอแอดมินตรวจสลิป"); },
+  get SUCCEEDED() { return translate("seller", "orders.paymentStatus.SUCCEEDED", "ชำระสำเร็จ"); },
+  get FAILED() { return translate("seller", "orders.paymentStatus.FAILED", "ไม่สำเร็จ"); },
+  get CANCELLED() { return translate("seller", "orders.paymentStatus.CANCELLED", "ยกเลิก"); },
+  get EXPIRED() { return translate("seller", "orders.paymentStatus.EXPIRED", "หมดเวลา"); },
 };
 
 /**
@@ -273,22 +322,22 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentRecordStatus, string> = {
  * เรียกว่า "ยอดที่ชำระ" ได้เฉพาะตอนสำเร็จ ส่วนรายการที่ล้มเหลว/ยกเลิก/หมดเวลาไม่มีเงินเข้าเลย
  */
 const PAYMENT_AMOUNT_LABEL: Partial<Record<PaymentRecordStatus, string>> = {
-  SUCCEEDED: "ยอดที่ชำระ (ทั้งคำสั่งซื้อ)",
-  PENDING: "ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)",
-  AWAITING_VERIFICATION: "ยอดที่แจ้งโอน (ทั้งคำสั่งซื้อ)",
+  get SUCCEEDED() { return translate("seller", "orders.paymentAmount.SUCCEEDED", "ยอดที่ชำระ (ทั้งคำสั่งซื้อ)"); },
+  get PENDING() { return translate("seller", "orders.paymentAmount.PENDING", "ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)"); },
+  get AWAITING_VERIFICATION() { return translate("seller", "orders.paymentAmount.AWAITING_VERIFICATION", "ยอดที่แจ้งโอน (ทั้งคำสั่งซื้อ)"); },
 };
 
 export function paymentRows(payment: OrderPayment | null): { id: string; label: string; value: string }[] {
   if (!payment) {
-    return [{ id: "status", label: "สถานะ", value: "ผู้ซื้อยังไม่ได้ชำระ" }];
+    return [{ id: "status", label: translate("seller", "orders.payment.status", "สถานะ"), value: translate("seller", "orders.payment.notPaid", "ผู้ซื้อยังไม่ได้ชำระ") }];
   }
   const amountLabel = PAYMENT_AMOUNT_LABEL[payment.status];
   return [
-    { id: "method", label: "ช่องทาง", value: PAYMENT_METHOD_LABEL[payment.method] ?? payment.method },
-    { id: "status", label: "สถานะ", value: PAYMENT_STATUS_LABEL[payment.status] ?? payment.status },
+    { id: "method", label: translate("seller", "orders.payment.method", "ช่องทาง"), value: PAYMENT_METHOD_LABEL[payment.method] ?? payment.method },
+    { id: "status", label: translate("seller", "orders.payment.status", "สถานะ"), value: PAYMENT_STATUS_LABEL[payment.status] ?? payment.status },
     ...(amountLabel ? [{ id: "amount", label: amountLabel, value: formatBaht(payment.amount) }] : []),
     ...(payment.paidAt
-      ? [{ id: "paid-at", label: "เวลาที่ชำระ", value: formatDateTime(payment.paidAt) }]
+      ? [{ id: "paid-at", label: translate("seller", "orders.payment.paidAt", "เวลาที่ชำระ"), value: formatDateTime(payment.paidAt) }]
       : []),
   ];
 }
@@ -301,7 +350,7 @@ const CONDITION_LABEL: Record<string, string> = {
   MP: "Moderately Played",
   HP: "Heavily Played",
   DMG: "Damaged",
-  SEALED: "ซีลปิด",
+  get SEALED() { return translate("seller", "orders.condition.sealed", "ซีลปิด"); },
 };
 
 /** "EN / FOIL · Near Mint" — บรรทัดรองใต้ชื่อสินค้า */
@@ -326,9 +375,9 @@ export type TimelineEntry = {
 };
 
 const RETURN_STEP_LABEL: Partial<Record<SellerOrderStatus, string>> = {
-  RETURN_REQUESTED: "ผู้ซื้อขอคืนสินค้า",
-  RETURNED: "ร้านได้รับสินค้าคืน",
-  REFUNDED: "คืนเงินให้ผู้ซื้อแล้ว",
+  get RETURN_REQUESTED() { return translate("seller", "orders.timeline.returnRequested", "ผู้ซื้อขอคืนสินค้า"); },
+  get RETURNED() { return translate("seller", "orders.timeline.returned", "ร้านได้รับสินค้าคืน"); },
+  get REFUNDED() { return translate("seller", "orders.timeline.refunded", "คืนเงินให้ผู้ซื้อแล้ว"); },
 };
 
 type TimelineStep = { id: string; label: string; at: string | null };
@@ -354,23 +403,23 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
   });
 
   const closingSteps: TimelineStep[] = isReturnOpen(order.status)
-    ? [{ id: "return-resolution", label: "สรุปผลคำขอคืนสินค้า", at: null }]
+    ? [{ id: "return-resolution", label: translate("seller", "orders.timeline.returnResolution", "สรุปผลคำขอคืนสินค้า"), at: null }]
     : order.status === "REFUNDED"
       ? []
       : [
           {
             id: "completed",
-            label: "ผู้ซื้อได้รับสินค้า · ปล่อยเงินเข้าบัญชีร้าน",
+            label: translate("seller", "orders.timeline.completed", "ผู้ซื้อได้รับสินค้า · ปล่อยเงินเข้าบัญชีร้าน"),
             at: order.completedAt ?? enteredAt(order, "COMPLETED"),
           },
         ];
 
   const steps: TimelineStep[] = [
-    { id: "ordered", label: "ผู้ซื้อสั่งซื้อ", at: order.createdAt },
-    { id: "paid", label: "ผู้ซื้อชำระเงิน", at: paidAt },
-    { id: "accepted", label: "คุณรับออเดอร์ · เริ่มแพ็ค", at: order.acceptedAt },
-    { id: "shipped", label: "ส่งพัสดุและกรอกเลขพัสดุ", at: order.shippedAt },
-    { id: "delivered", label: "พัสดุถึงผู้ซื้อ", at: order.deliveredAt },
+    { id: "ordered", label: translate("seller", "orders.timeline.ordered", "ผู้ซื้อสั่งซื้อ"), at: order.createdAt },
+    { id: "paid", label: translate("seller", "orders.timeline.paid", "ผู้ซื้อชำระเงิน"), at: paidAt },
+    { id: "accepted", label: translate("seller", "orders.timeline.accepted", "คุณรับออเดอร์ · เริ่มแพ็ค"), at: order.acceptedAt },
+    { id: "shipped", label: translate("seller", "orders.timeline.shipped", "ส่งพัสดุและกรอกเลขพัสดุ"), at: order.shippedAt },
+    { id: "delivered", label: translate("seller", "orders.timeline.delivered", "พัสดุถึงผู้ซื้อ"), at: order.deliveredAt },
     ...returnSteps,
     ...closingSteps,
   ].filter(
@@ -386,7 +435,9 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
         .map((step) => ({ id: step.id, label: step.label, detail: formatDateTime(step.at!), done: true })),
       {
         id: "cancelled",
-        label: order.cancelReason ? `ยกเลิกคำสั่งซื้อ · ${order.cancelReason}` : "ยกเลิกคำสั่งซื้อ",
+        label: order.cancelReason
+          ? translate("seller", "orders.timeline.cancelledWithReason", "ยกเลิกคำสั่งซื้อ · {reason}", { reason: order.cancelReason })
+          : translate("seller", "orders.timeline.cancelled", "ยกเลิกคำสั่งซื้อ"),
         detail: formatDateTime(order.cancelledAt),
         done: true,
       },
@@ -400,8 +451,8 @@ export function timelineEntries(order: SellerOrderDetails, paidAt: string | null
     detail: step.at
       ? formatDateTime(step.at)
       : index === currentIndex
-        ? "กำลังดำเนินการ"
-        : "รอดำเนินการ",
+        ? translate("seller", "orders.timeline.inProgress", "กำลังดำเนินการ")
+        : translate("seller", "orders.timeline.waiting", "รอดำเนินการ"),
     done: Boolean(step.at),
   }));
 }
@@ -427,10 +478,10 @@ export function profitSummary(detail: SellerOrderDetail): ProfitSummary | null {
       ...(hasPromotionDiscount
         ? []
         : [
-            { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(order.grandTotal) },
-            { id: "commission", label: "− ค่าคอมมิชชั่น", value: formatBaht(order.commissionAmount) },
+            { id: "sales", label: translate("seller", "orders.money.salesWithShipping", "ยอดขาย (รวมค่าส่ง)"), value: formatBaht(order.grandTotal) },
+            { id: "commission", label: translate("seller", "orders.profit.commission", "− ค่าคอมมิชชั่น"), value: formatBaht(order.commissionAmount) },
           ]),
-      { id: "cost", label: "− ต้นทุนสินค้า", value: formatBaht(roundMoney(detail.costTotal)) },
+      { id: "cost", label: translate("seller", "orders.profit.cost", "− ต้นทุนสินค้า"), value: formatBaht(roundMoney(detail.costTotal)) },
     ],
     net: formatBaht(roundMoney(order.sellerNetAmount - detail.costTotal)),
   };
@@ -467,47 +518,153 @@ export type MonthlySummary = {
  */
 export function monthlySummary(month: DashboardMonthSummary): MonthlySummary {
   return {
-    title: "ผลประกอบการเดือนนี้",
+    title: translate("seller", "orders.monthly.title", "ผลประกอบการเดือนนี้"),
     rows: [
       // แดชบอร์ดแสดงยอดเดือนเดียวกันแบบไม่รวมค่าส่ง ป้ายจึงต้องบอกว่ายอดนี้รวม
-      { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: formatBaht(month.revenue), tone: "default" },
-      { id: "cost", label: "ต้นทุนสินค้า", value: `− ${formatBaht(roundMoney(month.cost))}`, tone: "muted" },
-      { id: "commission", label: "ค่าคอมมิชชั่น", value: `− ${formatBaht(month.commission)}`, tone: "muted" },
+      { id: "sales", label: translate("seller", "orders.money.salesWithShipping", "ยอดขาย (รวมค่าส่ง)"), value: formatBaht(month.revenue), tone: "default" },
+      { id: "cost", label: translate("seller", "orders.monthly.cost", "ต้นทุนสินค้า"), value: `− ${formatBaht(roundMoney(month.cost))}`, tone: "muted" },
+      { id: "commission", label: translate("seller", "orders.monthly.commission", "ค่าคอมมิชชั่น"), value: `− ${formatBaht(month.commission)}`, tone: "muted" },
     ],
-    netLabel: "กำไรสุทธิ",
+    netLabel: translate("seller", "orders.money.net", "กำไรสุทธิ"),
     netValue: formatBaht(roundMoney(month.net)),
   };
 }
 
-export const SHIPPING_STEPS = {
-  title: "ขั้นตอนการจัดส่ง",
-  items: [
-    { id: "accept", label: "กดรับออเดอร์ให้ผู้ซื้อรู้ว่าเริ่มแพ็คแล้ว" },
-    { id: "pack", label: "แพ็คการ์ดด้วย Top Loader" },
-    { id: "photo", label: "ถ่ายรูปก่อนปิดกล่อง" },
-    { id: "tracking", label: "กรอกขนส่งและเลขพัสดุ" },
-    { id: "confirm", label: "กดยืนยันจัดส่ง" },
-  ],
-};
+export function shippingSteps() {
+  return {
+    title: translate("seller", "orders.shippingSteps.title", "ขั้นตอนการจัดส่ง"),
+    items: [
+      { id: "accept", label: translate("seller", "orders.shippingSteps.accept", "กดรับออเดอร์ให้ผู้ซื้อรู้ว่าเริ่มแพ็คแล้ว") },
+      { id: "pack", label: translate("seller", "orders.shippingSteps.pack", "แพ็คการ์ดด้วย Top Loader") },
+      { id: "photo", label: translate("seller", "orders.shippingSteps.photo", "ถ่ายรูปก่อนปิดกล่อง") },
+      { id: "tracking", label: translate("seller", "orders.shippingSteps.tracking", "กรอกขนส่งและเลขพัสดุ") },
+      { id: "confirm", label: translate("seller", "orders.shippingSteps.confirm", "กดยืนยันจัดส่ง") },
+    ],
+  };
+}
 
-export const PACKING_TIP = {
-  title: "เคล็ดลับ",
-  description:
-    "ส่งให้ทันวันที่ร้านกำหนดไว้ เงินจะเข้าบัญชีร้านเมื่อผู้ซื้อยืนยันรับสินค้า หรือครบกำหนดหลังส่ง",
-};
+export function packingTip() {
+  return {
+    title: translate("seller", "orders.tip.title", "เคล็ดลับ"),
+    description: translate("seller", "orders.tip.description", "ส่งให้ทันวันที่ร้านกำหนดไว้ เงินจะเข้าบัญชีร้านเมื่อผู้ซื้อยืนยันรับสินค้า หรือครบกำหนดหลังส่ง"),
+  };
+}
 
 // ---------- error ----------
 
 /** ข้อความภาษาไทยของ error ที่หน้านี้เจอบ่อย ที่เหลือใช้ข้อความจาก backend */
 export function orderErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ORDER_STATUS_TRANSITION")) {
-    return "สถานะออเดอร์เปลี่ยนไปแล้ว รีเฟรชแล้วลองใหม่";
+    return translate("seller", "orders.errors.statusChanged", "สถานะออเดอร์เปลี่ยนไปแล้ว รีเฟรชแล้วลองใหม่");
   }
   if (hasErrorCode(error, "PAYMENT_UNDER_REVIEW")) {
-    return "สลิปของออเดอร์นี้กำลังรอแอดมินตรวจ ยกเลิกได้หลังตรวจเสร็จ";
+    return translate("seller", "orders.errors.underReview", "สลิปของออเดอร์นี้กำลังรอแอดมินตรวจ ยกเลิกได้หลังตรวจเสร็จ");
   }
   if (hasErrorCode(error, "ORDER_NOT_FOUND")) {
-    return "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ";
+    return translate("seller", "orders.errors.notFound", "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ");
   }
-  return getErrorMessage(error, fallback);
+  return translateError(error, fallback);
 }
+
+export function orderSummaryDownloadErrorMessage(error: unknown): string {
+  if (isNetworkError(error)) {
+    return translate("seller", "orders.errors.network", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
+  }
+  if (isApiError(error)) {
+    switch (error.status) {
+      case 401:
+        return translate("seller", "orders.errors.sessionExpired", "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่");
+      case 403:
+        return translate("seller", "orders.errors.forbidden", "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารของร้าน");
+      case 404:
+        return translate("seller", "orders.errors.notFound", "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ");
+      default:
+        if (error.status >= 500) return translate("seller", "orders.errors.pdfServer", "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง");
+    }
+  }
+  return translateError(error, translate("seller", "orders.errors.pdfFailed", "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"));
+}
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-554]
+// @tolgee-key {"key": "orders.tabs.awaiting_pack", "ns": "seller", "defaultValue": "รอแพ็ค"}
+// @tolgee-key {"key": "orders.tabs.awaiting_payment", "ns": "seller", "defaultValue": "รอชำระ"}
+// @tolgee-key {"key": "orders.tabs.shipped", "ns": "seller", "defaultValue": "กำลังจัดส่ง"}
+// @tolgee-key {"key": "orders.tabs.completed", "ns": "seller", "defaultValue": "สำเร็จ"}
+// @tolgee-key {"key": "orders.tabs.returns", "ns": "seller", "defaultValue": "คืนสินค้า"}
+// @tolgee-key {"key": "orders.tabs.cancelled", "ns": "seller", "defaultValue": "ยกเลิก"}
+// @tolgee-key {"key": "orders.subtitle.counting", "ns": "seller", "defaultValue": "กำลังนับออเดอร์…"}
+// @tolgee-key {"key": "orders.subtitle.summary", "ns": "seller", "defaultValue": "{toPack} ออเดอร์รอแพ็ค · {shipping} กำลังจัดส่ง · จัดส่งให้ทันกำหนดเพื่อรักษาคะแนนร้าน"}
+// @tolgee-key {"key": "orders.sort.default", "ns": "seller", "defaultValue": "เรียง: ด่วนที่สุดก่อน"}
+// @tolgee-key {"key": "orders.sort.newest", "ns": "seller", "defaultValue": "เรียง: ใหม่สุดก่อน"}
+// @tolgee-key {"key": "orders.sort.oldest", "ns": "seller", "defaultValue": "เรียง: เก่าสุดก่อน"}
+// @tolgee-key {"key": "orders.sort.totalDesc", "ns": "seller", "defaultValue": "เรียง: ยอดสูง-ต่ำ"}
+// @tolgee-key {"key": "orders.carrier.unspecified", "ns": "seller", "defaultValue": "ไม่ระบุขนส่ง"}
+// @tolgee-key {"key": "orders.carrier.buyerChose", "ns": "seller", "defaultValue": "ผู้ซื้อเลือก: {name} ({carrier})"}
+// @tolgee-key {"key": "orders.address.none", "ns": "seller", "defaultValue": "ไม่มีที่อยู่จัดส่ง"}
+// @tolgee-key {"key": "orders.address.phone", "ns": "seller", "defaultValue": "โทร {phone}"}
+// @tolgee-key {"key": "orders.ago.justNow", "ns": "seller", "defaultValue": "เมื่อสักครู่"}
+// @tolgee-key {"key": "orders.ago.minutes", "ns": "seller", "defaultValue": "เมื่อ {minutes} นาทีที่แล้ว"}
+// @tolgee-key {"key": "orders.ago.hours", "ns": "seller", "defaultValue": "เมื่อ {hours} ชม. ที่แล้ว"}
+// @tolgee-key {"key": "orders.ago.days", "ns": "seller", "defaultValue": "เมื่อ {days} วันที่แล้ว"}
+// @tolgee-key {"key": "orders.deadline.overdue", "ns": "seller", "defaultValue": "เลยกำหนดส่ง"}
+// @tolgee-key {"key": "orders.deadline.near", "ns": "seller", "defaultValue": "ใกล้เกินกำหนด"}
+// @tolgee-key {"key": "orders.deadline.shipBy", "ns": "seller", "defaultValue": "ต้องจัดส่งภายใน {date}"}
+// @tolgee-key {"key": "orders.paymentState.paid", "ns": "seller", "defaultValue": "ชำระแล้ว"}
+// @tolgee-key {"key": "orders.paymentState.pending", "ns": "seller", "defaultValue": "รอชำระ"}
+// @tolgee-key {"key": "orders.paymentState.refunded", "ns": "seller", "defaultValue": "ยกเลิก / คืนเงิน"}
+// @tolgee-key {"key": "orders.paymentState.cancelled", "ns": "seller", "defaultValue": "ยกเลิก"}
+// @tolgee-key {"key": "orders.paymentMethod.BANK_TRANSFER", "ns": "seller", "defaultValue": "โอนผ่านธนาคาร"}
+// @tolgee-key {"key": "orders.paymentMethod.MOCK_GATEWAY", "ns": "seller", "defaultValue": "ช่องทางทดสอบ"}
+// @tolgee-key {"key": "orders.paymentMethod.WALLET", "ns": "seller", "defaultValue": "กระเป๋าเงิน"}
+// @tolgee-key {"key": "orders.paymentMethod.CASH_ON_DELIVERY", "ns": "seller", "defaultValue": "เก็บเงินปลายทาง"}
+// @tolgee-key {"key": "orders.paymentStatus.PENDING", "ns": "seller", "defaultValue": "รอชำระ"}
+// @tolgee-key {"key": "orders.paymentStatus.AWAITING_VERIFICATION", "ns": "seller", "defaultValue": "รอแอดมินตรวจสลิป"}
+// @tolgee-key {"key": "orders.paymentStatus.SUCCEEDED", "ns": "seller", "defaultValue": "ชำระสำเร็จ"}
+// @tolgee-key {"key": "orders.paymentStatus.FAILED", "ns": "seller", "defaultValue": "ไม่สำเร็จ"}
+// @tolgee-key {"key": "orders.paymentStatus.CANCELLED", "ns": "seller", "defaultValue": "ยกเลิก"}
+// @tolgee-key {"key": "orders.paymentStatus.EXPIRED", "ns": "seller", "defaultValue": "หมดเวลา"}
+// @tolgee-key {"key": "orders.paymentAmount.SUCCEEDED", "ns": "seller", "defaultValue": "ยอดที่ชำระ (ทั้งคำสั่งซื้อ)"}
+// @tolgee-key {"key": "orders.paymentAmount.PENDING", "ns": "seller", "defaultValue": "ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)"}
+// @tolgee-key {"key": "orders.paymentAmount.AWAITING_VERIFICATION", "ns": "seller", "defaultValue": "ยอดที่แจ้งโอน (ทั้งคำสั่งซื้อ)"}
+// @tolgee-key {"key": "orders.payment.status", "ns": "seller", "defaultValue": "สถานะ"}
+// @tolgee-key {"key": "orders.payment.notPaid", "ns": "seller", "defaultValue": "ผู้ซื้อยังไม่ได้ชำระ"}
+// @tolgee-key {"key": "orders.payment.method", "ns": "seller", "defaultValue": "ช่องทาง"}
+// @tolgee-key {"key": "orders.payment.paidAt", "ns": "seller", "defaultValue": "เวลาที่ชำระ"}
+// @tolgee-key {"key": "orders.condition.sealed", "ns": "seller", "defaultValue": "ซีลปิด"}
+// @tolgee-key {"key": "orders.timeline.returnRequested", "ns": "seller", "defaultValue": "ผู้ซื้อขอคืนสินค้า"}
+// @tolgee-key {"key": "orders.timeline.returned", "ns": "seller", "defaultValue": "ร้านได้รับสินค้าคืน"}
+// @tolgee-key {"key": "orders.timeline.refunded", "ns": "seller", "defaultValue": "คืนเงินให้ผู้ซื้อแล้ว"}
+// @tolgee-key {"key": "orders.timeline.returnResolution", "ns": "seller", "defaultValue": "สรุปผลคำขอคืนสินค้า"}
+// @tolgee-key {"key": "orders.timeline.completed", "ns": "seller", "defaultValue": "ผู้ซื้อได้รับสินค้า · ปล่อยเงินเข้าบัญชีร้าน"}
+// @tolgee-key {"key": "orders.timeline.ordered", "ns": "seller", "defaultValue": "ผู้ซื้อสั่งซื้อ"}
+// @tolgee-key {"key": "orders.timeline.paid", "ns": "seller", "defaultValue": "ผู้ซื้อชำระเงิน"}
+// @tolgee-key {"key": "orders.timeline.accepted", "ns": "seller", "defaultValue": "คุณรับออเดอร์ · เริ่มแพ็ค"}
+// @tolgee-key {"key": "orders.timeline.shipped", "ns": "seller", "defaultValue": "ส่งพัสดุและกรอกเลขพัสดุ"}
+// @tolgee-key {"key": "orders.timeline.delivered", "ns": "seller", "defaultValue": "พัสดุถึงผู้ซื้อ"}
+// @tolgee-key {"key": "orders.timeline.cancelledWithReason", "ns": "seller", "defaultValue": "ยกเลิกคำสั่งซื้อ · {reason}"}
+// @tolgee-key {"key": "orders.timeline.cancelled", "ns": "seller", "defaultValue": "ยกเลิกคำสั่งซื้อ"}
+// @tolgee-key {"key": "orders.timeline.inProgress", "ns": "seller", "defaultValue": "กำลังดำเนินการ"}
+// @tolgee-key {"key": "orders.timeline.waiting", "ns": "seller", "defaultValue": "รอดำเนินการ"}
+// @tolgee-key {"key": "orders.money.salesWithShipping", "ns": "seller", "defaultValue": "ยอดขาย (รวมค่าส่ง)"}
+// @tolgee-key {"key": "orders.profit.commission", "ns": "seller", "defaultValue": "− ค่าคอมมิชชั่น"}
+// @tolgee-key {"key": "orders.profit.cost", "ns": "seller", "defaultValue": "− ต้นทุนสินค้า"}
+// @tolgee-key {"key": "orders.monthly.title", "ns": "seller", "defaultValue": "ผลประกอบการเดือนนี้"}
+// @tolgee-key {"key": "orders.monthly.cost", "ns": "seller", "defaultValue": "ต้นทุนสินค้า"}
+// @tolgee-key {"key": "orders.monthly.commission", "ns": "seller", "defaultValue": "ค่าคอมมิชชั่น"}
+// @tolgee-key {"key": "orders.money.net", "ns": "seller", "defaultValue": "กำไรสุทธิ"}
+// @tolgee-key {"key": "orders.shippingSteps.title", "ns": "seller", "defaultValue": "ขั้นตอนการจัดส่ง"}
+// @tolgee-key {"key": "orders.shippingSteps.accept", "ns": "seller", "defaultValue": "กดรับออเดอร์ให้ผู้ซื้อรู้ว่าเริ่มแพ็คแล้ว"}
+// @tolgee-key {"key": "orders.shippingSteps.pack", "ns": "seller", "defaultValue": "แพ็คการ์ดด้วย Top Loader"}
+// @tolgee-key {"key": "orders.shippingSteps.photo", "ns": "seller", "defaultValue": "ถ่ายรูปก่อนปิดกล่อง"}
+// @tolgee-key {"key": "orders.shippingSteps.tracking", "ns": "seller", "defaultValue": "กรอกขนส่งและเลขพัสดุ"}
+// @tolgee-key {"key": "orders.shippingSteps.confirm", "ns": "seller", "defaultValue": "กดยืนยันจัดส่ง"}
+// @tolgee-key {"key": "orders.tip.title", "ns": "seller", "defaultValue": "เคล็ดลับ"}
+// @tolgee-key {"key": "orders.tip.description", "ns": "seller", "defaultValue": "ส่งให้ทันวันที่ร้านกำหนดไว้ เงินจะเข้าบัญชีร้านเมื่อผู้ซื้อยืนยันรับสินค้า หรือครบกำหนดหลังส่ง"}
+// @tolgee-key {"key": "orders.errors.statusChanged", "ns": "seller", "defaultValue": "สถานะออเดอร์เปลี่ยนไปแล้ว รีเฟรชแล้วลองใหม่"}
+// @tolgee-key {"key": "orders.errors.underReview", "ns": "seller", "defaultValue": "สลิปของออเดอร์นี้กำลังรอแอดมินตรวจ ยกเลิกได้หลังตรวจเสร็จ"}
+// @tolgee-key {"key": "orders.errors.notFound", "ns": "seller", "defaultValue": "ไม่พบคำสั่งซื้อนี้ในร้านของคุณ"}
+// @tolgee-key {"key": "orders.errors.network", "ns": "seller", "defaultValue": "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่"}
+// @tolgee-key {"key": "orders.errors.sessionExpired", "ns": "seller", "defaultValue": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่"}
+// @tolgee-key {"key": "orders.errors.forbidden", "ns": "seller", "defaultValue": "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารของร้าน"}
+// @tolgee-key {"key": "orders.errors.pdfServer", "ns": "seller", "defaultValue": "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง"}
+// @tolgee-key {"key": "orders.errors.pdfFailed", "ns": "seller", "defaultValue": "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"}

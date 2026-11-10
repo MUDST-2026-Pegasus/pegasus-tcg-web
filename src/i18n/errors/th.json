@@ -1,0 +1,101 @@
+{
+  "ABORTED": "ยกเลิกคำขอแล้ว",
+  "BID_TOO_LOW": "ต้องบิดอย่างน้อย {minNextBid}",
+  "EXPORT_TOO_LARGE": "ข้อมูลมากเกินไป กรุณาลดช่วงหรือเพิ่มตัวกรอง",
+  "HTTP_500": "ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้ง",
+  "HTTP_502": "ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้ง",
+  "HTTP_503": "ระบบปิดปรับปรุงชั่วคราว ลองใหม่ภายหลัง",
+  "HTTP_504": "เซิร์ฟเวอร์ตอบช้าเกินไป ลองใหม่อีกครั้ง",
+  "MALFORMED_RESPONSE": "เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง ลองใหม่อีกครั้ง",
+  "NETWORK_ERROR": "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
+  "PROMO_CHANGED": "ยอดชำระเปลี่ยนไป",
+  "PROMO_CLAIM_FULL": "โค้ดถูกเก็บครบสิทธิ์แล้ว",
+  "PROMO_EXPIRED": "โค้ดหมดอายุแล้ว",
+  "PROMO_MIN_SPEND_NOT_MET": "ยอดซื้อยังไม่ถึงยอดขั้นต่ำเพื่อใช้โค้ดนี้",
+  "PROMO_NOT_APPLICABLE": "ไม่มีสินค้าในตะกร้าที่เข้าเงื่อนไขโค้ดนี้",
+  "PROMO_NOT_CLAIMED": "โค้ดนี้ต้องเก็บก่อนใช้งาน",
+  "PROMO_NOT_FOUND": "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง",
+  "PROMO_NOT_STARTED": "โค้ดยังไม่เริ่มใช้งาน",
+  "PROMO_PAUSED": "โค้ดถูกระงับชั่วคราว",
+  "PROMO_USED_UP": "สิทธิ์ของโค้ดถูกใช้ครบแล้ว",
+  "PROMO_USER_LIMIT_REACHED": "คุณใช้โค้ดนี้ครบจำนวนครั้งแล้ว",
+  "PROMO_WRONG_SELLER": "โค้ดนี้เป็นของร้านค้าอื่น — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น",
+  "authAlert": {
+    "ACCOUNT_DEACTIVATED": {
+      "description": "Please contact support for help.",
+      "title": "Account is deactivated"
+    },
+    "ACCOUNT_SUSPENDED": {
+      "description": "Please contact support for help.",
+      "title": "Account is suspended"
+    },
+    "EMAIL_ALREADY_USED": {
+      "description": "Please contact support for help.",
+      "title": "This email can't be used"
+    },
+    "GOOGLE_ALREADY_LINKED": {
+      "description": "Please contact support for help.",
+      "title": "This email is linked to another Google account"
+    },
+    "GOOGLE_EMAIL_NOT_VERIFIED": {
+      "description": "Verify your email with Google, then try again.",
+      "title": "Google email not verified"
+    },
+    "GOOGLE_LINK_NOT_ALLOWED": {
+      "description": "An account with this email already exists and can't be linked to Google automatically.",
+      "title": "Please log in with your email and password"
+    },
+    "GOOGLE_SIGNIN_DISABLED": {
+      "description": "Please use your email and password.",
+      "title": "Google sign-in is unavailable"
+    },
+    "GOOGLE_SIGNIN_NOT_ALLOWED": {
+      "description": "Please log in with your email and password.",
+      "title": "Google sign-in isn't available for this account"
+    },
+    "GOOGLE_TOKEN_INVALID": {
+      "description": "Please continue with Google again.",
+      "title": "Google sign-in expired"
+    }
+  },
+  "cart": {
+    "mergeFailed": {
+      "description": "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
+      "title": "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ"
+    }
+  },
+  "promo": {
+    "minSpendShortfall": "ซื้อสินค้าเพิ่มอีก {amount} เพื่อใช้โค้ดนี้",
+    "startsAt": "โค้ดใช้ได้ตั้งแต่วันที่ {date}",
+    "wrongSellerNamed": "โค้ดนี้เป็นของร้าน {seller} — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น"
+  },
+  "upload": {
+    "accessDenied": "บัญชีนี้ไม่มีสิทธิ์อัปโหลดไฟล์ประเภทนี้",
+    "cancelled": "ยกเลิกการอัปโหลดแล้ว",
+    "empty": "ไฟล์ \"{name}\" ว่างเปล่า ลองเลือกไฟล์ใหม่",
+    "failed": "อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง",
+    "maxSize": "ไม่เกิน {max}",
+    "networkError": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
+    "storageFailed": "อัปโหลดไฟล์ไม่สำเร็จ",
+    "storageRejected": "ที่เก็บไฟล์ไม่รับไฟล์นี้ ลองใหม่อีกครั้ง",
+    "storageUnreachable": "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
+    "tooLarge": "ไฟล์ \"{name}\" ใหญ่เกิน {max}",
+    "tooLargeWithSize": "ไฟล์ \"{name}\" ขนาด {size} ใหญ่เกิน {max}",
+    "typeList": "{list} หรือ {last}",
+    "unsupportedType": "ไฟล์ \"{name}\" เป็นชนิดที่ไม่รองรับ ใช้ได้เฉพาะ {types}"
+  },
+  "validation": {
+    "Email": "รูปแบบอีเมลไม่ถูกต้อง",
+    "Max": "ต้องไม่เกิน {value}",
+    "Min": "ต้องไม่น้อยกว่า {value}",
+    "NotBlank": "กรุณากรอกช่องนี้",
+    "NotEmpty": "กรุณากรอกช่องนี้",
+    "NotNull": "กรุณากรอกช่องนี้",
+    "Pattern": "รูปแบบไม่ถูกต้อง",
+    "Positive": "ต้องมากกว่า 0",
+    "PositiveOrZero": "ต้องไม่ติดลบ",
+    "Size": "ความยาวต้องอยู่ระหว่าง {min} ถึง {max} ตัวอักษร",
+    "missingParameter": "ขาดข้อมูลที่จำเป็น",
+    "typeMismatch": "รูปแบบค่าไม่ถูกต้อง"
+  }
+}

@@ -1,9 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslate } from "@/lib/i18n";
 
 /** วางตรงกับ DashboardContent — หัวหน้า, ยอดขาย + สิ่งที่ต้องทำ, สถิติ 4 ใบ, ออเดอร์ + สต็อก */
 export function DashboardSkeleton() {
+  const { t } = useTranslate("seller");
   return (
-    <div className="flex flex-col gap-6" aria-busy="true" aria-label="กำลังโหลดแดชบอร์ด">
+    <div className="flex flex-col gap-6" aria-busy="true" aria-label={t("dashboard.loading", "กำลังโหลดแดชบอร์ด")}>
       <div className="flex flex-col gap-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-3 w-80" />

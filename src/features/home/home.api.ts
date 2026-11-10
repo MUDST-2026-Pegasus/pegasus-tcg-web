@@ -4,6 +4,7 @@ import type {
   HomeBannerDto,
   PublicListingDto,
   PublicProfileDto,
+  RecommendedShopDto,
   TrendingProductDto,
 } from "./home.types";
 
@@ -24,12 +25,17 @@ export async function getPublicProfile(username: string, signal?: AbortSignal): 
     // Older API versions only expose the seller inside each public listing.
     if (!isApiError(error) || ![401, 403, 404].includes(error.status)) throw error;
     const listings = await getStorefront(username, 1, 0, signal);
-    return listings.items[0]?.seller ?? { username, displayName: null, avatarUrl: null };
+    const seller = listings.items[0]?.seller;
+    return seller ? { ...seller, bannerUrl: null } : { username, displayName: null, avatarUrl: null, bannerUrl: null };
   }
 }
 
 export function getBanners(): Promise<HomeBannerDto[]> {
   return api.get<HomeBannerDto[]>("/home/banners", PUBLIC);
+}
+
+export function getRecommendedShops(): Promise<RecommendedShopDto[]> {
+  return api.get<RecommendedShopDto[]>("/home/recommended-shops", PUBLIC);
 }
 
 export function getTrending(limit: number): Promise<TrendingProductDto[]> {

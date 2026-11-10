@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMessage, useTranslate, type Message } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -289,10 +290,12 @@ function PageStatus({
 }
 
 /** หน้าฝั่งผู้ซื้อทั่วไป: หัวข้อ + ตารางการ์ดสินค้า */
-export function CatalogPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function CatalogPageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.page", "กำลังโหลดหน้า");
   return (
     <PageStatus
-      label={label}
+      label={text}
       className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 py-10"
     >
       <HeadingSkeleton />
@@ -302,10 +305,12 @@ export function CatalogPageSkeleton({ label = "กำลังโหลดหน
 }
 
 /** หน้ารายละเอียดสินค้า / ประกาศขาย */
-export function DetailPageSkeleton({ label = "กำลังโหลดรายละเอียด" }: { label?: string }) {
+export function DetailPageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.details", "กำลังโหลดรายละเอียด");
   return (
     <PageStatus
-      label={label}
+      label={text}
       className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-5 py-8"
     >
       <Skeleton className="h-4 w-56 rounded-md" />
@@ -316,10 +321,12 @@ export function DetailPageSkeleton({ label = "กำลังโหลดรา�
 }
 
 /** หน้าโปรไฟล์ร้าน / นักสะสม: ปุ่มกลับ + หัวโปรไฟล์ + ตารางการ์ด */
-export function ProfilePageSkeleton({ label = "กำลังโหลดโปรไฟล์" }: { label?: string }) {
+export function ProfilePageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.profile", "กำลังโหลดโปรไฟล์");
   return (
     <PageStatus
-      label={label}
+      label={text}
       className="min-h-[580px] bg-muted/60 px-5 py-8 sm:px-8 sm:py-12 lg:px-12"
     >
       <div className="mx-auto flex w-full max-w-[1344px] flex-col gap-8">
@@ -333,10 +340,12 @@ export function ProfilePageSkeleton({ label = "กำลังโหลดโป
 }
 
 /** หน้าฟอร์ม / checkout: เนื้อหาซ้าย + สรุปขวา */
-export function FormPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function FormPageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.page", "กำลังโหลดหน้า");
   return (
     <PageStatus
-      label={label}
+      label={text}
       className="mx-auto w-full max-w-6xl px-5 py-10"
     >
       <FormBodySkeleton />
@@ -345,10 +354,12 @@ export function FormPageSkeleton({ label = "กำลังโหลดหน้
 }
 
 /** หน้าบทความ (About / ข้อตกลง / นโยบาย) */
-export function ArticlePageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function ArticlePageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.page", "กำลังโหลดหน้า");
   return (
     <PageStatus
-      label={label}
+      label={text}
       className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 py-12"
     >
       <Skeleton className="h-56 w-full rounded-2xl" />
@@ -368,20 +379,22 @@ export const AUTH_CARD_CONTAINER_CLASS = CARD_CONTAINER_CLASS;
 
 /** หน้า login — การ์ดขนาด max-w-2xl พร้อม banner สูง 220px และ 2 ช่องกรอก */
 export function LoginPageSkeleton({
-  label = "กำลังโหลดหน้าเข้าสู่ระบบ...",
+  label,
   className,
 }: {
-  label?: string;
+  label?: Message | string;
   className?: string;
 } = {}) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.login", "กำลังโหลดหน้าเข้าสู่ระบบ...");
   return (
     <Card
       role="status"
       aria-busy="true"
-      aria-label={label}
+      aria-label={text}
       className={cn(CARD_CONTAINER_CLASS, className)}
     >
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{text}</span>
 
       {/* Header Banner: h-[220px] matching real LoginPage */}
       <div className="relative h-[220px] shrink-0 overflow-hidden bg-muted/40" aria-hidden="true">
@@ -428,20 +441,22 @@ export function LoginPageSkeleton({
 
 /** หน้า register — การ์ดขนาด max-w-2xl พร้อม banner สูง 256px (h-64) และ 5 ช่องกรอก */
 export function RegisterPageSkeleton({
-  label = "กำลังโหลดหน้าลงทะเบียน...",
+  label,
   className,
 }: {
-  label?: string;
+  label?: Message | string;
   className?: string;
 } = {}) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.register", "กำลังโหลดหน้าลงทะเบียน...");
   return (
     <Card
       role="status"
       aria-busy="true"
-      aria-label={label}
+      aria-label={text}
       className={cn(CARD_CONTAINER_CLASS, className)}
     >
-      <span className="sr-only">{label}</span>
+      <span className="sr-only">{text}</span>
 
       {/* Header Banner: h-64 (256px) matching real RegisterPage */}
       <div className="relative h-64 shrink-0 overflow-hidden bg-muted/40" aria-hidden="true">
@@ -516,7 +531,7 @@ export function RegisterPageSkeleton({
 
 export type AuthPageSkeletonProps = {
   variant?: "login" | "register";
-  label?: string;
+  label?: Message | string;
   className?: string;
 };
 
@@ -532,23 +547,25 @@ export function AuthPageSkeleton({
   if (variant === "register") {
     return (
       <RegisterPageSkeleton
-        label={label ?? "กำลังโหลดหน้าลงทะเบียน..."}
+        label={label}
         className={className}
       />
     );
   }
   return (
     <LoginPageSkeleton
-      label={label ?? "กำลังโหลดหน้าเข้าสู่ระบบ..."}
+      label={label}
       className={className}
     />
   );
 }
 
 /** หน้าหลังบ้าน (admin / seller): หัวข้อ + การ์ดตัวเลข + ตาราง */
-export function DashboardPageSkeleton({ label = "กำลังโหลดหน้า" }: { label?: string }) {
+export function DashboardPageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.page", "กำลังโหลดหน้า");
   return (
-    <PageStatus label={label} className="flex flex-col gap-6">
+    <PageStatus label={text} className="flex flex-col gap-6">
       <HeadingSkeleton />
       <StatCardsSkeleton />
       <TableSkeleton />
@@ -556,28 +573,14 @@ export function DashboardPageSkeleton({ label = "กำลังโหลดห�
   );
 }
 
-/** หน้าบัญชีผู้ใช้: เมนูซ้าย (AccountSidebar) + เนื้อหาขวา */
-export function AccountPageSkeleton({ label = "กำลังโหลดบัญชี" }: { label?: string }) {
+/** เนื้อหาฝั่งขวาของหน้า /account/* — sidebar มาจาก AccountLayout อยู่แล้ว */
+export function AccountPageSkeleton({ label }: { label?: Message | string }) {
+  const { t } = useTranslate();
+  const text = useMessage()(label) ?? t("states.loading.account", "กำลังโหลดบัญชี");
   return (
-    <PageStatus label={label} className="bg-muted/60 px-4 py-10 sm:px-6 lg:px-12">
-      <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[280px_1fr]">
-        <div className="flex h-fit flex-col gap-3 rounded-xl border bg-card p-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-12 rounded-full" />
-            <div className="flex flex-1 flex-col gap-2">
-              <Skeleton className="h-4 w-28 rounded-md" />
-              <Skeleton className="h-3 w-20 rounded-md" />
-            </div>
-          </div>
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-9 w-full rounded-lg" />
-          ))}
-        </div>
-        <div className="flex min-w-0 flex-col gap-6">
-          <HeadingSkeleton />
-          <ProductRowsSkeleton rows={2} />
-        </div>
-      </div>
+    <PageStatus label={text} className="flex min-w-0 flex-col gap-6">
+      <HeadingSkeleton />
+      <ProductRowsSkeleton rows={2} />
     </PageStatus>
   );
 }

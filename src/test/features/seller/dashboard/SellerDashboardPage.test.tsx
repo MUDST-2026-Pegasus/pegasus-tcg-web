@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 
 import { SellerDashboardPage } from "@/features/seller/dashboard/SellerDashboardPage";
 import * as dashboardApi from "@/features/seller/dashboard/dashboard.api";
@@ -52,6 +52,7 @@ function mockDashboardData(overrides: Partial<SellerDashboard> = {}): SellerDash
       lowStock: [
         {
           listingId: 7,
+          imageUrl: "https://example.com/charizard.png",
           productName: "Charizard ex",
           lotLabel: "Box A",
           conditionCode: "NM",
@@ -60,6 +61,7 @@ function mockDashboardData(overrides: Partial<SellerDashboard> = {}): SellerDash
         },
         {
           listingId: 8,
+          imageUrl: null,
           productName: "Pikachu VMAX",
           lotLabel: null,
           conditionCode: "LP",
@@ -77,6 +79,7 @@ function mockDashboardData(overrides: Partial<SellerDashboard> = {}): SellerDash
         buyerUsername: "nattapong_p",
         buyerDisplayName: "Nattapong",
         firstItemName: "Charizard ex",
+        firstImageUrl: "https://example.com/order-item.png",
         itemCount: 2,
         grandTotal: 1850,
         status: "PAID",
@@ -106,15 +109,19 @@ describe("SellerDashboardPage", () => {
     // Recent orders
     expect(screen.getByText("PGS-20261013-000041-S1")).toBeInTheDocument();
     expect(screen.getByText(/Nattapong/i)).toBeInTheDocument();
+    expect(screen.getAllByAltText("รูปสินค้า Charizard ex")[0]).toHaveAttribute("src", "https://example.com/order-item.png");
 
     // Low stock
     expect(screen.getByText("Charizard ex")).toBeInTheDocument();
+    expect(screen.getAllByAltText("รูปสินค้า Charizard ex")[1]).toHaveAttribute("src", "https://example.com/charizard.png");
     expect(screen.getByText("Box A · NM")).toBeInTheDocument();
     expect(screen.getByText("เหลือ 1 ชิ้น")).toBeInTheDocument();
     expect(screen.getByText("2 รายการ")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Charizard ex.*เหลือ 1 ชิ้น/ })).toHaveAttribute("href", "/seller/products/7/restock");
     expect(screen.getByText("ไปหน้าจัดการสินค้า").closest("a")).toHaveAttribute("href", "/seller/products?status=ACTIVE&sort=stock_asc");
     expect(screen.getByText("Pikachu VMAX")).toBeInTheDocument();
+    fireEvent.error(screen.getAllByAltText("รูปสินค้า Charizard ex")[0]);
+    expect(screen.getAllByAltText("รูปสินค้า Charizard ex")).toHaveLength(1);
   });
 
   it("renders error boundary state when dashboard query fails", async () => {

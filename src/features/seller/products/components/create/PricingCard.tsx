@@ -39,6 +39,7 @@ import type { MarketSnapshot } from "../../listing-form.types";
 import { formatSignedBaht, roundMoney, toNumber } from "../../products.format";
 import type { PricingMode } from "../../products.types";
 import { AmountInput } from "../AmountInput";
+import { useTranslate, translate } from "@/lib/i18n";
 
 /** ตั้งราคาห่างจากค่ากลางไม่เกินกี่ % ถึงนับว่า "ใกล้ค่ากลาง" */
 const NEAR_MEDIAN_PERCENT = 5;
@@ -52,13 +53,13 @@ const HELPER_CLASS = "text-[10px] leading-normal text-gray-400";
 const MODES: { value: PricingMode; title: string; description: string }[] = [
   {
     value: "MANUAL",
-    title: "ตั้งราคาเอง",
-    description: "ราคาคงที่ตามที่กรอก เปลี่ยนเองได้ทุกเมื่อ",
+    get title() { return translate("seller", "products.create.pricing.mode.fixed", "ตั้งราคาเอง"); },
+    get description() { return translate("seller", "products.create.pricing.mode.fixedHint", "ราคาคงที่ตามที่กรอก เปลี่ยนเองได้ทุกเมื่อ"); },
   },
   {
     value: "AUTO_MEDIAN",
-    title: "ตามราคาตลาดอัตโนมัติ",
-    description: "ระบบขยับราคาให้ทุกคืนตามค่ากลางตลาด ภายในขอบเขตที่คุณตั้ง",
+    get title() { return translate("seller", "products.create.pricing.mode.auto", "ตามราคาตลาดอัตโนมัติ"); },
+    get description() { return translate("seller", "products.create.pricing.mode.autoHint", "ระบบขยับราคาให้ทุกคืนตามค่ากลางตลาด ภายในขอบเขตที่คุณตั้ง"); },
   },
 ];
 
@@ -94,6 +95,7 @@ export function PricingCard({
   stock,
   autoFocusPrice = false,
 }: PricingCardProps) {
+  const { t } = useTranslate("seller");
   const ids = {
     price: useId(),
     cost: useId(),
@@ -126,11 +128,11 @@ export function PricingCard({
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-foreground">ราคาและจำนวน</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("products.create.pricing.title", "ราคาและจำนวน")}</h2>
         <p className="text-xs text-gray-500">
           {mode === "create"
-            ? "ต้นทุนใช้คำนวณกำไรในรายงานของคุณ ผู้ซื้อไม่เห็นข้อมูลนี้"
-            : "จำนวนและต้นทุนมาจากประวัติการรับเข้า เพิ่มได้ที่หน้าเติมสต็อก"}
+            ? t("products.create.pricing.costHint", "ต้นทุนใช้คำนวณกำไรในรายงานของคุณ ผู้ซื้อไม่เห็นข้อมูลนี้")
+            : t("products.create.pricing.editStockHint", "จำนวนและต้นทุนมาจากประวัติการรับเข้า เพิ่มได้ที่หน้าเติมสต็อก")}
         </p>
       </div>
 
@@ -139,7 +141,7 @@ export function PricingCard({
         name="pricingMode"
         render={({ field }) => (
           <RadioGroup
-            aria-label="โหมดราคา"
+            aria-label={t("products.create.pricing.modeLabel", "โหมดราคา")}
             value={field.value}
             onValueChange={(next) => field.onChange(next as PricingMode)}
             className="grid gap-3 sm:grid-cols-2"
@@ -180,12 +182,12 @@ export function PricingCard({
           form={form}
           name="price"
           id={ids.price}
-          label={isAuto ? "ราคาเริ่มต้นต่อใบ (บาท) *" : "ราคาขายต่อใบ (บาท) *"}
+          label={isAuto ? t("products.create.pricing.startPrice", "ราคาเริ่มต้นต่อใบ (บาท) *") : t("products.create.pricing.price", "ราคาขายต่อใบ (บาท) *")}
           helper={
             isAuto
-              ? "ใช้ราคานี้จนกว่าระบบจะปรับครั้งแรก"
+              ? t("products.create.pricing.startPriceHint", "ใช้ราคานี้จนกว่าระบบจะปรับครั้งแรก")
               : market.data
-                ? `ค่ากลางตลาดตอนนี้ ${formatBaht(market.data.median)}`
+                ? t("products.create.pricing.marketNow", "ค่ากลางตลาดตอนนี้ {median}", { median: formatBaht(market.data.median) })
                 : undefined
           }
           autoFocus={autoFocusPrice}
@@ -197,15 +199,15 @@ export function PricingCard({
               form={form}
               name="unitCost"
               id={ids.cost}
-              label="ต้นทุนต่อใบ (บาท) *"
-              helper="ไม่แสดงต่อผู้ซื้อ ใส่ 0 ได้ถ้าไม่ได้ซื้อมา"
+              label={t("products.create.pricing.unitCost", "ต้นทุนต่อใบ (บาท) *")}
+              helper={t("products.create.pricing.unitCostHint", "ไม่แสดงต่อผู้ซื้อ ใส่ 0 ได้ถ้าไม่ได้ซื้อมา")}
             />
             <Field
               className="gap-1.5"
               data-invalid={Boolean(errors.quantity) || undefined}
             >
               <FieldLabel htmlFor={ids.quantity} className={LABEL_CLASS}>
-                จำนวนที่มี (ใบ) *
+                {t("products.create.pricing.quantity", "จำนวนที่มี (ใบ) *")}
               </FieldLabel>
               <Controller
                 control={control}
@@ -224,7 +226,7 @@ export function PricingCard({
                 )}
               />
               <FieldDescription className={HELPER_CLASS}>
-                สูงสุด {MAX_UNITS_PER_STOCK_IN} ใบต่อครั้ง · ระบบตัดสต็อกเองเมื่อขายได้
+                {t("products.create.pricing.quantityHint", "สูงสุด {max} ใบต่อครั้ง · ระบบตัดสต็อกเองเมื่อขายได้", { max: MAX_UNITS_PER_STOCK_IN })}
               </FieldDescription>
               <FieldError errors={[errors.quantity]} />
             </Field>
@@ -232,7 +234,7 @@ export function PricingCard({
         ) : stock ? (
           <Field className="gap-1.5">
             <FieldLabel htmlFor={ids.quantity} className={LABEL_CLASS}>
-              พร้อมขาย (ใบ)
+              {t("products.create.pricing.available", "พร้อมขาย (ใบ)")}
             </FieldLabel>
             <Input
               id={ids.quantity}
@@ -241,12 +243,12 @@ export function PricingCard({
               className={READ_ONLY_INPUT_CLASS}
             />
             <FieldDescription className={HELPER_CLASS}>
-              เพิ่มจำนวนได้ที่หน้า{" "}
+              {t("products.create.pricing.addMoreAt", "เพิ่มจำนวนได้ที่หน้า")}{" "}
               <Link
                 to={stock.restockTo}
                 className="font-medium text-teal-600 no-underline hover:underline"
               >
-                เติมสต็อก
+                {t("products.actions.restock", "เติมสต็อก")}
               </Link>
             </FieldDescription>
           </Field>
@@ -258,22 +260,22 @@ export function PricingCard({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-y-3 rounded-[10px] border border-muted bg-neutral-50 p-4">
-        <SummaryItem label="ราคาขาย" value={formatBaht(price ?? 0)} strong />
+        <SummaryItem label={t("products.create.pricing.summary.price", "ราคาขาย")} value={formatBaht(price ?? 0)} strong />
         <SummaryItem
-          label={`− ค่าคอมมิชชั่น ~${ESTIMATED_COMMISSION_PERCENT}%`}
+          label={t("products.create.pricing.summary.commission", "− ค่าคอมมิชชั่น ~{percent}%", { percent: ESTIMATED_COMMISSION_PERCENT })}
           value={formatBaht(commission)}
         />
         {cost !== null ? (
-          <SummaryItem label="− ต้นทุน" value={formatBaht(cost)} />
+          <SummaryItem label={t("products.create.pricing.summary.cost", "− ต้นทุน")} value={formatBaht(cost)} />
         ) : null}
         <SummaryItem
-          label={cost !== null ? "= กำไรต่อใบ" : "= ได้รับต่อใบ"}
+          label={cost !== null ? t("products.create.pricing.summary.profit", "= กำไรต่อใบ") : t("products.create.pricing.summary.net", "= ได้รับต่อใบ")}
           value={formatSignedBaht(netPerUnit)}
           tone={netPerUnit < 0 ? "negative" : "positive"}
         />
         <div className="flex flex-col items-end gap-[5px]">
           <p className="text-xs text-gray-500">
-            {cost !== null ? "กำไรรวมถ้าขายหมด" : "รวมถ้าขายหมด"} {quantity} ใบ
+            {cost !== null ? t("products.create.pricing.summary.totalProfit", "กำไรรวมถ้าขายหมด {quantity} ใบ", { quantity }) : t("products.create.pricing.summary.total", "รวมถ้าขายหมด {quantity} ใบ", { quantity })}
           </p>
           <p
             className={cn(
@@ -286,8 +288,7 @@ export function PricingCard({
         </div>
       </div>
       <p className={HELPER_CLASS}>
-        ค่าคอมมิชชั่นคิดจากอัตรามาตรฐานของแพลตฟอร์ม ({ESTIMATED_COMMISSION_PERCENT}%) —
-        บางหมวดอาจต่างกัน ยอดจริงอยู่ในคำสั่งซื้อ
+        {t("products.create.pricing.commissionNote", "ค่าคอมมิชชั่นคิดจากอัตรามาตรฐานของแพลตฟอร์ม ({percent}%) — บางหมวดอาจต่างกัน ยอดจริงอยู่ในคำสั่งซื้อ", { percent: ESTIMATED_COMMISSION_PERCENT })}
       </p>
 
       <MarketComparison market={market} price={price} />
@@ -352,6 +353,7 @@ function AutoPricingFields({
   ids: { offset: string; floor: string; ceiling: string };
   market: MarketState;
 }) {
+  const { t } = useTranslate("seller");
   const { control } = form;
   const formState = useFormState({ control, name: "autoPriceOffsetPercent" });
   const [offsetText, floorText, ceilingText] = useWatch({
@@ -381,18 +383,18 @@ function AutoPricingFields({
       <div className="flex gap-2.5">
         <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-teal-600" />
         <div className="flex flex-col gap-1.5 text-xs leading-5 text-gray-700">
-          <p className="font-semibold text-foreground">ราคาอัตโนมัติทำงานอย่างไร</p>
+          <p className="font-semibold text-foreground">{t("products.create.pricing.auto.howTitle", "ราคาอัตโนมัติทำงานอย่างไร")}</p>
           <ul className="flex list-disc flex-col gap-0.5 pl-4">
             <li>
-              ทุกคืนตี 3 ระบบหาค่ากลางราคาของประกาศที่เปิดขายอยู่ของการ์ดพิมพ์นี้ในสภาพเดียวกัน
+              {t("products.create.pricing.auto.how1", "ทุกคืนตี 3 ระบบหาค่ากลางราคาของประกาศที่เปิดขายอยู่ของการ์ดพิมพ์นี้ในสภาพเดียวกัน")}
             </li>
             <li>
-              ราคาใหม่ = ค่ากลาง × (1 + ส่วนต่าง %) แล้วไม่ต่ำกว่าราคาต่ำสุด และไม่สูงกว่าราคาสูงสุดที่คุณตั้ง
+              {t("products.create.pricing.auto.how2", "ราคาใหม่ = ค่ากลาง × (1 + ส่วนต่าง %) แล้วไม่ต่ำกว่าราคาต่ำสุด และไม่สูงกว่าราคาสูงสุดที่คุณตั้ง")}
             </li>
             <li>
-              ถ้ามีประกาศในตลาดน้อยกว่า {AUTO_PRICE_MIN_SAMPLE} ใบ ราคาจะคงเดิม (ใช้ราคาเริ่มต้น)
+              {t("products.create.pricing.auto.how3", "ถ้ามีประกาศในตลาดน้อยกว่า {min} ใบ ราคาจะคงเดิม (ใช้ราคาเริ่มต้น)", { min: AUTO_PRICE_MIN_SAMPLE })}
             </li>
-            <li>ราคาทุกครั้งที่ระบบเปลี่ยนถูกบันทึกในประวัติราคาของประกาศ</li>
+            <li>{t("products.create.pricing.auto.how4", "ราคาทุกครั้งที่ระบบเปลี่ยนถูกบันทึกในประวัติราคาของประกาศ")}</li>
           </ul>
         </div>
       </div>
@@ -403,7 +405,7 @@ function AutoPricingFields({
           data-invalid={Boolean(formState.errors.autoPriceOffsetPercent) || undefined}
         >
           <FieldLabel htmlFor={ids.offset} className={LABEL_CLASS}>
-            ส่วนต่างจากค่ากลาง (%)
+            {t("products.create.pricing.auto.offset", "ส่วนต่างจากค่ากลาง (%)")}
           </FieldLabel>
           <Controller
             control={control}
@@ -424,7 +426,7 @@ function AutoPricingFields({
             )}
           />
           <FieldDescription className={HELPER_CLASS}>
-            เช่น -5 = ถูกกว่าค่ากลาง 5% · 0 = เท่าค่ากลาง
+            {t("products.create.pricing.auto.offsetHint", "เช่น -5 = ถูกกว่าค่ากลาง 5% · 0 = เท่าค่ากลาง")}
           </FieldDescription>
           <FieldError errors={[formState.errors.autoPriceOffsetPercent]} />
         </Field>
@@ -433,32 +435,32 @@ function AutoPricingFields({
           form={form}
           name="autoPriceFloor"
           id={ids.floor}
-          label="ราคาต่ำสุด (บาท) *"
-          helper="ระบบจะไม่ลดราคาต่ำกว่านี้"
+          label={t("products.create.pricing.auto.floor", "ราคาต่ำสุด (บาท) *")}
+          helper={t("products.create.pricing.auto.floorHint", "ระบบจะไม่ลดราคาต่ำกว่านี้")}
         />
         <MoneyField
           form={form}
           name="autoPriceCeiling"
           id={ids.ceiling}
-          label="ราคาสูงสุด (บาท) *"
-          helper="ระบบจะไม่ขึ้นราคาเกินนี้"
+          label={t("products.create.pricing.auto.ceiling", "ราคาสูงสุด (บาท) *")}
+          helper={t("products.create.pricing.auto.ceilingHint", "ระบบจะไม่ขึ้นราคาเกินนี้")}
         />
       </div>
 
       <p className="text-xs text-gray-700">
         {!market.enabled
-          ? "เลือกการ์ดและสภาพก่อน จะได้เห็นตัวอย่างราคาจากตลาด"
+          ? t("products.create.pricing.auto.previewNeedsCard", "เลือกการ์ดและสภาพก่อน จะได้เห็นตัวอย่างราคาจากตลาด")
           : market.isPending
-            ? "กำลังดูราคาในตลาด…"
+            ? t("products.create.pricing.auto.previewLoading", "กำลังดูราคาในตลาด…")
             : preview && market.data
-              ? `ถ้าตลาดเป็นแบบตอนนี้ (ค่ากลาง ${formatBaht(market.data.median)} จาก ${market.data.listingCount} ประกาศ) คืนนี้ราคาจะเป็น ${formatBaht(preview.price)}${
+              ? `${t("products.create.pricing.auto.preview", "ถ้าตลาดเป็นแบบตอนนี้ (ค่ากลาง {median} จาก {count} ประกาศ) คืนนี้ราคาจะเป็น {price}", { median: formatBaht(market.data.median), count: market.data.listingCount, price: formatBaht(preview.price) })}${
                   preview.heldAt === "floor"
-                    ? " — ชนราคาต่ำสุดที่ตั้งไว้"
+                    ? t("products.create.pricing.auto.hitFloor", " — ชนราคาต่ำสุดที่ตั้งไว้")
                     : preview.heldAt === "ceiling"
-                      ? " — ชนราคาสูงสุดที่ตั้งไว้"
+                      ? t("products.create.pricing.auto.hitCeiling", " — ชนราคาสูงสุดที่ตั้งไว้")
                       : ""
                 }`
-              : `ตอนนี้มีประกาศในตลาดไม่ถึง ${AUTO_PRICE_MIN_SAMPLE} ใบ ราคาจะคงอยู่ที่ราคาเริ่มต้นจนกว่าตลาดจะมีข้อมูลพอ`}
+              : t("products.create.pricing.auto.notEnough", "ตอนนี้มีประกาศในตลาดไม่ถึง {min} ใบ ราคาจะคงอยู่ที่ราคาเริ่มต้นจนกว่าตลาดจะมีข้อมูลพอ", { min: AUTO_PRICE_MIN_SAMPLE })}
       </p>
     </div>
   );
@@ -497,14 +499,15 @@ function SummaryItem({
   );
 }
 
-/** แถบเทียบราคาของเรากับช่วงต่ำสุด–สูงสุดของประกาศอื่นที่เปิดขายอยู่ */
-function MarketComparison({
+/** แถบเทียบราคาของเรากับช่วงต่ำสุด–สูงสุดของประกาศอื่นที่เปิดขายอยู่ (หน้าเปิดประมูลใช้ด้วย) */
+export function MarketComparison({
   market,
   price,
 }: {
   market: MarketState;
   price: number | null;
 }) {
+  const { t } = useTranslate("seller");
   if (!market.enabled) {
     return null;
   }
@@ -514,7 +517,7 @@ function MarketComparison({
   if (!market.data) {
     return (
       <p className="rounded-lg bg-neutral-50 px-3.5 py-3 text-xs text-gray-500">
-        ยังไม่มีใครเปิดขายการ์ดพิมพ์นี้ในสภาพนี้ — คุณจะเป็นประกาศแรก
+        {t("products.create.pricing.market.empty", "ยังไม่มีใครเปิดขายการ์ดพิมพ์นี้ในสภาพนี้ — คุณจะเป็นประกาศแรก")}
       </p>
     );
   }
@@ -534,16 +537,16 @@ function MarketComparison({
   let badgeLabel: string | null = null;
   if (diffPercent !== null) {
     const rounded = Math.abs(diffPercent).toFixed(1);
-    if (rounded === "0.0") badgeLabel = "เท่ากับค่ากลาง";
-    else if (diffPercent > 0) badgeLabel = `สูงกว่าค่ากลาง ${rounded}%`;
-    else badgeLabel = `ต่ำกว่าค่ากลาง ${rounded}%`;
+    if (rounded === "0.0") badgeLabel = t("products.create.pricing.market.equal", "เท่ากับค่ากลาง");
+    else if (diffPercent > 0) badgeLabel = t("products.create.pricing.market.above", "สูงกว่าค่ากลาง {percent}%", { percent: rounded });
+    else badgeLabel = t("products.create.pricing.market.below", "ต่ำกว่าค่ากลาง {percent}%", { percent: rounded });
   }
 
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium text-gray-700">
-          เทียบกับราคาตลาด ({snapshot.listingCount} ประกาศที่ขายอยู่)
+          {t("products.create.pricing.market.title", "เทียบกับราคาตลาด ({count} ประกาศที่ขายอยู่)", { count: snapshot.listingCount })}
         </p>
         {badgeLabel ? (
           <Badge
@@ -572,15 +575,21 @@ function MarketComparison({
 
       <div className="flex items-start justify-between gap-2">
         <p className="text-[10px] text-gray-400">
-          ต่ำสุด {formatBaht(snapshot.low)}
+          {t("products.create.pricing.market.low", "ต่ำสุด {price}", { price: formatBaht(snapshot.low) })}
         </p>
         <p className="text-[10px] font-medium text-gray-700">
-          ค่ากลาง {formatBaht(snapshot.median)}
+          {t("products.create.pricing.market.median", "ค่ากลาง {price}", { price: formatBaht(snapshot.median) })}
         </p>
         <p className="text-[10px] text-gray-400">
-          สูงสุด {formatBaht(snapshot.high)}
+          {t("products.create.pricing.market.high", "สูงสุด {price}", { price: formatBaht(snapshot.high) })}
         </p>
       </div>
     </div>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.create.pricing.mode.fixed", "ns": "seller", "defaultValue": "ตั้งราคาเอง"}
+// @tolgee-key {"key": "products.create.pricing.mode.fixedHint", "ns": "seller", "defaultValue": "ราคาคงที่ตามที่กรอก เปลี่ยนเองได้ทุกเมื่อ"}
+// @tolgee-key {"key": "products.create.pricing.mode.auto", "ns": "seller", "defaultValue": "ตามราคาตลาดอัตโนมัติ"}
+// @tolgee-key {"key": "products.create.pricing.mode.autoHint", "ns": "seller", "defaultValue": "ระบบขยับราคาให้ทุกคืนตามค่ากลางตลาด ภายในขอบเขตที่คุณตั้ง"}

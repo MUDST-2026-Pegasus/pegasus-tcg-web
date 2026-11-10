@@ -1,4 +1,4 @@
-import { api, type PageResponse } from "@/lib/api";
+import { api, type FileDownload, type PageResponse } from "@/lib/api";
 
 import type {
   CancelOrderPayload,
@@ -34,6 +34,10 @@ export function getSellerOrderCounts(): Promise<SellerOrderCounts> {
 
 export function getSellerOrder(id: number): Promise<SellerOrderDetail> {
   return api.get<SellerOrderDetail>(`/sellers/me/orders/${id}`);
+}
+
+export function downloadSellerOrderSummary(id: number): Promise<FileDownload> {
+  return api.download(`/sellers/me/orders/${id}/summary.pdf`);
 }
 
 /** PAID → PREPARING — ไม่บังคับ ส่งจาก PAID ได้เลย แต่บอกผู้ซื้อว่ามีคนรับเรื่องแล้ว */

@@ -1,0 +1,289 @@
+{
+  "account": {
+    "adminDashboard": "Admin Dashboard",
+    "becomeSeller": "Become a Seller",
+    "loadingAccount": "Loading account",
+    "loggedOut": "ออกจากระบบเรียบร้อยแล้ว",
+    "menu": "Account",
+    "myAccount": "My Account",
+    "myCollection": "My Collection",
+    "sellerDashboard": "Seller Dashboard"
+  },
+  "actions": {
+    "cancel": "ยกเลิก",
+    "clear": "ล้าง",
+    "done": "เสร็จ",
+    "next": "ถัดไป",
+    "previous": "ก่อนหน้า",
+    "reload": "โหลดใหม่",
+    "retry": "ลองใหม่"
+  },
+  "auth": {
+    "checkingSession": "กำลังตรวจสอบการเข้าสู่ระบบ"
+  },
+  "cardLabels": {
+    "edition": {
+      "notApplicable": "ไม่ระบุ"
+    },
+    "finish": {
+      "notApplicable": "ไม่มี (ของซีล/อุปกรณ์)"
+    }
+  },
+  "carriers": {
+    "thailandPostEms": "ไปรษณีย์ไทย EMS",
+    "thailandPostRegistered": "ไปรษณีย์ไทย ลงทะเบียน"
+  },
+  "condition": {
+    "dmg": "มีความเสียหาย",
+    "hp": "มีรอยจากการใช้งานมาก",
+    "lp": "มีรอยเล็กน้อย",
+    "mp": "มีรอยจากการใช้งาน",
+    "nm": "สภาพใกล้เคียงใหม่",
+    "sealed": "ยังไม่แกะซีล"
+  },
+  "datePicker": {
+    "hour": "ชั่วโมง",
+    "minute": "นาที",
+    "pickDate": "เลือกวัน",
+    "pickDateTime": "เลือกวันและเวลา",
+    "pickRange": "เลือกช่วงวัน",
+    "time": "เวลา"
+  },
+  "dateTime": {
+    "ago": "{time}ที่แล้ว"
+  },
+  "home": {
+    "eiei": "โบ๊ทdiwa"
+  },
+  "listing": {
+    "deliveryByShop": "จัดส่งตามเงื่อนไขร้าน",
+    "deliveryNotSet": "ยังไม่ตั้งค่าการจัดส่ง",
+    "freeShipping": "Free shipping",
+    "newShop": "ร้านใหม่",
+    "outOfStock": "Out of stock",
+    "sales": "{count} sales",
+    "shipsInDays": "Ships in {days} days",
+    "shipsTomorrow": "Ships tomorrow"
+  },
+  "nav": {
+    "account": "ACCOUNT",
+    "allProducts": "All products",
+    "auction": "Auction",
+    "becomeSeller": "Become a seller",
+    "cart": "ตะกร้าสินค้า",
+    "cartWithCount": "{count, plural, other {ตะกร้าสินค้า มีสินค้า {count} ชิ้น}}",
+    "categories": "Shop categories",
+    "closeMenu": "Close menu",
+    "home": "Home",
+    "login": "Log in",
+    "loginHint": "เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ",
+    "logoAria": "Pegasus TCG — กลับหน้าแรก",
+    "logout": "Log out",
+    "newArrivals": "New arrivals",
+    "openMenu": "Open menu",
+    "sale": "Sale",
+    "search": "ค้นหา",
+    "searchPlaceholder": "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…",
+    "shop": "SHOP",
+    "signup": "Sign up"
+  },
+  "pagination": {
+    "pageOf": "หน้า {page} จาก {total}"
+  },
+  "publicSellerReviews": {
+    "empty": "ยังไม่มีรีวิว",
+    "loadFailed": "โหลดรีวิวไม่สำเร็จ",
+    "loadingAria": "กำลังโหลดรีวิว",
+    "noSellerReviews": "บัญชีนี้ยังไม่มีรีวิวร้านค้า",
+    "ratingSummary": "คะแนนเฉลี่ย {average} / 5 จาก {count} รีวิว",
+    "reviewFromMyOrders": "รีวิวจากคำสั่งซื้อของฉัน",
+    "sellerReply": "ผู้ขายตอบ: {reply}",
+    "subtitle": "ผู้ซื้อให้คะแนนได้หลังคำสั่งซื้อเสร็จสมบูรณ์",
+    "title": "รีวิวร้านค้า"
+  },
+  "reviewStars": {
+    "legend": "คะแนนรีวิว",
+    "scoreOutOf": "{value} / 5 ดาว",
+    "starScore": "{score} ดาว",
+    "starsOutOf": "{rating} จาก 5 ดาว"
+  },
+  "routeError": {
+    "title": "หน้านี้มีปัญหา"
+  },
+  "routes": {
+    "loading": {
+      "addressBook": "กำลังโหลดที่อยู่",
+      "auctionDetail": "กำลังโหลดประมูล",
+      "auctionList": "กำลังโหลดประมูล",
+      "cart": "กำลังโหลดตะกร้า",
+      "checkout": "กำลังโหลดหน้าชำระเงิน",
+      "collectorProfile": "กำลังโหลดโปรไฟล์นักสะสม",
+      "listingDetail": "กำลังโหลดประกาศขาย",
+      "marketListings": "กำลังโหลดประกาศขาย",
+      "myAuctions": "กำลังโหลดการประมูลของฉัน",
+      "myCollection": "กำลังโหลดคอลเลกชัน",
+      "myCoupons": "กำลังโหลดโค้ดของฉัน",
+      "orderHistory": "กำลังโหลดคำสั่งซื้อ",
+      "payment": "กำลังโหลดหน้าชำระเงิน",
+      "productDetail": "กำลังโหลดสินค้า",
+      "profile": "กำลังโหลดโปรไฟล์",
+      "publicCollection": "กำลังโหลดคอลเลกชัน",
+      "publicSeller": "กำลังโหลดร้านค้า",
+      "sale": "กำลังโหลดสินค้าลดราคา",
+      "searchResults": "กำลังโหลดผลการค้นหา"
+    },
+    "title": {
+      "admin": {
+        "activityLog": "บันทึกกิจกรรม",
+        "auctions": "จัดการประมูล",
+        "auctionsAuctionId": "ประมูล",
+        "auctionsBannedBidders": "ผู้ถูกแบนประมูล",
+        "cardAttributes": "คุณสมบัติการ์ด",
+        "catalog": "จัดการแคตตาล็อก",
+        "commission": "ค่าคอมมิชชัน",
+        "index": "ภาพรวมแอดมิน",
+        "orders": "คำสั่งซื้อ",
+        "payments": "ตรวจสลิป",
+        "payouts": "จ่ายเงินผู้ขาย",
+        "promotions": "โปรโมชัน",
+        "promotionsIdEdit": "แก้ไขโปรโมชัน",
+        "promotionsNew": "สร้างโปรโมชัน",
+        "refunds": "คืนเงิน",
+        "reportsWeeklyStockProfit": "รายงานประจำสัปดาห์",
+        "reviews": "รีวิว",
+        "salesIdEdit": "แก้ไขการลดราคา",
+        "salesNew": "สร้างการลดราคา",
+        "sellers": "อนุมัติผู้ขาย",
+        "users": "ผู้ใช้"
+      },
+      "auth": {
+        "login": "เข้าสู่ระบบ",
+        "register": "สมัครสมาชิก"
+      },
+      "error": "เกิดข้อผิดพลาด",
+      "public": {
+        "about": "เกี่ยวกับเรา",
+        "accountCollection": "คอลเลกชันของฉัน",
+        "addresses": "ที่อยู่",
+        "auctions": "ประมูล",
+        "auctions2": "การประมูลของฉัน",
+        "auctionsAuctionId": "ประมูล",
+        "becomeASeller": "สมัครเป็นผู้ขาย",
+        "cart": "ตะกร้าสินค้า",
+        "checkout": "ชำระเงิน",
+        "collectorsUsername": "นักสะสม",
+        "coupons": "โค้ดของฉัน",
+        "index": "หน้าแรก",
+        "listingsListingId": "ประกาศขาย",
+        "notFound": "ไม่พบหน้านี้",
+        "orders": "คำสั่งซื้อของฉัน",
+        "payment": "ชำระเงิน",
+        "paymentSuccess": "ชำระเงินสำเร็จ",
+        "privacyPolicy": "นโยบายความเป็นส่วนตัว",
+        "productsProductId": "สินค้า",
+        "productsProductIdListings": "ประกาศขาย",
+        "profile": "โปรไฟล์",
+        "sale": "สินค้าลดราคา",
+        "saleSlug": "สินค้าลดราคา",
+        "search": "ค้นหา",
+        "termsOfService": "ข้อตกลงการใช้งาน",
+        "uUsername": "ร้านค้า",
+        "usersUsername": "คอลเลกชัน"
+      },
+      "seller": {
+        "auctions": "ประมูลของฉัน",
+        "auctionsAuctionId": "ประมูล",
+        "auctionsNew": "สร้างประมูล",
+        "index": "แดชบอร์ดผู้ขาย",
+        "logout": "ออกจากระบบ",
+        "orders": "คำสั่งซื้อ",
+        "ordersOrderId": "รายละเอียดคำสั่งซื้อ",
+        "payout": "การรับเงิน",
+        "products": "สินค้าของฉัน",
+        "productsNew": "เพิ่มสินค้า",
+        "productsProductIdEdit": "แก้ไขสินค้า",
+        "productsProductIdRestock": "เติมสต็อก",
+        "promotions": "โปรโมชัน",
+        "returns": "คืนสินค้า",
+        "reviews": "รีวิว",
+        "salesIdEdit": "แก้ไขการลดราคา",
+        "salesNew": "สร้างการลดราคา",
+        "shop": "ร้านของฉัน",
+        "verification": "ยืนยันตัวตน"
+      }
+    }
+  },
+  "sidebar": {
+    "admin": {
+      "groups": {
+        "catalog": "แคตตาล็อก",
+        "finance": "จัดการเงิน",
+        "operations": "การดำเนินงาน",
+        "overview": "ภาพรวม",
+        "system": "ระบบ",
+        "trust": "ความน่าเชื่อถือ"
+      },
+      "items": {
+        "activityLog": "บันทึกกิจกรรม",
+        "auctions": "การประมูล",
+        "cardAttributes": "เกมและคุณสมบัติการ์ด",
+        "catalog": "จัดการแคตตาล็อก",
+        "commission": "ค่าคอมมิชชั่น",
+        "orders": "ภาพรวมคำสั่งซื้อ",
+        "payments": "ตรวจสอบสลิปชำระเงิน",
+        "payouts": "ถอนเงินผู้ขาย",
+        "platformOverview": "ภาพรวมแพลตฟอร์ม",
+        "promotions": "โปรโมชั่น & โค้ดส่วนลด",
+        "refunds": "คืนเงิน",
+        "reviews": "จัดการรีวิว",
+        "sellerApproval": "อนุมัติผู้ขาย",
+        "users": "จัดการผู้ใช้",
+        "weeklyReport": "รายงานสต็อก/กำไรรายสัปดาห์"
+      }
+    },
+    "seller": {
+      "groups": {
+        "finance": "การเงิน",
+        "overview": "ภาพรวม",
+        "shop": "ร้านค้า"
+      },
+      "items": {
+        "auctions": "การประมูล",
+        "dashboard": "แดชบอร์ด",
+        "orders": "จัดการคำสั่งซื้อ",
+        "payout": "ถอนเงิน",
+        "products": "จัดการสินค้า",
+        "promotions": "โค้ดส่วนลดร้าน",
+        "returns": "คำขอคืนสินค้า",
+        "reviews": "รีวิวร้านค้า",
+        "shop": "จัดการร้านค้า"
+      }
+    }
+  },
+  "states": {
+    "loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+    "loading": {
+      "account": "กำลังโหลดบัญชี",
+      "details": "กำลังโหลดรายละเอียด",
+      "home": "กำลังโหลดหน้าแรก",
+      "homeData": "กำลังโหลดข้อมูลหน้าแรก",
+      "login": "กำลังโหลดหน้าเข้าสู่ระบบ...",
+      "page": "กำลังโหลดหน้า",
+      "profile": "กำลังโหลดโปรไฟล์",
+      "register": "กำลังโหลดหน้าลงทะเบียน..."
+    },
+    "noData": "ไม่มีข้อมูล",
+    "notBuiltYet": "ยังไม่ได้ทำหน้านี้",
+    "tryAgainOrRefresh": "ลองใหม่อีกครั้ง หรือรีเฟรชหน้านี้",
+    "unknownCause": "ไม่ทราบสาเหตุ"
+  },
+  "upload": {
+    "cancelUpload": "ยกเลิกการอัปโหลด {name}",
+    "chooseFile": "เลือกไฟล์",
+    "dropHere": "ลากไฟล์มาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์",
+    "maxFiles": "สูงสุด {count} ไฟล์",
+    "remove": "ลบ {name}",
+    "uploaded": "อัปโหลดแล้ว · {size}",
+    "uploading": "กำลังอัปโหลด {name}"
+  }
+}

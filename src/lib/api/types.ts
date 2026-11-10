@@ -12,6 +12,10 @@ export type ApiEnvelope<T> = {
 export type FieldViolation = {
   field: string;
   message: string;
+  /** ชื่อ constraint เช่น "NotBlank", "Size" — BE เริ่มส่งใน I18N-04 (TCG-548) */
+  code?: string;
+  /** ค่าของ constraint เช่น { max: 34 } */
+  params?: Record<string, unknown>;
 };
 
 /** ส่งมาใน `data` ตอน `success === false` */
@@ -29,6 +33,7 @@ export type PageResponse<T> = {
   size: number;
   totalItems: number;
   totalPages: number;
+  correctedQuery?: string;
 };
 
 export const API_ERROR_CODES = [
@@ -37,6 +42,7 @@ export const API_ERROR_CODES = [
   "METHOD_NOT_ALLOWED",
   "UNSUPPORTED_FILE_TYPE",
   "FILE_TOO_LARGE",
+  "EXPORT_TOO_LARGE",
   "FILE_NOT_FOUND",
   "INVALID_CREDENTIALS",
   "UNAUTHENTICATED",
@@ -45,6 +51,13 @@ export const API_ERROR_CODES = [
   "ACCOUNT_SUSPENDED",
   "ACCOUNT_DEACTIVATED",
   "EMAIL_NOT_VERIFIED",
+  "GOOGLE_TOKEN_INVALID",
+  "GOOGLE_EMAIL_NOT_VERIFIED",
+  "GOOGLE_SIGNIN_NOT_ALLOWED",
+  "GOOGLE_LINK_NOT_ALLOWED",
+  "GOOGLE_ALREADY_LINKED",
+  "GOOGLE_SIGNIN_DISABLED",
+  "ROLE_REQUIRES_PASSWORD",
   "ACCESS_DENIED",
   "USER_NOT_FOUND",
   "ROLE_NOT_FOUND",

@@ -1,17 +1,27 @@
+import type { ReactNode } from "react";
 import { Star } from "lucide-react";
+import { useTranslate } from "@/lib/i18n";
+
+type PricingTipCardProps = {
+  title?: string;
+  children?: ReactNode;
+};
 
 /** เคล็ดลับข้างฟอร์ม — คำแนะนำทั่วไป ไม่อ้างตัวเลขสถิติที่ระบบไม่ได้วัดจริง */
-export function PricingTipCard() {
+export function PricingTipCard({
+  title,
+  children,
+}: PricingTipCardProps) {
+  const { t } = useTranslate("seller");
+  title ??= t("products.create.tip.title", "เคล็ดลับตั้งราคา");
+  children ??= t("products.create.tip.description", "ตั้งราคาใกล้ค่ากลางของประกาศที่ขายอยู่ช่วยให้ขายได้เร็วขึ้น ถ้าการ์ดสภาพดีกว่าคนอื่น ค่อยตั้งสูงกว่าและใส่รูปมุมให้ครบ");
   return (
     <div className="flex w-full flex-col gap-2 rounded-xl bg-emerald-50 p-4">
       <div className="flex items-center gap-2">
         <Star aria-hidden="true" className="size-4 text-teal-600" />
-        <p className="text-xs font-semibold text-teal-600">เคล็ดลับตั้งราคา</p>
+        <p className="text-xs font-semibold text-teal-600">{title}</p>
       </div>
-      <p className="text-xs leading-4 text-teal-600">
-        ตั้งราคาใกล้ค่ากลางของประกาศที่ขายอยู่ช่วยให้ขายได้เร็วขึ้น ถ้าการ์ดสภาพดีกว่าคนอื่น
-        ค่อยตั้งสูงกว่าและใส่รูปมุมให้ครบ
-      </p>
+      <p className="text-xs leading-4 text-teal-600">{children}</p>
     </div>
   );
 }

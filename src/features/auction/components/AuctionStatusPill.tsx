@@ -13,15 +13,13 @@ const PILL_TONE: Record<AuctionPillKind, string> = {
   Lost: "bg-secondary text-muted-foreground",
   Ended: "bg-secondary text-muted-foreground",
   Unsold: "bg-secondary text-muted-foreground",
-  SecondChance: "bg-sky-50 text-primary",
   Suspended: "bg-red-50 text-red-700",
-  NeedsDecision: "bg-amber-50 text-amber-800",
 };
 
 type AuctionStatusPillProps = {
   /** แปลงจากสถานะด้วย `pillForStatus` / `pillForViewer` ใน auction.format.ts */
   kind: AuctionPillKind;
-  /** แทนข้อความมาตรฐาน เช่น "ขายแล้ว", "สูงสุด", "อันดับ 2" — สียังตาม kind */
+  /** แทนข้อความมาตรฐาน เช่น "ขายแล้ว", "สูงสุด" — สียังตาม kind */
   label?: string;
   className?: string;
 };

@@ -1,5 +1,8 @@
 import { Outlet, ScrollRestoration } from "react-router-dom";
 
+import { PageTitleSync } from "@/components/layout/PageTitleSync";
+import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
+
 /**
  * Root layout component placed at the top level of the router hierarchy.
  * Includes <ScrollRestoration /> to ensure that any route navigation
@@ -8,6 +11,8 @@ import { Outlet, ScrollRestoration } from "react-router-dom";
 export function RootLayout() {
   return (
     <>
+      <PageTitleSync />
+      <FaroPageViewTracker />
       <ScrollRestoration />
       <Outlet />
     </>

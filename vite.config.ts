@@ -28,6 +28,9 @@ export default defineConfig(() => {
       tailwindcss(),
       babel({ presets: [reactCompilerPreset()] }),
     ],
+    build: {
+      sourcemap: "hidden" as const,
+    },
     resolve: {
       alias: {
         // "@" ชี้ไปที่ src/ — ต้องตรงกับ paths ใน tsconfig.app.json
@@ -42,7 +45,21 @@ export default defineConfig(() => {
       reporters: ['default', 'junit', 'html'],
       outputFile: {
         junit: './test-results/junit.xml',
-        html: './test-results/html/index.html'
+        html: './test-results/html/index.html',
+      },
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json-summary', 'json', 'html'],
+        reportsDirectory: './coverage',
+        include: ['src/**/*.{ts,tsx}'],
+        exclude: [
+          'src/test/**',
+          'src/**/*.test.{ts,tsx}',
+          'src/**/*.spec.{ts,tsx}',
+          'src/**/*.d.ts',
+          'src/main.tsx',
+          'src/setupTests.ts',
+        ],
       },
     },
   };

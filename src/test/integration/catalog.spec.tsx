@@ -142,6 +142,19 @@ describe("Catalog Search and Filter Integration Flow", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the corrected term while keeping the typed query and relevance order", async () => {
+    vi.mocked(catalogApi.getProducts).mockResolvedValue({
+      ...makePage([makeProduct(2, "Pikachu", 2)]),
+      correctedQuery: "Pokemon",
+    });
+
+    renderWithProviders(<SearchResultsPage />, { route: "/search?q=pokamon" });
+
+    expect(await screen.findByText(/Showing results for “Pokemon” · You searched “pokamon”/)).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Search products" })).toHaveValue("pokamon");
+    expect(catalogApi.getProducts).toHaveBeenCalledWith(expect.objectContaining({ q: "pokamon", sort: "relevance" }));
+  });
+
   it("renders error state when product query fails", async () => {
     vi.mocked(catalogApi.getProducts).mockRejectedValue(new Error("API failure"));
 

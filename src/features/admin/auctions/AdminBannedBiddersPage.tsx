@@ -1,0 +1,198 @@
+import { useState } from "react";
+
+import { Info, ShieldCheck } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+
+import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/components/common";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Card } from "@/components/ui/card";
+import { getAllBannedBidders } from "@/features/auction/auction.api";
+import { useBannedBidders } from "@/features/auction/auction.queries";
+import type { BannedBidder, BanTab } from "@/features/auction/auction.types";
+import { ProductTableSkeleton } from "@/features/seller/products/components/ProductTableSkeleton";
+import { downloadCsv } from "@/lib/csv";
+
+import { useFileExport } from "../export";
+import { ExportButton } from "../components/ExportButton";
+
+import { BAN_TABS, canLiftBan, formatDayMonthYear, latestStrike, memberAge, readBanTab } from "./admin-auctions.format";
+import { AdminKpi, AdminSearchBox, AdminTabs } from "./components/AdminAuctionShared";
+import { LiftBanDialog } from "./components/LiftBanDialog";
+import { StrikeDots } from "./components/StrikeDots";
+import { useTranslate } from "@/lib/i18n";
+
+type OpenDialog = { bidder: BannedBidder; mode: "lift" | "history" };
+
+/** `/admin/auctions/banned-bidders` — A4 ผู้ใช้ที่ถูกห้ามบิด ตาม Figma 2309:8795 [TCG-635 · FE-9] */
+export function AdminBannedBiddersPage() {
+  const { t } = useTranslate("auction");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = readBanTab(searchParams.get("tab"));
+  const search = searchParams.get("q") ?? "";
+  const bidders = useBannedBidders({ tab, q: search || undefined });
+  const [dialog, setDialog] = useState<OpenDialog | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  function updateParams(changes: { tab?: BanTab; q?: string }) {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (changes.tab !== undefined) {
+          if (changes.tab === "BANNED") next.delete("tab");
+          else next.set("tab", changes.tab);
+        }
+        if (changes.q !== undefined) {
+          if (changes.q.trim()) next.set("q", changes.q.trim());
+          else next.delete("q");
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  }
+
+  const open = (bidder: BannedBidder, mode: OpenDialog["mode"]) => {
+    setDialog({ bidder, mode });
+    setDialogOpen(true);
+  };
+
+  const data = bidders.data;
+
+  const biddersExport = useFileExport();
+  // ดึงครบทุกหน้าของแท็บและคำค้นนี้ก่อน หน้าใดล้มเหลวไม่ดาวน์โหลดไฟล์ที่ไม่ครบ [TCG-749]
+  const exportCsv = () =>
+    void biddersExport.run(async () => {
+      const rows = await getAllBannedBidders({ tab, q: search || undefined });
+      downloadCsv(`banned-bidders-${tab.toLowerCase()}.csv`, [
+        [t("admin.adminBannedBiddersPage.text", "ผู้ใช้"), t("admin.adminBannedBiddersPage.text2", "อีเมล"), t("admin.adminBannedBiddersPage.text3", "ไม่ชำระ"), t("admin.adminBannedBiddersPage.text4", "ครั้งล่าสุด"), t("admin.adminBannedBiddersPage.text5", "ห้ามบิดถึง")],
+        ...rows.map((b) => [b.username, b.maskedEmail, `${b.strikeCount}/${b.strikeLimit}`, latestStrike(b), b.bannedUntil ? formatDayMonthYear(b.bannedUntil) : ""]),
+      ]);
+    });
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Breadcrumb>
+        <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
+          <BreadcrumbItem>
+            <BreadcrumbLink render={<Link to="/admin/auctions" />}>{t("admin.adminBannedBiddersPage.text6", "การประมูลทั้งหมด")}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-medium text-gray-700">{t("admin.adminBannedBiddersPage.text7", "ผู้ใช้ที่ถูกห้ามบิด")}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">{t("admin.adminBannedBiddersPage.text7", "ผู้ใช้ที่ถูกห้ามบิด")}</h1>
+          <p className="text-[13px] text-muted-foreground">
+            {t("admin.adminBannedBiddersPage.text8", "ระบบห้ามบิดอัตโนมัติเมื่อไม่ชำระหลังชนะครบ 3 ครั้ง · แอดมินยกเลิกโทษได้ถ้าไม่ใช่ความผิดของผู้ใช้")}
+          </p>
+        </div>
+        <ExportButton
+          label={t("admin.adminBannedBiddersPage.text9", "ส่งออก CSV")}
+          pending={biddersExport.pending}
+          disabled={!data}
+          onClick={exportCsv}
+        />
+      </div>
+
+      <p className="flex items-start gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs leading-5 text-sky-800">
+        <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+        {t("admin.adminBannedBiddersPage.text10", "ไม่ชำระ 1–2 ครั้ง = เตือน · ครบ 3 ครั้ง = ห้ามบิด 30 วัน · ผู้ที่ถูกห้ามยังซื้อสินค้าปกติได้ · ตัวนับรีเซ็ตเมื่อพ้นโทษ")}
+      </p>
+
+      {data ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <AdminKpi label={t("admin.adminBannedBiddersPage.label", "ห้ามบิดอยู่")} value={data.tabCounts.BANNED} valueClass="text-red-700" />
+          <AdminKpi label={t("admin.adminBannedBiddersPage.label2", "ใกล้ถูกห้าม (2/3)")} value={data.tabCounts.AT_RISK} valueClass="text-amber-800" />
+          <AdminKpi label={t("admin.adminBannedBiddersPage.label3", "ยกเลิกโทษแล้ว (30 วัน)")} value={data.liftedLast30Days} />
+          <AdminKpi label={t("admin.adminBannedBiddersPage.label4", "พ้นโทษแล้ว (30 วัน)")} value={data.expiredLast30Days} />
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <AdminTabs label={t("admin.adminBannedBiddersPage.label5", "สถานะโทษ")} tabs={BAN_TABS} active={tab} counts={data?.tabCounts} onChange={(next) => updateParams({ tab: next })} />
+        <AdminSearchBox value={search} placeholder={t("admin.adminBannedBiddersPage.placeholder", "ค้นหาชื่อผู้ใช้หรืออีเมล…")} onChange={(q) => updateParams({ q })} />
+      </div>
+
+      <QueryBoundary
+        query={bidders}
+        loading={<ProductTableSkeleton />}
+        errorTitle={t("admin.adminBannedBiddersPage.errorTitle", "โหลดรายชื่อไม่สำเร็จ")}
+        isEmpty={(result) => result.page.items.length === 0}
+        empty={<EmptyState icon={ShieldCheck} title={t("admin.adminBannedBiddersPage.title", "ไม่มีผู้ใช้ที่ถูกห้ามบิด")} description={t("admin.adminBannedBiddersPage.description", "ผู้ที่ไม่ชำระหลังชนะครบ 3 ครั้งจะแสดงที่นี่โดยอัตโนมัติ")} />}
+      >
+        {(result) => <BannedBiddersTable bidders={result.page.items} onOpen={open} />}
+      </QueryBoundary>
+
+      <LiftBanDialog
+        key={dialog ? `${dialog.mode}-${dialog.bidder.userId}` : "none"}
+        bidder={dialog?.bidder ?? null}
+        mode={dialog?.mode ?? "history"}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+    </div>
+  );
+}
+
+function BannedBiddersTable({ bidders, onOpen }: { bidders: BannedBidder[]; onOpen: (bidder: BannedBidder, mode: OpenDialog["mode"]) => void }) {
+  const { t } = useTranslate("auction");
+  const head = "text-xs font-normal text-muted-foreground";
+  const action = "cursor-pointer text-xs font-semibold text-primary hover:underline";
+  const columns: DataTableColumn<BannedBidder>[] = [
+    {
+      id: "user",
+      header: t("admin.adminBannedBiddersPage.text", "ผู้ใช้"),
+      meta: { headClassName: `pl-4 ${head}`, cellClassName: "py-3 pl-4" },
+      cell: ({ row: { original: bidder } }) => (
+        <>
+          <p className="text-sm font-semibold text-foreground">{bidder.username}</p>
+          <p className="text-[11px] text-muted-foreground">
+            {bidder.maskedEmail} {t("admin.adminBannedBiddersPage.text11", "· สมาชิก")}{" "}{memberAge(bidder.memberSince)}
+          </p>
+        </>
+      ),
+    },
+    { id: "strikes", header: t("admin.adminBannedBiddersPage.text3", "ไม่ชำระ"), meta: { headClassName: head }, cell: ({ row }) => <StrikeDots count={row.original.strikeCount} limit={row.original.strikeLimit} /> },
+    { id: "latest", header: t("admin.adminBannedBiddersPage.text4", "ครั้งล่าสุด"), meta: { headClassName: head, cellClassName: "text-xs text-muted-foreground" }, cell: ({ row }) => latestStrike(row.original) },
+    {
+      id: "until",
+      header: t("admin.adminBannedBiddersPage.text5", "ห้ามบิดถึง"),
+      meta: { headClassName: head, cellClassName: "text-sm font-semibold text-red-700" },
+      cell: ({ row: { original: bidder } }) =>
+        bidder.bannedUntil && canLiftBan(bidder) ? formatDayMonthYear(bidder.bannedUntil) : <span className="text-xs font-normal text-muted-foreground">—</span>,
+    },
+    {
+      id: "actions",
+      header: () => <span className="sr-only">{t("admin.adminBannedBiddersPage.text12", "การกระทำ")}</span>,
+      meta: { headClassName: "pr-4", cellClassName: "pr-4 text-right" },
+      cell: ({ row: { original: bidder } }) => (
+        <div className="flex items-center justify-end gap-3">
+          <button type="button" className={action} onClick={() => onOpen(bidder, "history")}>
+            {t("admin.adminBannedBiddersPage.text13", "ดูประวัติ")}
+          </button>
+          {canLiftBan(bidder) ? (
+            <button type="button" className={action} onClick={() => onOpen(bidder, "lift")}>
+              {t("admin.adminBannedBiddersPage.text14", "ยกเลิกโทษ")}
+            </button>
+          ) : null}
+        </div>
+      ),
+    },
+  ];
+  return (
+    <Card className="gap-0 overflow-hidden rounded-xl p-0 shadow-none">
+      <DataTable columns={columns} data={bidders} getRowId={(bidder) => String(bidder.userId)} headerRowClassName="bg-muted/40 hover:bg-muted/40" />
+    </Card>
+  );
+}

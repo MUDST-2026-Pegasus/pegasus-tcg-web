@@ -7,7 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import type { FileUploadState } from "@/hooks/use-file-upload";
 import { formatFileSize } from "@/lib/upload";
 
-import { BANK_BOOK_REQUIREMENTS } from "../application.constants";
+import { bankBookRequirements } from "../application.constants";
+import { useTranslate } from "@/lib/i18n";
 
 type BankBookUploadProps = {
   id: string;
@@ -24,6 +25,7 @@ type BankBookUploadProps = {
  * จึงมีแค่ object key ที่ต้องส่งไปกับคำขอ
  */
 export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
+  const { t } = useTranslate("seller");
   const item = upload.items[0];
   const message = item?.error ?? error;
   const percent = Math.round((item?.progress ?? 0) * 100);
@@ -35,7 +37,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
           htmlFor={id}
           className="text-xs font-medium text-foreground/80"
         >
-          รูปหน้าสมุดบัญชี หรือ หน้าแอปธนาคาร *
+          {t("application.bankBook.label", "รูปหน้าสมุดบัญชี หรือ หน้าแอปธนาคาร *")}
         </FieldLabel>
         <span className="ml-auto text-[10px] text-muted-foreground/75">
           {upload.hint}
@@ -55,7 +57,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
               {item.previewUrl && (
                 <img
                   src={item.previewUrl}
-                  alt="ตัวอย่างรูปที่เลือก"
+                  alt={t("application.bankBook.previewAlt", "ตัวอย่างรูปที่เลือก")}
                   className="max-h-20 max-w-full rounded-md border border-border object-contain"
                 />
               )}
@@ -67,7 +69,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                 <div className="flex w-full max-w-48 items-center gap-2">
                   <Progress
                     value={percent}
-                    aria-label="กำลังอัปโหลดรูปหน้าสมุดบัญชี"
+                    aria-label={t("application.bankBook.uploading", "กำลังอัปโหลดรูปหน้าสมุดบัญชี")}
                     className="flex-1 [&_[data-slot=progress-track]]:h-1.5"
                   />
                   <span className="text-[10px] text-muted-foreground tabular-nums">
@@ -77,7 +79,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
               ) : item.status === "done" ? (
                 <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <CircleCheck aria-hidden className="size-3 text-teal-600" />
-                  อัปโหลดแล้ว · {formatFileSize(item.file.size)}
+                  {t("application.bankBook.uploaded", "อัปโหลดแล้ว · {size}", { size: formatFileSize(item.file.size) })}
                 </p>
               ) : (
                 <p className="text-[10px] text-muted-foreground">
@@ -92,7 +94,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                   size="sm"
                   className="h-8.5 rounded-sm px-2.5"
                 >
-                  เปลี่ยนไฟล์
+                  {t("application.bankBook.change", "เปลี่ยนไฟล์")}
                 </Button>
                 {item.status === "error" && item.canRetry && (
                   <Button
@@ -106,7 +108,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                     }}
                   >
                     <RotateCw data-icon="inline-start" />
-                    ลองใหม่
+                    {t("actions.retry", "ลองใหม่", { ns: "common" })}
                   </Button>
                 )}
                 <Button
@@ -119,7 +121,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                     upload.remove(item.id);
                   }}
                 >
-                  {item.status === "uploading" ? "ยกเลิก" : "ลบไฟล์"}
+                  {item.status === "uploading" ? t("actions.cancel", "ยกเลิก", { ns: "common" }) : t("application.bankBook.remove", "ลบไฟล์")}
                 </Button>
               </div>
             </>
@@ -129,10 +131,10 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                 <CloudUpload aria-hidden className="size-6 text-teal-600" />
               </span>
               <p className="text-xs font-medium text-teal-600">
-                ลากรูปมาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์
+                {t("application.bankBook.drop", "ลากรูปมาวางที่นี่ หรือ คลิกเพื่อเลือกไฟล์")}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                ถ่ายจากหน้าแอปธนาคารก็ได้ ไม่ต้องเป็นสมุดบัญชีเล่มจริง
+                {t("application.bankBook.dropHint", "ถ่ายจากหน้าแอปธนาคารก็ได้ ไม่ต้องเป็นสมุดบัญชีเล่มจริง")}
               </p>
               {/* click วิ่งขึ้นไปที่กรอบให้เปิดตัวเลือกไฟล์ ปุ่มนี้มีไว้ให้กดผ่านคีย์บอร์ดได้ */}
               <Button
@@ -141,7 +143,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
                 size="sm"
                 className="h-8.5 rounded-sm px-2.5"
               >
-                เลือกไฟล์
+                {t("application.bankBook.choose", "เลือกไฟล์")}
               </Button>
             </>
           )}
@@ -149,10 +151,10 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
 
         <div className="flex flex-col gap-2.25 rounded-lg border border-border bg-muted/30 px-3.5 py-4 sm:w-62.5">
           <p className="text-[11px] font-medium text-foreground/80">
-            ในรูปต้องเห็นชัด
+            {t("application.bankBook.mustShow", "ในรูปต้องเห็นชัด")}
           </p>
           <ul className="flex flex-col gap-2.25">
-            {BANK_BOOK_REQUIREMENTS.map((requirement) => (
+            {bankBookRequirements().map((requirement) => (
               <li
                 key={requirement}
                 className="flex items-center gap-2 text-[11px] text-muted-foreground"
@@ -166,7 +168,7 @@ export function BankBookUpload({ id, upload, error }: BankBookUploadProps) {
             ))}
           </ul>
           <p className="text-[10px] text-muted-foreground/75">
-            ปิดหรือขีดฆ่าข้อมูลอื่นที่ไม่เกี่ยวข้องได้
+            {t("application.bankBook.redactHint", "ปิดหรือขีดฆ่าข้อมูลอื่นที่ไม่เกี่ยวข้องได้")}
           </p>
         </div>
       </div>

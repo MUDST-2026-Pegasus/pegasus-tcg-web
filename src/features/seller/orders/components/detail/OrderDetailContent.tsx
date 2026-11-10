@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Link } from "react-router-dom";
 
+import { AuctionSourcePill } from "@/features/auction/components/AuctionSourcePill";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -19,11 +20,12 @@ import {
   SELLER_ORDER_STATUS_TONE,
 } from "@/features/seller/shared/order-status";
 import { cn } from "@/lib/utils";
+import { downloadBlob } from "@/lib/download";
 
 import {
-  CARRIER_OPTIONS,
   RETURNS_PATH,
   addressLines,
+  buyerChoiceNote,
   canAccept,
   canCancel,
   canShip,
@@ -31,6 +33,7 @@ import {
   formatAgo,
   isReturnStatus,
   orderErrorMessage,
+  orderSummaryDownloadErrorMessage,
   parseShippingAddress,
   paymentRows,
   paymentStateOf,
@@ -41,19 +44,23 @@ import {
   tabOfStatus,
   timelineEntries,
 } from "../../orders.format";
-import { useAcceptOrder, useShipOrder } from "../../orders.queries";
+import { useAcceptOrder, useDownloadOrderSummary, useShipOrder } from "../../orders.queries";
 import type { SellerOrderDetail } from "../../orders.types";
+import { useCarrierPicker } from "../../useCarrierPicker";
 
 import { ConfirmShipDialog } from "../ConfirmShipDialog";
 
 import { BuyerCard } from "./BuyerCard";
 import { CancelOrderDialog } from "./CancelOrderDialog";
+import { SaleOrderBreakdown } from "@/features/sale/components/SaleOrderBreakdown";
+
 import { OrderProfitCard } from "./OrderProfitCard";
 import { OrderTimelineCard } from "./OrderTimelineCard";
 import { PackingListCard } from "./PackingListCard";
 import { PaymentCard } from "./PaymentCard";
 import { PromotionOrderMoneyCard } from "./PromotionOrderMoneyCard";
 import { ShippingInfoCard } from "./ShippingInfoCard";
+import { useTranslate, translate } from "@/lib/i18n";
 
 type OrderDetailContentProps = {
   detail: SellerOrderDetail;
@@ -62,37 +69,41 @@ type OrderDetailContentProps = {
 /** subtitle ใต้เลขออเดอร์ — บอกว่าตอนนี้ใครต้องทำอะไร */
 function nextStepNote(detail: SellerOrderDetail): string {
   const { order, shipBy } = detail.summary;
-  const ordered = `สั่งซื้อ${formatAgo(order.createdAt)}`;
+  const ordered = translate("seller", "orderDetail.next.ordered", "สั่งซื้อ{ago}", { ago: formatAgo(order.createdAt) });
   switch (order.status) {
     case "PENDING_PAYMENT":
-      return `${ordered} · รอผู้ซื้อชำระเงิน ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด`;
+      return translate("seller", "orderDetail.next.pendingPayment", "{ordered} · รอผู้ซื้อชำระเงิน ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด", { ordered });
     case "PAID":
     case "PREPARING":
-      return shipBy ? `${ordered} · ${shipByLabel(shipBy)} เพื่อรักษาคะแนนร้าน` : ordered;
+      return shipBy
+        ? translate("seller", "orderDetail.next.toShip", "{ordered} · {shipBy} เพื่อรักษาคะแนนร้าน", { ordered, shipBy: shipByLabel(shipBy) })
+        : ordered;
     case "SHIPPED":
     case "DELIVERED":
-      return `${ordered} · ส่งแล้ว รอผู้ซื้อยืนยันรับสินค้า`;
+      return translate("seller", "orderDetail.next.shipped", "{ordered} · ส่งแล้ว รอผู้ซื้อยืนยันรับสินค้า", { ordered });
     case "COMPLETED":
-      return `${ordered} · ผู้ซื้อได้รับสินค้าแล้ว เงินเข้าบัญชีร้าน`;
+      return translate("seller", "orderDetail.next.completed", "{ordered} · ผู้ซื้อได้รับสินค้าแล้ว เงินเข้าบัญชีร้าน", { ordered });
     case "CANCELLED":
-      return `${ordered} · คำสั่งซื้อถูกยกเลิก`;
+      return translate("seller", "orderDetail.next.cancelled", "{ordered} · คำสั่งซื้อถูกยกเลิก", { ordered });
     case "RETURN_REQUESTED":
-      return `${ordered} · ผู้ซื้อขอคืนสินค้า ตอบคำขอได้ที่หน้าคำขอคืนสินค้า`;
+      return translate("seller", "orderDetail.next.returnRequested", "{ordered} · ผู้ซื้อขอคืนสินค้า ตอบคำขอได้ที่หน้าคำขอคืนสินค้า", { ordered });
     case "RETURNED":
-      return `${ordered} · ร้านได้รับสินค้าคืนแล้ว รอสรุปผลการคืนเงิน`;
+      return translate("seller", "orderDetail.next.returned", "{ordered} · ร้านได้รับสินค้าคืนแล้ว รอสรุปผลการคืนเงิน", { ordered });
     case "REFUNDED":
-      return `${ordered} · คืนเงินให้ผู้ซื้อแล้ว`;
+      return translate("seller", "orderDetail.next.refunded", "{ordered} · คืนเงินให้ผู้ซื้อแล้ว", { ordered });
   }
 }
 
 export function OrderDetailContent({ detail }: OrderDetailContentProps) {
+  const { t } = useTranslate("seller");
   const { summary } = detail;
   const { order } = summary;
   const tab = tabOfStatus(order.status);
 
   const accept = useAcceptOrder();
   const ship = useShipOrder();
-  const [carrier, setCarrier] = useState(CARRIER_OPTIONS[0].value);
+  const downloadSummary = useDownloadOrderSummary();
+  const { carrier, setCarrier, match: carrierMatch } = useCarrierPicker(summary.shippingChoice);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [packedIds, setPackedIds] = useState<number[]>([]);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -102,7 +113,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
   const tracking = trackingNumber.trim();
   const profit = profitSummary(detail);
   const hasPromotionDiscount = (order.sellerDiscount ?? 0) > 0 || (order.platformDiscount ?? 0) > 0;
-  const busy = accept.isPending || ship.isPending;
+  const busy = accept.isPending || ship.isPending || downloadSummary.isPending;
 
   function handleTogglePacked(id: number) {
     setPackedIds((current) =>
@@ -112,12 +123,12 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
 
   function handleAccept() {
     accept.mutate(order.id, {
-      onSuccess: () => toast.add({ type: "success", title: "รับออเดอร์แล้ว" }),
+      onSuccess: () => toast.add({ type: "success", title: t("orders.accept.success", "รับออเดอร์แล้ว") }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "รับออเดอร์ไม่สำเร็จ",
-          description: orderErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("orders.accept.failed", "รับออเดอร์ไม่สำเร็จ"),
+          description: orderErrorMessage(error, t("orders.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   }
@@ -132,17 +143,36 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
         onSuccess: () =>
           toast.add({
             type: "success",
-            title: "ยืนยันจัดส่งแล้ว",
+            title: t("orders.ship.success", "ยืนยันจัดส่งแล้ว"),
             description: `${carrierLabel(carrier)} ${tracking}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "ยืนยันจัดส่งไม่สำเร็จ",
-            description: orderErrorMessage(error, "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง"),
+            title: t("orders.ship.failed", "ยืนยันจัดส่งไม่สำเร็จ"),
+            description: orderErrorMessage(error, t("orders.ship.failedHint", "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง")),
           }),
       },
     );
+  }
+
+  function handleDownloadSummary() {
+    downloadSummary.mutate(order.id, {
+      onSuccess: ({ blob, filename }) => {
+        downloadBlob(blob, filename ?? `order-summary-${summary.orderNumber}.pdf`);
+        toast.add({
+          type: "success",
+          title: t("orderDetail.pdf.success", "ดาวน์โหลด Order Summary แล้ว"),
+          description: filename ?? `order-summary-${summary.orderNumber}.pdf`,
+        });
+      },
+      onError: (error) =>
+        toast.add({
+          type: "error",
+          title: t("orderDetail.pdf.failed", "ดาวน์โหลด Order Summary ไม่สำเร็จ"),
+          description: orderSummaryDownloadErrorMessage(error),
+        }),
+    });
   }
 
   return (
@@ -150,7 +180,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/seller/orders" />}>จัดการคำสั่งซื้อ</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/seller/orders" />}>{t("orders.title", "จัดการคำสั่งซื้อ")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -179,9 +209,10 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             >
               {statusTitle(order.status)}
             </Badge>
+            <AuctionSourcePill order={summary} basePath="/seller/auctions" />
           </div>
           <p className="text-xs text-gray-500">
-            คำสั่งซื้อของผู้ซื้อ {summary.orderNumber} · {nextStepNote(detail)}
+            {t("orderDetail.subtitle", "คำสั่งซื้อของผู้ซื้อ {orderNumber} · {note}", { orderNumber: summary.orderNumber, note: nextStepNote(detail) })}
           </p>
         </div>
 
@@ -195,7 +226,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               render={<Link to={RETURNS_PATH} />}
               nativeButton={false}
             >
-              {order.status === "RETURN_REQUESTED" ? "ตอบคำขอคืนสินค้า" : "ดูคำขอคืนสินค้า"}
+              {order.status === "RETURN_REQUESTED" ? t("orderDetail.returns.respond", "ตอบคำขอคืนสินค้า") : t("orderDetail.returns.view", "ดูคำขอคืนสินค้า")}
             </Button>
           ) : null}
           {canCancel(order.status) ? (
@@ -206,7 +237,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               disabled={busy}
               onClick={() => setCancelOpen(true)}
             >
-              ยกเลิกคำสั่งซื้อ
+              {t("orderDetail.cancel.title", "ยกเลิกคำสั่งซื้อ")}
             </Button>
           ) : null}
           {canAccept(order.status) ? (
@@ -218,29 +249,41 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
               onClick={handleAccept}
             >
               {accept.isPending ? <Spinner /> : null}
-              รับออเดอร์
+              {t("orders.accept.action", "รับออเดอร์")}
             </Button>
           ) : null}
           {shippable ? (
-            // ยังไม่ได้กรอกเลขพัสดุในการ์ดข้อมูลการจัดส่ง = ยืนยันไม่ได้
+            // ยังไม่ได้เลือกขนส่งหรือกรอกเลขพัสดุในการ์ดข้อมูลการจัดส่ง = ยืนยันไม่ได้
             <Button
               size="sm"
               className="rounded-md px-2.5"
-              disabled={tracking === "" || busy}
+              disabled={tracking === "" || carrier === "" || busy}
               onClick={() => setShipConfirmOpen(true)}
             >
               {ship.isPending ? <Spinner /> : null}
-              ยืนยันจัดส่ง
+              {t("orders.confirmShip.confirm", "ยืนยันจัดส่ง")}
             </Button>
           ) : null}
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-md px-2.5"
+            disabled={busy}
+            aria-busy={downloadSummary.isPending}
+            aria-label={downloadSummary.isPending ? t("orderDetail.pdf.generating", "กำลังสร้าง PDF...") : "Download Order Summary (PDF)"}
+            onClick={handleDownloadSummary}
+          >
+            {downloadSummary.isPending ? <Spinner /> : null}
+            {downloadSummary.isPending ? t("orderDetail.pdf.generating", "กำลังสร้าง PDF...") : "Download Order Summary (PDF)"}
+          </Button>
         </div>
       </div>
 
       <div className="flex flex-col items-start gap-5 lg:flex-row">
         <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
           <PackingListCard
-            title={shippable ? "รายการที่ต้องแพ็ค" : "รายการสินค้า"}
-            countLabel={`${pieceCount(order.items)} ใบ · ${order.items.length} รายการ`}
+            title={shippable ? t("orderDetail.items.toPack", "รายการที่ต้องแพ็ค") : t("orderDetail.items.title", "รายการสินค้า")}
+            countLabel={t("orderDetail.items.count", "{pieces} ใบ · {lines} รายการ", { pieces: pieceCount(order.items), lines: order.items.length })}
             items={order.items}
             packable={shippable}
             packedIds={packedIds}
@@ -251,12 +294,14 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
             editable={shippable}
             shipByLabel={shippable && summary.shipBy ? shipByLabel(summary.shipBy) : null}
             shipment={order.shipments[0] ?? null}
+            shippingChoice={summary.shippingChoice}
             carrier={carrier}
+            carrierMatch={carrierMatch}
             onCarrierChange={setCarrier}
             trackingNumber={trackingNumber}
             onTrackingNumberChange={setTrackingNumber}
           />
-          <OrderTimelineCard title="ไทม์ไลน์" entries={timelineEntries(order, summary.paidAt)} />
+          <OrderTimelineCard title={t("orderDetail.timeline", "ไทม์ไลน์")} entries={timelineEntries(order, summary.paidAt)} />
         </div>
 
         <div className="flex w-full shrink-0 flex-col gap-4 lg:w-80">
@@ -268,6 +313,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
           <PaymentCard state={paymentStateOf(order.status, summary.paidAt)} rows={paymentRows(detail.payment)} />
           {hasPromotionDiscount && <PromotionOrderMoneyCard order={order} />}
           {profit ? <OrderProfitCard {...profit} /> : null}
+          <SaleOrderBreakdown items={order.items} viewer="seller" />
         </div>
       </div>
 
@@ -277,6 +323,7 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
         orderNumber={order.sellerOrderNumber}
         carrierName={carrierLabel(carrier)}
         trackingNumber={tracking}
+        buyerChoiceNote={buyerChoiceNote(summary.shippingChoice, carrierMatch)}
         onConfirm={handleShip}
       />
 
@@ -290,3 +337,14 @@ export function OrderDetailContent({ detail }: OrderDetailContentProps) {
     </div>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-554]
+// @tolgee-key {"key": "orderDetail.next.ordered", "ns": "seller", "defaultValue": "สั่งซื้อ{ago}"}
+// @tolgee-key {"key": "orderDetail.next.pendingPayment", "ns": "seller", "defaultValue": "{ordered} · รอผู้ซื้อชำระเงิน ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด"}
+// @tolgee-key {"key": "orderDetail.next.toShip", "ns": "seller", "defaultValue": "{ordered} · {shipBy} เพื่อรักษาคะแนนร้าน"}
+// @tolgee-key {"key": "orderDetail.next.shipped", "ns": "seller", "defaultValue": "{ordered} · ส่งแล้ว รอผู้ซื้อยืนยันรับสินค้า"}
+// @tolgee-key {"key": "orderDetail.next.completed", "ns": "seller", "defaultValue": "{ordered} · ผู้ซื้อได้รับสินค้าแล้ว เงินเข้าบัญชีร้าน"}
+// @tolgee-key {"key": "orderDetail.next.cancelled", "ns": "seller", "defaultValue": "{ordered} · คำสั่งซื้อถูกยกเลิก"}
+// @tolgee-key {"key": "orderDetail.next.returnRequested", "ns": "seller", "defaultValue": "{ordered} · ผู้ซื้อขอคืนสินค้า ตอบคำขอได้ที่หน้าคำขอคืนสินค้า"}
+// @tolgee-key {"key": "orderDetail.next.returned", "ns": "seller", "defaultValue": "{ordered} · ร้านได้รับสินค้าคืนแล้ว รอสรุปผลการคืนเงิน"}
+// @tolgee-key {"key": "orderDetail.next.refunded", "ns": "seller", "defaultValue": "{ordered} · คืนเงินให้ผู้ซื้อแล้ว"}

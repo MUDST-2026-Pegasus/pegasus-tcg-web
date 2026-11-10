@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import { PAYMENT_STATE_LABEL, type PaymentState } from "../../orders.format";
+import { useTranslate } from "@/lib/i18n";
 
 const STATUS_BADGE: Record<PaymentState, string> = {
   paid: "bg-[#e3f4ec] text-[#12805c]",
@@ -18,10 +19,11 @@ type PaymentCardProps = {
 
 /** สลิปอยู่กับแอดมินที่เป็นคนตรวจ ร้านเห็นแค่ผลการชำระ */
 export function PaymentCard({ state, rows }: PaymentCardProps) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-foreground">การชำระเงิน</p>
+        <p className="text-xs font-semibold text-foreground">{t("orderDetail.payment.title", "การชำระเงิน")}</p>
         <Badge className={cn("h-5 rounded-full px-2 text-xs", STATUS_BADGE[state])}>
           {PAYMENT_STATE_LABEL[state]}
         </Badge>

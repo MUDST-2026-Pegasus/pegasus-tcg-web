@@ -24,7 +24,9 @@ import { ProfitWarningCard } from "./ProfitWarningCard";
 import { RestockFormCard } from "./RestockFormCard";
 import { RestockHistoryCard } from "./RestockHistoryCard";
 import { RestockSummaryCard } from "./RestockSummaryCard";
+import { StockForecastCard } from "./StockForecastCard";
 import { WeightedCostCard } from "./WeightedCostCard";
+import { useTranslate } from "@/lib/i18n";
 
 const PRODUCTS_PATH = "/seller/products";
 
@@ -33,6 +35,7 @@ type RestockContentProps = {
 };
 
 export function RestockContent({ data }: RestockContentProps) {
+  const { t } = useTranslate("seller");
   const navigate = useNavigate();
   const restock = useRestockListing();
   const [draft, setDraft] = useState<RestockDraft>(data.initialDraft);
@@ -57,13 +60,13 @@ export function RestockContent({ data }: RestockContentProps) {
       });
       toast.add({
         type: "success",
-        title: `รับเข้า ${result.quantity} ${data.product.unit} แล้ว`,
+        title: t("restock.toast.saved", "รับเข้า {quantity} {unit} แล้ว", { quantity: result.quantity, unit: data.product.unit }),
       });
       navigate(PRODUCTS_PATH);
     } catch (error) {
       toast.add({
         type: "error",
-        title: listingErrorMessage(error, "บันทึกการรับเข้าไม่สำเร็จ ลองใหม่อีกครั้ง"),
+        title: listingErrorMessage(error, t("restock.toast.failed", "บันทึกการรับเข้าไม่สำเร็จ ลองใหม่อีกครั้ง")),
       });
     }
   }
@@ -173,6 +176,7 @@ export function RestockContent({ data }: RestockContentProps) {
           </div>
         </div>
       </div>
+      <StockForecastCard listingId={Number(data.productId)} />
     </div>
   );
 }

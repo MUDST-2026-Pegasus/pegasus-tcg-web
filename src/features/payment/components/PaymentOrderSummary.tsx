@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PAYMENT_PAGE_FIXTURE } from "@/features/payment/Payment.fixture";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 function ProductThumbnail({
   imageUrl,
@@ -48,6 +49,8 @@ interface PaymentOrderSummaryProps {
   subtotal?: number;
   shippingTotal?: number;
   grandTotal?: number;
+  /** ส่วนลดราคาสินค้า (ราคาลด) แยกจากโค้ด — `subtotal` เป็นยอดหลังลดแล้ว (TCG-683) */
+  saleDiscount?: number | null;
 }
 
 export function PaymentOrderSummary({
@@ -55,7 +58,9 @@ export function PaymentOrderSummary({
   subtotal,
   shippingTotal,
   grandTotal,
+  saleDiscount,
 }: PaymentOrderSummaryProps) {
+  const { t } = useTranslate("buyer");
   const hasRealItems = Boolean(items && items.length > 0);
 
   const displayItems = hasRealItems
@@ -74,22 +79,22 @@ export function PaymentOrderSummary({
       ];
 
   const formattedSubtotal = hasRealItems && subtotal !== undefined
-    ? `THB ${Number(subtotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(subtotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.subtotal;
 
   const formattedShipping = hasRealItems && shippingTotal !== undefined
-    ? `THB ${Number(shippingTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(shippingTotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.shipping;
 
   const formattedTotal = hasRealItems && grandTotal !== undefined
-    ? `THB ${Number(grandTotal).toLocaleString("th-TH")}`
+    ? `THB ${Number(grandTotal).toLocaleString(intlLocale())}`
     : PAYMENT_PAGE_FIXTURE.orderSummary.total;
 
   return (
     <div className="bg-card rounded-2xl border border-muted shadow-sm p-6 space-y-4">
       {/* Title */}
       <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-        Order Summary
+        {t("payment.summary.title", "Order Summary")}
       </h2>
 
       <div className="h-px bg-secondary" />
@@ -120,7 +125,7 @@ export function PaymentOrderSummary({
                   </p>
                 )}
                 <p className="text-sm font-normal text-slate-900 mt-1.5">
-                  THB {Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString("th-TH")}
+                  THB {Number(item.lineTotal || item.unitPrice * (item.quantity || 1)).toLocaleString(intlLocale())}
                   {item.quantity > 1 && (
                     <span className="text-xs text-slate-500 font-normal ml-1">
                       × {item.quantity}
@@ -137,17 +142,29 @@ export function PaymentOrderSummary({
 
       {/* Price Breakdown */}
       <div className="space-y-3 text-sm">
+        {hasRealItems && saleDiscount ? (
+          <>
+            <div className="flex justify-between items-center">
+              <span className="font-normal text-slate-600">{t("cart.summary.listTotal", "ราคาสินค้า (ก่อนลด)")}</span>
+              <span className="font-normal text-slate-900">THB {Number((subtotal ?? 0) + saleDiscount).toLocaleString(intlLocale())}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-normal text-slate-600">{t("cart.summary.saleDiscount", "ส่วนลดราคาสินค้า")}</span>
+              <span className="font-normal text-[#dc2626]">−THB {Number(saleDiscount).toLocaleString(intlLocale())}</span>
+            </div>
+          </>
+        ) : null}
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Subtotal</span>
+          <span className="font-normal text-slate-600">{saleDiscount ? t("payment.summary.subtotalAfterSale", "Subtotal (หลังลดราคา)") : t("payment.summary.subtotal", "Subtotal")}</span>
           <span className="font-normal text-slate-900">{formattedSubtotal}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Shipping</span>
+          <span className="font-normal text-slate-600">{t("payment.summary.shipping", "Shipping")}</span>
           <span className="font-normal text-slate-900">{formattedShipping}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="font-normal text-slate-600">Tax</span>
-          <span className="font-normal text-slate-600">Included</span>
+          <span className="font-normal text-slate-600">{t("payment.summary.tax", "Tax")}</span>
+          <span className="font-normal text-slate-600">{t("payment.summary.included", "Included")}</span>
         </div>
       </div>
 
@@ -155,7 +172,7 @@ export function PaymentOrderSummary({
 
       {/* Total Row */}
       <div className="flex justify-between items-center pt-1">
-        <span className="text-base font-bold text-slate-900">Total</span>
+        <span className="text-base font-bold text-slate-900">{t("payment.summary.total", "Total")}</span>
         <span className="text-2xl font-black text-slate-900 tracking-tight">
           {formattedTotal}
         </span>

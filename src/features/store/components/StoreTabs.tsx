@@ -1,5 +1,6 @@
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 export type StoreTabsProps = {
   activeTab: string;
@@ -7,6 +8,8 @@ export type StoreTabsProps = {
   collectionTotal?: number;
   ratingCount?: number;
   isNonSeller?: boolean;
+  /** ประมูลที่เปิดอยู่ของร้าน — 0/ไม่ส่ง = ซ่อนแท็บ "ประมูล" [TCG-636] */
+  auctionsTotal?: number;
 };
 
 export function StoreTabs({
@@ -15,15 +18,17 @@ export function StoreTabs({
   collectionTotal,
   ratingCount,
   isNonSeller = false,
+  auctionsTotal = 0,
 }: StoreTabsProps) {
+  const { t } = useTranslate("buyer");
   return (
     <TabsList
-      aria-label="Store tabs"
+      aria-label={t("store.tabs", "Store tabs")}
       className="flex h-auto! w-full items-center justify-start gap-6 sm:gap-8 rounded-none border-b border-border bg-transparent p-0 overflow-x-auto"
     >
       <TabsTrigger
         value="products"
-        aria-label={`สินค้าที่วางขาย (${listingsTotal ?? 0})`}
+        aria-label={`${t("store.listings", "สินค้าที่วางขาย")} (${listingsTotal ?? 0})`}
         className={cn(
           "flex-none! w-auto! h-12 rounded-none border-0 border-b-2 bg-transparent! px-1 pb-3 pt-2 text-sm sm:text-base font-medium transition-colors hover:text-foreground after:hidden!",
           activeTab === "products"
@@ -31,7 +36,7 @@ export function StoreTabs({
             : "border-transparent! text-muted-foreground hover:border-border",
         )}
       >
-        <span>สินค้าที่วางขาย</span>
+        <span>{t("store.listings", "สินค้าที่วางขาย")}</span>
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-colors",
@@ -46,7 +51,7 @@ export function StoreTabs({
 
       <TabsTrigger
         value="collection"
-        aria-label={`คอลเลกชัน (${collectionTotal ?? 0})`}
+        aria-label={`${t("store.collection", "คอลเลกชัน")} (${collectionTotal ?? 0})`}
         className={cn(
           "flex-none! w-auto! h-12 rounded-none border-0 border-b-2 bg-transparent! px-1 pb-3 pt-2 text-sm sm:text-base font-medium transition-colors hover:text-foreground after:hidden!",
           activeTab === "collection"
@@ -54,7 +59,7 @@ export function StoreTabs({
             : "border-transparent! text-muted-foreground hover:border-border",
         )}
       >
-        <span>คอลเลกชัน</span>
+        <span>{t("store.collection", "คอลเลกชัน")}</span>
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-colors",
@@ -67,10 +72,35 @@ export function StoreTabs({
         </span>
       </TabsTrigger>
 
+      {auctionsTotal > 0 && (
+        <TabsTrigger
+          value="auctions"
+          aria-label={`${t("store.auctions", "ประมูล")} (${auctionsTotal})`}
+          className={cn(
+            "flex-none! w-auto! h-12 rounded-none border-0 border-b-2 bg-transparent! px-1 pb-3 pt-2 text-sm sm:text-base font-medium transition-colors hover:text-foreground after:hidden!",
+            activeTab === "auctions"
+              ? "border-primary! text-primary! font-semibold"
+              : "border-transparent! text-muted-foreground hover:border-border",
+          )}
+        >
+          <span>{t("store.auctions", "ประมูล")}</span>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-colors",
+              activeTab === "auctions"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground",
+            )}
+          >
+            {auctionsTotal}
+          </span>
+        </TabsTrigger>
+      )}
+
       {!isNonSeller && (
         <TabsTrigger
           value="reviews"
-          aria-label={`รีวิวจากผู้ซื้อ (${ratingCount ?? 0})`}
+          aria-label={`${t("store.buyerReviews", "รีวิวจากผู้ซื้อ")} (${ratingCount ?? 0})`}
           className={cn(
             "flex-none! w-auto! h-12 rounded-none border-0 border-b-2 bg-transparent! px-1 pb-3 pt-2 text-sm sm:text-base font-medium transition-colors hover:text-foreground after:hidden!",
             activeTab === "reviews"
@@ -78,7 +108,7 @@ export function StoreTabs({
               : "border-transparent! text-muted-foreground hover:border-border",
           )}
         >
-          <span>รีวิวจากผู้ซื้อ</span>
+          <span>{t("store.buyerReviews", "รีวิวจากผู้ซื้อ")}</span>
           <span
             className={cn(
               "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-colors",

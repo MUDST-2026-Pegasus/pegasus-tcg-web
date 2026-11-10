@@ -60,6 +60,8 @@ export type SellerListingSummary = {
   /** รูปแรกของประกาศ เป็น presigned URL อายุสั้น ห้ามเก็บไว้ใช้ภายหลัง */
   primaryPhotoUrl: string | null;
   updatedAt: string;
+  /** ผูกกับการประมูลอยู่ — เลือกเข้าการลดราคาไม่ได้ (SAL-03) · API เก่าไม่ส่งมา = `false` */
+  inAuction?: boolean;
 };
 
 /** `dto/ListingPhotoResponse.java` */
@@ -96,6 +98,9 @@ export type SellerListing = Omit<SellerListingSummary, "primaryPhotoUrl"> & {
   photos: ListingPhoto[];
   similarListings: SimilarListing[];
   costBasis: ListingCostBasis;
+  /** เหตุผลที่แอดมินระงับ — `null` เว้นแต่ BLOCKED */
+  blockReason: string | null;
+  blockedAt: string | null;
 };
 
 /**
@@ -134,6 +139,9 @@ export type ListingQuery = {
    * เลขการ์ด SKU และป้ายล็อตของเราเอง ไม่ใส่/ว่าง = ไม่ค้น
    */
   q?: string;
+  /** ประกาศของการ์ดพิมพ์นี้ + สภาพนี้เท่านั้น — หาประกาศให้การ์ดที่กลับจากประมูล [TCG-639] */
+  variantId?: number;
+  condition?: CardCondition;
   /** ไม่ใส่ = แก้ไขล่าสุดก่อน */
   sort?: ListingSort;
   /** เริ่มที่ 0 */

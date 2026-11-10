@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 const productTitleWidths = ["w-36", "w-40", "w-32", "w-36", "w-40"];
 
@@ -185,14 +186,15 @@ export function FeaturedSkeleton() {
 }
 
 export function HomePageSkeleton() {
+  const { t } = useTranslate();
   return (
     <main
       aria-busy="true"
-      aria-label="กำลังโหลดหน้าแรก"
+      aria-label={t("states.loading.home", "กำลังโหลดหน้าแรก")}
       className="bg-secondary font-sans"
     >
       <span className="sr-only" role="status" aria-live="polite">
-        กำลังโหลดข้อมูลหน้าแรก
+        {t("states.loading.homeData", "กำลังโหลดข้อมูลหน้าแรก")}
       </span>
       <HeroSkeleton />
       <ProductGridSkeleton />

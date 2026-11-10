@@ -9,6 +9,7 @@ import {
   formatThaiDateTime,
 } from "../application.format";
 import type { Verification } from "../application.types";
+import { useTranslate } from "@/lib/i18n";
 
 type SubmissionSummaryCardProps = {
   verification: Verification;
@@ -18,22 +19,23 @@ type SubmissionSummaryCardProps = {
 export function SubmissionSummaryCard({
   verification,
 }: SubmissionSummaryCardProps) {
+  const { t } = useTranslate("seller");
   const approved = verification.status === "APPROVED";
 
   const meta = [
     {
-      label: "เลขที่คำขอ",
+      label: t("application.summary.number", "เลขที่คำขอ"),
       value: formatApplicationNumber(verification.id, verification.submittedAt),
     },
-    { label: "ส่งเมื่อ", value: formatThaiDateTime(verification.submittedAt) },
+    { label: t("application.summary.submittedAt", "ส่งเมื่อ"), value: formatThaiDateTime(verification.submittedAt) },
     approved && verification.reviewedAt
       ? {
-          label: "อนุมัติเมื่อ",
+          label: t("application.summary.approvedAt", "อนุมัติเมื่อ"),
           value: formatThaiDateTime(verification.reviewedAt),
         }
       : {
-          label: "คาดว่าทราบผล",
-          value: `ภายใน ${formatThaiDate(expectedDecisionDate(verification.submittedAt))}`,
+          label: t("application.summary.expected", "คาดว่าทราบผล"),
+          value: t("application.summary.expectedBy", "ภายใน {date}", { date: formatThaiDate(expectedDecisionDate(verification.submittedAt)) }),
         },
   ];
 
@@ -46,12 +48,12 @@ export function SubmissionSummaryCard({
       </span>
 
       <h1 className="text-[22px] font-bold text-foreground">
-        {approved ? "คำขอของคุณได้รับการอนุมัติแล้ว" : "ส่งคำขอเรียบร้อยแล้ว"}
+        {approved ? t("application.summary.approvedTitle", "คำขอของคุณได้รับการอนุมัติแล้ว") : t("application.summary.submittedTitle", "ส่งคำขอเรียบร้อยแล้ว")}
       </h1>
       <p className="text-xs text-muted-foreground">
         {approved
-          ? "ออกจากระบบแล้วเข้าสู่ระบบใหม่อีกครั้ง เพื่อเริ่มใช้งานหลังบ้านผู้ขาย"
-          : "เราได้รับชื่อจริงและบัญชีรับเงินของคุณแล้ว ทีมงานจะตรวจสอบและแจ้งผลทางอีเมลภายใน 1 วันทำการ"}
+          ? t("application.summary.relogin", "ออกจากระบบแล้วเข้าสู่ระบบใหม่อีกครั้ง เพื่อเริ่มใช้งานหลังบ้านผู้ขาย")
+          : t("application.summary.submittedDescription", "เราได้รับชื่อจริงและบัญชีรับเงินของคุณแล้ว ทีมงานจะตรวจสอบและแจ้งผลทางอีเมลภายใน 1 วันทำการ")}
       </p>
 
       <dl className="grid w-full gap-3 rounded-lg bg-muted/70 px-4 py-3.5 sm:grid-cols-3 sm:gap-0">
