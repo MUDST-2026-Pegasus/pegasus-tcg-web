@@ -14,6 +14,7 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslate } from "@/lib/i18n";
 
 type FinanceReasonDialogProps = {
   open: boolean;
@@ -56,6 +57,7 @@ function ReasonForm({
 }: Pick<FinanceReasonDialogProps, "placeholder" | "confirmLabel" | "onConfirm" | "errorMessage"> & {
   onClose: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const [reason, setReason] = useState("");
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -89,7 +91,7 @@ function ReasonForm({
       )}
 
       <Field data-invalid={(touched && missing) || undefined}>
-        <FieldLabel htmlFor="finance-reason">เหตุผล</FieldLabel>
+        <FieldLabel htmlFor="finance-reason">{t("finance.reason", "เหตุผล")}</FieldLabel>
         <Textarea
           id="finance-reason"
           rows={4}
@@ -99,11 +101,11 @@ function ReasonForm({
           value={reason}
           onChange={(event) => setReason(event.target.value)}
         />
-        <FieldError errors={touched && missing ? [{ message: "กรุณากรอกเหตุผล" }] : []} />
+        <FieldError errors={touched && missing ? [{ message: t("finance.reasonRequired", "กรุณากรอกเหตุผล") }] : []} />
       </Field>
 
       <DialogFooter>
-        <DialogClose render={<Button type="button" variant="outline" />}>ยกเลิก</DialogClose>
+        <DialogClose render={<Button type="button" variant="outline" />}>{t("actions.cancel", "ยกเลิก", { ns: "common" })}</DialogClose>
         <Button type="submit" variant="destructive" disabled={submitting}>
           {submitting && <Spinner data-icon="inline-start" />}
           {confirmLabel}

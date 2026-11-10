@@ -7,13 +7,14 @@ import { cn } from "@/lib/utils";
 import { financeErrorMessage } from "../finance.format";
 import { SLIP_AUTO_APPROVE_KEY } from "../finance.api";
 import { useSetSlipAutoApprove, useSlipAutoApprove } from "../finance.queries";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 /**
  * การ์ดสลับโหมดตรวจสลิป — อ่าน/เขียน platform setting `payment.slip_auto_approve`
  * มีผลกับสลิปที่แนบหลังเปลี่ยนเท่านั้น สลิปที่อยู่ในคิวแล้วยังต้องตรวจเอง
  */
 export function SlipModeCard({ queueCount }: { queueCount: number }) {
+  const { t } = useTranslate("admin");
   const autoApprove = useSlipAutoApprove();
   const setAutoApprove = useSetSlipAutoApprove();
   const enabled = autoApprove.data ?? false;
@@ -27,20 +28,20 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
       onSuccess: () =>
         toast.add({
           type: "success",
-          title: next ? "เปิดอนุมัติสลิปอัตโนมัติแล้ว" : "เปลี่ยนเป็นตรวจสอบเองแล้ว",
+          title: next ? t("payments.mode.autoOn", "เปิดอนุมัติสลิปอัตโนมัติแล้ว") : t("payments.mode.manualOn", "เปลี่ยนเป็นตรวจสอบเองแล้ว"),
         }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "เปลี่ยนโหมดไม่สำเร็จ",
-          description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("payments.mode.failed", "เปลี่ยนโหมดไม่สำเร็จ"),
+          description: financeErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   };
 
   const options = [
-    { value: false, label: "ตรวจสอบเอง", icon: UserCheck },
-    { value: true, label: "อนุมัติอัตโนมัติ", icon: Zap },
+    { value: false, label: t("payments.mode.manual", "ตรวจสอบเอง"), icon: UserCheck },
+    { value: true, label: t("payments.mode.auto", "อนุมัติอัตโนมัติ"), icon: Zap },
   ];
 
   return (
@@ -51,25 +52,23 @@ export function SlipModeCard({ queueCount }: { queueCount: number }) {
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-semibold text-foreground">โหมดตรวจสอบสลิปชำระเงิน</p>
+            <p className="text-sm font-semibold text-foreground">{t("payments.mode.title", "โหมดตรวจสอบสลิปชำระเงิน")}</p>
             <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
               {SLIP_AUTO_APPROVE_KEY} = {autoApprove.isPending ? "…" : String(enabled)}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            ตรวจสอบเอง: admin ต้องกดอนุมัติทุกสลิป · อนุมัติอัตโนมัติ:
-            ระบบยืนยันการชำระเงินทันทีที่ผู้ซื้อแนบสลิป (ยังตรวจยอดเงินและสลิปซ้ำให้ทุกครั้ง)
+            {t("payments.mode.description", "ตรวจสอบเอง: admin ต้องกดอนุมัติทุกสลิป · อนุมัติอัตโนมัติ: ระบบยืนยันการชำระเงินทันทีที่ผู้ซื้อแนบสลิป (ยังตรวจยอดเงินและสลิปซ้ำให้ทุกครั้ง)")}
           </p>
           <p className="text-[11px] text-[#9aa5ad]">
-            การเปลี่ยนโหมดมีผลกับสลิปที่แนบหลังจากนี้ — สลิป {queueCount.toLocaleString(intlLocale())}{" "}
-            รายการที่อยู่ในคิวตอนนี้ยังต้องตรวจเอง
+            {t("payments.mode.queueNote", "การเปลี่ยนโหมดมีผลกับสลิปที่แนบหลังจากนี้ — สลิป {count} รายการที่อยู่ในคิวตอนนี้ยังต้องตรวจเอง", { count: queueCount.toLocaleString(intlLocale()) })}
           </p>
         </div>
       </div>
 
       <div
         role="radiogroup"
-        aria-label="โหมดตรวจสอบสลิป"
+        aria-label={t("payments.mode.label", "โหมดตรวจสอบสลิป")}
         className="flex shrink-0 gap-1 self-start rounded-[10px] bg-secondary p-1 md:self-auto"
       >
         {options.map((option) => {
