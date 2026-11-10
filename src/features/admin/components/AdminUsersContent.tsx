@@ -6,17 +6,17 @@ import { useSearchParams } from "react-router-dom";
 import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth/auth.queries";
 
+import { downloadBlob } from "@/lib/download";
+
 import { formatCount } from "../catalog.format";
+import { useFileExport } from "../export";
+import { downloadAdminUsersCsv } from "../users.api";
 import { useAdminUsers, useUserCounts } from "../users.queries";
 import type { AdminUser, RoleCode, UserStatus } from "../users.types";
 import { AddAdminDialog } from "./AddAdminDialog";
+import { ExportButton } from "./ExportButton";
 import { UserDetailSheet } from "./UserDetailSheet";
 import { UserRolesDialog } from "./UserRolesDialog";
 import { type UserStatusAction, UserStatusDialog } from "./UserStatusDialog";
@@ -108,6 +108,18 @@ export function AdminUsersContent() {
     );
   }
 
+  const usersExport = useFileExport();
+  // ตัวกรองปัจจุบันไปทั้งชุด backend คืนทุกแถวที่ตรง ไม่ใช่แค่หน้าที่เปิดอยู่ [TCG-749]
+  const exportCsv = () =>
+    void usersExport.run(async () => {
+      const { blob, filename } = await downloadAdminUsersCsv({
+        q: filters.q,
+        role: filters.role ?? undefined,
+        status: filters.status ?? undefined,
+      });
+      downloadBlob(blob, filename ?? "admin-users.csv");
+    });
+
   const clearFilters = () => writeParams({ q: "", role: null, status: null });
   const filtered = Boolean(filters.q || filters.role || filters.status);
 
@@ -127,15 +139,7 @@ export function AdminUsersContent() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* backend ยังไม่มี endpoint ส่งออก ปิดไว้พร้อมบอกเหตุผล */}
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออก CSV
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
-          </Tooltip>
+          <ExportButton label="ส่งออก CSV" pending={usersExport.pending} onClick={exportCsv} />
           <Button className="rounded-md px-2.5" onClick={() => setDialog({ kind: "add-admin" })}>
             <Plus data-icon="inline-start" />
             เพิ่มผู้ดูแล

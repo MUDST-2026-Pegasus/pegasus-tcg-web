@@ -1,5 +1,5 @@
 import type { CheckoutResponse } from "@/features/cart/checkout.types";
-import { api } from "@/lib/api";
+import { api, fetchAllPages } from "@/lib/api";
 
 import {
   ADMIN_AUCTION_DETAIL_FIXTURE,
@@ -19,6 +19,7 @@ import { banTabOf, matchesAdminAuctionTab, matchesMyAuctionTab } from "./auction
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,
+  AdminAuctionRow,
   AdminAuctionTab,
   AuctionCheckoutRequest,
   AuctionDetail,
@@ -380,6 +381,16 @@ export function getBannedBidders(params: BannedBidderParams = {}): Promise<Banne
     return mock({ ...fixture, page: { ...fixture.page, items, totalItems: items.length, totalPages: items.length ? 1 : 0 } });
   }
   return api.get<BannedBidderPage>("/admin/auctions/banned-bidders", { query: params });
+}
+
+/** ทุกแถวของแท็บและคำค้นนี้ ไม่ใช่แค่หน้าที่เปิดอยู่ — สำหรับส่งออก [TCG-749] */
+export function getAllAdminAuctions(params: Omit<AdminAuctionListParams, "page" | "size">): Promise<AdminAuctionRow[]> {
+  return fetchAllPages(async (page, size) => (await getAdminAuctions({ ...params, page, size })).page);
+}
+
+/** ทุกแถวของแท็บและคำค้นนี้ ไม่ใช่แค่หน้าที่เปิดอยู่ — สำหรับส่งออก [TCG-749] */
+export function getAllBannedBidders(params: Omit<BannedBidderParams, "page" | "size">): Promise<BannedBidder[]> {
+  return fetchAllPages(async (page, size) => (await getBannedBidders({ ...params, page, size })).page);
 }
 
 export function liftBiddingBan(userId: number, payload: LiftBiddingBanRequest): Promise<BannedBidder> {

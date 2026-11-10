@@ -1,15 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 
 import * as ordersApi from "@/features/admin/orders.api";
+import { addDays, bangkokToday, orderExportRange } from "@/features/admin/orders.export";
+import { toast } from "@/components/ui/toast";
 import type { OrderBoard } from "@/features/admin/orders.types";
 import { AdminOrdersPage } from "@/features/admin/pages/AdminOrdersPage";
-import { renderWithProviders } from "@/test/utils";
+import { renderWithProviders, userEvent } from "@/test/utils";
 
 vi.mock("@/features/admin/orders.api", () => ({
   getOrderBoard: vi.fn(),
   getAdminOrders: vi.fn(),
   getAdminOrder: vi.fn(),
+  downloadAdminOrdersCsv: vi.fn(),
 }));
 
 const mockBoard: OrderBoard = {
@@ -126,5 +129,52 @@ describe("AdminOrdersPage", () => {
     expect(await screen.findByText("คำสั่งซื้อ PGS-20261014-000101")).toBeInTheDocument();
     expect(ordersApi.getAdminOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "PGS-20261014-000101" }));
     expect((await screen.findAllByRole("button", { name: /PGS-20261014-000101-1/ })).length).toBeGreaterThan(0);
+  });
+
+  describe("CSV export [TCG-749]", () => {
+    beforeEach(() => {
+      vi.mocked(ordersApi.getOrderBoard).mockResolvedValue(mockBoard);
+      vi.spyOn(toast, "add").mockImplementation(vi.fn());
+      Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:orders") });
+      Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    });
+
+    it("defaults to the last 30 days and every status, and sends the picked statuses", async () => {
+      const csv = new Blob(["csv"], { type: "text/csv" });
+      vi.mocked(ordersApi.downloadAdminOrdersCsv).mockResolvedValue({ blob: csv, filename: "admin-orders.csv" });
+      const user = userEvent.setup();
+      renderWithProviders(<AdminOrdersPage />, { route: "/admin/orders" });
+
+      await user.click(screen.getByRole("button", { name: "ส่งออก CSV" }));
+      const dialog = await screen.findByRole("dialog");
+      const today = bangkokToday();
+      expect(within(dialog).getByLabelText("ตั้งแต่วันที่")).toHaveValue(addDays(today, -29));
+      expect(within(dialog).getByLabelText("ถึงวันที่")).toHaveValue(today);
+
+      await user.click(within(dialog).getByRole("checkbox", { name: "ทุกสถานะ" }));
+      await user.click(within(dialog).getByRole("checkbox", { name: "ชำระแล้ว" }));
+      await user.click(within(dialog).getByRole("button", { name: "ดาวน์โหลด CSV" }));
+
+      await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledWith(csv));
+      expect(ordersApi.downloadAdminOrdersCsv).toHaveBeenCalledWith({
+        ...orderExportRange(addDays(today, -29), today),
+        statuses: ["PAID"],
+      });
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    });
+
+    it("will not export a range that ends before it starts", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<AdminOrdersPage />, { route: "/admin/orders" });
+
+      await user.click(screen.getByRole("button", { name: "ส่งออก CSV" }));
+      const dialog = await screen.findByRole("dialog");
+      fireEvent.change(within(dialog).getByLabelText("ตั้งแต่วันที่"), { target: { value: "2026-11-20" } });
+      fireEvent.change(within(dialog).getByLabelText("ถึงวันที่"), { target: { value: "2026-11-01" } });
+
+      expect(within(dialog).getByRole("button", { name: "ดาวน์โหลด CSV" })).toBeDisabled();
+      expect(within(dialog).getByText(/วันแรกต้องไม่อยู่หลังวันสุดท้าย/)).toBeInTheDocument();
+      expect(ordersApi.downloadAdminOrdersCsv).not.toHaveBeenCalled();
+    });
   });
 });

@@ -7,6 +7,7 @@ import { StrikeDots } from "@/features/admin/auctions/components/StrikeDots";
 import * as auctionApi from "@/features/auction/auction.api";
 import { ADMIN_AUCTION_DETAIL_FIXTURES } from "@/features/auction/auction.fixture";
 import { render, renderWithProviders, screen, userEvent, waitFor, within } from "@/test/utils";
+import { toast } from "@/components/ui/toast";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -29,6 +30,22 @@ async function findRow(cardName: string) {
 }
 
 describe("A1 AdminAuctionsPage", () => {
+  it("exports every page and builds no file when a page fails [TCG-749]", async () => {
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:auctions") });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    const toastSpy = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+    const all = vi.spyOn(auctionApi, "getAllAdminAuctions").mockRejectedValueOnce(new Error("page 3 failed"));
+    const user = userEvent.setup();
+    renderWithProviders(<AdminAuctionsPage />, { route: "/admin/auctions?tab=LIVE&q=pika&page=2" });
+    await findRow("Pikachu Illustrator");
+
+    await user.click(screen.getByRole("button", { name: "ส่งออก CSV" }));
+
+    await waitFor(() => expect(toastSpy).toHaveBeenCalledWith(expect.objectContaining({ type: "error", title: "ส่งออกไฟล์ไม่สำเร็จ" })));
+    expect(all).toHaveBeenCalledWith({ tab: "LIVE", q: "pika" });
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+  });
+
   it("shows suspend only on auctions that are still open", async () => {
     renderWithProviders(<AdminAuctionsPage />, { route: "/admin/auctions" });
 
