@@ -4,6 +4,7 @@ import { CouponTicket } from "@/features/promotions/CouponTicket";
 
 import { money } from "../promotions.format";
 import type { SellerPromotionInput } from "../promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 /** ยอดตัวอย่างใน preview ตาม Figma PRM-S2 A (ลูกค้าซื้อ ฿1,200) */
 const SAMPLE_SUBTOTAL = 1200;
@@ -11,6 +12,7 @@ const SAMPLE_SUBTOTAL = 1200;
 const SAMPLE_COMMISSION_RATE = 0.05;
 
 export function SellerPromotionPreview({ control }: { control: Control<SellerPromotionInput> }) {
+  const { t } = useTranslate("promotions");
   const form = useWatch({ control }) as SellerPromotionInput;
   const subtotal = Math.max(SAMPLE_SUBTOTAL, form.minSpend || 0);
   const discount = Math.min(
@@ -25,24 +27,24 @@ export function SellerPromotionPreview({ control }: { control: Control<SellerPro
 
   return (
     <aside className="grid min-w-0 content-start gap-3.5 rounded-xl bg-muted p-4">
-      <strong className="text-xs font-semibold">ตัวอย่าง</strong>
+      <strong className="text-xs font-semibold">{t("seller.sellerPromotionPreview.strong", "ตัวอย่าง")}</strong>
       <CouponTicket promotion={form} preview />
       <dl className="grid gap-2.5 text-xs">
-        <strong className="text-xs font-semibold">ถ้าลูกค้าซื้อ {money(subtotal)} จากร้านคุณ</strong>
-        <PreviewRow label="ยอดสินค้า" value={money(subtotal)} />
-        <PreviewRow label="โค้ดร้าน (ร้านออก)" value={`− ${money(discount)}`} className="text-amber-700" />
+        <strong className="text-xs font-semibold">{t("seller.sellerPromotionPreview.strong2", "ถ้าลูกค้าซื้อ")} {money(subtotal)} {t("seller.sellerPromotionPreview.strong3", "จากร้านคุณ")}</strong>
+        <PreviewRow label={t("seller.sellerPromotionPreview.label", "ยอดสินค้า")} value={money(subtotal)} />
+        <PreviewRow label={t("seller.sellerPromotionPreview.label2", "โค้ดร้าน (ร้านออก)")} value={`− ${money(discount)}`} className="text-amber-700" />
         <PreviewRow
-          label={`คอมมิชชั่น ${SAMPLE_COMMISSION_RATE * 100}% ของ ${money(afterShopCode)}`}
+          label={t("seller.sellerPromotionPreview.label3", "คอมมิชชั่น {value}% ของ {value2}", { value: SAMPLE_COMMISSION_RATE * 100, value2: money(afterShopCode) })}
           value={`− ${money(commission)}`}
         />
         <PreviewRow
-          label="ร้านได้รับ (ไม่รวมค่าส่ง)"
+          label={t("seller.sellerPromotionPreview.label4", "ร้านได้รับ (ไม่รวมค่าส่ง)")}
           value={money(payout)}
           className="text-emerald-700"
           total
         />
         <p className="text-[11px] text-muted-foreground">
-          ถ้าลูกค้าใช้โค้ด Pegasus ร่วมด้วย ร้านยังได้ {money(payout)} เท่าเดิม
+          {t("seller.sellerPromotionPreview.p", "ถ้าลูกค้าใช้โค้ด Pegasus ร่วมด้วย ร้านยังได้")} {money(payout)} {t("seller.sellerPromotionPreview.p2", "เท่าเดิม")}
         </p>
       </dl>
     </aside>

@@ -7,6 +7,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 /** การ์ดตัวเลือกแบบ radio (การมองเห็น / ประเภทส่วนลด) — แบบ choice card ของ `Field` */
 export function ChoiceCard({
@@ -163,6 +164,7 @@ export function PromotionInputBox({
   suffix?: string;
   locked?: boolean;
 }) {
+  const { t } = useTranslate("promotions");
   const styles = BOX_STYLES[appearance];
   return (
     <InputGroup
@@ -178,7 +180,7 @@ export function PromotionInputBox({
       {suffix || locked ? (
         <InputGroupAddon align="inline-end" className={styles.end}>
           {suffix ? <InputGroupText className={styles.text}>{suffix}</InputGroupText> : null}
-          {locked ? <Lock aria-label="ล็อก" className={styles.lock} /> : null}
+          {locked ? <Lock aria-label={t("buyer.promotionFormControls.ariaLabel", "ล็อก")} className={styles.lock} /> : null}
         </InputGroupAddon>
       ) : null}
     </InputGroup>
@@ -241,11 +243,12 @@ export function NumberInput({
 
 /** ท้ายช่อง: หน่วย และแม่กุญแจเมื่อแก้ไม่ได้ */
 export function LockedSuffix({ suffix, locked }: { suffix?: string; locked?: boolean }) {
+  const { t } = useTranslate("promotions");
   if (!suffix && !locked) return null;
   return (
     <InputGroupAddon align="inline-end">
       {suffix ? <InputGroupText>{suffix}</InputGroupText> : null}
-      {locked ? <Lock aria-label="ล็อก" /> : null}
+      {locked ? <Lock aria-label={t("buyer.promotionFormControls.ariaLabel", "ล็อก")} /> : null}
     </InputGroupAddon>
   );
 }

@@ -11,7 +11,7 @@ import { useDeleteSellerPromotion, usePauseSellerPromotion, useResumeSellerPromo
 import { formatPromoDateTime, limitLabel, thaiDate } from "../promotions.format";
 import type { SellerPromotion } from "../promotions.types";
 import type { PromotionAction } from "./SellerPromotionCard";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const SUPPORT_EMAIL = "support@pegasus.gg";
 /**
@@ -42,6 +42,7 @@ function ActionDialog({
   onClose: () => void;
   onAction: (action: PromotionAction) => void;
 }) {
+  const { t } = useTranslate("promotions");
   const pause = usePauseSellerPromotion();
   const resume = useResumeSellerPromotion();
   const remove = useDeleteSellerPromotion();
@@ -58,17 +59,17 @@ function ActionDialog({
       if (kind === "pause") await pause.mutateAsync(code.id);
       if (kind === "resume") await resume.mutateAsync(code.id);
       if (kind === "delete") await remove.mutateAsync(code.id);
-      const verb = kind === "pause" ? "หยุด" : kind === "resume" ? "เปิดใช้" : "ลบ";
-      toast.add({ title: `${verb}โค้ด ${code.code} แล้ว`, type: "success" });
+      const verb = kind === "pause" ? t("seller.sellerPromotionActionDialog.verb", "หยุด") : kind === "resume" ? t("seller.sellerPromotionActionDialog.verb2", "เปิดใช้") : t("seller.sellerPromotionActionDialog.verb3", "ลบ");
+      toast.add({ title: t("seller.sellerPromotionActionDialog.title", "{verb}โค้ด {code} แล้ว", { verb, code: code.code }), type: "success" });
       onClose();
     } catch (error) {
       if (hasErrorCode(error, "PROMO_IN_USE")) return setServerBlocked(true);
       if (hasErrorCode(error, "PROMO_PAUSED")) return setResumeBlocked(true);
       toast.add({
-        title: "ทำรายการไม่สำเร็จ",
+        title: t("seller.sellerPromotionActionDialog.title2", "ทำรายการไม่สำเร็จ"),
         description: hasErrorCode(error, "SELLER_NOT_VERIFIED")
-          ? "กรุณายืนยันตัวตนผู้ขายก่อนทำรายการ"
-          : translateError(error, "กรุณาลองอีกครั้ง"),
+          ? t("seller.sellerPromotionActionDialog.description", "กรุณายืนยันตัวตนผู้ขายก่อนทำรายการ")
+          : translateError(error, t("seller.sellerPromotionActionDialog.translateError", "กรุณาลองอีกครั้ง")),
         type: "error",
       });
     }
@@ -84,27 +85,27 @@ function ActionDialog({
         onOpenChange={close}
         tone="warning"
         icon={<AlertTriangle />}
-        title={`ลบโค้ด ${code.code} ไม่ได้`}
+        title={t("seller.sellerPromotionActionDialog.title3", "ลบโค้ด {code} ไม่ได้", { code: code.code })}
         description={
           code.usedCount > 0
-            ? `ลูกค้าใช้แล้ว ${code.usedCount} ครั้ง ต้องเก็บไว้เพื่อให้ใบเสร็จและรายได้ย้อนหลังถูกต้อง`
+            ? t("seller.sellerPromotionActionDialog.description2", "ลูกค้าใช้แล้ว {usedCount} ครั้ง ต้องเก็บไว้เพื่อให้ใบเสร็จและรายได้ย้อนหลังถูกต้อง", { usedCount: code.usedCount })
             : code.claimedCount > 0
-              ? `ลูกค้าเก็บโค้ดไว้แล้ว ${code.claimedCount} คน ต้องเก็บไว้เพื่อไม่ให้โค้ดในกระเป๋าลูกค้าหายไป`
-              : "มีคำสั่งซื้อที่ใช้โค้ดนี้แล้ว ต้องเก็บไว้เพื่อให้ใบเสร็จและรายได้ย้อนหลังถูกต้อง"
+              ? t("seller.sellerPromotionActionDialog.description3", "ลูกค้าเก็บโค้ดไว้แล้ว {claimedCount} คน ต้องเก็บไว้เพื่อไม่ให้โค้ดในกระเป๋าลูกค้าหายไป", { claimedCount: code.claimedCount })
+              : t("seller.sellerPromotionActionDialog.description4", "มีคำสั่งซื้อที่ใช้โค้ดนี้แล้ว ต้องเก็บไว้เพื่อให้ใบเสร็จและรายได้ย้อนหลังถูกต้อง")
         }
         actions={
           <>
             <Button variant="outline" onClick={onClose}>
-              ปิด
+              {t("seller.sellerPromotionActionDialog.button", "ปิด")}
             </Button>
             {canPauseInstead ? (
-              <Button onClick={() => onAction({ kind: "pause", code })}>หยุดชั่วคราวแทน</Button>
+              <Button onClick={() => onAction({ kind: "pause", code })}>{t("seller.sellerPromotionActionDialog.button2", "หยุดชั่วคราวแทน")}</Button>
             ) : null}
           </>
         }
       >
         <p className="rounded-[10px] bg-sky-50 px-3 py-2.5 text-xs text-primary">
-          ใช้ “หยุดชั่วคราว” แทน หรือแก้วันสิ้นสุดให้เป็นวันนี้
+          {t("seller.sellerPromotionActionDialog.p", "ใช้ “หยุดชั่วคราว” แทน หรือแก้วันสิ้นสุดให้เป็นวันนี้")}
         </p>
       </PromotionDialog>
     );
@@ -113,7 +114,7 @@ function ActionDialog({
   const confirm = (label: string, danger: boolean) => (
     <>
       <Button variant="outline" onClick={onClose}>
-        ยกเลิก
+        {t("seller.sellerPromotionActionDialog.button3", "ยกเลิก")}
       </Button>
       <Button disabled={busy} className={danger ? PROMOTION_DANGER_BUTTON : undefined} onClick={() => void perform()}>
         {label}
@@ -128,22 +129,21 @@ function ActionDialog({
         onOpenChange={close}
         tone="warning"
         icon={<CirclePause />}
-        title={`หยุดโค้ด ${code.code} ชั่วคราว?`}
-        description="ลูกค้าจะเก็บหรือใช้โค้ดนี้ไม่ได้จนกว่าคุณจะเปิดอีกครั้ง"
-        actions={confirm("หยุดโค้ด", true)}
+        title={t("seller.sellerPromotionActionDialog.title4", "หยุดโค้ด {code} ชั่วคราว?", { code: code.code })}
+        description={t("seller.sellerPromotionActionDialog.description5", "ลูกค้าจะเก็บหรือใช้โค้ดนี้ไม่ได้จนกว่าคุณจะเปิดอีกครั้ง")}
+        actions={confirm(t("seller.sellerPromotionActionDialog.confirm", "หยุดโค้ด"), true)}
       >
         <SummaryBox
           rows={[
-            ["ลูกค้าที่เก็บไว้", `${code.claimedCount} คน`],
+            [t("seller.sellerPromotionActionDialog.text", "ลูกค้าที่เก็บไว้"), t("seller.sellerPromotionActionDialog.text2", "{claimedCount} คน", { claimedCount: code.claimedCount })],
             [
-              "ออเดอร์รอชำระที่ใช้โค้ดนี้",
-              code.pendingOrderCount == null ? "—" : `${code.pendingOrderCount} รายการ`,
+              t("seller.sellerPromotionActionDialog.text3", "ออเดอร์รอชำระที่ใช้โค้ดนี้"),
+              code.pendingOrderCount == null ? "—" : t("seller.sellerPromotionActionDialog.text4", "{pendingOrderCount} รายการ", { pendingOrderCount: code.pendingOrderCount }),
             ],
           ]}
         />
         <p className="text-[11px] text-muted-foreground">
-          โค้ดยังอยู่ในกระเป๋าลูกค้าพร้อมป้าย “หยุดชั่วคราว” · ออเดอร์รอชำระยังได้ส่วนลดจนหมดเวลาชำระ ·
-          แถบโค้ดบนหน้าร้านซ่อนโค้ดนี้
+          {t("seller.sellerPromotionActionDialog.p2", "โค้ดยังอยู่ในกระเป๋าลูกค้าพร้อมป้าย “หยุดชั่วคราว” · ออเดอร์รอชำระยังได้ส่วนลดจนหมดเวลาชำระ · แถบโค้ดบนหน้าร้านซ่อนโค้ดนี้")}
         </p>
       </PromotionDialog>
     );
@@ -151,25 +151,25 @@ function ActionDialog({
 
   if (kind === "resume") {
     const remaining =
-      code.usageLimitTotal == null ? "ไม่จำกัด" : limitLabel(Math.max(0, code.usageLimitTotal - code.usedCount));
+      code.usageLimitTotal == null ? t("seller.sellerPromotionActionDialog.remaining", "ไม่จำกัด") : limitLabel(Math.max(0, code.usageLimitTotal - code.usedCount));
     return (
       <PromotionDialog
         open
         onOpenChange={close}
         tone="success"
         icon={<CirclePlay />}
-        title={`เปิดใช้ ${code.code} อีกครั้ง?`}
+        title={t("seller.sellerPromotionActionDialog.title5", "เปิดใช้ {code} อีกครั้ง?", { code: code.code })}
         description={
           code.claimedCount > 0
-            ? `ลูกค้าที่เก็บไว้ ${code.claimedCount} คนใช้ได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน`
-            : "ลูกค้าใช้โค้ดได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน"
+            ? t("seller.sellerPromotionActionDialog.description6", "ลูกค้าที่เก็บไว้ {claimedCount} คนใช้ได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน", { claimedCount: code.claimedCount })
+            : t("seller.sellerPromotionActionDialog.description7", "ลูกค้าใช้โค้ดได้ทันที และโค้ดกลับมาแสดงบนหน้าร้าน")
         }
-        actions={confirm("เปิดใช้โค้ด", false)}
+        actions={confirm(t("seller.sellerPromotionActionDialog.confirm2", "เปิดใช้โค้ด"), false)}
       >
         <SummaryBox
           rows={[
-            ["สิทธิ์คงเหลือ", remaining],
-            ["หมดอายุ", thaiDate(code.endsAt)],
+            [t("seller.sellerPromotionActionDialog.text5", "สิทธิ์คงเหลือ"), remaining],
+            [t("seller.sellerPromotionActionDialog.text6", "หมดอายุ"), thaiDate(code.endsAt)],
           ]}
         />
       </PromotionDialog>
@@ -182,15 +182,16 @@ function ActionDialog({
       onOpenChange={close}
       tone="danger"
       icon={<Trash2 />}
-      title={`ลบโค้ด ${code.code}?`}
-      description="ยังไม่มีลูกค้าเก็บหรือใช้โค้ดนี้ ลบแล้วกู้คืนไม่ได้"
-      actions={confirm("ลบโค้ด", true)}
+      title={t("seller.sellerPromotionActionDialog.title6", "ลบโค้ด {code}?", { code: code.code })}
+      description={t("seller.sellerPromotionActionDialog.description8", "ยังไม่มีลูกค้าเก็บหรือใช้โค้ดนี้ ลบแล้วกู้คืนไม่ได้")}
+      actions={confirm(t("seller.sellerPromotionActionDialog.confirm3", "ลบโค้ด"), true)}
     />
   );
 }
 
 /** INFO — โค้ดที่ทีมงานหยุด ร้านเปิดใช้เองไม่ได้ */
 function StaffPausedDialog({ code, onClose }: { code: SellerPromotion; onClose: () => void }) {
+  const { t } = useTranslate("promotions");
   const reference = `PRM-${code.id}`;
   return (
     <PromotionDialog
@@ -200,33 +201,33 @@ function StaffPausedDialog({ code, onClose }: { code: SellerPromotion; onClose: 
       }}
       tone="danger"
       icon={<ShieldAlert />}
-      title={`ทีมงานหยุดโค้ด ${code.code}`}
-      description={`หยุดเมื่อ ${code.pausedAt ? formatPromoDateTime(code.pausedAt) : "—"} · คุณเปิดใช้เองไม่ได้`}
-      footerNote={`อ้างอิง #${reference}`}
+      title={t("seller.sellerPromotionActionDialog.title7", "ทีมงานหยุดโค้ด {code}", { code: code.code })}
+      description={t("seller.sellerPromotionActionDialog.description9", "หยุดเมื่อ {value} · คุณเปิดใช้เองไม่ได้", { value: code.pausedAt ? formatPromoDateTime(code.pausedAt) : "—" })}
+      footerNote={t("seller.sellerPromotionActionDialog.footerNote", "อ้างอิง #{reference}", { reference })}
       actions={
         <>
           <Button variant="outline" onClick={onClose}>
-            ปิด
+            {t("seller.sellerPromotionActionDialog.button", "ปิด")}
           </Button>
           <Button
             nativeButton={false}
             render={
-              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`โค้ด ${code.code} (#${reference})`)}`} />
+              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(t("seller.sellerPromotionActionDialog.encodeURIComponent", "โค้ด {code} (#{reference})", { code: code.code, reference }))}`} />
             }
           >
-            ติดต่อทีมงาน
+            {t("seller.sellerPromotionActionDialog.button4", "ติดต่อทีมงาน")}
           </Button>
         </>
       }
     >
       <p className="rounded-[10px] bg-red-50 px-3 py-2.5 text-xs text-red-700">
-        เหตุผล: {code.pauseReason || "โปรดติดต่อทีมงานเพื่อสอบถามรายละเอียด"}
+        {t("seller.sellerPromotionActionDialog.p3", "เหตุผล:")} {code.pauseReason || t("seller.sellerPromotionActionDialog.p4", "โปรดติดต่อทีมงานเพื่อสอบถามรายละเอียด")}
       </p>
       <div className="grid gap-1.5 text-xs">
-        <strong className="font-semibold">สิ่งที่ทำได้</strong>
+        <strong className="font-semibold">{t("seller.sellerPromotionActionDialog.strong", "สิ่งที่ทำได้")}</strong>
         <ul className="grid list-disc gap-1.5 pl-4 text-foreground/80">
-          <li>สร้างโค้ดใหม่ที่มีขั้นต่ำและเพดานส่วนลด</li>
-          <li>ติดต่อทีมงานพร้อมเลขอ้างอิงด้านล่าง ถ้าคิดว่าเป็นความผิดพลาด</li>
+          <li>{t("seller.sellerPromotionActionDialog.li", "สร้างโค้ดใหม่ที่มีขั้นต่ำและเพดานส่วนลด")}</li>
+          <li>{t("seller.sellerPromotionActionDialog.li2", "ติดต่อทีมงานพร้อมเลขอ้างอิงด้านล่าง ถ้าคิดว่าเป็นความผิดพลาด")}</li>
         </ul>
       </div>
     </PromotionDialog>

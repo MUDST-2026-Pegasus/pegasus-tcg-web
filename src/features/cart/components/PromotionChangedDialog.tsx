@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { checkoutMoney } from "../checkout.format";
+import { useTranslate } from "@/lib/i18n";
 
 export interface PromotionChangedDialogProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function PromotionChangedDialog({
   onChooseAnotherCode,
   onConfirmNewTotal,
 }: PromotionChangedDialogProps) {
+  const { t } = useTranslate("promotions");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[440px] rounded-2xl p-6">
@@ -48,17 +50,17 @@ export function PromotionChangedDialog({
             <AlertTriangle className="size-6" />
           </div>
           <DialogTitle className="text-lg font-semibold">
-            ยอดชำระเปลี่ยนไป
+            {t("cart.promotionChangedDialog.dialogTitle", "ยอดชำระเปลี่ยนไป")}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-            โค้ดหรือยอดส่วนลดเปลี่ยนระหว่างสั่งซื้อ กรุณาตรวจสอบยอดใหม่ก่อนยืนยัน
+            {t("cart.promotionChangedDialog.dialogDescription", "โค้ดหรือยอดส่วนลดเปลี่ยนระหว่างสั่งซื้อ กรุณาตรวจสอบยอดใหม่ก่อนยืนยัน")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-2 rounded-xl bg-muted/40 p-4 text-sm">
-          <p>ยอดเดิม: {checkoutMoney(previousTotal)}</p>
+          <p>{t("cart.promotionChangedDialog.p", "ยอดเดิม:")} {checkoutMoney(previousTotal)}</p>
           {droppedCode && (
-            <p className="text-amber-700">โค้ดที่เปลี่ยน: {droppedCode}</p>
+            <p className="text-amber-700">{t("cart.promotionChangedDialog.p2", "โค้ดที่เปลี่ยน:")} {droppedCode}</p>
           )}
           {droppedReason && (
             <p className="text-xs text-amber-700 leading-normal">
@@ -67,18 +69,18 @@ export function PromotionChangedDialog({
           )}
           {sellerDiscountTotal > 0 && (
             <p className="flex justify-between text-xs text-teal-700 dark:text-teal-400">
-              <span>ส่วนลดร้านที่ยังใช้ได้</span>
+              <span>{t("cart.promotionChangedDialog.span", "ส่วนลดร้านที่ยังใช้ได้")}</span>
               <span>− {checkoutMoney(sellerDiscountTotal)}</span>
             </p>
           )}
           {platformDiscountTotal > 0 && (
             <p className="flex justify-between text-xs text-primary">
-              <span>ส่วนลด Pegasus ที่ยังใช้ได้</span>
+              <span>{t("cart.promotionChangedDialog.span2", "ส่วนลด Pegasus ที่ยังใช้ได้")}</span>
               <span>− {checkoutMoney(platformDiscountTotal)}</span>
             </p>
           )}
           <p className="font-semibold text-foreground">
-            ยอดใหม่: {loading ? "กำลังคำนวณ..." : checkoutMoney(newTotal)}
+            {t("cart.promotionChangedDialog.p3", "ยอดใหม่:")} {loading ? t("cart.promotionChangedDialog.p4", "กำลังคำนวณ...") : checkoutMoney(newTotal)}
           </p>
         </div>
 
@@ -91,7 +93,7 @@ export function PromotionChangedDialog({
               onChooseAnotherCode(droppedOwner);
             }}
           >
-            เลือกโค้ดอื่น
+            {t("cart.promotionChangedDialog.button", "เลือกโค้ดอื่น")}
           </Button>
           <Button
             type="button"
@@ -102,7 +104,7 @@ export function PromotionChangedDialog({
             }}
           >
             {loading && <Spinner className="mr-1.5" />}
-            สั่งซื้อด้วยยอดใหม่
+            {t("cart.promotionChangedDialog.button2", "สั่งซื้อด้วยยอดใหม่")}
           </Button>
         </DialogFooter>
       </DialogContent>

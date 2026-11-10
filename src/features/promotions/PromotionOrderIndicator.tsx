@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslate } from "@/lib/i18n";
 
 type PromotionOrderIndicatorProps = {
   codes?: readonly string[];
@@ -12,9 +13,10 @@ type PromotionOrderIndicatorProps = {
 
 /** Accessible code indicator for discounted seller orders in the order list. */
 export function PromotionOrderIndicator({ codes = [] }: PromotionOrderIndicatorProps) {
+  const { t } = useTranslate("promotions");
   const description = codes.length
-    ? `ใช้งานโค้ดส่วนลด ${codes.join(", ")}`
-    : "ออเดอร์นี้ใช้โค้ดส่วนลด";
+    ? t("buyer.promotionOrderIndicator.description", "ใช้งานโค้ดส่วนลด {value}", { value: codes.join(", ") })
+    : t("buyer.promotionOrderIndicator.description2", "ออเดอร์นี้ใช้โค้ดส่วนลด");
 
   return (
     <Tooltip>

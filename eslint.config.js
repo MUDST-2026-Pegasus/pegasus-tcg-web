@@ -16,14 +16,6 @@ const I18N_PENDING = [
   'src/test/**',
   'src/components/ui/**',
   // TCG-743 I18N-23 โปรโมชัน / โค้ดส่วนลด (namespace promotions)
-  'src/features/promotions/**',
-  'src/features/account/pages/MyCouponsPage.tsx',
-  'src/features/seller/promotions/**',
-  'src/features/store/components/StorePromotionStrip.tsx',
-  'src/features/cart/components/{CartCodePicker,CheckoutPlatformPromotion,CheckoutPlatformPromotionCard,CheckoutPromotionDialogs,PromotionChangedDialog}.tsx',
-  'src/features/admin/components/{AdminPromotion*,Promotion*,ClaimTicketPreview}.tsx',
-  'src/features/admin/promotions.*.ts',
-  'src/features/admin/pages/AdminPromotion*.tsx',
   // TCG-744 I18N-24 ลดราคา / Flash Sale (namespace sale)
   'src/components/sale/**',
   'src/features/sale/**',

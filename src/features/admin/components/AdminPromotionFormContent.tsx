@@ -40,7 +40,7 @@ import { AdminPromotionFormSections } from "./AdminPromotionFormSections";
 import { PromotionDialog } from "./PromotionDialog";
 import { PromotionFormAside } from "./PromotionFormAside";
 import { PromotionSaveDialog } from "./PromotionSaveDialog";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminPromotionInput> = [
@@ -101,22 +101,23 @@ function emptyPromotion(): AdminPromotionInput {
 
 /** หน้า /admin/promotions/new และ /:id/edit (Figma PRM-A2) */
 export function AdminPromotionFormContent({ id }: { id: number }) {
+  const { t } = useTranslate("promotions");
   const existing = usePromotion(id);
-  if (id > 0 && existing.isPending) return <FormPageSkeleton label="กำลังโหลดโค้ด" />;
+  if (id > 0 && existing.isPending) return <FormPageSkeleton label={t("admin.adminPromotionFormContent.label", "กำลังโหลดโค้ด")} />;
   if (id > 0 && existing.isError) {
     return (
       <ErrorState
-        title="โหลดโค้ดไม่สำเร็จ"
-        fallbackMessage={promotionErrorMessage(existing.error, "กรุณาลองอีกครั้ง")}
+        title={t("admin.adminPromotionFormContent.title", "โหลดโค้ดไม่สำเร็จ")}
+        fallbackMessage={promotionErrorMessage(existing.error, t("admin.adminPromotionFormContent.promotionErrorMessage", "กรุณาลองอีกครั้ง"))}
         onRetry={() => void existing.refetch()}
       />
     );
   }
   if (existing.data?.ownerType === "SELLER") {
     return (
-      <EmptyState icon={Lock} title="โค้ดร้านค้าแก้ไขโดยแอดมินไม่ได้">
+      <EmptyState icon={Lock} title={t("admin.adminPromotionFormContent.title2", "โค้ดร้านค้าแก้ไขโดยแอดมินไม่ได้")}>
         <Button variant="outline" nativeButton={false} render={<Link to="/admin/promotions" />}>
-          กลับไปรายการโปรโมชั่น
+          {t("admin.adminPromotionFormContent.button", "กลับไปรายการโปรโมชั่น")}
         </Button>
       </EmptyState>
     );
@@ -125,6 +126,7 @@ export function AdminPromotionFormContent({ id }: { id: number }) {
 }
 
 function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
+  const { t } = useTranslate("promotions");
   const navigate = useNavigate();
   const save = useSavePromotion();
   const games = useAdminGames();
@@ -197,7 +199,7 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           // ปลด blocker ก่อน navigate ไม่งั้นถาม "ออกจากหน้านี้?" ซ้ำ
           flushSync(() => setSaved(true));
           toast.add({
-            title: existing ? "บันทึกการเปลี่ยนแปลงแล้ว" : `เปิดใช้ ${payload.code} แล้ว`,
+            title: existing ? t("admin.adminPromotionFormContent.title3", "บันทึกการเปลี่ยนแปลงแล้ว") : t("admin.adminPromotionFormContent.title4", "เปิดใช้ {code} แล้ว", { code: payload.code }),
             type: "success",
           });
           navigate("/admin/promotions");
@@ -210,8 +212,8 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
             return;
           }
           toast.add({
-            title: existing ? "บันทึกไม่สำเร็จ" : "สร้างโค้ดไม่สำเร็จ",
-            description: promotionErrorMessage(error, "กรุณาลองอีกครั้ง"),
+            title: existing ? t("admin.adminPromotionFormContent.title5", "บันทึกไม่สำเร็จ") : t("admin.adminPromotionFormContent.title6", "สร้างโค้ดไม่สำเร็จ"),
+            description: promotionErrorMessage(error, t("admin.adminPromotionFormContent.promotionErrorMessage", "กรุณาลองอีกครั้ง")),
             type: "error",
           });
         },
@@ -226,25 +228,25 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/admin/promotions" />}>โปรโมชั่น &amp; โค้ดส่วนลด</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/admin/promotions" />}>{t("admin.adminPromotionFormContent.breadcrumbLink", "โปรโมชั่น & โค้ดส่วนลด")}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{existing ? `แก้ไข ${existing.code}` : "สร้างโค้ด Pegasus"}</BreadcrumbPage>
+              <BreadcrumbPage>{existing ? t("admin.adminPromotionFormContent.breadcrumbPage", "แก้ไข {code}", { code: existing.code }) : t("admin.adminPromotionFormContent.breadcrumbPage2", "สร้างโค้ด Pegasus")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black">{existing ? "แก้ไขโค้ด Pegasus" : "สร้างโค้ด Pegasus"}</h1>
-            <p className="text-sm text-muted-foreground">Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน</p>
+            <h1 className="text-2xl font-black">{existing ? t("admin.adminPromotionFormContent.h1", "แก้ไขโค้ด Pegasus") : t("admin.adminPromotionFormContent.breadcrumbPage2", "สร้างโค้ด Pegasus")}</h1>
+            <p className="text-sm text-muted-foreground">{t("admin.adminPromotionFormContent.p", "Pegasus เป็นผู้ออกเงินส่วนลด — ร้านค้ายังได้รับเงินเต็มจำนวน")}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="px-2.5" onClick={() => navigate("/admin/promotions")}>
-              ยกเลิก
+              {t("admin.adminPromotionFormContent.button2", "ยกเลิก")}
             </Button>
             <Button size="sm" className="px-2.5" onClick={requestSave}>
-              {existing ? "บันทึก" : "บันทึกและเปิดใช้"}
+              {existing ? t("admin.adminPromotionFormContent.button3", "บันทึก") : t("admin.adminPromotionFormContent.button4", "บันทึกและเปิดใช้")}
             </Button>
           </div>
         </header>
@@ -256,13 +258,12 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
           <AlertDescription className="text-xs text-[#0058bc]">
             {locks.used ? (
               <>
-                โค้ดนี้มีคนใช้แล้ว {existing?.usedCount.toLocaleString(intlLocale())} ครั้ง — ฟิลด์ที่มี{" "}
-                <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้
+                {t("admin.adminPromotionFormContent.fragment", "โค้ดนี้มีคนใช้แล้ว")} {existing?.usedCount.toLocaleString(intlLocale())} {t("admin.adminPromotionFormContent.fragment2", "ครั้ง — ฟิลด์ที่มี")}{" "}
+                <Lock className="inline size-3" aria-label={t("admin.adminPromotionFormContent.ariaLabel", "แม่กุญแจ")} /> {t("admin.adminPromotionFormContent.fragment3", "แก้ไม่ได้")}
               </>
             ) : (
               <>
-                มีผู้เก็บโค้ดนี้แล้ว {existing?.claimedCount.toLocaleString(intlLocale())} คน — “ต้องเก็บก่อนใช้” ล็อก
-                และจำนวนที่แจกเพิ่มได้อย่างเดียว
+                {t("admin.adminPromotionFormContent.fragment4", "มีผู้เก็บโค้ดนี้แล้ว")} {existing?.claimedCount.toLocaleString(intlLocale())} {t("admin.adminPromotionFormContent.fragment5", "คน — “ต้องเก็บก่อนใช้” ล็อก และจำนวนที่แจกเพิ่มได้อย่างเดียว")}
               </>
             )}
           </AlertDescription>
@@ -298,15 +299,15 @@ function PromotionEditor({ existing }: { existing?: AdminPromotion }) {
         onOpenChange={(open) => !open && blocker.reset?.()}
         tone="warning"
         icon={<LogOut />}
-        title="ออกจากหน้านี้?"
-        description="การเปลี่ยนแปลงในฟอร์มยังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด"
+        title={t("admin.adminPromotionFormContent.title7", "ออกจากหน้านี้?")}
+        description={t("admin.adminPromotionFormContent.description", "การเปลี่ยนแปลงในฟอร์มยังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด")}
         actions={
           <>
             <Button variant="outline" onClick={() => blocker.reset?.()}>
-              อยู่ต่อ
+              {t("admin.adminPromotionFormContent.button5", "อยู่ต่อ")}
             </Button>
             <Button className={PROMOTION_DANGER_BUTTON} onClick={() => blocker.proceed?.()}>
-              ออกโดยไม่บันทึก
+              {t("admin.adminPromotionFormContent.button6", "ออกโดยไม่บันทึก")}
             </Button>
           </>
         }

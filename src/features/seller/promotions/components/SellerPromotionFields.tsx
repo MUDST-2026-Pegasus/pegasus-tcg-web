@@ -10,6 +10,7 @@ import {
 } from "@/features/promotions/shared/PromotionFormControls";
 
 import type { SellerPromotionInput } from "../promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 type NumberKey = "discountValue" | "maxDiscount" | "minSpend" | "usageLimitTotal" | "usageLimitPerUser" | "claimLimit";
 
@@ -67,6 +68,7 @@ export function NumberField({
   required,
   locked,
 }: FieldProps & { name: NumberKey; label: string; unit: string; hint?: string; required?: boolean; locked?: boolean }) {
+  const { t } = useTranslate("promotions");
   return (
     <Controller
       control={control}
@@ -85,8 +87,8 @@ export function NumberField({
           value={field.value}
           onBlur={field.onBlur}
           onChange={field.onChange}
-          prefix={unit === "฿" ? unit : undefined}
-          suffix={unit === "฿" ? undefined : unit}
+          prefix={unit === t("seller.sellerPromotionFields.prefix", "฿") ? unit : undefined}
+          suffix={unit === t("seller.sellerPromotionFields.prefix", "฿") ? undefined : unit}
           locked={locked}
         />
       )}
@@ -177,19 +179,20 @@ export function Segmented<K extends "discountType" | "visibility">({
 }
 
 export function DiscountFields({ control, errors }: FieldProps) {
+  const { t } = useTranslate("promotions");
   const discountType = useWatch({ control, name: "discountType" });
   const fixed = discountType === "FIXED";
   return (
     <>
       <Row>
-        <NumberField control={control} errors={errors} name="discountValue" label="ลด" unit={fixed ? "฿" : "%"} required />
+        <NumberField control={control} errors={errors} name="discountValue" label={t("seller.sellerPromotionFields.label", "ลด")} unit={fixed ? t("seller.sellerPromotionFields.prefix", "฿") : "%"} required />
         <NumberField
           control={control}
           errors={errors}
           name="minSpend"
-          label="ยอดขั้นต่ำ (เฉพาะสินค้าร้านนี้)"
-          unit="฿"
-          hint={fixed ? "ส่วนลดต้องไม่เกินยอดขั้นต่ำ · 0 = ไม่มีขั้นต่ำ" : "0 = ไม่มีขั้นต่ำ"}
+          label={t("seller.sellerPromotionFields.label2", "ยอดขั้นต่ำ (เฉพาะสินค้าร้านนี้)")}
+          unit={t("seller.sellerPromotionFields.prefix", "฿")}
+          hint={fixed ? t("seller.sellerPromotionFields.hint", "ส่วนลดต้องไม่เกินยอดขั้นต่ำ · 0 = ไม่มีขั้นต่ำ") : t("seller.sellerPromotionFields.hint2", "0 = ไม่มีขั้นต่ำ")}
         />
       </Row>
       {fixed ? null : (
@@ -197,9 +200,9 @@ export function DiscountFields({ control, errors }: FieldProps) {
           control={control}
           errors={errors}
           name="maxDiscount"
-          label="ลดสูงสุด"
-          unit="฿"
-          hint="เว้นว่าง = ไม่จำกัด"
+          label={t("seller.sellerPromotionFields.label3", "ลดสูงสุด")}
+          unit={t("seller.sellerPromotionFields.prefix", "฿")}
+          hint={t("seller.sellerPromotionFields.hint3", "เว้นว่าง = ไม่จำกัด")}
         />
       )}
     </>
@@ -207,6 +210,7 @@ export function DiscountFields({ control, errors }: FieldProps) {
 }
 
 export function ClaimFields({ control, errors, claimFixed }: FieldProps & { claimFixed: boolean }) {
+  const { t } = useTranslate("promotions");
   const visibility = useWatch({ control, name: "visibility" });
   const claimable = useWatch({ control, name: "claimable" });
   return (
@@ -217,11 +221,11 @@ export function ClaimFields({ control, errors, claimFixed }: FieldProps & { clai
         render={({ field }) => (
           <ToggleRow
             id="seller-promotion-claimable"
-            title="ให้ลูกค้ากดเก็บที่หน้าร้าน"
+            title={t("seller.sellerPromotionFields.title", "ให้ลูกค้ากดเก็บที่หน้าร้าน")}
             hint={
               claimFixed
-                ? "มีลูกค้าเก็บโค้ดแล้ว จึงเปลี่ยนการกดเก็บไม่ได้"
-                : "แสดงในแถบ “โค้ดส่วนลดของร้าน” บนหน้าร้าน (ต้องเป็นสาธารณะ)"
+                ? t("seller.sellerPromotionFields.hint4", "มีลูกค้าเก็บโค้ดแล้ว จึงเปลี่ยนการกดเก็บไม่ได้")
+                : t("seller.sellerPromotionFields.hint5", "แสดงในแถบ “โค้ดส่วนลดของร้าน” บนหน้าร้าน (ต้องเป็นสาธารณะ)")
             }
             checked={field.value}
             disabled={visibility !== "PUBLIC" || claimFixed}
@@ -239,9 +243,9 @@ export function ClaimFields({ control, errors, claimFixed }: FieldProps & { clai
           control={control}
           errors={errors}
           name="claimLimit"
-          label="จำนวนที่แจก"
-          unit="ใบ"
-          hint="เว้นว่าง = ไม่จำกัด"
+          label={t("seller.sellerPromotionFields.label4", "จำนวนที่แจก")}
+          unit={t("seller.sellerPromotionFields.unit", "ใบ")}
+          hint={t("seller.sellerPromotionFields.hint3", "เว้นว่าง = ไม่จำกัด")}
         />
       ) : null}
     </>
