@@ -4,7 +4,7 @@ import { FormatIcu } from "@tolgee/format-icu";
 export const LANGUAGES = ["th", "en"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const DEFAULT_LANGUAGE: Language = "th";
-export const NAMESPACES = ["common", "errors", "buyer", "seller", "admin"] as const;
+export const NAMESPACES = ["common", "errors", "buyer", "seller", "admin", "promotions", "sale", "auction"] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 // JSON แยก chunk ต่อ namespace × ภาษา — โหลดเมื่อหน้าแรกที่ใช้ ns นั้นเรียก useTranslate(ns)
@@ -19,6 +19,12 @@ const staticData = {
   "en:seller": () => import("@/i18n/seller/en.json"),
   "th:admin": () => import("@/i18n/admin/th.json"),
   "en:admin": () => import("@/i18n/admin/en.json"),
+  "th:promotions": () => import("@/i18n/promotions/th.json"),
+  "en:promotions": () => import("@/i18n/promotions/en.json"),
+  "th:sale": () => import("@/i18n/sale/th.json"),
+  "en:sale": () => import("@/i18n/sale/en.json"),
+  "th:auction": () => import("@/i18n/auction/th.json"),
+  "en:auction": () => import("@/i18n/auction/en.json"),
 };
 
 // ต้องเช็ก import.meta.env.DEV ตรงนี้ (ค่าคงที่ตอน build) — ถ้าตัดสินตอน runtime Vite จะฝัง key ลง dist/ [TCG-544]
