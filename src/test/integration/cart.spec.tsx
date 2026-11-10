@@ -136,6 +136,20 @@ describe("CartPage Integration Flow", () => {
     });
   });
 
+  it("refreshes the rendered quantity and shop total from the updated cart response", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<CartPage />);
+
+    await screen.findByText("Blue-Eyes White Dragon");
+    await user.click(screen.getByRole("button", { name: "เพิ่มจำนวน Blue-Eyes White Dragon" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("จำนวน Blue-Eyes White Dragon")).toHaveTextContent("3");
+      expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿1,800");
+    });
+    expect(cartApi.updateQuantity).toHaveBeenCalledWith(1, { quantity: 3 });
+  });
+
   it("removes an item when Remove button is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<CartPage />);

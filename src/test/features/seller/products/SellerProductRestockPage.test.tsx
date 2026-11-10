@@ -10,6 +10,7 @@ import type { SellerListing } from "@/features/seller/products/products.types";
 import type { SellerProfile } from "@/features/seller/shared/seller.types";
 import { renderWithProviders, screen, waitFor } from "@/test/utils";
 import { ApiError } from "@/lib/api";
+import { toast } from "@/components/ui/toast";
 
 vi.mock("@/features/seller/shared/seller.api", () => ({
   getSellerProfile: vi.fn(),
@@ -27,6 +28,28 @@ vi.mock("@/features/seller/products/listing-form.api", () => ({
   getStockIns: vi.fn(),
   addListingUnits: vi.fn(),
 }));
+
+vi.mock("@/lib/api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/api")>();
+  return {
+    ...actual,
+    api: {
+      ...actual.api,
+      get: vi.fn().mockResolvedValue({
+        listingId: 101,
+        listingName: "Charizard Base Set Holo",
+        status: "FORECAST_AVAILABLE",
+        periodStart: "2026-10-15",
+        periodEnd: "2026-11-13",
+        availableStock: 2,
+        completedSales30Days: 6,
+        daysRemaining: 10,
+        estimatedStockoutDate: "2026-11-23",
+        updatedAt: "2026-11-13T00:00:00Z",
+      }),
+    },
+  };
+});
 
 const mockProfile: SellerProfile = {
   id: 10,
@@ -153,5 +176,29 @@ describe("SellerProductRestockPage", () => {
     await waitFor(() => {
       expect(saveBtn).toBeEnabled();
     });
+  });
+
+  it("blocks duplicate restock submissions while saving and reports an API stock validation error", async () => {
+    let rejectSave!: (reason: unknown) => void;
+    const toastSpy = vi.spyOn(toast, "add");
+    vi.mocked(productsApi.getMyListing).mockResolvedValue(mockListing);
+    vi.mocked(listingFormApi.addListingUnits).mockImplementation(() => new Promise((_, reject) => { rejectSave = reject; }));
+
+    const user = userEvent.setup();
+    renderPage("101");
+    await screen.findByRole("heading", { name: "เติมสต็อก" });
+
+    await user.type(screen.getByLabelText(/จำนวนที่รับเข้า/), "4");
+    await user.type(screen.getByLabelText(/ต้นทุนรวมทั้งล็อต/), "40000");
+    const saveButton = screen.getByRole("button", { name: "บันทึกการรับเข้า" });
+    await user.click(saveButton);
+    expect(screen.getByRole("button", { name: "บันทึกการรับเข้า" })).toBeDisabled();
+    await user.click(saveButton);
+    expect(listingFormApi.addListingUnits).toHaveBeenCalledTimes(1);
+
+    rejectSave(new ApiError({ status: 422, code: "VALIDATION_ERROR", message: "Stock entry is invalid" }));
+    await waitFor(() => expect(toastSpy).toHaveBeenCalledWith(expect.objectContaining({ title: "Stock entry is invalid", type: "error" })));
+    expect(screen.getByRole("button", { name: "บันทึกการรับเข้า" })).toBeEnabled();
+    expect(listingFormApi.addListingUnits).toHaveBeenCalledTimes(1);
   });
 });
