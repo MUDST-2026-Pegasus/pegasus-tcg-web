@@ -42,4 +42,14 @@ describe("SellerReviewsPage", () => {
     await user.click(screen.getByRole("button", { name: "ยืนยันส่งคำตอบ" }));
     await waitFor(() => expect(afterSalesApi.replyReview).toHaveBeenCalledWith(1, "ขอบคุณครับ"));
   });
+
+  it("renders seller reviews in English with zero Thai UI text when language is en", async () => {
+    renderWithProviders(<Routes><Route path="/seller/reviews" element={<SellerReviewsPage />} /></Routes>, {
+      route: "/seller/reviews?tab=unreplied",
+      language: "en",
+    });
+    expect(await screen.findByRole("tab", { name: "Unreplied 1" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "Reply" })).toBeInTheDocument();
+    expect(screen.getByText("Store Reviews")).toBeInTheDocument();
+  });
 });

@@ -7,6 +7,7 @@ import { afterSalesApi } from "../after-sales.api";
 import { formatBaht, mapReturnErrorMessage } from "../after-sales.format";
 import type { SellerReturnRequest } from "../after-sales.types";
 import { DEFAULT_RETURN_DRAFT, getRefundAmount, type ReturnDraft } from "./return-draft";
+import { useTranslate } from "@/lib/i18n";
 
 /** Everything a return decision changes: the return list, seller to-dos and dashboard. */
 function invalidateReturnQueries(cache: QueryClient) {
@@ -21,6 +22,7 @@ function invalidateReturnQueries(cache: QueryClient) {
  * Per-card form drafts, the approve/reject/receive confirm modals, and their API calls.
  */
 export function useReturnActions() {
+  const { t } = useTranslate("seller");
   const cache = useQueryClient();
 
   // Form states per card
@@ -44,8 +46,8 @@ export function useReturnActions() {
     } catch (error) {
       toast.add({
         type: "error",
-        title: "ดำเนินการไม่สำเร็จ",
-        description: mapReturnErrorMessage(error),
+        title: t("sellerReturns.actions.failedTitle", "ดำเนินการไม่สำเร็จ"),
+        description: mapReturnErrorMessage(error, t),
       });
     } finally {
       setBusyId(null);
@@ -65,8 +67,11 @@ export function useReturnActions() {
       () => {
         toast.add({
           type: "success",
-          title: "อนุมัติคำขอคืนเงินเรียบร้อยแล้ว",
-          description: `คำขอ RT-${id} จำนวนเงิน ${formatBaht(amount)}`,
+          title: t("sellerReturns.actions.approveSuccessTitle", "อนุมัติคำขอคืนเงินเรียบร้อยแล้ว"),
+          description: t("sellerReturns.actions.approveSuccessDesc", "คำขอ RT-{id} จำนวนเงิน {amount}", {
+            id,
+            amount: formatBaht(amount),
+          }),
         });
         setApproveModalItem(null);
       }
@@ -83,8 +88,10 @@ export function useReturnActions() {
       () => {
         toast.add({
           type: "success",
-          title: "ปฏิเสธคำขอคืนสินค้าแล้ว",
-          description: `คำขอ RT-${id} ถูกปฏิเสธ ระบบจะโอนเงิน Escrow ตามกำหนดเดิม`,
+          title: t("sellerReturns.actions.rejectSuccessTitle", "ปฏิเสธคำขอคืนสินค้าแล้ว"),
+          description: t("sellerReturns.actions.rejectSuccessDesc", "คำขอ RT-{id} ถูกปฏิเสธ ระบบจะโอนเงิน Escrow ตามกำหนดเดิม", {
+            id,
+          }),
         });
         setRejectModalItem(null);
       }
@@ -102,8 +109,12 @@ export function useReturnActions() {
       () => {
         toast.add({
           type: "success",
-          title: "ยืนยันรับสินค้าคืนสำเร็จ",
-          description: `ระบบปล่อยเงินคืนให้ผู้ซื้อ และ${restock ? "นำการ์ดกลับเข้าสต็อกเรียบร้อยแล้ว" : "ไม่นำกลับเข้าสต็อก"}`,
+          title: t("sellerReturns.actions.receiveSuccessTitle", "ยืนยันรับสินค้าคืนสำเร็จ"),
+          description: t(
+            "sellerReturns.actions.receiveSuccessDesc",
+            "ระบบปล่อยเงินคืนให้ผู้ซื้อ และ{restock, select, true {นำการ์ดกลับเข้าสต็อกเรียบร้อยแล้ว} other {ไม่นำกลับเข้าสต็อก}}",
+            { restock: String(restock) }
+          ),
         });
         setReceiveModalItem(null);
       }

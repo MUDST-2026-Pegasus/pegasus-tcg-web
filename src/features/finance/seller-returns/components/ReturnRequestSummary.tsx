@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatBahtShort, returnReasonLabel } from "../../after-sales.format";
 import type { ReturnEvidenceLink, SellerReturnRequest } from "../../after-sales.types";
 import { ReturnEvidenceGrid } from "./ReturnEvidenceGrid";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * REQUESTED card body: buyer's reason, the cards asked back, and evidence.
@@ -16,19 +17,21 @@ export function ReturnRequestSummary({
   item: SellerReturnRequest;
   onEvidenceClick: (link: ReturnEvidenceLink, list: ReturnEvidenceLink[]) => void;
 }) {
+  const { t } = useTranslate("seller");
+
   return (
     <>
       {/* Reason & Description */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-foreground">
-            เหตุผลจากผู้ซื้อ
+            {t("sellerReturns.summary.reasonFromBuyer", "เหตุผลจากผู้ซื้อ")}
           </span>
           <Badge
             variant="destructive"
             className="bg-destructive/10 text-destructive border-destructive/20 text-[11px] font-medium"
           >
-            {returnReasonLabel(item.reasonCode)}
+            {returnReasonLabel(item.reasonCode, t)}
           </Badge>
         </div>
         {item.description && (
@@ -41,7 +44,7 @@ export function ReturnRequestSummary({
       {/* Items to return */}
       <div className="space-y-2">
         <div className="text-xs font-semibold text-foreground">
-          สินค้าที่ขอคืน · {item.items?.length ?? 0} รายการ
+          {t("sellerReturns.summary.itemsToReturn", "สินค้าที่ขอคืน · {count} รายการ", { count: item.items?.length ?? 0 })}
         </div>
         <div className="divide-y divide-border rounded-lg border border-border bg-card">
           {item.items && item.items.length > 0 ? (
@@ -68,8 +71,11 @@ export function ReturnRequestSummary({
                       {cardItem.variantLabel ? ` — ${cardItem.variantLabel}` : ""}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      {cardItem.conditionCode} · คืน {cardItem.quantityReturned} จาก{" "}
-                      {cardItem.quantityOrdered} ใบ
+                      {t("sellerReturns.summary.returnQuantity", "{condition} · คืน {returned} จาก {ordered} ใบ", {
+                        condition: cardItem.conditionCode,
+                        returned: cardItem.quantityReturned,
+                        ordered: cardItem.quantityOrdered,
+                      })}
                     </div>
                   </div>
                 </div>
@@ -80,7 +86,7 @@ export function ReturnRequestSummary({
             ))
           ) : (
             <div className="p-3 text-xs text-muted-foreground">
-              ไม่พบรายการสินค้าที่ระบุคืน
+              {t("sellerReturns.summary.noItemsFound", "ไม่พบรายการสินค้าที่ระบุคืน")}
             </div>
           )}
         </div>

@@ -2,16 +2,19 @@ import { Check } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Steps to Return (ขั้นตอนการคืนสินค้า)
  */
 export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
+  const { t } = useTranslate("seller");
+
   return (
     <Card className="gap-0 rounded-xl border border-border py-0 shadow-none ring-0">
       <CardContent className="p-5 space-y-4">
         <h3 className="font-bold text-sm text-foreground">
-          ขั้นตอนการคืนสินค้า
+          {t("sellerReturns.steps.title", "ขั้นตอนการคืนสินค้า")}
         </h3>
 
         <div className="space-y-4">
@@ -22,7 +25,7 @@ export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
             </div>
             <div className="space-y-0.5">
               <div className="text-xs font-semibold text-foreground">
-                1. ผู้ซื้อเปิดคำขอพร้อมหลักฐาน
+                {t("sellerReturns.steps.step1Title", "1. ผู้ซื้อเปิดคำขอพร้อมหลักฐาน")}
               </div>
             </div>
           </div>
@@ -48,10 +51,10 @@ export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
                   currentStep === 2 ? "text-primary font-bold" : "text-foreground"
                 )}
               >
-                คุณอนุมัติหรือปฏิเสธ
+                {t("sellerReturns.steps.step2Title", "คุณอนุมัติหรือปฏิเสธ")}
               </div>
               <div className="text-[11px] text-muted-foreground leading-tight">
-                ไม่มีกำหนดเวลา แต่มีผลถูกหักเงินจนกว่าจะตัดสิน
+                {t("sellerReturns.steps.step2Desc", "ไม่มีกำหนดเวลา แต่มีผลถูกหักเงินจนกว่าจะตัดสิน")}
               </div>
             </div>
           </div>
@@ -77,10 +80,10 @@ export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
                   currentStep === 3 ? "text-primary font-bold" : "text-foreground"
                 )}
               >
-                ผู้ซื้อส่งของคืน
+                {t("sellerReturns.steps.step3Title", "ผู้ซื้อส่งของคืน")}
               </div>
               <div className="text-[11px] text-muted-foreground leading-tight">
-                เฉพาะเมื่อคุณให้ส่งคืน
+                {t("sellerReturns.steps.step3Desc", "เฉพาะเมื่อคุณให้ส่งคืน")}
               </div>
             </div>
           </div>
@@ -106,7 +109,7 @@ export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
                   currentStep === 4 ? "text-primary font-bold" : "text-foreground"
                 )}
               >
-                คุณยืนยันได้รับของ
+                {t("sellerReturns.steps.step4Title", "คุณยืนยันได้รับของ")}
               </div>
             </div>
           </div>
@@ -132,10 +135,10 @@ export function ReturnStepsWidget({ currentStep }: { currentStep: number }) {
                   currentStep === 5 ? "text-primary font-bold" : "text-foreground"
                 )}
               >
-                ระบบคืนเงินให้ผู้ซื้อ
+                {t("sellerReturns.steps.step5Title", "ระบบคืนเงินให้ผู้ซื้อ")}
               </div>
               <div className="text-[11px] text-muted-foreground leading-tight">
-                ถ้าผู้ซื้อโอนเงินมา แอดมินจะโอนคืนให้
+                {t("sellerReturns.steps.step5Desc", "ถ้าผู้ซื้อโอนเงินมา แอดมินจะโอนคืนให้")}
               </div>
             </div>
           </div>

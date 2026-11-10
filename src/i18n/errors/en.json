@@ -1,5 +1,24 @@
 {
   "ABORTED": "The request was cancelled.",
+  "BID_TOO_LOW": "Your bid must be at least {minNextBid}",
+  "HTTP_500": "Something went wrong on our side. Please try again.",
+  "HTTP_502": "Something went wrong on our side. Please try again.",
+  "HTTP_503": "We're down for maintenance. Please try again later.",
+  "HTTP_504": "The server took too long to respond. Please try again.",
+  "MALFORMED_RESPONSE": "The server sent an unexpected response. Please try again.",
+  "NETWORK_ERROR": "Can't reach the server. Check your connection and try again.",
+  "PROMO_CHANGED": "The total has changed",
+  "PROMO_CLAIM_FULL": "This code has been fully collected",
+  "PROMO_EXPIRED": "This code has expired",
+  "PROMO_MIN_SPEND_NOT_MET": "Your order hasn't reached the minimum spend for this code",
+  "PROMO_NOT_APPLICABLE": "No items in your cart qualify for this code",
+  "PROMO_NOT_CLAIMED": "Collect this code before using it",
+  "PROMO_NOT_FOUND": "Code not found. Check the spelling and try again.",
+  "PROMO_NOT_STARTED": "This code isn't active yet",
+  "PROMO_PAUSED": "This code is temporarily paused",
+  "PROMO_USED_UP": "This code has been fully used",
+  "PROMO_USER_LIMIT_REACHED": "You've already used this code the maximum number of times",
+  "PROMO_WRONG_SELLER": "This code belongs to another shop — enter it in that shop's “Shop code” field",
   "authAlert": {
     "ACCOUNT_DEACTIVATED": {
       "description": "Please contact support for help.",
@@ -38,36 +57,17 @@
       "title": "Google sign-in expired"
     }
   },
-  "BID_TOO_LOW": "Your bid must be at least {minNextBid}",
   "cart": {
     "mergeFailed": {
       "description": "Your guest items are still saved. Please sign out and sign in again.",
       "title": "Signed in, but the cart could not be merged"
     }
   },
-  "HTTP_500": "Something went wrong on our side. Please try again.",
-  "HTTP_502": "Something went wrong on our side. Please try again.",
-  "HTTP_503": "We're down for maintenance. Please try again later.",
-  "HTTP_504": "The server took too long to respond. Please try again.",
-  "MALFORMED_RESPONSE": "The server sent an unexpected response. Please try again.",
-  "NETWORK_ERROR": "Can't reach the server. Check your connection and try again.",
-  "PROMO_CHANGED": "The total has changed",
-  "PROMO_CLAIM_FULL": "This code has been fully collected",
-  "PROMO_EXPIRED": "This code has expired",
-  "PROMO_MIN_SPEND_NOT_MET": "Your order hasn't reached the minimum spend for this code",
   "promo": {
     "minSpendShortfall": "Spend {amount} more to use this code",
     "startsAt": "This code can be used from {date}",
     "wrongSellerNamed": "This code belongs to {seller} — enter it in that shop's “Shop code” field"
   },
-  "PROMO_NOT_APPLICABLE": "No items in your cart qualify for this code",
-  "PROMO_NOT_CLAIMED": "Collect this code before using it",
-  "PROMO_NOT_FOUND": "Code not found. Check the spelling and try again.",
-  "PROMO_NOT_STARTED": "This code isn't active yet",
-  "PROMO_PAUSED": "This code is temporarily paused",
-  "PROMO_USED_UP": "This code has been fully used",
-  "PROMO_USER_LIMIT_REACHED": "You've already used this code the maximum number of times",
-  "PROMO_WRONG_SELLER": "This code belongs to another shop — enter it in that shop's “Shop code” field",
   "upload": {
     "accessDenied": "This account does not have permission to upload this file type",
     "cancelled": "Upload cancelled",
@@ -87,7 +87,6 @@
     "Email": "Enter a valid email address",
     "Max": "Must be at most {value}",
     "Min": "Must be at least {value}",
-    "missingParameter": "Required value is missing",
     "NotBlank": "This field is required",
     "NotEmpty": "This field is required",
     "NotNull": "This field is required",
@@ -95,6 +94,7 @@
     "Positive": "Must be greater than 0",
     "PositiveOrZero": "Must not be negative",
     "Size": "Must be between {min} and {max} characters",
+    "missingParameter": "Required value is missing",
     "typeMismatch": "Invalid value"
   }
 }

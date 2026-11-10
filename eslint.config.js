@@ -49,6 +49,8 @@ const I18N_GUARDED = [
   'src/features/admin/components/{AdminOrdersContent,AdminPaymentReviewContent,AdminPayoutsContent,AdminRefundsContent,FinanceReasonDialog,FinanceShared,OrderBoardSkeleton,OrderColumnCard,OrderDetailSheet,OrderKanbanColumn,OrderListSheet,PaymentSlipDetail,PayoutDetail,RefundDetail,SlipModeCard}.tsx',
   'src/features/admin/components/Commission*.tsx',
   'src/features/admin/components/orders.styles.ts',
+  // I18N-13 — finance: คืนสินค้า / คืนเงิน / รีวิว
+  'src/features/finance/**/*.{ts,tsx}',
 ]
 // ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
 const I18N_PENDING = [

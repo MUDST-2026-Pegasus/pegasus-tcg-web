@@ -8,11 +8,7 @@ import {
 } from "@/components/ui/select";
 
 import type { ReturnSortOrder } from "../useSellerReturns";
-
-const SORT_OPTIONS: { value: ReturnSortOrder; label: string }[] = [
-  { value: "longest_first", label: "เรียง: รอนานสุดก่อน" },
-  { value: "newest_first", label: "เรียง: ใหม่สุดก่อน" },
-];
+import { useTranslate } from "@/lib/i18n";
 
 interface ReturnSortSelectProps {
   value: ReturnSortOrder;
@@ -20,16 +16,23 @@ interface ReturnSortSelectProps {
 }
 
 export function ReturnSortSelect({ value, onChange }: ReturnSortSelectProps) {
+  const { t } = useTranslate("seller");
+
+  const sortOptions = [
+    { value: "longest_first" as const, label: t("sellerReturns.sort.longestFirst", "เรียง: รอนานสุดก่อน") },
+    { value: "newest_first" as const, label: t("sellerReturns.sort.newestFirst", "เรียง: ใหม่สุดก่อน") },
+  ];
+
   return (
     <Select
-      items={SORT_OPTIONS}
+      items={sortOptions}
       value={value}
       onValueChange={(next) => {
         if (next !== null) onChange(next as ReturnSortOrder);
       }}
     >
       <SelectTrigger
-        aria-label="เรียงลำดับคำขอคืนสินค้า"
+        aria-label={t("sellerReturns.sort.ariaLabel", "เรียงลำดับคำขอคืนสินค้า")}
         size="sm"
         className="rounded-lg border-input bg-background text-xs font-medium text-foreground"
       >
@@ -37,7 +40,7 @@ export function ReturnSortSelect({ value, onChange }: ReturnSortSelectProps) {
       </SelectTrigger>
       <SelectContent className="w-auto min-w-(--anchor-width)">
         <SelectGroup>
-          {SORT_OPTIONS.map((option) => (
+          {sortOptions.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
