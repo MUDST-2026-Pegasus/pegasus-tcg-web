@@ -26,6 +26,7 @@ import { useAdminOrders } from "../orders.queries";
 import type { AdminOrderSummary, OrderBoardColumn } from "../orders.types";
 import { CatalogPagination } from "./CatalogPagination";
 import { ORDER_TONE_BADGE } from "./orders.styles";
+import { useTranslate } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 const SEARCH_DELAY_MS = 300;
@@ -75,6 +76,7 @@ function OrderListPanel({
   enabled: boolean;
   onSelect: (order: AdminOrderSummary) => void;
 }) {
+  const { t } = useTranslate("admin");
   const meta = ORDER_COLUMN_META[column.key];
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
@@ -102,7 +104,7 @@ function OrderListPanel({
       <SheetHeader className="pr-14">
         <SheetTitle className="text-lg font-semibold">{meta.title}</SheetTitle>
         <SheetDescription>
-          ทั้งหมด {formatCount(column.count)} รายการ · กดรายการเพื่อดูรายละเอียด
+          {t("orders.list.count", "ทั้งหมด {count} รายการ · กดรายการเพื่อดูรายละเอียด", { count: formatCount(column.count) })}
         </SheetDescription>
       </SheetHeader>
 
@@ -115,8 +117,8 @@ function OrderListPanel({
           <Input
             value={search}
             onChange={(event) => handleSearchInput(event.target.value)}
-            placeholder="ค้นหาเลขคำสั่งซื้อ หรือชื่อผู้ซื้อ/ผู้ขาย"
-            aria-label="ค้นหาคำสั่งซื้อ"
+            placeholder={t("orders.list.searchPlaceholder", "ค้นหาเลขคำสั่งซื้อ หรือชื่อผู้ซื้อ/ผู้ขาย")}
+            aria-label={t("orders.list.search", "ค้นหาคำสั่งซื้อ")}
             className="pl-8"
           />
         </div>
@@ -124,11 +126,11 @@ function OrderListPanel({
         <QueryBoundary
           query={orders}
           loading={<OrderListSkeleton />}
-          errorTitle="โหลดคำสั่งซื้อไม่สำเร็จ"
+          errorTitle={t("orders.detail.loadFailed", "โหลดคำสั่งซื้อไม่สำเร็จ")}
           isEmpty={(result) => result.items.length === 0}
           empty={
             <EmptyState
-              title={q ? "ไม่พบคำสั่งซื้อที่ค้นหา" : "ยังไม่มีคำสั่งซื้อในสถานะนี้"}
+              title={q ? t("orders.list.noMatch", "ไม่พบคำสั่งซื้อที่ค้นหา") : t("orders.column.empty", "ยังไม่มีคำสั่งซื้อในสถานะนี้")}
             />
           }
         >

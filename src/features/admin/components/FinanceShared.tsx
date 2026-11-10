@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { accentFor, initialsOf } from "../finance.format";
 import type { FinanceParty } from "../finance.types";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * ชิ้นส่วนที่สามหน้าการเงิน (ตรวจสลิป / คืนเงิน / ถอนเงินผู้ขาย) ใช้ร่วมกัน
@@ -27,6 +28,7 @@ export function FinancePageHeader({
   onExport: () => void;
   exportDisabled?: boolean;
 }) {
+  const { t } = useTranslate("admin");
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
@@ -42,7 +44,7 @@ export function FinancePageHeader({
         disabled={exportDisabled}
         onClick={onExport}
       >
-        ส่งออก CSV
+        {t("finance.exportCsv", "ส่งออก CSV")}
       </Button>
     </div>
   );
@@ -121,9 +123,10 @@ export function FinanceTabs<T extends string>({
   onSearchChange: (value: string) => void;
   searchPlaceholder: string;
 }) {
+  const { t } = useTranslate("admin");
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div role="tablist" aria-label="กรองรายการ" className="flex flex-wrap items-center gap-1">
+      <div role="tablist" aria-label={t("finance.filterTabs", "กรองรายการ")} className="flex flex-wrap items-center gap-1">
         {tabs.map((tab) => {
           const isActive = tab.value === active;
           return (

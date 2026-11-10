@@ -40,8 +40,8 @@
       "oneLevel": "Can be nested one level deep",
       "parent": "Parent category",
       "parentShared": "{name} (all games)",
-      "saved": "Category saved",
       "saveFailed": "Could not save the category. Please try again",
+      "saved": "Category saved",
       "scope": "Applies to *",
       "sharedHint": "This category is shared across all games; edits affect every game"
     },
@@ -64,8 +64,8 @@
       "invalidAttributeDefinition": "Choice fields need at least one option, and other field types must not have options"
     },
     "fieldForm": {
-      "added": "Added field {label}",
       "addTitle": "Add field · {game}",
+      "added": "Added field {label}",
       "description": "The field appears in this game's add-card form right away, and becomes a storefront filter when \"Filterable\" is on",
       "editTitle": "Edit field {label}",
       "filterableHint": "Show as a filter on this game's storefront",
@@ -79,8 +79,8 @@
       "optionsEditHint": "If you remove an option, cards using that value must be fixed the next time they are saved",
       "optionsHint": "One option per line",
       "requiredHint": "Must be filled in every time a card of this game is added or edited",
-      "saved": "Field saved",
       "saveFailed": "Could not save the field. Please try again",
+      "saved": "Field saved",
       "type": "Type *"
     },
     "fields": {
@@ -93,11 +93,11 @@
       },
       "count": "{count} fields",
       "delete": "Delete field",
-      "deleted": "Deleted field {label}",
       "deleteDescription": "The add-card form and storefront filters will no longer have this field. Values stored under the key \"{key}\" are not deleted, but nothing will read them",
       "deleteFailed": "Could not delete the field. Please try again",
       "deleteTitle": "Delete field {label}?",
       "deleteUsage": "{game} has {count} catalogue cards that may already have this field filled in",
+      "deleted": "Deleted field {label}",
       "edit": "Edit",
       "emptyDescription": "Add the first field of {game}, e.g. HP or rarity, and the add-card form will get it right away",
       "emptyTitle": "No fields yet",
@@ -142,8 +142,8 @@
       "name": "Game name *",
       "nameLocalPlaceholder": "e.g. โปเกมอน",
       "namePlaceholder": "e.g. Pokémon",
-      "saved": "Game details saved",
-      "saveFailed": "Could not save the game. Please try again"
+      "saveFailed": "Could not save the game. Please try again",
+      "saved": "Game details saved"
     },
     "games": {
       "add": "+ Add game",
@@ -159,8 +159,8 @@
       "live": "On sale",
       "loadFailed": "Could not load games",
       "productCount": "Catalogue products",
-      "shown": "{name} is now shown on the storefront",
       "showOnStore": "Show on storefront",
+      "shown": "{name} is now shown on the storefront",
       "toggleFailed": "Could not change the game status"
     },
     "json": {
@@ -178,8 +178,8 @@
       "viewJson": "View as JSON"
     },
     "setForm": {
-      "added": "Added set {code}",
       "addTitle": "Add card set · {game}",
+      "added": "Added set {code}",
       "code": "Set code *",
       "codeHint": "A-Z 0-9 . - _ · must be unique within this game",
       "codePlaceholder": "e.g. SV9",
@@ -188,8 +188,8 @@
       "name": "Set name *",
       "namePlaceholder": "e.g. Battle Partners",
       "releaseHint": "Future dates are allowed",
-      "saved": "Card set saved",
       "saveFailed": "Could not save the card set. Please try again",
+      "saved": "Card set saved",
       "totalPlaceholder": "e.g. 100"
     },
     "sets": {
@@ -206,10 +206,10 @@
       "counting": "Counting…",
       "delete": "Delete set {name}",
       "deleteConfirm": "Delete card set",
-      "deleted": "Deleted set {code}",
       "deleteDescription": "This cannot be undone. A set that still has catalogue cards cannot be deleted until they are moved to another set",
       "deleteFailed": "Could not delete the card set. Please try again",
       "deleteTitle": "Delete set {code} · {name}?",
+      "deleted": "Deleted set {code}",
       "edit": "Edit set {name}",
       "emptyDescription": "Add the first set of {game} to group cards by release",
       "emptyTitle": "No card sets yet",
@@ -282,8 +282,8 @@
       "moveUp": "Move entry {n} up",
       "name": "Name",
       "remove": "Remove entry {n}",
-      "saved": "Abilities & Attacks saved",
       "saveFailed": "Could not save Abilities & Attacks. Please try again",
+      "saved": "Abilities & Attacks saved",
       "sourceUrl": "Source link",
       "typeOf": "Type of entry {n}"
     },
@@ -339,17 +339,17 @@
       "alreadyPrimary": "Already the main image",
       "attach": "Attach images",
       "attachCount": "Attach {count} images",
-      "attached": "Attached {count} images",
       "attachFailed": "Could not attach images",
       "attachOneFailed": "could not attach",
       "attachPartial": "Attached {ok} images, {failed} failed",
+      "attached": "Attached {count} images",
       "delete": "Delete this image",
       "deleteConfirm": "Delete image",
-      "deleted": "Image deleted",
       "deleteDescription": "The file is also removed from storage. This cannot be undone",
       "deleteFailed": "Could not delete the image. Please try again",
       "deletePrimaryDescription": "The file is also removed from storage. This cannot be undone · This is the main image; the next image becomes the main one",
       "deleteTitle": "Delete this image?",
+      "deleted": "Image deleted",
       "emptyDescription": "The first attached image becomes the main image shown on the product card",
       "emptyTitle": "No images yet",
       "loadFailed": "Could not load image",
@@ -365,10 +365,10 @@
     "listings": {
       "block": "Suspend listing",
       "blockDialog": {
-        "blocked": "Listing suspended",
         "blockFailed": "Could not suspend",
         "blockReason": "Reason for suspension",
         "blockTitle": "Suspend this listing?",
+        "blocked": "Listing suspended",
         "conflict": "The listing status has changed; the list has been refreshed",
         "effectHidden": "The listing disappears from the storefront and search right away; existing carts cannot check out",
         "effectLocked": "The seller cannot change the price or status, or delete the listing, until it is lifted",
@@ -381,9 +381,9 @@
         "remaining": "{count} cards left",
         "returnsTo": "the listing returns to “{status}”",
         "summary": "{card} · {condition} · shop {shop}",
-        "unblocked": "Suspension lifted",
         "unblockFailed": "Could not lift the suspension",
         "unblockTitle": "Lift the suspension of this listing?",
+        "unblocked": "Suspension lifted",
         "visibleNow": "and buyers see it right away"
       },
       "cards": "{count} cards",
@@ -485,9 +485,9 @@
       "noSet": "No set",
       "rarity": "Rarity",
       "rarityPlaceholder": "e.g. SR, SAR",
-      "saved": "Product saved",
       "saveEdit": "Save changes",
       "saveFailed": "Could not save the product. Please try again",
+      "saved": "Product saved",
       "set": "Set",
       "setHint": "Accessories are not in any set; choose \"No set\"",
       "slug": "Slug (end of the URL)",
@@ -495,26 +495,6 @@
       "slugLocked": "Cannot be changed after creation because shared links point here",
       "slugPlaceholder": "Leave blank and it is generated from the name and card number",
       "type": "Product type"
-    },
-    "products": {
-      "blocked": "{count} suspended",
-      "delete": "Delete product",
-      "deleted": "Product deleted",
-      "deleteDescription": "Its variants, images and Abilities & Attacks are deleted too. This cannot be undone · Only products with no listings, orders or collections referring to them can be deleted",
-      "deleteFailed": "Could not delete the product. Please try again",
-      "deleteTitle": "Delete {name}?",
-      "edit": "Edit {name}",
-      "emptyDescription": "Add the first card and sellers can pick it to list",
-      "emptyTitle": "This game has no catalogue products yet",
-      "loadFailed": "Could not load catalogue products",
-      "noMatchDescription": "Try another search, or clear the filters to see everything for this game",
-      "noMatchTitle": "No products match the filters",
-      "none": "No products found",
-      "noSeller": "No sellers yet",
-      "noVariant": "No variants yet",
-      "range": "Showing {from}–{to} of {total}",
-      "searching": "Searching…",
-      "stock": "{shops} shops · {qty} cards left"
     },
     "productType": {
       "accessory": "Accessory",
@@ -524,6 +504,26 @@
       "other": "Other",
       "singleCard": "Single card",
       "starterDeck": "Starter deck"
+    },
+    "products": {
+      "blocked": "{count} suspended",
+      "delete": "Delete product",
+      "deleteDescription": "Its variants, images and Abilities & Attacks are deleted too. This cannot be undone · Only products with no listings, orders or collections referring to them can be deleted",
+      "deleteFailed": "Could not delete the product. Please try again",
+      "deleteTitle": "Delete {name}?",
+      "deleted": "Product deleted",
+      "edit": "Edit {name}",
+      "emptyDescription": "Add the first card and sellers can pick it to list",
+      "emptyTitle": "This game has no catalogue products yet",
+      "loadFailed": "Could not load catalogue products",
+      "noMatchDescription": "Try another search, or clear the filters to see everything for this game",
+      "noMatchTitle": "No products match the filters",
+      "noSeller": "No sellers yet",
+      "noVariant": "No variants yet",
+      "none": "No products found",
+      "range": "Showing {from}–{to} of {total}",
+      "searching": "Searching…",
+      "stock": "{shops} shops · {qty} cards left"
     },
     "sets": {
       "all": "All sets",
@@ -571,8 +571,8 @@
       "categoryRequired": "Choose a category",
       "damage": "Enter a number 0 or above, or leave blank",
       "effectNameRequired": "Enter a name",
-      "effectsMax": "At most {max} entries per card",
       "effectTextMax": "Description must be at most {max} characters",
+      "effectsMax": "At most {max} entries per card",
       "energyCount": "At most {max} energies",
       "energyNameMax": "Each energy name must be at most {max} characters",
       "gameRequired": "Choose a game",
@@ -591,8 +591,8 @@
     "variants": {
       "activeHint": "Active — when off, sellers cannot list more of this variant",
       "add": "+ Add variant",
-      "added": "Variant added",
       "addShort": "Add variant",
+      "added": "Variant added",
       "barcode": "Barcode",
       "description": "One variant = one version actually traded, e.g. English Foil and Japanese Normal are different variants. Listings and reference prices belong to a variant",
       "edit": "Edit",
@@ -603,14 +603,627 @@
       "printingNote": "Printing note",
       "printingNoteHint": "Part of the variant's identity, not a description",
       "printingNotePlaceholder": "e.g. Alt Art, Full Art — leave blank for a regular card",
-      "saved": "Variant saved",
       "saveFailed": "Could not save the variant. Please try again",
+      "saved": "Variant saved",
       "skuEditHint": "Clear it to keep the current SKU",
       "skuHint": "Generated from game, set, card number, language and finish",
       "skuPlaceholder": "Leave blank and it is generated"
     }
   },
+  "commission": {
+    "categories": {
+      "add": "+ Add category",
+      "advanced": "Edit the detailed rule for {name}",
+      "advancedShort": "Detailed settings",
+      "description": "Turn on the switch to set a rate separate from the default",
+      "empty": "No games or categories to configure yet",
+      "manage": "Manage all rules ({count} active)",
+      "rate": "Commission rate for {name}",
+      "title": "Category-specific rates",
+      "toggle": "Set a specific rate for {name}"
+    },
+    "default": {
+      "description": "Applies to every category without a specific rate",
+      "input": "Commission rate (%)",
+      "recommended": "Recommended 3–7%",
+      "title": "Platform-wide default rate"
+    },
+    "errors": {
+      "categoryNotFound": "This category no longer exists",
+      "forbidden": "This account does not have ADMIN permission",
+      "gameNotFound": "This game no longer exists",
+      "invalid": "The rule data is invalid. Please check it again",
+      "retry": "Please try again",
+      "ruleNotFound": "This rule no longer exists",
+      "sellerNotFound": "No shop with this ID"
+    },
+    "form": {
+      "active": "Enable this rule",
+      "addDescription": "Set separate rates for a game, category or seller; the default rate applies where there is no rule",
+      "addTitle": "Add commission rule",
+      "back": "All rules",
+      "chooseCategory": "Choose a category",
+      "chooseGame": "Choose a game",
+      "confirm": "Confirm",
+      "confirmDelete": "Delete rule #{id} permanently? This cannot be undone",
+      "conflict": "There are active rules for {target} in the same period ({rules}) — the higher-priority rule is used; on a tie, the newer rule wins",
+      "create": "Create rule",
+      "editDescription": "Changes apply to orders created after saving; existing orders do not change",
+      "fixedFee": "Fixed fee per order",
+      "fixedFeeHint": "Added on top of the percentage. Blank = 0",
+      "from": "Effective from",
+      "maxFee": "Maximum fee",
+      "minFee": "Minimum fee",
+      "period": "Period and priority",
+      "priority": "Priority",
+      "priorityHint": "Breaks ties between rules in the same scope; higher wins",
+      "rate": "Commission rate",
+      "rateHint": "0–100%, up to 3 decimal places",
+      "ratePlaceholder": "e.g. 5.0",
+      "rates": "Rate and fees",
+      "saveEdit": "Save changes",
+      "saving": "Saving...",
+      "scope": "Applies to",
+      "scopeLabel": "Scope",
+      "sellerId": "Shop ID (seller profile ID)",
+      "sellerIdHint": "Find the ID on the order page or the seller approval page",
+      "sellerIdPlaceholder": "e.g. 12",
+      "to": "Ends",
+      "toHint": "Blank = applies until turned off",
+      "unset": "Not set"
+    },
+    "history": {
+      "close": "Close",
+      "description": "Latest {count} changes to commission rules and the default rate",
+      "empty": "No commission changes yet",
+      "title": "Commission change history",
+      "viewAll": "View all in the activity log"
+    },
+    "impact": {
+      "description": "Rate increases only affect new orders; existing orders keep the rate at the time of purchase",
+      "title": "Impact on sellers"
+    },
+    "page": {
+      "checkAndRetry": "Please check the list and try again",
+      "description": "Set the fee rate the platform charges sellers in each category",
+      "forbidden": "This account does not have ADMIN permission for commission settings",
+      "history": "View change history",
+      "invalidRate": "Rates must be between 0–100% with at most 3 decimal places",
+      "loadFailed": "Could not load commission settings",
+      "loading": "Loading commission settings",
+      "partialSave": "Not every rate was saved",
+      "save": "Save settings",
+      "saved": "Commission settings saved",
+      "title": "Commission"
+    },
+    "policy": {
+      "buyerPays": "Charge the buyer instead of the seller",
+      "excludeShipping": "Exclude shipping",
+      "onSuccess": "Charge when the order completes",
+      "refundOnCancel": "Refund the fee on cancellation",
+      "title": "Fee collection rules"
+    },
+    "preview": {
+      "clampMax": "Lowered to the maximum",
+      "clampMin": "Raised to the minimum",
+      "clampPrice": "Capped at the sale price",
+      "clamped": "Adjusted to min/max",
+      "commission": "Commission ({rate}%)",
+      "fixedFee": "Fixed fee",
+      "price": "Sale price",
+      "samplePrice": "Sample sale price",
+      "sellerNet": "Seller receives",
+      "title": "Example calculation",
+      "totalFee": "Total fee"
+    },
+    "retry": "Try again",
+    "rows": {
+      "allGames": "All games",
+      "categoryDescription": "Product category",
+      "categoryFallback": "Category #{id}",
+      "custom": "Custom",
+      "default": "Use default",
+      "gameDescription": "Cards and products of this game"
+    },
+    "rules": {
+      "activate": "Activate rule #{id}",
+      "activated": "Rule #{id} activated",
+      "add": "Add rule",
+      "added": "Commission rule added",
+      "all": "All",
+      "confirmDeactivate": "Deactivate this rule?",
+      "confirmDelete": "Delete this rule permanently? This cannot be undone",
+      "deactivate": "Deactivate rule #{id}",
+      "deactivated": "Rule #{id} deactivated",
+      "delete": "Delete rule #{id}",
+      "deleteFailed": "Could not delete",
+      "deleteShort": "Delete rule",
+      "deleted": "Rule #{id} deleted",
+      "description": "When charging fees, the most specific rule wins: seller › category › game › platform. Within the same scope, the higher priority wins",
+      "edit": "Edit rule #{id}",
+      "editShort": "Edit",
+      "empty": "No rules in this view — the platform-wide default rate applies",
+      "filter": "Filter by scope",
+      "list": "Commission rules",
+      "max": "max {amount}",
+      "min": "min {amount}",
+      "noEnd": "No end date",
+      "off": "Off",
+      "on": "On",
+      "priority": "priority {n}",
+      "saved": "Rule #{id} saved",
+      "showInactive": "Show inactive rules",
+      "title": "Commission rules"
+    },
+    "scope": {
+      "category": "Category",
+      "categoryHint": "Applies when every item in the order is in the selected category; beats game rules",
+      "game": "Game",
+      "gameHint": "Applies when every item in the order is in the selected game",
+      "global": "Platform-wide",
+      "globalHint": "Applies to every order that matches no specific rule",
+      "seller": "Seller",
+      "sellerHint": "Applies to every order of this seller; beats all other rules"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "inactive": "Disabled",
+      "scheduled": "Scheduled"
+    },
+    "target": {
+      "game": "Game #{id}",
+      "seller": "Shop #{id}"
+    },
+    "validation": {
+      "categoryRequired": "Please choose a category",
+      "fromRequired": "Choose when it takes effect",
+      "gameRequired": "Please choose a game",
+      "maxBelowMin": "The maximum must not be less than the minimum",
+      "money": "Amounts must not be negative, with at most 2 decimal places",
+      "priority": "Priority must be a whole number between -32768 and 32767",
+      "rateRange": "The rate must be between 0–100% with at most 3 decimal places",
+      "rateRequired": "Enter the commission rate",
+      "sellerRequired": "Enter the shop ID (seller profile ID) as a number",
+      "toAfterFrom": "The end date must be after the start date"
+    }
+  },
   "common": {
     "tryAgain": "Please try again"
+  },
+  "finance": {
+    "ago": "{time} ago",
+    "checkConnection": "Check your connection and try again",
+    "errors": {
+      "paymentAmountMismatch": "The amount no longer matches the order's outstanding balance",
+      "paymentState": "This item has already been handled. Try refreshing the queue",
+      "refundDestinationChanged": "The buyer changed the account number meanwhile. Check the new number and enter it again",
+      "refundDestinationRequired": "The buyer has not provided a refund account yet"
+    },
+    "exportCsv": "Export CSV",
+    "filterTabs": "Filter items",
+    "noSearchMatch": "No matching items",
+    "payoutStatus": {
+      "approved": "Approved · awaiting transfer",
+      "failed": "Transfer failed",
+      "paid": "Paid",
+      "processing": "Transferring",
+      "rejected": "Rejected",
+      "requested": "New request"
+    },
+    "reason": "Reason",
+    "reasonRequired": "Please enter a reason",
+    "refundSource": {
+      "cancel": "Cancelled",
+      "full": "Full refund",
+      "partial": "Partial refund"
+    },
+    "refundStatus": {
+      "approved": "Ready to transfer",
+      "pending": "Pending",
+      "processed": "Transferred",
+      "processing": "Transferring",
+      "rejected": "Rejected"
+    },
+    "sortNewest": "Sort by: newest",
+    "sortOldest": "Sort by: oldest"
+  },
+  "orders": {
+    "alert": {
+      "disputeHint": "Buyers requested returns; the money for these orders is held until it is resolved",
+      "disputes": "{count} orders with open disputes",
+      "joiner": " and",
+      "overdue": "{count} payments overdue by more than {timeout}",
+      "overdueHint": "Overdue orders should be cancelled automatically and their stock returned to sellers. If they are still here, the auto-cancel job may have a problem",
+      "title": "There are {items}"
+    },
+    "column": {
+      "awaitingShipment": "Paid · awaiting shipment",
+      "completed": "Completed",
+      "disputed": "Disputed",
+      "empty": "No orders in this status yet",
+      "inTransit": "In transit",
+      "more": "See more",
+      "pendingPayment": "Awaiting payment"
+    },
+    "context": {
+      "noReview": "Not reviewed",
+      "packing": "Packing {time}",
+      "pending": "Pending {time}",
+      "review": "Reviewed {rating} stars"
+    },
+    "description": "Track every order on the platform by status · buyers' money is held by the platform until they receive the items",
+    "detail": {
+      "address": "Address",
+      "amounts": "Order amount",
+      "buyer": "Buyer",
+      "buyerNote": "Buyer note",
+      "carrier": "Carrier",
+      "commission": "Commission",
+      "delivery": "Delivery",
+      "discount": "Discount",
+      "download": "Download Order Summary (PDF)",
+      "downloadFailed": "Could not download the Order Summary",
+      "downloaded": "Order Summary downloaded",
+      "generating": "Generating PDF...",
+      "grandTotal": "Grand total",
+      "history": "Status history",
+      "items": "Items",
+      "loadFailed": "Could not load the order",
+      "loadFailedHint": "This order may no longer exist, or the connection failed",
+      "meta": "Order {order} · placed {date}",
+      "method": "Method",
+      "noHistory": "No status changes yet",
+      "noPayment": "No payment yet",
+      "paidAt": "Paid at",
+      "parties": "Seller and buyer",
+      "payment": "Payment",
+      "recipient": "Recipient",
+      "returnReason": "Return reason",
+      "review": "Review",
+      "seller": "Seller",
+      "sellerNet": "Seller receives",
+      "shipping": "Shipping",
+      "stars": "{rating} stars",
+      "status": "Status",
+      "subtotal": "Items subtotal"
+    },
+    "disputes": "Manage disputes",
+    "duration": {
+      "days": "{n} d",
+      "hours": "{n} h",
+      "minutes": "{n} min"
+    },
+    "exportUnavailable": "Exporting to a file is not available yet",
+    "itemCount": "{count} cards",
+    "list": {
+      "count": "{count} in total · click an item for details",
+      "noMatch": "No matching orders",
+      "search": "Search orders",
+      "searchPlaceholder": "Search order number, or buyer/seller name"
+    },
+    "loadFailed": "Could not load the order overview",
+    "loading": "Loading orders",
+    "paymentMethod": {
+      "bankTransfer": "Bank transfer",
+      "cashOnDelivery": "Cash on delivery",
+      "mockGateway": "Test gateway",
+      "wallet": "Wallet"
+    },
+    "paymentStatus": {
+      "awaitingVerification": "Awaiting slip review",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "failed": "Failed",
+      "pending": "Awaiting payment",
+      "succeeded": "Paid"
+    },
+    "pdfError": {
+      "failed": "Couldn't download the PDF. Please try again",
+      "forbidden": "This account is not allowed to download order documents",
+      "network": "Cannot reach the server. Check your internet connection and try again",
+      "notFound": "The selected order was not found or has been deleted",
+      "server": "PDF generation failed. Please try again",
+      "unauthorized": "Your session has expired. Please sign in and try again"
+    },
+    "returnReason": {
+      "counterfeit": "Suspected counterfeit",
+      "damaged": "Damaged item",
+      "notAsDescribed": "Not as described",
+      "notReceived": "Not received",
+      "other": "Other reason",
+      "wrongItem": "Wrong item received"
+    },
+    "search": {
+      "failed": "Could not search orders",
+      "loading": "Searching orders...",
+      "notFound": "No order with this number",
+      "retry": "Try again",
+      "title": "Order {order}"
+    },
+    "status": {
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "delivered": "Delivered",
+      "paid": "Paid",
+      "pendingPayment": "Awaiting payment",
+      "preparing": "Packing",
+      "refunded": "Refunded",
+      "returnRequested": "Return requested",
+      "returned": "Returned",
+      "shipped": "Shipped"
+    },
+    "title": "Order overview"
+  },
+  "payments": {
+    "approveFailed": "Could not approve",
+    "approved": "Payment approved",
+    "approvedHint": "{amount} is now held in each shop's escrow",
+    "check": {
+      "amountMatches": "Amount matches the outstanding balance {amount}",
+      "amountMismatch": "Amount does not match the outstanding balance {amount} — cannot approve",
+      "noSlip": "No slip file yet",
+      "notDuplicate": "This slip has not been used for another payment",
+      "slipUploaded": "Slip file uploaded"
+    },
+    "description": "Review buyers' transfer slips before confirming orders · once approved, the money is held in escrow per shop",
+    "detail": {
+      "accountName": "Destination account name",
+      "amount": "Amount due",
+      "approve": "Approve payment",
+      "autoChecked": "Checked automatically when the slip was attached",
+      "bankTransfer": "Bank transfer",
+      "createdAt": "Created at",
+      "escrowNote": "Once approved, the money is held in escrow per shop",
+      "meta": "PAY-{id} · order {order} · created {created} · payment due {expires}",
+      "method": "Payment method",
+      "mustMatch": "Details the slip must match",
+      "pending": "Pending review",
+      "platformAccount": "Transferred to (platform account)",
+      "reasonRequired": "Enter a reason before rejecting the slip",
+      "reference": "Reference entered by the buyer",
+      "reject": "Reject slip",
+      "rejectReason": "Rejection reason",
+      "rejectReasonPlaceholder": "Reason for rejecting (required to reject), e.g. amount mismatch, unclear slip, wrong account",
+      "result": "Review result",
+      "resultHint": "Check that the amount, date/time and destination account on the slip match the details above · rejecting requires a reason, and the buyer must create a new payment",
+      "skip": "Skip to next",
+      "total": "Total"
+    },
+    "emptyDescription": "When buyers attach slips they appear here, nearest payment deadline first",
+    "emptyTitle": "No slips to review",
+    "loadFailed": "Could not load the slip queue",
+    "mode": {
+      "auto": "Auto-approve",
+      "autoOn": "Slip auto-approval turned on",
+      "description": "Manual: an admin must approve every slip · Auto-approve: payment is confirmed as soon as the buyer attaches a slip (amount and duplicate slips are still checked every time)",
+      "failed": "Could not change the mode",
+      "label": "Slip review mode",
+      "manual": "Manual review",
+      "manualOn": "Switched to manual review",
+      "queueNote": "The mode applies to slips attached from now on — the {count} slips already in the queue still need manual review",
+      "title": "Payment slip review mode"
+    },
+    "nearDeadline": "Payment deadline near",
+    "placeholder": "Choose a slip from the queue on the left to review it",
+    "queueSubtitle": "PAY-{id} · created {ago}",
+    "queueTitle": "Slips awaiting review ({count})",
+    "rejectFailed": "Could not reject",
+    "rejected": "Slip rejected",
+    "rejectedHint": "The buyer must create a new payment",
+    "shops": "{count} shops",
+    "slip": {
+      "alt": "Transfer slip of PAY-{id}",
+      "clickToOpen": "Click to open the file",
+      "image": "Transfer slip image",
+      "none": "No slip file",
+      "openFull": "Open the full-size slip",
+      "openNewTab": "Open the slip in a new tab",
+      "tempLink": "Temporary link · reload the queue if it does not open"
+    },
+    "sortDeadline": "Sort by: nearest deadline",
+    "stats": {
+      "approvedToday": "Approved today",
+      "awaiting": "Awaiting slip review",
+      "awaitingTransfer": "Awaiting buyer transfer",
+      "rejectedToday": "Rejected today"
+    },
+    "title": "Verify payment slips",
+    "viewing": "Viewing"
+  },
+  "payouts": {
+    "account": {
+      "missing": "No payout account found for this request",
+      "title": "Seller's payout account",
+      "verified": "Account verified · created at KYC approval"
+    },
+    "actionFailed": "Action failed",
+    "closed": {
+      "failed": "Transfer failed — the reserved amount is available for the seller to withdraw again",
+      "rejected": "Request rejected — the reserved amount is available for the seller to withdraw again"
+    },
+    "description": "Approve and transfer money to sellers · the amount is reserved when requested and deducted from the wallet only when the transfer is confirmed",
+    "detail": {
+      "amount": "Amount to transfer to the seller",
+      "available": "Available in wallet",
+      "canWithdraw": "Seller can still withdraw",
+      "closed": "Closed; the reserved amount is returned for the seller to withdraw again",
+      "ledgerDone": "Deducted from the ledger (PAYOUT_OUT) · reference {ref}",
+      "ledgerPending": "Not yet deducted from the ledger — the deduction (PAYOUT_OUT) happens only when payment is confirmed",
+      "meta": "PO-{id} · shop {shop} · requested {date}",
+      "reserved": "Reserved (including this request)",
+      "verified": "Identity verified"
+    },
+    "done": {
+      "approve": "Withdrawal request approved",
+      "fail": "Transfer marked as failed",
+      "paid": "Payment recorded",
+      "reject": "Withdrawal request rejected",
+      "start": "Transfer started"
+    },
+    "emptyDescription": "Sellers' withdrawal requests appear here",
+    "emptyQueue": "Nothing in \"{queue}\"",
+    "loadFailed": "Could not load withdrawal requests",
+    "orders": {
+      "completedAt": "completed {date}",
+      "hint": "COMPLETED · oldest to newest until the amount is covered",
+      "linked": "Orders linked to this withdrawal",
+      "toLink": "Orders to be linked to this withdrawal",
+      "total": "Total (after commission)"
+    },
+    "paid": {
+      "confirm": "Confirm payment",
+      "description": "After transferring in the banking app, enter the reference and attach the slip (both required) · if the transfer failed, give a reason and the reserved amount becomes available to the seller again",
+      "done": "Paid",
+      "referencePlaceholder": "e.g. 20261014KBANK0012345",
+      "slip": "Transfer slip (PAYOUT_SLIP)",
+      "title": "Confirm payment"
+    },
+    "placeholder": "Choose a withdrawal request from the queue on the left to review and transfer it",
+    "queueSubtitle": "PO-{id} · requested {ago}",
+    "reason": {
+      "description": "The seller will see this reason, and the reserved amount becomes withdrawable again · this is not recorded in the ledger",
+      "failPlaceholder": "e.g. destination account frozen, bank returned the transfer",
+      "failTitle": "Report failed transfer",
+      "rejectConfirm": "Confirm rejection",
+      "rejectPlaceholder": "e.g. account under review",
+      "rejectTitle": "Reject withdrawal request"
+    },
+    "review": {
+      "approve": "Approve",
+      "description": "Check the amount against the wallet and the verified account before approving · rejecting returns the reserved amount to the seller immediately",
+      "title": "Review withdrawal request"
+    },
+    "searchHint": "Try searching by PO number or shop name",
+    "searchPlaceholder": "Search PO / shop name",
+    "start": {
+      "description": "Press when you are about to transfer in the banking app — the status becomes “Transferring” so other admins know it is taken",
+      "title": "Start transfer"
+    },
+    "stats": {
+      "closedThisMonth": "Rejected / failed this month",
+      "inProgress": "Approved + transferring",
+      "paidThisMonth": "Paid this month",
+      "requested": "New requests (REQUESTED)"
+    },
+    "steps": {
+      "approved": "Approved",
+      "awaiting": "Awaiting confirmation",
+      "paid": "Paid",
+      "processing": "Transferring",
+      "rejected": "Rejected",
+      "requested": "Requested"
+    },
+    "tabs": {
+      "approved": "Approved",
+      "closed": "Rejected / failed",
+      "open": "Pending",
+      "paid": "Paid",
+      "processing": "Transferring",
+      "requested": "New requests"
+    },
+    "title": "Seller withdrawals",
+    "transferFailed": "Transfer failed"
+  },
+  "refunds": {
+    "account": {
+      "automatic": "No manual transfer needed — {method} is refunded automatically",
+      "bank": "Bank",
+      "failedAttempts": "Transfer failed {count} times — check that the buyer has fixed the account before transferring again",
+      "missing": "The buyer has not provided an account yet — wait for them to fill it in on their refund page before transferring",
+      "name": "Account name",
+      "number": "Account number",
+      "title": "Refund account provided by the buyer"
+    },
+    "attempt": {
+      "failed": "Failed",
+      "processed": "Completed",
+      "processing": "Transferring"
+    },
+    "createdAt": "created {date}",
+    "description": "Refunds created by the system from order cancellations and returns · admins transfer the money to the buyer's account",
+    "detail": {
+      "afterConfirm": "Once the transfer is confirmed → deducted from this SO's escrow",
+      "amount": "Amount to refund",
+      "escrow": "Escrow of {so}",
+      "reference": "reference {ref}",
+      "refundedBefore": "Refunded previously",
+      "remaining": "remaining {amount}",
+      "settled": "Refunded",
+      "settledAt": "at {date}",
+      "type": "Type"
+    },
+    "emptyDescription": "Refunds appear here when the system creates them",
+    "emptyQueue": "Nothing in \"{queue}\"",
+    "failDialog": {
+      "confirm": "Mark as failed",
+      "description": "The item returns to “Ready to transfer” and the buyer must fix the refund account before the next transfer",
+      "done": "Marked as failed",
+      "placeholder": "e.g. destination account closed, bank returned the transfer",
+      "title": "Report failed refund transfer"
+    },
+    "failedAttempts": "{count} failed transfers",
+    "history": {
+      "count": "{count} attempts",
+      "empty": "No transfer started yet",
+      "loadFailed": "Could not load history",
+      "reason": "Reason: {reason}",
+      "reference": "Reference: {ref}",
+      "title": "Transfer history"
+    },
+    "loadFailed": "Could not load refunds",
+    "noAccount": "No account yet",
+    "notice": "There is no direct refund button — the system creates refunds when (1) a paid order is cancelled or (2) a seller approves a return · the buyer must provide an account before an admin can transfer",
+    "origin": {
+      "cancel": "From cancellation of {order}",
+      "return": "From return RTN-{id} of {order}",
+      "shop": "shop {shop} · {so}"
+    },
+    "placeholder": "Choose a refund from the queue on the left to see the account and transfer it",
+    "queue": {
+      "all": "All",
+      "approved": "Ready-to-transfer queue",
+      "processed": "Transferred",
+      "processing": "Transferring"
+    },
+    "searchHint": "Try searching by RF number, order number or buyer name",
+    "searchPlaceholder": "Search RF / ORD / buyer name",
+    "source": {
+      "cancel": "Order cancelled",
+      "full": "Full return",
+      "partial": "Partial return"
+    },
+    "stats": {
+      "failed": "Transfer failed · awaiting buyer account fix",
+      "processedThisMonth": "Transferred this month",
+      "processing": "Transferring",
+      "ready": "Ready to transfer"
+    },
+    "steps": {
+      "accountInput": "Destination account number",
+      "accountPlaceholder": "Type the destination account number, e.g. 1234567890",
+      "checkAccount": "Check the account number and try again",
+      "confirm": "Confirm transferred",
+      "done": "Refunded · reference {ref}",
+      "failed": "Transfer failed",
+      "locked": "Account locked; you can start the transfer",
+      "one": "Confirm the account number, then start the transfer",
+      "oneHint": "Type the destination account number exactly as the buyer saved it. If the buyer changes it meanwhile, the transfer cannot start",
+      "recordFailed": "Could not save",
+      "recordFailedRetry": "Could not save. Please try again",
+      "recorded": "Refund transfer recorded",
+      "referenceInput": "Transfer reference",
+      "referencePlaceholder": "Transfer reference (transferReference)",
+      "start": "Start transfer",
+      "startFailed": "Could not start the transfer",
+      "title": "Refund transfer steps",
+      "two": "Confirm the transfer result",
+      "twoHint": "After transferring in the banking app, enter the reference to close the item (repeating with the same reference has no extra effect), or report a failed transfer and the item returns to ready-to-transfer for the buyer to fix the account"
+    },
+    "tabs": {
+      "processing": "Transferring ({count})",
+      "ready": "Ready to transfer ({count})"
+    },
+    "title": "Buyer refunds"
   }
 }
