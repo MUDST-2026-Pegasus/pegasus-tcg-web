@@ -25,6 +25,7 @@ import {
   type SortChoice,
 } from "../orders.format";
 import type { SellerOrderCounts } from "../orders.types";
+import { useTranslate } from "@/lib/i18n";
 
 /** พิมพ์หยุดนานเท่านี้ค่อยค้น ไม่ยิงทุกตัวอักษร */
 const SEARCH_DELAY_MS = 400;
@@ -49,6 +50,7 @@ export function OrderFilterBar({
   sort,
   onSortChange,
 }: OrderFilterBarProps) {
+  const { t } = useTranslate("seller");
   const [text, setText] = useState(search);
   const [syncedSearch, setSyncedSearch] = useState(search);
   const timer = useRef<number | undefined>(undefined);
@@ -106,8 +108,8 @@ export function OrderFilterBar({
           </InputGroupAddon>
           <InputGroupInput
             type="search"
-            aria-label="ค้นหาคำสั่งซื้อ"
-            placeholder="เลขออเดอร์ หรือชื่อผู้ซื้อ"
+            aria-label={t("orders.filter.search", "ค้นหาคำสั่งซื้อ")}
+            placeholder={t("orders.filter.searchPlaceholder", "เลขออเดอร์ หรือชื่อผู้ซื้อ")}
             value={text}
             onChange={(event) => handleSearchInput(event.target.value)}
             onKeyDown={(event) => {
@@ -124,7 +126,7 @@ export function OrderFilterBar({
           }}
         >
           <SelectTrigger
-            aria-label="เรียงลำดับ"
+            aria-label={t("orders.filter.sort", "เรียงลำดับ")}
             className="h-8 w-48 rounded-lg border-input bg-background text-sm"
           >
             <SelectValue />

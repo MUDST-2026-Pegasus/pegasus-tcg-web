@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 import type { LowStock, StockSeverity } from "../dashboard.types";
 import { ProductThumbnail } from "./ProductThumbnail";
+import { useTranslate } from "@/lib/i18n";
 
 const PILL_COLOR: Record<StockSeverity, string> = {
   critical: "bg-[#fdecea] text-[#d0342c]",
@@ -15,6 +16,7 @@ const PILL_COLOR: Record<StockSeverity, string> = {
 
 /** แต่ละแถวพาไปหน้าเติมสต็อกของประกาศนั้นตรง ๆ */
 export function LowStockCard({ title, subtitle, count, items, actionLabel, actionTo, emptyLabel }: LowStock) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0 lg:w-80">
       <div className="flex items-start justify-between gap-2 px-5 pt-4 pb-3.5">
@@ -24,7 +26,7 @@ export function LowStockCard({ title, subtitle, count, items, actionLabel, actio
         </div>
         {count > 0 && (
           <Badge className="h-auto shrink-0 rounded-full bg-[#fdf0dd] px-2 py-[3px] text-xs text-[#b45309]">
-            {count} รายการ
+            {t("dashboard.lowStock.count", "{count} รายการ", { count })}
           </Badge>
         )}
       </div>

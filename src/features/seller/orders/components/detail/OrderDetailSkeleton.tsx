@@ -1,9 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslate } from "@/lib/i18n";
 
 /** วางตรงกับ OrderDetailContent — หัว, คอลัมน์ซ้าย 3 การ์ด, คอลัมน์ขวา 3 การ์ด */
 export function OrderDetailSkeleton() {
+  const { t } = useTranslate("seller");
   return (
-    <div className="flex flex-col gap-5" aria-busy="true" aria-label="กำลังโหลดคำสั่งซื้อ">
+    <div className="flex flex-col gap-5" aria-busy="true" aria-label={t("orders.loading", "กำลังโหลดคำสั่งซื้อ")}>
       <Skeleton className="h-3 w-64" />
       <div className="flex flex-col gap-2">
         <Skeleton className="h-8 w-72" />

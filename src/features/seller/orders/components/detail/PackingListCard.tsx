@@ -7,6 +7,7 @@ import { formatBaht } from "@/features/seller/shared/seller.format";
 
 import { itemMeta } from "../../orders.format";
 import type { OrderItem } from "../../orders.types";
+import { useTranslate } from "@/lib/i18n";
 
 type PackingListCardProps = {
   title: string;
@@ -27,6 +28,7 @@ export function PackingListCard({
   packedIds,
   onTogglePacked,
 }: PackingListCardProps) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2 px-5 pt-4 pb-3.5">
@@ -46,7 +48,7 @@ export function PackingListCard({
               <Checkbox
                 checked={packedIds.includes(item.id)}
                 onCheckedChange={() => onTogglePacked(item.id)}
-                aria-label={`แพ็คแล้ว: ${item.productName}`}
+                aria-label={t("orderDetail.items.packed", "แพ็คแล้ว: {name}", { name: item.productName })}
               />
             ) : null}
 

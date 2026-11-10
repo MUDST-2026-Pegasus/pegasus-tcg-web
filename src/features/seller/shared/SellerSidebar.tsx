@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useSellerNav } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 const NAV_ACTIVE =
   "data-active:bg-[#e6f4f2] data-active:font-medium data-active:text-teal-600 data-active:hover:bg-[#e6f4f2] data-active:hover:text-teal-600";
@@ -26,6 +27,7 @@ const NAV_HOVER = "hover:bg-secondary hover:text-gray-700";
  * แยกจาก AppSidebar ของ admin ตรง ๆ เพื่อให้ปรับหน้าตาได้อิสระโดยไม่ต้องกังวลเรื่องผลกระทบข้ามฝั่ง
  */
 export function SellerSidebar() {
+  const { t } = useTranslate("seller");
   const { isMobile } = useSidebar();
   const sellerNav = useSellerNav();
 
@@ -37,7 +39,7 @@ export function SellerSidebar() {
       <div className="sticky top-[var(--navbar-h,75px)] flex h-full max-h-[calc(100svh-var(--navbar-h,75px))] flex-col px-3 py-4">
         <SidebarHeader className="gap-0 px-0.5 pt-1 pb-4">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-bold text-primary">DASHBOARD</span>
+            <span className="text-base font-bold text-primary">{t("sidebar.title", "DASHBOARD")}</span>
             <Badge className="h-5 rounded-[5px] bg-teal-600 px-2 py-0.5 text-[9px] leading-4 font-medium text-white">
               SELLER
             </Badge>

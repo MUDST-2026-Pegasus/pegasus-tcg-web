@@ -261,5 +261,9 @@
     "remove": "ลบ {name}",
     "uploaded": "อัปโหลดแล้ว · {size}",
     "uploading": "กำลังอัปโหลด {name}"
+  },
+  "carriers": {
+    "thailandPostEms": "ไปรษณีย์ไทย EMS",
+    "thailandPostRegistered": "ไปรษณีย์ไทย ลงทะเบียน"
   }
 }
