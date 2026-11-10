@@ -60,11 +60,18 @@ Copy these from [`.env.example`](.env.example). Values beginning with `VITE_` ar
 | `pnpm preview --port 5173` | Serve the production build locally (also the URL expected by Cypress). |
 | `pnpm lint` | Check the code with ESLint. |
 | `pnpm test` | Run all Vitest tests once. |
-| `pnpm test:unit` | Run Vitest excluding integration tests. |
-| `pnpm test:integration` | Run integration tests. |
+| `pnpm test:unit` | Run Vitest excluding integration tests (writes JUnit report to `test-results/unit.xml`). |
+| `pnpm test:integration` | Run integration tests (writes JUnit report to `test-results/integration.xml`). |
+| `pnpm test:coverage` | Run Vitest with v8 coverage (writes reports to `coverage/`). |
 | `pnpm test:watch` | Run Vitest in watch mode. |
 | `pnpm cyopen` | Open the Cypress test runner. |
 | `pnpm cyrun` | Run Cypress headlessly. |
+
+### Test results & coverage in CI
+
+- **Pull Requests:** Every PR to `develop` or `main` gets sticky comments summarizing **FE Unit + Integration** test counts (passed / failed / skipped) and a **Vitest Coverage** report (Lines, Statements, Functions, Branches, plus changed files).
+- **GitHub Actions Job Summary:** Each workflow run in **CI** (`quality` job) and **Cypress E2E Tests** (`e2e-cypress.yml`) publishes test result tables and coverage summaries directly to the run's **Summary** tab (including scheduled/nightly or push runs where there is no PR).
+- **Local inspection:** Run `pnpm test:unit --coverage` or `pnpm test:coverage` locally to view the text summary in the terminal, open `coverage/index.html` for the interactive HTML coverage report, or open `test-results/html/index.html` for the Vitest HTML test report.
 
 Cypress expects the app at `http://localhost:5173`. Start `pnpm dev` in one terminal, then run `pnpm cyrun` in another. If the Cypress binary is missing, run `pnpm exec cypress install` first. The E2E workflow in `.github/workflows/e2e-cypress.yml` builds the app and starts a preview server before running Cypress.
 

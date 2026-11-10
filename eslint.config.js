@@ -29,7 +29,7 @@ const T_CALL = "CallExpression[callee.name=/^(t|errorText|errorMessage|msg|trans
 const thaiMessage = 'ข้อความไทย hardcode — ใช้ t("<page>.<section>.<element>", "ข้อความเดิม") (ดู CONTRIBUTING: ข้อความ / หลายภาษา)'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'coverage', 'test-results', '.vitest']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

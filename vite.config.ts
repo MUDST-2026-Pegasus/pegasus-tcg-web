@@ -45,7 +45,21 @@ export default defineConfig(() => {
       reporters: ['default', 'junit', 'html'],
       outputFile: {
         junit: './test-results/junit.xml',
-        html: './test-results/html/index.html'
+        html: './test-results/html/index.html',
+      },
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json-summary', 'json', 'html'],
+        reportsDirectory: './coverage',
+        include: ['src/**/*.{ts,tsx}'],
+        exclude: [
+          'src/test/**',
+          'src/**/*.test.{ts,tsx}',
+          'src/**/*.spec.{ts,tsx}',
+          'src/**/*.d.ts',
+          'src/main.tsx',
+          'src/setupTests.ts',
+        ],
       },
     },
   };
