@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 import { publishBlockedReason } from "./seller.format";
 import type { SellerProfile } from "./seller.types";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const TONE_CLASS = {
   danger: "border-red-200 bg-red-50 text-red-700",
@@ -60,6 +60,7 @@ type SellerStatusBannerProps = {
  * ร้านปกติไม่มีแถบอะไรเลย
  */
 export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
+  const { t } = useTranslate("seller");
   const { data, isError, error, refetch, isRefetching } = profile;
   const banners: ReactNode[] = [];
 
@@ -69,7 +70,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         key="error"
         tone="warning"
         icon={TriangleAlert}
-        title="โหลดสถานะร้านไม่สำเร็จ"
+        title={t("banner.loadFailed", "โหลดสถานะร้านไม่สำเร็จ")}
         action={
           <Button
             variant="outline"
@@ -78,11 +79,11 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
             disabled={isRefetching}
             onClick={() => void refetch()}
           >
-            ลองใหม่
+            {t("actions.retry", "ลองใหม่", { ns: "common" })}
           </Button>
         }
       >
-        {translateError(error, "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง")}
+        {translateError(error, t("banner.checkConnection", "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง"))}
       </Banner>,
     );
   }
@@ -93,11 +94,10 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         key="suspended"
         tone="danger"
         icon={OctagonX}
-        title="ร้านของคุณถูกระงับ"
+        title={t("banner.suspended.title", "ร้านของคุณถูกระงับ")}
       >
-        {data.suspendedReason ? <>เหตุผล: {data.suspendedReason} · </> : null}
-        ประกาศทั้งหมดถูกซ่อนจากผู้ซื้อ
-        และลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ
+        {data.suspendedReason ? <>{t("banner.suspended.reason", "เหตุผล: {reason} · ", { reason: data.suspendedReason })}</> : null}
+        {t("banner.suspended.description", "ประกาศทั้งหมดถูกซ่อนจากผู้ซื้อ และลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ")}
       </Banner>,
     );
   } else if (data !== undefined && !data?.canPublish) {
@@ -106,7 +106,7 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         key="unverified"
         tone="warning"
         icon={TriangleAlert}
-        title="ยังลงขายไม่ได้"
+        title={t("banner.cannotPublish", "ยังลงขายไม่ได้")}
       >
         {publishBlockedReason(data)}
       </Banner>,
@@ -119,10 +119,9 @@ export function SellerStatusBanner({ profile }: SellerStatusBannerProps) {
         key="vacation"
         tone="info"
         icon={Palmtree}
-        title="โหมดพักร้อนเปิดอยู่"
+        title={t("banner.vacation.title", "โหมดพักร้อนเปิดอยู่")}
       >
-        ผู้ซื้อจะไม่เห็นประกาศของคุณทุกใบจนกว่าจะปิดโหมดพักร้อน
-        สถานะของแต่ละประกาศไม่เปลี่ยน
+        {t("banner.vacation.description", "ผู้ซื้อจะไม่เห็นประกาศของคุณทุกใบจนกว่าจะปิดโหมดพักร้อน สถานะของแต่ละประกาศไม่เปลี่ยน")}
       </Banner>,
     );
   }

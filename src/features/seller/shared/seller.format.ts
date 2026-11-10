@@ -2,7 +2,7 @@ import { initialsOf } from "@/features/account/account.format";
 import type { AuthUser } from "@/features/auth/auth.types";
 
 import type { SellerProfile, SellerStatus } from "./seller.types";
-import { numberFormat } from "@/lib/i18n";
+import { numberFormat, translate } from "@/lib/i18n";
 
 const bahtWhole = numberFormat({ maximumFractionDigits: 0 });
 const bahtSatang = numberFormat({
@@ -16,7 +16,7 @@ const bahtSatang = numberFormat({
  */
 export function formatBaht(amount: number): string {
   const formatter = Number.isInteger(amount) ? bahtWhole : bahtSatang;
-  return `฿${formatter.format(amount)}`;
+  return `฿${formatter.format(amount)}`; // eslint-disable-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน ไม่ใช่ข้อความ
 }
 
 /**
@@ -44,11 +44,11 @@ export function toSellerIdentity(user: AuthUser | null): SellerIdentity {
 
 /** บรรทัดใต้ชื่อใน sidebar — บอกสถานะร้านจริงจาก `/sellers/me` */
 export const SELLER_STATUS_LABEL: Record<SellerStatus, string> = {
-  NOT_APPLIED: "ยังไม่ได้สมัครเป็นผู้ขาย",
-  PENDING: "รอตรวจเอกสารยืนยันตัวตน",
-  VERIFIED: "ผู้ขายที่ยืนยันแล้ว",
-  REJECTED: "ยืนยันตัวตนไม่ผ่าน",
-  SUSPENDED: "ร้านถูกระงับ",
+  get NOT_APPLIED() { return translate("seller", "sellerStatus.NOT_APPLIED", "ยังไม่ได้สมัครเป็นผู้ขาย"); },
+  get PENDING() { return translate("seller", "sellerStatus.PENDING", "รอตรวจเอกสารยืนยันตัวตน"); },
+  get VERIFIED() { return translate("seller", "sellerStatus.VERIFIED", "ผู้ขายที่ยืนยันแล้ว"); },
+  get REJECTED() { return translate("seller", "sellerStatus.REJECTED", "ยืนยันตัวตนไม่ผ่าน"); },
+  get SUSPENDED() { return translate("seller", "sellerStatus.SUSPENDED", "ร้านถูกระงับ"); },
 };
 
 /**
@@ -65,12 +65,23 @@ export function publishBlockedReason(
   }
   switch (profile?.status) {
     case "SUSPENDED":
-      return "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ";
+      return translate("seller", "publishBlocked.suspended", "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ");
     case "PENDING":
-      return "รอแอดมินตรวจเอกสารยืนยันตัวตน ลงขายได้หลังได้รับอนุมัติ";
+      return translate("seller", "publishBlocked.pending", "รอแอดมินตรวจเอกสารยืนยันตัวตน ลงขายได้หลังได้รับอนุมัติ");
     case "REJECTED":
-      return "เอกสารยืนยันตัวตนไม่ผ่าน ต้องยื่นใหม่และได้รับอนุมัติก่อนจึงจะลงขายได้";
+      return translate("seller", "publishBlocked.rejected", "เอกสารยืนยันตัวตนไม่ผ่าน ต้องยื่นใหม่และได้รับอนุมัติก่อนจึงจะลงขายได้");
     default:
-      return "ต้องยืนยันตัวตนผู้ขายก่อนจึงจะลงขายได้";
+      return translate("seller", "publishBlocked.notVerified", "ต้องยืนยันตัวตนผู้ขายก่อนจึงจะลงขายได้");
   }
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-554]
+// @tolgee-key {"key": "sellerStatus.NOT_APPLIED", "ns": "seller", "defaultValue": "ยังไม่ได้สมัครเป็นผู้ขาย"}
+// @tolgee-key {"key": "sellerStatus.PENDING", "ns": "seller", "defaultValue": "รอตรวจเอกสารยืนยันตัวตน"}
+// @tolgee-key {"key": "sellerStatus.VERIFIED", "ns": "seller", "defaultValue": "ผู้ขายที่ยืนยันแล้ว"}
+// @tolgee-key {"key": "sellerStatus.REJECTED", "ns": "seller", "defaultValue": "ยืนยันตัวตนไม่ผ่าน"}
+// @tolgee-key {"key": "sellerStatus.SUSPENDED", "ns": "seller", "defaultValue": "ร้านถูกระงับ"}
+// @tolgee-key {"key": "publishBlocked.suspended", "ns": "seller", "defaultValue": "ร้านถูกระงับ ลงขายหรือแก้ประกาศไม่ได้จนกว่าแอดมินจะยกเลิกการระงับ"}
+// @tolgee-key {"key": "publishBlocked.pending", "ns": "seller", "defaultValue": "รอแอดมินตรวจเอกสารยืนยันตัวตน ลงขายได้หลังได้รับอนุมัติ"}
+// @tolgee-key {"key": "publishBlocked.rejected", "ns": "seller", "defaultValue": "เอกสารยืนยันตัวตนไม่ผ่าน ต้องยื่นใหม่และได้รับอนุมัติก่อนจึงจะลงขายได้"}
+// @tolgee-key {"key": "publishBlocked.notVerified", "ns": "seller", "defaultValue": "ต้องยืนยันตัวตนผู้ขายก่อนจึงจะลงขายได้"}

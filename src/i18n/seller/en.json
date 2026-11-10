@@ -1,1 +1,672 @@
-{}
+{
+  "application": {
+    "bankBook": {
+      "change": "Change file",
+      "choose": "Choose file",
+      "drop": "Drag an image here or click to choose a file",
+      "dropHint": "A screenshot of your banking app works too — no physical passbook needed",
+      "label": "Passbook page or banking app screenshot *",
+      "mustShow": "The image must clearly show",
+      "previewAlt": "Preview of the selected image",
+      "redactHint": "You may cover or cross out any unrelated information",
+      "remove": "Remove file",
+      "requirement": {
+        "accountName": "Account name (matching the name above)",
+        "accountNumber": "Account number",
+        "bankName": "Bank name or logo"
+      },
+      "uploaded": "Uploaded · {size}",
+      "uploading": "Uploading passbook image"
+    },
+    "banks": {
+      "BAAC": "Bank for Agriculture and Agricultural Cooperatives",
+      "BAY": "Bank of Ayudhya (Krungsri)",
+      "BBL": "Bangkok Bank",
+      "CIMBT": "CIMB Thai Bank",
+      "GHB": "Government Housing Bank",
+      "GSB": "Government Savings Bank",
+      "IBANK": "Islamic Bank of Thailand",
+      "ICBCT": "ICBC (Thai)",
+      "KBANK": "Kasikornbank",
+      "KKP": "Kiatnakin Phatra Bank",
+      "KTB": "Krungthai Bank",
+      "LHB": "Land and Houses Bank",
+      "SCB": "Siam Commercial Bank",
+      "TISCO": "TISCO Bank",
+      "TTB": "TMBThanachart Bank",
+      "UOBT": "UOB Thailand"
+    },
+    "details": {
+      "accountNumber": "Account number",
+      "bank": "Bank",
+      "edit": "Request changes",
+      "legalName": "Legal full name",
+      "title": "Submitted details"
+    },
+    "duration": "Takes less than 2 minutes",
+    "form": {
+      "acceptTerms": "I confirm that the information and documents submitted are true, and I accept the PEGASUS seller terms and privacy policy",
+      "accountHint": "Must be your own savings or current account",
+      "accountNumber": "Account number *",
+      "accountPlaceholder": "e.g. 123-4-56789-0",
+      "accountTaken": "This account number is already used by another seller",
+      "autosave": "Your draft is saved automatically",
+      "back": "Back",
+      "bank": "Bank *",
+      "bankHint": "All banks in Thailand are supported",
+      "bankPlaceholder": "Select a bank",
+      "firstName": "First name *",
+      "firstNameHint": "Spell it as shown in your passbook, without a title",
+      "firstNamePlaceholder": "Nattapong",
+      "imageInvalid": "The attached image can't be used. Please upload a new one",
+      "lastName": "Last name *",
+      "lastNameHint": "Must match the bank account name below",
+      "lastNamePlaceholder": "Pongsuwan",
+      "nameMatchWarning": "The bank account name must match the first and last name above, otherwise the application will be rejected",
+      "ownerHint": "Buyers will not see this information",
+      "ownerSection": "Account holder's legal name",
+      "payoutHint": "Used to transfer your sales to you",
+      "payoutSection": "Payout account",
+      "privacy": "Bank account details are encrypted and visible only to the review team. Buyers only see your shop name",
+      "rejectedHint": "Please check your details and submit again",
+      "rejectedTitle": "Your previous application was not approved",
+      "resubmit": "Resubmit account verification",
+      "submit": "Submit application",
+      "submitFailed": "Couldn't submit the application. Please try again",
+      "submitting": "Submitting…",
+      "uploading": "Uploading image…"
+    },
+    "loading": "Loading application",
+    "progress": {
+      "approved": "Approved",
+      "approvedAt": "Approved {date}",
+      "open": "Open your shop and start selling right away",
+      "relogin": "Sign out and sign in again to start using the seller center",
+      "review": "Name and bank account review",
+      "reviewHint": "Usually takes no more than 1 business day",
+      "reviewing": "In review",
+      "submitted": "Application submitted",
+      "title": "Application status",
+      "waiting": "Waiting for review"
+    },
+    "status": {
+      "home": "Back to home",
+      "mismatchHint": "If the account name doesn't match the name you entered, our team will email you to fix just that part — no need to reapply",
+      "view": "View application status"
+    },
+    "subtitle": "Just enter your legal name and payout account, then our team will review it within 1 business day",
+    "summary": {
+      "approvedAt": "Approved on",
+      "approvedTitle": "Your application has been approved",
+      "expected": "Expected result",
+      "expectedBy": "By {date}",
+      "number": "Application number",
+      "relogin": "Sign out and sign in again to start using the seller center",
+      "submittedAt": "Submitted on",
+      "submittedDescription": "We've received your legal name and payout account. Our team will review it and email you the result within 1 business day",
+      "submittedTitle": "Application submitted"
+    },
+    "title": "Become a seller",
+    "validation": {
+      "acceptTerms": "Please confirm your details and accept the terms before submitting",
+      "accountChars": "Only digits, hyphens (-) and spaces are allowed",
+      "accountMinDigits": "The account number must have at least 10 digits",
+      "accountRequired": "Please enter the account number",
+      "accountTooLong": "The account number is too long",
+      "bankBookRequired": "Please attach a passbook page or banking app screenshot",
+      "bankRequired": "Please select a bank",
+      "firstNameRequired": "Please enter your first name",
+      "firstNameTooLong": "First name can be at most 100 characters",
+      "lastNameRequired": "Please enter your last name",
+      "lastNameTooLong": "Last name can be at most 100 characters"
+    }
+  },
+  "banner": {
+    "cannotPublish": "You can't list items yet",
+    "checkConnection": "Check your connection and try again",
+    "loadFailed": "Couldn't load shop status",
+    "suspended": {
+      "description": "All listings are hidden from buyers, and you can't create or edit listings until an admin lifts the suspension",
+      "reason": "Reason: {reason} ·",
+      "title": "Your shop is suspended"
+    },
+    "vacation": {
+      "description": "Buyers won't see any of your listings until you turn off vacation mode. Each listing's status stays the same",
+      "title": "Vacation mode is on"
+    }
+  },
+  "dashboard": {
+    "actions": {
+      "createListing": "+ New listing",
+      "viewShop": "View shop"
+    },
+    "auctions": {
+      "awaitingPayment": "Awaiting winner payment",
+      "dueIn": "Due in {hours} h",
+      "live": "Live auctions",
+      "withBids": "{count} with bids"
+    },
+    "delta": {
+      "new": "New"
+    },
+    "greeting": "Hello, {name} 👋",
+    "loadFailed": "Couldn't load the dashboard",
+    "loading": "Loading dashboard",
+    "lowStock": {
+      "count": "{count} items",
+      "empty": "All items are well stocked",
+      "manage": "Go to product management",
+      "remaining": "{count} left",
+      "subtitle": "Listings with {count} or fewer left · lowest first",
+      "title": "Low stock",
+      "viewAll": "View all {count} items"
+    },
+    "productImageAlt": "Product image {name}",
+    "recentOrders": {
+      "empty": "No orders yet",
+      "item": "{name} · {count} pcs",
+      "product": "Product",
+      "title": "Recent orders",
+      "viewAll": "View all"
+    },
+    "sales": {
+      "description": "From {count} orders · average {average} per order",
+      "empty": "No paid orders this month yet",
+      "label": "{month} sales (excluding shipping)",
+      "monthly": "Monthly sales"
+    },
+    "stats": {
+      "escrow": {
+        "footnote": "Released when the buyer confirms receipt",
+        "label": "Pending release"
+      },
+      "listings": {
+        "label": "Active listings",
+        "none": "No new listings this month",
+        "thisMonth": "+{count} this month"
+      },
+      "rating": {
+        "count": "from {count} reviews",
+        "label": "Shop rating",
+        "none": "No reviews yet"
+      },
+      "withdrawable": {
+        "footnote": "Excludes withdrawals in progress",
+        "label": "Available to withdraw"
+      }
+    },
+    "subtitle": "Your shop overview · {date}",
+    "todo": {
+      "empty": "Nothing pending — your shop is all caught up",
+      "none": "Nothing pending",
+      "pack": {
+        "description": "{count} orders awaiting shipment",
+        "title": "Pack and ship orders"
+      },
+      "payment": {
+        "description": "{count} orders · cancelled automatically if not paid in time",
+        "title": "Orders awaiting buyer payment"
+      },
+      "pending": "{count} items pending",
+      "restock": {
+        "description": "{count} items with {threshold} or fewer cards left",
+        "title": "Restock low-stock items"
+      },
+      "returns": {
+        "description": "{count} requests awaiting your decision",
+        "title": "Respond to return requests"
+      },
+      "reviews": {
+        "description": "{count} reviews without a reply",
+        "title": "Reply to reviews"
+      },
+      "title": "To do today"
+    }
+  },
+  "logout": {
+    "title": "Sign out"
+  },
+  "orderDetail": {
+    "backToOrders": "Back to order management",
+    "buyer": {
+      "new": "New customer of your shop",
+      "note": "Note from buyer: {note}",
+      "orderCount": "Bought from your shop {count} times",
+      "title": "Buyer",
+      "viewProfile": "View buyer profile"
+    },
+    "buyerShipping": {
+      "eta": "· Buyer expects delivery in {days} days",
+      "paid": "Buyer paid {fee} shipping",
+      "title": "Buyer's shipping choice"
+    },
+    "cancel": {
+      "confirm": "Confirm cancellation",
+      "description": "Cards in this order will be listed for sale again immediately — this can't be undone",
+      "descriptionPaid": "Cards in this order will be listed for sale again immediately and the buyer will be refunded — this can't be undone",
+      "dialogTitle": "Cancel order {orderNumber}",
+      "failed": "Couldn't cancel. Please try again",
+      "keep": "Keep order",
+      "reason": "Cancellation reason",
+      "reasonPlaceholder": "e.g. The card was damaged while packing. Sorry for the inconvenience",
+      "success": "Order cancelled",
+      "title": "Cancel order"
+    },
+    "items": {
+      "count": "{pieces} cards · {lines} items",
+      "packed": "Packed: {name}",
+      "title": "Items",
+      "toPack": "Items to pack"
+    },
+    "money": {
+      "commission": "Commission {rate}% of {base}",
+      "customerPaid": "Customer paid",
+      "items": "Items subtotal",
+      "platformDiscount": "Pegasus discount subsidy",
+      "platformNote": "Pegasus codes don't reduce your shop's income — this amount is transferred to your shop wallet when funds are released",
+      "sellerReceives": "Shop receives",
+      "shipping": "Shipping",
+      "shippingWithCarrier": "Shipping · {carrier}",
+      "title": "Order amount"
+    },
+    "next": {
+      "cancelled": "{ordered} · Order cancelled",
+      "completed": "{ordered} · Buyer received the items, funds released to your shop",
+      "ordered": "Ordered {ago}",
+      "pendingPayment": "{ordered} · Awaiting buyer payment, cancelled automatically if not paid in time",
+      "refunded": "{ordered} · Buyer refunded",
+      "returned": "{ordered} · Shop received the return, awaiting refund decision",
+      "returnRequested": "{ordered} · Buyer requested a return, respond on the return requests page",
+      "shipped": "{ordered} · Shipped, awaiting buyer confirmation",
+      "toShip": "{ordered} · {shipBy} to keep your shop rating"
+    },
+    "notFound": {
+      "description": "This order may not exist or doesn't belong to your shop",
+      "title": "Order {orderId} not found"
+    },
+    "payment": {
+      "title": "Payment"
+    },
+    "pdf": {
+      "failed": "Couldn't download the Order Summary",
+      "generating": "Generating PDF...",
+      "success": "Order Summary downloaded"
+    },
+    "profit": {
+      "title": "Profit from this order"
+    },
+    "returns": {
+      "respond": "Respond to return request",
+      "view": "View return request"
+    },
+    "shipping": {
+      "address": "Recipient address",
+      "carrierRequired": "Carrier *",
+      "copied": "Copied",
+      "copy": "Copy",
+      "hint": "Enter the tracking number and press \"Confirm shipment\" — the buyer will receive it automatically",
+      "title": "Shipping details",
+      "tracking": "Tracking number",
+      "trackingPlaceholder": "e.g. TH2408xxxx91",
+      "trackingRequired": "Tracking number *"
+    },
+    "subtitle": "Buyer order {orderNumber} · {note}",
+    "timeline": "Timeline"
+  },
+  "orders": {
+    "accept": {
+      "action": "Accept order",
+      "failed": "Couldn't accept the order",
+      "success": "Order accepted",
+      "successDescription": "{orderNumber} · Pack it and enter the tracking number"
+    },
+    "address": {
+      "none": "No shipping address",
+      "phone": "Tel. {phone}"
+    },
+    "ago": {
+      "days": "{days} days ago",
+      "hours": "{hours} h ago",
+      "justNow": "just now",
+      "minutes": "{minutes} min ago"
+    },
+    "cancel": {
+      "reasonRequired": "Enter a reason — the buyer will see this message",
+      "reasonTooLong": "The reason must be at most 255 characters"
+    },
+    "card": {
+      "address": "Shipping address",
+      "cancelReason": "Cancellation reason: {reason}",
+      "freeShipping": "Free shipping",
+      "orderedAgo": "· Ordered {ago}",
+      "packing": "Packing",
+      "shipping": "Shipping fee",
+      "shippingWithName": "Shipping fee · {name}",
+      "showItems": "Show items of {orderNumber}",
+      "viewDetail": "View order details"
+    },
+    "carrier": {
+      "buyerChose": "Buyer chose: {name} ({carrier})",
+      "unspecified": "No carrier specified"
+    },
+    "carrierHint": {
+      "differs": "Differs from the buyer's choice ({carrier}) — the buyer will see the carrier you confirm",
+      "matches": "Pre-selected from the buyer's choice · change it if you ship with another carrier",
+      "unset": "This option has no carrier — choose the carrier you actually use before confirming"
+    },
+    "condition": {
+      "sealed": "Sealed"
+    },
+    "confirmShip": {
+      "back": "Go back and edit",
+      "confirm": "Confirm shipment",
+      "description": "The tracking number will be sent to the buyer immediately. After confirming, the order can't be cancelled and the carrier or tracking number can't be changed",
+      "title": "Confirm shipment of {orderNumber}?"
+    },
+    "deadline": {
+      "near": "Due soon",
+      "overdue": "Past ship-by date",
+      "shipBy": "Ship by {date}"
+    },
+    "empty": {
+      "search": "No orders match \"{search}\"",
+      "searchHint": "Try searching by order number or the buyer's username",
+      "tab": "No orders in {tab}"
+    },
+    "errors": {
+      "forbidden": "This account isn't allowed to download shop documents",
+      "network": "Can't connect to the server. Please check your internet and try again",
+      "notFound": "This order wasn't found in your shop",
+      "pdfFailed": "Couldn't download the PDF. Please try again",
+      "pdfServer": "PDF generation failed. Please try again",
+      "sessionExpired": "Your session has expired. Please sign in and try again",
+      "statusChanged": "The order status has changed. Refresh and try again",
+      "underReview": "This order's payment slip is awaiting admin review. You can cancel after the review"
+    },
+    "filter": {
+      "search": "Search orders",
+      "searchPlaceholder": "Order number or buyer name",
+      "sort": "Sort"
+    },
+    "loadFailed": "Couldn't load orders",
+    "loading": "Loading order history",
+    "money": {
+      "net": "Net profit",
+      "salesWithShipping": "Sales (incl. shipping)"
+    },
+    "monthly": {
+      "commission": "Commission",
+      "cost": "Cost of goods",
+      "title": "This month's performance"
+    },
+    "pagination": {
+      "label": "Change page",
+      "page": " · Page {page} of {totalPages}",
+      "total": "{total} orders in total"
+    },
+    "paymentAmount": {
+      "AWAITING_VERIFICATION": "Amount reported (whole order)",
+      "PENDING": "Amount due (whole order)",
+      "SUCCEEDED": "Amount paid (whole order)"
+    },
+    "payment": {
+      "method": "Method",
+      "notPaid": "The buyer hasn't paid yet",
+      "paidAt": "Paid at",
+      "status": "Status"
+    },
+    "paymentMethod": {
+      "BANK_TRANSFER": "Bank transfer",
+      "CASH_ON_DELIVERY": "Cash on delivery",
+      "MOCK_GATEWAY": "Test gateway",
+      "WALLET": "Wallet"
+    },
+    "paymentState": {
+      "cancelled": "Cancelled",
+      "paid": "Paid",
+      "pending": "Awaiting payment",
+      "refunded": "Cancelled / refunded"
+    },
+    "paymentStatus": {
+      "AWAITING_VERIFICATION": "Awaiting slip review",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "FAILED": "Failed",
+      "PENDING": "Awaiting payment",
+      "SUCCEEDED": "Paid"
+    },
+    "profit": {
+      "commission": "− Commission",
+      "cost": "− Cost of goods"
+    },
+    "ship": {
+      "failed": "Couldn't confirm shipment",
+      "failedHint": "Check the tracking number and try again",
+      "success": "Shipment confirmed"
+    },
+    "shipping": {
+      "carrier": "Carrier",
+      "carrierPlaceholder": "Select a carrier",
+      "carrierPlaceholderShort": "Select carrier",
+      "tracking": "Tracking number",
+      "trackingFor": "Tracking number for {orderNumber}",
+      "trackingPlaceholder": "Enter tracking number"
+    },
+    "shippingSteps": {
+      "accept": "Accept the order so the buyer knows you've started packing",
+      "confirm": "Press confirm shipment",
+      "pack": "Pack cards in a top loader",
+      "photo": "Take a photo before sealing the box",
+      "title": "Shipping steps",
+      "tracking": "Enter the carrier and tracking number"
+    },
+    "sort": {
+      "default": "Sort: most urgent first",
+      "newest": "Sort: newest first",
+      "oldest": "Sort: oldest first",
+      "totalDesc": "Sort: total high to low"
+    },
+    "subtitle": {
+      "counting": "Counting orders…",
+      "summary": "{toPack} orders to pack · {shipping} in transit · ship on time to keep your shop rating"
+    },
+    "tabs": {
+      "awaiting_pack": "To pack",
+      "awaiting_payment": "Awaiting payment",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "returns": "Returns",
+      "shipped": "In transit"
+    },
+    "timeline": {
+      "accepted": "You accepted the order · packing started",
+      "cancelled": "Order cancelled",
+      "cancelledWithReason": "Order cancelled · {reason}",
+      "completed": "Buyer received the items · funds released to your shop",
+      "delivered": "Parcel delivered to buyer",
+      "inProgress": "In progress",
+      "ordered": "Buyer placed the order",
+      "paid": "Buyer paid",
+      "refunded": "Buyer refunded",
+      "returned": "Shop received the return",
+      "returnRequested": "Buyer requested a return",
+      "returnResolution": "Return request resolution",
+      "shipped": "Parcel shipped and tracking number entered",
+      "waiting": "Pending"
+    },
+    "tip": {
+      "description": "Ship by your shop's ship-by date. Funds reach your shop account when the buyer confirms receipt or the period after shipping ends",
+      "title": "Tip"
+    },
+    "title": "Manage orders",
+    "tryAgain": "Please try again"
+  },
+  "orderStatus": {
+    "CANCELLED": "Cancelled",
+    "COMPLETED": "Completed",
+    "DELIVERED": "Delivered",
+    "PAID": "To pack",
+    "PENDING_PAYMENT": "Awaiting payment",
+    "PREPARING": "Packing",
+    "REFUNDED": "Refunded",
+    "RETURNED": "Returned",
+    "RETURN_REQUESTED": "Return requested",
+    "SHIPPED": "Shipped"
+  },
+  "publishBlocked": {
+    "checking": "Checking shop status",
+    "loadFailed": "Couldn't load shop status",
+    "notVerified": "You need to verify your seller identity before listing items",
+    "pending": "Waiting for an admin to review your identity documents. You can list items once approved",
+    "rejected": "Your identity documents were not approved. Resubmit and get approved before listing items",
+    "suspended": "Your shop is suspended. You can't create or edit listings until an admin lifts the suspension"
+  },
+  "sellerStatus": {
+    "NOT_APPLIED": "Not yet applied as a seller",
+    "PENDING": "Identity documents under review",
+    "REJECTED": "Identity verification failed",
+    "SUSPENDED": "Shop suspended",
+    "VERIFIED": "Verified seller"
+  },
+  "shop": {
+    "loadFailed": "Couldn't load data",
+    "loading": "Loading",
+    "operations": {
+      "autoAccept": "Accept orders automatically",
+      "handlingDays": "Handling time (business days)",
+      "handlingDaysError": "Enter a whole number from 0–30 days",
+      "save": "Save settings",
+      "saved": "Settings saved",
+      "subtitle": "Set shop open/close status and handling time",
+      "title": "Shop operations",
+      "vacation": "Temporarily close shop",
+      "vacationConfirm": {
+        "confirm": "Close shop",
+        "description": "All items will be hidden once you save the settings. Paid orders still need to be shipped as usual",
+        "title": "Temporarily close shop?"
+      },
+      "vacationHint": "Hide all items and stop new orders · paid orders still need to be shipped as usual"
+    },
+    "preview": {
+      "authentic": "Authenticity guaranteed",
+      "handling": "Ships within {days} days",
+      "phone": "Phone number : {phone}",
+      "returns": "7-day returns",
+      "title": "Shop preview as buyers see it"
+    },
+    "profile": {
+      "avatar": "Shop profile picture",
+      "banner": "Shop banner",
+      "bannerAlt": "Shop banner {name}",
+      "bannerHint": "{hint} · Recommended 1920 × 480 px with key content centered",
+      "copyFailed": "Couldn't copy",
+      "copyLink": "Copy link",
+      "displayName": "Display name",
+      "link": "Shop link",
+      "linkCopied": "Link copied",
+      "linkHint": "Can't be edited because it's tied to your account username",
+      "noBanner": "No banner yet",
+      "pendingRemove": "Save to remove the image",
+      "phone": "Contact phone",
+      "phonePublic": "Show phone number on shop page",
+      "phonePublicOff": "Private · only you can see the phone number in your profile",
+      "phonePublicOn": "Public · shop visitors can see your phone number",
+      "remove": "Remove image",
+      "removeBanner": "Remove banner",
+      "save": "Save shop details",
+      "saved": "Shop details saved",
+      "subtitle": "Buyers see this on your shop page and everywhere your name appears",
+      "syncNote": "This uses the same details as your account profile — changes here also update your profile name and picture",
+      "title": "Shop details",
+      "unsaved": "New image not saved yet",
+      "uploadBanner": "Upload shop banner",
+      "uploading": "Uploading…",
+      "uploadNew": "Upload new image"
+    },
+    "saveFailed": "Couldn't save",
+    "shipping": {
+      "activate": "Enable {name}",
+      "add": "Add option",
+      "columns": {
+        "actions": "Actions",
+        "active": "Enabled",
+        "days": "Delivery time",
+        "fee": "Shipping fee",
+        "freeThreshold": "Free shipping from",
+        "name": "Name / carrier",
+        "order": "Order"
+      },
+      "days": "{days} days",
+      "daysMax": "Up to {max} days",
+      "daysMin": "From {min} days",
+      "daysRange": "{min}–{max} days",
+      "deactivate": "Disable {name}",
+      "dialog": {
+        "addTitle": "Add shipping option",
+        "description": "Set the shipping fee and delivery time buyers will see",
+        "editTitle": "Edit shipping option"
+      },
+      "edit": "Edit {name}",
+      "empty": "No shipping options yet",
+      "extraFee": "+ {fee} per additional card",
+      "form": {
+        "baseFee": "Base fee (THB)",
+        "carrier": "Carrier",
+        "daysMax": "Maximum delivery time (days)",
+        "daysMin": "Minimum delivery time (days)",
+        "freeThreshold": "Free shipping from (THB)",
+        "name": "Option name *",
+        "noCarrier": "Not specified",
+        "perItemFee": "Per additional card (THB)",
+        "save": "Save option"
+      },
+      "inactive": "Disabled",
+      "moveDown": "Move {name} down",
+      "moveUp": "Move {name} up",
+      "noExtraFee": "No extra charge per card",
+      "note": "Only verified shops (VERIFIED) can add new options · the eye icon disables an option; nothing is actually deleted",
+      "saved": "Shipping options saved",
+      "subtitle": "Buyers choose at checkout · shown in the order you set · disabled options are hidden from buyers",
+      "title": "Shipping options",
+      "toggleFailed": "Couldn't save the option"
+    },
+    "stats": {
+      "listings": "Items",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
+    "status": {
+      "active": "Shop is active",
+      "canPublish": "You can list items",
+      "submitVerification": "Submit identity documents",
+      "vacation": "Temporarily closed",
+      "vacationDescription": "Buyers won't see any of your items until you reopen the shop",
+      "verifiedAt": "Verified on {date}"
+    },
+    "subtitle": "Shop status, operations, shop details and shipping options",
+    "title": "Manage shop",
+    "validation": {
+      "daysOrder": "Maximum days can't be less than minimum days",
+      "minThreshold": "Minimum amount is 0.01 THB",
+      "nameRequired": "Please enter a name",
+      "twoDecimals": "Use at most 2 decimal places"
+    },
+    "verification": {
+      "bankAccount": "Bank account",
+      "bankAccountWith": "Bank account · {bank} {account}",
+      "bankBook": "Passbook page",
+      "legalName": "Full name as on ID card",
+      "status": {
+        "approved": "Verified",
+        "rejected": "Not verified",
+        "submitted": "Documents submitted",
+        "underReview": "In review"
+      },
+      "title": "Identity verification"
+    },
+    "viewShop": "View shop"
+  },
+  "sidebar": {
+    "title": "DASHBOARD"
+  }
+}

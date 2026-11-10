@@ -27,6 +27,7 @@ import { useCarrierPicker } from "../useCarrierPicker";
 
 import { CarrierHint } from "./CarrierHint";
 import { ConfirmShipDialog } from "./ConfirmShipDialog";
+import { useTranslate } from "@/lib/i18n";
 
 /** ตรงกับ `@Size(max = 64)` ของ `ShipOrderRequest.trackingNumber` */
 const TRACKING_MAX = 64;
@@ -42,6 +43,7 @@ type ShipmentFormProps = {
  * ยังไม่มีเลขพัสดุ = ยืนยันไม่ได้ ระบบส่งเลขให้ผู้ซื้อเองหลังยืนยัน
  */
 export function ShipmentForm({ orderId, orderNumber, shippingChoice = null }: ShipmentFormProps) {
+  const { t } = useTranslate("seller");
   const ship = useShipOrder();
   const [trackingNumber, setTrackingNumber] = useState("");
   const { carrier, setCarrier, match } = useCarrierPicker(shippingChoice);
@@ -63,14 +65,14 @@ export function ShipmentForm({ orderId, orderNumber, shippingChoice = null }: Sh
         onSuccess: () =>
           toast.add({
             type: "success",
-            title: "ยืนยันจัดส่งแล้ว",
+            title: t("orders.ship.success", "ยืนยันจัดส่งแล้ว"),
             description: `${orderNumber} · ${carrierLabel(carrier)} ${tracking}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "ยืนยันจัดส่งไม่สำเร็จ",
-            description: orderErrorMessage(error, "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง"),
+            title: t("orders.ship.failed", "ยืนยันจัดส่งไม่สำเร็จ"),
+            description: orderErrorMessage(error, t("orders.ship.failedHint", "ตรวจเลขพัสดุแล้วลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -86,8 +88,8 @@ export function ShipmentForm({ orderId, orderNumber, shippingChoice = null }: Sh
           value={trackingNumber}
           maxLength={TRACKING_MAX}
           onChange={(event) => setTrackingNumber(event.target.value)}
-          aria-label={`เลขพัสดุของ ${orderNumber}`}
-          placeholder="กรอกเลขพัสดุ"
+          aria-label={t("orders.shipping.trackingFor", "เลขพัสดุของ {orderNumber}", { orderNumber })}
+          placeholder={t("orders.shipping.trackingPlaceholder", "กรอกเลขพัสดุ")}
         />
       </InputGroup>
 
@@ -99,13 +101,13 @@ export function ShipmentForm({ orderId, orderNumber, shippingChoice = null }: Sh
         }}
       >
         <SelectTrigger
-          aria-label="เลือกขนส่ง"
+          aria-label={t("orders.shipping.carrierPlaceholderShort", "เลือกขนส่ง")}
           className={cn(
             "h-8 w-48 rounded-lg border-input bg-background text-sm",
             match === "differs" && "border-[#b45309]",
           )}
         >
-          <SelectValue placeholder="เลือกบริษัทขนส่ง" />
+          <SelectValue placeholder={t("orders.shipping.carrierPlaceholder", "เลือกบริษัทขนส่ง")} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -125,7 +127,7 @@ export function ShipmentForm({ orderId, orderNumber, shippingChoice = null }: Sh
         onClick={() => setConfirmOpen(true)}
       >
         {ship.isPending ? <Spinner /> : null}
-        ยืนยันจัดส่ง
+        {t("orders.confirmShip.confirm", "ยืนยันจัดส่ง")}
       </Button>
 
       {/* ปุ่มกดไม่ได้หรือขนส่งไม่ตรง ต้องบอกเหตุผล แต่ตอนตรงกันการ์ดไม่ต้องรก */}

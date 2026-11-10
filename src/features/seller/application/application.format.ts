@@ -10,6 +10,7 @@ export function formatThaiDate(value: string | Date): string {
 /** "14 ก.ย. 2569 · 10:24 น." */
 export function formatThaiDateTime(value: string | Date): string {
   const date = new Date(value);
+  // eslint-disable-next-line no-restricted-syntax -- คำต่อท้ายเวลาเฉพาะภาษาไทย
   return `${formatThaiDate(date)} · ${format(date, "HH:mm")}${currentLanguage() === "th" ? " น." : ""}`;
 }
 

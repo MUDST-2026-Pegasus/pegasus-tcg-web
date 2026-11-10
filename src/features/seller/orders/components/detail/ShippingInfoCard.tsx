@@ -22,6 +22,7 @@ import type { Shipment, ShippingChoice } from "../../orders.types";
 import { CarrierHint } from "../CarrierHint";
 
 import { BuyerShippingChoice } from "./BuyerShippingChoice";
+import { useTranslate } from "@/lib/i18n";
 
 /** ตรงกับ `@Size(max = 64)` ของ `ShipOrderRequest.trackingNumber` */
 const TRACKING_MAX = 64;
@@ -65,6 +66,7 @@ export function ShippingInfoCard({
   trackingNumber,
   onTrackingNumberChange,
 }: ShippingInfoCardProps) {
+  const { t } = useTranslate("seller");
   const [copied, setCopied] = useState(false);
   const carrierId = useId();
   const trackingId = useId();
@@ -81,14 +83,14 @@ export function ShippingInfoCard({
 
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-base font-semibold text-foreground">ข้อมูลการจัดส่ง</p>
+      <p className="text-base font-semibold text-foreground">{t("orderDetail.shipping.title", "ข้อมูลการจัดส่ง")}</p>
 
       <div className="flex flex-col gap-2 rounded-[10px] border border-muted bg-neutral-50 p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <UserIcon aria-hidden="true" className="size-4 text-slate-500" />
             <p className="text-xs font-semibold text-gray-700">
-              ที่อยู่ผู้รับ
+              {t("orderDetail.shipping.address", "ที่อยู่ผู้รับ")}
             </p>
           </div>
 
@@ -99,7 +101,7 @@ export function ShippingInfoCard({
             className="h-auto gap-1.5 rounded-md px-1.5 py-0.5 text-xs font-medium text-teal-600 hover:bg-[#e6f4f2] hover:text-teal-600"
           >
             {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
-            <span aria-live="polite">{copied ? "คัดลอกแล้ว" : "คัดลอก"}</span>
+            <span aria-live="polite">{copied ? t("orderDetail.shipping.copied", "คัดลอกแล้ว") : t("orderDetail.shipping.copy", "คัดลอก")}</span>
           </Button>
         </div>
 
@@ -117,7 +119,7 @@ export function ShippingInfoCard({
           <div className="flex flex-col gap-3.5 sm:flex-row">
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor={carrierId} className={LABEL_CLASS}>
-                บริษัทขนส่ง *
+                {t("orderDetail.shipping.carrierRequired", "บริษัทขนส่ง *")}
               </Label>
               <Select
                 items={CARRIER_OPTIONS}
@@ -128,7 +130,7 @@ export function ShippingInfoCard({
                   id={carrierId}
                   className={cn(`${FIELD_CLASS} w-full`, carrierMatch === "differs" && "border-[#b45309]")}
                 >
-                  <SelectValue placeholder="เลือกบริษัทขนส่ง" />
+                  <SelectValue placeholder={t("orders.shipping.carrierPlaceholder", "เลือกบริษัทขนส่ง")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -145,7 +147,7 @@ export function ShippingInfoCard({
 
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor={trackingId} className={LABEL_CLASS}>
-                เลขพัสดุ (Tracking Number) *
+                {t("orderDetail.shipping.trackingRequired", "เลขพัสดุ (Tracking Number) *")}
               </Label>
               <Input
                 id={trackingId}
@@ -153,7 +155,7 @@ export function ShippingInfoCard({
                 maxLength={TRACKING_MAX}
                 value={trackingNumber}
                 onChange={(event) => onTrackingNumberChange(event.target.value)}
-                placeholder="เช่น TH2408xxxx91"
+                placeholder={t("orderDetail.shipping.trackingPlaceholder", "เช่น TH2408xxxx91")}
                 className={`${FIELD_CLASS} px-2.5`}
               />
             </div>
@@ -166,7 +168,7 @@ export function ShippingInfoCard({
             />
             <p className="flex-1 text-xs leading-4 text-[#b45309]">
               {shipByLabel ? `${shipByLabel} · ` : ""}
-              กรอกเลขพัสดุแล้วกด "ยืนยันจัดส่ง" ระบบจะส่งเลขให้ผู้ซื้ออัตโนมัติ
+              {t("orderDetail.shipping.hint", "กรอกเลขพัสดุแล้วกด \"ยืนยันจัดส่ง\" ระบบจะส่งเลขให้ผู้ซื้ออัตโนมัติ")}
             </p>
           </div>
         </>
@@ -176,7 +178,7 @@ export function ShippingInfoCard({
         <div className="flex flex-col gap-3.5 sm:flex-row">
           <div className="flex flex-1 flex-col gap-1.5">
             <Label htmlFor={carrierId} className={LABEL_CLASS}>
-              บริษัทขนส่ง
+              {t("orders.shipping.carrier", "บริษัทขนส่ง")}
             </Label>
             <Input
               id={carrierId}
@@ -187,7 +189,7 @@ export function ShippingInfoCard({
           </div>
           <div className="flex flex-1 flex-col gap-1.5">
             <Label htmlFor={trackingId} className={LABEL_CLASS}>
-              เลขพัสดุ (Tracking Number)
+              {t("orderDetail.shipping.tracking", "เลขพัสดุ (Tracking Number)")}
             </Label>
             <Input
               id={trackingId}

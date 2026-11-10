@@ -1,4 +1,5 @@
 import { ConfirmDialog } from "@/components/common";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmShipDialogProps = {
   open: boolean;
@@ -28,14 +29,15 @@ export function ConfirmShipDialog({
   buyerChoiceNote,
   onConfirm,
 }: ConfirmShipDialogProps) {
+  const { t } = useTranslate("seller");
   return (
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={`ยืนยันจัดส่ง ${orderNumber}?`}
-      description="ระบบจะส่งเลขพัสดุนี้ให้ผู้ซื้อทันที หลังยืนยันแล้วยกเลิกคำสั่งซื้อไม่ได้ และแก้ขนส่งหรือเลขพัสดุไม่ได้"
-      confirmLabel="ยืนยันจัดส่ง"
-      cancelLabel="กลับไปแก้"
+      title={t("orders.confirmShip.title", "ยืนยันจัดส่ง {orderNumber}?", { orderNumber })}
+      description={t("orders.confirmShip.description", "ระบบจะส่งเลขพัสดุนี้ให้ผู้ซื้อทันที หลังยืนยันแล้วยกเลิกคำสั่งซื้อไม่ได้ และแก้ขนส่งหรือเลขพัสดุไม่ได้")}
+      confirmLabel={t("orders.confirmShip.confirm", "ยืนยันจัดส่ง")}
+      cancelLabel={t("orders.confirmShip.back", "กลับไปแก้")}
       onConfirm={() => {
         onOpenChange(false);
         onConfirm();
@@ -44,11 +46,11 @@ export function ConfirmShipDialog({
       <div className="flex flex-col gap-2 rounded-lg bg-neutral-50 p-3.5 text-xs">
         <dl className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-gray-500">บริษัทขนส่ง</dt>
+          <dt className="text-gray-500">{t("orders.shipping.carrier", "บริษัทขนส่ง")}</dt>
           <dd className="font-medium text-foreground">{carrierName}</dd>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-gray-500">เลขพัสดุ</dt>
+          <dt className="text-gray-500">{t("orders.shipping.tracking", "เลขพัสดุ")}</dt>
           <dd className="font-medium break-all text-foreground">{trackingNumber}</dd>
         </div>
       </dl>

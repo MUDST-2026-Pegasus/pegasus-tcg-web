@@ -10,6 +10,7 @@ import { ApplicationProgressCard } from "./ApplicationProgressCard";
 import { Callout } from "./Callout";
 import { SubmissionSummaryCard } from "./SubmissionSummaryCard";
 import { SubmittedDetailsCard } from "./SubmittedDetailsCard";
+import { useTranslate } from "@/lib/i18n";
 
 const PROGRESS_CARD_ID = "seller-application-progress";
 
@@ -28,6 +29,7 @@ export function ApplicationStatusView({
   isRefreshing,
   onRefresh,
 }: ApplicationStatusViewProps) {
+  const { t } = useTranslate("seller");
   const handleViewStatus = () => {
     // ดึงสถานะล่าสุดแล้วเลื่อนไปที่การ์ดสถานะ
     onRefresh();
@@ -46,8 +48,7 @@ export function ApplicationStatusView({
       />
 
       <Callout tone="info" icon={Info}>
-        ถ้าชื่อบัญชีไม่ตรงกับชื่อที่กรอก ทีมงานจะส่งอีเมลให้แก้ไขเฉพาะส่วนนั้น
-        ไม่ต้องสมัครใหม่ทั้งหมด
+        {t("application.status.mismatchHint", "ถ้าชื่อบัญชีไม่ตรงกับชื่อที่กรอก ทีมงานจะส่งอีเมลให้แก้ไขเฉพาะส่วนนั้น ไม่ต้องสมัครใหม่ทั้งหมด")}
       </Callout>
 
       <div className="flex flex-wrap justify-center gap-2.5">
@@ -58,7 +59,7 @@ export function ApplicationStatusView({
             "h-8 rounded-sm px-2.5",
           )}
         >
-          กลับหน้าแรก
+          {t("application.status.home", "กลับหน้าแรก")}
         </Link>
         <Button
           type="button"
@@ -68,7 +69,7 @@ export function ApplicationStatusView({
           className="h-8 rounded-sm px-2.5"
         >
           {isRefreshing && <Spinner />}
-          ดูสถานะคำขอ
+          {t("application.status.view", "ดูสถานะคำขอ")}
         </Button>
       </div>
     </>

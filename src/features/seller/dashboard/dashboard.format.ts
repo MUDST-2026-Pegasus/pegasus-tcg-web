@@ -16,7 +16,7 @@ import type {
   TodoItem,
   TodoList,
 } from "./dashboard.types";
-import { dateTimeFormat, formatMonth, formatYear, monthStart, numberFormat } from "@/lib/i18n";
+import { dateTimeFormat, formatMonth, formatYear, monthStart, numberFormat, translate } from "@/lib/i18n";
 
 /**
  * แปลงค่าดิบจาก `/sellers/me/dashboard` → ข้อความบนการ์ดแต่ละใบ
@@ -49,7 +49,7 @@ export function thaiMonthLong(value: string): string {
  */
 export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
-    return value === 0 ? null : { label: "ใหม่", trend: "new" };
+    return value === 0 ? null : { label: translate("seller", "dashboard.delta.new", "ใหม่"), trend: "new" };
   }
   const rounded = Math.round(((value - previous) / previous) * 1000) / 10;
   if (rounded === 0) {
@@ -78,13 +78,13 @@ export function salesSummary(dashboard: SellerDashboard): SalesSummary {
 
   return {
     // ยอดนี้คือ `items_subtotal` — หน้าจัดการคำสั่งซื้อมีอีกยอดที่รวมค่าส่ง จึงต้องบอกให้ชัด
-    label: `ยอดขายเดือน${thaiMonthLong(period.month)} (ไม่รวมค่าส่ง)`,
+    label: translate("seller", "dashboard.sales.label", "ยอดขายเดือน{month} (ไม่รวมค่าส่ง)", { month: thaiMonthLong(period.month) }),
     amount: formatBaht(sales.value),
     delta: formatDelta(sales.value, sales.previous),
     description:
       sales.orderCount === 0
-        ? "ยังไม่มีคำสั่งซื้อที่ชำระแล้วในเดือนนี้"
-        : `จาก ${count.format(sales.orderCount)} คำสั่งซื้อ · เฉลี่ย ${formatBaht(Math.round(average))} ต่อออเดอร์`,
+        ? translate("seller", "dashboard.sales.empty", "ยังไม่มีคำสั่งซื้อที่ชำระแล้วในเดือนนี้")
+        : translate("seller", "dashboard.sales.description", "จาก {count} คำสั่งซื้อ · เฉลี่ย {average} ต่อออเดอร์", { count: count.format(sales.orderCount), average: formatBaht(Math.round(average)) }),
     bars: sales.monthly.map((point) => ({
       month: point.month,
       amount: point.amount,
@@ -113,8 +113,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "pack",
         accent: "red",
-        title: "แพ็คและจัดส่งคำสั่งซื้อ",
-        description: `${count.format(toPack)} ออเดอร์รอจัดส่ง`,
+        title: translate("seller", "dashboard.todo.pack.title", "แพ็คและจัดส่งคำสั่งซื้อ"),
+        description: translate("seller", "dashboard.todo.pack.description", "{count} ออเดอร์รอจัดส่ง", { count: count.format(toPack) }),
         to: "/seller/orders?status=awaiting_pack",
       },
     },
@@ -123,8 +123,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "returns",
         accent: "red",
-        title: "ตอบคำขอคืนสินค้า",
-        description: `${count.format(returns)} คำขอรอการตัดสินใจ`,
+        title: translate("seller", "dashboard.todo.returns.title", "ตอบคำขอคืนสินค้า"),
+        description: translate("seller", "dashboard.todo.returns.description", "{count} คำขอรอการตัดสินใจ", { count: count.format(returns) }),
         to: "/seller/returns",
       },
     },
@@ -133,8 +133,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "restock",
         accent: "amber",
-        title: "เติมสต็อกสินค้าที่ใกล้หมด",
-        description: `${count.format(listings.lowStockCount)} รายการเหลือไม่เกิน ${listings.lowStockThreshold} ใบ`,
+        title: translate("seller", "dashboard.todo.restock.title", "เติมสต็อกสินค้าที่ใกล้หมด"),
+        description: translate("seller", "dashboard.todo.restock.description", "{count} รายการเหลือไม่เกิน {threshold} ใบ", { count: count.format(listings.lowStockCount), threshold: String(listings.lowStockThreshold) }),
         // ใกล้หมดนับเฉพาะ ACTIVE — เรียงคงเหลือน้อยก่อน ใบที่ต้องเติมจะอยู่บนสุด
         to: "/seller/products?status=ACTIVE&sort=stock_asc",
       },
@@ -144,8 +144,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "payment",
         accent: "primary",
-        title: "ออเดอร์รอผู้ซื้อชำระเงิน",
-        description: `${count.format(unpaid)} ออเดอร์ · ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด`,
+        title: translate("seller", "dashboard.todo.payment.title", "ออเดอร์รอผู้ซื้อชำระเงิน"),
+        description: translate("seller", "dashboard.todo.payment.description", "{count} ออเดอร์ · ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด", { count: count.format(unpaid) }),
         to: "/seller/orders?status=awaiting_payment",
       },
     },
@@ -154,8 +154,8 @@ export function todoList(dashboard: SellerDashboard): TodoList {
       item: {
         id: "reviews",
         accent: "gray",
-        title: "ตอบกลับรีวิว",
-        description: `${count.format(reviews.unreplied)} รีวิวยังไม่ได้ตอบ`,
+        title: translate("seller", "dashboard.todo.reviews.title", "ตอบกลับรีวิว"),
+        description: translate("seller", "dashboard.todo.reviews.description", "{count} รีวิวยังไม่ได้ตอบ", { count: count.format(reviews.unreplied) }),
         to: "/seller/reviews?tab=unreplied",
       },
     },
@@ -166,12 +166,14 @@ export function todoList(dashboard: SellerDashboard): TodoList {
     .map((candidate) => candidate.item);
 
   return {
-    title: "สิ่งที่ต้องทำวันนี้",
+    title: translate("seller", "dashboard.todo.title", "สิ่งที่ต้องทำวันนี้"),
     description:
-      items.length === 0 ? "ไม่มีงานค้าง" : `${items.length} รายการรอดำเนินการ`,
+      items.length === 0
+        ? translate("seller", "dashboard.todo.none", "ไม่มีงานค้าง")
+        : translate("seller", "dashboard.todo.pending", "{count} รายการรอดำเนินการ", { count: String(items.length) }),
     count: items.length,
     items,
-    emptyLabel: "ไม่มีอะไรค้าง ร้านของคุณเรียบร้อยดี",
+    emptyLabel: translate("seller", "dashboard.todo.empty", "ไม่มีอะไรค้าง ร้านของคุณเรียบร้อยดี"),
   };
 }
 
@@ -181,50 +183,52 @@ export function statCards(dashboard: SellerDashboard): StatCardData[] {
     {
       id: "listings",
       accent: "primary",
-      label: "สินค้าที่ลงขาย",
+      label: translate("seller", "dashboard.stats.listings.label", "สินค้าที่ลงขาย"),
       value: count.format(listings.active),
       footnote:
         listings.publishedThisMonth > 0
-          ? `+${count.format(listings.publishedThisMonth)} เดือนนี้`
-          : "ยังไม่มีประกาศใหม่เดือนนี้",
+          ? translate("seller", "dashboard.stats.listings.thisMonth", "+{count} เดือนนี้", { count: count.format(listings.publishedThisMonth) })
+          : translate("seller", "dashboard.stats.listings.none", "ยังไม่มีประกาศใหม่เดือนนี้"),
     },
     {
       id: "escrow",
       accent: "violet",
-      label: "เงินรอปล่อย",
+      label: translate("seller", "dashboard.stats.escrow.label", "เงินรอปล่อย"),
       value: formatBaht(wallet.pending),
-      footnote: "ปล่อยเมื่อผู้ซื้อยืนยันรับสินค้า",
+      footnote: translate("seller", "dashboard.stats.escrow.footnote", "ปล่อยเมื่อผู้ซื้อยืนยันรับสินค้า"),
     },
     {
       id: "rating",
       accent: "amber",
-      label: "คะแนนร้านค้า",
+      label: translate("seller", "dashboard.stats.rating.label", "คะแนนร้านค้า"),
       value: reviews.average === null ? "—" : `${reviews.average.toFixed(1)} / 5.0`,
       footnote:
-        reviews.count === 0 ? "ยังไม่มีรีวิว" : `จาก ${count.format(reviews.count)} รีวิว`,
+        reviews.count === 0
+          ? translate("seller", "dashboard.stats.rating.none", "ยังไม่มีรีวิว")
+          : translate("seller", "dashboard.stats.rating.count", "จาก {count} รีวิว", { count: count.format(reviews.count) }),
     },
     {
       id: "withdrawable",
       accent: "green",
-      label: "ยอดเงินพร้อมถอน",
+      label: translate("seller", "dashboard.stats.withdrawable.label", "ยอดเงินพร้อมถอน"),
       value: formatBaht(wallet.withdrawable),
-      footnote: "หักยอดที่กำลังถอนแล้ว",
+      footnote: translate("seller", "dashboard.stats.withdrawable.footnote", "หักยอดที่กำลังถอนแล้ว"),
     },
   ];
 }
 
 export function recentOrders(dashboard: SellerDashboard): RecentOrders {
   return {
-    title: "คำสั่งซื้อล่าสุด",
-    actionLabel: "ดูทั้งหมด",
-    emptyLabel: "ยังไม่มีคำสั่งซื้อ",
+    title: translate("seller", "dashboard.recentOrders.title", "คำสั่งซื้อล่าสุด"),
+    actionLabel: translate("seller", "dashboard.recentOrders.viewAll", "ดูทั้งหมด"),
+    emptyLabel: translate("seller", "dashboard.recentOrders.empty", "ยังไม่มีคำสั่งซื้อ"),
     items: dashboard.recentOrders.map((order) => ({
       id: order.sellerOrderId,
-      productName: order.firstItemName ?? "สินค้า",
+      productName: order.firstItemName ?? translate("seller", "dashboard.recentOrders.product", "สินค้า"),
       imageUrl: order.firstImageUrl,
       number: order.sellerOrderNumber,
       buyer: order.buyerUsername,
-      item: `${order.firstItemName ?? "สินค้า"} · ${count.format(order.itemCount)} ชิ้น`,
+      item: translate("seller", "dashboard.recentOrders.item", "{name} · {count} ชิ้น", { name: order.firstItemName ?? translate("seller", "dashboard.recentOrders.product", "สินค้า"), count: count.format(order.itemCount) }),
       price: formatBaht(order.grandTotal),
       status: order.status,
       statusLabel: SELLER_ORDER_STATUS_LABEL[order.status],
@@ -235,22 +239,22 @@ export function recentOrders(dashboard: SellerDashboard): RecentOrders {
 export function lowStock(dashboard: SellerDashboard): LowStock {
   const { listings } = dashboard;
   return {
-    title: "สต็อกใกล้หมด",
-    subtitle: `ประกาศที่เหลือไม่เกิน ${count.format(listings.lowStockThreshold)} ชิ้น · น้อยสุดก่อน`,
+    title: translate("seller", "dashboard.lowStock.title", "สต็อกใกล้หมด"),
+    subtitle: translate("seller", "dashboard.lowStock.subtitle", "ประกาศที่เหลือไม่เกิน {count} ชิ้น · น้อยสุดก่อน", { count: count.format(listings.lowStockThreshold) }),
     count: listings.lowStockCount,
     items: listings.lowStock.map((listing) => ({
       listingId: listing.listingId,
       imageUrl: listing.imageUrl,
       name: listing.productName,
       metaLabel: listing.lotLabel ? `${listing.lotLabel} · ${listing.conditionCode}` : null,
-      remainingLabel: `เหลือ ${count.format(listing.quantityAvailable)} ชิ้น`,
+      remainingLabel: translate("seller", "dashboard.lowStock.remaining", "เหลือ {count} ชิ้น", { count: count.format(listing.quantityAvailable) }),
       severity: listing.quantityAvailable <= 1 ? "critical" : "warning",
     })),
     actionLabel: listings.lowStockCount > listings.lowStock.length
-      ? `ดูทั้งหมด ${count.format(listings.lowStockCount)} รายการ`
-      : "ไปหน้าจัดการสินค้า",
+      ? translate("seller", "dashboard.lowStock.viewAll", "ดูทั้งหมด {count} รายการ", { count: count.format(listings.lowStockCount) })
+      : translate("seller", "dashboard.lowStock.manage", "ไปหน้าจัดการสินค้า"),
     actionTo: "/seller/products?status=ACTIVE&sort=stock_asc",
-    emptyLabel: "สต็อกยังพอทุกรายการ",
+    emptyLabel: translate("seller", "dashboard.lowStock.empty", "สต็อกยังพอทุกรายการ"),
   };
 }
 
@@ -266,12 +270,12 @@ export function toDashboardData(
   now: Date = new Date(),
 ): DashboardData {
   return {
-    greeting: `สวัสดี, ${seller.displayName} 👋`,
-    subtitle: `สรุปภาพรวมร้านของคุณ · ${todayFormat.format(now)}`,
+    greeting: translate("seller", "dashboard.greeting", "สวัสดี, {name} 👋", { name: seller.displayName }),
+    subtitle: translate("seller", "dashboard.subtitle", "สรุปภาพรวมร้านของคุณ · {date}", { date: todayFormat.format(now) }),
     actions: {
-      viewShopLabel: "ดูหน้าร้าน",
+      viewShopLabel: translate("seller", "dashboard.actions.viewShop", "ดูหน้าร้าน"),
       viewShopTo: seller.username ? `/u/${seller.username}` : null,
-      createListingLabel: "+ ลงขายสินค้า",
+      createListingLabel: translate("seller", "dashboard.actions.createListing", "+ ลงขายสินค้า"),
     },
     sales: salesSummary(dashboard),
     todo: todoList(dashboard),
@@ -280,3 +284,48 @@ export function toDashboardData(
     lowStock: lowStock(dashboard),
   };
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-554]
+// @tolgee-key {"key": "dashboard.delta.new", "ns": "seller", "defaultValue": "ใหม่"}
+// @tolgee-key {"key": "dashboard.sales.label", "ns": "seller", "defaultValue": "ยอดขายเดือน{month} (ไม่รวมค่าส่ง)"}
+// @tolgee-key {"key": "dashboard.sales.empty", "ns": "seller", "defaultValue": "ยังไม่มีคำสั่งซื้อที่ชำระแล้วในเดือนนี้"}
+// @tolgee-key {"key": "dashboard.sales.description", "ns": "seller", "defaultValue": "จาก {count} คำสั่งซื้อ · เฉลี่ย {average} ต่อออเดอร์"}
+// @tolgee-key {"key": "dashboard.todo.pack.title", "ns": "seller", "defaultValue": "แพ็คและจัดส่งคำสั่งซื้อ"}
+// @tolgee-key {"key": "dashboard.todo.pack.description", "ns": "seller", "defaultValue": "{count} ออเดอร์รอจัดส่ง"}
+// @tolgee-key {"key": "dashboard.todo.returns.title", "ns": "seller", "defaultValue": "ตอบคำขอคืนสินค้า"}
+// @tolgee-key {"key": "dashboard.todo.returns.description", "ns": "seller", "defaultValue": "{count} คำขอรอการตัดสินใจ"}
+// @tolgee-key {"key": "dashboard.todo.restock.title", "ns": "seller", "defaultValue": "เติมสต็อกสินค้าที่ใกล้หมด"}
+// @tolgee-key {"key": "dashboard.todo.restock.description", "ns": "seller", "defaultValue": "{count} รายการเหลือไม่เกิน {threshold} ใบ"}
+// @tolgee-key {"key": "dashboard.todo.payment.title", "ns": "seller", "defaultValue": "ออเดอร์รอผู้ซื้อชำระเงิน"}
+// @tolgee-key {"key": "dashboard.todo.payment.description", "ns": "seller", "defaultValue": "{count} ออเดอร์ · ยกเลิกอัตโนมัติถ้าไม่จ่ายตามกำหนด"}
+// @tolgee-key {"key": "dashboard.todo.reviews.title", "ns": "seller", "defaultValue": "ตอบกลับรีวิว"}
+// @tolgee-key {"key": "dashboard.todo.reviews.description", "ns": "seller", "defaultValue": "{count} รีวิวยังไม่ได้ตอบ"}
+// @tolgee-key {"key": "dashboard.todo.title", "ns": "seller", "defaultValue": "สิ่งที่ต้องทำวันนี้"}
+// @tolgee-key {"key": "dashboard.todo.none", "ns": "seller", "defaultValue": "ไม่มีงานค้าง"}
+// @tolgee-key {"key": "dashboard.todo.pending", "ns": "seller", "defaultValue": "{count} รายการรอดำเนินการ"}
+// @tolgee-key {"key": "dashboard.todo.empty", "ns": "seller", "defaultValue": "ไม่มีอะไรค้าง ร้านของคุณเรียบร้อยดี"}
+// @tolgee-key {"key": "dashboard.stats.listings.label", "ns": "seller", "defaultValue": "สินค้าที่ลงขาย"}
+// @tolgee-key {"key": "dashboard.stats.listings.thisMonth", "ns": "seller", "defaultValue": "+{count} เดือนนี้"}
+// @tolgee-key {"key": "dashboard.stats.listings.none", "ns": "seller", "defaultValue": "ยังไม่มีประกาศใหม่เดือนนี้"}
+// @tolgee-key {"key": "dashboard.stats.escrow.label", "ns": "seller", "defaultValue": "เงินรอปล่อย"}
+// @tolgee-key {"key": "dashboard.stats.escrow.footnote", "ns": "seller", "defaultValue": "ปล่อยเมื่อผู้ซื้อยืนยันรับสินค้า"}
+// @tolgee-key {"key": "dashboard.stats.rating.label", "ns": "seller", "defaultValue": "คะแนนร้านค้า"}
+// @tolgee-key {"key": "dashboard.stats.rating.none", "ns": "seller", "defaultValue": "ยังไม่มีรีวิว"}
+// @tolgee-key {"key": "dashboard.stats.rating.count", "ns": "seller", "defaultValue": "จาก {count} รีวิว"}
+// @tolgee-key {"key": "dashboard.stats.withdrawable.label", "ns": "seller", "defaultValue": "ยอดเงินพร้อมถอน"}
+// @tolgee-key {"key": "dashboard.stats.withdrawable.footnote", "ns": "seller", "defaultValue": "หักยอดที่กำลังถอนแล้ว"}
+// @tolgee-key {"key": "dashboard.recentOrders.title", "ns": "seller", "defaultValue": "คำสั่งซื้อล่าสุด"}
+// @tolgee-key {"key": "dashboard.recentOrders.viewAll", "ns": "seller", "defaultValue": "ดูทั้งหมด"}
+// @tolgee-key {"key": "dashboard.recentOrders.empty", "ns": "seller", "defaultValue": "ยังไม่มีคำสั่งซื้อ"}
+// @tolgee-key {"key": "dashboard.recentOrders.product", "ns": "seller", "defaultValue": "สินค้า"}
+// @tolgee-key {"key": "dashboard.recentOrders.item", "ns": "seller", "defaultValue": "{name} · {count} ชิ้น"}
+// @tolgee-key {"key": "dashboard.lowStock.title", "ns": "seller", "defaultValue": "สต็อกใกล้หมด"}
+// @tolgee-key {"key": "dashboard.lowStock.subtitle", "ns": "seller", "defaultValue": "ประกาศที่เหลือไม่เกิน {count} ชิ้น · น้อยสุดก่อน"}
+// @tolgee-key {"key": "dashboard.lowStock.remaining", "ns": "seller", "defaultValue": "เหลือ {count} ชิ้น"}
+// @tolgee-key {"key": "dashboard.lowStock.viewAll", "ns": "seller", "defaultValue": "ดูทั้งหมด {count} รายการ"}
+// @tolgee-key {"key": "dashboard.lowStock.manage", "ns": "seller", "defaultValue": "ไปหน้าจัดการสินค้า"}
+// @tolgee-key {"key": "dashboard.lowStock.empty", "ns": "seller", "defaultValue": "สต็อกยังพอทุกรายการ"}
+// @tolgee-key {"key": "dashboard.greeting", "ns": "seller", "defaultValue": "สวัสดี, {name} 👋"}
+// @tolgee-key {"key": "dashboard.subtitle", "ns": "seller", "defaultValue": "สรุปภาพรวมร้านของคุณ · {date}"}
+// @tolgee-key {"key": "dashboard.actions.viewShop", "ns": "seller", "defaultValue": "ดูหน้าร้าน"}
+// @tolgee-key {"key": "dashboard.actions.createListing", "ns": "seller", "defaultValue": "+ ลงขายสินค้า"}

@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 
 import { maskAccountNumber } from "../application.format";
 import type { Verification } from "../application.types";
+import { useTranslate } from "@/lib/i18n";
 
 type SubmittedDetailsCardProps = {
   verification: Verification;
@@ -12,14 +13,15 @@ type SubmittedDetailsCardProps = {
 export function SubmittedDetailsCard({
   verification,
 }: SubmittedDetailsCardProps) {
+  const { t } = useTranslate("seller");
   const rows = [
     {
-      label: "ชื่อ-นามสกุลจริง",
+      label: t("application.details.legalName", "ชื่อ-นามสกุลจริง"),
       value: `${verification.legalFirstName} ${verification.legalLastName}`,
     },
-    { label: "ธนาคาร", value: verification.bankName },
+    { label: t("application.details.bank", "ธนาคาร"), value: verification.bankName },
     {
-      label: "เลขที่บัญชี",
+      label: t("application.details.accountNumber", "เลขที่บัญชี"),
       value: maskAccountNumber(verification.bankAccountNumber),
     },
   ];
@@ -27,7 +29,7 @@ export function SubmittedDetailsCard({
   return (
     <Card className="gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center gap-2.5">
-        <h2 className="text-sm font-semibold text-foreground">ข้อมูลที่ส่งไป</h2>
+        <h2 className="text-sm font-semibold text-foreground">{t("application.details.title", "ข้อมูลที่ส่งไป")}</h2>
         {/* backend ยังไม่มี endpoint ให้ผู้สมัครแก้คำขอที่รอตรวจสอบ เปิดใช้เมื่อฝั่งนั้นพร้อม */}
         <Button
           type="button"
@@ -36,7 +38,7 @@ export function SubmittedDetailsCard({
           disabled
           className="ml-auto h-8 rounded-sm px-2.5"
         >
-          ขอแก้ไขข้อมูล
+          {t("application.details.edit", "ขอแก้ไขข้อมูล")}
         </Button>
       </div>
 

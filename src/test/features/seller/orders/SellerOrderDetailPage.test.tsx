@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import { SellerOrderDetailPage } from "@/features/seller/orders/SellerOrderDetailPage";
 import * as ordersApi from "@/features/seller/orders/orders.api";
 import type { SellerOrderDetail } from "@/features/seller/orders/orders.types";
-import { createTestQueryClient } from "@/test/utils";
+import { renderWithProviders, screen } from "@/test/utils";
 
 vi.mock("@/features/seller/orders/orders.api", () => ({
   getSellerOrder: vi.fn(),
@@ -84,14 +82,11 @@ const mockOrderDetail: SellerOrderDetail = {
 };
 
 function renderWithRoute(route: string) {
-  return render(
-    <QueryClientProvider client={createTestQueryClient()}>
-      <MemoryRouter initialEntries={[route]}>
-        <Routes>
-          <Route path="/seller/orders/:orderId" element={<SellerOrderDetailPage />} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
+  return renderWithProviders(
+    <Routes>
+      <Route path="/seller/orders/:orderId" element={<SellerOrderDetailPage />} />
+    </Routes>,
+    { route },
   );
 }
 

@@ -12,6 +12,7 @@ import {
 import { SellerSidebar } from "./SellerSidebar";
 import { SellerStatusBanner } from "./SellerStatusBanner";
 import { useSellerProfile } from "./seller.queries";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Layout ของโซนผู้ขายทั้งหมด — เหมือน DashboardLayout ของ admin
@@ -21,6 +22,8 @@ import { useSellerProfile } from "./seller.queries";
  * สถานะร้านมาจาก `/sellers/me`
  */
 export function SellerLayout() {
+  // โหลด namespace seller ก่อนเรนเดอร์ลูก — format helper ใน seller ใช้ translate("seller", …) ที่ไม่ได้ subscribe เอง
+  useTranslate("seller");
   const profile = useSellerProfile();
   const pathname = useLocation().pathname;
   const isShop = pathname === "/seller/shop";

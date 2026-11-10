@@ -1,11 +1,13 @@
 import { ImageIcon } from "lucide-react";
 import { useState } from "react";
+import { useTranslate } from "@/lib/i18n";
 
 export function ProductThumbnail({ imageUrl, name, className }: {
   imageUrl: string | null;
   name: string;
   className: string;
 }) {
+  const { t } = useTranslate("seller");
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const showImage = Boolean(imageUrl && imageUrl !== failedUrl);
 
@@ -15,7 +17,7 @@ export function ProductThumbnail({ imageUrl, name, className }: {
       {showImage && (
         <img
           src={imageUrl!}
-          alt={`รูปสินค้า ${name}`}
+          alt={t("dashboard.productImageAlt", "รูปสินค้า {name}", { name })}
           className="absolute inset-0 size-full object-cover"
           onError={() => setFailedUrl(imageUrl)}
         />

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useLatestVerification } from "./application.queries";
 import { ApplicationStatusView } from "./components/ApplicationStatusView";
 import { SellerApplicationForm } from "./components/SellerApplicationForm";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * สมัครเป็นผู้ขาย — Figma: V3 · Buyer / สมัครเป็นผู้ขาย (ฉบับย่อ) node 1689:6494
@@ -20,6 +21,7 @@ import { SellerApplicationForm } from "./components/SellerApplicationForm";
  * ไม่ได้อยู่ใต้ /seller ที่บังคับบทบาท SELLER
  */
 export function SellerApplicationPage() {
+  const { t } = useTranslate("seller");
   const queryClient = useQueryClient();
   const { user, hasRole } = useAuth();
   const {
@@ -56,7 +58,7 @@ export function SellerApplicationPage() {
         )}
       >
         {isPending ? (
-          <div role="status" aria-busy="true" aria-label="กำลังโหลดใบสมัคร" className="flex flex-col gap-4.5">
+          <div role="status" aria-busy="true" aria-label={t("application.loading", "กำลังโหลดใบสมัคร")} className="flex flex-col gap-4.5">
             <Skeleton className="h-8 w-64 rounded-lg" />
             <Skeleton className="h-4 w-96 max-w-full rounded-md" />
             <PanelSkeleton rows={4} />
@@ -73,13 +75,12 @@ export function SellerApplicationPage() {
             <header className="flex flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-2.5">
                 <h1 className="text-[26px] font-bold text-foreground">
-                  สมัครเป็นผู้ขาย
+                  {t("application.title", "สมัครเป็นผู้ขาย")}
                 </h1>
-                <Badge variant="secondary">ใช้เวลาไม่ถึง 2 นาที</Badge>
+                <Badge variant="secondary">{t("application.duration", "ใช้เวลาไม่ถึง 2 นาที")}</Badge>
               </div>
               <p className="text-[13px] text-muted-foreground">
-                กรอกแค่ชื่อจริงและบัญชีรับเงิน แล้วรอทีมงานตรวจสอบภายใน 1
-                วันทำการ
+                {t("application.subtitle", "กรอกแค่ชื่อจริงและบัญชีรับเงิน แล้วรอทีมงานตรวจสอบภายใน 1 วันทำการ")}
               </p>
             </header>
             <SellerApplicationForm

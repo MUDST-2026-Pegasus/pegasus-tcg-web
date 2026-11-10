@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import type { SalesSummary } from "../dashboard.types";
+import { useTranslate } from "@/lib/i18n";
 
 /** เดือนที่ขายได้ 0 ยังเห็นเป็นเส้นบาง ๆ ไม่หายไปจากกราฟ */
 const MIN_BAR_PERCENT = 6;
@@ -26,6 +27,7 @@ export function SalesCard({
   rangeStart,
   rangeEnd,
 }: SalesSummary) {
+  const { t } = useTranslate("seller");
   const heights = barPercents(bars.map((bar) => bar.amount));
 
   return (
@@ -43,7 +45,7 @@ export function SalesCard({
         <p className="text-xs text-teal-100">{description}</p>
       </div>
 
-      <ol className="flex h-16 items-end gap-1.5" aria-label="ยอดขายรายเดือน">
+      <ol className="flex h-16 items-end gap-1.5" aria-label={t("dashboard.sales.monthly", "ยอดขายรายเดือน")}>
         {bars.map((bar, index) => (
           <li
             key={bar.month}

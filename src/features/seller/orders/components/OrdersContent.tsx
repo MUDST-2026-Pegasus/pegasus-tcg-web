@@ -4,8 +4,8 @@ import { EmptyState, QueryBoundary } from "@/components/common";
 import { useSellerDashboard } from "@/features/seller/dashboard/dashboard.queries";
 
 import {
-  PACKING_TIP,
-  SHIPPING_STEPS,
+  packingTip,
+  shippingSteps,
   monthlySummary,
   ordersSubtitle,
   type OrderTabMeta,
@@ -20,6 +20,7 @@ import { OrderListSkeleton } from "./OrderListSkeleton";
 import { OrderPagination } from "./OrderPagination";
 import { ShippingStepsCard } from "./ShippingStepsCard";
 import { TipCard } from "./TipCard";
+import { useTranslate } from "@/lib/i18n";
 
 export const ORDERS_PAGE_SIZE = 10;
 
@@ -45,6 +46,7 @@ export function OrdersContent({
   onSortChange,
   onPageChange,
 }: OrdersContentProps) {
+  const { t } = useTranslate("seller");
   const counts = useSellerOrderCounts();
   const dashboard = useSellerDashboard();
   const orders = useSellerOrders({
@@ -79,7 +81,7 @@ export function OrdersContent({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">จัดการคำสั่งซื้อ</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("orders.title", "จัดการคำสั่งซื้อ")}</h1>
         <p className="text-xs text-gray-500">{ordersSubtitle(counts.data)}</p>
       </div>
 
@@ -98,12 +100,16 @@ export function OrdersContent({
           <QueryBoundary
             query={orders}
             loading={<OrderListSkeleton />}
-            errorTitle="โหลดคำสั่งซื้อไม่สำเร็จ"
+            errorTitle={t("orders.loadFailed", "โหลดคำสั่งซื้อไม่สำเร็จ")}
             isEmpty={(result) => result.items.length === 0}
             empty={
               <EmptyState
-                title={search ? `ไม่พบคำสั่งซื้อที่ตรงกับ "${search}"` : `ไม่มีคำสั่งซื้อในแท็บ${tab.label}`}
-                description={search ? "ลองค้นด้วยเลขออเดอร์ หรือชื่อผู้ใช้ของผู้ซื้อ" : undefined}
+                title={
+                  search
+                    ? t("orders.empty.search", "ไม่พบคำสั่งซื้อที่ตรงกับ \"{search}\"", { search })
+                    : t("orders.empty.tab", "ไม่มีคำสั่งซื้อในแท็บ{tab}", { tab: tab.label })
+                }
+                description={search ? t("orders.empty.searchHint", "ลองค้นด้วยเลขออเดอร์ หรือชื่อผู้ใช้ของผู้ซื้อ") : undefined}
               />
             }
           >
@@ -129,9 +135,9 @@ export function OrdersContent({
         </div>
 
         <div className="flex w-full shrink-0 flex-col gap-4 lg:w-80">
-          <ShippingStepsCard {...SHIPPING_STEPS} />
+          <ShippingStepsCard {...shippingSteps()} />
           {dashboard.data ? <MonthlySummaryCard {...monthlySummary(dashboard.data.month)} /> : null}
-          <TipCard {...PACKING_TIP} />
+          <TipCard {...packingTip()} />
         </div>
       </div>
     </div>
