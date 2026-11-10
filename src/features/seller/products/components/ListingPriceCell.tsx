@@ -27,6 +27,7 @@ import { isPriceEditable } from "../products.rules";
 import type { SellerListingSummary } from "../products.types";
 
 import { AmountInput } from "./AmountInput";
+import { useTranslate } from "@/lib/i18n";
 
 /** ขอบบนของ `@Digits(integer = 12, fraction = 2)` ใน `ListingPriceRequest.java` */
 const MAX_PRICE = 1e12;
@@ -45,6 +46,7 @@ type ListingPriceCellProps = {
  * ถ้าส่ง MANUAL ไปจะเปลี่ยนวิธีตั้งราคาทิ้งโดยไม่ตั้งใจ จึงให้ไปแก้ที่หน้าแก้ไขประกาศแทน
  */
 export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
+  const { t } = useTranslate("seller");
   const changePrice = useChangeListingPrice();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -66,11 +68,11 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
         >
           {price}
           <span className="rounded bg-sky-50 px-1 text-[10px] text-primary">
-            อัตโนมัติ
+            {t("products.price.auto", "อัตโนมัติ")}
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          ราคาตามตลาด ระบบปรับให้ทุกคืน เปลี่ยนวิธีตั้งราคาได้ที่หน้าแก้ไขประกาศ
+          {t("products.price.autoHint", "ราคาตามตลาด ระบบปรับให้ทุกคืน เปลี่ยนวิธีตั้งราคาได้ที่หน้าแก้ไขประกาศ")}
         </TooltipContent>
       </Tooltip>
     );
@@ -103,7 +105,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
         onSuccess: () =>
           toast.add({
             type: "success",
-            title: "เปลี่ยนราคาแล้ว",
+            title: t("products.price.saved", "เปลี่ยนราคาแล้ว"),
             description: `${name} · ${formatBaht(next)}`,
           }),
         onError: (error) => {
@@ -114,10 +116,10 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
           }
           toast.add({
             type: "error",
-            title: "เปลี่ยนราคาไม่สำเร็จ",
+            title: t("products.price.failed", "เปลี่ยนราคาไม่สำเร็จ"),
             description: listingErrorMessage(
               error,
-              "ราคากลับเป็นค่าเดิมแล้ว ลองใหม่อีกครั้ง",
+              t("products.price.reverted", "ราคากลับเป็นค่าเดิมแล้ว ลองใหม่อีกครั้ง"),
             ),
           });
         },
@@ -140,7 +142,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
         render={
           <button
             type="button"
-            aria-label={`แก้ราคา: ${name}`}
+            aria-label={t("products.price.edit", "แก้ราคา: {name}", { name })}
             className="group -mx-1 flex cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 hover:bg-secondary"
           />
         }
@@ -155,7 +157,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <Field className="gap-1.5">
             <FieldLabel htmlFor={inputId} className="text-xs">
-              ราคาขายต่อใบ (บาท)
+              {t("products.price.label", "ราคาขายต่อใบ (บาท)")}
             </FieldLabel>
             <AmountInput
               id={inputId}
@@ -166,7 +168,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
               className="h-8"
             />
             <FieldDescription className="text-[11px]">
-              ใช้กับการ์ดทุกใบบนประกาศนี้
+              {t("products.price.appliesAll", "ใช้กับการ์ดทุกใบบนประกาศนี้")}
             </FieldDescription>
           </Field>
           <div className="flex justify-end gap-2">
@@ -177,7 +179,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
               className="rounded-md px-2.5"
               onClick={() => setOpen(false)}
             >
-              ยกเลิก
+              {t("actions.cancel", "ยกเลิก", { ns: "common" })}
             </Button>
             <Button
               type="submit"
@@ -185,7 +187,7 @@ export function ListingPriceCell({ listing, readOnly }: ListingPriceCellProps) {
               className="rounded-md px-2.5"
               disabled={invalid}
             >
-              บันทึก
+              {t("products.price.save", "บันทึก")}
             </Button>
           </div>
         </form>

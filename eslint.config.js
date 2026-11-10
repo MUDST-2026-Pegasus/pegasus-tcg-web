@@ -40,6 +40,8 @@ const I18N_GUARDED = [
   'src/features/cart/**/*.{ts,tsx}',
   'src/features/payment/**/*.{ts,tsx}',
   'src/features/account/**/*.{ts,tsx}',
+  // I18N-15 (TCG-555)
+  'src/features/seller/{products,payout}/**/*.{ts,tsx}',
   // I18N-17 (TCG-557) — admin: การเงิน (สลิป คืนเงิน ถอนเงิน คอมมิชชั่น) และภาพรวมคำสั่งซื้อ
   'src/features/admin/pages/Admin{Commission,Orders,Payments,Payouts,Refunds}Page.tsx',
   'src/features/admin/{finance,orders}.format.ts',

@@ -10,6 +10,7 @@ import type { RestockCalculation } from "../../restock.calc";
 import { formatThaiDate } from "../../restock.calc";
 import { useStockIns } from "../../restock.queries";
 import type { RestockData, RestockDraft, RestockLot } from "../../restock.types";
+import { useTranslate } from "@/lib/i18n";
 
 const HEAD_CLASS = "h-auto px-3 py-2.5 text-xs font-medium text-gray-500";
 const CELL_CLASS = "px-3 py-3 text-xs";
@@ -41,6 +42,7 @@ export function RestockHistoryCard({
   draft,
   result,
 }: RestockHistoryCardProps) {
+  const { t } = useTranslate("seller");
   const pendingLot: RestockLot | null = result.isValid
     ? {
         id: "pending",
@@ -69,7 +71,7 @@ export function RestockHistoryCard({
     <div role="alert" className="flex flex-col items-center gap-2 text-xs text-gray-500">
       {errorLabel}
       <Button variant="outline" size="sm" className="rounded-md px-2.5" onClick={() => void stockIns.refetch()}>
-        ลองอีกครั้ง
+        {t("restock.retry", "ลองอีกครั้ง")}
       </Button>
     </div>
   );
@@ -104,8 +106,7 @@ export function RestockHistoryCard({
         <div className="flex flex-col gap-[3px]">
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <p className="text-xs text-gray-500">
-            {lotCount} ล็อต · รับเข้าสะสม {receivedCount} {unit} · ขายไปแล้ว{" "}
-            {soldCount} {unit}
+            {t("restock.history.summary", "{lots} ล็อต · รับเข้าสะสม {received} {unit} · ขายไปแล้ว {sold} {unit}", { lots: lotCount, received: receivedCount, sold: soldCount, unit })}
           </p>
         </div>
 

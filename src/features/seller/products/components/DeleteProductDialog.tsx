@@ -14,6 +14,7 @@ import { deleteBlockedReason } from "../products.rules";
 import type { SellerListingSummary } from "../products.types";
 
 import { ListingThumb } from "./ProductTable";
+import { useTranslate } from "@/lib/i18n";
 
 type DeleteProductDialogProps = {
   /** ประกาศที่กำลังจะลบ — เก็บไว้แม้ปิด dialog แล้ว เนื้อหาจะได้ไม่หายระหว่าง animation ปิด */
@@ -42,6 +43,7 @@ export function DeleteProductDialog({
   onConfirm,
   isPending,
 }: DeleteProductDialogProps) {
+  const { t } = useTranslate("seller");
   const blockedReason = listing ? deleteBlockedReason(listing) : null;
 
   return (
@@ -56,10 +58,10 @@ export function DeleteProductDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <DialogTitle className="text-base leading-normal font-bold text-foreground">
-              ลบสินค้านี้ออกจากร้าน?
+              {t("products.delete.title", "ลบสินค้านี้ออกจากร้าน?")}
             </DialogTitle>
             <DialogDescription className="text-xs leading-4 text-gray-500">
-              การลบไม่สามารถย้อนกลับได้ ผู้ซื้อจะไม่เห็นประกาศนี้อีก
+              {t("products.delete.description", "การลบไม่สามารถย้อนกลับได้ ผู้ซื้อจะไม่เห็นประกาศนี้อีก")}
             </DialogDescription>
           </div>
         </div>
@@ -76,8 +78,7 @@ export function DeleteProductDialog({
                   {listingMeta(listing)}
                 </p>
                 <p className="text-xs text-gray-500">
-                  พร้อมขาย {listing.quantityAvailable} ใบ · ติดจอง{" "}
-                  {listing.quantityReserved} ใบ
+                  {t("products.delete.stock", "พร้อมขาย {available} ใบ · ติดจอง {reserved} ใบ", { available: listing.quantityAvailable, reserved: listing.quantityReserved })}
                 </p>
               </div>
             </div>
@@ -90,7 +91,7 @@ export function DeleteProductDialog({
             />
             <p className="flex-1 text-xs leading-4 text-amber-700">
               {blockedReason ??
-                'การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ประวัติการขายยังอยู่ในรายงาน แนะนำให้ "พักการขาย" แทนถ้าจะกลับมาขายอีก'}
+                t("products.delete.note", "การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ประวัติการขายยังอยู่ในรายงาน แนะนำให้ \"พักการขาย\" แทนถ้าจะกลับมาขายอีก")}
             </p>
           </div>
         </div>
@@ -104,7 +105,7 @@ export function DeleteProductDialog({
               disabled={isPending}
               onClick={onUnpublish}
             >
-              พักการขายแทน
+              {t("products.delete.pauseInstead", "พักการขายแทน")}
             </Button>
           ) : null}
           <Button
@@ -114,7 +115,7 @@ export function DeleteProductDialog({
             disabled={isPending || blockedReason !== null}
             onClick={onConfirm}
           >
-            ลบถาวร
+            {t("products.delete.confirm", "ลบถาวร")}
           </Button>
         </DialogFooter>
       </DialogContent>

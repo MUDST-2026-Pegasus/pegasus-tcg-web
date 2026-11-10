@@ -10,6 +10,7 @@ import { ProductNotFound } from "./components/ProductNotFound";
 import { ListingEditContent } from "./components/edit/ListingEditContent";
 import { parseListingId } from "./products.format";
 import { useMyListing } from "./products.queries";
+import { useTranslate } from "@/lib/i18n";
 
 export function SellerProductEditPage() {
   const { productId } = useParams();
@@ -35,6 +36,7 @@ function ListingEditLoader({
   listingId: number;
   focusPrice: boolean;
 }) {
+  const { t } = useTranslate("seller");
   const listing = useMyListing(listingId);
 
   if (hasErrorCode(listing.error, "LISTING_NOT_FOUND")) {
@@ -45,7 +47,7 @@ function ListingEditLoader({
     <QueryBoundary
       query={listing}
       loading={
-        <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย">
+        <div role="status" aria-busy="true" aria-label={t("products.edit.loading", "กำลังโหลดประกาศขาย")}>
           <FormBodySkeleton />
         </div>
       }

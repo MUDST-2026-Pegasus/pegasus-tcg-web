@@ -43,6 +43,7 @@ import { ProductPagination } from "./ProductPagination";
 import { ProductTable } from "./ProductTable";
 import { ProductTableSkeleton } from "./ProductTableSkeleton";
 import { StockForecast } from "./StockForecast";
+import { useTranslate } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 
@@ -73,6 +74,7 @@ function readPage(value: string | null): number {
  * และทุกอย่างค้น/กรอง/เรียง/แบ่งหน้าที่ backend
  */
 export function ProductsContent() {
+  const { t } = useTranslate("seller");
   const [searchParams, setSearchParams] = useSearchParams();
   const status = readStatus(searchParams.get("status"));
   const search = searchParams.get("q")?.trim() ?? "";
@@ -168,13 +170,13 @@ export function ProductsContent() {
       onSuccess: () => {
         setSelectedIds((current) => current.filter((id) => id !== target.id));
         setIsDeleteOpen(false);
-        toast.add({ type: "success", title: "ลบประกาศแล้ว" });
+        toast.add({ type: "success", title: t("products.delete.success", "ลบประกาศแล้ว") });
       },
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "ลบประกาศไม่สำเร็จ",
-          description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("products.delete.failed", "ลบประกาศไม่สำเร็จ"),
+          description: listingErrorMessage(error, t("products.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   }
@@ -187,13 +189,13 @@ export function ProductsContent() {
       {
         onSuccess: () => {
           setIsDeleteOpen(false);
-          toast.add({ type: "success", title: "พักการขายแล้ว" });
+          toast.add({ type: "success", title: t("products.pause.success", "พักการขายแล้ว") });
         },
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "พักการขายไม่สำเร็จ",
-            description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("products.pause.failed", "พักการขายไม่สำเร็จ"),
+            description: listingErrorMessage(error, t("products.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -208,11 +210,11 @@ export function ProductsContent() {
     bulk.mutate(jobs, {
       onSuccess: ({ succeeded, failed }) => {
         setSelectedIds(failed.map((failure) => failure.id));
-        const parts = [`สำเร็จ ${succeeded} รายการ`];
-        if (skipped > 0) parts.push(`ข้าม ${skipped} รายการที่ทำไม่ได้`);
+        const parts = [t("products.bulk.succeeded", "สำเร็จ {count} รายการ", { count: succeeded })];
+        if (skipped > 0) parts.push(t("products.bulk.skipped", "ข้าม {count} รายการที่ทำไม่ได้", { count: skipped }));
         if (failed.length > 0) {
           parts.push(
-            `ไม่สำเร็จ ${failed.length} รายการ: ${listingErrorMessage(failed[0].error, "ลองใหม่อีกครั้ง")}`,
+            t("products.bulk.failed", "ไม่สำเร็จ {count} รายการ: {reason}", { count: failed.length, reason: listingErrorMessage(failed[0].error, t("products.tryAgain", "ลองใหม่อีกครั้ง")) }),
           );
         }
         toast.add({
@@ -229,7 +231,7 @@ export function ProductsContent() {
       target === "ACTIVE" ? canActivate(row) : canMoveTo(row, target),
     );
     runBulk(
-      target === "ACTIVE" ? "เปิดขาย" : "พักการขาย",
+      target === "ACTIVE" ? t("products.actions.activate", "เปิดขาย") : t("products.actions.pause", "พักการขาย"),
       eligible.map((row) => ({ id: row.id, status: target })),
     );
   }
@@ -237,7 +239,7 @@ export function ProductsContent() {
   function handleBulkPrice(percent: number) {
     setIsBulkPriceOpen(false);
     runBulk(
-      "ปรับราคา",
+      t("products.bulkPrice.adjust", "ปรับราคา"),
       selectedRows
         .filter(canBulkReprice)
         .map((row) => ({ id: row.id, price: adjustPrice(row.price, percent) })),
@@ -262,19 +264,19 @@ export function ProductsContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">จัดการสินค้า</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("products.title", "จัดการสินค้า")}</h1>
           <p className="text-xs text-gray-500">
             {counts.isPending
-              ? "กำลังนับประกาศ…"
-              : `ประกาศทั้งหมด ${counts.total} รายการ · พร้อมขาย ${counts.counts.ACTIVE} · หมดสต็อก ${counts.counts.SOLD_OUT} · ฉบับร่าง ${counts.counts.DRAFT}`}
+              ? t("products.subtitle.counting", "กำลังนับประกาศ…")
+              : t("products.subtitle.summary", "ประกาศทั้งหมด {total} รายการ · พร้อมขาย {active} · หมดสต็อก {soldOut} · ฉบับร่าง {draft}", { total: counts.total, active: counts.counts.ACTIVE, soldOut: counts.counts.SOLD_OUT, draft: counts.counts.DRAFT })}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="rounded-md px-2.5">
-            นำเข้า CSV
+            {t("products.importCsv", "นำเข้า CSV")}
           </Button>
-          <CreateListingButton label="+ ลงขายสินค้าใหม่" />
+          <CreateListingButton label={t("products.createListing", "+ ลงขายสินค้าใหม่")} />
         </div>
       </div>
 
@@ -309,17 +311,17 @@ export function ProductsContent() {
       <QueryBoundary
         query={listings}
         loading={<ProductTableSkeleton />}
-        errorTitle="โหลดรายการสินค้าไม่สำเร็จ"
+        errorTitle={t("products.loadFailed", "โหลดรายการสินค้าไม่สำเร็จ")}
         isEmpty={(page) => page.items.length === 0}
         empty={
           search ? (
             <EmptyState
               icon={PackageSearch}
-              title={`ไม่พบประกาศที่ตรงกับ "${search}"`}
+              title={t("products.empty.search", "ไม่พบประกาศที่ตรงกับ \"{search}\"", { search })}
               description={
                 status
-                  ? `ค้นเฉพาะสถานะ${LISTING_STATUS_LABEL[status]} — ลองคำอื่น หรือค้นทุกสถานะ`
-                  : "ค้นจากชื่อการ์ด ชื่อภาษาท้องถิ่น เลขการ์ด SKU และป้ายล็อต"
+                  ? t("products.empty.searchInStatus", "ค้นเฉพาะสถานะ{status} — ลองคำอื่น หรือค้นทุกสถานะ", { status: LISTING_STATUS_LABEL[status] })
+                  : t("products.empty.searchHint", "ค้นจากชื่อการ์ด ชื่อภาษาท้องถิ่น เลขการ์ด SKU และป้ายล็อต")
               }
             >
               <Button
@@ -328,7 +330,7 @@ export function ProductsContent() {
                 className="rounded-md px-2.5"
                 onClick={() => updateParams({ q: "" })}
               >
-                ล้างคำค้น
+                {t("products.empty.clearSearch", "ล้างคำค้น")}
               </Button>
               {status ? (
                 <Button
@@ -337,15 +339,15 @@ export function ProductsContent() {
                   className="rounded-md px-2.5"
                   onClick={() => updateParams({ status: null })}
                 >
-                  ค้นทุกสถานะ
+                  {t("products.empty.searchAll", "ค้นทุกสถานะ")}
                 </Button>
               ) : null}
             </EmptyState>
           ) : status ? (
             <EmptyState
               icon={PackageSearch}
-              title={`ไม่มีประกาศที่${LISTING_STATUS_LABEL[status]}`}
-              description="ลองเลือกสถานะอื่น หรือดูทั้งหมด"
+              title={t("products.empty.status", "ไม่มีประกาศที่{status}", { status: LISTING_STATUS_LABEL[status] })}
+              description={t("products.empty.statusHint", "ลองเลือกสถานะอื่น หรือดูทั้งหมด")}
             >
               <Button
                 variant="outline"
@@ -353,15 +355,15 @@ export function ProductsContent() {
                 className="rounded-md px-2.5"
                 onClick={() => updateParams({ status: null })}
               >
-                ดูทั้งหมด
+                {t("products.empty.viewAll", "ดูทั้งหมด")}
               </Button>
             </EmptyState>
           ) : (
             <EmptyState
-              title="ยังไม่มีประกาศขาย"
-              description="ลงขายการ์ดใบแรกแล้วประกาศจะขึ้นที่นี่"
+              title={t("products.empty.title", "ยังไม่มีประกาศขาย")}
+              description={t("products.empty.description", "ลงขายการ์ดใบแรกแล้วประกาศจะขึ้นที่นี่")}
             >
-              <CreateListingButton label="+ ลงขายสินค้าใหม่" />
+              <CreateListingButton label={t("products.createListing", "+ ลงขายสินค้าใหม่")} />
             </EmptyState>
           )
         }

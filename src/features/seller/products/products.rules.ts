@@ -1,5 +1,6 @@
 import { roundMoney } from "./products.format";
 import type { ListingStatus, SellerListingSummary } from "./products.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ผู้ขายย้ายประกาศจากสถานะหนึ่งไปไหนได้บ้าง — ลอกจาก `ListingStatus.sellerTargets()`
@@ -57,10 +58,10 @@ export function deleteBlockedReason(
   listing: SellerListingSummary,
 ): string | null {
   if (listing.status === "BLOCKED") {
-    return "ประกาศที่แอดมินระงับไว้ลบไม่ได้";
+    return translate("seller", "products.rules.deleteBlocked", "ประกาศที่แอดมินระงับไว้ลบไม่ได้");
   }
   if (listing.quantityReserved > 0) {
-    return `มีการ์ดติดจอง ${listing.quantityReserved} ใบในคำสั่งซื้อที่ยังไม่ปิด ลบได้หลังคำสั่งซื้อจบ`;
+    return translate("seller", "products.rules.deleteReserved", "มีการ์ดติดจอง {count} ใบในคำสั่งซื้อที่ยังไม่ปิด ลบได้หลังคำสั่งซื้อจบ", { count: listing.quantityReserved });
   }
   return null;
 }
@@ -78,10 +79,10 @@ export function activateBlockedReason(
   listing: SellerListingSummary,
 ): string | null {
   if (!listing.card.variantActive) {
-    return "การ์ดพิมพ์นี้ถูกปิดในแคตตาล็อกแล้ว";
+    return translate("seller", "products.rules.variantInactive", "การ์ดพิมพ์นี้ถูกปิดในแคตตาล็อกแล้ว");
   }
   if (listing.status === "DRAFT" && listing.quantityAvailable === 0) {
-    return "ยังไม่มีการ์ดบนประกาศ เติมสต็อกก่อน";
+    return translate("seller", "products.rules.noStock", "ยังไม่มีการ์ดบนประกาศ เติมสต็อกก่อน");
   }
   return null;
 }
@@ -95,3 +96,9 @@ export function canBulkReprice(listing: SellerListingSummary): boolean {
 export function adjustPrice(price: number, percent: number): number {
   return Math.max(0.01, roundMoney(price * (1 + percent / 100)));
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.rules.deleteBlocked", "ns": "seller", "defaultValue": "ประกาศที่แอดมินระงับไว้ลบไม่ได้"}
+// @tolgee-key {"key": "products.rules.deleteReserved", "ns": "seller", "defaultValue": "มีการ์ดติดจอง {count} ใบในคำสั่งซื้อที่ยังไม่ปิด ลบได้หลังคำสั่งซื้อจบ"}
+// @tolgee-key {"key": "products.rules.variantInactive", "ns": "seller", "defaultValue": "การ์ดพิมพ์นี้ถูกปิดในแคตตาล็อกแล้ว"}
+// @tolgee-key {"key": "products.rules.noStock", "ns": "seller", "defaultValue": "ยังไม่มีการ์ดบนประกาศ เติมสต็อกก่อน"}

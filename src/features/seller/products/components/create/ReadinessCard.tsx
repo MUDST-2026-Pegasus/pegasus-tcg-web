@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 export type ReadinessItem = {
   id: string;
@@ -19,7 +20,9 @@ type ReadinessCardProps = {
 };
 
 /** "พร้อมลงขายหรือยัง" — คำนวณจากค่าในฟอร์ม ติ๊กเองไม่ได้ */
-export function ReadinessCard({ items, title = "พร้อมลงขายหรือยัง" }: ReadinessCardProps) {
+export function ReadinessCard({ items, title }: ReadinessCardProps) {
+  const { t } = useTranslate("seller");
+  title ??= t("products.create.readiness.title", "พร้อมลงขายหรือยัง");
   const required = items.filter((item) => !item.optional);
   const doneCount = required.filter((item) => item.done).length;
   const isAllDone = doneCount === required.length;
@@ -57,7 +60,7 @@ export function ReadinessCard({ items, title = "พร้อมลงขาย�
               )}
             >
               {item.done ? item.doneLabel : item.pendingLabel}
-              {item.optional && !item.done ? " (ไม่บังคับ)" : ""}
+              {item.optional && !item.done ? t("products.create.readiness.optional", " (ไม่บังคับ)") : ""}
             </p>
           </li>
         ))}
