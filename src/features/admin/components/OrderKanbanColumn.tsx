@@ -6,6 +6,7 @@ import { ORDER_COLUMN_META } from "../orders.format";
 import type { AdminOrderSummary, OrderBoardColumn } from "../orders.types";
 import { OrderColumnCard } from "./OrderColumnCard";
 import { ORDER_TONE_DOT } from "./orders.styles";
+import { useTranslate } from "@/lib/i18n";
 
 type OrderKanbanColumnProps = {
   column: OrderBoardColumn;
@@ -22,6 +23,7 @@ export function OrderKanbanColumn({
   onSelect,
   onShowMore,
 }: OrderKanbanColumnProps) {
+  const { t } = useTranslate("admin");
   const meta = ORDER_COLUMN_META[column.key];
   const hasMore = column.count > column.items.length;
 
@@ -45,7 +47,7 @@ export function OrderKanbanColumn({
 
       {column.items.length === 0 ? (
         <p className="rounded-[10px] border border-dashed border-border px-3 py-6 text-center text-[11px] text-muted-foreground">
-          ยังไม่มีคำสั่งซื้อในสถานะนี้
+          {t("orders.column.empty", "ยังไม่มีคำสั่งซื้อในสถานะนี้")}
         </p>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -67,7 +69,7 @@ export function OrderKanbanColumn({
           onClick={() => onShowMore(column)}
           className="h-[31px] rounded-[10px] border-dashed border-border bg-transparent text-[11px] font-medium text-muted-foreground shadow-none hover:bg-[#fafbfb]"
         >
-          ดูเพิ่มเติม
+          {t("orders.column.more", "ดูเพิ่มเติม")}
         </Button>
       ) : null}
     </section>

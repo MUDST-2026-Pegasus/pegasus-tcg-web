@@ -25,14 +25,23 @@ import {
 } from "./FinanceShared";
 import { RefundDetail } from "./RefundDetail";
 import { SellerQueueSkeleton } from "./SellerQueueSkeleton";
+import { useTranslate, translate } from "@/lib/i18n";
 
 type RefundTab = Extract<RefundStatus, "APPROVED" | "PROCESSING" | "PROCESSED"> | "ALL";
 
 const QUEUE_TITLE: Record<RefundTab, string> = {
-  APPROVED: "คิวพร้อมโอน",
-  PROCESSING: "กำลังโอน",
-  PROCESSED: "โอนแล้ว",
-  ALL: "ทั้งหมด",
+  get APPROVED() {
+    return translate("admin", "refunds.queue.approved", "คิวพร้อมโอน");
+  },
+  get PROCESSING() {
+    return translate("admin", "refunds.queue.processing", "กำลังโอน");
+  },
+  get PROCESSED() {
+    return translate("admin", "refunds.queue.processed", "โอนแล้ว");
+  },
+  get ALL() {
+    return translate("admin", "refunds.queue.all", "ทั้งหมด");
+  },
 };
 
 /**
@@ -41,6 +50,7 @@ const QUEUE_TITLE: Record<RefundTab, string> = {
  * อ้างจาก Figma node 1913:2813
  */
 export function AdminRefundsContent() {
+  const { t } = useTranslate("admin");
   const [tab, setTab] = useState<RefundTab>("APPROVED");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -94,12 +104,12 @@ export function AdminRefundsContent() {
     }
     if (refund.failedAttempts > 0 && refund.status !== "PROCESSED") {
       badges.push({
-        label: `โอนพลาด ${refund.failedAttempts} ครั้ง`,
+        label: t("refunds.failedAttempts", "โอนพลาด {count} ครั้ง", { count: refund.failedAttempts }),
         className: "bg-[#fbe9e8] text-[#d0342c]",
       });
     }
     if (!refund.accountNumber && refund.status === "APPROVED" && refund.method === "BANK_TRANSFER") {
-      badges.push({ label: "ยังไม่ระบุบัญชี", className: "bg-[#fdf0dd] text-[#b45309]" });
+      badges.push({ label: t("refunds.noAccount", "ยังไม่ระบุบัญชี"), className: "bg-[#fdf0dd] text-[#b45309]" });
     }
     return badges;
   };
@@ -107,15 +117,15 @@ export function AdminRefundsContent() {
   const sourceText = (refund: AdminRefund) =>
     refund.returnRequestId !== null
       ? refund.resolution === "PARTIAL_REFUND"
-        ? "คืนสินค้าบางส่วน"
-        : "คืนสินค้าเต็มจำนวน"
-      : "ยกเลิกคำสั่งซื้อ";
+        ? t("refunds.source.partial", "คืนสินค้าบางส่วน")
+        : t("refunds.source.full", "คืนสินค้าเต็มจำนวน")
+      : t("refunds.source.cancel", "ยกเลิกคำสั่งซื้อ");
 
   return (
     <div className="flex flex-col gap-6">
       <FinancePageHeader
-        title="คืนเงินผู้ซื้อ"
-        description="รายการคืนเงินที่ระบบสร้างจากการยกเลิกคำสั่งซื้อและการคืนสินค้า · admin โอนคืนเข้าบัญชีที่ผู้ซื้อระบุ"
+        title={t("refunds.title", "คืนเงินผู้ซื้อ")}
+        description={t("refunds.description", "รายการคืนเงินที่ระบบสร้างจากการยกเลิกคำสั่งซื้อและการคืนสินค้า · admin โอนคืนเข้าบัญชีที่ผู้ซื้อระบุ")}
         onExport={exportCsv}
         exportDisabled={refunds.length === 0}
       />
@@ -123,8 +133,7 @@ export function AdminRefundsContent() {
       <div className="flex items-start gap-2.5 rounded-xl bg-[#e8f1fc] px-4 py-3 text-xs text-[#0058bc]">
         <Info className="mt-px size-4 shrink-0" />
         <p>
-          ไม่มีปุ่มขอคืนเงินโดยตรง — ระบบสร้างรายการคืนเงินให้เองเมื่อ (1) คำสั่งซื้อที่ชำระแล้วถูกยกเลิก หรือ
-          (2) ผู้ขายอนุมัติการคืนสินค้า · ผู้ซื้อต้องระบุบัญชีรับเงินก่อน admin จะเริ่มโอนได้
+          {t("refunds.notice", "ไม่มีปุ่มขอคืนเงินโดยตรง — ระบบสร้างรายการคืนเงินให้เองเมื่อ (1) คำสั่งซื้อที่ชำระแล้วถูกยกเลิก หรือ (2) ผู้ขายอนุมัติการคืนสินค้า · ผู้ซื้อต้องระบุบัญชีรับเงินก่อน admin จะเริ่มโอนได้")}
         </p>
       </div>
 
@@ -132,15 +141,15 @@ export function AdminRefundsContent() {
         isLoading={summary.isPending}
         isError={summary.isError}
         stats={[
-          { label: "พร้อมโอน", value: String(counts?.ready ?? 0), dotClass: "bg-[#b45309]", emphasized: true },
-          { label: "กำลังโอน", value: String(counts?.processing ?? 0), dotClass: "bg-[#12805c]" },
+          { label: t("refunds.stats.ready", "พร้อมโอน"), value: String(counts?.ready ?? 0), dotClass: "bg-[#b45309]", emphasized: true },
+          { label: t("refunds.stats.processing", "กำลังโอน"), value: String(counts?.processing ?? 0), dotClass: "bg-[#12805c]" },
           {
-            label: "โอนไม่สำเร็จ · รอผู้ซื้อแก้บัญชี",
+            label: t("refunds.stats.failed", "โอนไม่สำเร็จ · รอผู้ซื้อแก้บัญชี"),
             value: String(counts?.failedAwaitingBuyer ?? 0),
             dotClass: "bg-[#d0342c]",
           },
           {
-            label: "โอนแล้วเดือนนี้",
+            label: t("refunds.stats.processedThisMonth", "โอนแล้วเดือนนี้"),
             value: `${counts?.processedThisMonth ?? 0} · ${formatBahtShort(counts?.processedAmountThisMonth ?? 0)}`,
             dotClass: "bg-[#9aa5ad]",
           },
@@ -149,16 +158,16 @@ export function AdminRefundsContent() {
 
       <FinanceTabs<RefundTab>
         tabs={[
-          { value: "APPROVED", label: `พร้อมโอน (${counts?.ready ?? 0})` },
-          { value: "PROCESSING", label: `กำลังโอน (${counts?.processing ?? 0})` },
-          { value: "PROCESSED", label: "โอนแล้ว" },
-          { value: "ALL", label: "ทั้งหมด" },
+          { value: "APPROVED", label: t("refunds.tabs.ready", "พร้อมโอน ({count})", { count: counts?.ready ?? 0 }) },
+          { value: "PROCESSING", label: t("refunds.tabs.processing", "กำลังโอน ({count})", { count: counts?.processing ?? 0 }) },
+          { value: "PROCESSED", label: t("refunds.queue.processed", "โอนแล้ว") },
+          { value: "ALL", label: t("refunds.queue.all", "ทั้งหมด") },
         ]}
         active={tab}
         onChange={changeTab}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="ค้นหา RF / ORD / ชื่อผู้ซื้อ"
+        searchPlaceholder={t("refunds.searchPlaceholder", "ค้นหา RF / ORD / ชื่อผู้ซื้อ")}
       />
 
       <div className="flex flex-col items-start gap-6 lg:flex-row">
@@ -166,14 +175,14 @@ export function AdminRefundsContent() {
           <QueryBoundary
             query={queue}
             loading={<SellerQueueSkeleton />}
-            errorTitle="โหลดรายการคืนเงินไม่สำเร็จ"
-            errorMessage="ตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+            errorTitle={t("refunds.loadFailed", "โหลดรายการคืนเงินไม่สำเร็จ")}
+            errorMessage={t("finance.checkConnection", "ตรวจสอบการเชื่อมต่อแล้วลองใหม่")}
             isEmpty={() => refunds.length === 0}
             empty={
               <EmptyState
                 icon={Inbox}
-                title={search ? "ไม่พบรายการที่ค้นหา" : `ไม่มีรายการใน "${QUEUE_TITLE[tab]}"`}
-                description={search ? "ลองค้นด้วยเลข RF, เลขคำสั่งซื้อ หรือชื่อผู้ซื้อ" : "รายการคืนเงินจะขึ้นที่นี่เมื่อระบบสร้างให้"}
+                title={search ? t("finance.noSearchMatch", "ไม่พบรายการที่ค้นหา") : t("refunds.emptyQueue", "ไม่มีรายการใน \"{queue}\"", { queue: QUEUE_TITLE[tab] })}
+                description={search ? t("refunds.searchHint", "ลองค้นด้วยเลข RF, เลขคำสั่งซื้อ หรือชื่อผู้ซื้อ") : t("refunds.emptyDescription", "รายการคืนเงินจะขึ้นที่นี่เมื่อระบบสร้างให้")}
               />
             }
           >
@@ -181,7 +190,7 @@ export function AdminRefundsContent() {
               <>
                 <FinanceQueueHeader
                   title={`${QUEUE_TITLE[tab]} (${refunds.length})`}
-                  sortLabel={tab === "ALL" ? "เรียงตาม: ใหม่สุด" : "เรียงตาม: เก่าสุด"}
+                  sortLabel={tab === "ALL" ? t("finance.sortNewest", "เรียงตาม: ใหม่สุด") : t("finance.sortOldest", "เรียงตาม: เก่าสุด")}
                 />
                 <ul className="flex flex-col gap-3">
                   {refunds.map((refund) => (
@@ -215,9 +224,14 @@ export function AdminRefundsContent() {
             }}
           />
         ) : (
-          <FinanceDetailPlaceholder>เลือกรายการคืนเงินจากคิวทางซ้ายเพื่อดูบัญชีและโอนคืน</FinanceDetailPlaceholder>
+          <FinanceDetailPlaceholder>{t("refunds.placeholder", "เลือกรายการคืนเงินจากคิวทางซ้ายเพื่อดูบัญชีและโอนคืน")}</FinanceDetailPlaceholder>
         )}
       </div>
     </div>
   );
 }
+
+// @tolgee-key {"key": "refunds.queue.approved", "ns": "admin", "defaultValue": "คิวพร้อมโอน"}
+// @tolgee-key {"key": "refunds.queue.processing", "ns": "admin", "defaultValue": "กำลังโอน"}
+// @tolgee-key {"key": "refunds.queue.processed", "ns": "admin", "defaultValue": "โอนแล้ว"}
+// @tolgee-key {"key": "refunds.queue.all", "ns": "admin", "defaultValue": "ทั้งหมด"}

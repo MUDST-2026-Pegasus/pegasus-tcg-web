@@ -24,6 +24,7 @@ import {
 import { PaymentSlipDetail } from "./PaymentSlipDetail";
 import { SellerQueueSkeleton } from "./SellerQueueSkeleton";
 import { SlipModeCard } from "./SlipModeCard";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * หน้า "ตรวจสอบสลิปชำระเงิน" — คิว `AWAITING_VERIFICATION` เรียงใกล้หมดเวลาชำระก่อน
@@ -31,6 +32,7 @@ import { SlipModeCard } from "./SlipModeCard";
  * อ้างจาก Figma node 1913:2482
  */
 export function AdminPaymentReviewContent() {
+  const { t } = useTranslate("admin");
   const queue = usePaymentQueue();
   const summary = usePaymentSummary();
   const verify = useVerifyPayment();
@@ -58,18 +60,18 @@ export function AdminPaymentReviewContent() {
         onSuccess: () => {
           toast.add({
             type: "success",
-            title: approved ? "อนุมัติการชำระเงินแล้ว" : "ปฏิเสธสลิปแล้ว",
+            title: approved ? t("payments.approved", "อนุมัติการชำระเงินแล้ว") : t("payments.rejected", "ปฏิเสธสลิปแล้ว"),
             description: approved
-              ? `เงิน ${formatBahtShort(payment.amount)} ถูกพักใน escrow ของแต่ละร้านแล้ว`
-              : "ผู้ซื้อต้องสร้างรายการชำระใหม่",
+              ? t("payments.approvedHint", "เงิน {amount} ถูกพักใน escrow ของแต่ละร้านแล้ว", { amount: formatBahtShort(payment.amount) })
+              : t("payments.rejectedHint", "ผู้ซื้อต้องสร้างรายการชำระใหม่"),
           });
           setSelectedId(next?.id ?? null);
         },
         onError: (error) =>
           toast.add({
             type: "error",
-            title: approved ? "อนุมัติไม่สำเร็จ" : "ปฏิเสธไม่สำเร็จ",
-            description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: approved ? t("payments.approveFailed", "อนุมัติไม่สำเร็จ") : t("payments.rejectFailed", "ปฏิเสธไม่สำเร็จ"),
+            description: financeErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -96,15 +98,15 @@ export function AdminPaymentReviewContent() {
     ];
     if (payment.splits.length > 1) {
       badges.push({
-        label: `${payment.splits.length} ร้านค้า`,
+        label: t("payments.shops", "{count} ร้านค้า", { count: payment.splits.length }),
         className: "bg-muted text-muted-foreground",
       });
     }
     if (payment.id === selected?.id) {
-      badges.push({ label: "กำลังดู", className: "rounded-full bg-[#e8f1fc] text-[11px] text-[#0058bc]" });
+      badges.push({ label: t("payments.viewing", "กำลังดู"), className: "rounded-full bg-[#e8f1fc] text-[11px] text-[#0058bc]" });
     } else if (isNearDeadline(payment.expiresAt)) {
       badges.push({
-        label: "ใกล้หมดเวลาชำระ",
+        label: t("payments.nearDeadline", "ใกล้หมดเวลาชำระ"),
         className: "rounded-full bg-[#fdf0dd] text-[11px] text-[#b45309]",
       });
     }
@@ -114,8 +116,8 @@ export function AdminPaymentReviewContent() {
   return (
     <div className="flex flex-col gap-6">
       <FinancePageHeader
-        title="ตรวจสอบสลิปชำระเงิน"
-        description="ตรวจสลิปโอนเงินของผู้ซื้อก่อนยืนยันคำสั่งซื้อ · อนุมัติแล้วเงินจะถูกพักไว้ใน escrow แยกตามร้านค้า"
+        title={t("payments.title", "ตรวจสอบสลิปชำระเงิน")}
+        description={t("payments.description", "ตรวจสลิปโอนเงินของผู้ซื้อก่อนยืนยันคำสั่งซื้อ · อนุมัติแล้วเงินจะถูกพักไว้ใน escrow แยกตามร้านค้า")}
         onExport={exportCsv}
         exportDisabled={payments.length === 0}
       />
@@ -127,14 +129,14 @@ export function AdminPaymentReviewContent() {
         isError={summary.isError}
         stats={[
           {
-            label: "รอตรวจสลิป",
+            label: t("payments.stats.awaiting", "รอตรวจสลิป"),
             value: String(counts?.awaitingVerification ?? 0),
             dotClass: "bg-[#b45309]",
             emphasized: true,
           },
-          { label: "อนุมัติวันนี้", value: String(counts?.approvedToday ?? 0), dotClass: "bg-[#12805c]" },
-          { label: "ปฏิเสธวันนี้", value: String(counts?.rejectedToday ?? 0), dotClass: "bg-[#d0342c]" },
-          { label: "รอผู้ซื้อโอน", value: String(counts?.awaitingTransfer ?? 0), dotClass: "bg-[#9aa5ad]" },
+          { label: t("payments.stats.approvedToday", "อนุมัติวันนี้"), value: String(counts?.approvedToday ?? 0), dotClass: "bg-[#12805c]" },
+          { label: t("payments.stats.rejectedToday", "ปฏิเสธวันนี้"), value: String(counts?.rejectedToday ?? 0), dotClass: "bg-[#d0342c]" },
+          { label: t("payments.stats.awaitingTransfer", "รอผู้ซื้อโอน"), value: String(counts?.awaitingTransfer ?? 0), dotClass: "bg-[#9aa5ad]" },
         ]}
       />
 
@@ -143,22 +145,22 @@ export function AdminPaymentReviewContent() {
           <QueryBoundary
             query={queue}
             loading={<SellerQueueSkeleton />}
-            errorTitle="โหลดคิวสลิปไม่สำเร็จ"
-            errorMessage="ตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+            errorTitle={t("payments.loadFailed", "โหลดคิวสลิปไม่สำเร็จ")}
+            errorMessage={t("finance.checkConnection", "ตรวจสอบการเชื่อมต่อแล้วลองใหม่")}
             isEmpty={(data) => data.length === 0}
             empty={
               <EmptyState
                 icon={Inbox}
-                title="ไม่มีสลิปรอตรวจ"
-                description="เมื่อผู้ซื้อแนบสลิป รายการจะขึ้นที่นี่โดยเรียงใกล้หมดเวลาชำระก่อน"
+                title={t("payments.emptyTitle", "ไม่มีสลิปรอตรวจ")}
+                description={t("payments.emptyDescription", "เมื่อผู้ซื้อแนบสลิป รายการจะขึ้นที่นี่โดยเรียงใกล้หมดเวลาชำระก่อน")}
               />
             }
           >
             {() => (
               <>
                 <FinanceQueueHeader
-                  title={`คิวรอตรวจสลิป (${payments.length})`}
-                  sortLabel="เรียงตาม: ใกล้หมดเวลา"
+                  title={t("payments.queueTitle", "คิวรอตรวจสลิป ({count})", { count: payments.length })}
+                  sortLabel={t("payments.sortDeadline", "เรียงตาม: ใกล้หมดเวลา")}
                 />
                 <ul className="flex flex-col gap-3">
                   {payments.map((payment) => (
@@ -166,7 +168,7 @@ export function AdminPaymentReviewContent() {
                       <FinanceQueueCard
                         party={payment.buyer}
                         title={payment.buyer.username}
-                        subtitle={`PAY-${payment.id} · สร้างรายการ ${formatAgo(payment.createdAt)}`}
+                        subtitle={t("payments.queueSubtitle", "PAY-{id} · สร้างรายการ {ago}", { id: payment.id, ago: formatAgo(payment.createdAt) })}
                         amount={formatBahtShort(payment.amount)}
                         badges={badgesFor(payment)}
                         active={payment.id === selected?.id}
@@ -196,7 +198,7 @@ export function AdminPaymentReviewContent() {
             onSkip={payments.length > 1 ? () => setSelectedId(nextAfter(selected.id)?.id ?? null) : null}
           />
         ) : (
-          <FinanceDetailPlaceholder>เลือกสลิปจากคิวทางซ้ายเพื่อตรวจและตัดสิน</FinanceDetailPlaceholder>
+          <FinanceDetailPlaceholder>{t("payments.placeholder", "เลือกสลิปจากคิวทางซ้ายเพื่อตรวจและตัดสิน")}</FinanceDetailPlaceholder>
         )}
       </div>
     </div>

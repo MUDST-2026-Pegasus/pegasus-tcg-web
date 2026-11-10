@@ -40,6 +40,13 @@ const I18N_GUARDED = [
   'src/features/cart/**/*.{ts,tsx}',
   'src/features/payment/**/*.{ts,tsx}',
   'src/features/account/**/*.{ts,tsx}',
+  // I18N-17 (TCG-557) — admin: การเงิน (สลิป คืนเงิน ถอนเงิน คอมมิชชั่น) และภาพรวมคำสั่งซื้อ
+  'src/features/admin/pages/Admin{Commission,Orders,Payments,Payouts,Refunds}Page.tsx',
+  'src/features/admin/{finance,orders}.format.ts',
+  'src/features/admin/commission-rule.form.ts',
+  'src/features/admin/components/{AdminOrdersContent,AdminPaymentReviewContent,AdminPayoutsContent,AdminRefundsContent,FinanceReasonDialog,FinanceShared,OrderBoardSkeleton,OrderColumnCard,OrderDetailSheet,OrderKanbanColumn,OrderListSheet,PaymentSlipDetail,PayoutDetail,RefundDetail,SlipModeCard}.tsx',
+  'src/features/admin/components/Commission*.tsx',
+  'src/features/admin/components/orders.styles.ts',
 ]
 // ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
 const I18N_PENDING = [

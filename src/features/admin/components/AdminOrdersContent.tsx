@@ -20,12 +20,14 @@ import { OrderBoardSkeleton } from "./OrderBoardSkeleton";
 import { OrderDetailSheet } from "./OrderDetailSheet";
 import { OrderKanbanColumn } from "./OrderKanbanColumn";
 import { OrderListSheet } from "./OrderListSheet";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * ภาพรวมคำสั่งซื้อทั้งแพลตฟอร์ม — Kanban 5 คอลัมน์จาก `/admin/orders/board`
  * กดการ์ดเปิดรายละเอียด, "ดูเพิ่มเติม" เปิดรายการเต็มของคอลัมน์นั้น
  */
 export function AdminOrdersContent() {
+  const { t } = useTranslate("admin");
   const board = useOrderBoard();
   const [listColumn, setListColumn] = useState<OrderBoardColumn | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -49,10 +51,10 @@ export function AdminOrdersContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            ภาพรวมคำสั่งซื้อ
+            {t("orders.title", "ภาพรวมคำสั่งซื้อ")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
-            ติดตามคำสั่งซื้อทั้งแพลตฟอร์มตามสถานะ · เงินของผู้ซื้อพักไว้กับแพลตฟอร์มจนกว่าผู้ซื้อจะได้รับสินค้า
+            {t("orders.description", "ติดตามคำสั่งซื้อทั้งแพลตฟอร์มตามสถานะ · เงินของผู้ซื้อพักไว้กับแพลตฟอร์มจนกว่าผู้ซื้อจะได้รับสินค้า")}
           </p>
         </div>
 
@@ -61,32 +63,32 @@ export function AdminOrdersContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออก CSV
+                {t("finance.exportCsv", "ส่งออก CSV")}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้</TooltipContent>
+            <TooltipContent>{t("orders.exportUnavailable", "ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้")}</TooltipContent>
           </Tooltip>
           <Button
             className="rounded-md px-2.5"
             disabled={!disputes}
             onClick={() => disputes && setListColumn(disputes)}
           >
-            จัดการข้อพิพาท
+            {t("orders.disputes", "จัดการข้อพิพาท")}
           </Button>
         </div>
       </div>
 
       {searchedOrder && <div className="rounded-xl border bg-card p-4 text-sm">
-        <h2 className="font-semibold">คำสั่งซื้อ {searchedOrder}</h2>
-        {orderMatches.isPending && <p className="mt-2 text-muted-foreground">กำลังค้นหาคำสั่งซื้อ...</p>}
-        {orderMatches.isError && <p role="alert" className="mt-2 text-destructive">ค้นหาคำสั่งซื้อไม่สำเร็จ <button onClick={() => void orderMatches.refetch()}>ลองอีกครั้ง</button></p>}
-        {orderMatches.data && <div className="mt-2 grid gap-2">{orderMatches.data.items.filter((item) => item.orderNumber === searchedOrder).map((item) => <button key={item.sellerOrderId} type="button" className="rounded-lg border p-3 text-left hover:bg-muted" onClick={() => setSelectedId(item.sellerOrderId)}>{item.sellerOrderNumber} · {item.seller.displayName} · {item.status}</button>)}{!orderMatches.data.items.some((item) => item.orderNumber === searchedOrder) && <p className="text-muted-foreground">ไม่พบคำสั่งซื้อหมายเลขนี้</p>}</div>}
+        <h2 className="font-semibold">{t("orders.search.title", "คำสั่งซื้อ {order}", { order: searchedOrder })}</h2>
+        {orderMatches.isPending && <p className="mt-2 text-muted-foreground">{t("orders.search.loading", "กำลังค้นหาคำสั่งซื้อ...")}</p>}
+        {orderMatches.isError && <p role="alert" className="mt-2 text-destructive">{t("orders.search.failed", "ค้นหาคำสั่งซื้อไม่สำเร็จ")} <button onClick={() => void orderMatches.refetch()}>{t("orders.search.retry", "ลองอีกครั้ง")}</button></p>}
+        {orderMatches.data && <div className="mt-2 grid gap-2">{orderMatches.data.items.filter((item) => item.orderNumber === searchedOrder).map((item) => <button key={item.sellerOrderId} type="button" className="rounded-lg border p-3 text-left hover:bg-muted" onClick={() => setSelectedId(item.sellerOrderId)}>{item.sellerOrderNumber} · {item.seller.displayName} · {item.status}</button>)}{!orderMatches.data.items.some((item) => item.orderNumber === searchedOrder) && <p className="text-muted-foreground">{t("orders.search.notFound", "ไม่พบคำสั่งซื้อหมายเลขนี้")}</p>}</div>}
       </div>}
 
       <QueryBoundary
         query={board}
         loading={<OrderBoardSkeleton />}
-        errorTitle="โหลดภาพรวมคำสั่งซื้อไม่สำเร็จ"
+        errorTitle={t("orders.loadFailed", "โหลดภาพรวมคำสั่งซื้อไม่สำเร็จ")}
       >
         {({ columns, alerts }) => {
           const notice = orderAlertNotice(alerts);

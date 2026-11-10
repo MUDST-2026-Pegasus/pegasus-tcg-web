@@ -8,6 +8,7 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@
 import { useAuditLogs } from "../audit.queries";
 import type { AuditLogEntry } from "../audit.types";
 import { ActivityTimeline, ActivityTimelineSkeleton } from "./ActivityTimeline";
+import { useTranslate } from "@/lib/i18n";
 
 /** แถวล่าสุดต่อแหล่ง — ที่เก่ากว่านั้นดูต่อได้ในหน้าบันทึกกิจกรรม */
 const SHOWN = 20;
@@ -25,6 +26,7 @@ type CommissionHistorySheetProps = {
  * ยิงเฉพาะตอนเปิด Sheet
  */
 export function CommissionHistorySheet({ open, onClose, onSelect }: CommissionHistorySheetProps) {
+  const { t } = useTranslate("admin");
   const rules = useAuditLogs({ targetType: ["COMMISSION_RULE"], page: 0, size: SHOWN }, { enabled: open });
   const defaultRate = useAuditLogs(
     { targetType: ["SETTING"], targetId: DEFAULT_RATE_KEY, page: 0, size: SHOWN },
@@ -52,14 +54,14 @@ export function CommissionHistorySheet({ open, onClose, onSelect }: CommissionHi
       >
         <header className="flex items-center border-b border-muted py-[18px] pr-4 pl-6">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <SheetTitle className="text-[15px] font-bold text-foreground">ประวัติการแก้ไขค่าคอมมิชชั่น</SheetTitle>
+            <SheetTitle className="text-[15px] font-bold text-foreground">{t("commission.history.title", "ประวัติการแก้ไขค่าคอมมิชชั่น")}</SheetTitle>
             <SheetDescription className="text-[11px] text-[#9aa5ad]">
-              กฎค่าคอมมิชชั่นและอัตราเริ่มต้น {SHOWN} รายการล่าสุด
+              {t("commission.history.description", "กฎค่าคอมมิชชั่นและอัตราเริ่มต้น {count} รายการล่าสุด", { count: SHOWN })}
             </SheetDescription>
           </div>
           <SheetClose
             render={
-              <Button variant="ghost" size="icon-sm" aria-label="ปิด" className="size-7 rounded-[7px] text-muted-foreground" />
+              <Button variant="ghost" size="icon-sm" aria-label={t("commission.history.close", "ปิด")} className="size-7 rounded-[7px] text-muted-foreground" />
             }
           >
             <X />
@@ -71,7 +73,7 @@ export function CommissionHistorySheet({ open, onClose, onSelect }: CommissionHi
             <div className="p-6">
               <ErrorState
                 error={error}
-                title="โหลดประวัติไม่สำเร็จ"
+                title={t("refunds.history.loadFailed", "โหลดประวัติไม่สำเร็จ")}
                 onRetry={() => {
                   void rules.refetch();
                   void defaultRate.refetch();
@@ -82,7 +84,7 @@ export function CommissionHistorySheet({ open, onClose, onSelect }: CommissionHi
           ) : entries === null ? (
             <ActivityTimelineSkeleton rows={4} />
           ) : entries.length === 0 ? (
-            <p className="px-6 py-10 text-center text-xs text-muted-foreground">ยังไม่มีการแก้ไขค่าคอมมิชชั่น</p>
+            <p className="px-6 py-10 text-center text-xs text-muted-foreground">{t("commission.history.empty", "ยังไม่มีการแก้ไขค่าคอมมิชชั่น")}</p>
           ) : (
             <ActivityTimeline entries={entries} onSelect={onSelect} />
           )}
@@ -90,7 +92,7 @@ export function CommissionHistorySheet({ open, onClose, onSelect }: CommissionHi
 
         <footer className="border-t border-muted px-6 py-3">
           <Button variant="ghost" className="rounded-md px-2.5" render={<Link to="/admin/activity-log?q=commission&range=all" />}>
-            ดูทั้งหมดในบันทึกกิจกรรม
+            {t("commission.history.viewAll", "ดูทั้งหมดในบันทึกกิจกรรม")}
           </Button>
         </footer>
       </SheetContent>
