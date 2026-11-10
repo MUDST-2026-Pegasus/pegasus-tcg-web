@@ -18,6 +18,9 @@
     "reload": "โหลดใหม่",
     "retry": "ลองใหม่"
   },
+  "auth": {
+    "checkingSession": "กำลังตรวจสอบการเข้าสู่ระบบ"
+  },
   "cardLabels": {
     "edition": {
       "notApplicable": "ไม่ระบุ"
@@ -41,6 +44,19 @@
     "pickDateTime": "เลือกวันและเวลา",
     "pickRange": "เลือกช่วงวัน",
     "time": "เวลา"
+  },
+  "home": {
+    "eiei": "โบ๊ทdiwa"
+  },
+  "listing": {
+    "deliveryByShop": "จัดส่งตามเงื่อนไขร้าน",
+    "deliveryNotSet": "ยังไม่ตั้งค่าการจัดส่ง",
+    "freeShipping": "Free shipping",
+    "newShop": "ร้านใหม่",
+    "outOfStock": "Out of stock",
+    "sales": "{count} sales",
+    "shipsInDays": "Ships in {days} days",
+    "shipsTomorrow": "Ships tomorrow"
   },
   "nav": {
     "account": "ACCOUNT",

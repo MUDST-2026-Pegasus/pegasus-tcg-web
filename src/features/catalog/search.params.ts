@@ -16,16 +16,9 @@ import type {
 
 export const SEARCH_PAGE_SIZE = 20;
 
-export const SEARCH_SORTS = [
-  { value: "relevance", label: "Most relevant" },
-  { value: "featured", label: "Featured" },
-  { value: "newest", label: "Newest" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "name", label: "Name: A to Z" },
-] as const;
+export const SEARCH_SORTS = ["relevance", "featured", "newest", "price_asc", "price_desc", "name"] as const;
 
-export type SearchSort = (typeof SEARCH_SORTS)[number]["value"];
+export type SearchSort = (typeof SEARCH_SORTS)[number];
 
 export const SEARCH_CONDITIONS: CardCondition[] = ["NM", "LP", "MP", "HP", "DMG", "SEALED"];
 
@@ -55,7 +48,7 @@ const SORT_TO_API: Record<SearchSort, ProductSort> = {
 };
 
 function isSort(value: string | null): value is SearchSort {
-  return SEARCH_SORTS.some((sort) => sort.value === value);
+  return SEARCH_SORTS.some((sort) => sort === value);
 }
 
 function isCondition(value: string): value is CardCondition {

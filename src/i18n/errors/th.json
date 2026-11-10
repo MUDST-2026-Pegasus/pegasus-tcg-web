@@ -1,6 +1,50 @@
 {
   "ABORTED": "ยกเลิกคำขอแล้ว",
+  "authAlert": {
+    "ACCOUNT_DEACTIVATED": {
+      "description": "Please contact support for help.",
+      "title": "Account is deactivated"
+    },
+    "ACCOUNT_SUSPENDED": {
+      "description": "Please contact support for help.",
+      "title": "Account is suspended"
+    },
+    "EMAIL_ALREADY_USED": {
+      "description": "Please contact support for help.",
+      "title": "This email can't be used"
+    },
+    "GOOGLE_ALREADY_LINKED": {
+      "description": "Please contact support for help.",
+      "title": "This email is linked to another Google account"
+    },
+    "GOOGLE_EMAIL_NOT_VERIFIED": {
+      "description": "Verify your email with Google, then try again.",
+      "title": "Google email not verified"
+    },
+    "GOOGLE_LINK_NOT_ALLOWED": {
+      "description": "An account with this email already exists and can't be linked to Google automatically.",
+      "title": "Please log in with your email and password"
+    },
+    "GOOGLE_SIGNIN_DISABLED": {
+      "description": "Please use your email and password.",
+      "title": "Google sign-in is unavailable"
+    },
+    "GOOGLE_SIGNIN_NOT_ALLOWED": {
+      "description": "Please log in with your email and password.",
+      "title": "Google sign-in isn't available for this account"
+    },
+    "GOOGLE_TOKEN_INVALID": {
+      "description": "Please continue with Google again.",
+      "title": "Google sign-in expired"
+    }
+  },
   "BID_TOO_LOW": "ต้องบิดอย่างน้อย {minNextBid}",
+  "cart": {
+    "mergeFailed": {
+      "description": "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
+      "title": "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ"
+    }
+  },
   "HTTP_500": "ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้ง",
   "HTTP_502": "ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้ง",
   "HTTP_503": "ระบบปิดปรับปรุงชั่วคราว ลองใหม่ภายหลัง",

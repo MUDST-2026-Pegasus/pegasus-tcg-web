@@ -1,5 +1,5 @@
 import type { CardCondition, ProductMarketDto, ProductType, PublicListingDto } from "./catalog.types";
-import { numberFormat } from "@/lib/i18n";
+import { numberFormat, translate } from "@/lib/i18n";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
@@ -36,10 +36,12 @@ const priceFormatter = numberFormat({
 /** null หรือไม่มีค่า = ไม่มีใครขาย */
 export function formatPrice(price: number | null | undefined): string {
   return price === null || price === undefined
-    ? "Out of stock"
+    ? translate("common", "listing.outOfStock", "Out of stock")
     : priceFormatter.format(price);
 }
 export function marketForListing(market: ProductMarketDto[] | undefined, listing: PublicListingDto | undefined) {
   if (!listing) return undefined;
   return market?.find((row) => row.catalogVariantId === listing.card.variantId && row.condition === listing.condition);
 }
+
+// @tolgee-key {"key":"listing.outOfStock","ns":"common","defaultValue":"Out of stock"}

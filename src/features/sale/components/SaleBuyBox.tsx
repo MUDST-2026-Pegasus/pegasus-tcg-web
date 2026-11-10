@@ -26,10 +26,10 @@ import type {
   PublicListingDto,
 } from "@/features/catalog/catalog.types";
 import { buyBoxState, listingTotal } from "@/lib/listing-detail.format";
-import { listingText as t } from "@/lib/listing-detail.messages";
 import { cn } from "@/lib/utils";
 import { notifyAddedAtSalePrice } from "../sale.notify";
 import { untilLabel } from "../sale.format";
+import { useListingText } from "@/lib/listing-detail.messages";
 
 type Listing = PublicListingDto & Partial<PublicListingDetailDto["listing"]>;
 /** Listing buy box. Pricing, quota and limits come from the API; shared sale logic stays here. */
@@ -52,6 +52,7 @@ export function SaleBuyBox({
   ownerActions?: ReactNode;
   delivery?: ReactNode;
 }) {
+  const t = useListingText();
   const auth = useAuth();
   const navigate = useNavigate();
   const state = buyBoxState(listing, auth.user?.username);

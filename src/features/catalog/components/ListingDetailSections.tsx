@@ -33,7 +33,6 @@ import {
   marketHint,
   sortedEffects,
 } from "../listing-detail.format";
-import { listingText as t } from "../listing-detail.messages";
 import type {
   CardSetDto,
   CatalogCardEffectDto,
@@ -45,6 +44,7 @@ import type {
 } from "../catalog.types";
 import { CONDITION_LABELS } from "../catalog.mappers";
 import { cn } from "@/lib/utils";
+import { useListingText } from "@/lib/listing-detail.messages";
 
 export function ListingGallery({
   photos,
@@ -59,6 +59,7 @@ export function ListingGallery({
   grade?: string;
   cert?: string | null;
 }) {
+  const t = useListingText();
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const selected = Math.min(index, Math.max(0, photos.length - 1));
@@ -201,6 +202,7 @@ export function ListingMarketHint({
   market: MarketStatDto | null | undefined;
   price: number;
 }) {
+  const t = useListingText();
   const hint = marketHint(market, price);
   const labels = {
     none: t.noMarket,
@@ -232,7 +234,7 @@ export function ListingMarketHint({
       </span>
       {market?.medianPrice != null && (
         <span className="text-muted-foreground">
-          {t.median} {condition} 30 วัน {formatSaleBaht(market.medianPrice)}
+          {t.medianLine(condition ?? "", formatSaleBaht(market.medianPrice))}
         </span>
       )}
     </div>
@@ -247,6 +249,7 @@ export function InformationGroup({
   title: string;
   rows: Row[];
 }) {
+  const t = useListingText();
   const visible = rows.flatMap(([label, value]) => {
     const text = displayValue(value);
     return text == null ? [] : [[label, text]];
@@ -299,6 +302,7 @@ export function ListingCardInformation({
   cert: string | null;
   errorAction?: ReactNode;
 }) {
+  const t = useListingText();
   const product = data.product;
   const attr = product.attributes ?? {};
   const pokemon = gameCode?.toUpperCase() === "POKEMON";
@@ -498,6 +502,7 @@ export function ListingCardInformation({
 }
 
 export function ListingInformationSkeleton() {
+  const t = useListingText();
   return (
     <section
       aria-label={t.loadingInfo}
@@ -519,6 +524,7 @@ export function ListingInformationSkeleton() {
 }
 
 export function ListingDetailSkeleton() {
+  const t = useListingText();
   return (
     <main
       className="mx-auto max-w-[1280px] space-y-7 px-5 py-7 lg:px-20"

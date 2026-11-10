@@ -22,7 +22,15 @@ const I18N_GUARDED = [
   'src/app/routes/**/*.{ts,tsx}',
   'src/features/home/**/*.{ts,tsx}',
   'src/features/about/**/*.{ts,tsx}',
+  // I18N-11 (TCG-551)
+  'src/features/auth/**/*.{ts,tsx}',
+  'src/features/catalog/**/*.{ts,tsx}',
+  'src/features/store/**/*.{ts,tsx}',
+  'src/features/collection/**/*.{ts,tsx}',
+  'src/lib/listing-detail.messages.ts',
 ]
+// ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23)
+const I18N_PENDING = ['src/features/catalog/components/ProductAuctionBox.tsx', 'src/features/store/components/StorePromotionStrip.tsx']
 const THAI = '/[\\u0E00-\\u0E7F]/'
 // default ของ t() (อาร์กิวเมนต์ใด ๆ ของ t / errorText / errorMessage / msg / translate) ยกเว้นไว้ — นอกนั้นเจอไทยแล้ว error
 const T_CALL = "CallExpression[callee.name=/^(t|errorText|errorMessage|msg|translate)$/]"
@@ -57,6 +65,7 @@ export default defineConfig([
   },
   {
     files: I18N_GUARDED,
+    ignores: I18N_PENDING,
     rules: {
       'no-restricted-syntax': [
         'error',

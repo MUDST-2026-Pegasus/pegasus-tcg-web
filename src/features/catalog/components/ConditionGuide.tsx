@@ -1,4 +1,3 @@
-import { listingText as t } from "@/lib/listing-detail.messages";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { CONDITION_LABELS } from "../catalog.mappers";
 import type { CardCondition } from "../catalog.types";
+import { useListingText } from "@/lib/listing-detail.messages";
 export function ConditionGuide({ condition }: { condition: CardCondition }) {
+  const t = useListingText();
   return (
     <Dialog>
       <DialogTrigger

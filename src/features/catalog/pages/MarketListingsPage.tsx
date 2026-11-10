@@ -27,12 +27,13 @@ function formatMarketPrice(amount: number, currency: string) {
 
 import { RARITY_LABELS } from "@/lib/card-labels";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 export function MarketListingsPage() {
+  const { t } = useTranslate("buyer");
   const { productId } = useParams<{ productId: string }>();
   const productQuery = useProductDetail(productId);
-  usePageTitle(productQuery.data?.product.name && `ประกาศขาย ${productQuery.data.product.name}`);
+  usePageTitle(productQuery.data?.product.name && t("market.pageTitle", "ประกาศขาย {name}", { name: productQuery.data.product.name }));
 
   if (productQuery.isPending) {
     return <MarketListingsSkeleton />;
@@ -42,9 +43,9 @@ export function MarketListingsPage() {
     const notFound = productQuery.error instanceof ApiError && productQuery.error.status === 404;
     return (
       <div role="alert" className="bg-secondary px-5 py-12 text-center">
-        <h1 className="text-xl font-bold">{notFound ? "ไม่พบสินค้านี้" : "โหลดสินค้าไม่สำเร็จ"}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{notFound ? "กรุณาตรวจสอบลิงก์สินค้า" : "กรุณาลองใหม่อีกครั้ง"}</p>
-        {notFound ? <Link className="mt-4 inline-block text-primary underline" to="/products">กลับหน้าสินค้า</Link> : <Button className="mt-4" onClick={() => void productQuery.refetch()}>ลองใหม่</Button>}
+        <h1 className="text-xl font-bold">{notFound ? t("product.notFound", "ไม่พบสินค้านี้") : t("product.loadFailed", "โหลดสินค้าไม่สำเร็จ")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{notFound ? t("market.notFoundHint", "กรุณาตรวจสอบลิงก์สินค้า") : t("market.loadFailedHint", "กรุณาลองใหม่อีกครั้ง")}</p>
+        {notFound ? <Link className="mt-4 inline-block text-primary underline" to="/products">{t("market.backToProducts", "กลับหน้าสินค้า")}</Link> : <Button className="mt-4" onClick={() => void productQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button>}
       </div>
     );
   }
@@ -54,8 +55,9 @@ export function MarketListingsPage() {
 
 /** วางตรงกับ MarketListingsContent — breadcrumb, หัวข้อ, การ์ดสรุปสินค้า, รายการประกาศขาย */
 function MarketListingsSkeleton() {
+  const { t } = useTranslate("buyer");
   return (
-    <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า" className="min-h-full bg-secondary">
+    <div role="status" aria-busy="true" aria-label={t("product.loading", "กำลังโหลดสินค้า")} className="min-h-full bg-secondary">
       <div className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
         <Skeleton className="h-3.5 w-56 rounded-md" />
         <Skeleton className="h-9 w-64 rounded-lg" />
@@ -77,6 +79,7 @@ function MarketListingsSkeleton() {
 }
 
 function MarketListingsContent({ data }: { data: ProductDetailDto }) {
+  const { t } = useTranslate("buyer");
   const { product, images } = data;
   const listingsQuery = useProductListings(product.id);
   const marketQuery = useProductMarket(product.id);
@@ -103,27 +106,27 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
       miniCart.open(opening);
       notifyAddedAtSalePrice(listing.card.productName, 1, listing.pricing);
     } catch (error) {
-      toast.add({ title: "เพิ่มลงรถเข็นไม่สำเร็จ", description: addToCartErrorMessage(error), type: "error" });
+      toast.add({ title: t("product.addToCartFailed", "เพิ่มลงรถเข็นไม่สำเร็จ"), description: addToCartErrorMessage(error), type: "error" });
     }
   }
 
   return (
     <div className="min-h-full bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Home</Link>
+        <nav aria-label={t("product.breadcrumb", "Breadcrumb")} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-primary">{t("nav.home", "Home", { ns: "common" })}</Link>
           <ChevronRight className="size-3.5" />
           <Link to={productHref(product.slug)} className="hover:text-primary">{title}</Link>
           <ChevronRight className="size-3.5" />
-          <span className="font-medium text-foreground">Market listings</span>
+          <span className="font-medium text-foreground">{t("product.marketListings", "Market listings")}</span>
         </nav>
 
-        <h1 className="text-[30px] font-bold leading-9 tracking-tight">Market listings</h1>
+        <h1 className="text-[30px] font-bold leading-9 tracking-tight">{t("product.marketListings", "Market listings")}</h1>
 
-        <section aria-label="Product summary" className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
+        <section aria-label={t("market.summary", "Product summary")} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
           <div className="flex min-w-0 flex-col items-start gap-[18px] sm:flex-row sm:items-center">
             <div className="flex h-[140px] w-[130px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-secondary">
-              {imageUrl ? <img src={imageUrl} alt={image?.altText || product.name} className="h-full w-full object-contain" /> : <span className="px-3 text-center text-xs text-muted-foreground">ยังไม่มีรูปสินค้า</span>}
+              {imageUrl ? <img src={imageUrl} alt={image?.altText || product.name} className="h-full w-full object-contain" /> : <span className="px-3 text-center text-xs text-muted-foreground">{t("product.noImage", "ยังไม่มีรูปสินค้า")}</span>}
             </div>
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap gap-1.5">
@@ -136,37 +139,37 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
             </div>
           </div>
           <div className="shrink-0 text-left sm:text-right">
-            <p className="text-xs text-muted-foreground">Market price</p>
+            <p className="text-xs text-muted-foreground">{t("product.marketPrice", "Market price")}</p>
             <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatMarketPrice(market.medianPrice, listings[0].currency) : "—"}</p>
-            {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">ข้อมูลราคายังน้อย</p>}
+            {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">{t("market.lowSample", "ข้อมูลราคายังน้อย")}</p>}
           </div>
         </section>
 
         <section aria-labelledby="listing-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-[22px]">
           <div className="mb-2">
             <p className="text-xs font-semibold text-primary">{listingsQuery.isSuccess ? `${listings.length} available` : "— available"}</p>
-            <h2 id="listing-heading" className="text-[22px] font-bold leading-7">Market listings</h2>
+            <h2 id="listing-heading" className="text-[22px] font-bold leading-7">{t("product.marketListings", "Market listings")}</h2>
           </div>
-          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label="กำลังโหลดประกาศขาย"><ListRowsSkeleton rows={6} className="divide-border" /></div> : listingsQuery.isError ? (
-            <div role="alert" className="space-y-3 py-10 text-center text-sm"><p>โหลดประกาศขายไม่สำเร็จ</p><Button onClick={() => void listingsQuery.refetch()}>ลองใหม่</Button></div>
-          ) : listings.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">ยังไม่มีประกาศขายสินค้านี้</p> : (
+          {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label={t("product.loadingListings", "กำลังโหลดประกาศขาย")}><ListRowsSkeleton rows={6} className="divide-border" /></div> : listingsQuery.isError ? (
+            <div role="alert" className="space-y-3 py-10 text-center text-sm"><p>{t("product.listingsFailed", "โหลดประกาศขายไม่สำเร็จ")}</p><Button onClick={() => void listingsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button></div>
+          ) : listings.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">{t("market.empty", "ยังไม่มีประกาศขายสินค้านี้")}</p> : (
             <div className="divide-y divide-border">
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
-                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Condition</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
-                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">Delivery</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
+                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.condition", "Condition")}</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
+                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.delivery", "Delivery")}</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
                   <ListingRowPrice price={listing.price} pricing={listing.pricing} />
-                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={`เพิ่มสินค้าของ ${listing.seller.displayName || listing.seller.username} ลงรถเข็น`} onClick={(event) => void addListingToCart(listing, event.currentTarget)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : "Add"}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={`ดูรายละเอียดสินค้าของ ${listing.seller.displayName || listing.seller.username}`} />}>more</Button></div>
+                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={t("market.addSellerItem", "เพิ่มสินค้าของ {seller} ลงรถเข็น", { seller: listing.seller.displayName || listing.seller.username })} onClick={(event) => void addListingToCart(listing, event.currentTarget)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : t("product.add", "Add")}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "more")}</Button></div>
                 </article>
               ))}
             </div>
           )}
           {listingsQuery.isSuccess && pageCount > 1 && (
-            <nav aria-label="หน้าประกาศขาย" className="mt-5 flex items-center justify-between gap-3 border-t pt-4 text-sm">
-              <Button variant="outline" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>ก่อนหน้า</Button>
+            <nav aria-label={t("market.pagination", "หน้าประกาศขาย")} className="mt-5 flex items-center justify-between gap-3 border-t pt-4 text-sm">
+              <Button variant="outline" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>{t("actions.previous", "ก่อนหน้า", { ns: "common" })}</Button>
               <span>{currentPage + 1} / {pageCount}</span>
-              <Button variant="outline" disabled={currentPage + 1 >= pageCount} onClick={() => setPage(currentPage + 1)}>ถัดไป</Button>
+              <Button variant="outline" disabled={currentPage + 1 >= pageCount} onClick={() => setPage(currentPage + 1)}>{t("actions.next", "ถัดไป", { ns: "common" })}</Button>
             </nav>
           )}
         </section>

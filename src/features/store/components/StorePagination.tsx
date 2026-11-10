@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 export type StorePaginationProps = {
   page: number;
@@ -14,13 +15,14 @@ export function StorePagination({
   pending,
   onChange,
 }: StorePaginationProps) {
+  const { t } = useTranslate("buyer");
   if (totalPages <= 1) return null;
 
   // Generate page numbers (1-indexed for display)
   const pages = Array.from({ length: totalPages }, (_, i) => i);
 
   return (
-    <nav aria-label="Store pages" className="flex items-center justify-center gap-1.5 sm:gap-2 pt-2">
+    <nav aria-label={t("store.pages", "Store pages")} className="flex items-center justify-center gap-1.5 sm:gap-2 pt-2">
       <Button
         variant="outline"
         size="sm"
@@ -28,8 +30,8 @@ export function StorePagination({
         onClick={() => onChange(page - 1)}
         className="h-9 px-3 rounded-lg text-sm text-foreground"
       >
-        <span className="sr-only">Previous</span>
-        <span>ก่อนหน้า</span>
+        <span className="sr-only">{t("store.previous", "Previous")}</span>
+        <span>{t("actions.previous", "ก่อนหน้า", { ns: "common" })}</span>
       </Button>
 
       {pages.map((p) => {
@@ -61,8 +63,8 @@ export function StorePagination({
         onClick={() => onChange(page + 1)}
         className="h-9 px-3 rounded-lg text-sm text-foreground"
       >
-        <span className="sr-only">Next</span>
-        <span>ถัดไป</span>
+        <span className="sr-only">{t("store.next", "Next")}</span>
+        <span>{t("actions.next", "ถัดไป", { ns: "common" })}</span>
       </Button>
     </nav>
   );
