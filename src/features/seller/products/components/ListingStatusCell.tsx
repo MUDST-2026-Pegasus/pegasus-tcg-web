@@ -21,6 +21,7 @@ import {
 import { useChangeListingStatus } from "../products.queries";
 import { activateBlockedReason, statusTargets } from "../products.rules";
 import type { ListingStatus, SellerListingSummary } from "../products.types";
+import { useTranslate, translate } from "@/lib/i18n";
 
 const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 
@@ -28,9 +29,9 @@ const BADGE_CLASS = "h-5 rounded-full px-2 text-xs";
 const TARGET_ACTION: Partial<
   Record<ListingStatus, { label: string; icon: LucideIcon }>
 > = {
-  ACTIVE: { label: "เปิดขาย", icon: Play },
-  PAUSED: { label: "พักการขาย", icon: Pause },
-  DELISTED: { label: "ปิดการขายถาวร…", icon: Ban },
+  ACTIVE: { get label() { return translate("seller", "products.actions.activate", "เปิดขาย"); }, icon: Play },
+  PAUSED: { get label() { return translate("seller", "products.actions.pause", "พักการขาย"); }, icon: Pause },
+  DELISTED: { get label() { return translate("seller", "products.actions.delistEllipsis", "ปิดการขายถาวร…"); }, icon: Ban },
 };
 
 type ListingStatusCellProps = {
@@ -50,6 +51,7 @@ export function ListingStatusCell({
   listing,
   readOnly,
 }: ListingStatusCellProps) {
+  const { t } = useTranslate("seller");
   const changeStatus = useChangeListingStatus();
   const [confirmDelist, setConfirmDelist] = useState(false);
 
@@ -71,15 +73,15 @@ export function ListingStatusCell({
         onSuccess: (updated) =>
           toast.add({
             type: "success",
-            title: "เปลี่ยนสถานะแล้ว",
+            title: t("products.statusCell.saved", "เปลี่ยนสถานะแล้ว"),
             // backend อาจย้ายไปที่อื่น เช่น เปิดขายประกาศที่ไม่เหลือการ์ดจะกลายเป็น SOLD_OUT
             description: `${listing.card.productName} · ${LISTING_STATUS_LABEL[updated.status]}`,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "เปลี่ยนสถานะไม่สำเร็จ",
-            description: listingErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("products.statusCell.failed", "เปลี่ยนสถานะไม่สำเร็จ"),
+            description: listingErrorMessage(error, t("products.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -92,7 +94,7 @@ export function ListingStatusCell({
           render={
             <button
               type="button"
-              aria-label={`เปลี่ยนสถานะ: ${listing.card.productName} (ตอนนี้${label})`}
+              aria-label={t("products.statusCell.change", "เปลี่ยนสถานะ: {name} (ตอนนี้{status})", { name: listing.card.productName, status: label })}
               className="cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
             />
           }
@@ -139,9 +141,9 @@ export function ListingStatusCell({
         open={confirmDelist}
         onOpenChange={setConfirmDelist}
         variant="destructive"
-        title={`ปิดการขาย “${listing.card.productName}” ถาวร?`}
-        description="ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่ การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้ “พักการขาย” แทน"
-        confirmLabel="ปิดการขายถาวร"
+        title={t("products.delist.title", "ปิดการขาย “{name}” ถาวร?", { name: listing.card.productName })}
+        description={t("products.delist.description", "ประกาศที่ปิดถาวรกลับมาเปิดขายไม่ได้ ต้องลงประกาศใหม่ การ์ดที่วางขายอยู่จะกลับเข้าคลังของคุณ ส่วนใบที่ติดจองจะกลับมาเมื่อคำสั่งซื้อจบ ถ้าจะกลับมาขายอีกให้ใช้ “พักการขาย” แทน")}
+        confirmLabel={t("products.actions.delist", "ปิดการขายถาวร")}
         onConfirm={() => {
           setConfirmDelist(false);
           move("DELISTED");
@@ -150,3 +152,8 @@ export function ListingStatusCell({
     </>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.actions.activate", "ns": "seller", "defaultValue": "เปิดขาย"}
+// @tolgee-key {"key": "products.actions.pause", "ns": "seller", "defaultValue": "พักการขาย"}
+// @tolgee-key {"key": "products.actions.delistEllipsis", "ns": "seller", "defaultValue": "ปิดการขายถาวร…"}

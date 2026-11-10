@@ -10,18 +10,20 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { useTranslate } from "@/lib/i18n";
 
 /** หน้าย่อยของสินค้า (เติมสต็อก / แก้ไข) เปิดด้วยรหัสสินค้าที่ไม่มีอยู่ */
 export function ProductNotFound() {
+  const { t } = useTranslate("seller");
   return (
     <Empty className="rounded-xl border border-border bg-card">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <SearchXIcon />
         </EmptyMedia>
-        <EmptyTitle>ไม่พบสินค้านี้</EmptyTitle>
+        <EmptyTitle>{t("products.notFound.title", "ไม่พบสินค้านี้")}</EmptyTitle>
         <EmptyDescription>
-          สินค้านี้อาจถูกลบไปแล้ว หรือไม่ได้เป็นของร้านคุณ
+          {t("products.notFound.description", "สินค้านี้อาจถูกลบไปแล้ว หรือไม่ได้เป็นของร้านคุณ")}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
@@ -32,7 +34,7 @@ export function ProductNotFound() {
           render={<Link to="/seller/products" />}
           nativeButton={false}
         >
-          กลับไปหน้าจัดการสินค้า
+          {t("products.notFound.back", "กลับไปหน้าจัดการสินค้า")}
         </Button>
       </EmptyContent>
     </Empty>

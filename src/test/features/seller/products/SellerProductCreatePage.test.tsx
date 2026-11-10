@@ -1,13 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
 
 import { SellerProductCreatePage } from "@/features/seller/products/SellerProductCreatePage";
 import * as listingFormApi from "@/features/seller/products/listing-form.api";
 import * as sellerApi from "@/features/seller/shared/seller.api";
-import { createTestQueryClient } from "@/test/utils";
+import { renderWithProviders, screen } from "@/test/utils";
 import type { SellerProfile } from "@/features/seller/shared/seller.types";
 
 vi.mock("@/features/seller/shared/seller.api", () => ({
@@ -101,13 +98,9 @@ describe("SellerProductCreatePage", () => {
   });
 
   function renderPage() {
-    const queryClient = createTestQueryClient();
-    return render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={["/seller/products/new"]}>
-          <SellerProductCreatePage />
-        </MemoryRouter>
-      </QueryClientProvider>,
+    return renderWithProviders(
+      <SellerProductCreatePage />,
+      { route: "/seller/products/new" },
     );
   }
 

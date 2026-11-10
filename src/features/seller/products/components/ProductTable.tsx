@@ -22,6 +22,7 @@ import type { SellerListingSummary } from "../products.types";
 
 import { ListingPriceCell } from "./ListingPriceCell";
 import { ListingStatusCell } from "./ListingStatusCell";
+import { useTranslate } from "@/lib/i18n";
 
 const HEAD_CLASS = "h-auto py-2.5 text-xs font-medium text-gray-500";
 
@@ -86,27 +87,28 @@ export function ProductTable({
   isFetching,
   footer,
 }: ProductTableProps) {
+  const { t } = useTranslate("seller");
   const allSelected = rows.length > 0 && selectedIds.length === rows.length;
 
   const columns: DataTableColumn<SellerListingSummary>[] = [
     {
       id: "select",
       header: () => (
-        <Checkbox checked={allSelected} onCheckedChange={onToggleAll} aria-label="เลือกสินค้าทั้งหมดในหน้านี้" className="size-3.5" />
+        <Checkbox checked={allSelected} onCheckedChange={onToggleAll} aria-label={t("products.table.selectAll", "เลือกสินค้าทั้งหมดในหน้านี้")} className="size-3.5" />
       ),
       meta: { headClassName: cn(HEAD_CLASS, "w-8 pl-5"), cellClassName: "py-3 pl-5" },
       cell: ({ row: { original: row } }) => (
         <Checkbox
           checked={selectedIds.includes(row.id)}
           onCheckedChange={() => onToggleRow(row.id)}
-          aria-label={`เลือกสินค้า: ${row.card.productName}`}
+          aria-label={t("products.table.select", "เลือกสินค้า: {name}", { name: row.card.productName })}
           className="size-3.5"
         />
       ),
     },
     {
       id: "product",
-      header: "สินค้า",
+      header: t("products.table.product", "สินค้า"),
       meta: { headClassName: cn(HEAD_CLASS, "w-72"), cellClassName: "py-3" },
       cell: ({ row: { original: row } }) => (
         <div className="flex items-center gap-3">
@@ -120,14 +122,14 @@ export function ProductTable({
     },
     {
       id: "price",
-      header: "ราคาขาย",
+      header: t("products.table.price", "ราคาขาย"),
       meta: { headClassName: cn(HEAD_CLASS, "w-32"), cellClassName: "py-3" },
       cell: ({ row }) => <ListingPriceCell listing={row.original} readOnly={readOnly} />,
     },
-    { id: "cost", header: "ต้นทุนเฉลี่ย", meta: { headClassName: cn(HEAD_CLASS, "w-28"), cellClassName: "py-3 text-xs text-gray-400" }, cell: () => "—" },
+    { id: "cost", header: t("products.table.averageCost", "ต้นทุนเฉลี่ย"), meta: { headClassName: cn(HEAD_CLASS, "w-28"), cellClassName: "py-3 text-xs text-gray-400" }, cell: () => "—" },
     {
       id: "available",
-      header: "พร้อมขาย",
+      header: t("products.table.available", "พร้อมขาย"),
       meta: { headClassName: cn(HEAD_CLASS, "w-28"), cellClassName: "py-3" },
       cell: ({ row: { original: row } }) => {
         const lowStock = isLowStock(row);
@@ -136,28 +138,28 @@ export function ProductTable({
             <span className={cn("text-xs font-semibold", row.quantityAvailable === 0 ? "text-[#d0342c]" : lowStock ? "text-[#b45309]" : "text-foreground")}>
               {row.quantityAvailable}
             </span>
-            <span className="text-[10px] text-gray-400">ใบ</span>
-            {lowStock ? <span className="text-[10px] font-medium text-[#b45309]">ใกล้หมด</span> : null}
+            <span className="text-[10px] text-gray-400">{t("products.unit.card", "ใบ")}</span>
+            {lowStock ? <span className="text-[10px] font-medium text-[#b45309]">{t("products.table.lowStock", "ใกล้หมด")}</span> : null}
           </div>
         );
       },
     },
     {
       id: "reserved",
-      header: "ติดจอง",
+      header: t("products.table.reserved", "ติดจอง"),
       meta: { headClassName: cn(HEAD_CLASS, "w-20"), cellClassName: "py-3 text-xs" },
       cell: ({ row: { original: row } }) => <span className={row.quantityReserved > 0 ? "text-gray-700" : "text-gray-400"}>{row.quantityReserved}</span>,
     },
     {
       id: "status",
-      header: "สถานะ",
+      header: t("products.table.status", "สถานะ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-32"), cellClassName: "py-3" },
       cell: ({ row }) => <ListingStatusCell listing={row.original} readOnly={readOnly} />,
     },
     {
       // คอลัมน์ปุ่มท้ายแถวไม่มีหัวตารางในดีไซน์
       id: "actions",
-      header: () => <span className="sr-only">ตัวเลือกเพิ่มเติม</span>,
+      header: () => <span className="sr-only">{t("products.table.more", "ตัวเลือกเพิ่มเติม")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: "py-2 pr-5" },
       cell: ({ row: { original: row } }) => {
         const name = row.card.productName;
@@ -166,7 +168,7 @@ export function ProductTable({
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`แก้ไขสินค้า: ${name}`}
+                      aria-label={t("products.table.edit", "แก้ไขสินค้า: {name}", { name })}
                       className="rounded-md text-slate-500"
                       render={<Link to={`/seller/products/${row.id}/edit`} />}
                       nativeButton={false}
@@ -179,7 +181,7 @@ export function ProductTable({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={`ตัวเลือกเพิ่มเติม: ${name}`}
+                            aria-label={t("products.table.moreFor", "ตัวเลือกเพิ่มเติม: {name}", { name })}
                             className="rounded-md text-slate-500"
                           />
                         }
@@ -197,7 +199,7 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <PackagePlus />
-                          เติมสต็อก
+                          {t("products.actions.restock", "เติมสต็อก")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -207,7 +209,7 @@ export function ProductTable({
                           className="rounded-lg text-xs"
                         >
                           <Trash2 />
-                          ลบสินค้า
+                          {t("products.actions.delete", "ลบสินค้า")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -33,7 +33,7 @@ import type {
   CatalogSearchItem,
   SelectedCard,
 } from "../../listing-form.types";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 /** พิมพ์ค้างไว้ครู่หนึ่งค่อยค้น ไม่ยิงทุกตัวอักษร */
 const SEARCH_DELAY_MS = 350;
@@ -51,6 +51,7 @@ type CardPickerProps = {
  * มีสองทาง: ค้นจากชื่อ/เลขการ์ด หรือกรอก SKU / สแกนบาร์โค้ด (`/catalog/variants/by-code`)
  */
 export function CardPicker({ onSelect, error }: CardPickerProps) {
+  const { t } = useTranslate("seller");
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [openProductId, setOpenProductId] = useState<number | null>(null);
@@ -76,10 +77,10 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
         <h2 className="text-base font-semibold text-foreground">
-          เลือกการ์ดจากแคตตาล็อก
+          {t("products.create.picker.title", "เลือกการ์ดจากแคตตาล็อก")}
         </h2>
         <p className="text-xs text-gray-500">
-          ค้นจากชื่อหรือเลขในชุด แล้วเลือกพิมพ์ (ภาษา / finish) ให้ตรงกับใบที่คุณมี
+          {t("products.create.picker.subtitle", "ค้นจากชื่อหรือเลขในชุด แล้วเลือกพิมพ์ (ภาษา / finish) ให้ตรงกับใบที่คุณมี")}
         </p>
       </div>
 
@@ -89,8 +90,8 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
         </InputGroupAddon>
         <InputGroupInput
           type="search"
-          aria-label="ค้นหาการ์ดในแคตตาล็อก"
-          placeholder="เช่น Charizard ex หรือ 006/197"
+          aria-label={t("products.create.picker.search", "ค้นหาการ์ดในแคตตาล็อก")}
+          placeholder={t("products.create.picker.searchPlaceholder", "เช่น Charizard ex หรือ 006/197")}
           value={text}
           onChange={(event) => handleSearchInput(event.target.value)}
           onKeyDown={(event) => {
@@ -106,27 +107,26 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
 
       {tooShort ? (
         <p className="text-xs text-gray-400">
-          พิมพ์อย่างน้อย {MIN_SEARCH_LENGTH} ตัวอักษรเพื่อค้นหา
+          {t("products.create.picker.minLength", "พิมพ์อย่างน้อย {min} ตัวอักษรเพื่อค้นหา", { min: MIN_SEARCH_LENGTH })}
         </p>
       ) : search.isPending ? (
         <SearchSkeleton />
       ) : search.data === undefined ? (
         <Alert variant="destructive">
           <AlertDescription>
-            {translateError(search.error, "ค้นหาการ์ดไม่สำเร็จ")}{" "}
+            {translateError(search.error, t("products.create.picker.searchFailed", "ค้นหาการ์ดไม่สำเร็จ"))}{" "}
             <button
               type="button"
               className="cursor-pointer font-medium underline underline-offset-2"
               onClick={() => search.refetch()}
             >
-              ลองใหม่
+              {t("actions.retry", "ลองใหม่", { ns: "common" })}
             </button>
           </AlertDescription>
         </Alert>
       ) : items.length === 0 ? (
         <p className="rounded-lg bg-neutral-50 px-3.5 py-3 text-xs text-gray-500">
-          ไม่พบการ์ดที่ตรงกับ "{query}" — ลองคำอื่น ค้นด้วย SKU / บาร์โค้ดด้านล่าง
-          หรือแจ้งแอดมินให้เพิ่มการ์ดเข้าแคตตาล็อก
+          {t("products.create.picker.noResults", "ไม่พบการ์ดที่ตรงกับ \"{query}\" — ลองคำอื่น ค้นด้วย SKU / บาร์โค้ดด้านล่าง หรือแจ้งแอดมินให้เพิ่มการ์ดเข้าแคตตาล็อก", { query })}
         </p>
       ) : (
         <ul
@@ -154,7 +154,7 @@ export function CardPicker({ onSelect, error }: CardPickerProps) {
 
       <div className="flex items-center gap-3 text-[11px] text-gray-400">
         <span className="h-px flex-1 bg-secondary" />
-        หรือ
+        {t("products.create.picker.or", "หรือ")}
         <span className="h-px flex-1 bg-secondary" />
       </div>
 
@@ -192,6 +192,7 @@ function SearchResultRow({
   onToggle: () => void;
   onSelect: (card: SelectedCard) => void;
 }) {
+  const { t } = useTranslate("seller");
   const meta = searchItemMeta(item);
 
   return (
@@ -222,9 +223,9 @@ function SearchResultRow({
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-0.5 text-[11px] text-gray-500">
-          <span>{item.variantCount} พิมพ์</span>
+          <span>{t("products.create.picker.variantCount", "{count} พิมพ์", { count: item.variantCount })}</span>
           {item.lowestPrice !== null ? (
-            <span>เริ่ม {formatBaht(item.lowestPrice)}</span>
+            <span>{t("products.create.picker.fromPrice", "เริ่ม {price}", { price: formatBaht(item.lowestPrice) })}</span>
           ) : null}
         </span>
       </button>
@@ -244,19 +245,20 @@ function VariantChooser({
   item: CatalogSearchItem;
   onSelect: (card: SelectedCard) => void;
 }) {
+  const { t } = useTranslate("seller");
   const detail = useCatalogProduct(item.id);
 
   if (detail.isPending) {
     return (
       <p className="flex items-center gap-2 px-3 pb-3 text-xs text-gray-500">
-        <Spinner className="size-3.5" /> กำลังโหลดพิมพ์ของการ์ดนี้…
+        <Spinner className="size-3.5" /> {t("products.create.picker.variantsLoading", "กำลังโหลดพิมพ์ของการ์ดนี้…")}
       </p>
     );
   }
   if (detail.data === undefined) {
     return (
       <p className="px-3 pb-3 text-xs text-destructive">
-        {translateError(detail.error, "โหลดพิมพ์ของการ์ดนี้ไม่สำเร็จ")}
+        {translateError(detail.error, t("products.create.picker.variantsFailed", "โหลดพิมพ์ของการ์ดนี้ไม่สำเร็จ"))}
       </p>
     );
   }
@@ -265,14 +267,14 @@ function VariantChooser({
   if (variants.length === 0) {
     return (
       <p className="px-3 pb-3 text-xs text-gray-500">
-        การ์ดนี้ยังไม่มีพิมพ์ที่เปิดให้ลงขาย แจ้งแอดมินให้เพิ่ม variant
+        {t("products.create.picker.noVariants", "การ์ดนี้ยังไม่มีพิมพ์ที่เปิดให้ลงขาย แจ้งแอดมินให้เพิ่ม variant")}
       </p>
     );
   }
 
   return (
     <div className="flex flex-col gap-1.5 px-3 pb-3">
-      <p className="text-[11px] font-medium text-gray-500">เลือกพิมพ์</p>
+      <p className="text-[11px] font-medium text-gray-500">{t("products.create.picker.choosePrinting", "เลือกพิมพ์")}</p>
       <div className="flex flex-wrap gap-2">
         {variants.map((variant) => (
           <Button
@@ -306,6 +308,7 @@ function VariantChooser({
 
 /** กรอก SKU ที่คนอื่นบอกต่อ หรือสแกนบาร์โค้ด (เครื่องสแกนพิมพ์แล้วกด Enter ให้เอง) */
 function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
+  const { t } = useTranslate("seller");
   const [code, setCode] = useState("");
   const [submitted, setSubmitted] = useState<string | null>(null);
 
@@ -328,8 +331,8 @@ function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
             <ScanBarcode />
           </InputGroupAddon>
           <InputGroupInput
-            aria-label="SKU หรือบาร์โค้ด"
-            placeholder="SKU หรือบาร์โค้ด เช่น PKM-SV8A-025-EN-NORMAL"
+            aria-label={t("products.create.picker.skuLabel", "SKU หรือบาร์โค้ด")}
+            placeholder={t("products.create.picker.skuPlaceholder", "SKU หรือบาร์โค้ด เช่น PKM-SV8A-025-EN-NORMAL")}
             value={code}
             onChange={(event) => setCode(event.target.value)}
             onKeyDown={(event) => {
@@ -348,19 +351,19 @@ function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
           disabled={code.trim() === ""}
           onClick={handleSubmit}
         >
-          ค้นด้วยรหัส
+          {t("products.create.picker.skuSearch", "ค้นด้วยรหัส")}
         </Button>
       </div>
 
       {submitted === null ? null : lookup.isPending ? (
         <p className="flex items-center gap-2 text-xs text-gray-500">
-          <Spinner className="size-3.5" /> กำลังค้น {submitted}…
+          <Spinner className="size-3.5" /> {t("products.create.picker.skuSearching", "กำลังค้น {code}…", { code: submitted })}
         </p>
       ) : lookup.data === undefined ? (
         <p className="text-xs text-destructive">
           {hasErrorCode(lookup.error, "VARIANT_NOT_FOUND")
-            ? `ไม่พบการ์ดที่มีรหัส "${submitted}" ในแคตตาล็อก`
-            : translateError(lookup.error, "ค้นด้วยรหัสไม่สำเร็จ")}
+            ? t("products.create.picker.skuNotFound", "ไม่พบการ์ดที่มีรหัส \"{code}\" ในแคตตาล็อก", { code: submitted })
+            : translateError(lookup.error, t("products.create.picker.skuFailed", "ค้นด้วยรหัสไม่สำเร็จ"))}
         </p>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5">
@@ -382,7 +385,7 @@ function CodeLookup({ onSelect }: { onSelect: (card: SelectedCard) => void }) {
               lookup.data && onSelect(selectedFromLookup(lookup.data, detail.data))
             }
           >
-            {lookup.data.variant.active ? "ใช้การ์ดนี้" : "พิมพ์นี้ปิดขายแล้ว"}
+            {lookup.data.variant.active ? t("products.create.picker.use", "ใช้การ์ดนี้") : t("products.create.picker.variantInactive", "พิมพ์นี้ปิดขายแล้ว")}
           </Button>
         </div>
       )}
