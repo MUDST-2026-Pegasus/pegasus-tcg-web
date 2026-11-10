@@ -8,6 +8,7 @@ import { formatCount } from "../catalog.format";
 import type { Game } from "../catalog.types";
 
 import { GameAvatar } from "./GameAvatar";
+import { useTranslate } from "@/lib/i18n";
 
 type GameInfoCardProps = {
   game: Game;
@@ -28,7 +29,8 @@ export function GameInfoCard({
   onToggleActive,
   isToggling,
 }: GameInfoCardProps) {
-  const meta = [`รหัส ${game.code}`, `/${game.slug}`, game.nameLocal]
+  const { t } = useTranslate("admin");
+  const meta = [t("cardAttributes.games.codeMeta", "รหัส {code}", { code: game.code }), `/${game.slug}`, game.nameLocal]
     .filter(Boolean)
     .join("  ·  ");
 
@@ -52,20 +54,20 @@ export function GameInfoCard({
                 game.active ? "bg-[#16a34a]" : "bg-[#9aa5ad]",
               )}
             />
-            {game.active ? "เปิดขายอยู่" : "ซ่อนจากหน้าร้าน"}
+            {game.active ? t("cardAttributes.games.live", "เปิดขายอยู่") : t("cardAttributes.games.hiddenStatus", "ซ่อนจากหน้าร้าน")}
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">{meta}</p>
       </div>
 
       <dl className="flex gap-6 border-border pr-2 sm:border-l sm:pl-4">
-        <Stat label="สินค้าในแคตตาล็อก" value={productCount} />
-        <Stat label="ชุดการ์ด" value={cardSetCount} />
+        <Stat label={t("cardAttributes.games.productCount", "สินค้าในแคตตาล็อก")} value={productCount} />
+        <Stat label={t("cardAttributes.tabs.sets", "ชุดการ์ด")} value={cardSetCount} />
       </dl>
 
       <div className="flex items-center gap-3 border-border sm:border-l sm:pl-4">
         <label className="flex items-center gap-2 text-xs text-[#414755]">
-          แสดงบนหน้าร้าน
+          {t("cardAttributes.games.showOnStore", "แสดงบนหน้าร้าน")}
           <Switch
             checked={game.active}
             disabled={isToggling}
@@ -73,7 +75,7 @@ export function GameInfoCard({
           />
         </label>
         <Button variant="outline" className="rounded-md px-2.5" onClick={onEdit}>
-          แก้ไขข้อมูลเกม
+          {t("cardAttributes.games.edit", "แก้ไขข้อมูลเกม")}
         </Button>
       </div>
     </Card>

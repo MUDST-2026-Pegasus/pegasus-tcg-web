@@ -31,6 +31,7 @@ import {
   HEAD_ROW_CLASS,
   ROW_SWITCH,
 } from "./taxonomy.styles";
+import { useTranslate } from "@/lib/i18n";
 
 export type AttributeFlag = "required" | "filterable";
 
@@ -68,6 +69,7 @@ export function CardSchemaTable({
   onToggle,
   onMove,
 }: CardSchemaTableProps) {
+  const { t } = useTranslate("admin");
   const flagColumn = (flag: AttributeFlag, label: string): DataTableColumn<GameAttribute> => ({
     id: flag,
     header: label,
@@ -85,7 +87,7 @@ export function CardSchemaTable({
   const columns: DataTableColumn<GameAttribute>[] = [
     {
       id: "label",
-      header: "ชื่อฟิลด์",
+      header: t("cardAttributes.fields.col.label", "ชื่อฟิลด์"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[260px] pl-5"), cellClassName: "py-2.5 pl-5" },
       cell: ({ row: { original: attribute } }) => (
         <div className="flex flex-col">
@@ -96,21 +98,21 @@ export function CardSchemaTable({
     },
     {
       id: "type",
-      header: "ประเภท",
+      header: t("cardAttributes.fields.col.type", "ประเภท"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5" },
       cell: ({ row }) => <FieldTypeBadge type={row.original.dataType} />,
     },
     {
       id: "values",
-      header: "ค่าที่รับ",
+      header: t("cardAttributes.fields.col.values", "ค่าที่รับ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[280px]"), cellClassName: "max-w-[280px] truncate py-2.5 text-xs text-muted-foreground" },
       cell: ({ row }) => acceptedValues(row.original),
     },
-    flagColumn("required", "จำเป็น"),
-    flagColumn("filterable", "ใช้กรอง"),
+    flagColumn("required", t("cardAttributes.fields.required", "จำเป็น")),
+    flagColumn("filterable", t("cardAttributes.fields.filterable", "ใช้กรอง")),
     {
       id: "actions",
-      header: () => <span className="sr-only">จัดการ</span>,
+      header: () => <span className="sr-only">{t("cardAttributes.col.actions", "จัดการ")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: "py-2 pr-5 text-right" },
       cell: ({ row: { original: attribute, index } }) => {
         const busy = isBusy(attribute.id);
@@ -121,7 +123,7 @@ export function CardSchemaTable({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={`จัดการฟิลด์ ${attribute.label}`}
+                            aria-label={t("cardAttributes.fields.manage", "จัดการฟิลด์ {label}", { label: attribute.label })}
                             disabled={busy}
                             className="rounded-md text-[#9aa5ad]"
                           />
@@ -132,14 +134,14 @@ export function CardSchemaTable({
                       <DropdownMenuContent align="end" className="w-44">
                         <DropdownMenuItem onClick={() => onEdit(attribute)}>
                           <Pencil />
-                          แก้ไข
+                          {t("cardAttributes.fields.edit", "แก้ไข")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={isReordering || index === 0}
                           onClick={() => onMove(attribute, -1)}
                         >
                           <ArrowUp />
-                          เลื่อนขึ้น
+                          {t("cardAttributes.fields.moveUp", "เลื่อนขึ้น")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={
@@ -148,7 +150,7 @@ export function CardSchemaTable({
                           onClick={() => onMove(attribute, 1)}
                         >
                           <ArrowDown />
-                          เลื่อนลง
+                          {t("cardAttributes.fields.moveDown", "เลื่อนลง")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -156,7 +158,7 @@ export function CardSchemaTable({
                           onClick={() => onDelete(attribute)}
                         >
                           <Trash2 />
-                          ลบฟิลด์
+                          {t("cardAttributes.fields.delete", "ลบฟิลด์")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -170,26 +172,26 @@ export function CardSchemaTable({
       <div className="flex items-center justify-between gap-4 px-5 pt-4 pb-3.5">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-[15px] font-semibold text-foreground">
-            คุณสมบัติการ์ดของ {game.name}
+            {t("cardAttributes.fields.heading", "คุณสมบัติการ์ดของ {game}", { game: game.name })}
           </h3>
           <p className="text-[11px] text-muted-foreground">
-            {attributes.length} ฟิลด์
+            {t("cardAttributes.fields.count", "{count} ฟิลด์", { count: attributes.length })}
             {productCount === undefined
               ? ""
-              : ` · ใช้กับการ์ด ${formatCount(productCount)} ใบ`}
+              : ` · ${t("cardAttributes.fields.usedBy", "ใช้กับการ์ด {count} ใบ", { count: formatCount(productCount) })}`}
           </p>
         </div>
 
         <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
-          + เพิ่มฟิลด์
+          {t("cardAttributes.fields.add", "+ เพิ่มฟิลด์")}
         </Button>
       </div>
 
       {attributes.length === 0 ? (
         <EmptyState
           icon={ListPlus}
-          title="ยังไม่มีฟิลด์"
-          description={`เพิ่มฟิลด์แรกของ ${game.name} เช่น HP หรือความหายาก แล้วฟอร์มเพิ่มการ์ดจะมีช่องนี้ทันที`}
+          title={t("cardAttributes.fields.emptyTitle", "ยังไม่มีฟิลด์")}
+          description={t("cardAttributes.fields.emptyDescription", "เพิ่มฟิลด์แรกของ {game} เช่น HP หรือความหายาก แล้วฟอร์มเพิ่มการ์ดจะมีช่องนี้ทันที", { game: game.name })}
           className={CARD_EMPTY_CLASS}
         />
       ) : (

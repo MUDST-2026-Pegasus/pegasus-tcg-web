@@ -55,6 +55,7 @@ import {
   CatalogGridSkeleton,
 } from "./CatalogSkeleton";
 import { CatalogToolbar, type CatalogToolbarSelect } from "./CatalogToolbar";
+import { useTranslate } from "@/lib/i18n";
 
 const ALL = "all";
 
@@ -75,6 +76,7 @@ type OpenProduct = (
  * หน้าต่างเพิ่ม/แก้สินค้าก็เปิดจาก URL (`?product=new`, `?product=<id>`)
  */
 export function AdminCatalogContent() {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = readFilters(searchParams);
   const target = readProductTarget(searchParams);
@@ -96,10 +98,10 @@ export function AdminCatalogContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            จัดการแคตตาล็อก
+            {t("catalog.page.title", "จัดการแคตตาล็อก")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
-            ฐานข้อมูลการ์ดกลางของแพลตฟอร์ม · ผู้ขายเลือกการ์ดจากที่นี่เพื่อลงขาย
+            {t("catalog.page.subtitle", "ฐานข้อมูลการ์ดกลางของแพลตฟอร์ม · ผู้ขายเลือกการ์ดจากที่นี่เพื่อลงขาย")}
           </p>
         </div>
 
@@ -108,17 +110,17 @@ export function AdminCatalogContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button variant="outline" className="rounded-md px-2.5" disabled>
-                นำเข้า CSV
+                {t("catalog.page.importCsv", "นำเข้า CSV")}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>ยังนำเข้าจากไฟล์ไม่ได้ในตอนนี้</TooltipContent>
+            <TooltipContent>{t("catalog.page.importUnavailable", "ยังนำเข้าจากไฟล์ไม่ได้ในตอนนี้")}</TooltipContent>
           </Tooltip>
           <Button
             className="rounded-md px-2.5"
             disabled={!games.data?.length}
             onClick={() => openProduct("new")}
           >
-            + เพิ่มการ์ดใหม่
+            {t("catalog.page.addProduct", "+ เพิ่มการ์ดใหม่")}
           </Button>
         </div>
       </div>
@@ -133,12 +135,12 @@ export function AdminCatalogContent() {
             </div>
           </div>
         }
-        errorTitle="โหลดรายชื่อเกมไม่สำเร็จ"
+        errorTitle={t("cardAttributes.games.loadFailed", "โหลดรายชื่อเกมไม่สำเร็จ")}
         isEmpty={(list) => list.length === 0}
         empty={
           <EmptyState
-            title="ยังไม่มีเกมในระบบ"
-            description="แคตตาล็อกแบ่งตามเกม ต้องมีเกมก่อนถึงจะเพิ่มการ์ดได้"
+            title={t("cardAttributes.games.emptyTitle", "ยังไม่มีเกมในระบบ")}
+            description={t("catalog.page.noGamesDescription", "แคตตาล็อกแบ่งตามเกม ต้องมีเกมก่อนถึงจะเพิ่มการ์ดได้")}
           />
         }
       >
@@ -172,6 +174,7 @@ function CatalogWorkspace({
   tab: ProductTab;
   onOpenProduct: OpenProduct;
 }) {
+  const { t } = useTranslate("admin");
   // URL ไม่ได้ระบุเกม หรือระบุเกมที่ไม่มีอยู่ → เกมแรกตามลำดับที่ backend เรียงมา
   const gameId = games.some((game) => game.id === filters.gameId)
     ? (filters.gameId as number)
@@ -195,15 +198,15 @@ function CatalogWorkspace({
   const selects: CatalogToolbarSelect[] = [
     {
       id: "category",
-      label: "หมวดหมู่",
+      label: t("catalog.filters.category", "หมวดหมู่"),
       value: filters.categoryId === null ? ALL : String(filters.categoryId),
       options: [
-        { value: ALL, label: "หมวดหมู่: ทั้งหมด" },
+        { value: ALL, label: t("catalog.filters.categoryAll", "หมวดหมู่: ทั้งหมด") },
         ...(categories.data ?? []).map((category) => ({
           value: String(category.id),
           label: category.active
             ? category.name
-            : `${category.name} (ปิดแล้ว)`,
+            : t("catalog.filters.closedItem", "{name} (ปิดแล้ว)", { name: category.name }),
         })),
       ],
       onValueChange: (value) =>
@@ -211,10 +214,10 @@ function CatalogWorkspace({
     },
     {
       id: "product-type",
-      label: "ชนิดของสินค้า",
+      label: t("catalog.filters.type", "ชนิดของสินค้า"),
       value: filters.productType ?? ALL,
       options: [
-        { value: ALL, label: "ชนิดของสินค้า: ทั้งหมด" },
+        { value: ALL, label: t("catalog.filters.typeAll", "ชนิดของสินค้า: ทั้งหมด") },
         ...PRODUCT_TYPES.map((type) => ({
           value: type,
           label: PRODUCT_TYPE_LABEL[type],
@@ -227,24 +230,24 @@ function CatalogWorkspace({
     },
     {
       id: "status",
-      label: "สถานะ",
+      label: t("catalog.filters.status", "สถานะ"),
       value: filters.activeOnly ? "active" : ALL,
       options: [
-        { value: ALL, label: "สถานะ: ทั้งหมด" },
-        { value: "active", label: "เฉพาะที่เปิดใช้งาน" },
+        { value: ALL, label: t("catalog.filters.statusAll", "สถานะ: ทั้งหมด") },
+        { value: "active", label: t("catalog.filters.activeOnly", "เฉพาะที่เปิดใช้งาน") },
       ],
       onValueChange: (value) =>
         onFiltersChange({ activeOnly: value === "active" }),
     },
     {
       id: "sale-status",
-      label: "สถานะการขาย",
+      label: t("catalog.filters.saleStatus", "สถานะการขาย"),
       value: filters.saleStatus ?? ALL,
       options: [
-        { value: ALL, label: "สถานะการขาย: ทั้งหมด" },
-        { value: "HAS_SELLER", label: "มีร้านขาย" },
-        { value: "NO_SELLER", label: "ไม่มีร้านขาย" },
-        { value: "HAS_BLOCKED", label: "มีประกาศถูกระงับ" },
+        { value: ALL, label: t("catalog.filters.saleStatusAll", "สถานะการขาย: ทั้งหมด") },
+        { value: "HAS_SELLER", label: t("catalog.filters.hasSeller", "มีร้านขาย") },
+        { value: "NO_SELLER", label: t("catalog.filters.noSeller", "ไม่มีร้านขาย") },
+        { value: "HAS_BLOCKED", label: t("catalog.filters.hasBlocked", "มีประกาศถูกระงับ") },
       ],
       onValueChange: (value) =>
         onFiltersChange({
@@ -253,11 +256,11 @@ function CatalogWorkspace({
     },
     {
       id: "sort",
-      label: "เรียงตาม",
+      label: t("catalog.filters.sort", "เรียงตาม"),
       value: filters.sort,
       options: PRODUCT_SORTS.map((sort) => ({
         value: sort,
-        label: `เรียงตาม: ${PRODUCT_SORT_LABEL[sort]}`,
+        label: t("catalog.filters.sortItem", "เรียงตาม: {sort}", { sort: PRODUCT_SORT_LABEL[sort] }),
       })),
       onValueChange: (value) =>
         onFiltersChange({ sort: value as ProductSort }),
@@ -278,7 +281,7 @@ function CatalogWorkspace({
 
       <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
         <CatalogToolbar
-          resultLabel={resultLabel(products.data, filters.page)}
+          resultLabel={resultLabel(products.data, filters.page, t)}
           search={filters.q}
           onSearchChange={(q) => onFiltersChange({ q })}
           selects={selects}
@@ -287,14 +290,14 @@ function CatalogWorkspace({
         <QueryBoundary
           query={products}
           loading={<CatalogGridSkeleton />}
-          errorTitle="โหลดสินค้าในแคตตาล็อกไม่สำเร็จ"
+          errorTitle={t("catalog.products.loadFailed", "โหลดสินค้าในแคตตาล็อกไม่สำเร็จ")}
           isEmpty={(page) => page.items.length === 0}
           empty={
             hasNarrowingFilters(filters) ? (
               <EmptyState
                 icon={PackageSearch}
-                title="ไม่พบสินค้าที่ตรงกับตัวกรอง"
-                description="ลองคำค้นอื่น หรือล้างตัวกรองแล้วดูทั้งหมดของเกมนี้"
+                title={t("catalog.products.noMatchTitle", "ไม่พบสินค้าที่ตรงกับตัวกรอง")}
+                description={t("catalog.products.noMatchDescription", "ลองคำค้นอื่น หรือล้างตัวกรองแล้วดูทั้งหมดของเกมนี้")}
               >
                 <Button
                   variant="outline"
@@ -310,20 +313,20 @@ function CatalogWorkspace({
                     })
                   }
                 >
-                  ล้างตัวกรอง
+                  {t("catalog.filters.clear", "ล้างตัวกรอง")}
                 </Button>
               </EmptyState>
             ) : (
               <EmptyState
-                title="เกมนี้ยังไม่มีสินค้าในแคตตาล็อก"
-                description="เพิ่มการ์ดใบแรกแล้วผู้ขายจะเลือกไปลงขายได้"
+                title={t("catalog.products.emptyTitle", "เกมนี้ยังไม่มีสินค้าในแคตตาล็อก")}
+                description={t("catalog.products.emptyDescription", "เพิ่มการ์ดใบแรกแล้วผู้ขายจะเลือกไปลงขายได้")}
               >
                 <Button
                   size="sm"
                   className="rounded-md px-2.5"
                   onClick={() => onOpenProduct("new")}
                 >
-                  + เพิ่มการ์ดใหม่
+                  {t("catalog.page.addProduct", "+ เพิ่มการ์ดใหม่")}
                 </Button>
               </EmptyState>
             )
@@ -370,14 +373,19 @@ function CatalogWorkspace({
 function resultLabel(
   data: { items: unknown[]; totalItems: number } | undefined,
   page: number,
+  translate: ReturnType<typeof useTranslate<"admin">>["t"],
 ): string {
   if (data === undefined) {
-    return "กำลังค้นหา…";
+    return translate("catalog.products.searching", "กำลังค้นหา…");
   }
   if (data.totalItems === 0) {
-    return "ไม่พบสินค้า";
+    return translate("catalog.products.none", "ไม่พบสินค้า");
   }
   const from = (page - 1) * CATALOG_PAGE_SIZE + 1;
   const to = from + data.items.length - 1;
-  return `แสดง ${formatCount(from)}–${formatCount(to)} จาก ${formatCount(data.totalItems)} รายการ`;
+  return translate("catalog.products.range", "แสดง {from}–{to} จาก {total} รายการ", { from: formatCount(from), to: formatCount(to), total: formatCount(data.totalItems) });
 }
+
+// @tolgee-key {"key": "catalog.products.searching", "ns": "admin", "defaultValue": "กำลังค้นหา…"}
+// @tolgee-key {"key": "catalog.products.none", "ns": "admin", "defaultValue": "ไม่พบสินค้า"}
+// @tolgee-key {"key": "catalog.products.range", "ns": "admin", "defaultValue": "แสดง {from}–{to} จาก {total} รายการ"}

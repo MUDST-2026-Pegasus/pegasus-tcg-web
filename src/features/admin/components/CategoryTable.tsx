@@ -16,6 +16,7 @@ import {
   HEAD_ROW_CLASS,
   ROW_SWITCH,
 } from "./taxonomy.styles";
+import { useTranslate } from "@/lib/i18n";
 
 type CategoryTableProps = {
   game: Game;
@@ -42,6 +43,7 @@ export function CategoryTable({
   onEdit,
   onToggleActive,
 }: CategoryTableProps) {
+  const { t } = useTranslate("admin");
   const rows = categoryTree(categories);
   const crossGame = categories.filter((category) => category.gameId === null).length;
   const ownGame = categories.length - crossGame;
@@ -49,7 +51,7 @@ export function CategoryTable({
   const columns: DataTableColumn<(typeof rows)[number]>[] = [
     {
       id: "name",
-      header: "หมวดหมู่",
+      header: t("cardAttributes.categories.col.category", "หมวดหมู่"),
       meta: { headClassName: cn(HEAD_CLASS, "pl-5"), cellClassName: "py-2.5 pl-5" },
       cell: ({ row: { original: { category, depth } } }) => {
         const image = imageUrls.get(category.id);
@@ -73,52 +75,52 @@ export function CategoryTable({
     },
     {
       id: "code",
-      header: "รหัส",
+      header: t("cardAttributes.col.code", "รหัส"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[120px]"), cellClassName: "py-2.5 text-xs font-medium text-muted-foreground" },
       cell: ({ row }) => row.original.category.code,
     },
     {
       id: "scope",
-      header: "ใช้กับ",
+      header: t("cardAttributes.categories.col.scope", "ใช้กับ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[130px]"), cellClassName: "py-2.5" },
       cell: ({ row }) =>
         row.original.category.gameId === null ? (
-          <Badge className="h-5 rounded-[5px] bg-[#e8f1fc] px-2 text-[10px] font-medium text-[#0058bc]">ทุกเกม</Badge>
+          <Badge className="h-5 rounded-[5px] bg-[#e8f1fc] px-2 text-[10px] font-medium text-[#0058bc]">{t("cardAttributes.categories.allGames", "ทุกเกม")}</Badge>
         ) : (
           <Badge variant="outline" className="h-5 max-w-full rounded-[5px] px-1.5 text-[10px] font-medium">
-            <span className="truncate">เฉพาะ {game.name}</span>
+            <span className="truncate">{t("cardAttributes.categories.onlyGame", "เฉพาะ {game}", { game: game.name })}</span>
           </Badge>
         ),
     },
     {
       id: "order",
-      header: "ลำดับ",
+      header: t("cardAttributes.categories.col.order", "ลำดับ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[60px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
       cell: ({ row }) => row.original.category.displayOrder,
     },
     {
       id: "active",
-      header: "เปิดใช้งาน",
+      header: t("cardAttributes.categories.col.active", "เปิดใช้งาน"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[80px]"), cellClassName: "py-2.5" },
       cell: ({ row: { original: { category } } }) => (
         <Switch
           checked={category.active}
           disabled={isBusy(category.id)}
           onCheckedChange={(checked) => onToggleActive(category, checked)}
-          aria-label={`เปิดใช้งาน: ${category.name}`}
+          aria-label={t("cardAttributes.categories.activeToggle", "เปิดใช้งาน: {name}", { name: category.name })}
           className={ROW_SWITCH}
         />
       ),
     },
     {
       id: "actions",
-      header: () => <span className="sr-only">จัดการ</span>,
+      header: () => <span className="sr-only">{t("cardAttributes.col.actions", "จัดการ")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, "w-[56px] pr-5"), cellClassName: "py-2 pr-5 text-right" },
       cell: ({ row: { original: { category } } }) => (
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`แก้ไขหมวด ${category.name}`}
+          aria-label={t("cardAttributes.categories.edit", "แก้ไขหมวด {name}", { name: category.name })}
           className="rounded-md text-[#9aa5ad]"
           onClick={() => onEdit(category)}
         >
@@ -133,31 +135,30 @@ export function CategoryTable({
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 pb-3.5">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-[15px] font-semibold text-foreground">
-            หมวดหมู่ของ {game.name}
+            {t("cardAttributes.categories.heading", "หมวดหมู่ของ {game}", { game: game.name })}
           </h3>
           <p className="text-[11px] text-muted-foreground">
-            {crossGame} หมวดใช้ร่วมทุกเกม · {ownGame} หมวดเฉพาะ {game.name}
+            {t("cardAttributes.categories.count", "{shared} หมวดใช้ร่วมทุกเกม · {own} หมวดเฉพาะ {game}", { shared: crossGame, own: ownGame, game: game.name })}
           </p>
         </div>
 
         <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
-          + เพิ่มหมวดหมู่
+          {t("cardAttributes.categories.add", "+ เพิ่มหมวดหมู่")}
         </Button>
       </div>
 
       <div className="flex items-center gap-2 bg-[#e8f1fc] px-5 py-2.5 text-[#0058bc]">
         <Info aria-hidden="true" className="size-[18px] shrink-0" />
         <p className="text-xs">
-          หมวดที่มีป้าย "ทุกเกม" ใช้ร่วมกันทุกเกม แก้แล้วมีผลทุกเกม ·
-          หมวดหมู่ลบไม่ได้เพราะมีสินค้าอ้างอิงอยู่ ให้ปิดใช้งานแทน
+          {t("cardAttributes.categories.notice", "หมวดที่มีป้าย \"ทุกเกม\" ใช้ร่วมกันทุกเกม แก้แล้วมีผลทุกเกม · หมวดหมู่ลบไม่ได้เพราะมีสินค้าอ้างอิงอยู่ ให้ปิดใช้งานแทน")}
         </p>
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
           icon={FolderTree}
-          title="ยังไม่มีหมวดหมู่"
-          description="เพิ่มหมวดแรก เช่น การ์ดเดี่ยว ของซีล หรืออุปกรณ์เสริม"
+          title={t("cardAttributes.categories.emptyTitle", "ยังไม่มีหมวดหมู่")}
+          description={t("cardAttributes.categories.emptyDescription", "เพิ่มหมวดแรก เช่น การ์ดเดี่ยว ของซีล หรืออุปกรณ์เสริม")}
           className={CARD_EMPTY_CLASS}
         />
       ) : (

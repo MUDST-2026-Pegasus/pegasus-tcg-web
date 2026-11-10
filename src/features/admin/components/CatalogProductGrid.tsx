@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 
 import { formatCount, productTitle, toProductCard } from "../catalog.format";
 import type { ProductSummary } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogProductGridProps = {
   products: ProductSummary[];
@@ -23,6 +24,7 @@ export function CatalogProductGrid({
   isFetching,
   onSelect,
 }: CatalogProductGridProps) {
+  const { t } = useTranslate("admin");
   return (
     <ul
       aria-busy={isFetching || undefined}
@@ -35,7 +37,7 @@ export function CatalogProductGrid({
         <li key={product.id} className="relative">
           <button
             type="button"
-            aria-label={`แก้ไข ${productTitle(product)}`}
+            aria-label={t("catalog.products.edit", "แก้ไข {name}", { name: productTitle(product) })}
             onClick={() => onSelect(product)}
             className="block w-full cursor-pointer rounded-lg text-left transition-shadow outline-none hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
           >
@@ -45,7 +47,7 @@ export function CatalogProductGrid({
             {/* ไม่มี variant = ผู้ขายยังลงขายการ์ดใบนี้ไม่ได้ เตือนให้เห็นจากตาราง */}
             {product.variantCount === 0 ? (
               <span className="rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[10px] font-medium text-[#b45309]">
-                ยังไม่มี variant
+                {t("catalog.products.noVariant", "ยังไม่มี variant")}
               </span>
             ) : null}
             {/* นับเฉพาะที่ผู้ซื้อซื้อได้ตอนนี้ */}
@@ -58,12 +60,12 @@ export function CatalogProductGrid({
               )}
             >
               {product.sellerCount === 0
-                ? "ไม่มีร้านขาย"
-                : `${formatCount(product.sellerCount)} ร้าน · เหลือ ${formatCount(product.availableQuantity)} ใบ`}
+                ? t("catalog.filters.noSeller", "ไม่มีร้านขาย")
+                : t("catalog.products.stock", "{shops} ร้าน · เหลือ {qty} ใบ", { shops: formatCount(product.sellerCount), qty: formatCount(product.availableQuantity) })}
             </span>
             {product.blockedListingCount > 0 ? (
               <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700">
-                ระงับ {formatCount(product.blockedListingCount)}
+                {t("catalog.products.blocked", "ระงับ {count}", { count: formatCount(product.blockedListingCount) })}
               </span>
             ) : null}
           </div>

@@ -16,6 +16,7 @@ import { useChangeListingBlock } from "../catalog.queries";
 import type { AdminCardListing } from "../catalog.types";
 
 import { formatThaiDate } from "../users.format";
+import { useTranslate } from "@/lib/i18n";
 
 const MAX_REASON = 500;
 
@@ -39,11 +40,12 @@ export function ListingBlockDialog({
   action,
   onClose,
 }: ListingBlockDialogProps) {
+  const { t } = useTranslate("admin");
   const change = useChangeListingBlock(productId);
   const [reason, setReason] = useState("");
   const isBlock = action === "block";
   const target = unblockTarget(listing);
-  const summary = `${cardLabel} · ${listingConditionLabel(listing)} · ร้าน ${listing.seller.username}`;
+  const summary = t("catalog.listings.blockDialog.summary", "{card} · {condition} · ร้าน {shop}", { card: cardLabel, condition: listingConditionLabel(listing), shop: listing.seller.username });
 
   function handleConfirm() {
     change.mutate(
@@ -52,7 +54,7 @@ export function ListingBlockDialog({
         onSuccess: () => {
           toast.add({
             type: "success",
-            title: isBlock ? "ระงับการขายแล้ว" : "ปลดการระงับแล้ว",
+            title: isBlock ? t("catalog.listings.blockDialog.blocked", "ระงับการขายแล้ว") : t("catalog.listings.blockDialog.unblocked", "ปลดการระงับแล้ว"),
             description: summary,
           });
           onClose();
@@ -68,26 +70,26 @@ export function ListingBlockDialog({
         if (!open) onClose();
       }}
       variant={isBlock ? "destructive" : "default"}
-      title={isBlock ? "ระงับการขายประกาศนี้?" : "ปลดการระงับประกาศนี้?"}
+      title={isBlock ? t("catalog.listings.blockDialog.blockTitle", "ระงับการขายประกาศนี้?") : t("catalog.listings.blockDialog.unblockTitle", "ปลดการระงับประกาศนี้?")}
       description={
         <>
           {summary}
           {isBlock
-            ? ` · เหลือ ${formatCount(listing.quantityAvailable)} ใบ`
-            : ` — ประกาศจะกลับเป็น “${LISTING_STATUS_LABEL[target]}”`}
-          {!isBlock && target === "ACTIVE" ? " และผู้ซื้อเห็นทันที" : null}
+            ? ` · ${t("catalog.listings.blockDialog.remaining", "เหลือ {count} ใบ", { count: formatCount(listing.quantityAvailable) })}`
+            : ` — ${t("catalog.listings.blockDialog.returnsTo", "ประกาศจะกลับเป็น “{status}”", { status: LISTING_STATUS_LABEL[target] })}`}
+          {!isBlock && target === "ACTIVE" ? ` ${t("catalog.listings.blockDialog.visibleNow", "และผู้ซื้อเห็นทันที")}` : null}
         </>
       }
-      confirmLabel={isBlock ? "ระงับการขาย" : "ปลดการระงับ"}
+      confirmLabel={isBlock ? t("catalog.listings.block", "ระงับการขาย") : t("catalog.listings.unblock", "ปลดการระงับ")}
       isPending={change.isPending}
       confirmDisabled={reason.trim() === ""}
       error={
         change.error ? (
           <>
-            <p className="font-medium">{isBlock ? "ระงับไม่สำเร็จ" : "ปลดการระงับไม่สำเร็จ"}</p>
+            <p className="font-medium">{isBlock ? t("catalog.listings.blockDialog.blockFailed", "ระงับไม่สำเร็จ") : t("catalog.listings.blockDialog.unblockFailed", "ปลดการระงับไม่สำเร็จ")}</p>
             {hasErrorCode(change.error, "LISTING_STATUS_TRANSITION")
-              ? "สถานะของประกาศเปลี่ยนไปแล้ว รายการอัปเดตให้ใหม่แล้ว"
-              : catalogErrorMessage(change.error, "ลองใหม่อีกครั้ง")}
+              ? t("catalog.listings.blockDialog.conflict", "สถานะของประกาศเปลี่ยนไปแล้ว รายการอัปเดตให้ใหม่แล้ว")
+              : catalogErrorMessage(change.error, t("common.tryAgain", "ลองใหม่อีกครั้ง"))}
           </>
         ) : null
       }
@@ -96,7 +98,7 @@ export function ListingBlockDialog({
       {!isBlock && listing.block ? (
         <div className="flex flex-col gap-1 rounded-lg bg-muted/60 p-3">
           <p className="text-[11px] font-medium text-muted-foreground">
-            เหตุผลที่ระงับ
+            {t("catalog.listings.blockDialog.blockReason", "เหตุผลที่ระงับ")}
             {listing.block.blockedByUsername
               ? ` · ${listing.block.blockedByUsername}`
               : null}
@@ -110,7 +112,7 @@ export function ListingBlockDialog({
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="listing-block-reason">
-          {isBlock ? "เหตุผล (ผู้ขายจะเห็น) *" : "เหตุผลที่ปลด *"}
+          {isBlock ? t("catalog.listings.blockDialog.reasonBlock", "เหตุผล (ผู้ขายจะเห็น) *") : t("catalog.listings.blockDialog.reasonUnblock", "เหตุผลที่ปลด *")}
         </Label>
         <Textarea
           id="listing-block-reason"
@@ -119,8 +121,8 @@ export function ListingBlockDialog({
           rows={3}
           placeholder={
             isBlock
-              ? "เช่น สงสัยการ์ดปลอม รูปไม่ตรงกับการ์ดจริง"
-              : "เช่น ตรวจแล้วเป็นการ์ดจริง"
+              ? t("catalog.listings.blockDialog.reasonBlockPlaceholder", "เช่น สงสัยการ์ดปลอม รูปไม่ตรงกับการ์ดจริง")
+              : t("catalog.listings.blockDialog.reasonUnblockPlaceholder", "เช่น ตรวจแล้วเป็นการ์ดจริง")
           }
           onChange={(event) => setReason(event.target.value)}
         />
@@ -128,13 +130,12 @@ export function ListingBlockDialog({
 
       {isBlock ? (
         <div className="flex flex-col gap-1 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground">เมื่อระงับแล้ว</p>
-          <p>ประกาศหายจากหน้าร้านและผลค้นหาทันที ตะกร้าที่มีอยู่ชำระเงินไม่ได้</p>
+          <p className="font-semibold text-foreground">{t("catalog.listings.blockDialog.effectsTitle", "เมื่อระงับแล้ว")}</p>
+          <p>{t("catalog.listings.blockDialog.effectHidden", "ประกาศหายจากหน้าร้านและผลค้นหาทันที ตะกร้าที่มีอยู่ชำระเงินไม่ได้")}</p>
           <p>
-            การ์ดที่ติดจอง {formatCount(listing.quantityReserved)}{" "}
-            ใบในออเดอร์เดิมยังเดินต่อ ไม่ถูกยกเลิก
+            {t("catalog.listings.blockDialog.effectReserved", "การ์ดที่ติดจอง {count} ใบในออเดอร์เดิมยังเดินต่อ ไม่ถูกยกเลิก", { count: formatCount(listing.quantityReserved) })}
           </p>
-          <p>ผู้ขายแก้ราคา เปลี่ยนสถานะ หรือลบประกาศไม่ได้จนกว่าจะปลด</p>
+          <p>{t("catalog.listings.blockDialog.effectLocked", "ผู้ขายแก้ราคา เปลี่ยนสถานะ หรือลบประกาศไม่ได้จนกว่าจะปลด")}</p>
         </div>
       ) : null}
     </ConfirmDialog>

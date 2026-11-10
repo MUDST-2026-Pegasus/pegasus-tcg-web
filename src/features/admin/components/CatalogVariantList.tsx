@@ -11,6 +11,7 @@ import { variantLabel } from "../catalog.format";
 import type { CatalogProduct, CatalogVariant } from "../catalog.types";
 
 import { VariantFormDialog } from "./VariantFormDialog";
+import { useTranslate } from "@/lib/i18n";
 
 type CatalogVariantListProps = {
   product: CatalogProduct;
@@ -28,6 +29,7 @@ export function CatalogVariantList({
   product,
   variants,
 }: CatalogVariantListProps) {
+  const { t } = useTranslate("admin");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CatalogVariant | undefined>();
 
@@ -39,23 +41,23 @@ export function CatalogVariantList({
   const columns: DataTableColumn<CatalogVariant>[] = [
     { id: "variant", header: "Variant", meta: { cellClassName: "font-medium" }, cell: ({ row }) => variantLabel(row.original) },
     { id: "sku", header: "SKU", meta: { cellClassName: "font-mono text-xs" }, cell: ({ row }) => row.original.sku },
-    { id: "barcode", header: "บาร์โค้ด", meta: { cellClassName: "text-xs" }, cell: ({ row }) => row.original.barcode ?? "—" },
+    { id: "barcode", header: t("catalog.variants.barcode", "บาร์โค้ด"), meta: { cellClassName: "text-xs" }, cell: ({ row }) => row.original.barcode ?? "—" },
     {
       id: "status",
-      header: "สถานะ",
+      header: t("catalog.filters.status", "สถานะ"),
       meta: { headClassName: "w-24" },
       cell: ({ row: { original: variant } }) => (
         <Badge variant={variant.active ? "outline" : "secondary"} className="rounded-full">
-          {variant.active ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+          {variant.active ? t("catalog.status.active", "เปิดใช้งาน") : t("catalog.status.inactive", "ปิดใช้งาน")}
         </Badge>
       ),
     },
     {
       id: "edit",
-      header: () => <span className="sr-only">แก้ไข</span>,
+      header: () => <span className="sr-only">{t("catalog.variants.edit", "แก้ไข")}</span>,
       meta: { headClassName: "w-12" },
       cell: ({ row: { original: variant } }) => (
-        <Button variant="ghost" size="icon-sm" aria-label={`แก้ไข ${variantLabel(variant)}`} onClick={() => openDialog(variant)}>
+        <Button variant="ghost" size="icon-sm" aria-label={t("catalog.products.edit", "แก้ไข {name}", { name: variantLabel(variant) })} onClick={() => openDialog(variant)}>
           <Pencil />
         </Button>
       ),
@@ -66,22 +68,22 @@ export function CatalogVariantList({
     <div className="flex flex-col gap-4 px-6 pb-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">
-          ภาษา + finish + edition + หมายเหตุการพิมพ์ ห้ามซ้ำกันในสินค้าเดียว
+          {t("catalog.variants.hint", "ภาษา + finish + edition + หมายเหตุการพิมพ์ ห้ามซ้ำกันในสินค้าเดียว")}
         </p>
         <Button
           size="sm"
           className="rounded-md px-2.5"
           onClick={() => openDialog()}
         >
-          + เพิ่ม variant
+          {t("catalog.variants.add", "+ เพิ่ม variant")}
         </Button>
       </div>
 
       {variants.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="ยังไม่มี variant"
-          description="เพิ่มอย่างน้อยหนึ่ง variant ผู้ขายถึงจะเลือกการ์ดนี้ไปลงขายได้"
+          title={t("catalog.products.noVariant", "ยังไม่มี variant")}
+          description={t("catalog.variants.emptyDescription", "เพิ่มอย่างน้อยหนึ่ง variant ผู้ขายถึงจะเลือกการ์ดนี้ไปลงขายได้")}
           className="min-h-60"
         />
       ) : (

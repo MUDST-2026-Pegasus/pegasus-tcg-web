@@ -8,6 +8,7 @@ import { ATTRIBUTE_TYPE_LABEL, ATTRIBUTE_TYPES } from "../taxonomy.format";
 
 import { FieldTypeBadge } from "./FieldTypeBadge";
 import { GameAvatar } from "./GameAvatar";
+import { useTranslate } from "@/lib/i18n";
 
 type GameListPanelProps = {
   games: Game[];
@@ -32,12 +33,13 @@ export function GameListPanel({
   productCounts,
   showFieldTypes,
 }: GameListPanelProps) {
+  const { t } = useTranslate("admin");
   return (
     <div className="flex w-full flex-col gap-4 lg:w-[224px] lg:shrink-0">
       <Card className="gap-0 rounded-xl border border-border p-0 shadow-none ring-0">
         <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
           <p className="text-[13px] font-semibold text-foreground">
-            เกมทั้งหมด ({games.length})
+            {t("cardAttributes.games.all", "เกมทั้งหมด ({count})", { count: games.length })}
           </p>
           <Button
             variant="outline"
@@ -45,7 +47,7 @@ export function GameListPanel({
             className="rounded-md px-2.5"
             onClick={onAddGame}
           >
-            + เพิ่มเกม
+            {t("cardAttributes.games.add", "+ เพิ่มเกม")}
           </Button>
         </div>
 
@@ -55,12 +57,12 @@ export function GameListPanel({
             const meta = [
               fieldCounts[game.id] === undefined
                 ? null
-                : `${fieldCounts[game.id]} ฟิลด์`,
+                : t("cardAttributes.fields.count", "{count} ฟิลด์", { count: fieldCounts[game.id] }),
               game.active
                 ? productCounts[game.id] === undefined
                   ? null
-                  : `${formatCount(productCounts[game.id])} การ์ด`
-                : "ซ่อนจากหน้าร้าน",
+                  : t("cardAttributes.games.cards", "{count} การ์ด", { count: formatCount(productCounts[game.id]) })
+                : t("cardAttributes.games.hiddenStatus", "ซ่อนจากหน้าร้าน"),
             ]
               .filter(Boolean)
               .join(" · ");
@@ -110,7 +112,7 @@ export function GameListPanel({
       {showFieldTypes && (
         <Card className="gap-2 rounded-xl border border-border p-4 shadow-none ring-0">
           <p className="text-xs font-semibold text-foreground">
-            ประเภทฟิลด์ที่รองรับ
+            {t("cardAttributes.fields.supportedTypes", "ประเภทฟิลด์ที่รองรับ")}
           </p>
           <ul className="flex flex-col gap-2">
             {ATTRIBUTE_TYPES.map((type) => (

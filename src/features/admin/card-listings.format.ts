@@ -3,6 +3,8 @@ import {
   LISTING_STATUS_LABEL,
 } from "@/features/seller/products/products.format";
 
+import { translate } from "@/lib/i18n";
+
 import type { AdminCardListing, ListingStatus } from "./catalog.types";
 
 /** ตัวช่วยของแท็บ "ร้านที่ขาย" — ไม่มี React ไม่มี state */
@@ -27,9 +29,9 @@ export function closedShopLabel(listing: AdminCardListing): string | null {
   if (listing.status !== "ACTIVE") return null;
   const { seller } = listing;
   if (seller.status !== "VERIFIED" || !seller.accountActive) {
-    return "ร้านถูกระงับ · ซื้อไม่ได้";
+    return translate("admin", "catalog.listings.shopSuspended", "ร้านถูกระงับ · ซื้อไม่ได้");
   }
-  return seller.onVacation ? "ร้านปิดชั่วคราว · ซื้อไม่ได้" : null;
+  return seller.onVacation ? translate("admin", "catalog.listings.shopOnVacation", "ร้านปิดชั่วคราว · ซื้อไม่ได้") : null;
 }
 
 /** ปลดแล้วไปสถานะไหน — ตรงกับ `AdminCardListingService.unblock` */
@@ -62,3 +64,6 @@ export { LISTING_STATUS_LABEL };
 export function shopInitials(username: string): string {
   return username.slice(0, 2).toUpperCase();
 }
+
+// @tolgee-key {"key": "catalog.listings.shopSuspended", "ns": "admin", "defaultValue": "ร้านถูกระงับ · ซื้อไม่ได้"}
+// @tolgee-key {"key": "catalog.listings.shopOnVacation", "ns": "admin", "defaultValue": "ร้านปิดชั่วคราว · ซื้อไม่ได้"}

@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslate } from "@/lib/i18n";
 
 /** dropdown หนึ่งตัวบนแถบเครื่องมือ — ตัวเลือกแรกควรเป็น "ทั้งหมด" ที่มีชื่อตัวกรองนำหน้า */
 export type CatalogToolbarSelect = {
@@ -52,6 +53,7 @@ export function CatalogToolbar({
   onSearchChange,
   selects,
 }: CatalogToolbarProps) {
+  const { t } = useTranslate("admin");
   const [text, setText] = useState(search);
   const [syncedSearch, setSyncedSearch] = useState(search);
   const timer = useRef<number | undefined>(undefined);
@@ -94,8 +96,8 @@ export function CatalogToolbar({
           </InputGroupAddon>
           <InputGroupInput
             type="search"
-            aria-label="ค้นหาชื่อการ์ด"
-            placeholder="ค้นหาชื่อการ์ด..."
+            aria-label={t("catalog.toolbar.search", "ค้นหาชื่อการ์ด")}
+            placeholder={t("catalog.toolbar.searchPlaceholder", "ค้นหาชื่อการ์ด...")}
             value={text}
             onChange={(event) => handleSearchInput(event.target.value)}
             onKeyDown={(event) => {
