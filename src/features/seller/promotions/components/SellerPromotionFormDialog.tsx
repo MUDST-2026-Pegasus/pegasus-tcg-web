@@ -26,7 +26,7 @@ import {
   TextField,
 } from "./SellerPromotionFields";
 import { SellerPromotionPreview } from "./SellerPromotionPreview";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const newInput = (): SellerPromotionInput => ({
   code: "",
@@ -81,6 +81,7 @@ export function SellerPromotionForm({
   verified: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslate("promotions");
   const [confirmClose, setConfirmClose] = useState(false);
   const create = useCreateSellerPromotion();
   const update = useUpdateSellerPromotion();
@@ -100,28 +101,28 @@ export function SellerPromotionForm({
       else await create.mutateAsync(payload);
       onClose();
       toast.add({
-        title: existing ? "บันทึกการแก้ไขแล้ว" : `สร้างโค้ด ${payload.code} แล้ว`,
+        title: existing ? t("seller.sellerPromotionFormDialog.title", "บันทึกการแก้ไขแล้ว") : t("seller.sellerPromotionFormDialog.title2", "สร้างโค้ด {code} แล้ว", { code: payload.code }),
         type: "success",
         actionProps: existing
           ? undefined
           : {
-              children: "คัดลอกโค้ด",
+              children: t("seller.sellerPromotionFormDialog.children", "คัดลอกโค้ด"),
               onClick: () => void navigator.clipboard?.writeText(payload.code),
             },
       });
     } catch (error) {
       if (hasErrorCode(error, "PROMO_CODE_TAKEN")) {
-        setError("code", { message: "โค้ดนี้ถูกใช้แล้วในระบบ (PROMO_CODE_TAKEN)" }, { shouldFocus: true });
+        setError("code", { message: t("seller.sellerPromotionFormDialog.message", "โค้ดนี้ถูกใช้แล้วในระบบ (PROMO_CODE_TAKEN)") }, { shouldFocus: true });
         return;
       }
       if (applyApiErrors(error, setError)) return;
       toast.add({
-        title: "บันทึกไม่สำเร็จ",
+        title: t("seller.sellerPromotionFormDialog.title3", "บันทึกไม่สำเร็จ"),
         description: hasErrorCode(error, "SELLER_NOT_VERIFIED")
-          ? "กรุณายืนยันตัวตนผู้ขายก่อนสร้างโค้ด"
+          ? t("seller.sellerPromotionFormDialog.description", "กรุณายืนยันตัวตนผู้ขายก่อนสร้างโค้ด")
           : hasErrorCode(error, "PROMO_IN_USE")
-            ? "โค้ดนี้มีลูกค้าใช้หรือเก็บแล้ว แก้ได้เฉพาะชื่อ วันสิ้นสุดที่ยาวขึ้น และจำนวนสิทธิ์ที่เพิ่มขึ้น"
-            : translateError(error, "กรุณาลองอีกครั้ง"),
+            ? t("seller.sellerPromotionFormDialog.description2", "โค้ดนี้มีลูกค้าใช้หรือเก็บแล้ว แก้ได้เฉพาะชื่อ วันสิ้นสุดที่ยาวขึ้น และจำนวนสิทธิ์ที่เพิ่มขึ้น")
+            : translateError(error, t("seller.sellerPromotionFormDialog.translateError", "กรุณาลองอีกครั้ง")),
         type: "error",
       });
     }
@@ -133,12 +134,12 @@ export function SellerPromotionForm({
       onOpenChange={setConfirmClose}
       tone="warning"
       icon={<LogOut />}
-      title="ทิ้งการแก้ไข?"
-      description="ข้อมูลที่กรอกในฟอร์มยังไม่ได้บันทึก ถ้าปิดตอนนี้จะหายทั้งหมด"
+      title={t("seller.sellerPromotionFormDialog.title4", "ทิ้งการแก้ไข?")}
+      description={t("seller.sellerPromotionFormDialog.description3", "ข้อมูลที่กรอกในฟอร์มยังไม่ได้บันทึก ถ้าปิดตอนนี้จะหายทั้งหมด")}
       actions={
         <>
           <Button variant="outline" onClick={() => setConfirmClose(false)}>
-            กลับไปแก้ต่อ
+            {t("seller.sellerPromotionFormDialog.button", "กลับไปแก้ต่อ")}
           </Button>
           <Button
             className="bg-destructive text-white hover:bg-destructive/90"
@@ -147,7 +148,7 @@ export function SellerPromotionForm({
               onClose();
             }}
           >
-            ทิ้งการแก้ไข
+            {t("seller.sellerPromotionFormDialog.button2", "ทิ้งการแก้ไข")}
           </Button>
         </>
       }
@@ -164,54 +165,54 @@ export function SellerPromotionForm({
           }}
           tone="teal"
           icon={<Pencil />}
-          title={`แก้ไขโค้ด ${existing.code}`}
-          description={`ลูกค้าใช้แล้ว ${existing.usedCount} ครั้ง · ช่องที่มี 🔒 แก้ไม่ได้เพื่อให้ทุกออเดอร์คิดส่วนลดแบบเดียวกัน`}
+          title={t("seller.sellerPromotionFormDialog.title5", "แก้ไขโค้ด {code}", { code: existing.code })}
+          description={t("seller.sellerPromotionFormDialog.description4", "ลูกค้าใช้แล้ว {usedCount} ครั้ง · ช่องที่มี 🔒 แก้ไม่ได้เพื่อให้ทุกออเดอร์คิดส่วนลดแบบเดียวกัน", { usedCount: existing.usedCount })}
           className="sm:max-w-[460px]"
           actions={
             <>
               <Button variant="outline" onClick={requestClose}>
-                ยกเลิก
+                {t("seller.sellerPromotionFormDialog.button3", "ยกเลิก")}
               </Button>
               <Button disabled={busy || !verified} onClick={() => void save()}>
-                บันทึก
+                {t("seller.sellerPromotionFormDialog.button4", "บันทึก")}
               </Button>
             </>
           }
         >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <LockedText label="รหัสโค้ด" value={existing.code} />
-            <LockedText label="ส่วนลด" value={discountLabel(existing)} />
-            <LockedText label="ยอดขั้นต่ำ" value={existing.minSpend > 0 ? money(existing.minSpend) : "ไม่มีขั้นต่ำ"} />
-            <TextField control={control} errors={errors} name="name" label="ชื่อที่ลูกค้าเห็น" />
+            <LockedText label={t("seller.sellerPromotionFormDialog.label", "รหัสโค้ด")} value={existing.code} />
+            <LockedText label={t("seller.sellerPromotionFormDialog.label2", "ส่วนลด")} value={discountLabel(existing)} />
+            <LockedText label={t("seller.sellerPromotionFormDialog.label3", "ยอดขั้นต่ำ")} value={existing.minSpend > 0 ? money(existing.minSpend) : t("seller.sellerPromotionFormDialog.value", "ไม่มีขั้นต่ำ")} />
+            <TextField control={control} errors={errors} name="name" label={t("seller.sellerPromotionFormDialog.label4", "ชื่อที่ลูกค้าเห็น")} />
             <DateField
               control={control}
               errors={errors}
               name="endsAt"
-              label="สิ้นสุด (ยืดได้)"
+              label={t("seller.sellerPromotionFormDialog.label5", "สิ้นสุด (ยืดได้)")}
               min={toLocalInput(existing.endsAt)}
             />
             <NumberField
               control={control}
               errors={errors}
               name="usageLimitPerUser"
-              label="สิทธิ์ต่อคน"
-              unit="ครั้ง"
+              label={t("seller.sellerPromotionFormDialog.label6", "สิทธิ์ต่อคน")}
+              unit={t("seller.sellerPromotionFormDialog.unit", "ครั้ง")}
               locked
             />
             <NumberField
               control={control}
               errors={errors}
               name="usageLimitTotal"
-              label={`จำนวนสิทธิ์ (≥ ${existing.usedCount})`}
-              unit="สิทธิ์"
+              label={t("seller.sellerPromotionFormDialog.label7", "จำนวนสิทธิ์ (≥ {usedCount})", { usedCount: existing.usedCount })}
+              unit={t("seller.sellerPromotionFormDialog.unit2", "สิทธิ์")}
             />
             {existing.claimable ? (
               <NumberField
                 control={control}
                 errors={errors}
                 name="claimLimit"
-                label={`จำนวนที่แจก (≥ ${existing.claimedCount})`}
-                unit="ใบ"
+                label={t("seller.sellerPromotionFormDialog.label8", "จำนวนที่แจก (≥ {claimedCount})", { claimedCount: existing.claimedCount })}
+                unit={t("seller.sellerPromotionFormDialog.unit3", "ใบ")}
               />
             ) : null}
           </div>
@@ -245,74 +246,74 @@ export function SellerPromotionForm({
               }}
             >
               <DialogTitle className="text-lg font-bold">
-                {existing ? `แก้ไขโค้ด ${existing.code}` : "สร้างโค้ดร้าน"}
+                {existing ? t("seller.sellerPromotionFormDialog.title5", "แก้ไขโค้ด {code}", { code: existing.code }) : t("seller.sellerPromotionFormDialog.dialogTitle", "สร้างโค้ดร้าน")}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                กรอกรายละเอียดโค้ดส่วนลดของร้าน ตัวอย่างตั๋วและยอดที่ร้านได้รับอยู่ด้านข้าง
+                {t("seller.sellerPromotionFormDialog.dialogDescription", "กรอกรายละเอียดโค้ดส่วนลดของร้าน ตัวอย่างตั๋วและยอดที่ร้านได้รับอยู่ด้านข้าง")}
               </DialogDescription>
               <Row>
                 <TextField
                   control={control}
                   errors={errors}
                   name="code"
-                  label="รหัสโค้ด"
+                  label={t("seller.sellerPromotionFormDialog.label", "รหัสโค้ด")}
                   required
-                  hint="A–Z 0–9 · 4–20 ตัว"
+                  hint={t("seller.sellerPromotionFormDialog.hint", "A–Z 0–9 · 4–20 ตัว")}
                   upper
                 />
-                <TextField control={control} errors={errors} name="name" label="ชื่อที่ลูกค้าเห็น" required />
+                <TextField control={control} errors={errors} name="name" label={t("seller.sellerPromotionFormDialog.label4", "ชื่อที่ลูกค้าเห็น")} required />
               </Row>
               <Segmented
                 control={control}
                 name="discountType"
-                label="ประเภทส่วนลด"
+                label={t("seller.sellerPromotionFormDialog.label9", "ประเภทส่วนลด")}
                 options={[
-                  ["FIXED", "ลดเป็นบาท"],
-                  ["PERCENT", "ลดเป็น %"],
+                  ["FIXED", t("seller.sellerPromotionFormDialog.text", "ลดเป็นบาท")],
+                  ["PERCENT", t("seller.sellerPromotionFormDialog.text2", "ลดเป็น %")],
                 ]}
               />
               <DiscountFields control={control} errors={errors} />
               <Row>
-                <DateField control={control} errors={errors} name="startsAt" label="เริ่ม" required />
-                <DateField control={control} errors={errors} name="endsAt" label="สิ้นสุด" />
+                <DateField control={control} errors={errors} name="startsAt" label={t("seller.sellerPromotionFormDialog.label10", "เริ่ม")} required />
+                <DateField control={control} errors={errors} name="endsAt" label={t("seller.sellerPromotionFormDialog.label11", "สิ้นสุด")} />
               </Row>
               <Row>
                 <NumberField
                   control={control}
                   errors={errors}
                   name="usageLimitTotal"
-                  label="จำนวนสิทธิ์ทั้งหมด"
-                  unit="สิทธิ์"
-                  hint="เว้นว่าง = ไม่จำกัด"
+                  label={t("seller.sellerPromotionFormDialog.label12", "จำนวนสิทธิ์ทั้งหมด")}
+                  unit={t("seller.sellerPromotionFormDialog.unit2", "สิทธิ์")}
+                  hint={t("seller.sellerPromotionFormDialog.hint2", "เว้นว่าง = ไม่จำกัด")}
                 />
                 <NumberField
                   control={control}
                   errors={errors}
                   name="usageLimitPerUser"
-                  label="สิทธิ์ต่อลูกค้า"
-                  unit="ครั้ง"
+                  label={t("seller.sellerPromotionFormDialog.label13", "สิทธิ์ต่อลูกค้า")}
+                  unit={t("seller.sellerPromotionFormDialog.unit", "ครั้ง")}
                 />
               </Row>
               <Segmented
                 control={control}
                 name="visibility"
-                label="การมองเห็น"
+                label={t("seller.sellerPromotionFormDialog.label14", "การมองเห็น")}
                 disabled={claimFixed}
                 onPick={(value) => {
                   if (value === "PRIVATE") setValue("claimable", false, { shouldDirty: true });
                 }}
                 options={[
-                  ["PUBLIC", "สาธารณะ"],
-                  ["PRIVATE", "ส่วนตัว (พิมพ์เอง)"],
+                  ["PUBLIC", t("seller.sellerPromotionFormDialog.text3", "สาธารณะ")],
+                  ["PRIVATE", t("seller.sellerPromotionFormDialog.text4", "ส่วนตัว (พิมพ์เอง)")],
                 ]}
               />
               <ClaimFields control={control} errors={errors} claimFixed={claimFixed} />
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="outline" onClick={requestClose}>
-                  ยกเลิก
+                  {t("seller.sellerPromotionFormDialog.button3", "ยกเลิก")}
                 </Button>
                 <Button type="submit" disabled={busy || !verified}>
-                  {existing ? "บันทึก" : "สร้างโค้ด"}
+                  {existing ? t("seller.sellerPromotionFormDialog.button4", "บันทึก") : t("seller.sellerPromotionFormDialog.button5", "สร้างโค้ด")}
                 </Button>
               </div>
             </form>

@@ -21,6 +21,7 @@ import {
   normalizePromotionCode,
 } from "@/features/cart/checkout.format";
 import type { AvailablePromotion, PromotionUiError } from "@/features/cart/promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 export interface CodePickerDialogProps {
   open: boolean;
@@ -65,6 +66,7 @@ export function CodePickerDialog({
   onNavigateHome,
   onNavigateToStore,
 }: CodePickerDialogProps) {
+  const { t } = useTranslate("promotions");
   const [draftCode, setDraftCode] = useState<string | null>(selectedCode ?? null);
   const [typed, setTyped] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -101,23 +103,23 @@ export function CodePickerDialog({
 
   const groups = [
     {
-      title: "เก็บไว้ใช้ได้",
+      title: t("buyer.codePickerDialog.title", "เก็บไว้ใช้ได้"),
       items: relevant.filter(
         (promotion) => promotion.source === "CLAIMED" && promotion.applicable,
       ),
     },
     {
-      title: "เก็บไว้แต่ยังใช้ไม่ได้",
+      title: t("buyer.codePickerDialog.title2", "เก็บไว้แต่ยังใช้ไม่ได้"),
       items: relevant.filter(
         (promotion) => promotion.source === "CLAIMED" && !promotion.applicable,
       ),
     },
     {
-      title: "ยังไม่ได้เก็บ",
+      title: t("buyer.codePickerDialog.title3", "ยังไม่ได้เก็บ"),
       items: relevant.filter((promotion) => promotion.source === "CLAIMABLE"),
     },
     {
-      title: "โค้ดทั่วไป",
+      title: t("buyer.codePickerDialog.title4", "โค้ดทั่วไป"),
       items: relevant.filter((promotion) => promotion.source === "PUBLIC"),
     },
   ];
@@ -146,12 +148,12 @@ export function CodePickerDialog({
 
   const title =
     owner === "PLATFORM"
-      ? "เลือกโค้ดส่วนลด Pegasus"
-      : `โค้ดร้าน ${sellerName || ""}`;
+      ? t("buyer.codePickerDialog.title5", "เลือกโค้ดส่วนลด Pegasus")
+      : t("buyer.codePickerDialog.title6", "โค้ดร้าน {value}", { value: sellerName || "" });
   const onNavigateToPromotions =
     owner === "PLATFORM" ? onNavigateHome : onNavigateToStore;
   const navigateLabel =
-    owner === "PLATFORM" ? "ไปหน้าแรกเพื่อเก็บโค้ด" : "ไปร้านค้าเพื่อเก็บโค้ด";
+    owner === "PLATFORM" ? t("buyer.codePickerDialog.navigateLabel", "ไปหน้าแรกเพื่อเก็บโค้ด") : t("buyer.codePickerDialog.navigateLabel2", "ไปร้านค้าเพื่อเก็บโค้ด");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,7 +164,7 @@ export function CodePickerDialog({
 
         {/* Input box at top as specified by Figma B2/C2 */}
         <div className="border-b px-6 pb-4">
-          <PromotionCodeForm id="promo-code-input" label="กรอกโค้ดอื่น"
+          <PromotionCodeForm id="promo-code-input" label={t("buyer.codePickerDialog.label", "กรอกโค้ดอื่น")}
             value={typed} onChange={setTyped} onSubmit={() => handleTrySubmit()}
             error={resolvedError} loading={loading || submitting} />
           {inputFooter}
@@ -172,16 +174,16 @@ export function CodePickerDialog({
         <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
           {isGuest && (
             <div className="rounded-xl border border-dashed border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
-              <p>เข้าสู่ระบบเพื่อดูโค้ดส่วนลดที่คุณเก็บไว้</p>
+              <p>{t("buyer.codePickerDialog.p", "เข้าสู่ระบบเพื่อดูโค้ดส่วนลดที่คุณเก็บไว้")}</p>
               <div className="mt-2 flex justify-center gap-2">
                 {onLogin && (
                   <Button size="sm" variant="outline" onClick={onLogin}>
-                    เข้าสู่ระบบ
+                    {t("buyer.codePickerDialog.button", "เข้าสู่ระบบ")}
                   </Button>
                 )}
                 {onRegister && (
                   <Button size="sm" variant="ghost" onClick={onRegister}>
-                    สมัครสมาชิก
+                    {t("buyer.codePickerDialog.button2", "สมัครสมาชิก")}
                   </Button>
                 )}
               </div>
@@ -260,8 +262,8 @@ export function CodePickerDialog({
           {!relevant.length && (
             <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 py-8 text-center">
               <TicketPercent className="size-8 text-muted-foreground/60" />
-              <p className="text-sm font-medium text-foreground">ยังไม่มีโค้ดที่เก็บไว้</p>
-              <p className="text-xs text-muted-foreground">เก็บโค้ดได้ที่หน้าแรกและหน้าร้าน</p>
+              <p className="text-sm font-medium text-foreground">{t("buyer.codePickerDialog.p2", "ยังไม่มีโค้ดที่เก็บไว้")}</p>
+              <p className="text-xs text-muted-foreground">{t("buyer.codePickerDialog.p3", "เก็บโค้ดได้ที่หน้าแรกและหน้าร้าน")}</p>
               {onNavigateToPromotions && (
                 <Button
                   size="sm"
@@ -286,7 +288,7 @@ export function CodePickerDialog({
             className="rounded-lg bg-background"
             onClick={handleClear}
           >
-            ไม่ใช้โค้ด
+            {t("buyer.codePickerDialog.button3", "ไม่ใช้โค้ด")}
           </Button>
           <Button
             type="button"
@@ -295,7 +297,7 @@ export function CodePickerDialog({
             disabled={!draftCode}
             onClick={handleConfirm}
           >
-            ใช้โค้ดนี้
+            {t("buyer.codePickerDialog.button4", "ใช้โค้ดนี้")}
           </Button>
         </div>
       </DialogContent>

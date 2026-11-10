@@ -1,5 +1,9 @@
 import { PromotionOwnerTag } from "./PromotionOwnerTag";
 import type { PromotionCodeSummary, PromotionOwnerType } from "./order.types";
+import { translate } from "@/lib/i18n";
+
+// @tolgee-key {"key":"buyer.promotionDiscountLines.SELLER","ns":"promotions","defaultValue":"ส่วนลดร้าน"}
+// @tolgee-key {"key":"buyer.promotionDiscountLines.PLATFORM","ns":"promotions","defaultValue":"ส่วนลด Pegasus"}
 
 type PromotionDiscountLinesProps = {
   sellerDiscount?: number | null;
@@ -14,8 +18,8 @@ type PromotionDiscountLinesProps = {
 };
 
 const DEFAULT_LABEL: Record<PromotionOwnerType, string> = {
-  SELLER: "ส่วนลดร้าน",
-  PLATFORM: "ส่วนลด Pegasus",
+  get SELLER() { return translate("promotions", "buyer.promotionDiscountLines.SELLER", "ส่วนลดร้าน"); },
+  get PLATFORM() { return translate("promotions", "buyer.promotionDiscountLines.PLATFORM", "ส่วนลด Pegasus"); },
 };
 
 /** Shared owner tags and discount rows for buyer, seller, and admin order summaries. */

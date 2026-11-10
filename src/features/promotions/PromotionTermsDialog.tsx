@@ -16,6 +16,7 @@ import { ClaimTicket } from "./ClaimTicket";
 import { termsRows } from "./claim.format";
 import { usePromotionTerms } from "./claim.queries";
 import type { PromotionTerms } from "./claim.types";
+import { useTranslate } from "@/lib/i18n";
 
 export interface PromotionTermsDialogProps {
   code: string | null;
@@ -36,6 +37,7 @@ export function PromotionTermsDialog({
   claiming = false,
   ownerView = false,
 }: PromotionTermsDialogProps) {
+  const { t } = useTranslate("promotions");
   const query = usePromotionTerms(code);
   const terms = query.data;
   const platform = terms?.ownerType === "PLATFORM";
@@ -46,8 +48,8 @@ export function PromotionTermsDialog({
     <Dialog open={code !== null} onOpenChange={onOpenChange}>
       <DialogContent className="w-[420px] max-w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-xl p-0">
         {query.isPending ? (
-          <div className="grid gap-4 p-6" role="status" aria-label="กำลังโหลดเงื่อนไขโค้ด">
-            <DialogTitle className="sr-only">เงื่อนไขโค้ด</DialogTitle>
+          <div className="grid gap-4 p-6" role="status" aria-label={t("buyer.promotionTermsDialog.ariaLabel", "กำลังโหลดเงื่อนไขโค้ด")}>
+            <DialogTitle className="sr-only">{t("buyer.promotionTermsDialog.dialogTitle", "เงื่อนไขโค้ด")}</DialogTitle>
             <Skeleton className="h-[100px] w-full rounded-xl" />
             <Skeleton className="h-5 w-2/3" />
             <Skeleton className="h-12 w-full" />
@@ -55,7 +57,7 @@ export function PromotionTermsDialog({
           </div>
         ) : query.isError || !terms ? (
           <div className="p-6">
-            <DialogTitle className="sr-only">เงื่อนไขโค้ด</DialogTitle>
+            <DialogTitle className="sr-only">{t("buyer.promotionTermsDialog.dialogTitle", "เงื่อนไขโค้ด")}</DialogTitle>
             <ErrorState error={query.error} onRetry={() => void query.refetch()} />
           </div>
         ) : (
@@ -71,8 +73,8 @@ export function PromotionTermsDialog({
                 <DialogTitle className="text-lg font-bold">{terms.name}</DialogTitle>
                 <DialogDescription className="text-xs">
                   {platform
-                    ? "โค้ดส่วนลดจาก Pegasus · Pegasus ออกส่วนลดให้"
-                    : `โค้ดร้าน ${terms.shop?.name ?? ""} · ร้านออกส่วนลดให้`}
+                    ? t("buyer.promotionTermsDialog.dialogDescription", "โค้ดส่วนลดจาก Pegasus · Pegasus ออกส่วนลดให้")
+                    : t("buyer.promotionTermsDialog.dialogDescription2", "โค้ดร้าน {value} · ร้านออกส่วนลดให้", { value: terms.shop?.name ?? "" })}
                 </DialogDescription>
               </DialogHeader>
               {terms.description && <p className="text-sm text-foreground/80">{terms.description}</p>}
@@ -80,11 +82,11 @@ export function PromotionTermsDialog({
               <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed bg-muted/40 px-4 py-2.5">
                 <strong className="truncate text-base tracking-[0.12em]">{terms.code}</strong>
                 <Button type="button" variant="outline" size="sm" onClick={() => onCopy(terms.code)}>
-                  <Copy data-icon="inline-start" /> คัดลอก
+                  <Copy data-icon="inline-start" /> {t("buyer.promotionTermsDialog.button", "คัดลอก")}
                 </Button>
               </div>
 
-              <ul className="grid gap-2.5" aria-label="เงื่อนไข">
+              <ul className="grid gap-2.5" aria-label={t("buyer.promotionTermsDialog.ariaLabel2", "เงื่อนไข")}>
                 {termsRows(terms).map((row) => (
                   <li key={row.label} className="flex gap-2.5">
                     <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-600" aria-hidden />
@@ -100,26 +102,26 @@ export function PromotionTermsDialog({
             <DialogFooter className="m-0 flex-row justify-end gap-2 rounded-none border-t bg-muted/30 px-6 py-3">
               {platform ? (
                 <Button type="button" variant="outline" size="sm" onClick={() => onCopy(terms.code)}>
-                  คัดลอกโค้ด
+                  {t("buyer.promotionTermsDialog.button2", "คัดลอกโค้ด")}
                 </Button>
               ) : (
                 <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-                  ปิด
+                  {t("buyer.promotionTermsDialog.button3", "ปิด")}
                 </Button>
               )}
               {canClaim ? (
                 <Button type="button" size="sm" disabled={claiming} onClick={() => onClaim?.(terms)}
                   className={platform ? undefined : "bg-teal-600 hover:bg-teal-700"}>
-                  {claiming ? <Spinner /> : "เก็บโค้ด"}
+                  {claiming ? <Spinner /> : t("buyer.promotionTermsDialog.button4", "เก็บโค้ด")}
                 </Button>
               ) : !platform && terms.shop && !ownerView ? (
                 <Button size="sm" className="bg-teal-600 hover:bg-teal-700" nativeButton={false}
                   render={<Link to={`/u/${encodeURIComponent(terms.shop.username)}`} />}>
-                  ไปที่ร้าน
+                  {t("buyer.promotionTermsDialog.button5", "ไปที่ร้าน")}
                 </Button>
               ) : platform && !ownerView ? (
                 <Button size="sm" nativeButton={false} render={<Link to="/products" />}>
-                  ช้อปเลย
+                  {t("buyer.promotionTermsDialog.button6", "ช้อปเลย")}
                 </Button>
               ) : null}
             </DialogFooter>
