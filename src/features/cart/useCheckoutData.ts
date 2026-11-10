@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/toast";
 import { ApiError } from "@/lib/api/errors";
 import { useAuth } from "@/features/auth/auth.queries";
 import { useCart, useShippingQuotes, cartKeys } from "./cart.queries";
+import { useTranslate } from "@/lib/i18n";
 
 interface CheckoutLocationState {
   selectedCartItemIds?: number[];
@@ -108,6 +109,7 @@ export function useCheckoutRedirects({
   hasRedirectedRef: RefObject<boolean>;
   completedRef: RefObject<boolean>;
 }) {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -139,12 +141,12 @@ export function useCheckoutRedirects({
       toast.add({
         title:
           hasPriceChanges || quotePriceChanged
-            ? "ราคาสินค้ามีการเปลี่ยนแปลง"
-            : "สินค้าบางรายการไม่พร้อมจำหน่าย",
+            ? t("checkout.toast.priceChanged", "ราคาสินค้ามีการเปลี่ยนแปลง")
+            : t("checkout.toast.unavailable", "สินค้าบางรายการไม่พร้อมจำหน่าย"),
         description:
           hasPriceChanges || quotePriceChanged
-            ? "กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ"
-            : "กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ",
+            ? t("checkout.toast.priceChangedHint", "กรุณากลับไปตรวจสอบและยอมรับราคาใหม่ในตะกร้าก่อนสั่งซื้อ")
+            : t("checkout.toast.unavailableHint", "กรุณานำสินค้าออกหรือยกเลิกเลือกในตะกร้าก่อนสั่งซื้อ"),
         type: "warning",
       });
       navigate("/cart", { replace: true });
@@ -162,6 +164,7 @@ export function useCheckoutRedirects({
     navigate,
     hasRedirectedRef,
     completedRef,
+    t,
   ]);
 
   useEffect(() => {
@@ -186,8 +189,8 @@ export function useCheckoutRedirects({
     ) {
       hasRedirectedRef.current = true;
       toast.add({
-        title: "ไม่พบสินค้าที่เลือกสั่งซื้อ",
-        description: "กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า",
+        title: t("checkout.status.empty", "ไม่พบสินค้าที่เลือกสั่งซื้อ"),
+        description: t("checkout.toast.emptyHint", "กรุณาเลือกสินค้าที่ต้องการสั่งซื้อจากตะกร้า"),
         type: "warning",
       });
       navigate("/cart", { replace: true });
@@ -202,5 +205,6 @@ export function useCheckoutRedirects({
     navigate,
     hasRedirectedRef,
     completedRef,
+    t,
   ]);
 }

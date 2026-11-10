@@ -4,6 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { useSyncExternalStore } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { TolgeeProvider } from "@tolgee/react";
+import { testTolgee } from "@/test/i18n";
 import { createTestQueryClient, render } from "@/test/utils";
 import { CheckoutPage } from "@/features/cart/pages/CheckoutPage";
 import * as authQueries from "@/features/auth/auth.queries";
@@ -127,9 +129,11 @@ function renderCheckout(
   const queryClient = createTestQueryClient();
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <CheckoutPage />
-      </MemoryRouter>
+      <TolgeeProvider tolgee={testTolgee("th")} fallback={null}>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <CheckoutPage />
+        </MemoryRouter>
+      </TolgeeProvider>
     </QueryClientProvider>,
   );
   return { ...view, queryClient };

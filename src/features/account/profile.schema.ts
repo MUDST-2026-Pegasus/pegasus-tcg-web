@@ -1,29 +1,44 @@
 import { z } from "zod";
 
 import type { AuthUser } from "@/features/auth/auth.types";
+import { useTranslate } from "@/lib/i18n";
 
 import type { UpdateProfilePayload } from "./profile.types";
 
-export const editProfileSchema = z.object({
-  displayName: z
-    .string()
-    .trim()
-    .min(1, "Name must not be blank")
-    .max(100, "Name must be at most 100 characters"),
-  phone: z
-    .string()
-    .trim()
-    .max(20, "Phone number must be at most 20 characters")
-    .refine(
-      (val) => !val || /^(\+?\d[\d()\-\s]*)?$/.test(val),
-      "Enter a valid phone number",
-    ),
-  phonePublic: z.boolean().optional(),
-  bio: z
-    .string()
-    .trim()
-    .max(1000, "Bio must be at most 1000 characters"),
-  avatarUrl: z.string().trim().optional(),
+type ProfileMessages = { nameBlank: string; nameMax: string; phoneMax: string; phoneInvalid: string; bioMax: string };
+
+const buildEditProfileSchema = (m: ProfileMessages) =>
+  z.object({
+    displayName: z.string().trim().min(1, m.nameBlank).max(100, m.nameMax),
+    phone: z
+      .string()
+      .trim()
+      .max(20, m.phoneMax)
+      .refine((val) => !val || /^(\+?\d[\d()\-\s]*)?$/.test(val), m.phoneInvalid),
+    phonePublic: z.boolean().optional(),
+    bio: z.string().trim().max(1000, m.bioMax),
+    avatarUrl: z.string().trim().optional(),
+  });
+
+/** schema ที่ข้อความ validation ตามภาษาปัจจุบัน */
+export function useEditProfileSchema() {
+  const { t } = useTranslate("buyer");
+  return buildEditProfileSchema({
+    nameBlank: t("account.profile.validation.nameBlank", "Name must not be blank"),
+    nameMax: t("account.profile.validation.nameMax", "Name must be at most 100 characters"),
+    phoneMax: t("account.profile.validation.phoneMax", "Phone number must be at most 20 characters"),
+    phoneInvalid: t("account.profile.validation.phoneInvalid", "Enter a valid phone number"),
+    bioMax: t("account.profile.validation.bioMax", "Bio must be at most 1000 characters"),
+  });
+}
+
+// shortcut: ข้อความคงที่ (อังกฤษ) สำหรับ seller ShopProfileCard — ให้ seller (TCG-555) ย้ายไปใช้ useEditProfileSchema แล้วลบตัวนี้
+export const editProfileSchema = buildEditProfileSchema({
+  nameBlank: "Name must not be blank",
+  nameMax: "Name must be at most 100 characters",
+  phoneMax: "Phone number must be at most 20 characters",
+  phoneInvalid: "Enter a valid phone number",
+  bioMax: "Bio must be at most 1000 characters",
 });
 
 export type EditProfileFormValues = z.infer<typeof editProfileSchema>;

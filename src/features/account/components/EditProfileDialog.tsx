@@ -29,12 +29,12 @@ import type { AuthUser } from "@/features/auth/auth.types";
 
 import { useUpdateProfile } from "../profile.queries";
 import {
-  editProfileSchema,
+  useEditProfileSchema,
   toEditProfileForm,
   toUpdateProfilePayload,
   type EditProfileFormValues,
 } from "../profile.schema";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type EditProfileDialogProps = {
   open: boolean;
@@ -47,6 +47,7 @@ export function EditProfileDialog({
   onOpenChange,
   user,
 }: EditProfileDialogProps) {
+  const { t } = useTranslate("buyer");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -56,10 +57,10 @@ export function EditProfileDialog({
       >
         <DialogHeader className="gap-1 text-left">
           <DialogTitle className="text-xl font-bold text-foreground">
-            Edit Profile
+            {t("account.profile.edit.title", "Edit Profile")}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Update your personal information.
+            {t("account.profile.edit.description", "Update your personal information.")}
           </DialogDescription>
         </DialogHeader>
         <EditProfileForm
@@ -79,8 +80,10 @@ function EditProfileForm({
   user: AuthUser;
   onSaved: () => void;
 }) {
+  const { t } = useTranslate("buyer");
   const updateProfile = useUpdateProfile();
 
+  const schema = useEditProfileSchema();
   const {
     register,
     handleSubmit,
@@ -89,7 +92,7 @@ function EditProfileForm({
     setError,
     formState: { errors, isSubmitting, isDirty, dirtyFields },
   } = useForm<EditProfileFormValues>({
-    resolver: zodResolver(editProfileSchema),
+    resolver: zodResolver(schema),
     defaultValues: toEditProfileForm(user),
   });
 
@@ -108,8 +111,8 @@ function EditProfileForm({
       await updateProfile.mutateAsync(payload);
       toast.add({
         type: "success",
-        title: "Profile updated",
-        description: "Your profile changes have been saved successfully.",
+        title: t("account.profile.edit.saved", "Profile updated"),
+        description: t("account.profile.edit.savedHint", "Your profile changes have been saved successfully."),
       });
       onSaved();
     } catch (error) {
@@ -122,7 +125,7 @@ function EditProfileForm({
       {updateProfile.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {translateError(updateProfile.error, "Could not save profile changes.")}
+            {translateError(updateProfile.error, t("account.profile.edit.failed", "Could not save profile changes."))}
           </AlertDescription>
         </Alert>
       )}
@@ -135,11 +138,11 @@ function EditProfileForm({
         {/* Field 1: Name */}
         <Field className="gap-2" data-invalid={Boolean(errors.displayName) || undefined}>
           <FieldLabel htmlFor="displayName" className="text-sm font-medium text-foreground">
-            Name
+            {t("account.profile.edit.name", "Name")}
           </FieldLabel>
           <Input
             id="displayName"
-            aria-label="Display Name"
+            aria-label={t("account.profile.edit.nameAria", "Display Name")}
             autoComplete="name"
             className="h-11 rounded-xl border border-input bg-white px-3.5 text-sm font-normal text-foreground dark:bg-background"
             aria-invalid={Boolean(errors.displayName)}
@@ -151,7 +154,7 @@ function EditProfileForm({
         {/* Field 2: Email */}
         <Field className="gap-2">
           <FieldLabel htmlFor="email" className="text-sm font-medium text-foreground">
-            Email
+            {t("account.profile.edit.email", "Email")}
           </FieldLabel>
           <Input
             id="email"
@@ -164,7 +167,7 @@ function EditProfileForm({
         {/* Field 3: Phone Number */}
         <Field className="gap-2" data-invalid={Boolean(errors.phone) || undefined}>
           <FieldLabel htmlFor="phone" className="text-sm font-medium text-foreground">
-            Phone Number
+            {t("account.profile.edit.phone", "Phone Number")}
           </FieldLabel>
           <Input
             id="phone"
@@ -188,12 +191,12 @@ function EditProfileForm({
                 isSwitchDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
               )}
             >
-              แสดงเบอร์โทรบนหน้าร้าน
+              {t("account.profile.edit.showPhone", "แสดงเบอร์โทรบนหน้าร้าน")}
             </label>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {phonePublic
-                ? "สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้"
-                : "Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์"}
+                ? t("account.profile.edit.phonePublic", "สาธารณะ · ผู้เข้าชมหน้าร้านมองเห็นเบอร์โทรได้")
+                : t("account.profile.edit.phonePrivate", "Private · เฉพาะคุณที่เห็นเบอร์โทรในโปรไฟล์")}
             </p>
           </div>
           <Controller
@@ -202,7 +205,7 @@ function EditProfileForm({
             render={({ field }) => (
               <Switch
                 id="phone-public"
-                aria-label="แสดงเบอร์โทรบนหน้าร้าน"
+                aria-label={t("account.profile.edit.showPhone", "แสดงเบอร์โทรบนหน้าร้าน")}
                 checked={field.value}
                 onCheckedChange={field.onChange}
                 onBlur={field.onBlur}
@@ -223,7 +226,7 @@ function EditProfileForm({
             />
           }
         >
-          Cancel
+          {t("account.orders.cancel", "Cancel")}
         </DialogClose>
         <Button
           type="submit"
@@ -231,7 +234,7 @@ function EditProfileForm({
           disabled={isSubmitting || !hasChanges}
         >
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          Save Changes
+          {t("account.profile.edit.save", "Save Changes")}
         </Button>
       </DialogFooter>
     </form>

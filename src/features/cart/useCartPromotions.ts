@@ -9,6 +9,7 @@ import {
   savePromotionSelection,
 } from "./promotions.storage";
 import type { PromoPreview, PromotionSelection, PromotionUiError } from "./promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 export type PromotionOwnerKey = "PLATFORM" | number;
 
@@ -56,6 +57,7 @@ interface CartPromotionsOptions {
  * notice (C2-E). The selection is stored for CheckoutPage.
  */
 export function useCartPromotions({ items, enabled, userId, cartId, onAutoPicked }: CartPromotionsOptions) {
+  const { t } = useTranslate("buyer");
   const [manual, setManual] = useState(readPromotionManual);
   const [selection, setSelection] = useState<PromotionSelection>(readPromotionSelection);
   const [debounced, setDebounced] = useState(selection);
@@ -168,13 +170,15 @@ export function useCartPromotions({ items, enabled, userId, cartId, onAutoPicked
         if (typed && code.code === typed.code) continue;
         const reason = formatPromotionError(code.status, { sellerName: code.sellerName, shortfall: code.shortfall });
         nextNotices[String(ownerOf(code))] =
-          `นำ ${code.code} ออกแล้ว: ${reason}${claimedCodes.has(code.code) ? " (ยังอยู่ในกระเป๋าโค้ด)" : ""}`;
+          claimedCodes.has(code.code)
+            ? t("cart.code.droppedClaimed", "นำ {code} ออกแล้ว: {reason} (ยังอยู่ในกระเป๋าโค้ด)", { code: code.code, reason })
+            : t("cart.code.dropped", "นำ {code} ออกแล้ว: {reason}", { code: code.code, reason });
       }
       setNotices((previous) => ({ ...previous, ...nextNotices }));
       setSelection((previous) => dropped.reduce((next, code) => withCode(next, ownerOf(code)!, null), previous));
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [manual, settled, preview, debounced, selection, typed, claimedCodes]);
+  }, [manual, settled, preview, debounced, selection, typed, claimedCodes, t]);
 
   const setCode = (owner: PromotionOwnerKey, code: string | null) => {
     const normalized = code ? normalizePromotionCode(code) : null;

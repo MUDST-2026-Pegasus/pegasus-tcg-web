@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/errors";
 import { checkoutApi } from "./checkout.api";
 import { cartKeys } from "./cart.queries";
 import { clearPromotionSelection } from "./promotions.storage";
+import { useTranslate } from "@/lib/i18n";
 
 export interface CheckoutPayload {
   cartItemIds: number[];
@@ -34,6 +35,7 @@ export function useCheckoutSubmit({
   completedRef: RefObject<boolean>;
   onError: (error: unknown, payload: CheckoutPayload) => Promise<void>;
 }) {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const submitting = useRef(false);
@@ -57,8 +59,8 @@ export function useCheckoutSubmit({
       completedRef.current = true;
       clearPromotionSelection();
       toast.add({
-        title: "สร้างคำสั่งซื้อสำเร็จ",
-        description: `คำสั่งซื้อ ${response.orderNumber}`,
+        title: t("checkout.toast.created", "สร้างคำสั่งซื้อสำเร็จ"),
+        description: t("checkout.toast.createdOrder", "คำสั่งซื้อ {number}", { number: response.orderNumber }),
         type: "success",
       });
       navigate(`/payment?orderId=${response.orderId}`, {

@@ -1,46 +1,51 @@
 import { z } from "zod";
 
+import { useTranslate } from "@/lib/i18n";
+
 import type { Address, AddressPayload } from "./address.types";
 
 /**
  * ตั้งให้ตรงกับ Bean Validation ใน `dto/AddressRequest.java`
  * ถ้าฝั่งโน้นแก้กติกา ต้องตามมาแก้ที่นี่ ไม่งั้นฟอร์มจะปล่อยผ่านแล้วไปตกที่ backend
- *
- * ข้อความเป็นภาษาอังกฤษให้เข้ากับหน้า Address Book ที่ใช้อังกฤษทั้งหน้า
  */
 
-/** ช่องที่ backend ปล่อยว่างได้ — ส่งเป็น `null` ไม่ใช่สตริงว่าง */
-const optional = (max: number, field: string) =>
-  z.string().trim().max(max, `${field} must be at most ${max} characters`);
+/** schema ที่ข้อความ validation ตามภาษาปัจจุบัน — hook เพื่อให้ tolgee CLI extract key จาก t() ได้ */
+export function useAddressSchema() {
+  const { t } = useTranslate("buyer");
 
-const required = (max: number, field: string) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${field} is required`)
-    .max(max, `${field} must be at most ${max} characters`);
+  /** ช่องที่ backend ปล่อยว่างได้ — ส่งเป็น `null` ไม่ใช่สตริงว่าง */
+  const optional = (max: number, field: string) =>
+    z.string().trim().max(max, t("account.address.validation.max", "{field} must be at most {max} characters", { field, max }));
 
-export const addressSchema = z.object({
-  label: optional(50, "Label"),
-  recipientName: required(150, "Recipient name"),
-  phone: required(20, "Phone number").regex(
-    /^[0-9+()\-\s]+$/,
-    "Enter a valid phone number",
-  ),
-  line1: required(255, "Address line 1"),
-  line2: optional(255, "Address line 2"),
-  subdistrict: optional(100, "Subdistrict"),
-  district: optional(100, "District"),
-  province: required(100, "Province"),
-  postalCode: required(10, "Postal code").regex(
-    /^[0-9]{5}$/,
-    "Postal code must be 5 digits",
-  ),
-  /** ในหน้านี้ "default" หมายถึงที่อยู่จัดส่งหลัก ส่วน billing ไม่ได้ให้ผู้ใช้เลือก */
-  defaultShipping: z.boolean(),
-});
+  const required = (max: number, field: string) =>
+    z
+      .string()
+      .trim()
+      .min(1, t("account.address.validation.required", "{field} is required", { field }))
+      .max(max, t("account.address.validation.max", "{field} must be at most {max} characters", { field, max }));
 
-export type AddressFormValues = z.infer<typeof addressSchema>;
+  return z.object({
+    label: optional(50, t("account.address.field.label", "Label")),
+    recipientName: required(150, t("account.address.field.recipientName", "Recipient name")),
+    phone: required(20, t("account.address.field.phone", "Phone number")).regex(
+      /^[0-9+()\-\s]+$/,
+      t("account.address.validation.phone", "Enter a valid phone number"),
+    ),
+    line1: required(255, t("account.address.field.line1", "Address line 1")),
+    line2: optional(255, t("account.address.field.line2", "Address line 2")),
+    subdistrict: optional(100, t("account.address.field.subdistrict", "Subdistrict")),
+    district: optional(100, t("account.address.field.district", "District")),
+    province: required(100, t("account.address.field.province", "Province")),
+    postalCode: required(10, t("account.address.field.postalCode", "Postal code")).regex(
+      /^[0-9]{5}$/,
+      t("account.address.validation.postalCode", "Postal code must be 5 digits"),
+    ),
+    /** ในหน้านี้ "default" หมายถึงที่อยู่จัดส่งหลัก ส่วน billing ไม่ได้ให้ผู้ใช้เลือก */
+    defaultShipping: z.boolean(),
+  });
+}
+
+export type AddressFormValues = z.infer<ReturnType<typeof useAddressSchema>>;
 
 export const EMPTY_ADDRESS_FORM: AddressFormValues = {
   label: "",

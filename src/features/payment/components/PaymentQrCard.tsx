@@ -3,7 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Clock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildPromptPayPayload } from "../promptpay";
-import { intlLocale } from "@/lib/i18n";
+import { formatMoney, intlLocale, useTranslate } from "@/lib/i18n";
 
 interface PaymentQrCardProps {
   amount: number;
@@ -161,6 +161,7 @@ export function PaymentQrCard({
   account,
   isExpired = false,
 }: PaymentQrCardProps) {
+  const { t } = useTranslate("buyer");
   const refSvg = useRef<SVGSVGElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -174,10 +175,7 @@ export function PaymentQrCard({
       // Invalid merchant configuration must never produce a misleading payment QR.
     }
   }
-  const amountText = `฿${amount.toLocaleString(intlLocale(), {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const amountText = formatMoney(amount);
 
   async function handleSaveQr() {
     if (!refSvg.current || saving || isExpired) return;
@@ -210,7 +208,7 @@ export function PaymentQrCard({
       {payload ? (
         <>
           <p className="text-xs text-muted-foreground font-medium mb-3 text-center">
-            Scan with any banking app
+            {t("payment.qr.scanHint", "Scan with any banking app")}
           </p>
           <div className="relative w-full max-w-[240px] bg-[#F8FAFC] border border-muted/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs overflow-hidden">
             <QRCodeSVG
@@ -229,29 +227,29 @@ export function PaymentQrCard({
               }}
               className="w-40 h-40 md:w-44 md:h-44"
               role="img"
-              aria-label="PromptPay QR Code"
+              aria-label={t("payment.qr.aria", "PromptPay QR Code")}
             />
             <span className="text-[11px] font-bold tracking-wider text-slate-800 mt-3 uppercase">
-              PAY VIA QR SCAN
+              {t("payment.qr.payVia", "PAY VIA QR SCAN")}
             </span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
-              Scan to Pay | {amountText}
+              {t("payment.qr.scanToPay", "Scan to Pay | {amount}", { amount: amountText })}
             </span>
 
             {isExpired && (
               <div
                 role="alert"
-                aria-label="QR Code Expired"
+                aria-label={t("payment.qr.expiredAria", "QR Code Expired")}
                 className="absolute inset-0 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10 transition-all"
               >
                 <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2 shadow-xs">
                   <Clock className="size-6 text-destructive" />
                 </div>
                 <p className="text-sm font-bold text-destructive">
-                  QR หมดอายุแล้ว
+                  {t("payment.qr.expired", "QR หมดอายุแล้ว")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  กรุณาเริ่มการชำระเงินใหม่
+                  {t("payment.qr.restart", "กรุณาเริ่มการชำระเงินใหม่")}
                 </p>
               </div>
             )}
@@ -259,7 +257,7 @@ export function PaymentQrCard({
         </>
       ) : (
         <p className="text-sm text-muted-foreground text-center">
-          กรุณาโอนเงินผ่านบัญชีธนาคารด้านล่าง
+          {t("payment.qr.bankHint", "กรุณาโอนเงินผ่านบัญชีธนาคารด้านล่าง")}
         </p>
       )}
 
@@ -272,7 +270,7 @@ export function PaymentQrCard({
           )}
           {promptpayId && (
             <p className="text-xs text-muted-foreground">
-              PromptPay ID {promptpayId}
+              {t("payment.qr.promptPayId", "PromptPay ID {id}", { id: promptpayId })}
             </p>
           )}
         </div>
@@ -314,12 +312,12 @@ export function PaymentQrCard({
           className="mt-4 rounded-full px-5 py-2 text-xs font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 shadow-2xs disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="size-3.5" />
-          <span>{saving ? "Saving QR…" : "Save QR"}</span>
+          <span>{saving ? t("payment.qr.saving", "Saving QR…") : t("payment.qr.save", "Save QR")}</span>
         </Button>
       )}
       {saveError && (
         <p role="alert" className="mt-2 text-sm text-destructive">
-          บันทึก QR ไม่สำเร็จ กรุณาลองอีกครั้ง
+          {t("payment.qr.saveFailed", "บันทึก QR ไม่สำเร็จ กรุณาลองอีกครั้ง")}
         </p>
       )}
     </div>

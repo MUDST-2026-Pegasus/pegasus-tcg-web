@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { TolgeeProvider } from "@tolgee/react";
+import { testTolgee } from "@/test/i18n";
 import { MemoryRouter, Route, Routes, useParams } from "react-router-dom";
 
 import * as authQueries from "@/features/auth/auth.queries";
@@ -104,11 +106,13 @@ function signedIn(signedInUser = true) {
 function renderCart(initialEntry: string | { pathname: string; state: unknown } = "/cart") {
   return render(
     <QueryClientProvider client={createTestQueryClient()}>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Routes>
-          <Route path="/cart" element={<CartPage />} />
-        </Routes>
-      </MemoryRouter>
+      <TolgeeProvider tolgee={testTolgee("th")} fallback={null}>
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <Routes>
+            <Route path="/cart" element={<CartPage />} />
+          </Routes>
+        </MemoryRouter>
+      </TolgeeProvider>
     </QueryClientProvider>,
   );
 }

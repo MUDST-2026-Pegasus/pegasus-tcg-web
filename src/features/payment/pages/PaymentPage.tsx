@@ -16,7 +16,7 @@ import { AuctionOrderBadge } from "@/features/auction/components/AuctionOrderBad
 import { PaymentQrCard } from "../components/PaymentQrCard";
 import { PaymentSteps } from "../components/PaymentSteps";
 import { PaymentOrderSummary, type OrderItemSummaryData } from "../components/PaymentOrderSummary";
-import { intlLocale, translateError } from "@/lib/i18n";
+import { intlLocale, translateError, useTranslate } from "@/lib/i18n";
 
 function transferAccount(raw: string | undefined): Record<string, string> {
   try {
@@ -57,6 +57,7 @@ function usePaymentCountdown(expiresAt: string | undefined, defaultTime = "14:59
 }
 
 export function PaymentPage() {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -144,14 +145,14 @@ export function PaymentPage() {
       queryClient.setQueryData(["finance", "payment-status", payment.id], updated);
       toast.add({
         type: "success",
-        title: "ส่งหลักฐานแล้ว",
-        description: "รอผู้ดูแลตรวจสอบการชำระเงิน",
+        title: t("payment.page.submitted", "ส่งหลักฐานแล้ว"),
+        description: t("payment.page.submittedHint", "รอผู้ดูแลตรวจสอบการชำระเงิน"),
       });
     } catch (error) {
       toast.add({
         type: "error",
-        title: "ส่งหลักฐานไม่สำเร็จ",
-        description: translateError(error, "กรุณาลองอีกครั้ง"),
+        title: t("payment.page.submitFailed", "ส่งหลักฐานไม่สำเร็จ"),
+        description: translateError(error, t("cart.toast.tryAgain", "กรุณาลองอีกครั้ง")),
       });
     } finally {
       setIsSubmitting(false);
@@ -178,26 +179,26 @@ export function PaymentPage() {
   if (!validOrderId) {
     return (
       <div className="container mx-auto max-w-xl p-8 text-center">
-        <p className="text-muted-foreground">ไม่พบหมายเลขคำสั่งซื้อ</p>
+        <p className="text-muted-foreground">{t("payment.page.noOrder", "ไม่พบหมายเลขคำสั่งซื้อ")}</p>
         <Button className="mt-4" onClick={() => navigate("/account/orders")}>
-          กลับไปประวัติคำสั่งซื้อ
+          {t("payment.page.backToOrders", "กลับไปประวัติคำสั่งซื้อ")}
         </Button>
       </div>
     );
   }
 
   if (paymentQuery.isPending) {
-    return <FormPageSkeleton label="กำลังเตรียมข้อมูลการชำระเงิน" />;
+    return <FormPageSkeleton label={t("payment.page.loading", "กำลังเตรียมข้อมูลการชำระเงิน")} />;
   }
 
   if (paymentQuery.isError) {
     return (
       <div className="container mx-auto max-w-xl p-8 text-center">
         <p role="alert" className="text-destructive font-medium">
-          {translateError(paymentQuery.error, "ไม่สามารถเริ่มการชำระเงินได้")}
+          {translateError(paymentQuery.error, t("payment.page.startFailed", "ไม่สามารถเริ่มการชำระเงินได้"))}
         </p>
         <Button className="mt-4" onClick={() => navigate("/account/orders")}>
-          กลับไปประวัติคำสั่งซื้อ
+          {t("payment.page.backToOrders", "กลับไปประวัติคำสั่งซื้อ")}
         </Button>
       </div>
     );
@@ -231,10 +232,10 @@ export function PaymentPage() {
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            Secure Checkout
+            {t("payment.page.title", "Secure Checkout")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Pay with PromptPay, then upload your slip so we can confirm your order.
+            {t("payment.page.subtitle", "Pay with PromptPay, then upload your slip so we can confirm your order.")}
           </p>
         </div>
 
@@ -250,13 +251,13 @@ export function PaymentPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                    AMOUNT DUE
+                    {t("payment.page.amountDue", "AMOUNT DUE")}
                   </span>
                   <p className="text-3xl font-extrabold text-foreground tracking-tight mt-0.5">
                     THB {formattedAmount}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Order #{orderNumber} · Pay exactly this amount
+                    {t("payment.page.orderLine", "Order #{number} · Pay exactly this amount", { number: orderNumber })}
                   </p>
                   {auctionNumber && <AuctionOrderBadge auctionNumber={auctionNumber} className="mt-2" />}
                 </div>
@@ -280,14 +281,14 @@ export function PaymentPage() {
                         isExpired ? "text-red-600" : "text-amber-600"
                       }`}
                     >
-                      {isExpired ? "Status" : "Expires in"}
+                      {isExpired ? t("payment.page.status", "Status") : t("payment.page.expiresIn", "Expires in")}
                     </span>
                     <span
                       className={`text-sm font-bold leading-tight ${
                         isExpired ? "text-red-700" : "text-amber-900"
                       }`}
                     >
-                      {isExpired ? "Expired (00:00)" : timeLeft}
+                      {isExpired ? t("payment.page.expired", "Expired (00:00)") : timeLeft}
                     </span>
                   </div>
                 </div>
@@ -335,14 +336,14 @@ export function PaymentPage() {
                     <div className="flex-1 text-center sm:text-left space-y-1">
                       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         <h4 className="text-sm font-bold text-sky-950">
-                          ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ
+                          {t("payment.page.reviewTitle", "ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ")}
                         </h4>
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-200/80 text-sky-900">
-                          Payment Under Review
+                          {t("payment.status.underReview", "Payment Under Review")}
                         </span>
                       </div>
                       <p className="text-xs text-sky-800/90 leading-relaxed">
-                        เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ
+                        {t("payment.page.reviewHint", "เราได้รับสลิปของคุณแล้ว คุณสามารถปิดหน้านี้หรือไปทำรายการอื่นได้โดยไม่ต้องรอ ระบบจะอัปเดตสถานะให้โดยอัตโนมัติเมื่อได้รับการอนุมัติ")}
                       </p>
                     </div>
                   </div>
@@ -355,7 +356,7 @@ export function PaymentPage() {
                       className="w-full h-11 rounded-xl bg-primary hover:bg-sky-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                     >
                       <FileText className="size-4" />
-                      <span>ดูประวัติคำสั่งซื้อ</span>
+                      <span>{t("payment.page.viewOrders", "ดูประวัติคำสั่งซื้อ")}</span>
                     </Button>
 
                     <Button
@@ -365,7 +366,7 @@ export function PaymentPage() {
                       className="w-full h-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <ShoppingBag className="size-4" />
-                      <span>เลือกซื้อสินค้าต่อ</span>
+                      <span>{t("payment.page.continueShopping", "เลือกซื้อสินค้าต่อ")}</span>
                     </Button>
                   </div>
                 </div>
@@ -384,19 +385,19 @@ export function PaymentPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        <span>Submitting payment...</span>
+                        <span>{t("payment.page.submitting", "Submitting payment...")}</span>
                       </>
                     ) : (
                       <>
                         <Lock className="size-4" />
-                        <span>Submit payment for verification</span>
+                        <span>{t("payment.page.submit", "Submit payment for verification")}</span>
                       </>
                     )}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
                     <Shield className="size-3.5 text-muted-foreground" />
-                    <span>Upload your slip and reference no. to continue.</span>
+                    <span>{t("payment.page.submitHint", "Upload your slip and reference no. to continue.")}</span>
                   </p>
                 </div>
               )}
@@ -410,8 +411,8 @@ export function PaymentPage() {
                   <p role="alert" className="text-sm font-medium text-destructive">
                     {payment.failureReason ||
                       (isExpired
-                        ? "การชำระเงินหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง"
-                        : `การชำระเงินสถานะ: ${payment.status}`)}
+                        ? t("payment.page.expiredHint", "การชำระเงินหมดอายุแล้ว กรุณาลองใหม่อีกครั้ง")
+                        : t("payment.page.statusLine", "การชำระเงินสถานะ: {status}", { status: payment.status }))}
                   </p>
                   <Button
                     variant="outline"
@@ -420,7 +421,7 @@ export function PaymentPage() {
                       setAttemptKey(crypto.randomUUID());
                     }}
                   >
-                    เริ่มการชำระเงินใหม่
+                    {t("payment.page.restart", "เริ่มการชำระเงินใหม่")}
                   </Button>
                 </div>
               )}

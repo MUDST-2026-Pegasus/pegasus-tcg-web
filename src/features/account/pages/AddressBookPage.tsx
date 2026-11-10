@@ -12,7 +12,7 @@ import { AddressBookSkeleton } from "../components/AddressBookSkeleton";
 import { AddressCard } from "../components/AddressCard";
 import { AddressFormDialog } from "../components/AddressFormDialog";
 import { DeleteAddressDialog } from "../components/DeleteAddressDialog";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 /**
  * สมุดที่อยู่ — ACC-01 · ต่อ `/addresses` ครบทั้ง 5 กริยา
@@ -26,6 +26,7 @@ import { translateError } from "@/lib/i18n";
  * - ทุก mutation `invalidateQueries` ให้เอง รายการจึงอัปเดตโดยไม่ต้อง reload
  */
 export function AddressBookPage() {
+  const { t } = useTranslate("buyer");
   const addresses = useAddresses();
   const setDefault = useSetDefaultAddress();
 
@@ -38,8 +39,8 @@ export function AddressBookPage() {
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "Could not set the default address",
-          description: translateError(error, "Please try again."),
+          title: t("account.address.setDefaultFailed", "Could not set the default address"),
+          description: translateError(error, t("account.orders.tryAgain", "Please try again.")),
         }),
     });
   };
@@ -48,27 +49,27 @@ export function AddressBookPage() {
     <>
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-semibold">Address Book</h1>
+            <h1 className="text-3xl font-semibold">{t("account.nav.addresses", "Address Book")}</h1>
             <Button disabled={(addresses.data?.length ?? 0) >= MAX_ADDRESSES} onClick={() => setEditing("new")}>
-              <Plus data-icon="inline-start" /> Add New Address
+              <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
             </Button>
           </div>
 
           <QueryBoundary
             query={addresses}
             loading={<AddressBookSkeleton />}
-            errorTitle="Could not load your addresses"
-            errorMessage="Check your connection and try again."
-            errorRetryLabel="Try again"
+            errorTitle={t("account.address.loadFailed", "Could not load your addresses")}
+            errorMessage={t("account.address.loadFailedHint", "Check your connection and try again.")}
+            errorRetryLabel={t("account.profile.tryAgain", "Try again")}
             isEmpty={(items) => items.length === 0}
             empty={
               <EmptyState
                 icon={MapPinPlus}
-                title="No saved addresses yet"
-                description="Save a shipping destination now and checkout will be one step shorter."
+                title={t("account.address.empty", "No saved addresses yet")}
+                description={t("account.address.emptyHint", "Save a shipping destination now and checkout will be one step shorter.")}
               >
                 <Button onClick={() => setEditing("new")}>
-                  <Plus data-icon="inline-start" /> Add New Address
+                  <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
                 </Button>
               </EmptyState>
             }
@@ -96,9 +97,9 @@ export function AddressBookPage() {
                   <span className="flex size-12 items-center justify-center rounded-full border">
                     <MapPinPlus />
                   </span>
-                  <span className="text-lg font-semibold">Add New Address</span>
+                  <span className="text-lg font-semibold">{t("account.address.addNew", "Add New Address")}</span>
                   <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
-                    Save a new shipping destination for faster checkout.
+                    {t("account.address.addNewHint", "Save a new shipping destination for faster checkout.")}
                   </span>
                 </Button>}
               </div>

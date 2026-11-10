@@ -8,6 +8,7 @@ import { AddressFormDialog } from "@/features/account/components/AddressFormDial
 import { formatAddressLines, MAX_ADDRESSES } from "@/features/account/address.format";
 import type { Address } from "@/features/account/address.types";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 interface Props {
   addresses: Address[];
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function CheckoutAddressPicker({ addresses, selectedId, onSelect, open, onOpenChange }: Props) {
+  const { t } = useTranslate("buyer");
   const [draftId, setDraftId] = useState<number | null>(selectedId);
   const [previousSelectedId, setPreviousSelectedId] = useState(selectedId);
   if (selectedId !== previousSelectedId) {
@@ -39,21 +41,21 @@ export function CheckoutAddressPicker({ addresses, selectedId, onSelect, open, o
       }}>
         <DialogContent className="checkout-address-dialog" overlayClassName="bg-[rgba(9,11,12,0.45)] supports-backdrop-filter:backdrop-blur-none" aria-describedby="checkout-address-description">
           <DialogHeader className="checkout-address-header">
-            <DialogTitle className="font-semibold">เลือกที่อยู่จัดส่ง</DialogTitle>
+            <DialogTitle className="font-semibold">{t("checkout.address.pickTitle", "เลือกที่อยู่จัดส่ง")}</DialogTitle>
             <span className="text-xs text-muted-foreground">{addresses.length} / {MAX_ADDRESSES}</span>
             <DialogDescription id="checkout-address-description" className="sr-only">
-              เลือกที่อยู่สำหรับคำสั่งซื้อนี้ หรือเพิ่มที่อยู่ใหม่
+              {t("checkout.address.pickDescription", "เลือกที่อยู่สำหรับคำสั่งซื้อนี้ หรือเพิ่มที่อยู่ใหม่")}
             </DialogDescription>
           </DialogHeader>
           <div className="checkout-address-body">
             {addresses.length === 0 ? (
               <div className="checkout-address-empty">
-                <p className="font-semibold text-sm">ยังไม่มีที่อยู่จัดส่ง</p>
-                <p className="text-xs text-muted-foreground">เพิ่มที่อยู่ก่อนเพื่อดำเนินการสั่งซื้อ</p>
+                <p className="font-semibold text-sm">{t("checkout.address.empty", "ยังไม่มีที่อยู่จัดส่ง")}</p>
+                <p className="text-xs text-muted-foreground">{t("checkout.address.emptyHint", "เพิ่มที่อยู่ก่อนเพื่อดำเนินการสั่งซื้อ")}</p>
               </div>
             ) : (
               <RadioGroup
-                aria-label="ที่อยู่จัดส่ง"
+                aria-label={t("checkout.address.title", "ที่อยู่จัดส่ง")}
                 value={draftId == null ? "" : String(draftId)}
                 onValueChange={(value) => setDraftId(Number(value))}
                 className="gap-2.5"
@@ -66,33 +68,33 @@ export function CheckoutAddressPicker({ addresses, selectedId, onSelect, open, o
                         <span className="flex flex-wrap items-center gap-1.5">
                           <span className="text-[13px] font-semibold">{address.recipientName} · {address.phone}</span>
                           {address.label && <span className="checkout-chip">{address.label}</span>}
-                          {address.defaultShipping && <span className="checkout-chip checkout-default">ค่าเริ่มต้น</span>}
+                          {address.defaultShipping && <span className="checkout-chip checkout-default">{t("checkout.address.default", "ค่าเริ่มต้น")}</span>}
                         </span>
                         <span className="mt-1 block text-xs leading-[18px] text-muted-foreground">
                           {formatAddressLines(address).join(" ")}
                         </span>
                       </span>
                     </label>
-                    <button type="button" className="checkout-link shrink-0 text-xs" aria-label={`แก้ไขที่อยู่ ${address.label || address.recipientName}`} onClick={() => editAddress(address)}>แก้ไข</button>
+                    <button type="button" className="checkout-link shrink-0 text-xs" aria-label={t("checkout.address.editAria", "แก้ไขที่อยู่ {name}", { name: address.label || address.recipientName })} onClick={() => editAddress(address)}>{t("checkout.address.edit", "แก้ไข")}</button>
                   </div>
                 ))}
               </RadioGroup>
             )}
             {addresses.length < MAX_ADDRESSES && (
-              <button type="button" className="checkout-add-address" onClick={() => editAddress()}>+ เพิ่มที่อยู่ใหม่</button>
+              <button type="button" className="checkout-add-address" onClick={() => editAddress()}>{t("checkout.address.add", "+ เพิ่มที่อยู่ใหม่")}</button>
             )}
           </div>
           <DialogFooter className="checkout-address-footer">
             <Button variant="ghost" className="rounded-full text-[13px]" onClick={() => {
               setDraftId(selectedId);
               onOpenChange(false);
-            }}>ยกเลิก</Button>
+            }}>{t("actions.cancel", "ยกเลิก", { ns: "common" })}</Button>
             <Button className="checkout-primary rounded-full text-[13px]" disabled={!validDraft} onClick={() => {
               if (draftId != null && validDraft) {
                 onSelect(draftId);
                 onOpenChange(false);
               }
-            }}>ใช้ที่อยู่นี้</Button>
+            }}>{t("checkout.address.use", "ใช้ที่อยู่นี้")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

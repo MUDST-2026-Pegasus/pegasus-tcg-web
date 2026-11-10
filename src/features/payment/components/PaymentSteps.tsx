@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { FileUploadState } from "@/hooks/use-file-upload";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 interface PaymentStepsProps {
   amount?: number;
@@ -27,6 +27,7 @@ export function PaymentSteps({
   onReferenceCodeChange,
   disabled = false,
 }: PaymentStepsProps) {
+  const { t } = useTranslate("buyer");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -88,9 +89,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="pb-4">
-          <h3 className="font-semibold text-sm text-foreground">Scan &amp; pay</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.scanTitle", "Scan & pay")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            Pay exactly THB {formattedAmount}, then save the slip from your banking app.
+            {t("payment.steps.scanHint", "Pay exactly THB {amount}, then save the slip from your banking app.", { amount: formattedAmount })}
           </p>
         </div>
       </div>
@@ -110,9 +111,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="flex-1 pb-4">
-          <h3 className="font-semibold text-sm text-foreground">Upload your slip</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.uploadTitle", "Upload your slip")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            We use it to verify your transfer.
+            {t("payment.steps.uploadHint", "We use it to verify your transfer.")}
           </p>
 
           {/* Dropzone Container */}
@@ -161,18 +162,18 @@ export function PaymentSteps({
               <div className="min-w-0">
                 <p className="text-xs">
                   {disabled ? (
-                    <span className="text-slate-500 font-medium">Payment submitted</span>
+                    <span className="text-slate-500 font-medium">{t("payment.steps.submitted", "Payment submitted")}</span>
                   ) : (
                     <>
                       <span className="text-primary font-semibold hover:underline">
-                        Click to upload
+                        {t("payment.steps.clickUpload", "Click to upload")}
                       </span>{" "}
-                      <span className="text-slate-500 font-normal">or drag &amp; drop</span>
+                      <span className="text-slate-500 font-normal">{t("payment.steps.dragDrop", "or drag & drop")}</span>
                     </>
                   )}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  JPG, PNG or PDF · up to 5 MB
+                  {t("payment.steps.fileRule", "JPG, PNG or PDF · up to 5 MB")}
                 </p>
               </div>
             </div>
@@ -183,7 +184,7 @@ export function PaymentSteps({
                 {uploadedItem.previewUrl ? (
                   <img
                     src={uploadedItem.previewUrl}
-                    alt="Slip preview"
+                    alt={t("payment.steps.preview", "Slip preview")}
                     className="w-10 h-10 rounded-lg object-cover border border-muted shrink-0"
                   />
                 ) : (
@@ -201,17 +202,17 @@ export function PaymentSteps({
                     </span>
                     {uploadedItem.status === "uploading" && (
                       <span className="text-[11px] text-primary flex items-center gap-1 font-medium">
-                        <Loader2 className="size-3 animate-spin" /> Uploading...
+                        <Loader2 className="size-3 animate-spin" /> {t("payment.steps.uploading", "Uploading...")}
                       </span>
                     )}
                     {uploadedItem.status === "done" && (
                       <span className="text-[11px] text-emerald-600 flex items-center gap-1 font-medium">
-                        <FileCheck2 className="size-3" /> Ready
+                        <FileCheck2 className="size-3" /> {t("payment.steps.ready", "Ready")}
                       </span>
                     )}
                     {uploadedItem.status === "error" && (
                       <span className="text-[11px] text-destructive font-medium">
-                        Failed
+                        {t("payment.steps.failed", "Failed")}
                       </span>
                     )}
                   </div>
@@ -227,7 +228,7 @@ export function PaymentSteps({
                       size="icon"
                       className="size-8 text-slate-500 hover:text-slate-800"
                       onClick={() => slip.retry(uploadedItem.id)}
-                      title="Retry upload"
+                      title={t("payment.steps.retry", "Retry upload")}
                     >
                       <RefreshCw className="size-3.5" />
                     </Button>
@@ -241,7 +242,7 @@ export function PaymentSteps({
                       slip.remove(uploadedItem.id);
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
-                    title="Remove file"
+                    title={t("payment.steps.remove", "Remove file")}
                   >
                     <Trash2 className="size-3.5" />
                   </Button>
@@ -272,14 +273,14 @@ export function PaymentSteps({
           </div>
         </div>
         <div className="flex-1 pb-2">
-          <h3 className="font-semibold text-sm text-foreground">Enter reference no.</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.refTitle", "Enter reference no.")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Find it on your slip as &quot;Ref. No.&quot;
+            {t("payment.steps.refHint", "Find it on your slip as \"Ref. No.\"")}
           </p>
 
           <Input
-            aria-label="เลขอ้างอิงการโอน"
-            placeholder="e.g. 2026101400051234"
+            aria-label={t("payment.steps.refAria", "เลขอ้างอิงการโอน")}
+            placeholder={t("payment.steps.refPlaceholder", "e.g. 2026101400051234")}
             value={referenceCode}
             disabled={disabled}
             onChange={(e) => onReferenceCodeChange(e.target.value)}

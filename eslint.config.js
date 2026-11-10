@@ -36,12 +36,23 @@ const I18N_GUARDED = [
   'src/features/admin/components/taxonomy.styles.ts',
   // I18N-14 (TCG-554)
   'src/features/seller/{shared,dashboard,shop,orders,application,logout}/**/*.{ts,tsx}',
+  // I18N-12 (TCG-552)
+  'src/features/cart/**/*.{ts,tsx}',
+  'src/features/payment/**/*.{ts,tsx}',
+  'src/features/account/**/*.{ts,tsx}',
 ]
-// ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), seller โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
+// ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
 const I18N_PENDING = [
   'src/features/catalog/components/ProductAuctionBox.tsx',
   'src/features/store/components/StorePromotionStrip.tsx',
   'src/features/seller/{promotions,sales,auctions}/**/*.{ts,tsx}',
+  'src/features/account/pages/MyCouponsPage.tsx',
+  'src/features/cart/components/CartCodePicker.tsx',
+  'src/features/cart/components/CheckoutPlatformPromotion.tsx',
+  'src/features/cart/components/CheckoutPlatformPromotionCard.tsx',
+  'src/features/cart/components/CheckoutPromotionDialogs.tsx',
+  'src/features/cart/components/PromotionChangedDialog.tsx',
+  'src/features/cart/components/CheckoutSaleQuotaDialog.tsx',
 ]
 const THAI = '/[\\u0E00-\\u0E7F]/'
 // default ของ t() (อาร์กิวเมนต์ใด ๆ ของ t / errorText / errorMessage / msg / translate) ยกเว้นไว้ — นอกนั้นเจอไทยแล้ว error

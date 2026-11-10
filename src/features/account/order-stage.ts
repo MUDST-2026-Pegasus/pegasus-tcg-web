@@ -1,5 +1,15 @@
 import type { OrderDetails, SellerOrderDetails } from "./orders.types";
 import { formatDateTime } from "@/lib/i18n";
+import { translate } from "@/lib/i18n";
+
+// @tolgee-key {"key": "account.stage.AWAITING_PAYMENT", "ns": "buyer", "defaultValue": "Awaiting Payment"}
+// @tolgee-key {"key": "account.stage.PAYMENT_REVIEW", "ns": "buyer", "defaultValue": "Verifying Payment"}
+// @tolgee-key {"key": "account.stage.PREPARING", "ns": "buyer", "defaultValue": "Preparing"}
+// @tolgee-key {"key": "account.stage.IN_TRANSIT", "ns": "buyer", "defaultValue": "In Transit"}
+// @tolgee-key {"key": "account.stage.RETURN_IN_PROGRESS", "ns": "buyer", "defaultValue": "Return Requested"}
+// @tolgee-key {"key": "account.stage.COMPLETED", "ns": "buyer", "defaultValue": "Completed"}
+// @tolgee-key {"key": "account.stage.CANCELLED", "ns": "buyer", "defaultValue": "Cancelled"}
+// @tolgee-key {"key": "account.stage.REFUNDED", "ns": "buyer", "defaultValue": "Refunded"}
 
 /**
  * Where a buyer's order is in the checkout → payout flow, as the order card shows it.
@@ -31,14 +41,14 @@ const PREPARING = ["PAID", "PREPARING"];
 const RETURNING = ["RETURN_REQUESTED", "RETURNED"];
 
 const stageInfo: Record<OrderStage, Omit<OrderStageInfo, "stage">> = {
-  AWAITING_PAYMENT: { label: "Awaiting Payment", badgeClassName: "bg-destructive text-white border-transparent" },
-  PAYMENT_REVIEW: { label: "Verifying Payment", badgeClassName: "bg-amber-100 text-amber-800 border-transparent" },
-  PREPARING: { label: "Preparing", badgeClassName: "bg-blue-100 text-blue-800 border-transparent" },
-  IN_TRANSIT: { label: "In Transit", badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
-  RETURN_IN_PROGRESS: { label: "Return Requested", badgeClassName: "bg-orange-100 text-orange-800 border-transparent" },
-  COMPLETED: { label: "Completed", badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
-  CANCELLED: { label: "Cancelled", badgeClassName: "bg-muted text-muted-foreground border-transparent" },
-  REFUNDED: { label: "Refunded", badgeClassName: "bg-violet-100 text-violet-800 border-transparent" },
+  AWAITING_PAYMENT: { get label() { return translate("buyer", "account.stage.AWAITING_PAYMENT", "Awaiting Payment"); }, badgeClassName: "bg-destructive text-white border-transparent" },
+  PAYMENT_REVIEW: { get label() { return translate("buyer", "account.stage.PAYMENT_REVIEW", "Verifying Payment"); }, badgeClassName: "bg-amber-100 text-amber-800 border-transparent" },
+  PREPARING: { get label() { return translate("buyer", "account.stage.PREPARING", "Preparing"); }, badgeClassName: "bg-blue-100 text-blue-800 border-transparent" },
+  IN_TRANSIT: { get label() { return translate("buyer", "account.stage.IN_TRANSIT", "In Transit"); }, badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
+  RETURN_IN_PROGRESS: { get label() { return translate("buyer", "account.stage.RETURN_IN_PROGRESS", "Return Requested"); }, badgeClassName: "bg-orange-100 text-orange-800 border-transparent" },
+  COMPLETED: { get label() { return translate("buyer", "account.stage.COMPLETED", "Completed"); }, badgeClassName: "bg-secondary text-secondary-foreground border-transparent" },
+  CANCELLED: { get label() { return translate("buyer", "account.stage.CANCELLED", "Cancelled"); }, badgeClassName: "bg-muted text-muted-foreground border-transparent" },
+  REFUNDED: { get label() { return translate("buyer", "account.stage.REFUNDED", "Refunded"); }, badgeClassName: "bg-violet-100 text-violet-800 border-transparent" },
 };
 
 function has(children: SellerOrderDetails[], statuses: string[]) {
