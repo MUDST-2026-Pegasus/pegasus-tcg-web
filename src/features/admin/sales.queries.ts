@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import * as salesApi from "./sales.api";
 import type { AdminSaleInput, AdminSaleQuery, SaleScopePreviewInput } from "./sales.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ทุกการกระทำ (สร้าง แก้ หยุด เปิด จบ ลบ) เปลี่ยนแถว ตัวเลขบนแท็บ และ KPI จึงล้างทั้ง `all`
@@ -95,7 +96,7 @@ export function useSaveSaleDraft() {
   return useMutation({
     mutationFn: async ({ id, input }: { id?: number; input: AdminSaleInput }) => {
       const sale = id ? await salesApi.updateSale(id, input) : await salesApi.createSale(input);
-      return sale.status === "PAUSED" ? sale : salesApi.pauseSale(sale.id, "ร่าง — ยังไม่เปิด", false);
+      return sale.status === "PAUSED" ? sale : salesApi.pauseSale(sale.id, translate("sale", "admin.draftPauseReason", "ร่าง — ยังไม่เปิด"), false);
     },
     onSuccess: invalidate,
   });
@@ -132,3 +133,6 @@ export function usePromotionPageTab(): PromotionPageTab {
   const [params] = useSearchParams();
   return params.get("tab") === "sales" ? "sales" : "codes";
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "admin.draftPauseReason", "ns": "sale", "defaultValue": "ร่าง — ยังไม่เปิด"}

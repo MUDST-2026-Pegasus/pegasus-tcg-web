@@ -2,7 +2,7 @@ import { hasErrorCode } from "@/lib/api";
 
 import { formatBaht, formatPeriod } from "./promotions.format";
 import type { AdminSale, SaleOwnerType, SaleStatus, SaleType } from "./sales.types";
-import { dateTimeFormat, intlLocale } from "@/lib/i18n";
+import { dateTimeFormat, intlLocale, translate } from "@/lib/i18n";
 
 /** ตาราง Figma SAL-A1 — 8 แถวต่อหน้าเหมือนแท็บโค้ด */
 export const SALE_PAGE_SIZE = 8;
@@ -15,27 +15,27 @@ export const SAMPLE_LIST_PRICE = 4200;
 export const SAMPLE_COMMISSION_RATE = 0.05;
 
 export const SALE_STATUS_TABS: Array<{ value: SaleStatus | null; label: string }> = [
-  { value: null, label: "ทั้งหมด" },
-  { value: "ACTIVE", label: "กำลังลด" },
-  { value: "SCHEDULED", label: "ตั้งเวลาไว้" },
-  { value: "PAUSED", label: "หยุดชั่วคราว" },
-  { value: "ENDED", label: "จบแล้ว" },
+  { value: null, get label() { return translate("sale", "admin.tabs.all", "ทั้งหมด"); } },
+  { value: "ACTIVE", get label() { return translate("sale", "admin.status.ACTIVE", "กำลังลด"); } },
+  { value: "SCHEDULED", get label() { return translate("sale", "admin.status.SCHEDULED", "ตั้งเวลาไว้"); } },
+  { value: "PAUSED", get label() { return translate("sale", "admin.status.PAUSED", "หยุดชั่วคราว"); } },
+  { value: "ENDED", get label() { return translate("sale", "admin.status.ENDED", "จบแล้ว"); } },
 ];
 
 export const SALE_TYPE_FILTERS: Array<{ value: SaleType | null; label: string }> = [
-  { value: null, label: "ทุกประเภท" },
+  { value: null, get label() { return translate("sale", "admin.type.all", "ทุกประเภท"); } },
   { value: "FLASH_SALE", label: "Flash Sale" },
-  { value: "CATEGORY_SALE", label: "ลดทั้งหมวด" },
-  { value: "SHOP_SALE", label: "ร้านค้า" },
+  { value: "CATEGORY_SALE", get label() { return translate("sale", "admin.type.category", "ลดทั้งหมวด"); } },
+  { value: "SHOP_SALE", get label() { return translate("sale", "admin.type.shop", "ร้านค้า"); } },
 ];
 
 export const SALE_STATUS_LABEL: Record<SaleStatus, string> = {
-  ACTIVE: "กำลังลด",
-  SCHEDULED: "ตั้งเวลาไว้",
-  PAUSED: "หยุดชั่วคราว",
-  ENDED: "จบแล้ว",
-  SOLD_OUT: "ขายหมด",
-  BUDGET_EXHAUSTED: "หมดงบ",
+  get ACTIVE() { return translate("sale", "admin.status.ACTIVE", "กำลังลด"); },
+  get SCHEDULED() { return translate("sale", "admin.status.SCHEDULED", "ตั้งเวลาไว้"); },
+  get PAUSED() { return translate("sale", "admin.status.PAUSED", "หยุดชั่วคราว"); },
+  get ENDED() { return translate("sale", "admin.status.ENDED", "จบแล้ว"); },
+  get SOLD_OUT() { return translate("sale", "admin.status.SOLD_OUT", "ขายหมด"); },
+  get BUDGET_EXHAUSTED() { return translate("sale", "admin.status.BUDGET_EXHAUSTED", "หมดงบ"); },
 };
 
 export const SALE_STATUS_STYLE: Record<SaleStatus, string> = {
@@ -53,7 +53,7 @@ export function isFinished(status: SaleStatus): boolean {
 }
 
 export function ownerLabel(owner: SaleOwnerType): string {
-  return owner === "PLATFORM" ? "Pegasus" : "ร้านค้า";
+  return owner === "PLATFORM" ? "Pegasus" : translate("sale", "admin.type.shop", "ร้านค้า");
 }
 
 const dayMonthYear = dateTimeFormat({ day: "numeric", month: "short", year: "numeric" }, { calendar: "gregory" });
@@ -75,8 +75,8 @@ export function durationLabel(startsAt: string, endsAt: string): string {
   if (!Number.isFinite(hours) || hours <= 0) return "";
   // 00:00–23:59 นับเป็น 24 ชม. ตาม Figma
   const rounded = Math.round(hours);
-  if (rounded <= FLASH_MAX_HOURS) return `ยาว ${rounded} ชั่วโมง`;
-  return `ยาว ${Math.round(hours / 24)} วัน`;
+  if (rounded <= FLASH_MAX_HOURS) return translate("sale", "admin.duration.hours", "ยาว {hours} ชั่วโมง", { hours: rounded });
+  return translate("sale", "admin.duration.days", "ยาว {days} วัน", { days: Math.round(hours / 24) });
 }
 
 /** บรรทัดแรกของคอลัมน์ระยะเวลา: วันเดียว "11 พ.ย. 2026" · หลายวัน "1–30 พ.ย. 2026" */
@@ -117,19 +117,21 @@ export function salePeriodHint(sale: AdminSale, now: number): string {
       : null;
   switch (sale.status) {
     case "SCHEDULED":
-      return clock ? `${clock} · อีก ${days(start.getTime())} วัน` : `เริ่มใน ${days(start.getTime())} วัน`;
+      return clock
+        ? translate("sale", "admin.period.clockIn", "{clock} · อีก {days} วัน", { clock, days: days(start.getTime()) })
+        : translate("sale", "admin.period.startsIn", "เริ่มใน {days} วัน", { days: days(start.getTime()) });
     case "ACTIVE":
-      return clock ?? `เหลือ ${days(end.getTime())} วัน`;
+      return clock ?? translate("sale", "admin.period.daysLeft", "เหลือ {days} วัน", { days: days(end.getTime()) });
     case "PAUSED":
       return isPausedByAdmin(sale)
-        ? `หยุดโดยแอดมิน${sale.pauseReason ? ` · ${sale.pauseReason}` : ""}`
-        : "ร้านหยุดไว้";
+        ? translate("sale", "admin.period.pausedByAdmin", "หยุดโดยแอดมิน{reason}", { reason: sale.pauseReason ? ` · ${sale.pauseReason}` : "" })
+        : translate("sale", "admin.period.pausedByShop", "ร้านหยุดไว้");
     case "SOLD_OUT":
-      return clock ?? "ขายครบโควตาแล้ว";
+      return clock ?? translate("sale", "admin.period.soldOut", "ขายครบโควตาแล้ว");
     case "BUDGET_EXHAUSTED":
-      return "จบก่อนกำหนด";
+      return translate("sale", "admin.period.endedEarly", "จบก่อนกำหนด");
     case "ENDED":
-      return sale.endedAt && Date.parse(sale.endedAt) < end.getTime() ? "จบก่อนกำหนด" : "สิ้นสุดแล้ว";
+      return sale.endedAt && Date.parse(sale.endedAt) < end.getTime() ? translate("sale", "admin.period.endedEarly", "จบก่อนกำหนด") : translate("sale", "admin.period.ended", "สิ้นสุดแล้ว");
   }
 }
 
@@ -148,16 +150,16 @@ export function isPausedByAdmin(sale: Pick<AdminSale, "ownerType" | "pauseReason
 
 /** "ลด 30%" / "ลด ฿50/ชิ้น" / "ราคาใหม่รายชิ้น" */
 export function saleDiscountLabel(sale: Pick<AdminSale, "discountType" | "discountValue">): string {
-  if (sale.discountType === "PERCENT") return `ลด ${sale.discountValue}%`;
-  if (sale.discountType === "FIXED_OFF") return `ลด ${formatBaht(sale.discountValue)}/ชิ้น`;
-  return "ราคาใหม่รายชิ้น";
+  if (sale.discountType === "PERCENT") return translate("sale", "admin.discount.percent", "ลด {percent}%", { percent: sale.discountValue ?? 0 });
+  if (sale.discountType === "FIXED_OFF") return translate("sale", "admin.discount.fixedOff", "ลด {amount}/ชิ้น", { amount: formatBaht(sale.discountValue) });
+  return translate("sale", "admin.discount.fixedPrice", "ราคาใหม่รายชิ้น");
 }
 
 export function saleDiscountDetail(sale: AdminSale): string {
-  if (sale.discountType === "FIXED_PRICE") return "ตั้งรายแถว";
-  if (sale.ownerType === "SELLER") return "ร้านออกเงิน";
+  if (sale.discountType === "FIXED_PRICE") return translate("sale", "admin.discount.perRow", "ตั้งรายแถว");
+  if (sale.ownerType === "SELLER") return translate("sale", "admin.discount.shopPays", "ร้านออกเงิน");
   if (sale.discountType === "PERCENT" && sale.maxDiscountPerUnit != null) {
-    return `สูงสุด ${formatBaht(sale.maxDiscountPerUnit)}/ชิ้น`;
+    return translate("sale", "admin.discount.maxPerUnit", "สูงสุด {amount}/ชิ้น", { amount: formatBaht(sale.maxDiscountPerUnit) });
   }
   return "—";
 }
@@ -182,15 +184,15 @@ export function saleScopeLabel(
 ): string {
   switch (sale.scopeType) {
     case "ALL":
-      return "ทุกเกม";
+      return translate("sale", "admin.scope.all", "ทุกเกม");
     case "SHOP":
-      return "ทุกสินค้าในร้าน";
+      return translate("sale", "admin.scope.shop", "ทุกสินค้าในร้าน");
     case "LISTINGS":
-      return "เลือก listing";
+      return translate("sale", "admin.scope.listings", "เลือก listing");
     default: {
-      const prefix = sale.scopeType === "GAME" ? "เกม" : sale.scopeType === "CATEGORY" ? "หมวด" : "ชุด";
+      const prefix = sale.scopeType === "GAME" ? translate("sale", "admin.scope.game", "เกม") : sale.scopeType === "CATEGORY" ? translate("sale", "admin.scope.category", "หมวด") : translate("sale", "admin.scope.set", "ชุด");
       const known = namesFor(sale, names);
-      if (known.length === 0) return `${prefix} ${sale.scopeIds.length} รายการ`;
+      if (known.length === 0) return translate("sale", "admin.scope.count", "{prefix} {count} รายการ", { prefix, count: sale.scopeIds.length });
       const shown = known.slice(0, 2).join(", ");
       return known.length > 2 ? `${prefix} ${shown} +${known.length - 2}` : `${prefix} ${shown}`;
     }
@@ -214,16 +216,16 @@ export function conditionLabel(code: string): string {
 export function saleScopeDetail(sale: AdminSale): string {
   if (sale.saleType === "FLASH_SALE") {
     const parts = [
-      sale.perListingQuota != null ? `โควตา ${sale.perListingQuota}/listing` : null,
-      sale.perBuyerLimit != null ? `${sale.perBuyerLimit} ชิ้น/คน` : null,
+      sale.perListingQuota != null ? translate("sale", "admin.scopeDetail.quota", "โควตา {quota}/listing", { quota: sale.perListingQuota }) : null,
+      sale.perBuyerLimit != null ? translate("sale", "admin.scopeDetail.perBuyer", "{limit} ชิ้น/คน", { limit: sale.perBuyerLimit }) : null,
     ].filter(Boolean);
-    return parts.length ? parts.join(" · ") : "ไม่จำกัดโควตา";
+    return parts.length ? parts.join(" · ") : translate("sale", "admin.scopeDetail.noQuota", "ไม่จำกัดโควตา");
   }
   if (sale.scopeType === "LISTINGS") return `${sale.listingCount.toLocaleString(intlLocale())} listing`;
-  if (sale.scopeType === "SHOP") return "ไม่รวมสินค้าประมูล";
+  if (sale.scopeType === "SHOP") return translate("sale", "admin.scopeDetail.noAuction", "ไม่รวมสินค้าประมูล");
   const parts = [
-    sale.conditions.length ? sale.conditions.map(conditionLabel).join(", ") : "ทุกสภาพ",
-    sale.minUnitPrice ? `ราคา ≥ ${formatBaht(sale.minUnitPrice)}` : null,
+    sale.conditions.length ? sale.conditions.map(conditionLabel).join(", ") : translate("sale", "admin.scopeDetail.allConditions", "ทุกสภาพ"),
+    sale.minUnitPrice ? translate("sale", "admin.scopeDetail.minPrice", "ราคา ≥ {price}", { price: formatBaht(sale.minUnitPrice) }) : null,
   ].filter(Boolean);
   return parts.join(" · ");
 }
@@ -231,10 +233,10 @@ export function saleScopeDetail(sale: AdminSale): string {
 /** บรรทัดรองของคอลัมน์แคมเปญ */
 export function saleSubtitle(sale: AdminSale): string {
   if (sale.ownerType === "SELLER") {
-    return `${sale.owner?.username ?? "ร้านค้า"} · ${sale.listingCount.toLocaleString(intlLocale())} listing`;
+    return `${sale.owner?.username ?? translate("sale", "admin.type.shop", "ร้านค้า")} · ${sale.listingCount.toLocaleString(intlLocale())} listing`;
   }
-  const link = sale.slug ? `/sale/${sale.slug}` : "ไม่มีหน้าแคมเปญ";
-  return sale.featuredOnHome ? `${link} · หน้าแรก` : link;
+  const link = sale.slug ? `/sale/${sale.slug}` : translate("sale", "admin.subtitle.noPage", "ไม่มีหน้าแคมเปญ");
+  return sale.featuredOnHome ? translate("sale", "admin.subtitle.home", "{link} · หน้าแรก", { link }) : link;
 }
 
 /** % ของงบที่ใช้ไปแล้ว — ไม่มีงบคืน `null` */
@@ -250,7 +252,7 @@ export function saleTypeBadge(sale: Pick<AdminSale, "saleType" | "scopeType">): 
 } {
   if (sale.saleType === "FLASH_SALE") return { type: "flash" };
   if (sale.saleType === "SHOP_SALE") return { type: "shop" };
-  return { type: "percent", label: sale.scopeType === "CARD_SET" ? "ลดทั้งชุดการ์ด" : "ลดทั้งหมวด" };
+  return { type: "percent", label: sale.scopeType === "CARD_SET" ? translate("sale", "admin.badge.cardSet", "ลดทั้งชุดการ์ด") : translate("sale", "admin.type.category", "ลดทั้งหมวด") };
 }
 
 /**
@@ -276,23 +278,78 @@ export function sampleSaleCalculation(
 
 /** "฿4.82M" — ยอดรวมก้อนใหญ่ในแถบผล preview */
 export function compactBaht(amount: number): string {
+  /* eslint-disable no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน */
   if (amount >= 1_000_000) return `฿${(amount / 1_000_000).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}M`;
   if (amount >= 10_000) return `฿${(amount / 1000).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}K`;
+  /* eslint-enable no-restricted-syntax */
   return formatBaht(amount);
 }
 
 /** ข้อความ error ของหน้าแคมเปญลดราคา แปลจาก `ApiError.code` */
 export function saleErrorMessage(error: unknown, fallback: string): string {
-  if (hasErrorCode(error, "SALE_IN_USE")) return "แคมเปญมีออเดอร์แล้ว ลบไม่ได้ (SALE_IN_USE) — ใช้ “จบแคมเปญ” แทน";
-  if (hasErrorCode(error, "SALE_NOT_FOUND")) return "ไม่พบแคมเปญนี้แล้ว ลองโหลดหน้าใหม่";
-  if (hasErrorCode(error, "SALE_OVERLAP")) return "listing ซ้อนกับการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP)";
-  if (hasErrorCode(error, "SALE_SLUG_TAKEN")) return "ลิงก์หน้าแคมเปญนี้ถูกใช้แล้ว ลองเปลี่ยน";
-  if (hasErrorCode(error, "SALE_PAUSED")) return "แคมเปญถูกหยุดโดยทีมงาน";
+  if (hasErrorCode(error, "SALE_IN_USE")) return translate("sale", "admin.errors.inUse", "แคมเปญมีออเดอร์แล้ว ลบไม่ได้ (SALE_IN_USE) — ใช้ “จบแคมเปญ” แทน");
+  if (hasErrorCode(error, "SALE_NOT_FOUND")) return translate("sale", "admin.errors.notFound", "ไม่พบแคมเปญนี้แล้ว ลองโหลดหน้าใหม่");
+  if (hasErrorCode(error, "SALE_OVERLAP")) return translate("sale", "admin.errors.overlap", "listing ซ้อนกับการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP)");
+  if (hasErrorCode(error, "SALE_SLUG_TAKEN")) return translate("sale", "admin.errors.slugTaken", "ลิงก์หน้าแคมเปญนี้ถูกใช้แล้ว ลองเปลี่ยน");
+  if (hasErrorCode(error, "SALE_PAUSED")) return translate("sale", "admin.errors.paused", "แคมเปญถูกหยุดโดยทีมงาน");
   if (hasErrorCode(error, "SALE_INVALID")) {
-    return "ข้อมูลแคมเปญไม่ผ่านเงื่อนไข (SALE_INVALID) — หลังมีออเดอร์แก้ได้เฉพาะชื่อ วันจบ งบ (เพิ่ม) โควตา (เพิ่ม)";
+    return translate("sale", "admin.errors.invalid", "ข้อมูลแคมเปญไม่ผ่านเงื่อนไข (SALE_INVALID) — หลังมีออเดอร์แก้ได้เฉพาะชื่อ วันจบ งบ (เพิ่ม) โควตา (เพิ่ม)");
   }
-  if (hasErrorCode(error, "GAME_NOT_FOUND")) return "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
-  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
-  if (hasErrorCode(error, "CARD_SET_NOT_FOUND")) return "ชุดการ์ดที่เลือกถูกลบไปแล้ว ลองเลือกใหม่";
+  if (hasErrorCode(error, "GAME_NOT_FOUND")) return translate("sale", "admin.errors.gameNotFound", "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่");
+  if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) return translate("sale", "admin.errors.categoryNotFound", "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่");
+  if (hasErrorCode(error, "CARD_SET_NOT_FOUND")) return translate("sale", "admin.errors.setNotFound", "ชุดการ์ดที่เลือกถูกลบไปแล้ว ลองเลือกใหม่");
   return fallback;
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "admin.tabs.all", "ns": "sale", "defaultValue": "ทั้งหมด"}
+// @tolgee-key {"key": "admin.status.ACTIVE", "ns": "sale", "defaultValue": "กำลังลด"}
+// @tolgee-key {"key": "admin.status.SCHEDULED", "ns": "sale", "defaultValue": "ตั้งเวลาไว้"}
+// @tolgee-key {"key": "admin.status.PAUSED", "ns": "sale", "defaultValue": "หยุดชั่วคราว"}
+// @tolgee-key {"key": "admin.status.ENDED", "ns": "sale", "defaultValue": "จบแล้ว"}
+// @tolgee-key {"key": "admin.type.all", "ns": "sale", "defaultValue": "ทุกประเภท"}
+// @tolgee-key {"key": "admin.type.category", "ns": "sale", "defaultValue": "ลดทั้งหมวด"}
+// @tolgee-key {"key": "admin.type.shop", "ns": "sale", "defaultValue": "ร้านค้า"}
+// @tolgee-key {"key": "admin.status.SOLD_OUT", "ns": "sale", "defaultValue": "ขายหมด"}
+// @tolgee-key {"key": "admin.status.BUDGET_EXHAUSTED", "ns": "sale", "defaultValue": "หมดงบ"}
+// @tolgee-key {"key": "admin.duration.hours", "ns": "sale", "defaultValue": "ยาว {hours} ชั่วโมง"}
+// @tolgee-key {"key": "admin.duration.days", "ns": "sale", "defaultValue": "ยาว {days} วัน"}
+// @tolgee-key {"key": "admin.period.clockIn", "ns": "sale", "defaultValue": "{clock} · อีก {days} วัน"}
+// @tolgee-key {"key": "admin.period.startsIn", "ns": "sale", "defaultValue": "เริ่มใน {days} วัน"}
+// @tolgee-key {"key": "admin.period.daysLeft", "ns": "sale", "defaultValue": "เหลือ {days} วัน"}
+// @tolgee-key {"key": "admin.period.pausedByAdmin", "ns": "sale", "defaultValue": "หยุดโดยแอดมิน{reason}"}
+// @tolgee-key {"key": "admin.period.pausedByShop", "ns": "sale", "defaultValue": "ร้านหยุดไว้"}
+// @tolgee-key {"key": "admin.period.soldOut", "ns": "sale", "defaultValue": "ขายครบโควตาแล้ว"}
+// @tolgee-key {"key": "admin.period.endedEarly", "ns": "sale", "defaultValue": "จบก่อนกำหนด"}
+// @tolgee-key {"key": "admin.period.ended", "ns": "sale", "defaultValue": "สิ้นสุดแล้ว"}
+// @tolgee-key {"key": "admin.discount.percent", "ns": "sale", "defaultValue": "ลด {percent}%"}
+// @tolgee-key {"key": "admin.discount.fixedOff", "ns": "sale", "defaultValue": "ลด {amount}/ชิ้น"}
+// @tolgee-key {"key": "admin.discount.fixedPrice", "ns": "sale", "defaultValue": "ราคาใหม่รายชิ้น"}
+// @tolgee-key {"key": "admin.discount.perRow", "ns": "sale", "defaultValue": "ตั้งรายแถว"}
+// @tolgee-key {"key": "admin.discount.shopPays", "ns": "sale", "defaultValue": "ร้านออกเงิน"}
+// @tolgee-key {"key": "admin.discount.maxPerUnit", "ns": "sale", "defaultValue": "สูงสุด {amount}/ชิ้น"}
+// @tolgee-key {"key": "admin.scope.all", "ns": "sale", "defaultValue": "ทุกเกม"}
+// @tolgee-key {"key": "admin.scope.shop", "ns": "sale", "defaultValue": "ทุกสินค้าในร้าน"}
+// @tolgee-key {"key": "admin.scope.listings", "ns": "sale", "defaultValue": "เลือก listing"}
+// @tolgee-key {"key": "admin.scope.game", "ns": "sale", "defaultValue": "เกม"}
+// @tolgee-key {"key": "admin.scope.category", "ns": "sale", "defaultValue": "หมวด"}
+// @tolgee-key {"key": "admin.scope.set", "ns": "sale", "defaultValue": "ชุด"}
+// @tolgee-key {"key": "admin.scope.count", "ns": "sale", "defaultValue": "{prefix} {count} รายการ"}
+// @tolgee-key {"key": "admin.scopeDetail.quota", "ns": "sale", "defaultValue": "โควตา {quota}/listing"}
+// @tolgee-key {"key": "admin.scopeDetail.perBuyer", "ns": "sale", "defaultValue": "{limit} ชิ้น/คน"}
+// @tolgee-key {"key": "admin.scopeDetail.noQuota", "ns": "sale", "defaultValue": "ไม่จำกัดโควตา"}
+// @tolgee-key {"key": "admin.scopeDetail.noAuction", "ns": "sale", "defaultValue": "ไม่รวมสินค้าประมูล"}
+// @tolgee-key {"key": "admin.scopeDetail.allConditions", "ns": "sale", "defaultValue": "ทุกสภาพ"}
+// @tolgee-key {"key": "admin.scopeDetail.minPrice", "ns": "sale", "defaultValue": "ราคา ≥ {price}"}
+// @tolgee-key {"key": "admin.subtitle.noPage", "ns": "sale", "defaultValue": "ไม่มีหน้าแคมเปญ"}
+// @tolgee-key {"key": "admin.subtitle.home", "ns": "sale", "defaultValue": "{link} · หน้าแรก"}
+// @tolgee-key {"key": "admin.badge.cardSet", "ns": "sale", "defaultValue": "ลดทั้งชุดการ์ด"}
+// @tolgee-key {"key": "admin.errors.inUse", "ns": "sale", "defaultValue": "แคมเปญมีออเดอร์แล้ว ลบไม่ได้ (SALE_IN_USE) — ใช้ “จบแคมเปญ” แทน"}
+// @tolgee-key {"key": "admin.errors.notFound", "ns": "sale", "defaultValue": "ไม่พบแคมเปญนี้แล้ว ลองโหลดหน้าใหม่"}
+// @tolgee-key {"key": "admin.errors.overlap", "ns": "sale", "defaultValue": "listing ซ้อนกับการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP)"}
+// @tolgee-key {"key": "admin.errors.slugTaken", "ns": "sale", "defaultValue": "ลิงก์หน้าแคมเปญนี้ถูกใช้แล้ว ลองเปลี่ยน"}
+// @tolgee-key {"key": "admin.errors.paused", "ns": "sale", "defaultValue": "แคมเปญถูกหยุดโดยทีมงาน"}
+// @tolgee-key {"key": "admin.errors.invalid", "ns": "sale", "defaultValue": "ข้อมูลแคมเปญไม่ผ่านเงื่อนไข (SALE_INVALID) — หลังมีออเดอร์แก้ได้เฉพาะชื่อ วันจบ งบ (เพิ่ม) โควตา (เพิ่ม)"}
+// @tolgee-key {"key": "admin.errors.gameNotFound", "ns": "sale", "defaultValue": "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่"}
+// @tolgee-key {"key": "admin.errors.categoryNotFound", "ns": "sale", "defaultValue": "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่"}
+// @tolgee-key {"key": "admin.errors.setNotFound", "ns": "sale", "defaultValue": "ชุดการ์ดที่เลือกถูกลบไปแล้ว ลองเลือกใหม่"}
