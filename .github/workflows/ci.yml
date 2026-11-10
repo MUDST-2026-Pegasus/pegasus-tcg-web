@@ -18,6 +18,10 @@ jobs:
     name: Lint / Type Check / Tests / Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -69,17 +73,38 @@ jobs:
         run: pnpm exec tsc -b --noEmit
 
       - name: Run Unit Tests
-        run: pnpm test:unit
+        run: pnpm test:unit --coverage
 
       - name: Run Integration Tests
         run: pnpm test:integration
+
+      - name: Publish Unit & Integration Test Results
+        if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          check_name: FE Unit + Integration
+          files: |
+            test-results/unit.xml
+            test-results/integration.xml
+          comment_mode: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'off' || 'always' }}
+
+      - name: Report Vitest Coverage
+        if: always()
+        continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: FE Unit Coverage
+          file-coverage-mode: changes
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vitest-results
-          path: test-results/
+          path: |
+            test-results/
+            coverage/
           if-no-files-found: ignore
           retention-days: 7
 
@@ -111,6 +136,10 @@ jobs:
   e2e:
     name: Cypress E2E
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     uses: ./.github/workflows/e2e-cypress.yml
 
   publish:
