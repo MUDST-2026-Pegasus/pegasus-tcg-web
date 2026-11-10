@@ -373,17 +373,17 @@ function CatalogWorkspace({
 function resultLabel(
   data: { items: unknown[]; totalItems: number } | undefined,
   page: number,
-  t: ReturnType<typeof useTranslate<"admin">>["t"],
+  translate: ReturnType<typeof useTranslate<"admin">>["t"],
 ): string {
   if (data === undefined) {
-    return t("catalog.products.searching", "กำลังค้นหา…");
+    return translate("catalog.products.searching", "กำลังค้นหา…");
   }
   if (data.totalItems === 0) {
-    return t("catalog.products.none", "ไม่พบสินค้า");
+    return translate("catalog.products.none", "ไม่พบสินค้า");
   }
   const from = (page - 1) * CATALOG_PAGE_SIZE + 1;
   const to = from + data.items.length - 1;
-  return t("catalog.products.range", "แสดง {from}–{to} จาก {total} รายการ", { from: formatCount(from), to: formatCount(to), total: formatCount(data.totalItems) });
+  return translate("catalog.products.range", "แสดง {from}–{to} จาก {total} รายการ", { from: formatCount(from), to: formatCount(to), total: formatCount(data.totalItems) });
 }
 
 // @tolgee-key {"key": "catalog.products.searching", "ns": "admin", "defaultValue": "กำลังค้นหา…"}

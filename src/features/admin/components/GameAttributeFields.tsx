@@ -137,15 +137,15 @@ export function GameAttributeFields({
 /** ช่องที่เป็นตัวเลือก — `null` = ช่องพิมพ์ */
 function choicesOf(
   attribute: GameAttribute,
-  t: ReturnType<typeof useTranslate<"admin">>["t"],
+  translate: ReturnType<typeof useTranslate<"admin">>["t"],
 ): { value: string; label: string }[] | null {
   if (attribute.dataType === "ENUM") {
     return attribute.options.map((option) => ({ value: option, label: option }));
   }
   if (attribute.dataType === "BOOLEAN") {
     return [
-      { value: "true", label: t("cardAttributes.form.yes", "ใช่") },
-      { value: "false", label: t("cardAttributes.form.no", "ไม่ใช่") },
+      { value: "true", label: translate("cardAttributes.form.yes", "ใช่") },
+      { value: "false", label: translate("cardAttributes.form.no", "ไม่ใช่") },
     ];
   }
   return null;

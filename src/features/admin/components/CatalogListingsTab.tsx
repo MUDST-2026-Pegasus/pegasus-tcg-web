@@ -472,8 +472,8 @@ function SummaryTile({
   );
 }
 
-function pricingModeLabel(listing: AdminCardListing, t: ReturnType<typeof useTranslate<"admin">>["t"]): string {
-  return listing.pricingMode === "AUTO_MEDIAN" ? t("catalog.listings.pricing.auto", "ราคาอัตโนมัติ") : t("catalog.listings.pricing.manual", "ตั้งเอง");
+function pricingModeLabel(listing: AdminCardListing, translate: ReturnType<typeof useTranslate<"admin">>["t"]): string {
+  return listing.pricingMode === "AUTO_MEDIAN" ? translate("catalog.listings.pricing.auto", "ราคาอัตโนมัติ") : translate("catalog.listings.pricing.manual", "ตั้งเอง");
 }
 
 function ListingDetail({
