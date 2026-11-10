@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.tolgee.io/cli-schema.json",
-  "apiUrl": "https://pegasus-tolgee.thanaboat.com/",
+  "apiUrl": "https://pegasus-tolgee.thanaboat.com",
   "projectId": 2,
   "format": "JSON_TOLGEE",
   "defaultNamespace": "common",
@@ -58,6 +58,36 @@
         "path": "./src/i18n/admin/en.json",
         "language": "en",
         "namespace": "admin"
+      },
+      {
+        "path": "./src/i18n/promotions/th.json",
+        "language": "th",
+        "namespace": "promotions"
+      },
+      {
+        "path": "./src/i18n/promotions/en.json",
+        "language": "en",
+        "namespace": "promotions"
+      },
+      {
+        "path": "./src/i18n/sale/th.json",
+        "language": "th",
+        "namespace": "sale"
+      },
+      {
+        "path": "./src/i18n/sale/en.json",
+        "language": "en",
+        "namespace": "sale"
+      },
+      {
+        "path": "./src/i18n/auction/th.json",
+        "language": "th",
+        "namespace": "auction"
+      },
+      {
+        "path": "./src/i18n/auction/en.json",
+        "language": "en",
+        "namespace": "auction"
       }
     ]
   },

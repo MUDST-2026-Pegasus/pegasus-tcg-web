@@ -5,6 +5,7 @@ import { DateTimePicker } from "@/components/common";
 
 import { FormField, NumberInput, type PromotionFieldAppearance } from "./PromotionFormControls";
 import { fromLocalInput, toLocalInput } from "./promotionForm.dates";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * ช่องกรอกที่ฟอร์มโค้ด Pegasus (แอดมิน) และโค้ดร้าน (ผู้ขาย) ใช้ร่วมกัน
@@ -76,6 +77,7 @@ export function PromotionDateField({
   defaultTime?: string;
   locked?: boolean;
 }) {
+  const { t } = useTranslate("promotions");
   return (
     <FormField
       field={field}
@@ -93,7 +95,7 @@ export function PromotionDateField({
         defaultTime={defaultTime}
         disabled={locked}
         className={appearance === "compact" ? COMPACT_DATE_CLASS : undefined}
-        suffix={locked ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+        suffix={locked ? <Lock aria-label={t("buyer.promotionFormFields.ariaLabel", "ล็อก")} className="text-muted-foreground" /> : null}
         value={toLocalInput(value)}
         onChange={(next) => {
           onChange(fromLocalInput(next));

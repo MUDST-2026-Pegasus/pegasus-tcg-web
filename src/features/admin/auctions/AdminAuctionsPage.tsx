@@ -26,7 +26,7 @@ import {
 import { AdminKpi, AdminSearchBox, AdminTabs } from "./components/AdminAuctionShared";
 import { RiskFlag } from "./components/RiskFlag";
 import { SuspendAuctionDialog, type SuspendTarget } from "./components/SuspendAuctionDialog";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate, translate } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 
@@ -36,13 +36,14 @@ const PAGE_SIZE = 20;
  * และ UNSOLD ที่มีบิดคือผู้ชนะไม่ชำระ [TCG-640]
  */
 function adminStatusLabel(row: AdminAuctionRow): string | undefined {
-  if (row.status === "SOLD") return "ขายแล้ว";
+  if (row.status === "SOLD") return translate("auction", "admin.adminAuctionsPage.text", "ขายแล้ว");
   if (row.status === "CANCELLED") return AUCTION_STATUS_LABEL.CANCELLED;
-  if (row.status === "UNSOLD" && row.bidCount > 0) return "ไม่มีผู้ชำระ";
+  if (row.status === "UNSOLD" && row.bidCount > 0) return translate("auction", "admin.adminAuctionsPage.text2", "ไม่มีผู้ชำระ");
   return undefined;
 }
 
 export function AdminAuctionsPage() {
+  const { t } = useTranslate("auction");
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = readAdminAuctionTab(searchParams.get("tab"));
   const search = searchParams.get("q") ?? "";
@@ -84,7 +85,7 @@ export function AdminAuctionsPage() {
   const exportCsv = () => {
     if (!data) return;
     downloadCsv(`auctions-${tab.toLowerCase()}.csv`, [
-      ["รหัสประมูล", "การ์ด", "ผู้ขาย", "ราคาปัจจุบัน", "บิด", "ผู้บิด", "สถานะ", "ปิด"],
+      [t("admin.adminAuctionsPage.text3", "รหัสประมูล"), t("admin.adminAuctionsPage.text4", "การ์ด"), t("admin.adminAuctionsPage.text5", "ผู้ขาย"), t("admin.adminAuctionsPage.text6", "ราคาปัจจุบัน"), t("admin.adminAuctionsPage.text7", "บิด"), t("admin.adminAuctionsPage.text8", "ผู้บิด"), t("admin.adminAuctionsPage.text9", "สถานะ"), t("admin.adminAuctionsPage.text10", "ปิด")],
       ...data.page.items.map((row) => [row.auctionNumber, row.cardName, row.shopName, row.currentPrice, row.bidCount, row.bidderCount, row.status, row.endsAt]),
     ]);
   };
@@ -93,15 +94,15 @@ export function AdminAuctionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">การประมูลทั้งหมด</h1>
-          <p className="text-[13px] text-muted-foreground">ดูประมูลทั้งแพลตฟอร์ม ระงับประมูลที่ผิดกฎ และจัดการผู้ใช้ที่ติดโทษห้ามบิด</p>
+          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">{t("admin.adminAuctionsPage.text11", "การประมูลทั้งหมด")}</h1>
+          <p className="text-[13px] text-muted-foreground">{t("admin.adminAuctionsPage.text12", "ดูประมูลทั้งแพลตฟอร์ม ระงับประมูลที่ผิดกฎ และจัดการผู้ใช้ที่ติดโทษห้ามบิด")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="rounded-md px-2.5" disabled={!data} onClick={exportCsv}>
-            ส่งออก CSV
+            {t("admin.adminAuctionsPage.text13", "ส่งออก CSV")}
           </Button>
           <Button className="rounded-md px-2.5" nativeButton={false} render={<Link to="/admin/auctions/banned-bidders" />}>
-            ผู้ใช้ที่ห้ามบิด{bannedCount !== undefined ? ` (${bannedCount.toLocaleString(intlLocale())})` : ""}
+            {t("admin.adminAuctionsPage.text14", "ผู้ใช้ที่ห้ามบิด")}{bannedCount !== undefined ? ` (${bannedCount.toLocaleString(intlLocale())})` : ""}
           </Button>
         </div>
       </div>
@@ -110,24 +111,24 @@ export function AdminAuctionsPage() {
 
       {data ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <AdminKpi label="กำลังประมูล" value={data.kpis.live} />
-          <AdminKpi label="จบภายใน 1 ชม." value={data.kpis.endingWithinHour} valueClass="text-red-700" />
-          <AdminKpi label="รอผู้ชนะชำระ" value={data.kpis.awaitingPayment} valueClass="text-amber-800" />
-          <AdminKpi label="ถูกระงับ (30 วัน)" value={data.kpis.suspendedLast30Days} />
+          <AdminKpi label={t("admin.adminAuctionsPage.label", "กำลังประมูล")} value={data.kpis.live} />
+          <AdminKpi label={t("admin.adminAuctionsPage.label2", "จบภายใน 1 ชม.")} value={data.kpis.endingWithinHour} valueClass="text-red-700" />
+          <AdminKpi label={t("admin.adminAuctionsPage.label3", "รอผู้ชนะชำระ")} value={data.kpis.awaitingPayment} valueClass="text-amber-800" />
+          <AdminKpi label={t("admin.adminAuctionsPage.label4", "ถูกระงับ (30 วัน)")} value={data.kpis.suspendedLast30Days} />
         </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <AdminTabs label="สถานะการประมูล" tabs={ADMIN_AUCTION_TABS} active={tab} counts={data?.tabCounts} onChange={(next) => updateParams({ tab: next })} />
-        <AdminSearchBox value={search} placeholder="ค้นหาการ์ด ผู้ขาย หรือรหัสประมูล…" onChange={(q) => updateParams({ q })} />
+        <AdminTabs label={t("admin.adminAuctionsPage.label5", "สถานะการประมูล")} tabs={ADMIN_AUCTION_TABS} active={tab} counts={data?.tabCounts} onChange={(next) => updateParams({ tab: next })} />
+        <AdminSearchBox value={search} placeholder={t("admin.adminAuctionsPage.placeholder", "ค้นหาการ์ด ผู้ขาย หรือรหัสประมูล…")} onChange={(q) => updateParams({ q })} />
       </div>
 
       <QueryBoundary
         query={auctions}
         loading={<ProductTableSkeleton />}
-        errorTitle="โหลดรายการประมูลไม่สำเร็จ"
+        errorTitle={t("admin.adminAuctionsPage.errorTitle", "โหลดรายการประมูลไม่สำเร็จ")}
         isEmpty={(result) => result.page.items.length === 0}
-        empty={<EmptyState icon={Gavel} title="ไม่พบการประมูล" description="ลองเปลี่ยนแท็บหรือคำค้นหา" />}
+        empty={<EmptyState icon={Gavel} title={t("admin.adminAuctionsPage.title", "ไม่พบการประมูล")} description={t("admin.adminAuctionsPage.description", "ลองเปลี่ยนแท็บหรือคำค้นหา")} />}
       >
         {(result) => (
           <AdminAuctionsTable
@@ -158,14 +159,15 @@ export function AdminAuctionsPage() {
 }
 
 function FlaggedBanner({ data }: { data: AdminAuctionPage }) {
+  const { t } = useTranslate("auction");
   return (
     <div role="status" className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
       <Flag aria-hidden className="mt-0.5 size-5 shrink-0" />
       <div className="flex flex-col gap-0.5">
         <p className="text-sm font-bold">
-          มี {data.reportedCount} ประมูลที่ถูกรายงาน และ {data.suspiciousCount} ประมูลที่มีรูปแบบบิดผิดปกติ
+          {t("admin.adminAuctionsPage.text15", "มี")}{" "}{data.reportedCount} {t("admin.adminAuctionsPage.text16", "ประมูลที่ถูกรายงาน และ")}{" "}{data.suspiciousCount} {t("admin.adminAuctionsPage.text17", "ประมูลที่มีรูปแบบบิดผิดปกติ")}
         </p>
-        <p className="text-xs">เช่น บัญชีใหม่บิดถี่ในประมูลเดียว หรือผู้บิดใช้ที่อยู่เดียวกับผู้ขาย — ตรวจสอบก่อนประมูลจบ</p>
+        <p className="text-xs">{t("admin.adminAuctionsPage.text18", "เช่น บัญชีใหม่บิดถี่ในประมูลเดียว หรือผู้บิดใช้ที่อยู่เดียวกับผู้ขาย — ตรวจสอบก่อนประมูลจบ")}</p>
       </div>
     </div>
   );
@@ -179,6 +181,7 @@ type AdminAuctionsTableProps = {
 };
 
 function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctionsTableProps) {
+  const { t } = useTranslate("auction");
   const navigate = useNavigate();
   const head = "text-xs font-normal text-muted-foreground";
   const link = "cursor-pointer text-xs font-semibold hover:underline";
@@ -186,7 +189,7 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
   const columns: DataTableColumn<AdminAuctionRow>[] = [
     {
       id: "card",
-      header: "การ์ด / รหัส",
+      header: t("admin.adminAuctionsPage.header", "การ์ด / รหัส"),
       meta: { headClassName: `pl-4 ${head}`, cellClassName: "py-3 pl-4" },
       cell: ({ row: { original: row } }) => (
         <div className="flex items-center gap-3">
@@ -205,23 +208,23 @@ function AdminAuctionsTable({ data, disabled, onSuspend, footer }: AdminAuctions
         </div>
       ),
     },
-    { id: "shop", header: "ผู้ขาย", meta: { headClassName: head, cellClassName: "text-xs text-muted-foreground" }, cell: ({ row }) => row.original.shopName },
-    { id: "price", header: "ราคาปัจจุบัน", meta: { headClassName: head, cellClassName: "text-sm font-semibold tabular-nums text-foreground" }, cell: ({ row }) => formatBaht(row.original.currentPrice) },
-    { id: "bids", header: "บิด / ผู้บิด", meta: { headClassName: head, cellClassName: "text-xs tabular-nums text-muted-foreground" }, cell: ({ row }) => `${row.original.bidCount} / ${row.original.bidderCount}` },
-    { id: "time", header: "เวลา", meta: { headClassName: head }, cell: ({ row }) => <TimeCell row={row.original} serverTime={data.serverTime} /> },
-    { id: "status", header: "สถานะ", meta: { headClassName: head }, cell: ({ row }) => <AuctionStatusPill kind={pillForStatus(row.original.status)} label={adminStatusLabel(row.original)} /> },
+    { id: "shop", header: t("admin.adminAuctionsPage.text5", "ผู้ขาย"), meta: { headClassName: head, cellClassName: "text-xs text-muted-foreground" }, cell: ({ row }) => row.original.shopName },
+    { id: "price", header: t("admin.adminAuctionsPage.text6", "ราคาปัจจุบัน"), meta: { headClassName: head, cellClassName: "text-sm font-semibold tabular-nums text-foreground" }, cell: ({ row }) => formatBaht(row.original.currentPrice) },
+    { id: "bids", header: t("admin.adminAuctionsPage.header2", "บิด / ผู้บิด"), meta: { headClassName: head, cellClassName: "text-xs tabular-nums text-muted-foreground" }, cell: ({ row }) => `${row.original.bidCount} / ${row.original.bidderCount}` },
+    { id: "time", header: t("admin.adminAuctionsPage.header3", "เวลา"), meta: { headClassName: head }, cell: ({ row }) => <TimeCell row={row.original} serverTime={data.serverTime} /> },
+    { id: "status", header: t("admin.adminAuctionsPage.text9", "สถานะ"), meta: { headClassName: head }, cell: ({ row }) => <AuctionStatusPill kind={pillForStatus(row.original.status)} label={adminStatusLabel(row.original)} /> },
     {
       id: "actions",
-      header: () => <span className="sr-only">การกระทำ</span>,
+      header: () => <span className="sr-only">{t("admin.adminAuctionsPage.text19", "การกระทำ")}</span>,
       meta: { headClassName: "pr-4", cellClassName: "pr-4 text-right" },
       cell: ({ row: { original: row } }) => (
         <div className="flex items-center justify-end gap-3" onClick={(event) => event.stopPropagation()}>
           <Link to={`/admin/auctions/${row.id}`} className={`${link} text-primary`}>
-            {row.status === "SUSPENDED" ? "ดูเหตุผล" : "ดู"}
+            {row.status === "SUSPENDED" ? t("admin.adminAuctionsPage.text20", "ดูเหตุผล") : t("admin.adminAuctionsPage.text21", "ดู")}
           </Link>
           {canSuspend(row.status) ? (
             <button type="button" className={`${link} text-destructive`} onClick={() => onSuspend(row)}>
-              ระงับ
+              {t("admin.adminAuctionsPage.text22", "ระงับ")}
             </button>
           ) : null}
         </div>
@@ -251,6 +254,10 @@ function TimeCell({ row, serverTime }: { row: AdminAuctionRow; serverTime: strin
 }
 
 function PaymentDue({ deadline, serverTime }: { deadline: string; serverTime: string }) {
+  const { t } = useTranslate("auction");
   const remaining = useCountdown(deadline, serverTime) ?? 0;
-  return <span className="text-xs text-muted-foreground tabular-nums">ชำระใน {formatRemaining(remaining)}</span>;
+  return <span className="text-xs text-muted-foreground tabular-nums">{t("admin.adminAuctionsPage.text23", "ชำระใน")}{" "}{formatRemaining(remaining)}</span>;
 }
+
+// @tolgee-key {"key": "admin.adminAuctionsPage.text", "ns": "auction", "defaultValue": "ขายแล้ว"}
+// @tolgee-key {"key": "admin.adminAuctionsPage.text2", "ns": "auction", "defaultValue": "ไม่มีผู้ชำระ"}

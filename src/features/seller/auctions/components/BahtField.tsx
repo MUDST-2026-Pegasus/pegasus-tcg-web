@@ -6,6 +6,9 @@ import { AmountInput } from "@/features/seller/products/components/AmountInput";
 import type { AuctionFormValues } from "../auction-form.types";
 import { AuctionFieldError } from "./AuctionFieldError";
 
+// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
+const BAHT_SIGN = "฿";
+
 type MoneyFieldName = "startingPrice" | "bidIncrement" | "buyNowPrice";
 
 type BahtFieldProps = {
@@ -28,9 +31,7 @@ export function BahtField({ form, name, id, label, hint, required }: BahtFieldPr
         {required ? " *" : null}
       </FieldLabel>
       <div className="relative">
-        <span aria-hidden className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
-          ฿
-        </span>
+        <span aria-hidden className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">{BAHT_SIGN}</span>
         <Controller
           control={form.control}
           name={name}

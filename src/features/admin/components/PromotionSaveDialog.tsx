@@ -19,7 +19,7 @@ import {
 import { changedPromotionFields, toPromotionInput } from "../promotions.schema";
 import type { AdminPromotion, AdminPromotionInput } from "../promotions.types";
 import { PromotionDialog } from "./PromotionDialog";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 type PromotionSaveDialogProps = {
   open: boolean;
@@ -38,16 +38,17 @@ export function PromotionSaveDialog(props: PromotionSaveDialogProps) {
 }
 
 function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfirm }: PromotionSaveDialogProps) {
+  const { t } = useTranslate("promotions");
   const cap = discountCapLabel(input);
   const audience =
     input.visibility === "PRIVATE"
-      ? "ผู้ซื้อกรอกรหัสเพื่อรับส่วนลดได้"
+      ? t("admin.promotionSaveDialog.audience", "ผู้ซื้อกรอกรหัสเพื่อรับส่วนลดได้")
       : input.claimable
-        ? "ผู้ซื้อจะเห็นและเก็บโค้ดได้"
-        : "ผู้ซื้อจะเห็นโค้ดตอนชำระเงิน";
+        ? t("admin.promotionSaveDialog.audience2", "ผู้ซื้อจะเห็นและเก็บโค้ดได้")
+        : t("admin.promotionSaveDialog.audience3", "ผู้ซื้อจะเห็นโค้ดตอนชำระเงิน");
   const distribution = input.claimable
-    ? `${limitLabel(input.claimLimit)} ใบ · ${input.featuredOnHome ? `หน้าแรก ลำดับ ${input.homeSort == null ? "ต่อท้าย" : input.homeSort + 1}` : "ไม่ขึ้นหน้าแรก"}`
-    : "ใช้รหัสโดยตรง";
+    ? t("admin.promotionSaveDialog.distribution4", "{value} ใบ · {value2}", { value: limitLabel(input.claimLimit), value2: input.featuredOnHome ? t("admin.promotionSaveDialog.distribution2", "หน้าแรก ลำดับ {value}", { value: input.homeSort == null ? t("admin.promotionSaveDialog.distribution", "ต่อท้าย") : input.homeSort + 1 }) : t("admin.promotionSaveDialog.distribution3", "ไม่ขึ้นหน้าแรก") })
+    : t("admin.promotionSaveDialog.distribution5", "ใช้รหัสโดยตรง");
 
   return (
     <PromotionDialog
@@ -55,54 +56,54 @@ function CreateDialog({ open, onOpenChange, input, scopeNames, pending, onConfir
       onOpenChange={onOpenChange}
       tone="info"
       icon={<CircleCheck />}
-      title={`เปิดใช้โค้ด ${input.code}?`}
-      description={`${audience}ตั้งแต่ ${formatPromoDateTime(input.startsAt)} · Pegasus เป็นผู้ออกส่วนลด ร้านได้เงินเต็ม`}
-      footerNote="หลังมีคนใช้ แก้ประเภท/มูลค่าไม่ได้"
+      title={t("admin.promotionSaveDialog.title", "เปิดใช้โค้ด {code}?", { code: input.code })}
+      description={t("admin.promotionSaveDialog.description", "{audience}ตั้งแต่ {value} · Pegasus เป็นผู้ออกส่วนลด ร้านได้เงินเต็ม", { audience, value: formatPromoDateTime(input.startsAt) })}
+      footerNote={t("admin.promotionSaveDialog.footerNote", "หลังมีคนใช้ แก้ประเภท/มูลค่าไม่ได้")}
       actions={
         <>
           <Button variant="outline" disabled={pending} onClick={() => onOpenChange(false)}>
-            ยกเลิก
+            {t("admin.promotionSaveDialog.button", "ยกเลิก")}
           </Button>
           <Button disabled={pending} onClick={onConfirm}>
-            เปิดใช้โค้ด
+            {t("admin.promotionSaveDialog.button2", "เปิดใช้โค้ด")}
           </Button>
         </>
       }
     >
       <div className="grid gap-2 rounded-md bg-muted px-3.5 py-3 text-xs [&>p]:flex [&>p]:items-start [&>p]:justify-between [&>p]:gap-3 [&>p]:text-muted-foreground [&>p>strong]:text-right [&>p>strong]:font-semibold [&>p>strong]:text-foreground">
         <p>
-          <span>ส่วนลด</span>
+          <span>{t("admin.promotionSaveDialog.span", "ส่วนลด")}</span>
           <strong>
             {input.discountType === "FREE_SHIPPING"
-              ? `ส่งฟรี ${cap}`
+              ? t("admin.promotionSaveDialog.strong", "ส่งฟรี {cap}", { cap })
               : input.discountType === "PERCENT"
                 ? `${input.discountValue}%${cap !== "—" ? ` ${cap}` : ""}`
                 : formatFieldValue("discountValue", input, scopeNames)}
           </strong>
         </p>
         <p>
-          <span>เงื่อนไข</span>
+          <span>{t("admin.promotionSaveDialog.span2", "เงื่อนไข")}</span>
           <strong>
             {minSpendLabel(input.minSpend)} · {scopeLabel({ ...input, ownerType: "PLATFORM" }, scopeNames)}
-            {input.newBuyerOnly ? " · ผู้ซื้อใหม่" : ""}
+            {input.newBuyerOnly ? t("admin.promotionSaveDialog.strong2", " · ผู้ซื้อใหม่") : ""}
           </strong>
         </p>
         <p>
-          <span>ระยะเวลา</span>
+          <span>{t("admin.promotionSaveDialog.span3", "ระยะเวลา")}</span>
           <strong>{formatPeriod(input.startsAt, input.endsAt)}</strong>
         </p>
         <p>
-          <span>สิทธิ์ใช้</span>
+          <span>{t("admin.promotionSaveDialog.span4", "สิทธิ์ใช้")}</span>
           <strong>
-            {limitLabel(input.usageLimitTotal)} สิทธิ์ · {input.usageLimitPerUser} ครั้ง/คน
+            {limitLabel(input.usageLimitTotal)} {t("admin.promotionSaveDialog.strong3", "สิทธิ์ ·")} {input.usageLimitPerUser} {t("admin.promotionSaveDialog.strong4", "ครั้ง/คน")}
           </strong>
         </p>
         <p>
-          <span>การแจก</span>
+          <span>{t("admin.promotionSaveDialog.span5", "การแจก")}</span>
           <strong>{distribution}</strong>
         </p>
         <p className="items-center! border-t pt-2.5 [&>strong]:text-lg [&>strong]:font-extrabold">
-          <span>งบสูงสุด ({budgetFormula(input)})</span>
+          <span>{t("admin.promotionSaveDialog.span6", "งบสูงสุด (")}{budgetFormula(input)})</span>
           <strong>{budgetLabel(input)}</strong>
         </p>
       </div>
@@ -119,6 +120,7 @@ function EditDialog({
   pending,
   onConfirm,
 }: PromotionSaveDialogProps & { existing: AdminPromotion }) {
+  const { t } = useTranslate("promotions");
   const before = toPromotionInput(existing);
   const changed = changedPromotionFields(existing, input);
   const oldBudget = campaignBudget(before);
@@ -130,22 +132,22 @@ function EditDialog({
       onOpenChange={onOpenChange}
       tone="info"
       icon={<Pencil />}
-      title="บันทึกการเปลี่ยนแปลง?"
-      description={`${existing.code} ถูกใช้แล้ว ${existing.usedCount.toLocaleString(intlLocale())} ครั้ง · ผู้ที่เก็บไว้ ${existing.claimedCount.toLocaleString(intlLocale())} คนจะเห็นข้อมูลใหม่ทันที`}
-      footerNote="บันทึกใน Activity Log"
+      title={t("admin.promotionSaveDialog.title2", "บันทึกการเปลี่ยนแปลง?")}
+      description={t("admin.promotionSaveDialog.description2", "{code} ถูกใช้แล้ว {value} ครั้ง · ผู้ที่เก็บไว้ {value3} คนจะเห็นข้อมูลใหม่ทันที", { code: existing.code, value: existing.usedCount.toLocaleString(intlLocale()), value3: existing.claimedCount.toLocaleString(intlLocale()) })}
+      footerNote={t("admin.promotionSaveDialog.footerNote2", "บันทึกใน Activity Log")}
       actions={
         <>
           <Button variant="outline" disabled={pending} onClick={() => onOpenChange(false)}>
-            ยกเลิก
+            {t("admin.promotionSaveDialog.button", "ยกเลิก")}
           </Button>
           <Button disabled={pending || changed.length === 0} onClick={onConfirm}>
-            บันทึก
+            {t("admin.promotionSaveDialog.button3", "บันทึก")}
           </Button>
         </>
       }
     >
       {changed.length === 0 ? (
-        <p className="rounded-md bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]">ยังไม่มีข้อมูลที่เปลี่ยนแปลง</p>
+        <p className="rounded-md bg-[#e8f1fc] px-3.5 py-2.5 text-xs text-[#0058bc]">{t("admin.promotionSaveDialog.p", "ยังไม่มีข้อมูลที่เปลี่ยนแปลง")}</p>
       ) : (
         <dl className="grid max-h-56 divide-y overflow-y-auto rounded-md border text-xs">
           {changed.map((key) => (
@@ -153,7 +155,7 @@ function EditDialog({
               <dt className="text-muted-foreground">{FIELD_LABEL[key]}</dt>
               <dd className="flex min-w-0 items-center gap-1.5 text-right">
                 <span className="text-muted-foreground">{formatFieldValue(key, before, scopeNames)}</span>
-                <ArrowRight aria-label="เป็น" className="size-3.5 shrink-0 text-muted-foreground" />
+                <ArrowRight aria-label={t("admin.promotionSaveDialog.ariaLabel", "เป็น")} className="size-3.5 shrink-0 text-muted-foreground" />
                 <strong className="font-semibold text-primary">{formatFieldValue(key, input, scopeNames)}</strong>
               </dd>
             </div>
@@ -162,7 +164,7 @@ function EditDialog({
       )}
       {changed.length > 0 && oldBudget !== newBudget ? (
         <p className="flex justify-between rounded-md bg-muted px-3.5 py-2.5 text-xs text-muted-foreground [&>strong]:text-[#b45309]">
-          <span>งบสูงสุดใหม่</span>
+          <span>{t("admin.promotionSaveDialog.span7", "งบสูงสุดใหม่")}</span>
           <strong>{budgetLabel(input)}</strong>
         </p>
       ) : null}

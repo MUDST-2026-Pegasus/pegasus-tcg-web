@@ -10,6 +10,7 @@ import { useMyAuctions } from "../auction.queries";
 import type { MyAuctionTab } from "../auction.types";
 import { MyAuctionRow } from "../components/MyAuctionRow";
 import { StrikeBanner } from "../components/StrikeBanner";
+import { useTranslate } from "@/lib/i18n";
 
 const STRIKE_CHIP: Record<StrikeTone, string> = {
   clear: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -23,6 +24,7 @@ function parseTab(raw: string | null): MyAuctionTab {
 
 /** `/account/auctions` — การประมูลของฉัน ฝั่งผู้ซื้อ (Figma W1 + B3-H) [TCG-631 · FE-5] */
 export function MyAuctionsPage() {
+  const { t } = useTranslate("auction");
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = parseTab(searchParams.get("tab"));
   const { data, isLoading, isError, refetch } = useMyAuctions(tab);
@@ -46,8 +48,8 @@ export function MyAuctionsPage() {
         <div className="flex min-w-0 flex-col gap-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">การประมูลของฉัน</h1>
-              <p className="mt-1 text-sm text-muted-foreground">ทุกประมูลที่คุณเคยบิด — ชนะแล้วชำระภายใน 24 ชม.</p>
+              <h1 className="text-2xl font-bold text-foreground">{t("buyer.myAuctionsPage.text", "การประมูลของฉัน")}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{t("buyer.myAuctionsPage.text2", "ทุกประมูลที่คุณเคยบิด — ชนะแล้วชำระภายใน 24 ชม.")}</p>
             </div>
             {data ? (
               <span
@@ -57,7 +59,7 @@ export function MyAuctionsPage() {
                 )}
               >
                 <ShieldCheck aria-hidden className="size-3.5" />
-                ไม่ชำระหลังชนะ {data.unpaidStrikes} / {data.strikeLimit} ครั้ง
+                {t("buyer.myAuctionsPage.text3", "ไม่ชำระหลังชนะ")}{" "}{data.unpaidStrikes} / {data.strikeLimit} {t("buyer.myAuctionsPage.text4", "ครั้ง")}
               </span>
             ) : null}
           </div>
@@ -72,7 +74,7 @@ export function MyAuctionsPage() {
           ) : null}
 
           {!neverBid ? (
-            <div role="tablist" aria-label="สถานะการประมูล" className="flex flex-wrap items-center gap-2 pb-1">
+            <div role="tablist" aria-label={t("buyer.myAuctionsPage.ariaLabel", "สถานะการประมูล")} className="flex flex-wrap items-center gap-2 pb-1">
               {MY_AUCTION_TABS.map(({ key, label }) => {
                 const active = tab === key;
                 return (
@@ -100,14 +102,14 @@ export function MyAuctionsPage() {
           ) : null}
 
           {isLoading ? (
-            <div role="status" aria-busy="true" aria-label="กำลังโหลดการประมูลของฉัน">
+            <div role="status" aria-busy="true" aria-label={t("buyer.myAuctionsPage.ariaLabel2", "กำลังโหลดการประมูลของฉัน")}>
               <ProductRowsSkeleton />
             </div>
           ) : isError || !data ? (
             <div role="alert" className="flex flex-col items-center gap-3 rounded-xl border bg-card p-6 py-16">
-              <p className="text-sm font-medium text-destructive">โหลดข้อมูลไม่สำเร็จ</p>
+              <p className="text-sm font-medium text-destructive">{t("buyer.myAuctionsPage.text5", "โหลดข้อมูลไม่สำเร็จ")}</p>
               <Button variant="outline" size="sm" onClick={() => void refetch()}>
-                ลองใหม่
+                {t("buyer.myAuctionsPage.text6", "ลองใหม่")}
               </Button>
             </div>
           ) : neverBid ? (
@@ -126,17 +128,18 @@ export function MyAuctionsPage() {
 
 /** W1 ยังไม่เคยบิด (Figma Empty states) */
 function EmptyState() {
+  const { t } = useTranslate("auction");
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border bg-card px-6 py-16 text-center">
       <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <Gavel aria-hidden className="size-5" />
       </div>
       <div>
-        <p className="text-base font-semibold text-foreground">คุณยังไม่ได้บิดประมูลไหน</p>
-        <p className="mt-1 text-sm text-muted-foreground">ประมูลที่คุณบิดจะแสดงที่นี่ พร้อมสถานะนำอยู่ / ถูกแซง / ชนะ</p>
+        <p className="text-base font-semibold text-foreground">{t("buyer.myAuctionsPage.text7", "คุณยังไม่ได้บิดประมูลไหน")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("buyer.myAuctionsPage.text8", "ประมูลที่คุณบิดจะแสดงที่นี่ พร้อมสถานะนำอยู่ / ถูกแซง / ชนะ")}</p>
       </div>
       <Button className="rounded-full" nativeButton={false} render={<Link to="/auctions" />}>
-        ดูประมูลที่เปิดอยู่
+        {t("buyer.myAuctionsPage.text9", "ดูประมูลที่เปิดอยู่")}
       </Button>
     </div>
   );

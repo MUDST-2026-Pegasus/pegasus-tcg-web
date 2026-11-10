@@ -40,7 +40,7 @@ import {
   toSellerAuctionRow,
 } from "./seller-auction-detail.format";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 function parseAuctionId(value: string | undefined): number | null {
   const id = Number(value);
@@ -49,6 +49,7 @@ function parseAuctionId(value: string | undefined): number | null {
 
 /** `/seller/auctions/:auctionId` — รายละเอียดประมูลฝั่งผู้ขาย ตาม Figma S4 (2308:8540) [TCG-634 · FE-8] */
 export function SellerAuctionDetailPage() {
+  const { t } = useTranslate("auction");
   const { auctionId } = useParams();
   const id = parseAuctionId(auctionId);
   const auction = useSellerAuction(id);
@@ -67,12 +68,12 @@ export function SellerAuctionDetailPage() {
           <EmptyMedia variant="icon">
             <SearchXIcon />
           </EmptyMedia>
-          <EmptyTitle>ไม่พบการประมูลนี้</EmptyTitle>
-          <EmptyDescription>การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง</EmptyDescription>
+          <EmptyTitle>{t("seller.sellerAuctionDetailPage.text", "ไม่พบการประมูลนี้")}</EmptyTitle>
+          <EmptyDescription>{t("seller.sellerAuctionDetailPage.text2", "การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง")}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to="/seller/auctions" />} nativeButton={false}>
-            การประมูลของฉัน
+            {t("seller.sellerAuctionDetailPage.text3", "การประมูลของฉัน")}
           </Button>
         </EmptyContent>
       </Empty>
@@ -80,7 +81,7 @@ export function SellerAuctionDetailPage() {
   }
 
   return (
-    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label="กำลังโหลดการประมูล" />} errorTitle="โหลดการประมูลไม่สำเร็จ">
+    <QueryBoundary query={auction} loading={<DashboardPageSkeleton label={t("seller.sellerAuctionDetailPage.label", "กำลังโหลดการประมูล")} />} errorTitle={t("seller.sellerAuctionDetailPage.errorTitle", "โหลดการประมูลไม่สำเร็จ")}>
       {/* key ตาม id — สลับไปใบอื่นแล้วตัวจับบิดใหม่ต้องเริ่มนับใหม่ */}
       {(detail) => <SellerAuctionDetailContent key={detail.id} detail={detail} />}
     </QueryBoundary>
@@ -88,6 +89,7 @@ export function SellerAuctionDetailPage() {
 }
 
 export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDetail }) {
+  const { t } = useTranslate("auction");
   const [cancelOpen, setCancelOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   // เปิด dialog แก้ราคาใหม่ทุกครั้ง ให้เริ่มจากค่าล่าสุด
@@ -104,7 +106,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
   const row = toSellerAuctionRow(detail);
   const { pill: rowPill } = sellerAuctionRowView(row);
   // แถวในตารางเดาผู้ชนะจากจำนวนบิด — ซื้อทันทีแล้วไม่จ่ายไม่มีบิด หน้านี้รู้ผู้ชนะจริง [TCG-639]
-  const pill = detail.status === "UNSOLD" && hadWinner(detail) ? { kind: rowPill.kind, label: "ไม่มีผู้ชำระ" } : rowPill;
+  const pill = detail.status === "UNSOLD" && hadWinner(detail) ? { kind: rowPill.kind, label: t("seller.sellerAuctionDetailPage.label2", "ไม่มีผู้ชำระ") } : rowPill;
   const live = detail.status === "LIVE";
   const hasBids = detail.bidCount > 0;
   const { card } = detail.item;
@@ -114,7 +116,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
       <Breadcrumb>
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to="/seller/auctions" />}>การประมูลของฉัน</BreadcrumbLink>
+            <BreadcrumbLink render={<Link to="/seller/auctions" />}>{t("seller.sellerAuctionDetailPage.text3", "การประมูลของฉัน")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
@@ -141,7 +143,7 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
         <div className="flex flex-col items-end gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" className="rounded-md px-2.5" render={<Link to={`/auctions/${detail.id}`} />} nativeButton={false}>
-              ดูหน้าประมูล
+              {t("seller.sellerAuctionDetailPage.text4", "ดูหน้าประมูล")}
             </Button>
             {live ? (
               <Button
@@ -151,16 +153,16 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
                 disabled={!detail.cancellable}
                 onClick={() => setCancelOpen(true)}
               >
-                ยกเลิกประมูล
+                {t("seller.sellerAuctionDetailPage.text5", "ยกเลิกประมูล")}
               </Button>
             ) : null}
             {detail.status === "UNSOLD" ? (
               <Button size="sm" className="rounded-md px-2.5" render={<Link to={relistPath(detail.id)} />} nativeButton={false}>
-                ประมูลใหม่
+                {t("seller.sellerAuctionDetailPage.text6", "ประมูลใหม่")}
               </Button>
             ) : null}
           </div>
-          {live && hasBids ? <p className="text-[11px] text-muted-foreground">ยกเลิกไม่ได้ — มีผู้บิดแล้ว</p> : null}
+          {live && hasBids ? <p className="text-[11px] text-muted-foreground">{t("seller.sellerAuctionDetailPage.text7", "ยกเลิกไม่ได้ — มีผู้บิดแล้ว")}</p> : null}
         </div>
       </div>
 
@@ -168,20 +170,20 @@ export function SellerAuctionDetailContent({ detail }: { detail: SellerAuctionDe
 
       <div className={`grid gap-4 sm:grid-cols-2 ${detail.watcherCount === undefined ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}>
         <Kpi
-          label="ราคาบิดสูงสุด"
+          label={t("seller.sellerAuctionDetailPage.label3", "ราคาบิดสูงสุด")}
           value={hasBids ? formatBaht(detail.currentPrice) : "—"}
           valueClass={hasBids ? "text-primary" : undefined}
-          note={`เริ่มต้น ${formatBaht(detail.startingPrice)}`}
+          note={t("seller.sellerAuctionDetailPage.note", "เริ่มต้น {startingPrice}", { startingPrice: formatBaht(detail.startingPrice) })}
         />
-        <Kpi label="จำนวนบิด" value={detail.bidCount.toLocaleString(intlLocale())} note={`จาก ${detail.bidderCount.toLocaleString(intlLocale())} ผู้บิด`} />
+        <Kpi label={t("seller.sellerAuctionDetailPage.label4", "จำนวนบิด")} value={detail.bidCount.toLocaleString(intlLocale())} note={t("seller.sellerAuctionDetailPage.note2", "จาก {bidderCount} ผู้บิด", { bidderCount: detail.bidderCount.toLocaleString(intlLocale()) })} />
         {detail.watcherCount !== undefined && (
-          <Kpi label="ผู้ติดตาม" value={detail.watcherCount.toLocaleString(intlLocale())} note="กดติดตามประมูลนี้" />
+          <Kpi label={t("seller.sellerAuctionDetailPage.label5", "ผู้ติดตาม")} value={detail.watcherCount.toLocaleString(intlLocale())} note={t("seller.sellerAuctionDetailPage.note3", "กดติดตามประมูลนี้")} />
         )}
         <Kpi
-          label="รายรับโดยประมาณ"
+          label={t("seller.sellerAuctionDetailPage.label6", "รายรับโดยประมาณ")}
           value={formatBaht(detail.estimatedPayout)}
           valueClass="text-emerald-700"
-          note={`หลังค่าคอมมิชชั่น ${detail.commissionPercent}%`}
+          note={t("seller.sellerAuctionDetailPage.note4", "หลังค่าคอมมิชชั่น {commissionPercent}%", { commissionPercent: detail.commissionPercent })}
         />
       </div>
 
@@ -219,37 +221,38 @@ function Kpi({ label, value, note, valueClass }: { label: string; value: string;
 
 /** ตาราง "ประวัติการบิด" — ใหม่สุดก่อน ชื่อผู้บิดปิดบัง */
 function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
+  const { t } = useTranslate("auction");
   // ระงับแล้วบิดทุกตัวถูกยกเลิก — ยังแสดงให้ผู้ขายเห็น แต่ขีดฆ่าและไม่มี "สูงสุด" [TCG-640]
   const cancelled = detail.status === "SUSPENDED";
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl p-0 shadow-none">
       <div className="flex items-center justify-between px-5 py-4">
-        <p className="text-base font-semibold text-foreground">ประวัติการบิด</p>
-        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString(intlLocale())} บิด</p>
+        <p className="text-base font-semibold text-foreground">{t("seller.sellerAuctionDetailPage.text8", "ประวัติการบิด")}</p>
+        <p className="text-xs text-muted-foreground">{detail.bidCount.toLocaleString(intlLocale())} {t("seller.sellerAuctionDetailPage.text9", "บิด")}</p>
       </div>
       {detail.bids.length === 0 ? (
-        <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">ยังไม่มีผู้บิด</p>
+        <p className="border-t border-border px-5 py-8 text-center text-sm text-muted-foreground">{t("seller.sellerAuctionDetailPage.text10", "ยังไม่มีผู้บิด")}</p>
       ) : (
         <DataTable
           columns={[
             {
               id: "bidder",
-              header: "ผู้บิด",
+              header: t("seller.sellerAuctionDetailPage.header", "ผู้บิด"),
               meta: { headClassName: "pl-5 text-xs font-normal text-muted-foreground", cellClassName: "py-3 pl-5" },
               cell: ({ row }) => (
                 <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <span className={cancelled ? "text-muted-foreground line-through" : undefined}>{row.original.bidderAlias}</span>
                   {cancelled ? (
-                    <AuctionStatusPill kind="Unsold" label="ยกเลิก" />
+                    <AuctionStatusPill kind="Unsold" label={t("seller.sellerAuctionDetailPage.label7", "ยกเลิก")} />
                   ) : row.index === 0 ? (
-                    <AuctionStatusPill kind="Leading" label="สูงสุด" />
+                    <AuctionStatusPill kind="Leading" label={t("seller.sellerAuctionDetailPage.label8", "สูงสุด")} />
                   ) : null}
                 </span>
               ),
             },
             {
               id: "amount",
-              header: "ราคา",
+              header: t("seller.sellerAuctionDetailPage.header2", "ราคา"),
               meta: { headClassName: "text-xs font-normal text-muted-foreground", cellClassName: "text-sm font-semibold tabular-nums" },
               cell: ({ row }) => (
                 <span className={cancelled ? "text-muted-foreground line-through" : row.index === 0 ? "text-primary" : "text-foreground"}>
@@ -259,9 +262,9 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
             },
             {
               id: "time",
-              header: "เวลา",
+              header: t("seller.sellerAuctionDetailPage.header3", "เวลา"),
               meta: { headClassName: "pr-5 text-xs font-normal text-muted-foreground", cellClassName: "pr-5 text-xs text-muted-foreground" },
-              cell: ({ row }) => `${formatAuctionShortDateTime(row.original.placedAt)}${isFirstBid(row.original, detail) ? " · บิดแรก" : ""}`,
+              cell: ({ row }) => `${formatAuctionShortDateTime(row.original.placedAt)}${isFirstBid(row.original, detail) ? t("seller.sellerAuctionDetailPage.text11", " · บิดแรก") : ""}`,
             },
           ] satisfies DataTableColumn<(typeof detail.bids)[number]>[]}
           data={detail.bids}
@@ -275,22 +278,23 @@ function BidHistoryCard({ detail }: { detail: SellerAuctionDetail }) {
 
 /** การ์ด "การตั้งค่าประมูล" — แก้ราคาซื้อทันทีได้จนกว่าจะมีบิดแรก */
 function SettingsCard({ detail, onEdit }: { detail: SellerAuctionDetail; onEdit: () => void }) {
+  const { t } = useTranslate("auction");
   const extended = detail.extensionCount > 0;
   const rows: { label: string; value: string }[] = [
-    { label: "ราคาเริ่มต้น", value: formatBaht(detail.startingPrice) },
-    { label: "บิดขั้นต่ำครั้งละ", value: `+${formatBaht(detail.bidIncrement)}` },
-    { label: "เปิดเมื่อ", value: formatAuctionShortDateTime(detail.startedAt) },
-    { label: extended ? "ปิด (เดิม)" : "ปิด", value: formatAuctionShortDateTime(extended ? detail.originalEndsAt : detail.endsAt) },
-    { label: "ซื้อทันที", value: buyNowSetting(detail) },
+    { label: t("seller.sellerAuctionDetailPage.label9", "ราคาเริ่มต้น"), value: formatBaht(detail.startingPrice) },
+    { label: t("seller.sellerAuctionDetailPage.label10", "บิดขั้นต่ำครั้งละ"), value: `+${formatBaht(detail.bidIncrement)}` },
+    { label: t("seller.sellerAuctionDetailPage.label11", "เปิดเมื่อ"), value: formatAuctionShortDateTime(detail.startedAt) },
+    { label: extended ? t("seller.sellerAuctionDetailPage.text12", "ปิด (เดิม)") : t("seller.sellerAuctionDetailPage.text13", "ปิด"), value: formatAuctionShortDateTime(extended ? detail.originalEndsAt : detail.endsAt) },
+    { label: t("seller.sellerAuctionDetailPage.label12", "ซื้อทันที"), value: buyNowSetting(detail) },
   ];
 
   return (
     <Card className="w-full gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between">
-        <p className="text-base font-semibold text-foreground">การตั้งค่าประมูล</p>
+        <p className="text-base font-semibold text-foreground">{t("seller.sellerAuctionDetailPage.text14", "การตั้งค่าประมูล")}</p>
         {detail.editable ? (
           <Button variant="link" size="sm" className="h-auto px-0 text-xs" onClick={onEdit}>
-            แก้ไข
+            {t("seller.sellerAuctionDetailPage.text15", "แก้ไข")}
           </Button>
         ) : null}
       </div>
@@ -304,10 +308,10 @@ function SettingsCard({ detail, onEdit }: { detail: SellerAuctionDetail; onEdit:
       </dl>
       <Separator />
       <div className="flex flex-col gap-1">
-        <p className="text-[11px] text-muted-foreground">หมายเหตุถึงผู้ซื้อ</p>
+        <p className="text-[11px] text-muted-foreground">{t("seller.sellerAuctionDetailPage.text16", "หมายเหตุถึงผู้ซื้อ")}</p>
         <p className="text-xs whitespace-pre-line text-foreground">{detail.sellerNote ?? "—"}</p>
       </div>
-      {detail.bidCount > 0 ? <p className="text-[11px] text-muted-foreground">มีผู้บิดแล้ว จึงแก้การตั้งค่าไม่ได้</p> : null}
+      {detail.bidCount > 0 ? <p className="text-[11px] text-muted-foreground">{t("seller.sellerAuctionDetailPage.text17", "มีผู้บิดแล้ว จึงแก้การตั้งค่าไม่ได้")}</p> : null}
     </Card>
   );
 }

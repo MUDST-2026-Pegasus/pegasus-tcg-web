@@ -4,8 +4,9 @@ import { toNumber } from "@/features/seller/products/products.format";
 
 import { closeAtMs } from "../auction-form.schema";
 import type { AuctionFormValues } from "../auction-form.types";
+import { useTranslate, translate } from "@/lib/i18n";
 
-const SHOP_LABEL = "ร้านของคุณ";
+const shopLabel = () => translate("auction", "seller.auctionPreviewCard.text", "ร้านของคุณ");
 /** ยังไม่ได้ตั้งเวลาปิด — ตัวนับในตัวอย่างโชว์ระยะกลาง ๆ ไว้ก่อน */
 const PLACEHOLDER_DURATION_MS = 3 * 24 * 60 * 60_000;
 
@@ -17,10 +18,11 @@ type AuctionPreviewCardProps = {
 
 /** "ตัวอย่างที่ผู้ซื้อจะเห็น" — การ์ดประมูลใบเดียวกับหน้ารวม อัปเดตตามที่กรอก [TCG-633 · FE-7] */
 export function AuctionPreviewCard({ unit, values, now }: AuctionPreviewCardProps) {
+  const { t } = useTranslate("auction");
   if (!unit) {
     return (
       <div className="flex aspect-[3/4] w-56 items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 text-center text-xs text-muted-foreground">
-        เลือกการ์ดจากสต็อกเพื่อดูตัวอย่าง
+        {t("seller.auctionPreviewCard.text2", "เลือกการ์ดจากสต็อกเพื่อดูตัวอย่าง")}
       </div>
     );
   }
@@ -30,7 +32,7 @@ export function AuctionPreviewCard({ unit, values, now }: AuctionPreviewCardProp
     id: 0,
     auctionNumber: "",
     item: unit.item,
-    shopName: SHOP_LABEL,
+    shopName: shopLabel(),
     startingPrice: start,
     currentPrice: start,
     bidCount: 0,
@@ -39,3 +41,5 @@ export function AuctionPreviewCard({ unit, values, now }: AuctionPreviewCardProp
   };
   return <AuctionCard auction={summary} preview className="w-56" />;
 }
+
+// @tolgee-key {"key": "seller.auctionPreviewCard.text", "ns": "auction", "defaultValue": "ร้านของคุณ"}

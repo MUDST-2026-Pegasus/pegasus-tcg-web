@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Ban, TriangleAlert } from "lucide-react";
 
 import { formatAuctionDate, isBiddingBanned } from "../auction.format";
+import { useTranslate } from "@/lib/i18n";
 
 type StrikeBannerProps = {
   unpaidStrikes: number;
@@ -18,10 +19,11 @@ type StrikeBannerProps = {
  * - ไม่เคย → ไม่แสดง
  */
 export function StrikeBanner({ unpaidStrikes, strikeLimit, bannedUntil, lastStrikeCardName }: StrikeBannerProps) {
+  const { t } = useTranslate("auction");
   if (isBiddingBanned(bannedUntil)) {
     return (
-      <Banner icon={<Ban aria-hidden className="size-5 shrink-0" />} title={`ถูกห้ามบิดถึง ${formatAuctionDate(bannedUntil!)}`}>
-        ไม่ชำระเงินหลังชนะครบ {strikeLimit} ครั้ง · ยังซื้อสินค้าปกติได้
+      <Banner icon={<Ban aria-hidden className="size-5 shrink-0" />} title={t("buyer.strikeBanner.title", "ถูกห้ามบิดถึง {value}", { value: formatAuctionDate(bannedUntil!) })}>
+        {t("buyer.strikeBanner.text", "ไม่ชำระเงินหลังชนะครบ")}{" "}{strikeLimit} {t("buyer.strikeBanner.text2", "ครั้ง · ยังซื้อสินค้าปกติได้")}
       </Banner>
     );
   }
@@ -29,9 +31,9 @@ export function StrikeBanner({ unpaidStrikes, strikeLimit, bannedUntil, lastStri
   return (
     <Banner
       icon={<TriangleAlert aria-hidden className="size-5 shrink-0" />}
-      title={`คุณไม่ชำระเงินภายในเวลา (${unpaidStrikes}/${strikeLimit})`}
+      title={t("buyer.strikeBanner.title2", "คุณไม่ชำระเงินภายในเวลา ({unpaidStrikes}/{strikeLimit})", { unpaidStrikes, strikeLimit })}
     >
-      {lastStrikeCardName ? `${lastStrikeCardName} · ` : ""}คำสั่งซื้อถูกยกเลิกแล้ว · ครบ {strikeLimit} ครั้งจะถูกห้ามบิด 30 วัน
+      {lastStrikeCardName ? `${lastStrikeCardName} · ` : ""}{t("buyer.strikeBanner.text3", "คำสั่งซื้อถูกยกเลิกแล้ว · ครบ")}{" "}{strikeLimit} {t("buyer.strikeBanner.text4", "ครั้งจะถูกห้ามบิด 30 วัน")}
     </Banner>
   );
 }

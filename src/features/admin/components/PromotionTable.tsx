@@ -28,7 +28,7 @@ import {
 } from "../promotions.format";
 import type { AdminPromotion } from "../promotions.types";
 import { PromotionOwnerTag, PromotionStatusPill } from "./PromotionBadges";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 export type PromotionRowAction = "copy" | "redemptions" | "pause" | "resume" | "delete";
 
@@ -48,10 +48,11 @@ const MENU_CLASS = "sticky right-0 w-[52px] bg-card px-2 text-right";
 
 /** ตาราง Figma PRM-A1 — 900px พอดีการ์ดที่จอ 1280 แคบกว่านั้นเลื่อนตาราง */
 export function PromotionTable({ promotions, scopeNames, now, onAction }: PromotionTableProps) {
+  const { t } = useTranslate("promotions");
   const columns: DataTableColumn<AdminPromotion>[] = [
     {
       id: "col0",
-      header: "โค้ด / แคมเปญ",
+      header: t("admin.promotionTable.header", "โค้ด / แคมเปญ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[22%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         return (
@@ -60,7 +61,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
           <strong className="truncate text-sm tracking-wide">{promotion.code}</strong>
           <PromotionOwnerTag owner={promotion.ownerType} />
           {promotion.featuredOnHome ? (
-            <House className="size-3.5 shrink-0 text-primary" aria-label="แสดงบนหน้าแรก" />
+            <House className="size-3.5 shrink-0 text-primary" aria-label={t("admin.promotionTable.ariaLabel", "แสดงบนหน้าแรก")} />
           ) : null}
         </div>
         <span className={SUB_CLASS} title={promotionSubtitle(promotion)}>
@@ -72,7 +73,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col1",
-      header: "ส่วนลด",
+      header: t("admin.promotionTable.header2", "ส่วนลด"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[15%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         return (
@@ -85,7 +86,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col2",
-      header: "เงื่อนไข",
+      header: t("admin.promotionTable.header3", "เงื่อนไข"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[16%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         return (
@@ -98,7 +99,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col3",
-      header: "ใช้ไปแล้ว",
+      header: t("admin.promotionTable.header4", "ใช้ไปแล้ว"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[15%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         const full = isUsageFull(promotion);
@@ -117,7 +118,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
         />
         {promotion.claimable ? (
           <span className={SUB_CLASS}>
-            เก็บแล้ว {promotion.claimedCount.toLocaleString(intlLocale())} / {limitLabel(promotion.claimLimit)}
+            {t("admin.promotionTable.span", "เก็บแล้ว")} {promotion.claimedCount.toLocaleString(intlLocale())} / {limitLabel(promotion.claimLimit)}
           </span>
         ) : null}
           </>
@@ -126,7 +127,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col4",
-      header: "ระยะเวลา",
+      header: t("admin.promotionTable.header5", "ระยะเวลา"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[18%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         return (
@@ -144,7 +145,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col5",
-      header: "สถานะ",
+      header: t("admin.promotionTable.header6", "สถานะ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[14%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: promotion } }) => {
         return (
@@ -156,7 +157,7 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
     },
     {
       id: "col6",
-      header: () => <span className="sr-only">จัดการ</span>,
+      header: () => <span className="sr-only">{t("admin.promotionTable.span2", "จัดการ")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, MENU_CLASS, "bg-muted"), cellClassName: cn(CELL_CLASS, MENU_CLASS) },
       cell: ({ row: { original: promotion } }) => {
         const isPlatform = promotion.ownerType === "PLATFORM";
@@ -165,25 +166,25 @@ export function PromotionTable({ promotions, scopeNames, now, onAction }: Promot
           <>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${promotion.code}`} />}
+            render={<Button variant="ghost" size="icon-sm" aria-label={t("admin.promotionTable.ariaLabel2", "จัดการ {code}", { code: promotion.code })} />}
           >
             <MoreVertical className="size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={4} className="w-40 min-w-40">
             {isPlatform ? (
-              <DropdownMenuItem render={<Link to={`/admin/promotions/${promotion.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+              <DropdownMenuItem render={<Link to={`/admin/promotions/${promotion.id}/edit`} />}>{t("admin.promotionTable.dropdownMenuItem", "แก้ไข")}</DropdownMenuItem>
             ) : null}
-            <DropdownMenuItem onClick={() => onAction("redemptions", promotion)}>ดูการใช้โค้ด</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction("copy", promotion)}>คัดลอกโค้ด</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAction("redemptions", promotion)}>{t("admin.promotionTable.dropdownMenuItem2", "ดูการใช้โค้ด")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAction("copy", promotion)}>{t("admin.promotionTable.dropdownMenuItem3", "คัดลอกโค้ด")}</DropdownMenuItem>
             <DropdownMenuItem
               className={paused ? undefined : "text-[#b45309] data-highlighted:text-[#b45309]"}
               onClick={() => onAction(paused ? "resume" : "pause", promotion)}
             >
-              {paused ? "เปิดใช้อีกครั้ง" : "หยุดชั่วคราว"}
+              {paused ? t("admin.promotionTable.dropdownMenuItem4", "เปิดใช้อีกครั้ง") : t("admin.promotionTable.dropdownMenuItem5", "หยุดชั่วคราว")}
             </DropdownMenuItem>
             {isPlatform ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction("delete", promotion)}>
-                ลบ
+                {t("admin.promotionTable.dropdownMenuItem6", "ลบ")}
               </DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>

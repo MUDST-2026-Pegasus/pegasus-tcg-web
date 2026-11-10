@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, renderWithProviders, screen } from "@/test/utils";
 
 import { countdownParts, formatCountdown, useCountdown } from "@/components/sale";
 
@@ -36,7 +36,7 @@ describe("useCountdown", () => {
 
   it("ticks every second and calls onDone once at zero (→ refetch)", () => {
     const onDone = vi.fn();
-    render(<Timer endsAt="2026-11-11T10:00:03Z" onDone={onDone} />);
+    renderWithProviders(<Timer endsAt="2026-11-11T10:00:03Z" onDone={onDone} />);
     expect(screen.getByText("00:00:03")).toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(1000));

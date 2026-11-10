@@ -2,7 +2,7 @@ import type { CardCondition } from "@/features/catalog/catalog.types";
 import { formatBaht } from "@/features/seller/shared/seller.format";
 
 import type { AdminAuctionRow, AdminAuctionTab, AuctionDetail, AuctionRules, AuctionStatus, AuctionSummary, AuctionViewerState, BannedBidder, BanTab, MyAuctionTab } from "./auction.types";
-import { dateTimeFormat, formatCountdown, intlLocale } from "@/lib/i18n";
+import { dateTimeFormat, formatCountdown, translate } from "@/lib/i18n";
 
 /** กติกาตอนที่ BE ยังไม่ส่ง `rules` มา (fixture / mock) */
 export const DEFAULT_AUCTION_RULES: AuctionRules = { paymentHours: 24, strikeLimit: 3, banDays: 30 };
@@ -13,7 +13,7 @@ export function auctionRules(auction: Pick<AuctionDetail, "rules">): AuctionRule
 
 /** "24 ชม." หรือ "30 นาที" เมื่อแอดมินตั้งไว้ไม่ถึงชั่วโมง */
 export function formatPaymentWindow(hours: number): string {
-  return hours >= 1 ? `${Number(hours.toFixed(2))} ชม.` : `${Math.round(hours * 60)} นาที`;
+  return hours >= 1 ? translate("auction", "buyer.auctionFormat.text", "{value} ชม.", { value: Number(hours.toFixed(2)) }) : translate("auction", "buyer.auctionFormat.text2", "{n} นาที", { n: Math.round(hours * 60) });
 }
 
 /**
@@ -70,7 +70,7 @@ const dateTimeFormatter = dateTimeFormat({
 
 /** "จ. 2 พ.ย. 21:00" — เวลาประเทศไทยเสมอ */
 export function formatAuctionDateTime(iso: string): string {
-  return dateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+  return dateTimeFormatter.format(new Date(iso)).replace(translate("auction", "buyer.auctionFormat.text3", " เวลา"), "");
 }
 
 const shortDateTimeFormatter = dateTimeFormat({
@@ -83,7 +83,7 @@ const shortDateTimeFormatter = dateTimeFormat({
 
 /** "31 ต.ค. 21:06" — ไม่มีวันในสัปดาห์ (หัวแถวในหน้าการประมูลของฉัน) */
 export function formatAuctionShortDateTime(iso: string): string {
-  return shortDateTimeFormatter.format(new Date(iso)).replace(" เวลา", "");
+  return shortDateTimeFormatter.format(new Date(iso)).replace(translate("auction", "buyer.auctionFormat.text3", " เวลา"), "");
 }
 
 const dayMonthFormatter = dateTimeFormat({
@@ -112,9 +112,9 @@ export function formatAuctionDate(iso: string): string {
 /** "2 นาทีที่แล้ว", "1 ชม.ที่แล้ว", "เมื่อวาน 22:14" สำหรับประวัติบิด */
 export function formatBidTime(iso: string, now: number = Date.now()): string {
   const diff = now - Date.parse(iso);
-  if (diff < MINUTE) return "เมื่อสักครู่";
-  if (diff < HOUR) return `${Math.floor(diff / MINUTE)} นาทีที่แล้ว`;
-  if (diff < DAY) return `${Math.floor(diff / HOUR)} ชม.ที่แล้ว`;
+  if (diff < MINUTE) return translate("auction", "buyer.auctionFormat.text4", "เมื่อสักครู่");
+  if (diff < HOUR) return translate("auction", "buyer.auctionFormat.text5", "{n} นาทีที่แล้ว", { n: Math.floor(diff / MINUTE) });
+  if (diff < DAY) return translate("auction", "buyer.auctionFormat.text6", "{n} ชม.ที่แล้ว", { n: Math.floor(diff / HOUR) });
   return formatAuctionDateTime(iso);
 }
 
@@ -134,16 +134,36 @@ export type AuctionPillKind =
   | "Suspended";
 
 export const AUCTION_PILL_LABEL: Record<AuctionPillKind, string> = {
-  Live: "กำลังประมูล",
-  EndingSoon: "ใกล้จบ",
-  Leading: "คุณนำอยู่",
-  Outbid: "ถูกบิดแซง",
-  Won: "ชนะประมูล",
-  AwaitingPayment: "รอชำระเงิน",
-  Lost: "ไม่ชนะ",
-  Ended: "จบแล้ว",
-  Unsold: "ไม่มีผู้บิด",
-  Suspended: "ถูกระงับ",
+  get Live() {
+    return translate("auction", "buyer.auctionFormat.live", "กำลังประมูล");
+  },
+  get EndingSoon() {
+    return translate("auction", "buyer.auctionFormat.endingSoon", "ใกล้จบ");
+  },
+  get Leading() {
+    return translate("auction", "buyer.auctionFormat.leading", "คุณนำอยู่");
+  },
+  get Outbid() {
+    return translate("auction", "buyer.auctionFormat.outbid", "ถูกบิดแซง");
+  },
+  get Won() {
+    return translate("auction", "buyer.auctionFormat.won", "ชนะประมูล");
+  },
+  get AwaitingPayment() {
+    return translate("auction", "buyer.auctionFormat.awaitingPayment", "รอชำระเงิน");
+  },
+  get Lost() {
+    return translate("auction", "buyer.auctionFormat.lost", "ไม่ชนะ");
+  },
+  get Ended() {
+    return translate("auction", "buyer.auctionFormat.ended", "จบแล้ว");
+  },
+  get Unsold() {
+    return translate("auction", "buyer.auctionFormat.unsold", "ไม่มีผู้บิด");
+  },
+  get Suspended() {
+    return translate("auction", "buyer.auctionFormat.suspended", "ถูกระงับ");
+  },
 };
 
 /** ป้ายของประมูลตามสถานะ (มุมผู้ขาย / แอดมิน / คนทั่วไป) — LIVE ที่เหลือ < 2 นาทีเป็น "ใกล้จบ" */
@@ -181,12 +201,24 @@ export function pillForViewer(state: AuctionViewerState): AuctionPillKind {
 
 /** ข้อความแท็บ/ตัวกรองตามสถานะ (หน้าผู้ขาย S1) */
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
-  LIVE: "กำลังประมูล",
-  AWAITING_PAYMENT: "รอชำระ",
-  SOLD: "ขายแล้ว",
-  UNSOLD: "ไม่มีผู้บิด",
-  CANCELLED: "ยกเลิก",
-  SUSPENDED: "ถูกระงับ",
+  get LIVE() {
+    return translate("auction", "buyer.auctionFormat.live", "กำลังประมูล");
+  },
+  get AWAITING_PAYMENT() {
+    return translate("auction", "buyer.auctionFormat.aWAITINGPAYMENT", "รอชำระ");
+  },
+  get SOLD() {
+    return translate("auction", "buyer.auctionFormat.sOLD", "ขายแล้ว");
+  },
+  get UNSOLD() {
+    return translate("auction", "buyer.auctionFormat.unsold", "ไม่มีผู้บิด");
+  },
+  get CANCELLED() {
+    return translate("auction", "buyer.auctionFormat.cANCELLED", "ยกเลิก");
+  },
+  get SUSPENDED() {
+    return translate("auction", "buyer.auctionFormat.suspended", "ถูกระงับ");
+  },
 };
 
 // ---------- กล่องบิด (B2) ----------
@@ -202,11 +234,21 @@ export function canSubmitBid(amount: number, minNextBid: number, live: boolean):
 // ---------- การประมูลของฉัน (W1) ----------
 
 export const MY_AUCTION_TABS: { key: MyAuctionTab; label: string }[] = [
-  { key: "ALL", label: "ทั้งหมด" },
-  { key: "BIDDING", label: "กำลังบิด" },
-  { key: "TO_PAY", label: "ต้องชำระ" },
-  { key: "WON", label: "ชนะแล้ว" },
-  { key: "LOST", label: "ไม่ชนะ" },
+  { key: "ALL", get label() {
+    return translate("auction", "buyer.auctionFormat.label", "ทั้งหมด");
+  } },
+  { key: "BIDDING", get label() {
+    return translate("auction", "buyer.auctionFormat.label2", "กำลังบิด");
+  } },
+  { key: "TO_PAY", get label() {
+    return translate("auction", "buyer.auctionFormat.label3", "ต้องชำระ");
+  } },
+  { key: "WON", get label() {
+    return translate("auction", "buyer.auctionFormat.label4", "ชนะแล้ว");
+  } },
+  { key: "LOST", get label() {
+    return translate("auction", "buyer.auctionFormat.lost", "ไม่ชนะ");
+  } },
 ];
 
 /** แถวนี้อยู่ในแท็บไหน — ใช้ทั้ง mock และหน้า */
@@ -268,7 +310,7 @@ export function isBiddingBanned(bannedUntil: string | null, now: number = Date.n
 
 /** "จากการประมูล #AUC-2026-0142" — ป้ายในหน้า checkout / ชำระเงิน */
 export function auctionOrderLabel(auctionNumber: string): string {
-  return `จากการประมูล #${auctionNumber.replace(/^#/, "")}`;
+  return translate("auction", "buyer.auctionFormat.text7", "จากการประมูล #{auctionNumber}", { auctionNumber: auctionNumber.replace(/^#/, "") });
 }
 
 /** เลขประมูลจาก query `?auction=` — ค่าแปลก ๆ ไม่แสดงป้าย */
@@ -285,12 +327,12 @@ export function conditionAndShop(condition: CardCondition, shopName: string): st
 
 /** ป้ายราคาบนการ์ด: ยังไม่มีบิดใช้ "ราคาเริ่มต้น" */
 export function priceLabel(bidCount: number): string {
-  return bidCount === 0 ? "ราคาเริ่มต้น" : "ราคาปัจจุบัน";
+  return bidCount === 0 ? translate("auction", "buyer.auctionFormat.text8", "ราคาเริ่มต้น") : translate("auction", "buyer.auctionFormat.text9", "ราคาปัจจุบัน");
 }
 
 /** "12 บิด" */
 export function formatBidCount(count: number): string {
-  return `${count.toLocaleString(intlLocale())} บิด`;
+  return translate("auction", "buyer.auctionFormat.text10", "{count} บิด", { count });
 }
 
 // ---------- แอดมิน [TCG-635] ----------
@@ -332,3 +374,31 @@ export function summarizeAuctions(auctions: AuctionSummary[], total: number) {
   const lowest = Math.min(...auctions.map((auction) => auction.currentPrice));
   return { count: Math.max(total, auctions.length), lowest, soonest };
 }
+
+// @tolgee-key {"key": "buyer.auctionFormat.text", "ns": "auction", "defaultValue": "{value} ชม."}
+// @tolgee-key {"key": "buyer.auctionFormat.text2", "ns": "auction", "defaultValue": "{n} นาที"}
+// @tolgee-key {"key": "buyer.auctionFormat.text3", "ns": "auction", "defaultValue": " เวลา"}
+// @tolgee-key {"key": "buyer.auctionFormat.text4", "ns": "auction", "defaultValue": "เมื่อสักครู่"}
+// @tolgee-key {"key": "buyer.auctionFormat.text5", "ns": "auction", "defaultValue": "{n} นาทีที่แล้ว"}
+// @tolgee-key {"key": "buyer.auctionFormat.text6", "ns": "auction", "defaultValue": "{n} ชม.ที่แล้ว"}
+// @tolgee-key {"key": "buyer.auctionFormat.live", "ns": "auction", "defaultValue": "กำลังประมูล"}
+// @tolgee-key {"key": "buyer.auctionFormat.endingSoon", "ns": "auction", "defaultValue": "ใกล้จบ"}
+// @tolgee-key {"key": "buyer.auctionFormat.leading", "ns": "auction", "defaultValue": "คุณนำอยู่"}
+// @tolgee-key {"key": "buyer.auctionFormat.outbid", "ns": "auction", "defaultValue": "ถูกบิดแซง"}
+// @tolgee-key {"key": "buyer.auctionFormat.won", "ns": "auction", "defaultValue": "ชนะประมูล"}
+// @tolgee-key {"key": "buyer.auctionFormat.awaitingPayment", "ns": "auction", "defaultValue": "รอชำระเงิน"}
+// @tolgee-key {"key": "buyer.auctionFormat.lost", "ns": "auction", "defaultValue": "ไม่ชนะ"}
+// @tolgee-key {"key": "buyer.auctionFormat.ended", "ns": "auction", "defaultValue": "จบแล้ว"}
+// @tolgee-key {"key": "buyer.auctionFormat.unsold", "ns": "auction", "defaultValue": "ไม่มีผู้บิด"}
+// @tolgee-key {"key": "buyer.auctionFormat.suspended", "ns": "auction", "defaultValue": "ถูกระงับ"}
+// @tolgee-key {"key": "buyer.auctionFormat.aWAITINGPAYMENT", "ns": "auction", "defaultValue": "รอชำระ"}
+// @tolgee-key {"key": "buyer.auctionFormat.sOLD", "ns": "auction", "defaultValue": "ขายแล้ว"}
+// @tolgee-key {"key": "buyer.auctionFormat.cANCELLED", "ns": "auction", "defaultValue": "ยกเลิก"}
+// @tolgee-key {"key": "buyer.auctionFormat.label", "ns": "auction", "defaultValue": "ทั้งหมด"}
+// @tolgee-key {"key": "buyer.auctionFormat.label2", "ns": "auction", "defaultValue": "กำลังบิด"}
+// @tolgee-key {"key": "buyer.auctionFormat.label3", "ns": "auction", "defaultValue": "ต้องชำระ"}
+// @tolgee-key {"key": "buyer.auctionFormat.label4", "ns": "auction", "defaultValue": "ชนะแล้ว"}
+// @tolgee-key {"key": "buyer.auctionFormat.text7", "ns": "auction", "defaultValue": "จากการประมูล #{auctionNumber}"}
+// @tolgee-key {"key": "buyer.auctionFormat.text8", "ns": "auction", "defaultValue": "ราคาเริ่มต้น"}
+// @tolgee-key {"key": "buyer.auctionFormat.text9", "ns": "auction", "defaultValue": "ราคาปัจจุบัน"}
+// @tolgee-key {"key": "buyer.auctionFormat.text10", "ns": "auction", "defaultValue": "{count} บิด"}

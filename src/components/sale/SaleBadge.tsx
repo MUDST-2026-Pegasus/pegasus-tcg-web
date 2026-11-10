@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { translate } from "@/lib/i18n";
 
 export type SaleBadgeType = "percent" | "flash" | "pegasus" | "shop";
 
@@ -10,9 +11,9 @@ const STYLE: Record<SaleBadgeType, string> = {
 };
 
 const DEFAULT_LABEL: Record<Exclude<SaleBadgeType, "percent">, string> = {
-  flash: "⚡ FLASH SALE",
-  pegasus: "Pegasus ลดให้",
-  shop: "ร้านลดเอง",
+  get flash() { return translate("sale", "badge.flash", "⚡ FLASH SALE"); },
+  get pegasus() { return translate("sale", "badge.pegasus", "Pegasus ลดให้"); },
+  get shop() { return translate("sale", "badge.shop", "ร้านลดเอง"); },
 };
 
 /**
@@ -47,3 +48,8 @@ export function SaleBadge({
     </span>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "badge.flash", "ns": "sale", "defaultValue": "⚡ FLASH SALE"}
+// @tolgee-key {"key": "badge.pegasus", "ns": "sale", "defaultValue": "Pegasus ลดให้"}
+// @tolgee-key {"key": "badge.shop", "ns": "sale", "defaultValue": "ร้านลดเอง"}

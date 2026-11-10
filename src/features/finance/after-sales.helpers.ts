@@ -76,7 +76,8 @@ export function calculateTabCounts(returns: SellerReturnRequest[]): Record<TabCa
 export function validatePartialRefundAmount(
   amount: number | string,
   grandTotal: number,
-  t: (key: string, def: string, ...args: any[]) => string = (_, def) => def
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (key: any, def: string, ...args: any[]) => string = (_, def) => def
 ): { valid: boolean; error?: string } {
   if (amount === "" || amount === null || amount === undefined) {
     return { valid: false, error: t("sellerReturns.validation.amountRequired", "กรุณาระบุยอดเงินคืน") };

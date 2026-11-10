@@ -66,15 +66,18 @@ import { PromotionHomeOrderDialog } from "./PromotionHomeOrderDialog";
 import { PromotionPageTabs } from "./PromotionPageTabs";
 import { PromotionRedemptionSheet } from "./PromotionRedemptionSheet";
 import { PromotionTable, type PromotionRowAction } from "./PromotionTable";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, translate, useTranslate } from "@/lib/i18n";
+
+// @tolgee-key {"key":"admin.adminPromotionsContent.label","ns":"promotions","defaultValue":"ทุกเจ้าของ"}
+// @tolgee-key {"key":"admin.adminPromotionsContent.label2","ns":"promotions","defaultValue":"ร้านค้า"}
 
 const OWNER_FILTERS: Array<{
   value: PromotionOwnerType | null;
   label: string;
 }> = [
-  { value: null, label: "ทุกเจ้าของ" },
+  { value: null, get label() { return translate("promotions", "admin.adminPromotionsContent.label", "ทุกเจ้าของ"); } },
   { value: "PLATFORM", label: "Pegasus" },
-  { value: "SELLER", label: "ร้านค้า" },
+  { value: "SELLER", get label() { return translate("promotions", "admin.adminPromotionsContent.label2", "ร้านค้า"); } },
 ];
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -84,6 +87,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * แท็บ "ลดราคาสินค้า" (`?tab=sales`) อยู่ที่ `AdminSalesContent`
  */
 export function AdminPromotionsContent() {
+  const { t } = useTranslate("promotions");
   const [params, setParams] = useSearchParams();
   const owner = params.get("owner") as PromotionOwnerType | null;
   const status = params.get("status") as PromotionStatus | null;
@@ -151,7 +155,7 @@ export function AdminPromotionsContent() {
     if (kind === "copy") {
       void navigator.clipboard?.writeText(promotion.code).then(() =>
         toast.add({
-          title: `คัดลอก ${promotion.code} แล้ว`,
+          title: t("admin.adminPromotionsContent.title", "คัดลอก {code} แล้ว", { code: promotion.code }),
           type: "success",
         }),
       );
@@ -192,9 +196,9 @@ export function AdminPromotionsContent() {
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
+          <h1 className="text-2xl font-black">{t("admin.adminPromotionsContent.h1", "โปรโมชั่น & ลดราคา")}</h1>
           <p className="text-sm text-muted-foreground">
-            สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง
+            {t("admin.adminPromotionsContent.p", "สร้างโค้ดที่ Pegasus ออกเงิน และดูแลโค้ดที่ร้านค้าสร้างเอง")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -205,7 +209,7 @@ export function AdminPromotionsContent() {
             disabled={!platform.data}
             onClick={() => setHomeOpen(true)}
           >
-            จัดลำดับหน้าแรก
+            {t("admin.adminPromotionsContent.button", "จัดลำดับหน้าแรก")}
           </Button>
           <Button
             size="sm"
@@ -214,7 +218,7 @@ export function AdminPromotionsContent() {
             nativeButton={false}
           >
             <Plus />
-            สร้างโค้ด Pegasus
+            {t("admin.adminPromotionsContent.button2", "สร้างโค้ด Pegasus")}
           </Button>
         </div>
       </header>
@@ -223,20 +227,20 @@ export function AdminPromotionsContent() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="โค้ดที่ใช้งานอยู่"
+          label={t("admin.adminPromotionsContent.label3", "โค้ดที่ใช้งานอยู่")}
           value={(
             (summary.data?.activePlatformCodes ?? 0) +
             (summary.data?.activeSellerCodes ?? 0)
           ).toLocaleString(intlLocale())}
-          note={`Pegasus ${summary.data?.activePlatformCodes ?? 0} · ร้านค้า ${summary.data?.activeSellerCodes ?? 0}`}
+          note={t("admin.adminPromotionsContent.note", "Pegasus {value} · ร้านค้า {value2}", { value: summary.data?.activePlatformCodes ?? 0, value2: summary.data?.activeSellerCodes ?? 0 })}
         />
         <KpiCard
-          label="ใช้โค้ด (30 วัน)"
+          label={t("admin.adminPromotionsContent.label4", "ใช้โค้ด (30 วัน)")}
           value={(summary.data?.redemptions30d ?? 0).toLocaleString(intlLocale())}
           note={
             change == null
-              ? "ยังไม่มีข้อมูลเดือนก่อน"
-              : `${change > 0 ? "+" : ""}${change}% จากเดือนก่อน`
+              ? t("admin.adminPromotionsContent.note2", "ยังไม่มีข้อมูลเดือนก่อน")
+              : t("admin.adminPromotionsContent.note3", "{value}{change}% จากเดือนก่อน", { value: change > 0 ? "+" : "", change })
           }
           tone={
             change == null || change === 0
@@ -247,17 +251,17 @@ export function AdminPromotionsContent() {
           }
         />
         <KpiCard
-          label="ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)"
+          label={t("admin.adminPromotionsContent.label5", "ต้นทุนส่วนลดที่ Pegasus ออก (30 วัน)")}
           value={formatBaht(summary.data?.platformDiscountCost30d)}
-          note={costShare ? `${costShare} ของ GMV` : "ยังไม่มียอดขายใน 30 วัน"}
+          note={costShare ? t("admin.adminPromotionsContent.note4", "{costShare} ของ GMV", { costShare }) : t("admin.adminPromotionsContent.note5", "ยังไม่มียอดขายใน 30 วัน")}
         />
         <KpiCard
-          label="ยอดขายจากออเดอร์ที่ใช้โค้ด"
+          label={t("admin.adminPromotionsContent.label6", "ยอดขายจากออเดอร์ที่ใช้โค้ด")}
           value={formatBaht(summary.data?.salesWithCodes30d)}
           note={
             orderShare
-              ? `${orderShare} ของออเดอร์ทั้งหมด`
-              : "ยังไม่มียอดขายใน 30 วัน"
+              ? t("admin.adminPromotionsContent.note6", "{orderShare} ของออเดอร์ทั้งหมด", { orderShare })
+              : t("admin.adminPromotionsContent.note5", "ยังไม่มียอดขายใน 30 วัน")
           }
         />
       </div>
@@ -272,7 +276,7 @@ export function AdminPromotionsContent() {
             }
           >
             <TabsList
-              aria-label="กรองตามสถานะ"
+              aria-label={t("admin.adminPromotionsContent.ariaLabel", "กรองตามสถานะ")}
               className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-muted p-[3px]"
             >
               {STATUS_TABS.map((tab) => {
@@ -300,7 +304,7 @@ export function AdminPromotionsContent() {
           </Tabs>
           <div className="flex flex-wrap items-center gap-3">
             <ToggleGroup
-              aria-label="เจ้าของโค้ด"
+              aria-label={t("admin.adminPromotionsContent.ariaLabel2", "เจ้าของโค้ด")}
               spacing={0}
               variant="outline"
               size="sm"
@@ -336,8 +340,8 @@ export function AdminPromotionsContent() {
                 </InputGroupAddon>
                 <InputGroupInput
                   className="text-[13px] md:text-[13px]"
-                  aria-label="ค้นหาโค้ด"
-                  placeholder="ค้นหาโค้ด / แคมเปญ / ร้าน"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel3", "ค้นหาโค้ด")}
+                  placeholder={t("admin.adminPromotionsContent.placeholder", "ค้นหาโค้ด / แคมเปญ / ร้าน")}
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
@@ -356,7 +360,7 @@ export function AdminPromotionsContent() {
         {list.isError && !list.data ? (
           <ErrorState
             error={list.error}
-            title="โหลดโค้ดไม่สำเร็จ"
+            title={t("admin.adminPromotionsContent.title2", "โหลดโค้ดไม่สำเร็จ")}
             onRetry={() => void list.refetch()}
             className="m-5 min-h-48"
           />
@@ -367,9 +371,9 @@ export function AdminPromotionsContent() {
               <EmptyMedia variant="icon">
                 <TicketPercent />
               </EmptyMedia>
-              <EmptyTitle>ยังไม่มีโค้ดในแท็บนี้</EmptyTitle>
+              <EmptyTitle>{t("admin.adminPromotionsContent.emptyTitle", "ยังไม่มีโค้ดในแท็บนี้")}</EmptyTitle>
               <EmptyDescription>
-                สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ
+                {t("admin.adminPromotionsContent.emptyDescription", "สร้างโค้ด Pegasus เพื่อกระตุ้นยอดขายช่วงแคมเปญ")}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
@@ -379,7 +383,7 @@ export function AdminPromotionsContent() {
                 nativeButton={false}
               >
                 <Plus />
-                สร้างโค้ด Pegasus
+                {t("admin.adminPromotionsContent.button2", "สร้างโค้ด Pegasus")}
               </Button>
             </EmptyContent>
           </Empty>
@@ -395,17 +399,17 @@ export function AdminPromotionsContent() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–
-            {page * PROMOTION_PAGE_SIZE + rows.length} จาก {totalItems} โค้ด
+            {t("admin.adminPromotionsContent.span", "แสดง")} {rows.length ? page * PROMOTION_PAGE_SIZE + 1 : 0}–
+            {page * PROMOTION_PAGE_SIZE + rows.length} {t("admin.adminPromotionsContent.span2", "จาก")} {totalItems} {t("admin.adminPromotionsContent.span3", "โค้ด")}
           </span>
-          <Pagination aria-label="หน้ารายการโปรโมชั่น" className="mx-0 w-auto">
+          <Pagination aria-label={t("admin.adminPromotionsContent.ariaLabel4", "หน้ารายการโปรโมชั่น")} className="mx-0 w-auto">
             <PaginationContent className="gap-2">
               <PaginationItem>
                 <Button
                   size="icon-sm"
                   className="size-7 text-[13px] text-[#414755]"
                   variant="outline"
-                  aria-label="หน้าก่อนหน้า"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel5", "หน้าก่อนหน้า")}
                   disabled={page === 0}
                   onClick={() =>
                     updateParams({ page: String(page - 1) }, false)
@@ -421,7 +425,7 @@ export function AdminPromotionsContent() {
                     className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
                     variant={number === page ? "default" : "outline"}
                     aria-current={number === page ? "page" : undefined}
-                    aria-label={`หน้า ${number + 1}`}
+                    aria-label={t("admin.adminPromotionsContent.ariaLabel6", "หน้า {value}", { value: number + 1 })}
                     onClick={() =>
                       updateParams(
                         { page: number ? String(number) : null },
@@ -438,7 +442,7 @@ export function AdminPromotionsContent() {
                   size="icon-sm"
                   className="size-7 text-[13px] text-[#414755]"
                   variant="outline"
-                  aria-label="หน้าถัดไป"
+                  aria-label={t("admin.adminPromotionsContent.ariaLabel7", "หน้าถัดไป")}
                   disabled={page + 1 >= totalPages}
                   onClick={() =>
                     updateParams({ page: String(page + 1) }, false)
@@ -455,9 +459,7 @@ export function AdminPromotionsContent() {
       <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] px-4 py-3.5 text-[#956019]">
         <Info />
         <AlertDescription className="text-[13px] text-[#956019]">
-          โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่
-          “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล (ร้านจะเห็นเหตุผลนั้น) · โค้ด
-          Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow
+          {t("admin.adminPromotionsContent.alertDescription", "โค้ดร้านค้า: ร้านเป็นผู้ออกเงินส่วนลดเอง แอดมินแก้ไขไม่ได้ แต่ “หยุดชั่วคราว” ได้พร้อมระบุเหตุผล (ร้านจะเห็นเหตุผลนั้น) · โค้ด Pegasus: ร้านได้เงินเต็ม Pegasus อุดหนุนส่วนต่างตอนปล่อย escrow")}
         </AlertDescription>
       </Alert>
 

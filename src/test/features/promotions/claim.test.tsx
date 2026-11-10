@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { TolgeeProvider } from "@tolgee/react";
+import { testTolgee } from "@/test/i18n";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import { toast } from "@/components/ui/toast";
@@ -19,7 +21,7 @@ import {
 import { isExpiringSoon } from "@/features/promotions/claim.format";
 import type { ClaimableCode, ClaimResult } from "@/features/promotions/claim.types";
 import { ApiError } from "@/lib/api";
-import { createTestQueryClient, render } from "@/test/utils";
+import { createTestQueryClient, render, renderWithProviders } from "@/test/utils";
 
 const pegasus10: ClaimableCode = {
   id: 41,
@@ -74,11 +76,13 @@ function LocationProbe() {
 function renderRail(codes: ClaimableCode[], route = "/") {
   return render(
     <QueryClientProvider client={createTestQueryClient()}>
-      <MemoryRouter initialEntries={[route]}>
-        <Routes>
-          <Route path="*" element={<><ClaimTicketRail codes={codes} source="HOME" /><LocationProbe /></>} />
-        </Routes>
-      </MemoryRouter>
+      <TolgeeProvider tolgee={testTolgee("th")} fallback={null}>
+        <MemoryRouter initialEntries={[route]}>
+          <Routes>
+            <Route path="*" element={<><ClaimTicketRail codes={codes} source="HOME" /><LocationProbe /></>} />
+          </Routes>
+        </MemoryRouter>
+      </TolgeeProvider>
     </QueryClientProvider>,
   );
 }
@@ -89,13 +93,13 @@ describe("ClaimTicket", () => {
     { state: "claimed", code: { ...pegasus10, claimed: true }, button: "เก็บแล้ว", note: "ใช้ได้ในตะกร้า" },
     { state: "sold out", code: { ...pegasus10, remainingClaims: 0 }, button: "หมดแล้ว", note: "ถูกเก็บครบแล้ว" },
   ])("shows the $state state", ({ code, button, note }) => {
-    render(<ClaimTicket promotion={code} onClaim={vi.fn()} />);
+    renderWithProviders(<ClaimTicket promotion={code} onClaim={vi.fn()} />);
     expect(screen.getByRole("button", { name: button })).toBeInTheDocument();
     expect(screen.getByText(note)).toBeInTheDocument();
   });
 
   it("labels Pegasus and shop codes and shows unlimited codes", () => {
-    render(
+    renderWithProviders(
       <>
         <ClaimTicket promotion={{ ...pegasus10, remainingClaims: null }} />
         <ClaimTicket promotion={shopCode} />
@@ -110,7 +114,7 @@ describe("ClaimTicket", () => {
   });
 
   it("hides the button for a shop looking at its own codes", () => {
-    render(<ClaimTicket promotion={shopCode} hideAction onClaim={vi.fn()} />);
+    renderWithProviders(<ClaimTicket promotion={shopCode} hideAction onClaim={vi.fn()} />);
     expect(screen.queryByRole("button", { name: /เก็บโค้ด/ })).not.toBeInTheDocument();
   });
 
@@ -118,7 +122,7 @@ describe("ClaimTicket", () => {
     const user = userEvent.setup();
     const onClaim = vi.fn();
     const onOpenTerms = vi.fn();
-    render(<ClaimTicket promotion={pegasus10} onClaim={onClaim} onOpenTerms={onOpenTerms} />);
+    renderWithProviders(<ClaimTicket promotion={pegasus10} onClaim={onClaim} onOpenTerms={onOpenTerms} />);
     await user.click(screen.getByRole("button", { name: "เก็บโค้ด PEGASUS10" }));
     expect(onClaim).toHaveBeenCalledOnce();
     expect(onOpenTerms).not.toHaveBeenCalled();
@@ -229,11 +233,7 @@ describe("sign-in to claim", () => {
     signedIn(true);
     const claim = vi.spyOn(claimApi, "claim").mockResolvedValue(result(false));
     rememberPendingClaim("?next=%2F&claim=41");
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <MemoryRouter><PendingClaimRunner /></MemoryRouter>
-      </QueryClientProvider>,
-    );
+    renderWithProviders(<PendingClaimRunner />);
     await waitFor(() => expect(claim).toHaveBeenCalledWith(41, undefined));
     expect(claim).toHaveBeenCalledOnce();
     await waitFor(() => expect(toast.add).toHaveBeenCalledWith(
@@ -244,11 +244,7 @@ describe("sign-in to claim", () => {
     signedIn(false);
     const claim = vi.spyOn(claimApi, "claim");
     rememberPendingClaim("?claim=41");
-    render(
-      <QueryClientProvider client={createTestQueryClient()}>
-        <MemoryRouter><PendingClaimRunner /></MemoryRouter>
-      </QueryClientProvider>,
-    );
+    renderWithProviders(<PendingClaimRunner />);
     expect(claim).not.toHaveBeenCalled();
   });
 });

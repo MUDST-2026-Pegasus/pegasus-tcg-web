@@ -1,4 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import { TolgeeProvider } from "@tolgee/react";
+import { testTolgee } from "@/test/i18n";
 import { createMemoryRouter, RouterProvider, type RouteObject } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -75,7 +77,9 @@ function renderAt(path: string, extra: RouteObject[] = [{ path: "/admin/promotio
   );
   render(
     <QueryClientProvider client={createTestQueryClient()}>
-      <RouterProvider router={router} />
+      <TolgeeProvider tolgee={testTolgee("th")} fallback={null}>
+        <RouterProvider router={router} />
+      </TolgeeProvider>
     </QueryClientProvider>,
   );
   return userEvent.setup();

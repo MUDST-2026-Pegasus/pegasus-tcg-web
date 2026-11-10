@@ -1,9 +1,12 @@
 import { useTranslate as useTolgeeTranslate, type DefaultParamType, type TFnType } from "@tolgee/react";
 
 import type admin from "@/i18n/admin/th.json";
+import type auction from "@/i18n/auction/th.json";
 import type buyer from "@/i18n/buyer/th.json";
 import type common from "@/i18n/common/th.json";
 import type errors from "@/i18n/errors/th.json";
+import type promotions from "@/i18n/promotions/th.json";
+import type sale from "@/i18n/sale/th.json";
 import type seller from "@/i18n/seller/th.json";
 import type { Namespace } from "@/lib/i18n/tolgee";
 
@@ -18,6 +21,9 @@ type KeysByNamespace = {
   buyer: Paths<typeof buyer>;
   seller: Paths<typeof seller>;
   admin: Paths<typeof admin>;
+  promotions: Paths<typeof promotions>;
+  sale: Paths<typeof sale>;
+  auction: Paths<typeof auction>;
 };
 
 export type TranslationKey<N extends Namespace = "common"> = KeysByNamespace[N];

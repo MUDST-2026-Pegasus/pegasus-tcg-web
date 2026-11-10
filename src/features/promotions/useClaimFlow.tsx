@@ -8,19 +8,21 @@ import { PromotionTermsDialog } from "./PromotionTermsDialog";
 import { claimErrorMessage, copyPromotionCode } from "./claim.format";
 import { useClaimPromotion } from "./claim.queries";
 import type { ClaimResult, ClaimSource } from "./claim.types";
+import { useTranslate } from "@/lib/i18n";
 
 type Claimable = ClaimTicketData & { id: number };
 
 export function useClaimToasts() {
+  const { t } = useTranslate("promotions");
   const navigate = useNavigate();
   return {
     success: (result: ClaimResult) =>
       toast.add({
         type: "success",
         title: result.alreadyClaimed
-          ? `เก็บ ${result.claim.code} ไว้แล้ว · ใช้ได้ในตะกร้า`
-          : `เก็บ ${result.claim.code} แล้ว · ใช้ได้ในตะกร้า`,
-        actionProps: { children: "โค้ดของฉัน", onClick: () => navigate("/account/coupons") },
+          ? t("buyer.useClaimFlow.title", "เก็บ {code} ไว้แล้ว · ใช้ได้ในตะกร้า", { code: result.claim.code })
+          : t("buyer.useClaimFlow.title2", "เก็บ {code} แล้ว · ใช้ได้ในตะกร้า", { code: result.claim.code }),
+        actionProps: { children: t("buyer.useClaimFlow.children", "โค้ดของฉัน"), onClick: () => navigate("/account/coupons") },
       }),
     error: (error: unknown) => toast.add({ type: "error", title: claimErrorMessage(error) }),
   };

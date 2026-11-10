@@ -434,7 +434,7 @@ route ถูกจัดกลุ่มตาม layout ในไฟล์ `src/
 
 ## ข้อความ / หลายภาษา
 
-เว็บรองรับ `th` (ภาษาหลัก) และ `en` ด้วย [Tolgee](https://app.tolgee.io/projects/36508) — epic TCG-543
+เว็บรองรับ `th` (ภาษาหลัก) และ `en` ด้วย [Tolgee](https://pegasus-tolgee.thanaboat.com/projects/2) (self-hosted) — epic TCG-543
 คำแปลอยู่ใน `src/i18n/<namespace>/<lang>.json` ที่ `pnpm i18n:pull` มา commit ไว้ เว็บไม่เรียก Tolgee ตอน runtime
 
 ```tsx
@@ -475,7 +475,7 @@ CLI ใช้ `TOLGEE_API_KEY` (project API key) จาก environment หรื
 ใส่ใน **`.env.development.local`** (ห้ามใส่ใน `.env` — Vite โหลด `.env` ตอน build production ด้วย):
 
 ```bash
-VITE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VITE_APP_TOLGEE_API_URL=https://pegasus-tolgee.thanaboat.com
 VITE_APP_TOLGEE_API_KEY=<project API key>
 ```
 

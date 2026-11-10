@@ -3,6 +3,7 @@ import { formatCountdown as formatSharedCountdown, intlLocale } from "@/lib/i18n
 
 /** ราคาบาทแบบ "฿4,200" — ราคาที่มาจาก API เป็นบาทเต็มอยู่แล้ว */
 export function formatSaleBaht(amount: number | null | undefined): string {
+  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน
   return `฿${Number(amount ?? 0).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
 }
 

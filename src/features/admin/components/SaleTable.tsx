@@ -31,7 +31,7 @@ import {
 } from "../sales.format";
 import type { AdminSale, SaleStatus } from "../sales.types";
 import { PromotionOwnerTag } from "./PromotionBadges";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 export type SaleRowAction = "pause" | "resume" | "end" | "delete";
 
@@ -63,10 +63,11 @@ export function SaleTable({
   now: number;
   onAction: (action: SaleRowAction, sale: AdminSale) => void;
 }) {
+  const { t } = useTranslate("sale");
   const columns: DataTableColumn<AdminSale>[] = [
     {
       id: "col0",
-      header: "แคมเปญ",
+      header: t("admin.table.campaign", "แคมเปญ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[21%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         return (
@@ -84,7 +85,7 @@ export function SaleTable({
     },
     {
       id: "col1",
-      header: "ประเภท",
+      header: t("admin.table.type", "ประเภท"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[11%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         const badge = saleTypeBadge(sale);
@@ -97,7 +98,7 @@ export function SaleTable({
     },
     {
       id: "col2",
-      header: "ส่วนลด",
+      header: t("admin.table.discount", "ส่วนลด"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[12%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         return (
@@ -110,7 +111,7 @@ export function SaleTable({
     },
     {
       id: "col3",
-      header: "ขอบเขต",
+      header: t("admin.table.scope", "ขอบเขต"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[15%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         return (
@@ -127,7 +128,7 @@ export function SaleTable({
     },
     {
       id: "col4",
-      header: "งบ / ขายแล้ว",
+      header: t("admin.table.budget", "งบ / ขายแล้ว"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[14%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         const percent = budgetPercent(sale);
@@ -147,16 +148,16 @@ export function SaleTable({
             </div>
           </>
         ) : (
-          <span className="block text-xs font-semibold">— (ไม่มีงบ)</span>
+          <span className="block text-xs font-semibold">{t("admin.table.noBudget", "— (ไม่มีงบ)")}</span>
         )}
         <span className={SUB_CLASS}>
           {sale.status === "SCHEDULED"
-            ? `เข้าร่วม ${sale.listingCount.toLocaleString(intlLocale())} listing`
+            ? t("admin.table.joined", "เข้าร่วม {count} listing", { count: sale.listingCount.toLocaleString(intlLocale()) })
             : sale.status === "SOLD_OUT"
-              ? "ขายหมดทุก listing"
+              ? t("admin.table.allSoldOut", "ขายหมดทุก listing")
               : sale.status === "BUDGET_EXHAUSTED"
-                ? "จบเพราะงบหมด"
-                : `ขายแล้ว ${sale.soldUnits.toLocaleString(intlLocale())} ชิ้น`}
+                ? t("admin.table.budgetExhausted", "จบเพราะงบหมด")
+                : t("admin.table.sold", "ขายแล้ว {count} ชิ้น", { count: sale.soldUnits.toLocaleString(intlLocale()) })}
         </span>
           </>
         );
@@ -164,7 +165,7 @@ export function SaleTable({
     },
     {
       id: "col5",
-      header: "ระยะเวลา",
+      header: t("admin.table.period", "ระยะเวลา"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[13%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         return (
@@ -179,7 +180,7 @@ export function SaleTable({
     },
     {
       id: "col6",
-      header: "สถานะ",
+      header: t("admin.table.status", "สถานะ"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[10%]"), cellClassName: CELL_CLASS },
       cell: ({ row: { original: sale } }) => {
         return (
@@ -191,7 +192,7 @@ export function SaleTable({
     },
     {
       id: "col7",
-      header: () => <span className="sr-only">จัดการ</span>,
+      header: () => <span className="sr-only">{t("admin.table.actions", "จัดการ")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, MENU_CLASS, "bg-muted"), cellClassName: cn(CELL_CLASS, MENU_CLASS) },
       cell: ({ row: { original: sale } }) => {
         const isPlatform = sale.ownerType === "PLATFORM";
@@ -200,16 +201,16 @@ export function SaleTable({
         return (
           <>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={`จัดการ ${sale.name}`} />}>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label={t("admin.table.manage", "จัดการ {name}", { name: sale.name })} />}>
             <MoreVertical className="size-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={4} className="w-44 min-w-44">
             {isPlatform && !finished ? (
-              <DropdownMenuItem render={<Link to={`/admin/sales/${sale.id}/edit`} />}>แก้ไข</DropdownMenuItem>
+              <DropdownMenuItem render={<Link to={`/admin/sales/${sale.id}/edit`} />}>{t("admin.menu.edit", "แก้ไข")}</DropdownMenuItem>
             ) : null}
             {isPlatform && sale.slug ? (
               <DropdownMenuItem render={<Link to={`/sale/${sale.slug}`} target="_blank" rel="noreferrer" />}>
-                ดูหน้าแคมเปญ
+                {t("admin.menu.viewPage", "ดูหน้าแคมเปญ")}
               </DropdownMenuItem>
             ) : null}
             {!finished ? (
@@ -217,15 +218,15 @@ export function SaleTable({
                 className={paused ? undefined : "text-[#b45309] data-highlighted:text-[#b45309]"}
                 onClick={() => onAction(paused ? "resume" : "pause", sale)}
               >
-                {paused ? "เปิดอีกครั้ง" : isPlatform ? "หยุดชั่วคราว" : "หยุดการลดราคาของร้าน"}
+                {paused ? t("admin.menu.resume", "เปิดอีกครั้ง") : isPlatform ? t("admin.menu.pause", "หยุดชั่วคราว") : t("admin.menu.pauseShop", "หยุดการลดราคาของร้าน")}
               </DropdownMenuItem>
             ) : null}
             {!finished && sale.status !== "SCHEDULED" ? (
-              <DropdownMenuItem onClick={() => onAction("end", sale)}>จบทันที</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAction("end", sale)}>{t("admin.menu.end", "จบทันที")}</DropdownMenuItem>
             ) : null}
             {isPlatform ? (
               <DropdownMenuItem variant="destructive" onClick={() => onAction("delete", sale)}>
-                ลบ
+                {t("admin.menu.delete", "ลบ")}
               </DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>

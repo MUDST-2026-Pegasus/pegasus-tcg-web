@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * ตัวเลือกแบบแท็บพื้นเทา (Figma SAL-A2 "ทุกสินค้า | เกม | หมวดหมู่ | ชุดการ์ด", "ลดเป็น % | ลดเป็นบาทต่อชิ้น")
@@ -53,6 +54,7 @@ export function Segmented<T extends string>({
 
 /** ชิปที่เลือกแล้ว (ฟ้า + ×) */
 export function SelectedChip({ label, onRemove, disabled }: { label: string; onRemove: () => void; disabled?: boolean }) {
+  const { t } = useTranslate("sale");
   return (
     <Badge
       variant="outline"
@@ -63,7 +65,7 @@ export function SelectedChip({ label, onRemove, disabled }: { label: string; onR
         type="button"
         variant="ghost"
         size="icon-xs"
-        aria-label={`เอา ${label} ออก`}
+        aria-label={t("admin.controls.remove", "เอา {label} ออก", { label })}
         disabled={disabled}
         onClick={onRemove}
         className="size-4 rounded-full text-[#0058bc] hover:bg-[#cfe0f7] hover:text-[#0058bc]"
@@ -98,6 +100,7 @@ export function ChipPicker({
   /** ค้นที่ server แทนการกรองในเครื่อง (ร้านค้า) */
   onSearch?: (q: string) => void;
 }) {
+  const { t } = useTranslate("sale");
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const labels = new Map(options.map((option) => [option.id, option.label]));
@@ -137,7 +140,7 @@ export function ChipPicker({
           <Input
             autoFocus
             aria-label={addLabel}
-            placeholder="ค้นหา…"
+            placeholder={t("admin.controls.search", "ค้นหา…")}
             value={q}
             onChange={(event) => {
               setQ(event.target.value);
@@ -160,12 +163,12 @@ export function ChipPicker({
             {loading ? (
               <span role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Spinner className="size-3.5" />
-                กำลังโหลด…
+                {t("admin.controls.loading", "กำลังโหลด…")}
               </span>
             ) : null}
             {!loading && matches.length === 0 ? (
               <span className="text-xs text-muted-foreground">
-                {onSearch && needle.length < 2 ? "พิมพ์อย่างน้อย 2 ตัวอักษร" : "ไม่พบรายการ"}
+                {onSearch && needle.length < 2 ? t("admin.controls.minLength", "พิมพ์อย่างน้อย {min} ตัวอักษร", { min: 2 }) : t("admin.controls.noResults", "ไม่พบรายการ")}
               </span>
             ) : null}
           </div>

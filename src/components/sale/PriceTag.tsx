@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { SaleBadge } from "./SaleBadge";
 import { formatSaleBaht, priceTagState } from "./sale.format";
 import type { ListingPricing } from "./sale.types";
+import { useTranslate } from "@/lib/i18n";
 
 const SIZE = {
   sm: { price: "text-sm", list: "text-[11px]", gap: "gap-1.5" },
@@ -33,6 +34,7 @@ export function PriceTag({
   inline?: boolean;
   className?: string;
 }) {
+  const { t } = useTranslate("sale");
   const state = priceTagState(pricing);
   const sizes = SIZE[size];
 
@@ -57,7 +59,7 @@ export function PriceTag({
         <span className={cn("font-bold text-[#dc2626]", sizes.price)}>{formatSaleBaht(pricing.salePrice)}</span>
         {showBadge ? <SaleBadge type="percent" percent={pricing.discountPercent} /> : null}
       </span>
-      <s className={cn("text-muted-foreground", sizes.list)} aria-label={`ราคาปกติ ${formatSaleBaht(pricing.listPrice)}`}>
+      <s className={cn("text-muted-foreground", sizes.list)} aria-label={t("price.listAria", "ราคาปกติ {price}", { price: formatSaleBaht(pricing.listPrice) })}>
         {formatSaleBaht(pricing.listPrice)}
       </s>
     </span>

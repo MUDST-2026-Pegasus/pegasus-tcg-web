@@ -7,63 +7,64 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 /*
  * ห้ามข้อความไทย hardcode — ใส่ผ่าน t("key", "ข้อความเดิม") แทน [TCG-549]
- * เปิดทีละโฟลเดอร์: การ์ดย้ายข้อความ (I18N-10 ถึง 19) เพิ่ม path ของตัวเองใน I18N_GUARDED
+ * guard ทั้ง src — I18N_PENDING คือไฟล์ที่ยังไม่ย้าย แยกเป็นบล็อกต่อการ์ด
+ * การ์ดที่ย้ายเสร็จลบเฉพาะบรรทัด path ในบล็อกตัวเอง เก็บบรรทัด comment ไว้ (กันการ์ดที่ทำพร้อมกัน conflict)
  */
-const I18N_GUARDED = [
-  'src/lib/i18n/**/*.{ts,tsx}',
-  'src/features/not-found/**/*.{ts,tsx}',
-  // I18N-10 (TCG-550)
-  'src/components/layout/**/*.{ts,tsx}',
-  'src/components/common/**/*.{ts,tsx}',
-  'src/lib/nav-config.ts',
-  'src/lib/card-labels.ts',
-  'src/lib/condition-description.ts',
-  'src/lib/upload/**/*.{ts,tsx}',
-  'src/app/routes/**/*.{ts,tsx}',
-  'src/features/home/**/*.{ts,tsx}',
-  'src/features/about/**/*.{ts,tsx}',
-  // I18N-11 (TCG-551)
-  'src/features/auth/**/*.{ts,tsx}',
-  'src/features/catalog/**/*.{ts,tsx}',
-  'src/features/store/**/*.{ts,tsx}',
-  'src/features/collection/**/*.{ts,tsx}',
-  'src/lib/listing-detail.messages.ts',
-  // I18N-16 (TCG-556) — admin: แคตตาล็อก เกม และคุณสมบัติการ์ด
-  'src/features/admin/pages/{AdminCatalogPage,AdminCardAttributesPage}.tsx',
-  'src/features/admin/{catalog,taxonomy,card-listings}.*.ts',
-  'src/features/admin/components/{AdminCatalogContent,AdminCardAttributesContent,AttributeFormDialog,CardAttributesSection,CardSchemaTable,CardSetFormDialog,CardSetTable,CardSetsSection,CategoriesSection,CategoryFormDialog,CategoryTable,ConfirmDeleteDialog,DeleteImageDialog,DeleteProductDialog,FieldTypeBadge,GameAttributeFields,GameAvatar,GameFormDialog,GameInfoCard,GameListPanel,ListingBlockDialog,LogoUploadField,SchemaJsonDialog,VariantFormDialog}.tsx',
-  'src/features/admin/components/Catalog*.tsx',
-  'src/features/admin/components/taxonomy.styles.ts',
-  // I18N-14 (TCG-554)
-  'src/features/seller/{shared,dashboard,shop,orders,application,logout}/**/*.{ts,tsx}',
-  // I18N-12 (TCG-552)
-  'src/features/cart/**/*.{ts,tsx}',
-  'src/features/payment/**/*.{ts,tsx}',
-  'src/features/account/**/*.{ts,tsx}',
-  // I18N-15 (TCG-555)
-  'src/features/seller/{products,payout}/**/*.{ts,tsx}',
-  // I18N-17 (TCG-557) — admin: การเงิน (สลิป คืนเงิน ถอนเงิน คอมมิชชั่น) และภาพรวมคำสั่งซื้อ
-  'src/features/admin/pages/Admin{Commission,Orders,Payments,Payouts,Refunds}Page.tsx',
-  'src/features/admin/{finance,orders}.format.ts',
-  'src/features/admin/commission-rule.form.ts',
-  'src/features/admin/components/{AdminOrdersContent,AdminPaymentReviewContent,AdminPayoutsContent,AdminRefundsContent,FinanceReasonDialog,FinanceShared,OrderBoardSkeleton,OrderColumnCard,OrderDetailSheet,OrderKanbanColumn,OrderListSheet,PaymentSlipDetail,PayoutDetail,RefundDetail,SlipModeCard}.tsx',
-  'src/features/admin/components/Commission*.tsx',
-  'src/features/admin/components/orders.styles.ts',
-  // I18N-13 — finance: คืนสินค้า / คืนเงิน / รีวิว
-  'src/features/finance/**/*.{ts,tsx}',
-]
+const I18N_GUARDED = ['src/**/*.{ts,tsx}']
 // ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
 const I18N_PENDING = [
-  'src/features/catalog/components/ProductAuctionBox.tsx',
-  'src/features/store/components/StorePromotionStrip.tsx',
-  'src/features/seller/{promotions,sales,auctions}/**/*.{ts,tsx}',
-  'src/features/account/pages/MyCouponsPage.tsx',
-  'src/features/cart/components/CartCodePicker.tsx',
-  'src/features/cart/components/CheckoutPlatformPromotion.tsx',
-  'src/features/cart/components/CheckoutPlatformPromotionCard.tsx',
-  'src/features/cart/components/CheckoutPromotionDialogs.tsx',
-  'src/features/cart/components/PromotionChangedDialog.tsx',
-  'src/features/cart/components/CheckoutSaleQuotaDialog.tsx',
+  'src/test/**',
+  'src/components/ui/**',
+  // TCG-743 I18N-23 โปรโมชัน / โค้ดส่วนลด (namespace promotions)
+  // TCG-744 I18N-24 ลดราคา / Flash Sale (namespace sale)
+  // TCG-745 I18N-25 ประมูล (namespace auction)
+  // TCG-553 I18N-13 คืนสินค้า / คืนเงิน / รีวิว
+  // TCG-558 I18N-18 admin: ผู้ใช้ อนุมัติผู้ขาย รีวิว ภาพรวม บันทึกกิจกรรม รายงาน
+  'src/features/admin/admin.fixture.ts',
+  'src/features/admin/audit.format.ts',
+  'src/features/admin/components/ActivityLogToolbar.tsx',
+  'src/features/admin/components/ActivitySummaryPanel.tsx',
+  'src/features/admin/components/AddAdminDialog.tsx',
+  'src/features/admin/components/AdminActivityLogContent.tsx',
+  'src/features/admin/components/AdminOverviewContent.tsx',
+  'src/features/admin/components/AdminReviewsContent.tsx',
+  'src/features/admin/components/AdminSellerApprovalContent.tsx',
+  'src/features/admin/components/AdminUsersContent.tsx',
+  'src/features/admin/components/AdminWeeklyReportContent.tsx',
+  'src/features/admin/components/AuditEntrySheet.tsx',
+  'src/features/admin/components/BankBookImage.tsx',
+  'src/features/admin/components/GameShareChart.tsx',
+  'src/features/admin/components/MonthlySalesChart.tsx',
+  'src/features/admin/components/RecentActivityCard.tsx',
+  'src/features/admin/components/RejectVerificationDialog.tsx',
+  'src/features/admin/components/ReviewModerationCard.tsx',
+  'src/features/admin/components/ReviewSellerCard.tsx',
+  'src/features/admin/components/ReviewStars.tsx',
+  'src/features/admin/components/SellerApprovalStats.tsx',
+  'src/features/admin/components/SellerDetailPanel.tsx',
+  'src/features/admin/components/SellerQueueList.tsx',
+  'src/features/admin/components/TopSellersCard.tsx',
+  'src/features/admin/components/UserDetailSheet.tsx',
+  'src/features/admin/components/UserRolesDialog.tsx',
+  'src/features/admin/components/UserStatusDialog.tsx',
+  'src/features/admin/components/UsersTable.tsx',
+  'src/features/admin/components/UsersToolbar.tsx',
+  'src/features/admin/components/WeeklyGameShareChart.tsx',
+  'src/features/admin/components/WeeklyReportExportDialog.tsx',
+  'src/features/admin/components/WeeklyReportFilters.tsx',
+  'src/features/admin/components/WeeklyReportSettingsDialog.tsx',
+  'src/features/admin/components/WeeklyReportTable.tsx',
+  'src/features/admin/components/WeeklyTrendChart.tsx',
+  'src/features/admin/metrics.format.ts',
+  'src/features/admin/reviews.format.ts',
+  'src/features/admin/users.format.ts',
+  'src/features/admin/verification.format.ts',
+  'src/features/admin/verification.schema.ts',
+  'src/features/admin/weekly-report.format.ts',
+  'src/features/admin/weekly-report.schema.ts',
+  // ยังไม่มีการ์ด
+  'src/hooks/use-file-upload.ts',
+  // จบรายการ
 ]
 const THAI = '/[\\u0E00-\\u0E7F]/'
 // default ของ t() (อาร์กิวเมนต์ใด ๆ ของ t / errorText / errorMessage / msg / translate) ยกเว้นไว้ — นอกนั้นเจอไทยแล้ว error
