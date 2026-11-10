@@ -1,7 +1,7 @@
 import { formatSaleBaht, isOnSale, type ListingPricing } from "@/components/sale";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode, isApiError } from "@/lib/api";
-import { dateTimeFormat } from "@/lib/i18n";
+import { dateTimeFormat, translate } from "@/lib/i18n";
 
 const clock = dateTimeFormat({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" }, { calendar: "gregory" });
 
@@ -22,8 +22,8 @@ export function notifyAddedAtSalePrice(
   (options?.manager ?? toast).add({
     ...(options ? { timeout: 4000, data: { quickCart: true, imageUrl: options.imageUrl },
       actionProps: { children: options.viewCartLabel, onClick: options.onViewCart } } : {}),
-    title: "เพิ่มลงตะกร้าที่ราคา Flash",
-    description: `เพิ่ม ${name} ราคา ${formatSaleBaht(pricing.salePrice)} แล้ว · ราคานี้ถึง ${clock.format(new Date(pricing.sale.endsAt))} ต้องชำระก่อนหมดเวลาจองสต็อก`,
+    title: translate("sale", "notify.added.title", "เพิ่มลงตะกร้าที่ราคา Flash"),
+    description: translate("sale", "notify.added.description", "เพิ่ม {name} ราคา {price} แล้ว · ราคานี้ถึง {time} ต้องชำระก่อนหมดเวลาจองสต็อก", { name, price: formatSaleBaht(pricing.salePrice), time: clock.format(new Date(pricing.sale.endsAt)) }),
     type: "success",
   });
   if (limit != null && quantity > limit) notifyBuyerLimit(limit, pricing.listPrice);
@@ -34,7 +34,7 @@ export function notifyAddedAtSalePrice(
 export function notifyBuyerLimit(limit: number, listPrice: number) {
   toast.add({
     title: "SALE_BUYER_LIMIT_REACHED",
-    description: `ราคา Flash จำกัดคนละ ${limit} ชิ้น · ชิ้นที่ ${limit + 1} คิดราคาปกติ ${formatSaleBaht(listPrice)}`,
+    description: translate("sale", "notify.buyerLimit", "ราคา Flash จำกัดคนละ {limit} ชิ้น · ชิ้นที่ {next} คิดราคาปกติ {price}", { limit, next: limit + 1, price: formatSaleBaht(listPrice) }),
     type: "warning",
   });
 }
@@ -50,3 +50,8 @@ export function quotaListingId(error: unknown): number | null {
   const id = Number(error.details.listingId);
   return Number.isFinite(id) && id > 0 ? id : null;
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "notify.added.title", "ns": "sale", "defaultValue": "เพิ่มลงตะกร้าที่ราคา Flash"}
+// @tolgee-key {"key": "notify.added.description", "ns": "sale", "defaultValue": "เพิ่ม {name} ราคา {price} แล้ว · ราคานี้ถึง {time} ต้องชำระก่อนหมดเวลาจองสต็อก"}
+// @tolgee-key {"key": "notify.buyerLimit", "ns": "sale", "defaultValue": "ราคา Flash จำกัดคนละ {limit} ชิ้น · ชิ้นที่ {next} คิดราคาปกติ {price}"}

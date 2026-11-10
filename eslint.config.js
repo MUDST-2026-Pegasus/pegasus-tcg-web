@@ -25,13 +25,6 @@ const I18N_PENDING = [
   'src/features/admin/promotions.*.ts',
   'src/features/admin/pages/AdminPromotion*.tsx',
   // TCG-744 I18N-24 ลดราคา / Flash Sale (namespace sale)
-  'src/components/sale/**',
-  'src/features/sale/**',
-  'src/features/seller/sales/**',
-  'src/features/cart/components/CheckoutSaleQuotaDialog.tsx',
-  'src/features/admin/components/{AdminSale*,Sale*}.tsx',
-  'src/features/admin/sales.*.ts',
-  'src/features/admin/pages/AdminSale*.tsx',
   // TCG-745 I18N-25 ประมูล (namespace auction)
   'src/features/auction/**',
   'src/features/catalog/components/ProductAuctionBox.tsx',

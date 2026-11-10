@@ -1,1 +1,720 @@
-{}
+{
+  "admin": {
+    "action": {
+      "close": "ปิด",
+      "delete": {
+        "description": "ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้",
+        "failed": "ลบไม่สำเร็จ",
+        "success": "ลบ {name} แล้ว",
+        "title": "ลบ “{name}”?"
+      },
+      "deleteBlocked": {
+        "description": "แคมเปญมีออเดอร์แล้ว (ขายไป {count} ชิ้น) ต้องเก็บไว้เพื่อบัญชีและการคืนเงิน{hint}",
+        "end": "จบแคมเปญแทน",
+        "endHint": " · ใช้ “จบแคมเปญ” แทน",
+        "title": "ลบแคมเปญนี้ไม่ได้"
+      },
+      "end": {
+        "confirm": "จบแคมเปญ",
+        "description": "{count} listing กลับเป็นราคาปกติทันที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน” · ออเดอร์ที่จ่ายแล้วไม่กระทบ",
+        "failed": "จบแคมเปญไม่สำเร็จ",
+        "sold": "ขายไปแล้ว",
+        "subsidy": "อุดหนุนแล้ว",
+        "success": "จบ {name} แล้ว",
+        "title": "จบ {name} ตอนนี้?"
+      },
+      "noReason": "ไม่ได้ระบุ",
+      "pause": {
+        "confirm": "หยุดแคมเปญ",
+        "description": "{count} listing กลับเป็นราคาปกติภายใน 1 นาที จนกว่าจะเปิดอีกครั้ง · ออเดอร์ที่จ่ายแล้วไม่กระทบ",
+        "failed": "หยุดแคมเปญไม่สำเร็จ",
+        "success": "หยุด {name} แล้ว",
+        "title": "หยุด {name} ชั่วคราว?"
+      },
+      "pauseShop": {
+        "confirm": "หยุดการลดราคา",
+        "description": "ร้านเป็นผู้ออกเงิน แอดมินแก้ไม่ได้ · หยุดแล้วร้านจะเห็นเหตุผลนี้และติดต่อทีมงานได้",
+        "failed": "หยุดการลดราคาไม่สำเร็จ",
+        "footer": "บันทึกใน Activity Log",
+        "notified": " · แจ้งร้านแล้ว",
+        "notify": "ส่งอีเมลแจ้งร้าน",
+        "reason": "เหตุผล (ร้านเห็น) *",
+        "reasonPlaceholder": "เช่น ราคาลดต่ำผิดปกติ กรุณาตรวจสอบราคา",
+        "success": "หยุด “{name}” แล้ว{notified}",
+        "title": "หยุด “{name}” ของ {shop}?"
+      },
+      "pieces": "{count} ชิ้น",
+      "resume": {
+        "description": "listing ที่เข้าเงื่อนไขได้ราคาลดกลับภายใน 1 นาที",
+        "failed": "เปิดแคมเปญไม่สำเร็จ",
+        "period": "ช่วงเวลา",
+        "reason": "เหตุผลที่หยุด",
+        "success": "เปิด {name} อีกครั้งแล้ว",
+        "title": "เปิด {name} อีกครั้ง?"
+      },
+      "unlimited": "ไม่จำกัด"
+    },
+    "aside": {
+      "buyerPays": "ผู้ซื้อจ่าย",
+      "campaignFallback": "แคมเปญ",
+      "cap": " (เพดาน {amount})",
+      "commission": "คอมมิชชั่น (จากราคาตั้งต้น)",
+      "discountFixed": "ส่วนลด {amount}/ชิ้น",
+      "discountPercent": "ส่วนลด {percent}%{cap}",
+      "listPrice": "ราคาตั้งต้น",
+      "preview": "ตัวอย่างที่ผู้ซื้อเห็น",
+      "sample": "ตัวอย่างการคำนวณ (listing {price} · คอมมิชชั่น {percent}%)",
+      "sellerReceives": "ร้านได้",
+      "subsidy": "Pegasus อุดหนุน (SALE_SUBSIDY)",
+      "summary": "สรุป"
+    },
+    "badge": {
+      "cardSet": "ลดทั้งชุดการ์ด"
+    },
+    "controls": {
+      "loading": "กำลังโหลด…",
+      "minLength": "พิมพ์อย่างน้อย {min} ตัวอักษร",
+      "noResults": "ไม่พบรายการ",
+      "remove": "เอา {label} ออก",
+      "search": "ค้นหา…"
+    },
+    "discount": {
+      "fixedOff": "ลด {amount}/ชิ้น",
+      "fixedPrice": "ราคาใหม่รายชิ้น",
+      "maxPerUnit": "สูงสุด {amount}/ชิ้น",
+      "perRow": "ตั้งรายแถว",
+      "percent": "ลด {percent}%",
+      "shopPays": "ร้านออกเงิน"
+    },
+    "draftPauseReason": "ร่าง — ยังไม่เปิด",
+    "duration": {
+      "days": "ยาว {days} วัน",
+      "hours": "ยาว {hours} ชั่วโมง"
+    },
+    "errors": {
+      "categoryNotFound": "หมวดหมู่ที่เลือกถูกลบไปแล้ว ลองเลือกใหม่",
+      "gameNotFound": "เกมที่เลือกถูกลบไปแล้ว ลองเลือกใหม่",
+      "inUse": "แคมเปญมีออเดอร์แล้ว ลบไม่ได้ (SALE_IN_USE) — ใช้ “จบแคมเปญ” แทน",
+      "invalid": "ข้อมูลแคมเปญไม่ผ่านเงื่อนไข (SALE_INVALID) — หลังมีออเดอร์แก้ได้เฉพาะชื่อ วันจบ งบ (เพิ่ม) โควตา (เพิ่ม)",
+      "notFound": "ไม่พบแคมเปญนี้แล้ว ลองโหลดหน้าใหม่",
+      "overlap": "listing ซ้อนกับการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP)",
+      "paused": "แคมเปญถูกหยุดโดยทีมงาน",
+      "setNotFound": "ชุดการ์ดที่เลือกถูกลบไปแล้ว ลองเลือกใหม่",
+      "slugTaken": "ลิงก์หน้าแคมเปญนี้ถูกใช้แล้ว ลองเปลี่ยน"
+    },
+    "field": {
+      "endsAt": "วันสิ้นสุด",
+      "perBuyerLimit": "จำกัดต่อผู้ซื้อ",
+      "perListingQuota": "โควตาต่อ listing",
+      "startsAt": "วันเริ่ม"
+    },
+    "form": {
+      "backToList": "กลับไปรายการลดราคา",
+      "banner": "แบนเนอร์ (ไม่บังคับ)",
+      "bannerCurrent": "แบนเนอร์ปัจจุบัน",
+      "bannerHint": "ใช้บนหน้า /sale/{slug} · แนะนำ 1200×300",
+      "bannerUpload": "อัปโหลดรูป 1200×300",
+      "breadcrumb": {
+        "create": "สร้างแคมเปญ",
+        "edit": "แก้ไข {name}",
+        "sales": "ลดราคาสินค้า"
+      },
+      "budget": "งบอุดหนุนสูงสุด",
+      "budgetHint": "ยอดจองถึงงบ → แคมเปญจบเอง (หมดงบ) · ว่าง = ไม่จำกัด",
+      "budgetIncreaseOnly": "งบอุดหนุนสูงสุด (เพิ่มได้เท่านั้น)",
+      "conditions": "สภาพการ์ด (ไม่บังคับ)",
+      "conditionsAria": "สภาพการ์ด",
+      "conditionsHint": "ไม่เลือก = ทุกสภาพ",
+      "confirm": {
+        "budget": "งบอุดหนุน",
+        "listings": "listing ที่เข้าตอนนี้",
+        "listingsValue": "{count} จาก {shops} ร้าน",
+        "saveDescription": "listing ที่ได้ราคาลดอยู่จะคิดราคาใหม่ภายใน 1 นาที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน”",
+        "saveTitle": "บันทึกการเปลี่ยนแปลง {name}?",
+        "schedule": "ตั้งเวลาเปิด",
+        "scheduleDescription": "listing ที่เข้าเงื่อนไขจะเปลี่ยนเป็นราคาลดอัตโนมัติเมื่อถึงเวลาเริ่ม",
+        "scheduleTitle": "ตั้งเวลาเปิด {name}?"
+      },
+      "discard": {
+        "confirm": "ทิ้งการแก้ไข",
+        "description": "การเปลี่ยนแปลงในแคมเปญยังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด",
+        "stay": "อยู่ต่อ",
+        "title": "ทิ้งการแก้ไข?"
+      },
+      "discount": "ลด",
+      "discountAria": "ส่วนลด",
+      "discountFixed": "ลดเป็นบาทต่อชิ้น",
+      "discountFixedHint": "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1",
+      "discountPercent": "ลดเป็น %",
+      "discountPrefix": "ลด ",
+      "discountType": "ประเภทส่วนลด",
+      "durationPrefix": "ยาว ",
+      "endsAt": "สิ้นสุด",
+      "endsAtHint": "ต้องหลังวันเริ่ม",
+      "excludeSellers": "ยกเว้นร้าน (ไม่บังคับ)",
+      "homeBanner": "แสดงแบนเนอร์บนหน้าแรก",
+      "homeBannerHint": "แบนเนอร์ลดทั้งหมวดใต้แถบ Flash Sale · เรียงตามลำดับ",
+      "homeFlash": "แสดงบนหน้าแรก (แถบ Flash Sale)",
+      "homeFlashHint": "ครั้งละ 1 Flash Sale · ก่อนเริ่ม 24 ชม. แสดงเป็น “เร็วๆ นี้”",
+      "homeSort": "ลำดับแบนเนอร์บนหน้าแรก",
+      "homeSortHint": "เลขน้อยแสดงก่อน",
+      "lockNote": "แก้ไขหลังมีออเดอร์: ได้เฉพาะชื่อ, วันจบ, งบ (เพิ่ม), โควตา (เพิ่ม), หยุด/จบทันที",
+      "locked": {
+        "after": "แก้ไม่ได้ · งบและโควตาเพิ่มได้อย่างเดียว",
+        "before": "แคมเปญนี้มีออเดอร์แล้ว (ขายไป {count} ชิ้น) — ฟิลด์ที่มี",
+        "icon": "แม่กุญแจ"
+      },
+      "lockedIcon": "ล็อก",
+      "maxPerUnit": "เพดานส่วนลดต่อชิ้น",
+      "maxPerUnitHint": "การ์ดราคาสูงลดไม่เกินนี้ · ว่าง = ไม่จำกัด",
+      "minPrice": "ราคาขั้นต่ำต่อชิ้น",
+      "minPriceHint": "listing ราคาต่ำกว่านี้ไม่เข้าร่วม",
+      "name": "ชื่อแคมเปญ",
+      "perBuyer": "จำกัดต่อผู้ซื้อ",
+      "perBuyerHint": "เกิน → SALE_BUYER_LIMIT_REACHED · ว่าง = ไม่จำกัด",
+      "perBuyerSuffix": "ชิ้น / listing",
+      "pieces": "ชิ้น",
+      "preview": {
+        "failed": "นับ listing ที่เข้าเงื่อนไขไม่สำเร็จ",
+        "loading": "กำลังนับ listing ที่เข้าเงื่อนไข…",
+        "result": "เข้าเงื่อนไขตอนนี้ {count} listing จาก {shops} ร้าน · ราคารวมก่อนลด {total}"
+      },
+      "quota": "โควตาต่อ listing",
+      "quotaHint": "ขายครบแล้ว listing นั้นกลับเป็นราคาปกติ",
+      "quotaIncreaseOnly": "โควตาต่อ listing (เพิ่มได้เท่านั้น)",
+      "save": "บันทึก",
+      "saveDraft": "บันทึกร่าง",
+      "schedule": "ตั้งเวลาเปิดแคมเปญ",
+      "scope": {
+        "add": "เพิ่ม{noun}",
+        "all": "ทุกสินค้า",
+        "cardSet": "ชุดการ์ด",
+        "category": "หมวดหมู่"
+      },
+      "scopeLabel": "ขอบเขตสินค้า",
+      "searchShop": "ค้นหาร้าน…",
+      "section": {
+        "budget": "5. งบ & การแสดงผล",
+        "discount": "3. ส่วนลด",
+        "period": "4. ช่วงเวลา & โควตา",
+        "periodDescription": "ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)",
+        "periodFlash": "Flash Sale ยาวได้ไม่เกิน 72 ชั่วโมง · ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)",
+        "scope": "2. ขอบเขตสินค้า",
+        "scopeDescription": "listing ที่ LISTED และเข้าเงื่อนไขทั้งหมดได้ราคาลดอัตโนมัติ (ไม่รวมสินค้าประมูล)",
+        "type": "1. ประเภทแคมเปญ"
+      },
+      "sellerSaleReadOnly": "การลดราคาของร้านแอดมินแก้ไขไม่ได้ (หยุดได้พร้อมเหตุผล)",
+      "shopFallback": "ร้าน #{id}",
+      "slug": "ลิงก์หน้าแคมเปญ",
+      "slugHint": "a–z 0–9 และ - · ใช้เป็น /sale/{slug}",
+      "startsAt": "เริ่ม",
+      "subtitle": "Pegasus ออกเงินส่วนลด · ร้านได้เงินเต็มราคาตั้งต้น",
+      "summary": {
+        "budget": "งบ {budget}{home}",
+        "cap": " สูงสุด {amount}/ชิ้น",
+        "home": " · แสดงบนหน้าแรก",
+        "lowerWins": "listing ที่ร้านลดเองอยู่แล้ว ใช้ราคาที่ต่ำกว่า",
+        "percent": "ลด {percent}%{cap}",
+        "quota": "โควตา {quota}/listing · {limit}/คน"
+      },
+      "title": {
+        "edit": "แก้ไขแคมเปญลดราคา"
+      },
+      "toast": {
+        "createFailed": "สร้างแคมเปญไม่สำเร็จ",
+        "draftSaved": "บันทึกร่างแล้ว — แคมเปญหยุดไว้ ยังไม่เปิด",
+        "saveFailed": "บันทึกไม่สำเร็จ",
+        "saved": "บันทึกการเปลี่ยนแปลงแล้ว",
+        "scheduled": "ตั้งเวลาเปิด {name} แล้ว"
+      },
+      "type": "ประเภทแคมเปญ",
+      "typeCategory": "ลดทั้งหมวด / ชุดการ์ด",
+      "typeCategoryHint": "ลดตามเกม หมวดหมู่ หรือชุดการ์ด ช่วงหลายวัน",
+      "typeFlashHint": "ช่วงสั้น ≤ 72 ชม. · โควตาชิ้นต่อ listing · นับถอยหลังบนหน้าแรก"
+    },
+    "list": {
+      "create": "สร้างแคมเปญลดราคา",
+      "empty": {
+        "description": "สร้าง Flash Sale หรือแคมเปญลดทั้งหมวด ผู้ซื้อเห็นราคาลดทันทีโดยไม่ต้องใช้โค้ด",
+        "title": "ยังไม่มีแคมเปญในแท็บนี้"
+      },
+      "kpi": {
+        "active": "กำลังลดราคา",
+        "activeNote": "Pegasus {platform} · ร้านค้า {seller}",
+        "listings": "Listing ที่ลดอยู่ตอนนี้",
+        "listingsNote": "ทั้งแคมเปญ Pegasus และร้านลดเอง",
+        "revenue": "ยอดขายจากราคาลด (30 วัน)",
+        "revenueNote": "ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว",
+        "subsidy": "Pegasus อุดหนุน (30 วัน)",
+        "subsidyNote": "SALE_SUBSIDY · แยกจากต้นทุนโค้ด"
+      },
+      "loadFailed": "โหลดแคมเปญไม่สำเร็จ",
+      "loading": "กำลังโหลดแคมเปญ...",
+      "nextPage": "หน้าถัดไป",
+      "note": "แคมเปญ Pegasus: ร้านได้เงินเต็มราคาตั้งต้น Pegasus อุดหนุนส่วนลดตอนปล่อย escrow (SALE_SUBSIDY) · ยอดจองถึงงบ → แคมเปญจบเอง (หมดงบ) · การลดราคาของร้าน: ร้านออกเงินเอง แอดมินแก้ไม่ได้ แต่หยุดได้พร้อมเหตุผล · 1 listing ใช้ราคาลดได้ทีละรายการ (ราคาต่ำสุดชนะ) และยังใช้โค้ดส่วนลดซ้อนได้",
+      "pageN": "หน้า {page}",
+      "pagination": "หน้ารายการแคมเปญลดราคา",
+      "prevPage": "หน้าก่อนหน้า",
+      "range": "แสดง {from}–{to} จาก {total} แคมเปญ",
+      "search": "ค้นหาแคมเปญ",
+      "searchPlaceholder": "ค้นหาแคมเปญ / ร้าน",
+      "statusFilter": "กรองตามสถานะ",
+      "subtitle": "ตั้งราคาลดให้สินค้าโดยตรง ผู้ซื้อเห็นราคาที่ลดแล้วทันทีโดยไม่ต้องใช้โค้ด · Flash Sale / ลดทั้งหมวด / ดูแลการลดราคาของร้าน",
+      "title": "โปรโมชั่น & ลดราคา",
+      "typeFilter": "ประเภทการลดราคา"
+    },
+    "menu": {
+      "delete": "ลบ",
+      "edit": "แก้ไข",
+      "end": "จบทันที",
+      "pause": "หยุดชั่วคราว",
+      "pauseShop": "หยุดการลดราคาของร้าน",
+      "resume": "เปิดอีกครั้ง",
+      "viewPage": "ดูหน้าแคมเปญ"
+    },
+    "period": {
+      "clockIn": "{clock} · อีก {days} วัน",
+      "daysLeft": "เหลือ {days} วัน",
+      "ended": "สิ้นสุดแล้ว",
+      "endedEarly": "จบก่อนกำหนด",
+      "pausedByAdmin": "หยุดโดยแอดมิน{reason}",
+      "pausedByShop": "ร้านหยุดไว้",
+      "soldOut": "ขายครบโควตาแล้ว",
+      "startsIn": "เริ่มใน {days} วัน"
+    },
+    "retry": "ลองอีกครั้ง",
+    "scope": {
+      "all": "ทุกเกม",
+      "category": "หมวด",
+      "count": "{prefix} {count} รายการ",
+      "game": "เกม",
+      "listings": "เลือก listing",
+      "set": "ชุด",
+      "shop": "ทุกสินค้าในร้าน"
+    },
+    "scopeDetail": {
+      "allConditions": "ทุกสภาพ",
+      "minPrice": "ราคา ≥ {price}",
+      "noAuction": "ไม่รวมสินค้าประมูล",
+      "noQuota": "ไม่จำกัดโควตา",
+      "perBuyer": "{limit} ชิ้น/คน",
+      "quota": "โควตา {quota}/listing"
+    },
+    "status": {
+      "ACTIVE": "กำลังลด",
+      "BUDGET_EXHAUSTED": "หมดงบ",
+      "ENDED": "จบแล้ว",
+      "PAUSED": "หยุดชั่วคราว",
+      "SCHEDULED": "ตั้งเวลาไว้",
+      "SOLD_OUT": "ขายหมด"
+    },
+    "subtitle": {
+      "home": "{link} · หน้าแรก",
+      "noPage": "ไม่มีหน้าแคมเปญ"
+    },
+    "table": {
+      "actions": "จัดการ",
+      "allSoldOut": "ขายหมดทุก listing",
+      "budget": "งบ / ขายแล้ว",
+      "budgetExhausted": "จบเพราะงบหมด",
+      "campaign": "แคมเปญ",
+      "discount": "ส่วนลด",
+      "joined": "เข้าร่วม {count} listing",
+      "manage": "จัดการ {name}",
+      "noBudget": "— (ไม่มีงบ)",
+      "period": "ระยะเวลา",
+      "scope": "ขอบเขต",
+      "sold": "ขายแล้ว {count} ชิ้น",
+      "status": "สถานะ",
+      "type": "ประเภท"
+    },
+    "tabs": {
+      "all": "ทั้งหมด"
+    },
+    "tryAgain": "กรุณาลองอีกครั้ง",
+    "type": {
+      "all": "ทุกประเภท",
+      "category": "ลดทั้งหมวด",
+      "shop": "ร้านค้า"
+    },
+    "validation": {
+      "budgetBelowUsed": "งบต้องไม่น้อยกว่ายอดที่อุดหนุนไปแล้ว",
+      "budgetIncreaseOnly": "หลังมีออเดอร์ งบเพิ่มได้อย่างเดียว",
+      "budgetPositive": "งบต้องมากกว่า ฿0",
+      "budgetUnlimited": "แคมเปญนี้ไม่จำกัดงบ — หลังมีออเดอร์ตั้งงบเพิ่มไม่ได้",
+      "countInt": "{label}ต้องเป็นจำนวนเต็ม",
+      "countMin": "{label}ต้องอย่างน้อย {min}",
+      "countNumber": "กรอก{label}เป็นตัวเลข",
+      "dateRequired": "กรุณาเลือก{label}",
+      "discountRequired": "กรอกส่วนลด",
+      "endBeforeStart": "วันสิ้นสุดต้องหลังวันเริ่ม",
+      "endInFuture": "วันสิ้นสุดต้องอยู่ในอนาคต",
+      "flashMaxHours": "Flash Sale ยาวได้ไม่เกิน {hours} ชั่วโมง",
+      "flashQuotaRequired": "Flash Sale ต้องกำหนดโควตาต่อ listing",
+      "maxChars": "ไม่เกิน {max} ตัวอักษร",
+      "nameRequired": "กรุณากรอกชื่อแคมเปญ",
+      "nonNegative": "ต้องไม่ติดลบ",
+      "number": "กรอกเป็นตัวเลข",
+      "percentRange": "เปอร์เซ็นต์ต้องเป็นจำนวนเต็ม {min}–{max}",
+      "positive": "ต้องมากกว่า ฿0",
+      "quotaIncreaseOnly": "หลังมีออเดอร์ โควตาเพิ่มได้อย่างเดียว",
+      "scopeRequired": "เลือกอย่างน้อยหนึ่งรายการ",
+      "slugFormat": "ใช้ได้เฉพาะ a–z 0–9 และ - (ห้ามขึ้นต้น/ลงท้ายด้วย -)",
+      "slugMax": "ไม่เกิน {max} ตัว",
+      "slugMin": "ลิงก์ต้องยาวอย่างน้อย {min} ตัว",
+      "sortNonNegative": "ลำดับต้องไม่ติดลบ"
+    }
+  },
+  "badge": {
+    "flash": "⚡ FLASH SALE",
+    "pegasus": "Pegasus ลดให้",
+    "shop": "ร้านลดเอง"
+  },
+  "breakdown": {
+    "adminTotals": "SALE_SUBSIDY {platform} · ร้านออกเอง {seller} · ลง ledger ตอนปล่อย escrow",
+    "commissionNote": "คอมมิชชั่น: รายการที่ Pegasus ลด คิดจากราคาตั้งต้น · รายการที่ร้านลด คิดจากราคาที่ลดแล้ว",
+    "label": "ราคาลดในคำสั่งซื้อ",
+    "listPaid": "ราคาตั้งต้น / ผู้ซื้อจ่าย",
+    "platform": "ลดราคาสินค้า · Pegasus{name}",
+    "platformSeller": "Pegasus อุดหนุน (ได้ตอนปล่อย escrow)",
+    "shop": "ลดราคาสินค้า · ร้าน{name}",
+    "shopSeller": "ส่วนลดที่ร้านออก",
+    "title": "ราคาลดในคำสั่งซื้อนี้"
+  },
+  "card": {
+    "flashSoldOut": "ราคา Flash หมดแล้ว",
+    "left": "เหลือ {left} ชิ้น",
+    "progress": "ขายแล้ว {sold}/{quota} · เหลือ {left} ชิ้น",
+    "soldOut": "หมดแล้ว",
+    "upcoming": "⚡ เร็วๆ นี้"
+  },
+  "countdown": {
+    "endsIn": "จบใน",
+    "endsInAria": "จบใน {time}",
+    "startsIn": "เริ่มใน",
+    "startsInAria": "เริ่มใน {time}"
+  },
+  "discount": {
+    "fixedOff": "ลด {amount}",
+    "fixedPrice": "ราคาพิเศษ",
+    "percent": "ลด {percent}%",
+    "upToPercent": "ลดสูงสุด {percent}%"
+  },
+  "featured": {
+    "bannerTerms": "ราคาลดแล้วในหน้าสินค้า ไม่ต้องใช้โค้ด · {until} · ใช้โค้ดส่วนลดซ้อนได้",
+    "listLabel": "สินค้า Flash Sale",
+    "shopNow": "ช้อปเลย →",
+    "viewAll": "ดูทั้งหมด"
+  },
+  "headline": "{discount} ทุกชิ้นในแคมเปญ",
+  "hero": {
+    "ended": "{name} จบแล้ว · ราคากลับเป็นราคาปกติ",
+    "endedLink": "ดูสินค้าลดราคาอื่นที่หน้า SALE",
+    "endedShort": "จบแล้ว",
+    "endedToast": "{name} จบแล้ว",
+    "endedToastHint": "ดูสินค้าลดราคาอื่นได้ที่หน้า SALE",
+    "endsIn": "เหลืออีก",
+    "pegasus": "แคมเปญ Pegasus",
+    "shop": "ร้านค้า",
+    "shopName": " · ร้าน {name}",
+    "startsIn": "เริ่มในอีก",
+    "status": "สถานะ"
+  },
+  "notify": {
+    "added": {
+      "description": "เพิ่ม {name} ราคา {price} แล้ว · ราคานี้ถึง {time} ต้องชำระก่อนหมดเวลาจองสต็อก",
+      "title": "เพิ่มลงตะกร้าที่ราคา Flash"
+    },
+    "buyerLimit": "ราคา Flash จำกัดคนละ {limit} ชิ้น · ชิ้นที่ {next} คิดราคาปกติ {price}"
+  },
+  "page": {
+    "breadcrumb": {
+      "home": "หน้าแรก"
+    },
+    "empty": {
+      "campaign": "แคมเปญนี้ยังไม่มีสินค้าที่ลดราคา",
+      "filter": "ไม่มีสินค้าที่ตรงกับตัวกรอง"
+    },
+    "filter": {
+      "allConditions": "ทุกสภาพ",
+      "allGames": "ทุกเกม",
+      "condition": "สภาพ",
+      "game": "เกม",
+      "minDiscount": "ลด ≥ {value}%"
+    },
+    "loadFailed": "โหลดสินค้าลดราคาไม่สำเร็จ",
+    "loadMore": "โหลดเพิ่ม",
+    "loadingMore": "กำลังโหลด…",
+    "range": "แสดง 1–{shown} จาก {total}",
+    "sort": {
+      "aria": "เรียงตาม",
+      "discount": "ลดมากสุด",
+      "ending": "ใกล้หมดเวลา",
+      "label": "เรียง:",
+      "price": "ราคาต่ำสุด"
+    },
+    "subtitle": "ราคาลดแล้วทั้งหมด ไม่ต้องใช้โค้ด",
+    "tabAll": "ทั้งหมด {count}",
+    "tabUpcoming": " · เร็วๆ นี้",
+    "tabs": "แคมเปญลดราคา"
+  },
+  "price": {
+    "apply": "ใช้",
+    "clear": "ล้าง",
+    "filter": "ราคา",
+    "filterActive": "ราคา: {min}–{max}",
+    "listAria": "ราคาปกติ {price}",
+    "max": "ราคาสูงสุด",
+    "maxPlaceholder": "สูงสุด",
+    "min": "ราคาต่ำสุด",
+    "minPlaceholder": "ต่ำสุด"
+  },
+  "priceChanged": {
+    "accept": "ยืนยันราคาใหม่",
+    "description": "ราคาลดจบแล้วระหว่างที่สินค้าอยู่ในตะกร้า",
+    "newTotal": "ยอดรวมใหม่",
+    "remove": "นำออกจากตะกร้า",
+    "title": "ราคาสินค้าบางรายการเปลี่ยน",
+    "unavailable": "ไม่พร้อมจำหน่าย"
+  },
+  "priceLocked": {
+    "aSale": "การลดราคา",
+    "attempted": "ราคาที่จะตั้ง",
+    "current": "ราคาปัจจุบัน",
+    "description": "{name} อยู่ใน {sale}{until} · ลดราคาได้ แต่ขึ้นราคาได้หลังแคมเปญจบ เพื่อไม่ให้ราคาขีดฆ่าสูงเกินจริง",
+    "ok": "ตกลง",
+    "ownerShop": " (ร้าน)",
+    "title": "ขึ้นราคาไม่ได้ระหว่างการลดราคา",
+    "until": " ถึง {date}"
+  },
+  "quota": {
+    "buyAtList": "ซื้อราคาปกติ",
+    "description": "โควตาราคา{salePrice} ของ {name} ถูกซื้อครบแล้ว · ซื้อต่อได้ที่ราคาปกติ{listPrice}",
+    "remove": "นำออก",
+    "thisProduct": "สินค้านี้",
+    "title": "ราคา Flash Sale เต็มแล้ว"
+  },
+  "seller": {
+    "action": {
+      "adminPaused": {
+        "description": "เหตุผล: {reason} · แก้ราคาแล้วขอให้ทีมงานเปิดอีกครั้ง",
+        "noReason": "ไม่ได้ระบุ",
+        "title": "ทีมงานหยุด “{name}”"
+      },
+      "close": "ปิด",
+      "contact": "ติดต่อทีมงาน",
+      "delete": {
+        "confirm": "ลบ",
+        "failed": "ลบไม่สำเร็จ",
+        "noOrders": "ยังไม่มีออเดอร์ที่ใช้ราคานี้ ลบแล้วกู้คืนไม่ได้",
+        "scheduled": "ยังไม่เริ่มและยังไม่มีออเดอร์ ลบแล้วกู้คืนไม่ได้",
+        "success": "ลบ “{name}” แล้ว",
+        "title": "ลบ “{name}”?"
+      },
+      "end": {
+        "confirm": "จบตอนนี้",
+        "description": "{count} listing กลับเป็นราคาปกติทันที · ขายไปแล้ว {sold} ชิ้น ไม่กระทบ",
+        "failed": "จบการลดราคาไม่สำเร็จ",
+        "success": "จบ “{name}” แล้ว",
+        "title": "จบ “{name}” ตอนนี้?"
+      },
+      "inUse": "มีออเดอร์แล้ว ลบไม่ได้ — จบก่อนกำหนดแทน",
+      "pause": {
+        "confirm": "หยุดชั่วคราว",
+        "description": "{count} listing กลับเป็นราคาปกติจนกว่าจะเปิดอีกครั้ง",
+        "failed": "หยุดไม่สำเร็จ",
+        "success": "หยุด “{name}” แล้ว",
+        "title": "หยุด “{name}” ชั่วคราว?"
+      },
+      "resume": {
+        "confirm": "เปิดอีกครั้ง",
+        "description": "listing ได้ราคาลดกลับภายใน 1 นาที",
+        "failed": "เปิดไม่สำเร็จ",
+        "success": "เปิด “{name}” แล้ว",
+        "title": "เปิด “{name}” อีกครั้ง?"
+      }
+    },
+    "discount": {
+      "fixedOff": "ลด {amount}/ชิ้น",
+      "fixedPrice": "ราคาใหม่รายชิ้น",
+      "perRow": "ตั้งรายแถว",
+      "percent": "ลด {percent}%",
+      "percentRange": "ลด {min}–{max}%",
+      "shopPays": "ร้านออกเงิน"
+    },
+    "errors": {
+      "inUse": "มีออเดอร์แล้ว ลบไม่ได้ — ใช้ “จบก่อนกำหนด” แทน",
+      "invalid": "ข้อมูลการลดราคาไม่ผ่านเงื่อนไข ตรวจราคาแต่ละแถวอีกครั้ง",
+      "notFound": "ไม่พบการลดราคานี้แล้ว ลองโหลดหน้าใหม่",
+      "notVerified": "ร้านยังไม่ผ่านการยืนยัน จึงลดราคาสินค้าไม่ได้",
+      "overlap": "มี listing อยู่ในการลดราคาอื่นช่วงเดียวกัน (SALE_OVERLAP) — เอาออกจากอันเดิมก่อน",
+      "paused": "ทีมงานหยุดการลดราคานี้ไว้ เปิดเองไม่ได้ — ติดต่อทีมงาน"
+    },
+    "form": {
+      "addCategory": "เพิ่มหมวดหมู่",
+      "breadcrumb": {
+        "create": "สร้างการลดราคา",
+        "edit": "แก้ไขการลดราคา"
+      },
+      "bulk": {
+        "apply": "ใช้กับที่เลือก",
+        "aria": "เปอร์เซ็นต์ที่ลดทุกแถวที่เลือก",
+        "label": "ตั้งทุกแถวที่เลือก:"
+      },
+      "discard": {
+        "confirm": "ทิ้งการแก้ไข",
+        "description": "การลดราคายังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด",
+        "stay": "อยู่ต่อ",
+        "title": "ทิ้งการแก้ไข?"
+      },
+      "discountAria": "ส่วนลด",
+      "discountFixed": "ลดเป็นบาทต่อชิ้น",
+      "discountPercent": "ลดเป็น %",
+      "discountType": "ประเภทส่วนลด",
+      "endsAt": "สิ้นสุด",
+      "errors": {
+        "categoryRequired": "เลือกหมวดอย่างน้อยหนึ่งหมวด",
+        "discountRequired": "กรอกส่วนลด",
+        "endBeforeStart": "วันสิ้นสุดต้องหลังวันเริ่ม",
+        "fixedPositive": "ต้องมากกว่า ฿0",
+        "nameRequired": "กรุณากรอกชื่อ",
+        "percentRange": "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90"
+      },
+      "hintFixed": "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1",
+      "hintPercent": "1–90% · ไม่รวมสินค้าประมูล",
+      "loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+      "loading": "กำลังโหลด...",
+      "name": "ชื่อ (ผู้ซื้อไม่เห็น)",
+      "nameAria": "ชื่อการลดราคา",
+      "preview": {
+        "commission": "คอมมิชชั่น (จากราคาลด)",
+        "net": "คุณได้",
+        "sample": "ตัวอย่าง: {name} (คอมมิชชั่น {percent}%)",
+        "shopDiscount": "ส่วนลดที่ร้านออก",
+        "title": "ผู้ซื้อเห็น"
+      },
+      "save": "บันทึก",
+      "saveFix": "บันทึก (แก้ {count} แถวก่อน)",
+      "scope": "สินค้าที่ลด",
+      "scopeCategory": "หมวดหมู่",
+      "scopeListings": "เลือก listing",
+      "search": "ค้นหา listing ในร้าน",
+      "section": {
+        "info": "1. ข้อมูลการลดราคา",
+        "items": "2. สินค้าที่ลด"
+      },
+      "selectOne": "เลือก listing อย่างน้อย 1 รายการ",
+      "startsAt": "เริ่ม",
+      "subtitle": "ร้านออกส่วนลดเอง · คอมมิชชั่นคิดจากราคาที่ลดแล้ว",
+      "summary": {
+        "fixRows": "แก้ {count} แถวก่อนบันทึก",
+        "lockAll": "ระหว่างนี้ขึ้นราคา listing ที่เข้าร่วมไม่ได้",
+        "lockSelected": "ระหว่างนี้ขึ้นราคา {count} listing นี้ไม่ได้",
+        "range": " · ลด {range}",
+        "title": "สรุป"
+      },
+      "table": {
+        "empty": "ยังไม่มี listing ที่เปิดขาย",
+        "inAuction": "อยู่ในการประมูล — เลือกไม่ได้",
+        "noMatch": "ไม่พบ listing ที่ค้นหา",
+        "percent": "ลด",
+        "price": "ราคาปัจจุบัน",
+        "salePrice": "ราคาลด",
+        "salePriceFor": "ราคาลด {name}",
+        "select": "เลือก {name}",
+        "selectAll": "เลือกทั้งหมด",
+        "selected": "เลือกแล้ว {selected} จาก {total} listing · listing ประมูลเลือกไม่ได้",
+        "stock": "คงเหลือ"
+      },
+      "toast": {
+        "created": "ตั้งการลดราคา “{name}” แล้ว",
+        "failed": "บันทึกไม่สำเร็จ",
+        "updated": "บันทึกการลดราคาแล้ว"
+      },
+      "verifyFirst": "ร้านต้องผ่านการยืนยันก่อนจึงลดราคาสินค้าได้"
+    },
+    "list": {
+      "columns": {
+        "actions": "จัดการ",
+        "discount": "ส่วนลด",
+        "items": "สินค้า",
+        "period": "ระยะเวลา",
+        "sale": "การลดราคา",
+        "status": "สถานะ"
+      },
+      "empty": {
+        "description": "ตั้งราคาลดให้สินค้า ผู้ซื้อเห็นราคาใหม่ทันทีโดยไม่ต้องใช้โค้ด",
+        "title": "ยังไม่มีการลดราคา"
+      },
+      "kpi": {
+        "active": "กำลังลดราคา",
+        "discount": "ส่วนลดที่ร้านออก (30 วัน)",
+        "discountNote": "คอมมิชชั่นคิดจากราคาที่ลดแล้ว",
+        "listings": "Listing ที่ลดอยู่",
+        "listingsNote": "ด้วยราคาลดของร้าน",
+        "revenue": "ยอดขายจากราคาลด (30 วัน)",
+        "revenueNote": "ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว",
+        "scheduled": "{count} ตั้งเวลาไว้"
+      },
+      "loadFailed": "โหลดการลดราคาไม่สำเร็จ",
+      "loading": "กำลังโหลดการลดราคา...",
+      "manage": "จัดการ {name}",
+      "menu": {
+        "edit": "แก้ไข",
+        "endEarly": "จบก่อนกำหนด",
+        "pauseReason": "ดูเหตุผลที่ทีมงานหยุด"
+      },
+      "note": "ราคาขีดฆ่า = ราคา listing ปัจจุบัน · ระหว่างการลดราคาที่ตั้งเวลาไว้หรือกำลังลด ขึ้นราคา listing ไม่ได้ · 1 listing ใช้ราคาลดได้ทีละรายการ ถ้าอยู่ในแคมเปญ Pegasus ด้วย ผู้ซื้อเห็นราคาที่ต่ำกว่า · โค้ดส่วนลดยังใช้ซ้อนได้",
+      "page": "หน้า {page} / {total}",
+      "pagination": "หน้ารายการลดราคา",
+      "sold": "ขายแล้ว {count} ชิ้น",
+      "subtitle": "ลดราคาสินค้าให้ผู้ซื้อเห็นราคาใหม่ทันที ไม่ต้องใช้โค้ด · ร้านเป็นผู้ออกส่วนลด",
+      "verifyFirst": "ร้านต้องผ่านการยืนยันก่อน"
+    },
+    "pegasus": {
+      "description": "Pegasus ออกส่วนลดให้ · คุณได้เงินเต็มราคาตั้งต้น · ระหว่างแคมเปญขึ้นราคา listing เหล่านี้ไม่ได้ (ลดได้)",
+      "item": "{name} · ลด {percent}%",
+      "loading": "กำลังโหลด…",
+      "locked": "ล็อกราคา",
+      "title": "สินค้าของคุณในแคมเปญ Pegasus",
+      "until": "ถึง {date}"
+    },
+    "period": {
+      "daysLeft": "เหลือ {days} วัน",
+      "ended": "สิ้นสุดแล้ว",
+      "paused": "หยุดไว้",
+      "pausedByTeam": "ทีมงานหยุด",
+      "startsIn": "เริ่มใน {days} วัน"
+    },
+    "retry": "ลองอีกครั้ง",
+    "row": {
+      "campaignLower": "ราคาแคมเปญต่ำกว่า",
+      "missing": "กรอกราคาลด",
+      "notLower": "ราคาลดต้องต่ำกว่าราคาปัจจุบัน",
+      "other": "อื่น",
+      "overlap": "อยู่ในการลดราคา{name} ช่วงเดียวกัน → SALE_OVERLAP เอาออกจากอันเดิมก่อน",
+      "platform": "อยู่ในแคมเปญ {name} ({price}) · {who} → ผู้ซื้อเห็น {buyerSees}",
+      "tooLow": "ราคาลดต้องไม่ต่ำกว่า ฿1",
+      "yoursLower": "ราคาของคุณต่ำกว่า"
+    },
+    "scope": {
+      "categories": "{count} หมวด",
+      "listings": "เลือก {count} listing",
+      "shop": "ทุกสินค้าในร้าน"
+    },
+    "tabs": {
+      "codes": "โค้ดส่วนลดร้าน",
+      "label": "ประเภทโปรโมชั่นของร้าน",
+      "sales": "ลดราคาสินค้า"
+    },
+    "title": "โปรโมชั่นของร้าน",
+    "tryAgain": "กรุณาลองอีกครั้ง"
+  },
+  "terms": {
+    "limited": "จำนวนจำกัด",
+    "maxPerUnit": "สูงสุด {amount} ต่อชิ้น",
+    "perBuyer": "คนละ {limit} ชิ้นต่อสินค้า",
+    "stackable": "ใช้โค้ดส่วนลดซ้อนได้"
+  },
+  "until": "ถึง {date}"
+}

@@ -20,7 +20,7 @@ import type { AdminSale, SaleStatus, SaleType } from "../sales.types";
 import { PromotionPageTabs } from "./PromotionPageTabs";
 import { SaleActionDialog, type SaleActionState } from "./SaleActionDialog";
 import { SaleTable, type SaleRowAction } from "./SaleTable";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -29,6 +29,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * filter / แท็บสถานะ / หน้า อยู่ใน URL ทั้งหมด
  */
 export function AdminSalesContent() {
+  const { t } = useTranslate("sale");
   const [params, setParams] = useSearchParams();
   const status = params.get("status") as SaleStatus | null;
   const type = params.get("type") as SaleType | null;
@@ -99,15 +100,14 @@ export function AdminSalesContent() {
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="grid gap-1">
-          <h1 className="text-2xl font-black">โปรโมชั่น &amp; ลดราคา</h1>
+          <h1 className="text-2xl font-black">{t("admin.list.title", "โปรโมชั่น & ลดราคา")}</h1>
           <p className="text-sm text-muted-foreground">
-            ตั้งราคาลดให้สินค้าโดยตรง ผู้ซื้อเห็นราคาที่ลดแล้วทันทีโดยไม่ต้องใช้โค้ด · Flash Sale / ลดทั้งหมวด /
-            ดูแลการลดราคาของร้าน
+            {t("admin.list.subtitle", "ตั้งราคาลดให้สินค้าโดยตรง ผู้ซื้อเห็นราคาที่ลดแล้วทันทีโดยไม่ต้องใช้โค้ด · Flash Sale / ลดทั้งหมวด / ดูแลการลดราคาของร้าน")}
           </p>
         </div>
         <Button size="sm" className="px-3" render={<Link to="/admin/sales/new" />} nativeButton={false}>
           <Plus />
-          สร้างแคมเปญลดราคา
+          {t("admin.list.create", "สร้างแคมเปญลดราคา")}
         </Button>
       </header>
 
@@ -115,24 +115,24 @@ export function AdminSalesContent() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="กำลังลดราคา"
+          label={t("admin.list.kpi.active", "กำลังลดราคา")}
           value={((s?.activePlatformSales ?? 0) + (s?.activeSellerSales ?? 0)).toLocaleString(intlLocale())}
-          note={`Pegasus ${s?.activePlatformSales ?? 0} · ร้านค้า ${s?.activeSellerSales ?? 0}`}
+          note={t("admin.list.kpi.activeNote", "Pegasus {platform} · ร้านค้า {seller}", { platform: s?.activePlatformSales ?? 0, seller: s?.activeSellerSales ?? 0 })}
         />
         <KpiCard
-          label="Listing ที่ลดอยู่ตอนนี้"
+          label={t("admin.list.kpi.listings", "Listing ที่ลดอยู่ตอนนี้")}
           value={(s?.listingsOnSale ?? 0).toLocaleString(intlLocale())}
-          note="ทั้งแคมเปญ Pegasus และร้านลดเอง"
+          note={t("admin.list.kpi.listingsNote", "ทั้งแคมเปญ Pegasus และร้านลดเอง")}
         />
         <KpiCard
-          label="ยอดขายจากราคาลด (30 วัน)"
+          label={t("admin.list.kpi.revenue", "ยอดขายจากราคาลด (30 วัน)")}
           value={formatBaht(s?.saleSales30d)}
-          note="ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว"
+          note={t("admin.list.kpi.revenueNote", "ยอดที่ผู้ซื้อจ่ายในออเดอร์ที่ชำระแล้ว")}
         />
         <KpiCard
-          label="Pegasus อุดหนุน (30 วัน)"
+          label={t("admin.list.kpi.subsidy", "Pegasus อุดหนุน (30 วัน)")}
           value={formatBaht(s?.saleSubsidy30d)}
-          note="SALE_SUBSIDY · แยกจากต้นทุนโค้ด"
+          note={t("admin.list.kpi.subsidyNote", "SALE_SUBSIDY · แยกจากต้นทุนโค้ด")}
         />
       </div>
 
@@ -144,7 +144,7 @@ export function AdminSalesContent() {
               value={status ?? "ALL"}
               onValueChange={(value) => updateParams({ status: value === "ALL" ? null : String(value) })}
             >
-              <TabsList aria-label="กรองตามสถานะ" className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
+              <TabsList aria-label={t("admin.list.statusFilter", "กรองตามสถานะ")} className="h-auto max-w-full gap-1 overflow-x-auto rounded-md bg-[#eef1f2] p-[3px]">
                 {SALE_STATUS_TABS.map((tab) => {
                   const count =
                     tab.value == null
@@ -163,7 +163,7 @@ export function AdminSalesContent() {
                 })}
               </TabsList>
             </Tabs>
-            <div role="group" aria-label="ประเภทการลดราคา" className="flex overflow-hidden rounded-sm border">
+            <div role="group" aria-label={t("admin.list.typeFilter", "ประเภทการลดราคา")} className="flex overflow-hidden rounded-sm border">
               {SALE_TYPE_FILTERS.map((filter) => (
                 <Button
                   key={filter.label}
@@ -192,8 +192,8 @@ export function AdminSalesContent() {
               </InputGroupAddon>
               <InputGroupInput
                 className="text-[13px] md:text-[13px]"
-                aria-label="ค้นหาแคมเปญ"
-                placeholder="ค้นหาแคมเปญ / ร้าน"
+                aria-label={t("admin.list.search", "ค้นหาแคมเปญ")}
+                placeholder={t("admin.list.searchPlaceholder", "ค้นหาแคมเปญ / ร้าน")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
@@ -201,12 +201,12 @@ export function AdminSalesContent() {
           </form>
         </div>
 
-        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">กำลังโหลดแคมเปญ...</p> : null}
+        {list.isPending ? <p className="p-6 text-sm text-muted-foreground">{t("admin.list.loading", "กำลังโหลดแคมเปญ...")}</p> : null}
         {list.isError ? (
           <p role="alert" className="p-6 text-sm text-destructive">
-            โหลดแคมเปญไม่สำเร็จ{" "}
+            {t("admin.list.loadFailed", "โหลดแคมเปญไม่สำเร็จ")}{" "}
             <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void list.refetch()}>
-              ลองอีกครั้ง
+              {t("admin.retry", "ลองอีกครั้ง")}
             </Button>
           </p>
         ) : null}
@@ -216,13 +216,13 @@ export function AdminSalesContent() {
               <EmptyMedia variant="icon">
                 <BadgePercent />
               </EmptyMedia>
-              <EmptyTitle>ยังไม่มีแคมเปญในแท็บนี้</EmptyTitle>
-              <EmptyDescription>สร้าง Flash Sale หรือแคมเปญลดทั้งหมวด ผู้ซื้อเห็นราคาลดทันทีโดยไม่ต้องใช้โค้ด</EmptyDescription>
+              <EmptyTitle>{t("admin.list.empty.title", "ยังไม่มีแคมเปญในแท็บนี้")}</EmptyTitle>
+              <EmptyDescription>{t("admin.list.empty.description", "สร้าง Flash Sale หรือแคมเปญลดทั้งหมวด ผู้ซื้อเห็นราคาลดทันทีโดยไม่ต้องใช้โค้ด")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button size="sm" render={<Link to="/admin/sales/new" />} nativeButton={false}>
                 <Plus />
-                สร้างแคมเปญลดราคา
+                {t("admin.list.create", "สร้างแคมเปญลดราคา")}
               </Button>
             </EmptyContent>
           </Empty>
@@ -231,16 +231,15 @@ export function AdminSalesContent() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            แสดง {rows.length ? page * SALE_PAGE_SIZE + 1 : 0}–{page * SALE_PAGE_SIZE + rows.length} จาก {totalItems}{" "}
-            แคมเปญ
+            {t("admin.list.range", "แสดง {from}–{to} จาก {total} แคมเปญ", { from: rows.length ? page * SALE_PAGE_SIZE + 1 : 0, to: page * SALE_PAGE_SIZE + rows.length, total: totalItems })}
           </span>
           {totalPages > 1 ? (
-            <nav aria-label="หน้ารายการแคมเปญลดราคา" className="flex items-center gap-2">
+            <nav aria-label={t("admin.list.pagination", "หน้ารายการแคมเปญลดราคา")} className="flex items-center gap-2">
               <Button
                 size="icon-sm"
                 className="size-7 text-[13px] text-[#414755]"
                 variant="outline"
-                aria-label="หน้าก่อนหน้า"
+                aria-label={t("admin.list.prevPage", "หน้าก่อนหน้า")}
                 disabled={page === 0}
                 onClick={() => updateParams({ page: String(page - 1) }, false)}
               >
@@ -253,7 +252,7 @@ export function AdminSalesContent() {
                   className="h-7 w-auto min-w-7 px-2.5 text-[13px]"
                   variant={number === page ? "default" : "outline"}
                   aria-current={number === page ? "page" : undefined}
-                  aria-label={`หน้า ${number + 1}`}
+                  aria-label={t("admin.list.pageN", "หน้า {page}", { page: number + 1 })}
                   onClick={() => updateParams({ page: number ? String(number) : null }, false)}
                 >
                   {number + 1}
@@ -263,7 +262,7 @@ export function AdminSalesContent() {
                 size="icon-sm"
                 className="size-7 text-[13px] text-[#414755]"
                 variant="outline"
-                aria-label="หน้าถัดไป"
+                aria-label={t("admin.list.nextPage", "หน้าถัดไป")}
                 disabled={page + 1 >= totalPages}
                 onClick={() => updateParams({ page: String(page + 1) }, false)}
               >
@@ -277,9 +276,7 @@ export function AdminSalesContent() {
       <Alert className="rounded-[12px] border-[#fde4bd] bg-[#fff1db] px-4 py-3.5 text-[#956019]">
         <Info />
         <AlertDescription className="text-[13px] text-[#956019]">
-          แคมเปญ Pegasus: ร้านได้เงินเต็มราคาตั้งต้น Pegasus อุดหนุนส่วนลดตอนปล่อย escrow (SALE_SUBSIDY) · ยอดจองถึงงบ →
-          แคมเปญจบเอง (หมดงบ) · การลดราคาของร้าน: ร้านออกเงินเอง แอดมินแก้ไม่ได้ แต่หยุดได้พร้อมเหตุผล · 1 listing
-          ใช้ราคาลดได้ทีละรายการ (ราคาต่ำสุดชนะ) และยังใช้โค้ดส่วนลดซ้อนได้
+          {t("admin.list.note", "แคมเปญ Pegasus: ร้านได้เงินเต็มราคาตั้งต้น Pegasus อุดหนุนส่วนลดตอนปล่อย escrow (SALE_SUBSIDY) · ยอดจองถึงงบ → แคมเปญจบเอง (หมดงบ) · การลดราคาของร้าน: ร้านออกเงินเอง แอดมินแก้ไม่ได้ แต่หยุดได้พร้อมเหตุผล · 1 listing ใช้ราคาลดได้ทีละรายการ (ราคาต่ำสุดชนะ) และยังใช้โค้ดส่วนลดซ้อนได้")}
         </AlertDescription>
       </Alert>
 

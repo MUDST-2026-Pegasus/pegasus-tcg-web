@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { FLASH_MAX_HOURS, hoursBetween, saleHasOrders } from "./sales.format";
 import type { AdminSale, AdminSaleInput } from "./sales.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ฟอร์มสร้าง/แก้แคมเปญลดราคา (Figma SAL-A2) — กติกาตาม SAL-01/02 (TCG-676/677):
@@ -32,36 +33,42 @@ export type SaleFormContext = {
   now?: number;
 };
 
-const optionalCount = (label: string) =>
-  z.number({ error: `กรอก${label}เป็นตัวเลข` }).int(`${label}ต้องเป็นจำนวนเต็ม`).min(1, `${label}ต้องอย่างน้อย 1`).nullable();
+// label เป็น getter เพราะ schema สร้างตอนโหลด module แต่ข้อความต้องแปลตอน validate
+const optionalCount = (label: () => string) =>
+  z
+    .number({ error: () => translate("sale", "admin.validation.countNumber", "กรอก{label}เป็นตัวเลข", { label: label() }) })
+    .int({ error: () => translate("sale", "admin.validation.countInt", "{label}ต้องเป็นจำนวนเต็ม", { label: label() }) })
+    .min(1, { error: () => translate("sale", "admin.validation.countMin", "{label}ต้องอย่างน้อย {min}", { label: label(), min: 1 }) })
+    .nullable();
 
-const isoDate = (label: string) => z.string().refine((value) => Number.isFinite(Date.parse(value)), `กรุณาเลือก${label}`);
+const isoDate = (label: () => string) =>
+  z.string().refine((value) => Number.isFinite(Date.parse(value)), { error: () => translate("sale", "admin.validation.dateRequired", "กรุณาเลือก{label}", { label: label() }) });
 
 const saleShape = z.object({
-  name: z.string().trim().min(1, "กรุณากรอกชื่อแคมเปญ").max(80, "ไม่เกิน 80 ตัวอักษร"),
+  name: z.string().trim().min(1, { error: () => translate("sale", "admin.validation.nameRequired", "กรุณากรอกชื่อแคมเปญ") }).max(80, { error: () => translate("sale", "admin.validation.maxChars", "ไม่เกิน {max} ตัวอักษร", { max: 80 }) }),
   slug: z
     .string()
     .trim()
-    .min(3, "ลิงก์ต้องยาวอย่างน้อย 3 ตัว")
-    .max(60, "ไม่เกิน 60 ตัว")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "ใช้ได้เฉพาะ a–z 0–9 และ - (ห้ามขึ้นต้น/ลงท้ายด้วย -)"),
+    .min(3, { error: () => translate("sale", "admin.validation.slugMin", "ลิงก์ต้องยาวอย่างน้อย {min} ตัว", { min: 3 }) })
+    .max(60, { error: () => translate("sale", "admin.validation.slugMax", "ไม่เกิน {max} ตัว", { max: 60 }) })
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: () => translate("sale", "admin.validation.slugFormat", "ใช้ได้เฉพาะ a–z 0–9 และ - (ห้ามขึ้นต้น/ลงท้ายด้วย -)") }),
   saleType: z.enum(["FLASH_SALE", "CATEGORY_SALE"]),
   discountType: z.enum(["PERCENT", "FIXED_OFF"]),
-  discountValue: z.number({ error: "กรอกส่วนลด" }).nullable(),
-  maxDiscountPerUnit: z.number({ error: "กรอกเป็นตัวเลข" }).positive("ต้องมากกว่า ฿0").nullable(),
+  discountValue: z.number({ error: () => translate("sale", "admin.validation.discountRequired", "กรอกส่วนลด") }).nullable(),
+  maxDiscountPerUnit: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.positive", "ต้องมากกว่า ฿0") }).nullable(),
   scopeType: z.enum(["ALL", "GAME", "CATEGORY", "CARD_SET"]),
   scopeIds: z.array(z.number()),
   conditions: z.array(z.string()),
-  minUnitPrice: z.number({ error: "กรอกเป็นตัวเลข" }).nonnegative("ต้องไม่ติดลบ").nullable(),
+  minUnitPrice: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).nonnegative({ error: () => translate("sale", "admin.validation.nonNegative", "ต้องไม่ติดลบ") }).nullable(),
   excludedSellerIds: z.array(z.number()),
-  perListingQuota: optionalCount("โควตาต่อ listing"),
-  perBuyerLimit: optionalCount("จำกัดต่อผู้ซื้อ"),
-  budgetCap: z.number({ error: "กรอกเป็นตัวเลข" }).positive("งบต้องมากกว่า ฿0").nullable(),
+  perListingQuota: optionalCount(() => translate("sale", "admin.field.perListingQuota", "โควตาต่อ listing")),
+  perBuyerLimit: optionalCount(() => translate("sale", "admin.field.perBuyerLimit", "จำกัดต่อผู้ซื้อ")),
+  budgetCap: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.budgetPositive", "งบต้องมากกว่า ฿0") }).nullable(),
   bannerImageUrl: z.string().nullable(),
   featuredOnHome: z.boolean(),
-  homeSort: z.number().int().min(0, "ลำดับต้องไม่ติดลบ").nullable(),
-  startsAt: isoDate("วันเริ่ม"),
-  endsAt: isoDate("วันสิ้นสุด"),
+  homeSort: z.number().int().min(0, { error: () => translate("sale", "admin.validation.sortNonNegative", "ลำดับต้องไม่ติดลบ") }).nullable(),
+  startsAt: isoDate(() => translate("sale", "admin.field.startsAt", "วันเริ่ม")),
+  endsAt: isoDate(() => translate("sale", "admin.field.endsAt", "วันสิ้นสุด")),
 });
 
 /** zod schema factory — กติกาข้ามฟิลด์ขึ้นกับแคมเปญเดิม */
@@ -73,50 +80,50 @@ export function createSaleSchema({ existing, now = Date.now() }: SaleFormContext
 
     const discount = value.discountValue;
     if (discount == null) {
-      issue("discountValue", "กรอกส่วนลด");
+      issue("discountValue", translate("sale", "admin.validation.discountRequired", "กรอกส่วนลด"));
     } else if (value.discountType === "PERCENT" && (discount < 1 || discount > 90 || !Number.isInteger(discount))) {
-      issue("discountValue", "เปอร์เซ็นต์ต้องเป็นจำนวนเต็ม 1–90");
+      issue("discountValue", translate("sale", "admin.validation.percentRange", "เปอร์เซ็นต์ต้องเป็นจำนวนเต็ม {min}–{max}", { min: 1, max: 90 }));
     } else if (value.discountType === "FIXED_OFF" && discount <= 0) {
-      issue("discountValue", "ต้องมากกว่า ฿0");
+      issue("discountValue", translate("sale", "admin.validation.positive", "ต้องมากกว่า ฿0"));
     }
 
     if (value.scopeType !== "ALL" && value.scopeIds.length === 0) {
-      issue("scopeIds", "เลือกอย่างน้อยหนึ่งรายการ");
+      issue("scopeIds", translate("sale", "admin.validation.scopeRequired", "เลือกอย่างน้อยหนึ่งรายการ"));
     }
 
     const starts = Date.parse(value.startsAt);
     const ends = Date.parse(value.endsAt);
     if (Number.isFinite(starts) && Number.isFinite(ends)) {
       if (ends <= starts) {
-        issue("endsAt", "วันสิ้นสุดต้องหลังวันเริ่ม");
+        issue("endsAt", translate("sale", "admin.validation.endBeforeStart", "วันสิ้นสุดต้องหลังวันเริ่ม"));
       } else if (value.saleType === "FLASH_SALE" && hoursBetween(value.startsAt, value.endsAt) > FLASH_MAX_HOURS) {
-        issue("endsAt", `Flash Sale ยาวได้ไม่เกิน ${FLASH_MAX_HOURS} ชั่วโมง`);
+        issue("endsAt", translate("sale", "admin.validation.flashMaxHours", "Flash Sale ยาวได้ไม่เกิน {hours} ชั่วโมง", { hours: FLASH_MAX_HOURS }));
       } else if (!existing && ends <= now) {
-        issue("endsAt", "วันสิ้นสุดต้องอยู่ในอนาคต");
+        issue("endsAt", translate("sale", "admin.validation.endInFuture", "วันสิ้นสุดต้องอยู่ในอนาคต"));
       }
     }
 
     if (value.saleType === "FLASH_SALE" && value.perListingQuota == null) {
-      issue("perListingQuota", "Flash Sale ต้องกำหนดโควตาต่อ listing");
+      issue("perListingQuota", translate("sale", "admin.validation.flashQuotaRequired", "Flash Sale ต้องกำหนดโควตาต่อ listing"));
     }
 
     if (locks.hasOrders && existing) {
       if (existing.budgetCap != null && (value.budgetCap == null ? false : value.budgetCap < existing.budgetCap)) {
-        issue("budgetCap", "หลังมีออเดอร์ งบเพิ่มได้อย่างเดียว");
+        issue("budgetCap", translate("sale", "admin.validation.budgetIncreaseOnly", "หลังมีออเดอร์ งบเพิ่มได้อย่างเดียว"));
       }
       if (existing.budgetCap == null && value.budgetCap != null) {
-        issue("budgetCap", "แคมเปญนี้ไม่จำกัดงบ — หลังมีออเดอร์ตั้งงบเพิ่มไม่ได้");
+        issue("budgetCap", translate("sale", "admin.validation.budgetUnlimited", "แคมเปญนี้ไม่จำกัดงบ — หลังมีออเดอร์ตั้งงบเพิ่มไม่ได้"));
       }
       if (
         existing.perListingQuota != null &&
         value.perListingQuota != null &&
         value.perListingQuota < existing.perListingQuota
       ) {
-        issue("perListingQuota", "หลังมีออเดอร์ โควตาเพิ่มได้อย่างเดียว");
+        issue("perListingQuota", translate("sale", "admin.validation.quotaIncreaseOnly", "หลังมีออเดอร์ โควตาเพิ่มได้อย่างเดียว"));
       }
     }
     if (value.budgetCap != null && existing?.subsidyReserved != null && value.budgetCap < existing.subsidyReserved) {
-      issue("budgetCap", "งบต้องไม่น้อยกว่ายอดที่อุดหนุนไปแล้ว");
+      issue("budgetCap", translate("sale", "admin.validation.budgetBelowUsed", "งบต้องไม่น้อยกว่ายอดที่อุดหนุนไปแล้ว"));
     }
   });
 }
@@ -183,3 +190,34 @@ export function slugify(name: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 60);
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "admin.validation.countNumber", "ns": "sale", "defaultValue": "กรอก{label}เป็นตัวเลข"}
+// @tolgee-key {"key": "admin.validation.countInt", "ns": "sale", "defaultValue": "{label}ต้องเป็นจำนวนเต็ม"}
+// @tolgee-key {"key": "admin.validation.countMin", "ns": "sale", "defaultValue": "{label}ต้องอย่างน้อย {min}"}
+// @tolgee-key {"key": "admin.validation.dateRequired", "ns": "sale", "defaultValue": "กรุณาเลือก{label}"}
+// @tolgee-key {"key": "admin.validation.nameRequired", "ns": "sale", "defaultValue": "กรุณากรอกชื่อแคมเปญ"}
+// @tolgee-key {"key": "admin.validation.maxChars", "ns": "sale", "defaultValue": "ไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "admin.validation.slugMin", "ns": "sale", "defaultValue": "ลิงก์ต้องยาวอย่างน้อย {min} ตัว"}
+// @tolgee-key {"key": "admin.validation.slugMax", "ns": "sale", "defaultValue": "ไม่เกิน {max} ตัว"}
+// @tolgee-key {"key": "admin.validation.slugFormat", "ns": "sale", "defaultValue": "ใช้ได้เฉพาะ a–z 0–9 และ - (ห้ามขึ้นต้น/ลงท้ายด้วย -)"}
+// @tolgee-key {"key": "admin.validation.discountRequired", "ns": "sale", "defaultValue": "กรอกส่วนลด"}
+// @tolgee-key {"key": "admin.validation.number", "ns": "sale", "defaultValue": "กรอกเป็นตัวเลข"}
+// @tolgee-key {"key": "admin.validation.positive", "ns": "sale", "defaultValue": "ต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "admin.validation.nonNegative", "ns": "sale", "defaultValue": "ต้องไม่ติดลบ"}
+// @tolgee-key {"key": "admin.field.perListingQuota", "ns": "sale", "defaultValue": "โควตาต่อ listing"}
+// @tolgee-key {"key": "admin.field.perBuyerLimit", "ns": "sale", "defaultValue": "จำกัดต่อผู้ซื้อ"}
+// @tolgee-key {"key": "admin.validation.budgetPositive", "ns": "sale", "defaultValue": "งบต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "admin.validation.sortNonNegative", "ns": "sale", "defaultValue": "ลำดับต้องไม่ติดลบ"}
+// @tolgee-key {"key": "admin.field.startsAt", "ns": "sale", "defaultValue": "วันเริ่ม"}
+// @tolgee-key {"key": "admin.field.endsAt", "ns": "sale", "defaultValue": "วันสิ้นสุด"}
+// @tolgee-key {"key": "admin.validation.percentRange", "ns": "sale", "defaultValue": "เปอร์เซ็นต์ต้องเป็นจำนวนเต็ม {min}–{max}"}
+// @tolgee-key {"key": "admin.validation.scopeRequired", "ns": "sale", "defaultValue": "เลือกอย่างน้อยหนึ่งรายการ"}
+// @tolgee-key {"key": "admin.validation.endBeforeStart", "ns": "sale", "defaultValue": "วันสิ้นสุดต้องหลังวันเริ่ม"}
+// @tolgee-key {"key": "admin.validation.flashMaxHours", "ns": "sale", "defaultValue": "Flash Sale ยาวได้ไม่เกิน {hours} ชั่วโมง"}
+// @tolgee-key {"key": "admin.validation.endInFuture", "ns": "sale", "defaultValue": "วันสิ้นสุดต้องอยู่ในอนาคต"}
+// @tolgee-key {"key": "admin.validation.flashQuotaRequired", "ns": "sale", "defaultValue": "Flash Sale ต้องกำหนดโควตาต่อ listing"}
+// @tolgee-key {"key": "admin.validation.budgetIncreaseOnly", "ns": "sale", "defaultValue": "หลังมีออเดอร์ งบเพิ่มได้อย่างเดียว"}
+// @tolgee-key {"key": "admin.validation.budgetUnlimited", "ns": "sale", "defaultValue": "แคมเปญนี้ไม่จำกัดงบ — หลังมีออเดอร์ตั้งงบเพิ่มไม่ได้"}
+// @tolgee-key {"key": "admin.validation.quotaIncreaseOnly", "ns": "sale", "defaultValue": "หลังมีออเดอร์ โควตาเพิ่มได้อย่างเดียว"}
+// @tolgee-key {"key": "admin.validation.budgetBelowUsed", "ns": "sale", "defaultValue": "งบต้องไม่น้อยกว่ายอดที่อุดหนุนไปแล้ว"}

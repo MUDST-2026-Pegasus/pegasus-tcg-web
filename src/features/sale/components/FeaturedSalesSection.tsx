@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { flashSubtitle, listingCardProps, saleHeadline, saleTerms, untilLabel } from "../sale.format";
 import { saleKeys, useFeaturedSales } from "../sale.queries";
 import type { FeaturedSales, PublicSale } from "../sale.types";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Figma SAL-B1 — แถบ Flash Sale + แบนเนอร์ลดทั้งหมวดบนหน้าแรก (`GET /sales/featured`)
@@ -35,6 +36,7 @@ function FeaturedSales({ data }: { data: FeaturedSales }) {
 }
 
 function FlashSaleStrip({ flash }: { flash: NonNullable<FeaturedSales["flashSale"]> }) {
+  const { t } = useTranslate("sale");
   const { sale, listings, soldOut } = flash;
   const queryClient = useQueryClient();
   const upcoming = sale.status === "SCHEDULED";
@@ -56,8 +58,8 @@ function FlashSaleStrip({ flash }: { flash: NonNullable<FeaturedSales["flashSale
           <h2 className="text-base font-bold">{sale.name}</h2>
           <p className="text-xs text-[#9a3412]">{flashSubtitle(sale)}</p>
         </div>
-        <div className="flex items-center gap-1.5" role="timer" aria-live="off" aria-label={`${upcoming ? "เริ่มใน" : "จบใน"} ${hh}:${mm}:${ss}`}>
-          <span className="mr-1 text-xs font-medium">{upcoming ? "เริ่มใน" : "จบใน"}</span>
+        <div className="flex items-center gap-1.5" role="timer" aria-live="off" aria-label={upcoming ? t("countdown.startsInAria", "เริ่มใน {time}", { time: `${hh}:${mm}:${ss}` }) : t("countdown.endsInAria", "จบใน {time}", { time: `${hh}:${mm}:${ss}` })}>
+          <span className="mr-1 text-xs font-medium">{upcoming ? t("countdown.startsIn", "เริ่มใน") : t("countdown.endsIn", "จบใน")}</span>
           {[hh, mm, ss].map((part, index) => (
             <span key={index} className="flex items-center gap-1.5">
               {index > 0 ? <span className="font-bold">:</span> : null}
@@ -68,10 +70,10 @@ function FlashSaleStrip({ flash }: { flash: NonNullable<FeaturedSales["flashSale
           ))}
         </div>
         <Link to={href} className="ml-auto inline-flex items-center gap-1 text-sm font-semibold text-[#c2410c] hover:underline">
-          ดูทั้งหมด <ArrowRight className="size-4" />
+          {t("featured.viewAll", "ดูทั้งหมด")} <ArrowRight className="size-4" />
         </Link>
       </header>
-      <div className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-1" aria-label="สินค้า Flash Sale">
+      <div className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-1" aria-label={t("featured.listLabel", "สินค้า Flash Sale")}>
         {listings.map((listing) => (
           <SaleProductCard
             key={listing.id}
@@ -107,6 +109,7 @@ const BANNER_STYLES = [
 
 /** แบนเนอร์แคมเปญ CATEGORY_SALE ที่ featured — ใบแรกกว้าง ที่เหลือเล็ก · ลิงก์ไป /sale/{slug} */
 function CategorySaleBanners({ banners }: { banners: PublicSale[] }) {
+  const { t } = useTranslate("sale");
   return (
     <div className="grid gap-4 md:grid-cols-[2.9fr_1fr]">
       {banners.slice(0, 3).map((sale, index) => {
@@ -128,12 +131,12 @@ function CategorySaleBanners({ banners }: { banners: PublicSale[] }) {
               <p className="text-xs font-semibold tracking-wide uppercase opacity-80">{sale.name}</p>
               <p className={cn("font-black", wide ? "text-2xl" : "text-xl")}>{saleHeadline(sale)}</p>
               <p className="mt-1 truncate text-xs opacity-85">
-                {wide ? `ราคาลดแล้วในหน้าสินค้า ไม่ต้องใช้โค้ด · ${untilLabel(sale.endsAt)} · ใช้โค้ดส่วนลดซ้อนได้` : `${saleTerms(sale)} · ${untilLabel(sale.endsAt)}`}
+                {wide ? t("featured.bannerTerms", "ราคาลดแล้วในหน้าสินค้า ไม่ต้องใช้โค้ด · {until} · ใช้โค้ดส่วนลดซ้อนได้", { until: untilLabel(sale.endsAt) }) : `${saleTerms(sale)} · ${untilLabel(sale.endsAt)}`}
               </p>
             </div>
             {wide ? (
               <span className="relative hidden shrink-0 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#073a5c] group-hover:bg-white/90 sm:inline-flex">
-                ช้อปเลย →
+                {t("featured.shopNow", "ช้อปเลย →")}
               </span>
             ) : null}
           </Link>

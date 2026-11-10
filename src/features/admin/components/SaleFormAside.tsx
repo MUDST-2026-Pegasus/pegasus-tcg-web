@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { formatBaht } from "../promotions.format";
 import { SAMPLE_COMMISSION_RATE, SAMPLE_LIST_PRICE, sampleSaleCalculation } from "../sales.format";
 import type { AdminSaleInput } from "../sales.types";
+import { useTranslate } from "@/lib/i18n";
 
 const ROW = "flex justify-between gap-3 [&>dt]:text-muted-foreground [&>dd]:font-semibold";
 
@@ -24,19 +25,20 @@ export function SaleFormAside({
   actions: ReactNode;
   note: string;
 }) {
+  const { t } = useTranslate("sale");
   const sample = sampleSaleCalculation(form);
   const flash = form.saleType === "FLASH_SALE";
   const percent = Math.round((100 * sample.discount) / sample.listPrice);
   const discountRow =
     form.discountType === "PERCENT"
-      ? `ส่วนลด ${form.discountValue ?? 0}%${form.maxDiscountPerUnit != null ? ` (เพดาน ${formatBaht(form.maxDiscountPerUnit)})` : ""}`
-      : `ส่วนลด ${formatBaht(form.discountValue)}/ชิ้น`;
+      ? t("admin.aside.discountPercent", "ส่วนลด {percent}%{cap}", { percent: form.discountValue ?? 0, cap: form.maxDiscountPerUnit != null ? t("admin.aside.cap", " (เพดาน {amount})", { amount: formatBaht(form.maxDiscountPerUnit) }) : "" })
+      : t("admin.aside.discountFixed", "ส่วนลด {amount}/ชิ้น", { amount: formatBaht(form.discountValue) });
   const quota = form.perListingQuota ?? 25;
 
   return (
     <aside className="grid min-w-0 gap-4 lg:sticky lg:top-4">
       <Card className="items-center gap-3 rounded-[12px] border border-border p-5 shadow-none ring-0">
-        <h2 className="text-[13px] font-semibold">ตัวอย่างที่ผู้ซื้อเห็น</h2>
+        <h2 className="text-[13px] font-semibold">{t("admin.aside.preview", "ตัวอย่างที่ผู้ซื้อเห็น")}</h2>
         <SaleProductCard
           className="pointer-events-none w-full max-w-[230px]"
           title="Charizard ex SAR"
@@ -52,7 +54,7 @@ export function SaleFormAside({
                   sale: {
                     id: 0,
                     slug: form.slug || null,
-                    name: form.name || "แคมเปญ",
+                    name: form.name || t("admin.aside.campaignFallback", "แคมเปญ"),
                     type: form.saleType,
                     endsAt: form.endsAt,
                     quotaLeft: flash ? Math.ceil(quota / 3) : null,
@@ -66,11 +68,11 @@ export function SaleFormAside({
       </Card>
       <Card className="gap-0 rounded-[12px] border border-border p-5 shadow-none ring-0">
         <h2 className="text-[13px] font-semibold">
-          ตัวอย่างการคำนวณ (listing {formatBaht(SAMPLE_LIST_PRICE)} · คอมมิชชั่น {SAMPLE_COMMISSION_RATE * 100}%)
+          {t("admin.aside.sample", "ตัวอย่างการคำนวณ (listing {price} · คอมมิชชั่น {percent}%)", { price: formatBaht(SAMPLE_LIST_PRICE), percent: SAMPLE_COMMISSION_RATE * 100 })}
         </h2>
         <dl className="mt-3 grid gap-2 text-xs">
           <div className={ROW}>
-            <dt>ราคาตั้งต้น</dt>
+            <dt>{t("admin.aside.listPrice", "ราคาตั้งต้น")}</dt>
             <dd>{formatBaht(sample.listPrice)}</dd>
           </div>
           <div className={ROW}>
@@ -78,25 +80,25 @@ export function SaleFormAside({
             <dd className="text-[#dc2626]">−{formatBaht(sample.discount)}</dd>
           </div>
           <div className={ROW}>
-            <dt>ผู้ซื้อจ่าย</dt>
+            <dt>{t("admin.aside.buyerPays", "ผู้ซื้อจ่าย")}</dt>
             <dd>{formatBaht(sample.buyerPays)}</dd>
           </div>
           <div className={ROW}>
-            <dt>คอมมิชชั่น (จากราคาตั้งต้น)</dt>
+            <dt>{t("admin.aside.commission", "คอมมิชชั่น (จากราคาตั้งต้น)")}</dt>
             <dd className="font-normal! text-muted-foreground">{formatBaht(sample.commission)}</dd>
           </div>
           <div className={ROW}>
-            <dt>ร้านได้</dt>
+            <dt>{t("admin.aside.sellerReceives", "ร้านได้")}</dt>
             <dd className="text-[#007a4a]">{formatBaht(sample.sellerReceives)}</dd>
           </div>
           <div className={ROW}>
-            <dt>Pegasus อุดหนุน (SALE_SUBSIDY)</dt>
+            <dt>{t("admin.aside.subsidy", "Pegasus อุดหนุน (SALE_SUBSIDY)")}</dt>
             <dd className="text-[#0069a8]">{formatBaht(sample.subsidy)}</dd>
           </div>
         </dl>
       </Card>
       <Card className="gap-2 rounded-[12px] border border-border p-5 shadow-none ring-0">
-        <h2 className="text-[13px] font-semibold">สรุป</h2>
+        <h2 className="text-[13px] font-semibold">{t("admin.aside.summary", "สรุป")}</h2>
         <ul className="grid gap-0.5 text-xs">
           {summary.map((line) => (
             <li key={line}>• {line}</li>

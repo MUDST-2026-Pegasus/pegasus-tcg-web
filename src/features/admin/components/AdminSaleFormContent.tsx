@@ -43,7 +43,7 @@ import { PromotionDialog } from "./PromotionDialog";
 import { ChoiceCard, FormField, LockedSuffix, NumberInput, ToggleRow } from "@/features/promotions/shared/PromotionFormControls";
 import { SaleFormAside } from "./SaleFormAside";
 import { ChipPicker, Segmented, ToggleChips } from "./SaleFormControls";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 /** ลำดับฟิลด์บนหน้า — กดบันทึกแล้วเลื่อนไปหา error แรกตามนี้ */
 const FIELD_ORDER: Array<keyof AdminSaleInput> = [
@@ -66,6 +66,9 @@ const CONDITIONS: Array<{ value: CardCondition; label: string }> = (
 ).map((value) => ({ value, label: conditionLabel(value) }));
 
 /** เริ่มพรุ่งนี้ 00:00 จบ 23:59 วันเดียวกัน (Flash 24 ชม. ตาม Figma SAL-A2) */
+// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน ไม่ใช่ข้อความ
+const BAHT = "฿";
+
 function emptySale(): AdminSaleInput {
   const start = new Date();
   start.setDate(start.getDate() + 1);
@@ -113,14 +116,15 @@ function useDebounced<T>(value: T, ms: number): T {
 
 /** หน้า /admin/sales/new และ /admin/sales/:id/edit (Figma SAL-A2) */
 export function AdminSaleFormContent({ id }: { id: number }) {
+  const { t } = useTranslate("sale");
   const existing = useSale(id);
-  if (id > 0 && existing.isPending) return <p className="p-8 text-sm text-muted-foreground">กำลังโหลดแคมเปญ...</p>;
+  if (id > 0 && existing.isPending) return <p className="p-8 text-sm text-muted-foreground">{t("admin.list.loading", "กำลังโหลดแคมเปญ...")}</p>;
   if (id > 0 && existing.isError) {
     return (
       <p role="alert" className="p-8 text-sm text-destructive">
-        {saleErrorMessage(existing.error, "โหลดแคมเปญไม่สำเร็จ")}{" "}
+        {saleErrorMessage(existing.error, t("admin.list.loadFailed", "โหลดแคมเปญไม่สำเร็จ"))}{" "}
         <Button variant="link" size="sm" className="h-auto p-0" onClick={() => void existing.refetch()}>
-          ลองอีกครั้ง
+          {t("admin.retry", "ลองอีกครั้ง")}
         </Button>
       </p>
     );
@@ -128,9 +132,9 @@ export function AdminSaleFormContent({ id }: { id: number }) {
   if (existing.data?.ownerType === "SELLER") {
     return (
       <div role="alert" className="grid gap-3 p-8 text-sm">
-        <p>การลดราคาของร้านแอดมินแก้ไขไม่ได้ (หยุดได้พร้อมเหตุผล)</p>
+        <p>{t("admin.form.sellerSaleReadOnly", "การลดราคาของร้านแอดมินแก้ไขไม่ได้ (หยุดได้พร้อมเหตุผล)")}</p>
         <Link className="text-primary underline" to="/admin/promotions?tab=sales">
-          กลับไปรายการลดราคา
+          {t("admin.form.backToList", "กลับไปรายการลดราคา")}
         </Link>
       </div>
     );
@@ -139,6 +143,7 @@ export function AdminSaleFormContent({ id }: { id: number }) {
 }
 
 function SaleEditor({ existing }: { existing?: AdminSale }) {
+  const { t } = useTranslate("sale");
   const navigate = useNavigate();
   const save = useSaveSale();
   const saveDraft = useSaveSaleDraft();
@@ -220,23 +225,23 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
     const found = (sellers.data ?? []).map((seller) => ({ id: seller.id, label: seller.username }));
     const known = form.excludedSellerIds
       .filter((sellerId) => !found.some((option) => option.id === sellerId))
-      .map((sellerId) => ({ id: sellerId, label: sellerNames.get(sellerId) ?? `ร้าน #${sellerId}` }));
+      .map((sellerId) => ({ id: sellerId, label: sellerNames.get(sellerId) ?? t("admin.form.shopFallback", "ร้าน #{id}", { id: sellerId }) }));
     return [...found, ...known];
-  }, [sellers.data, form.excludedSellerIds, sellerNames]);
+  }, [sellers.data, form.excludedSellerIds, sellerNames, t]);
 
   const scopeNoun =
-    form.scopeType === "GAME" ? "เกม" : form.scopeType === "CATEGORY" ? "หมวดหมู่" : form.scopeType === "CARD_SET" ? "ชุดการ์ด" : "";
+    form.scopeType === "GAME" ? t("admin.scope.game", "เกม") : form.scopeType === "CATEGORY" ? t("admin.form.scope.category", "หมวดหมู่") : form.scopeType === "CARD_SET" ? t("admin.form.scope.cardSet", "ชุดการ์ด") : "";
   const summaryLines = [
-    `${form.scopeType === "ALL" ? "ทุกสินค้า" : `${form.scopeIds.length} ${scopeNoun}`}${preview.data ? ` · ${preview.data.listingCount.toLocaleString(intlLocale())} listing` : ""}`,
+    `${form.scopeType === "ALL" ? t("admin.form.scope.all", "ทุกสินค้า") : `${form.scopeIds.length} ${scopeNoun}`}${preview.data ? ` · ${preview.data.listingCount.toLocaleString(intlLocale())} listing` : ""}`,
     form.discountType === "PERCENT"
-      ? `ลด ${form.discountValue ?? 0}%${form.maxDiscountPerUnit != null ? ` สูงสุด ${formatBaht(form.maxDiscountPerUnit)}/ชิ้น` : ""}`
-      : `ลด ${formatBaht(form.discountValue)}/ชิ้น`,
-    `${salePeriod(form)}${durationLabel(form.startsAt, form.endsAt) ? ` (${durationLabel(form.startsAt, form.endsAt).replace("ยาว ", "")})` : ""}`,
+      ? t("admin.form.summary.percent", "ลด {percent}%{cap}", { percent: form.discountValue ?? 0, cap: form.maxDiscountPerUnit != null ? t("admin.form.summary.cap", " สูงสุด {amount}/ชิ้น", { amount: formatBaht(form.maxDiscountPerUnit) }) : "" })
+      : t("admin.discount.fixedOff", "ลด {amount}/ชิ้น", { amount: formatBaht(form.discountValue) }),
+    `${salePeriod(form)}${durationLabel(form.startsAt, form.endsAt) ? ` (${durationLabel(form.startsAt, form.endsAt).replace(t("admin.form.durationPrefix", "ยาว "), "")})` : ""}`,
     ...(flash
-      ? [`โควตา ${form.perListingQuota ?? "—"}/listing · ${form.perBuyerLimit == null ? "ไม่จำกัด" : `${form.perBuyerLimit} ชิ้น`}/คน`]
+      ? [t("admin.form.summary.quota", "โควตา {quota}/listing · {limit}/คน", { quota: form.perListingQuota ?? "—", limit: form.perBuyerLimit == null ? t("admin.action.unlimited", "ไม่จำกัด") : t("admin.action.pieces", "{count} ชิ้น", { count: form.perBuyerLimit }) })]
       : []),
-    `งบ ${form.budgetCap == null ? "ไม่จำกัด" : formatBaht(form.budgetCap)}${form.featuredOnHome ? " · แสดงบนหน้าแรก" : ""}`,
-    "listing ที่ร้านลดเองอยู่แล้ว ใช้ราคาที่ต่ำกว่า",
+    t("admin.form.summary.budget", "งบ {budget}{home}", { budget: form.budgetCap == null ? t("admin.action.unlimited", "ไม่จำกัด") : formatBaht(form.budgetCap), home: form.featuredOnHome ? t("admin.form.summary.home", " · แสดงบนหน้าแรก") : "" }),
+    t("admin.form.summary.lowerWins", "listing ที่ร้านลดเองอยู่แล้ว ใช้ราคาที่ต่ำกว่า"),
   ];
 
   const validate = (): boolean => {
@@ -265,8 +270,8 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
       return;
     }
     toast.add({
-      title: existing ? "บันทึกไม่สำเร็จ" : "สร้างแคมเปญไม่สำเร็จ",
-      description: saleErrorMessage(error, "กรุณาลองอีกครั้ง"),
+      title: existing ? t("admin.form.toast.saveFailed", "บันทึกไม่สำเร็จ") : t("admin.form.toast.createFailed", "สร้างแคมเปญไม่สำเร็จ"),
+      description: saleErrorMessage(error, t("admin.tryAgain", "กรุณาลองอีกครั้ง")),
       type: "error",
     });
   };
@@ -274,19 +279,19 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
   const submit = () =>
     save.mutate(
       { id: existing?.id, input: payload },
-      { onSuccess: (sale) => finish(existing ? "บันทึกการเปลี่ยนแปลงแล้ว" : `ตั้งเวลาเปิด ${sale.name} แล้ว`), onError },
+      { onSuccess: (sale) => finish(existing ? t("admin.form.toast.saved", "บันทึกการเปลี่ยนแปลงแล้ว") : t("admin.form.toast.scheduled", "ตั้งเวลาเปิด {name} แล้ว", { name: sale.name })), onError },
     );
 
   const submitDraft = () => {
     if (!validate()) return;
     saveDraft.mutate(
       { id: existing?.id, input: payload },
-      { onSuccess: () => finish("บันทึกร่างแล้ว — แคมเปญหยุดไว้ ยังไม่เปิด"), onError },
+      { onSuccess: () => finish(t("admin.form.toast.draftSaved", "บันทึกร่างแล้ว — แคมเปญหยุดไว้ ยังไม่เปิด")), onError },
     );
   };
 
   const pending = save.isPending || saveDraft.isPending || banner.isUploading;
-  const lockNote = "แก้ไขหลังมีออเดอร์: ได้เฉพาะชื่อ, วันจบ, งบ (เพิ่ม), โควตา (เพิ่ม), หยุด/จบทันที";
+  const lockNote = t("admin.form.lockNote", "แก้ไขหลังมีออเดอร์: ได้เฉพาะชื่อ, วันจบ, งบ (เพิ่ม), โควตา (เพิ่ม), หยุด/จบทันที");
 
   return (
     <main className={cn("grid w-full min-w-0 gap-6", PROMOTION_PAGE_CONTROLS)}>
@@ -294,21 +299,21 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         <Breadcrumb>
           <BreadcrumbList className="text-xs">
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/admin/promotions" />}>โปรโมชั่น &amp; ลดราคา</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/admin/promotions" />}>{t("admin.list.title", "โปรโมชั่น & ลดราคา")}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink render={<Link to="/admin/promotions?tab=sales" />}>ลดราคาสินค้า</BreadcrumbLink>
+              <BreadcrumbLink render={<Link to="/admin/promotions?tab=sales" />}>{t("admin.form.breadcrumb.sales", "ลดราคาสินค้า")}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{existing ? `แก้ไข ${existing.name}` : "สร้างแคมเปญ"}</BreadcrumbPage>
+              <BreadcrumbPage>{existing ? t("admin.form.breadcrumb.edit", "แก้ไข {name}", { name: existing.name }) : t("admin.form.breadcrumb.create", "สร้างแคมเปญ")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <header>
-          <h1 className="text-2xl font-black">{existing ? "แก้ไขแคมเปญลดราคา" : "สร้างแคมเปญลดราคา"}</h1>
-          <p className="text-sm text-muted-foreground">Pegasus ออกเงินส่วนลด · ร้านได้เงินเต็มราคาตั้งต้น</p>
+          <h1 className="text-2xl font-black">{existing ? t("admin.form.title.edit", "แก้ไขแคมเปญลดราคา") : t("admin.list.create", "สร้างแคมเปญลดราคา")}</h1>
+          <p className="text-sm text-muted-foreground">{t("admin.form.subtitle", "Pegasus ออกเงินส่วนลด · ร้านได้เงินเต็มราคาตั้งต้น")}</p>
         </header>
       </div>
 
@@ -316,17 +321,17 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         <Alert className="border-[#cfe0f7] bg-[#e8f1fc] text-[#0058bc]">
           <Info />
           <AlertDescription className="text-xs text-[#0058bc]">
-            แคมเปญนี้มีออเดอร์แล้ว (ขายไป {(existing?.soldUnits ?? 0).toLocaleString(intlLocale())} ชิ้น) — ฟิลด์ที่มี{" "}
-            <Lock className="inline size-3" aria-label="แม่กุญแจ" /> แก้ไม่ได้ · งบและโควตาเพิ่มได้อย่างเดียว
+            {t("admin.form.locked.before", "แคมเปญนี้มีออเดอร์แล้ว (ขายไป {count} ชิ้น) — ฟิลด์ที่มี", { count: (existing?.soldUnits ?? 0).toLocaleString(intlLocale()) })}{" "}
+            <Lock className="inline size-3" aria-label={t("admin.form.locked.icon", "แม่กุญแจ")} /> {t("admin.form.locked.after", "แก้ไม่ได้ · งบและโควตาเพิ่มได้อย่างเดียว")}
           </AlertDescription>
         </Alert>
       ) : null}
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="grid min-w-0 gap-4">
-          <Section title="1. ประเภทแคมเปญ">
+          <Section title={t("admin.form.section.type", "1. ประเภทแคมเปญ")}>
             <RadioGroup
-              aria-label="ประเภทแคมเปญ"
+              aria-label={t("admin.form.type", "ประเภทแคมเปญ")}
               value={form.saleType}
               onValueChange={(value) => change("saleType", value as AdminSaleInput["saleType"])}
               className="grid gap-4 sm:grid-cols-2"
@@ -334,21 +339,21 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
               <ChoiceCard
                 value="FLASH_SALE"
                 title="⚡ Flash Sale"
-                hint="ช่วงสั้น ≤ 72 ชม. · โควตาชิ้นต่อ listing · นับถอยหลังบนหน้าแรก"
+                hint={t("admin.form.typeFlashHint", "ช่วงสั้น ≤ 72 ชม. · โควตาชิ้นต่อ listing · นับถอยหลังบนหน้าแรก")}
                 disabled={locked("saleType")}
               />
               <ChoiceCard
                 value="CATEGORY_SALE"
-                title="ลดทั้งหมวด / ชุดการ์ด"
-                hint="ลดตามเกม หมวดหมู่ หรือชุดการ์ด ช่วงหลายวัน"
+                title={t("admin.form.typeCategory", "ลดทั้งหมวด / ชุดการ์ด")}
+                hint={t("admin.form.typeCategoryHint", "ลดตามเกม หมวดหมู่ หรือชุดการ์ด ช่วงหลายวัน")}
                 disabled={locked("saleType")}
               />
             </RadioGroup>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField field="name" htmlFor="sale-name" label="ชื่อแคมเปญ" required error={errors.name}>
+              <FormField field="name" htmlFor="sale-name" label={t("admin.form.name", "ชื่อแคมเปญ")} required error={errors.name}>
                 <Input
                   id="sale-name"
-                  aria-label="ชื่อแคมเปญ"
+                  aria-label={t("admin.form.name", "ชื่อแคมเปญ")}
                   aria-invalid={!!errors.name || undefined}
                   value={form.name}
                   maxLength={80}
@@ -359,15 +364,15 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
               <FormField
                 field="slug"
                 htmlFor="sale-slug"
-                label="ลิงก์หน้าแคมเปญ"
+                label={t("admin.form.slug", "ลิงก์หน้าแคมเปญ")}
                 required
-                hint="a–z 0–9 และ - · ใช้เป็น /sale/{slug}"
+                hint={t("admin.form.slugHint", "a–z 0–9 และ - · ใช้เป็น /sale/{slug}", { slug: "{slug}" })}
                 error={errors.slug}
               >
                 <InputGroup data-disabled={locked("slug") || undefined}>
                   <InputGroupInput
                     id="sale-slug"
-                    aria-label="ลิงก์หน้าแคมเปญ"
+                    aria-label={t("admin.form.slug", "ลิงก์หน้าแคมเปญ")}
                     aria-invalid={!!errors.slug || undefined}
                     value={form.slug}
                     maxLength={60}
@@ -391,19 +396,19 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
           </Section>
 
           <Section
-            title="2. ขอบเขตสินค้า"
-            description="listing ที่ LISTED และเข้าเงื่อนไขทั้งหมดได้ราคาลดอัตโนมัติ (ไม่รวมสินค้าประมูล)"
+            title={t("admin.form.section.scope", "2. ขอบเขตสินค้า")}
+            description={t("admin.form.section.scopeDescription", "listing ที่ LISTED และเข้าเงื่อนไขทั้งหมดได้ราคาลดอัตโนมัติ (ไม่รวมสินค้าประมูล)")}
           >
             <Segmented
-              label="ขอบเขตสินค้า"
+              label={t("admin.form.scopeLabel", "ขอบเขตสินค้า")}
               value={form.scopeType}
               disabled={locked("scopeType")}
               onChange={(value) => change("scopeType", value)}
               options={[
-                { value: "ALL", label: "ทุกสินค้า" },
-                { value: "GAME", label: "เกม" },
-                { value: "CATEGORY", label: "หมวดหมู่" },
-                { value: "CARD_SET", label: "ชุดการ์ด" },
+                { value: "ALL", label: t("admin.form.scope.all", "ทุกสินค้า") },
+                { value: "GAME", label: t("admin.scope.game", "เกม") },
+                { value: "CATEGORY", label: t("admin.form.scope.category", "หมวดหมู่") },
+                { value: "CARD_SET", label: t("admin.form.scope.cardSet", "ชุดการ์ด") },
               ]}
             />
             {form.scopeType !== "ALL" ? (
@@ -412,16 +417,16 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                   options={scopeOptions}
                   selected={form.scopeIds}
                   onChange={(ids) => change("scopeIds", ids)}
-                  addLabel={`เพิ่ม${scopeNoun}`}
+                  addLabel={t("admin.form.scope.add", "เพิ่ม{noun}", { noun: scopeNoun })}
                   disabled={locked("scopeIds")}
                   loading={scopeLoading}
                   error={errors.scopeIds}
                 />
               </div>
             ) : null}
-            <FormField field="conditions" label="สภาพการ์ด (ไม่บังคับ)" hint="ไม่เลือก = ทุกสภาพ">
+            <FormField field="conditions" label={t("admin.form.conditions", "สภาพการ์ด (ไม่บังคับ)")} hint={t("admin.form.conditionsHint", "ไม่เลือก = ทุกสภาพ")}>
               <ToggleChips
-                label="สภาพการ์ด"
+                label={t("admin.form.conditionsAria", "สภาพการ์ด")}
                 options={CONDITIONS}
                 selected={form.conditions}
                 disabled={locked("conditions")}
@@ -432,21 +437,21 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
               <FormField
                 field="minUnitPrice"
                 htmlFor="sale-minUnitPrice"
-                label="ราคาขั้นต่ำต่อชิ้น"
-                hint="listing ราคาต่ำกว่านี้ไม่เข้าร่วม"
+                label={t("admin.form.minPrice", "ราคาขั้นต่ำต่อชิ้น")}
+                hint={t("admin.form.minPriceHint", "listing ราคาต่ำกว่านี้ไม่เข้าร่วม")}
                 error={errors.minUnitPrice}
               >
                 <NumberInput
                   id="sale-minUnitPrice"
-                  label="ราคาขั้นต่ำต่อชิ้น"
+                  label={t("admin.form.minPrice", "ราคาขั้นต่ำต่อชิ้น")}
                   value={form.minUnitPrice}
                   onChange={(value) => change("minUnitPrice", value)}
-                  suffix="฿"
+                  suffix={BAHT}
                   locked={locked("minUnitPrice")}
                   invalid={!!errors.minUnitPrice}
                 />
               </FormField>
-              <FormField field="excludedSellerIds" label="ยกเว้นร้าน (ไม่บังคับ)">
+              <FormField field="excludedSellerIds" label={t("admin.form.excludeSellers", "ยกเว้นร้าน (ไม่บังคับ)")}>
                 <ChipPicker
                   options={sellerOptions}
                   selected={form.excludedSellerIds}
@@ -458,7 +463,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                     });
                     change("excludedSellerIds", ids);
                   }}
-                  addLabel="ค้นหาร้าน…"
+                  addLabel={t("admin.form.searchShop", "ค้นหาร้าน…")}
                   disabled={locked("excludedSellerIds")}
                   loading={sellers.isFetching}
                   onSearch={setSellerQuery}
@@ -474,32 +479,32 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
             />
           </Section>
 
-          <Section title="3. ส่วนลด">
+          <Section title={t("admin.form.section.discount", "3. ส่วนลด")}>
             <Segmented
-              label="ประเภทส่วนลด"
+              label={t("admin.form.discountType", "ประเภทส่วนลด")}
               value={form.discountType}
               disabled={locked("discountType")}
               onChange={(value) => change("discountType", value)}
               options={[
-                { value: "PERCENT", label: "ลดเป็น %" },
-                { value: "FIXED_OFF", label: "ลดเป็นบาทต่อชิ้น" },
+                { value: "PERCENT", label: t("admin.form.discountPercent", "ลดเป็น %") },
+                { value: "FIXED_OFF", label: t("admin.form.discountFixed", "ลดเป็นบาทต่อชิ้น") },
               ]}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 field="discountValue"
                 htmlFor="sale-discountValue"
-                label="ลด"
+                label={t("admin.form.discount", "ลด")}
                 required
-                hint={form.discountType === "PERCENT" ? "1–90%" : "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1"}
+                hint={form.discountType === "PERCENT" ? "1–90%" : t("admin.form.discountFixedHint", "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1")}
                 error={errors.discountValue}
               >
                 <NumberInput
                   id="sale-discountValue"
-                  label="ส่วนลด"
+                  label={t("admin.form.discountAria", "ส่วนลด")}
                   value={form.discountValue}
                   onChange={(value) => change("discountValue", value)}
-                  suffix={form.discountType === "PERCENT" ? "%" : "฿"}
+                  suffix={form.discountType === "PERCENT" ? "%" : BAHT}
                   min={1}
                   max={form.discountType === "PERCENT" ? 90 : undefined}
                   locked={locked("discountValue")}
@@ -510,16 +515,16 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 <FormField
                   field="maxDiscountPerUnit"
                   htmlFor="sale-maxDiscountPerUnit"
-                  label="เพดานส่วนลดต่อชิ้น"
-                  hint="การ์ดราคาสูงลดไม่เกินนี้ · ว่าง = ไม่จำกัด"
+                  label={t("admin.form.maxPerUnit", "เพดานส่วนลดต่อชิ้น")}
+                  hint={t("admin.form.maxPerUnitHint", "การ์ดราคาสูงลดไม่เกินนี้ · ว่าง = ไม่จำกัด")}
                   error={errors.maxDiscountPerUnit}
                 >
                   <NumberInput
                     id="sale-maxDiscountPerUnit"
-                    label="เพดานส่วนลดต่อชิ้น"
+                    label={t("admin.form.maxPerUnit", "เพดานส่วนลดต่อชิ้น")}
                     value={form.maxDiscountPerUnit}
                     onChange={(value) => change("maxDiscountPerUnit", value)}
-                    suffix="฿"
+                    suffix={BAHT}
                     locked={locked("maxDiscountPerUnit")}
                     invalid={!!errors.maxDiscountPerUnit}
                   />
@@ -529,36 +534,36 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
           </Section>
 
           <Section
-            title="4. ช่วงเวลา & โควตา"
+            title={t("admin.form.section.period", "4. ช่วงเวลา & โควตา")}
             description={
               flash
-                ? "Flash Sale ยาวได้ไม่เกิน 72 ชั่วโมง · ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)"
-                : "ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)"
+                ? t("admin.form.section.periodFlash", "Flash Sale ยาวได้ไม่เกิน 72 ชั่วโมง · ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)")
+                : t("admin.form.section.periodDescription", "ราคาลดเริ่ม/จบอัตโนมัติ (ตรวจทุก 1 นาที)")
             }
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField field="startsAt" htmlFor="sale-startsAt" label="เริ่ม" required error={errors.startsAt}>
+              <FormField field="startsAt" htmlFor="sale-startsAt" label={t("admin.form.startsAt", "เริ่ม")} required error={errors.startsAt}>
                 <DateTimePicker
                   id="sale-startsAt"
-                  aria-label="เริ่ม"
+                  aria-label={t("admin.form.startsAt", "เริ่ม")}
                   value={toLocalInput(form.startsAt)}
                   disabled={locked("startsAt")}
                   invalid={!!errors.startsAt}
-                  suffix={locked("startsAt") ? <Lock aria-label="ล็อก" className="text-muted-foreground" /> : null}
+                  suffix={locked("startsAt") ? <Lock aria-label={t("admin.form.lockedIcon", "ล็อก")} className="text-muted-foreground" /> : null}
                   onChange={(value) => change("startsAt", value ? new Date(value).toISOString() : "")}
                 />
               </FormField>
               <FormField
                 field="endsAt"
                 htmlFor="sale-endsAt"
-                label="สิ้นสุด"
+                label={t("admin.form.endsAt", "สิ้นสุด")}
                 required
-                hint={durationLabel(form.startsAt, form.endsAt) || "ต้องหลังวันเริ่ม"}
+                hint={durationLabel(form.startsAt, form.endsAt) || t("admin.form.endsAtHint", "ต้องหลังวันเริ่ม")}
                 error={errors.endsAt}
               >
                 <DateTimePicker
                   id="sale-endsAt"
-                  aria-label="สิ้นสุด"
+                  aria-label={t("admin.form.endsAt", "สิ้นสุด")}
                   invalid={!!errors.endsAt}
                   defaultTime="23:59"
                   min={toLocalInput(form.startsAt)}
@@ -572,17 +577,17 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 <FormField
                   field="perListingQuota"
                   htmlFor="sale-perListingQuota"
-                  label={locks.hasOrders ? "โควตาต่อ listing (เพิ่มได้เท่านั้น)" : "โควตาต่อ listing"}
+                  label={locks.hasOrders ? t("admin.form.quotaIncreaseOnly", "โควตาต่อ listing (เพิ่มได้เท่านั้น)") : t("admin.form.quota", "โควตาต่อ listing")}
                   required
-                  hint="ขายครบแล้ว listing นั้นกลับเป็นราคาปกติ"
+                  hint={t("admin.form.quotaHint", "ขายครบแล้ว listing นั้นกลับเป็นราคาปกติ")}
                   error={errors.perListingQuota}
                 >
                   <NumberInput
                     id="sale-perListingQuota"
-                    label="โควตาต่อ listing"
+                    label={t("admin.form.quota", "โควตาต่อ listing")}
                     value={form.perListingQuota}
                     onChange={(value) => change("perListingQuota", value)}
-                    suffix="ชิ้น"
+                    suffix={t("admin.form.pieces", "ชิ้น")}
                     min={locks.hasOrders ? (existing?.perListingQuota ?? 1) : 1}
                     invalid={!!errors.perListingQuota}
                   />
@@ -590,16 +595,16 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 <FormField
                   field="perBuyerLimit"
                   htmlFor="sale-perBuyerLimit"
-                  label="จำกัดต่อผู้ซื้อ"
-                  hint="เกิน → SALE_BUYER_LIMIT_REACHED · ว่าง = ไม่จำกัด"
+                  label={t("admin.form.perBuyer", "จำกัดต่อผู้ซื้อ")}
+                  hint={t("admin.form.perBuyerHint", "เกิน → SALE_BUYER_LIMIT_REACHED · ว่าง = ไม่จำกัด")}
                   error={errors.perBuyerLimit}
                 >
                   <NumberInput
                     id="sale-perBuyerLimit"
-                    label="จำกัดต่อผู้ซื้อ"
+                    label={t("admin.form.perBuyer", "จำกัดต่อผู้ซื้อ")}
                     value={form.perBuyerLimit}
                     onChange={(value) => change("perBuyerLimit", value)}
-                    suffix="ชิ้น / listing"
+                    suffix={t("admin.form.perBuyerSuffix", "ชิ้น / listing")}
                     min={1}
                     locked={locked("perBuyerLimit")}
                     invalid={!!errors.perBuyerLimit}
@@ -609,48 +614,48 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
             ) : null}
           </Section>
 
-          <Section title="5. งบ & การแสดงผล">
+          <Section title={t("admin.form.section.budget", "5. งบ & การแสดงผล")}>
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 field="budgetCap"
                 htmlFor="sale-budgetCap"
-                label={locks.hasOrders ? "งบอุดหนุนสูงสุด (เพิ่มได้เท่านั้น)" : "งบอุดหนุนสูงสุด"}
-                hint="ยอดจองถึงงบ → แคมเปญจบเอง (หมดงบ) · ว่าง = ไม่จำกัด"
+                label={locks.hasOrders ? t("admin.form.budgetIncreaseOnly", "งบอุดหนุนสูงสุด (เพิ่มได้เท่านั้น)") : t("admin.form.budget", "งบอุดหนุนสูงสุด")}
+                hint={t("admin.form.budgetHint", "ยอดจองถึงงบ → แคมเปญจบเอง (หมดงบ) · ว่าง = ไม่จำกัด")}
                 error={errors.budgetCap}
               >
                 <NumberInput
                   id="sale-budgetCap"
-                  label="งบอุดหนุนสูงสุด"
+                  label={t("admin.form.budget", "งบอุดหนุนสูงสุด")}
                   value={form.budgetCap}
                   onChange={(value) => change("budgetCap", value)}
-                  suffix="฿"
+                  suffix={BAHT}
                   min={locks.hasOrders ? (existing?.budgetCap ?? 0) : 0}
                   invalid={!!errors.budgetCap}
                 />
               </FormField>
-              <FormField field="bannerImageUrl" htmlFor="sale-banner" label="แบนเนอร์ (ไม่บังคับ)" hint="ใช้บนหน้า /sale/{slug} · แนะนำ 1200×300">
+              <FormField field="bannerImageUrl" htmlFor="sale-banner" label={t("admin.form.banner", "แบนเนอร์ (ไม่บังคับ)")} hint={t("admin.form.bannerHint", "ใช้บนหน้า /sale/{slug} · แนะนำ 1200×300", { slug: "{slug}" })}>
                 {existing?.bannerImageUrl && banner.items.length === 0 ? (
-                  <img src={existing.bannerImageUrl} alt="แบนเนอร์ปัจจุบัน" className="aspect-[4/1] w-full rounded-md object-cover" />
+                  <img src={existing.bannerImageUrl} alt={t("admin.form.bannerCurrent", "แบนเนอร์ปัจจุบัน")} className="aspect-[4/1] w-full rounded-md object-cover" />
                 ) : null}
-                <FileUpload id="sale-banner" upload={banner} title="อัปโหลดรูป 1200×300" />
+                <FileUpload id="sale-banner" upload={banner} title={t("admin.form.bannerUpload", "อัปโหลดรูป 1200×300")} />
               </FormField>
             </div>
             <ToggleRow
               id="sale-featured"
-              title={flash ? "แสดงบนหน้าแรก (แถบ Flash Sale)" : "แสดงแบนเนอร์บนหน้าแรก"}
+              title={flash ? t("admin.form.homeFlash", "แสดงบนหน้าแรก (แถบ Flash Sale)") : t("admin.form.homeBanner", "แสดงแบนเนอร์บนหน้าแรก")}
               hint={
                 flash
-                  ? "ครั้งละ 1 Flash Sale · ก่อนเริ่ม 24 ชม. แสดงเป็น “เร็วๆ นี้”"
-                  : "แบนเนอร์ลดทั้งหมวดใต้แถบ Flash Sale · เรียงตามลำดับ"
+                  ? t("admin.form.homeFlashHint", "ครั้งละ 1 Flash Sale · ก่อนเริ่ม 24 ชม. แสดงเป็น “เร็วๆ นี้”")
+                  : t("admin.form.homeBannerHint", "แบนเนอร์ลดทั้งหมวดใต้แถบ Flash Sale · เรียงตามลำดับ")
               }
               checked={form.featuredOnHome}
               onChange={(checked) => change("featuredOnHome", checked)}
             />
             {!flash && form.featuredOnHome ? (
-              <FormField field="homeSort" htmlFor="sale-homeSort" label="ลำดับแบนเนอร์บนหน้าแรก" hint="เลขน้อยแสดงก่อน" error={errors.homeSort}>
+              <FormField field="homeSort" htmlFor="sale-homeSort" label={t("admin.form.homeSort", "ลำดับแบนเนอร์บนหน้าแรก")} hint={t("admin.form.homeSortHint", "เลขน้อยแสดงก่อน")} error={errors.homeSort}>
                 <Input
                   id="sale-homeSort"
-                  aria-label="ลำดับแบนเนอร์บนหน้าแรก"
+                  aria-label={t("admin.form.homeSort", "ลำดับแบนเนอร์บนหน้าแรก")}
                   type="number"
                   min={1}
                   className="max-w-40"
@@ -672,15 +677,15 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
             <>
               {existing && existing.status !== "PAUSED" ? (
                 <Button variant="outline" disabled={pending} onClick={() => navigate("/admin/promotions?tab=sales")}>
-                  ยกเลิก
+                  {t("actions.cancel", "ยกเลิก", { ns: "common" })}
                 </Button>
               ) : (
                 <Button variant="outline" disabled={pending} onClick={submitDraft}>
-                  บันทึกร่าง
+                  {t("admin.form.saveDraft", "บันทึกร่าง")}
                 </Button>
               )}
               <Button disabled={pending} onClick={() => validate() && setConfirming(true)}>
-                {existing ? "บันทึก" : "ตั้งเวลาเปิดแคมเปญ"}
+                {existing ? t("admin.form.save", "บันทึก") : t("admin.form.schedule", "ตั้งเวลาเปิดแคมเปญ")}
               </Button>
             </>
           }
@@ -692,43 +697,43 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         onOpenChange={setConfirming}
         tone="info"
         icon={existing ? <Check /> : <CalendarClock />}
-        title={existing ? `บันทึกการเปลี่ยนแปลง ${payload.name}?` : `ตั้งเวลาเปิด ${payload.name}?`}
+        title={existing ? t("admin.form.confirm.saveTitle", "บันทึกการเปลี่ยนแปลง {name}?", { name: payload.name }) : t("admin.form.confirm.scheduleTitle", "ตั้งเวลาเปิด {name}?", { name: payload.name })}
         description={
           existing
-            ? "listing ที่ได้ราคาลดอยู่จะคิดราคาใหม่ภายใน 1 นาที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน”"
-            : "listing ที่เข้าเงื่อนไขจะเปลี่ยนเป็นราคาลดอัตโนมัติเมื่อถึงเวลาเริ่ม"
+            ? t("admin.form.confirm.saveDescription", "listing ที่ได้ราคาลดอยู่จะคิดราคาใหม่ภายใน 1 นาที · ผู้ซื้อที่มีสินค้าในตะกร้าจะเห็น “ราคาเปลี่ยน”")
+            : t("admin.form.confirm.scheduleDescription", "listing ที่เข้าเงื่อนไขจะเปลี่ยนเป็นราคาลดอัตโนมัติเมื่อถึงเวลาเริ่ม")
         }
         actions={
           <>
             <Button variant="outline" disabled={save.isPending} onClick={() => setConfirming(false)}>
-              ยกเลิก
+              {t("actions.cancel", "ยกเลิก", { ns: "common" })}
             </Button>
             <Button disabled={save.isPending} onClick={submit}>
-              {existing ? "บันทึก" : "ตั้งเวลาเปิด"}
+              {existing ? t("admin.form.save", "บันทึก") : t("admin.form.confirm.schedule", "ตั้งเวลาเปิด")}
             </Button>
           </>
         }
       >
         <dl className="grid gap-1.5 rounded-md bg-muted px-3.5 py-2.5 text-xs [&>div]:flex [&>div]:justify-between [&>div]:gap-3 [&_dt]:text-muted-foreground [&_dd]:font-semibold">
           <div>
-            <dt>ช่วงเวลา</dt>
+            <dt>{t("admin.action.resume.period", "ช่วงเวลา")}</dt>
             <dd>{salePeriod(payload)}</dd>
           </div>
           <div>
-            <dt>listing ที่เข้าตอนนี้</dt>
+            <dt>{t("admin.form.confirm.listings", "listing ที่เข้าตอนนี้")}</dt>
             <dd>
               {preview.data
-                ? `${preview.data.listingCount.toLocaleString(intlLocale())} จาก ${preview.data.shopCount.toLocaleString(intlLocale())} ร้าน`
+                ? t("admin.form.confirm.listingsValue", "{count} จาก {shops} ร้าน", { count: preview.data.listingCount.toLocaleString(intlLocale()), shops: preview.data.shopCount.toLocaleString(intlLocale()) })
                 : "—"}
             </dd>
           </div>
           <div>
-            <dt>ส่วนลด</dt>
-            <dd>{summaryLines[1].replace(/^ลด /, "")}</dd>
+            <dt>{t("admin.form.discountAria", "ส่วนลด")}</dt>
+            <dd>{summaryLines[1].replace(t("admin.form.discountPrefix", "ลด "), "")}</dd>
           </div>
           <div>
-            <dt>งบอุดหนุน</dt>
-            <dd>{payload.budgetCap == null ? "ไม่จำกัด" : formatBaht(payload.budgetCap)}</dd>
+            <dt>{t("admin.form.confirm.budget", "งบอุดหนุน")}</dt>
+            <dd>{payload.budgetCap == null ? t("admin.action.unlimited", "ไม่จำกัด") : formatBaht(payload.budgetCap)}</dd>
           </div>
         </dl>
       </PromotionDialog>
@@ -738,15 +743,15 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
         onOpenChange={(open) => !open && blocker.reset?.()}
         tone="warning"
         icon={<LogOut />}
-        title="ทิ้งการแก้ไข?"
-        description="การเปลี่ยนแปลงในแคมเปญยังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด"
+        title={t("admin.form.discard.title", "ทิ้งการแก้ไข?")}
+        description={t("admin.form.discard.description", "การเปลี่ยนแปลงในแคมเปญยังไม่ได้บันทึก ถ้าออกตอนนี้ข้อมูลจะหายทั้งหมด")}
         actions={
           <>
             <Button variant="outline" onClick={() => blocker.reset?.()}>
-              อยู่ต่อ
+              {t("admin.form.discard.stay", "อยู่ต่อ")}
             </Button>
             <Button className={PROMOTION_DANGER_BUTTON} onClick={() => blocker.proceed?.()}>
-              ทิ้งการแก้ไข
+              {t("admin.form.discard.confirm", "ทิ้งการแก้ไข")}
             </Button>
           </>
         }
@@ -769,15 +774,16 @@ function ScopePreviewBar({
   sellerCount?: number;
   total?: number;
 }) {
+  const { t } = useTranslate("sale");
   if (error) {
-    return <p className="rounded-md bg-[#fdecec] px-3.5 py-2.5 text-[13px] text-[#b42318]">นับ listing ที่เข้าเงื่อนไขไม่สำเร็จ</p>;
+    return <p className="rounded-md bg-[#fdecec] px-3.5 py-2.5 text-[13px] text-[#b42318]">{t("admin.form.preview.failed", "นับ listing ที่เข้าเงื่อนไขไม่สำเร็จ")}</p>;
   }
   return (
     <p aria-live="polite" className="flex items-center gap-2 rounded-md bg-[#f0f7fc] px-3.5 py-2.5 text-[13px] text-[#0058bc]">
       <Check className="size-4 shrink-0" aria-hidden />
       {loading || listingCount == null
-        ? "กำลังนับ listing ที่เข้าเงื่อนไข…"
-        : `เข้าเงื่อนไขตอนนี้ ${listingCount.toLocaleString(intlLocale())} listing จาก ${(sellerCount ?? 0).toLocaleString(intlLocale())} ร้าน · ราคารวมก่อนลด ${compactBaht(total ?? 0)}`}
+        ? t("admin.form.preview.loading", "กำลังนับ listing ที่เข้าเงื่อนไข…")
+        : t("admin.form.preview.result", "เข้าเงื่อนไขตอนนี้ {count} listing จาก {shops} ร้าน · ราคารวมก่อนลด {total}", { count: listingCount.toLocaleString(intlLocale()), shops: (sellerCount ?? 0).toLocaleString(intlLocale()), total: compactBaht(total ?? 0) })}
     </p>
   );
 }

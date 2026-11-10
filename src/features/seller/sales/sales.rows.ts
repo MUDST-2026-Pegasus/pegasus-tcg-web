@@ -1,3 +1,4 @@
+import { translate } from "@/lib/i18n";
 /**
  * ตารางเลือก listing + ราคาลดรายแถว (Figma SAL-S2) — คิดที่หน้าเว็บเพื่อช่วยกรอกเท่านั้น
  * backend ตรวจซ้ำทุกแถว (ราคาลด < ราคาปัจจุบัน และ ≥ ฿1 · `SALE_OVERLAP`)
@@ -33,9 +34,9 @@ export function applyBulkPercent(rows: SaleRowDraft[], percent: number): SaleRow
 export type RowError = "missing" | "not-lower" | "too-low" | "overlap";
 
 export const ROW_ERROR_MESSAGE: Record<Exclude<RowError, "overlap">, string> = {
-  missing: "กรอกราคาลด",
-  "not-lower": "ราคาลดต้องต่ำกว่าราคาปัจจุบัน",
-  "too-low": "ราคาลดต้องไม่ต่ำกว่า ฿1",
+  get missing() { return translate("sale", "seller.row.missing", "กรอกราคาลด"); },
+  get "not-lower"() { return translate("sale", "seller.row.notLower", "ราคาลดต้องต่ำกว่าราคาปัจจุบัน"); },
+  get "too-low"() { return translate("sale", "seller.row.tooLow", "ราคาลดต้องไม่ต่ำกว่า ฿1"); },
 };
 
 /** error ของแถวที่เลือก — แถวที่ไม่ได้เลือกไม่ตรวจ */
@@ -75,3 +76,8 @@ export function sellerTakeHome(price: number, salePrice: number, commissionRate:
   const commission = Math.round(salePrice * commissionRate);
   return { price, salePrice, commission, net: salePrice - commission, shopDiscount: price - salePrice };
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-744]
+// @tolgee-key {"key": "seller.row.missing", "ns": "sale", "defaultValue": "กรอกราคาลด"}
+// @tolgee-key {"key": "seller.row.notLower", "ns": "sale", "defaultValue": "ราคาลดต้องต่ำกว่าราคาปัจจุบัน"}
+// @tolgee-key {"key": "seller.row.tooLow", "ns": "sale", "defaultValue": "ราคาลดต้องไม่ต่ำกว่า ฿1"}

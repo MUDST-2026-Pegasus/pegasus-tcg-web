@@ -7,6 +7,7 @@ import { PriceTag } from "./PriceTag";
 import { SaleBadge } from "./SaleBadge";
 import { priceTagState, quotaProgress } from "./sale.format";
 import type { ListingPricing } from "./sale.types";
+import { useTranslate } from "@/lib/i18n";
 
 export type SaleProductCardProps = {
   title: string;
@@ -42,6 +43,7 @@ export function SaleProductCard({
   upcoming = false,
   className,
 }: SaleProductCardProps) {
+  const { t } = useTranslate("sale");
   const sale = pricing?.sale ?? null;
   const flashSale = sale?.type === "FLASH_SALE";
   const soldOut = flashSale && sale.quotaLeft != null && sale.quotaLeft <= 0;
@@ -69,9 +71,9 @@ export function SaleProductCard({
             {image ? <img src={image} alt={imageAlt ?? title} className="size-full object-contain" loading="lazy" /> : null}
           </div>
           {soldOut ? (
-            <SaleBadge type="percent" label="หมดแล้ว" className="absolute top-2 left-7 bg-foreground" />
+            <SaleBadge type="percent" label={t("card.soldOut", "หมดแล้ว")} className="absolute top-2 left-7 bg-foreground" />
           ) : upcoming ? (
-            <SaleBadge type="flash" label="⚡ เร็วๆ นี้" className="absolute top-2 left-7" />
+            <SaleBadge type="flash" label={t("card.upcoming", "⚡ เร็วๆ นี้")} className="absolute top-2 left-7" />
           ) : state === "flash" ? (
             <SaleBadge type="flash" className="absolute top-2 left-7" />
           ) : state === "sale" && shownPricing ? (
@@ -95,12 +97,12 @@ export function SaleProductCard({
               </div>
               <p className="text-[11px] font-medium text-[#c2410c]">
                 {soldOut
-                  ? "ราคา Flash หมดแล้ว"
+                  ? t("card.flashSoldOut", "ราคา Flash หมดแล้ว")
                   : progress
-                    ? `ขายแล้ว ${progress.sold}/${progress.quota} · เหลือ ${progress.left} ชิ้น`
+                    ? t("card.progress", "ขายแล้ว {sold}/{quota} · เหลือ {left} ชิ้น", { sold: progress.sold, quota: progress.quota, left: progress.left })
                     : sale.quotaLeft != null
-                      ? `เหลือ ${sale.quotaLeft} ชิ้น`
-                      : "จำนวนจำกัด"}
+                      ? t("card.left", "เหลือ {left} ชิ้น", { left: sale.quotaLeft })
+                      : t("terms.limited", "จำนวนจำกัด")}
               </p>
             </div>
           ) : null}
