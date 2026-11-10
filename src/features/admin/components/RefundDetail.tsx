@@ -32,6 +32,7 @@ import { refundMethodLabel } from "@/features/finance/refund.format";
 import type { AdminRefund, RefundStatus } from "../finance.types";
 import { AmountRow, InfoField, PartyAvatar } from "./FinanceShared";
 import { FinanceReasonDialog } from "./FinanceReasonDialog";
+import { useTranslate, translate } from "@/lib/i18n";
 
 /**
  * คอลัมน์ขวาของหน้าคืนเงิน — ยอด + บัญชีผู้ซื้อ, ขั้นตอนโอนสองขั้น, ประวัติการโอน
@@ -50,12 +51,13 @@ export function RefundDetail({
   /** รายการเปลี่ยนสถานะแล้ว — ให้หน้าหลักสลับแท็บตามไป รายการจะได้ไม่หลุดจากจอ */
   onMoved: (status: RefundStatus) => void;
 }) {
+  const { t } = useTranslate("admin");
   const meta = REFUND_STATUS_META[refund.status];
   const source = refundSourceLabel(refund.resolution, refund.returnRequestId);
   const typeLabel = refund.resolution
     ? `${RESOLUTION_LABEL[refund.resolution] ?? source.label} (${refund.resolution})`
-    : source.label === "ยกเลิก"
-      ? "ยกเลิกคำสั่งซื้อ"
+    : refund.returnRequestId === null
+      ? t("refunds.source.cancel", "ยกเลิกคำสั่งซื้อ")
       : source.label;
   const settled = refund.status === "PROCESSED";
   const refundedBefore =
@@ -66,11 +68,11 @@ export function RefundDetail({
       : refund.escrowAmount - refund.escrowRefunded - (settled ? 0 : refund.amount);
   const origin =
     refund.returnRequestId !== null
-      ? `มาจากคืนสินค้า RTN-${refund.returnRequestId} ของ ${refund.orderNumber}`
-      : `มาจากการยกเลิก ${refund.orderNumber}`;
+      ? t("refunds.origin.return", "มาจากคืนสินค้า RTN-{id} ของ {order}", { id: refund.returnRequestId, order: refund.orderNumber })
+      : t("refunds.origin.cancel", "มาจากการยกเลิก {order}", { order: refund.orderNumber });
   const shop =
     refund.seller && refund.sellerOrderNumber
-      ? ` (ร้าน ${refund.seller.username} · ${refund.sellerOrderNumber})`
+      ? ` (${t("refunds.origin.shop", "ร้าน {shop} · {so}", { shop: refund.seller.username, so: refund.sellerOrderNumber })})`
       : "";
 
   return (
@@ -90,7 +92,7 @@ export function RefundDetail({
             </div>
             <p className="text-xs text-muted-foreground">
               RF-{refund.id} · {origin}
-              {shop} · สร้างเมื่อ {formatThaiDateTime(refund.requestedAt)}
+              {shop} · {t("refunds.createdAt", "สร้างเมื่อ {date}", { date: formatThaiDateTime(refund.requestedAt) })}
             </p>
           </div>
         </div>
@@ -99,48 +101,48 @@ export function RefundDetail({
 
         <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
           <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-[10px] bg-secondary p-4">
-            <span className="text-[11px] text-[#9aa5ad]">ยอดที่ต้องโอนคืน</span>
+            <span className="text-[11px] text-[#9aa5ad]">{t("refunds.detail.amount", "ยอดที่ต้องโอนคืน")}</span>
             <span className="text-[26px] leading-tight font-bold text-foreground">{formatBaht(refund.amount)}</span>
-            <AmountRow label="ประเภท" value={typeLabel} />
+            <AmountRow label={t("refunds.detail.type", "ประเภท")} value={typeLabel} />
             {refund.escrowAmount !== null && (
               <AmountRow
-                label={`ยอดใน escrow ของ ${refund.sellerOrderNumber ?? "SO"}`}
+                label={t("refunds.detail.escrow", "ยอดใน escrow ของ {so}", { so: refund.sellerOrderNumber ?? "SO" })}
                 value={formatBaht(refund.escrowAmount)}
               />
             )}
             {refundedBefore !== null && (
-              <AmountRow label="คืนไปแล้วก่อนหน้า" value={formatBaht(refundedBefore)} />
+              <AmountRow label={t("refunds.detail.refundedBefore", "คืนไปแล้วก่อนหน้า")} value={formatBaht(refundedBefore)} />
             )}
             <p className="text-[11px] text-muted-foreground">
               {settled
-                ? `โอนคืนแล้ว${refund.processedAt ? `เมื่อ ${formatThaiDateTime(refund.processedAt)}` : ""} · เลขอ้างอิง ${refund.transferReference ?? "—"}`
-                : `ยืนยันโอนแล้ว → ตัดยอดออกจาก escrow ของ SO นี้${remaining !== null ? ` คงเหลือ ${formatBaht(remaining)}` : ""}`}
+                ? `${t("refunds.detail.settled", "โอนคืนแล้ว")}${refund.processedAt ? t("refunds.detail.settledAt", "เมื่อ {date}", { date: formatThaiDateTime(refund.processedAt) }) : ""} · ${t("refunds.detail.reference", "เลขอ้างอิง {ref}", { ref: refund.transferReference ?? "—" })}`
+                : `${t("refunds.detail.afterConfirm", "ยืนยันโอนแล้ว → ตัดยอดออกจาก escrow ของ SO นี้")}${remaining !== null ? ` ${t("refunds.detail.remaining", "คงเหลือ {amount}", { amount: formatBaht(remaining) })}` : ""}`}
             </p>
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-[10px] border border-border p-4">
             <div className="flex items-center gap-2">
               <CreditCard className="size-4 text-foreground" />
-              <p className="text-xs font-semibold text-foreground">บัญชีรับเงินคืนที่ผู้ซื้อระบุ</p>
+              <p className="text-xs font-semibold text-foreground">{t("refunds.account.title", "บัญชีรับเงินคืนที่ผู้ซื้อระบุ")}</p>
             </div>
             {refund.accountNumber ? (
               <>
-                <InfoField label="ธนาคาร" value={refund.bankName ?? "—"} />
-                <InfoField label="ชื่อบัญชี" value={refund.accountName ?? "—"} />
-                <InfoField label="เลขบัญชี" value={formatAccountNumber(refund.accountNumber)} large />
+                <InfoField label={t("refunds.account.bank", "ธนาคาร")} value={refund.bankName ?? "—"} />
+                <InfoField label={t("refunds.account.name", "ชื่อบัญชี")} value={refund.accountName ?? "—"} />
+                <InfoField label={t("refunds.account.number", "เลขบัญชี")} value={formatAccountNumber(refund.accountNumber)} large />
               </>
             ) : refund.method === "BANK_TRANSFER" ? (
               <p className="text-[13px] text-muted-foreground">
-                ผู้ซื้อยังไม่ได้ระบุบัญชี — รอผู้ซื้อกรอกที่หน้าคืนเงินของตัวเองก่อนจึงเริ่มโอนได้
+                {t("refunds.account.missing", "ผู้ซื้อยังไม่ได้ระบุบัญชี — รอผู้ซื้อกรอกที่หน้าคืนเงินของตัวเองก่อนจึงเริ่มโอนได้")}
               </p>
             ) : (
               <p className="text-[13px] text-muted-foreground">
-                ไม่ต้องโอนเอง — {refundMethodLabel(refund.method)} ระบบคืนให้อัตโนมัติ
+                {t("refunds.account.automatic", "ไม่ต้องโอนเอง — {method} ระบบคืนให้อัตโนมัติ", { method: refundMethodLabel(refund.method) })}
               </p>
             )}
             {refund.failedAttempts > 0 && refund.status === "APPROVED" && (
               <Badge className="h-auto self-start rounded-full bg-[#fdf0dd] px-2 py-0.5 text-[11px] font-medium whitespace-normal text-[#b45309]">
-                โอนไม่สำเร็จ {refund.failedAttempts} ครั้ง — ตรวจว่าผู้ซื้อแก้บัญชีแล้วก่อนเริ่มโอนใหม่
+                {t("refunds.account.failedAttempts", "โอนไม่สำเร็จ {count} ครั้ง — ตรวจว่าผู้ซื้อแก้บัญชีแล้วก่อนเริ่มโอนใหม่", { count: refund.failedAttempts })}
               </Badge>
             )}
           </div>
@@ -203,6 +205,7 @@ function RefundSteps({
   refund: AdminRefund;
   onMoved: (status: RefundStatus) => void;
 }) {
+  const { t } = useTranslate("admin");
   const [accountNumber, setAccountNumber] = useState("");
   const [reference, setReference] = useState("");
   const [failOpen, setFailOpen] = useState(false);
@@ -223,15 +226,15 @@ function RefundSteps({
       { id: refund.id, accountNumber: accountNumber.replace(/[\s-]/g, "") },
       {
         onSuccess: () => {
-          toast.add({ type: "success", title: "ล็อกบัญชีแล้ว เริ่มโอนได้" });
+          toast.add({ type: "success", title: t("refunds.steps.locked", "ล็อกบัญชีแล้ว เริ่มโอนได้") });
           setAccountNumber("");
           onMoved("PROCESSING");
         },
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "เริ่มโอนไม่สำเร็จ",
-            description: financeErrorMessage(error, "ตรวจเลขบัญชีแล้วลองใหม่"),
+            title: t("refunds.steps.startFailed", "เริ่มโอนไม่สำเร็จ"),
+            description: financeErrorMessage(error, t("refunds.steps.checkAccount", "ตรวจเลขบัญชีแล้วลองใหม่")),
           }),
       },
     );
@@ -241,14 +244,14 @@ function RefundSteps({
       { id: refund.id, transferReference: reference.trim() },
       {
         onSuccess: () => {
-          toast.add({ type: "success", title: "บันทึกการโอนคืนแล้ว" });
+          toast.add({ type: "success", title: t("refunds.steps.recorded", "บันทึกการโอนคืนแล้ว") });
           onMoved("PROCESSED");
         },
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "บันทึกไม่สำเร็จ",
-            description: financeErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("refunds.steps.recordFailed", "บันทึกไม่สำเร็จ"),
+            description: financeErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -259,21 +262,21 @@ function RefundSteps({
 
   return (
     <Card className="gap-5 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-sm font-semibold text-foreground">ขั้นตอนการโอนคืน</p>
+      <p className="text-sm font-semibold text-foreground">{t("refunds.steps.title", "ขั้นตอนการโอนคืน")}</p>
 
       <div className="flex flex-col gap-3">
-        <StepHead number={1} title="ยืนยันเลขบัญชี แล้วเริ่มโอน" transition="APPROVED → PROCESSING" state={stepOne} />
+        <StepHead number={1} title={t("refunds.steps.one", "ยืนยันเลขบัญชี แล้วเริ่มโอน")} transition="APPROVED → PROCESSING" state={stepOne} />
         <div className="flex flex-col gap-2 pl-10">
           <p className="text-xs text-muted-foreground">
-            พิมพ์เลขบัญชีปลายทางให้ตรงกับที่ผู้ซื้อบันทึกไว้ ถ้าผู้ซื้อแก้เลขบัญชีระหว่างนี้ระบบจะไม่ให้เริ่มโอน
+            {t("refunds.steps.oneHint", "พิมพ์เลขบัญชีปลายทางให้ตรงกับที่ผู้ซื้อบันทึกไว้ ถ้าผู้ซื้อแก้เลขบัญชีระหว่างนี้ระบบจะไม่ให้เริ่มโอน")}
             (REFUND_DESTINATION_CHANGED)
           </p>
           {stepOne === "active" && (
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
-                aria-label="เลขบัญชีปลายทาง"
+                aria-label={t("refunds.steps.accountInput", "เลขบัญชีปลายทาง")}
                 inputMode="numeric"
-                placeholder="พิมพ์เลขบัญชีปลายทาง เช่น 1234567890"
+                placeholder={t("refunds.steps.accountPlaceholder", "พิมพ์เลขบัญชีปลายทาง เช่น 1234567890")}
                 value={accountNumber}
                 onChange={(event) => setAccountNumber(event.target.value)}
                 className="h-9 flex-1 rounded-md border-input bg-background"
@@ -285,7 +288,7 @@ function RefundSteps({
                 onClick={startTransfer}
               >
                 {start.isPending && <Spinner data-icon="inline-start" />}
-                เริ่มโอน
+                {t("refunds.steps.start", "เริ่มโอน")}
               </Button>
             </div>
           )}
@@ -295,21 +298,20 @@ function RefundSteps({
       <Separator className="bg-muted" />
 
       <div className="flex flex-col gap-3">
-        <StepHead number={2} title="ยืนยันผลการโอน" transition="PROCESSING → PROCESSED" state={stepTwo} />
+        <StepHead number={2} title={t("refunds.steps.two", "ยืนยันผลการโอน")} transition="PROCESSING → PROCESSED" state={stepTwo} />
         <div className="flex flex-col gap-2 pl-10">
           <p className="text-xs text-muted-foreground">
-            หลังโอนในแอปธนาคารแล้ว กรอกเลขอ้างอิงเพื่อปิดรายการ (กดซ้ำด้วยเลขเดิมได้ไม่เกิดผลซ้ำ)
-            หรือแจ้งว่าโอนไม่สำเร็จ รายการจะกลับเป็นพร้อมโอนให้ผู้ซื้อแก้บัญชี
+            {t("refunds.steps.twoHint", "หลังโอนในแอปธนาคารแล้ว กรอกเลขอ้างอิงเพื่อปิดรายการ (กดซ้ำด้วยเลขเดิมได้ไม่เกิดผลซ้ำ) หรือแจ้งว่าโอนไม่สำเร็จ รายการจะกลับเป็นพร้อมโอนให้ผู้ซื้อแก้บัญชี")}
           </p>
           {settled ? (
             <p className="text-[13px] font-medium text-[#12805c]">
-              โอนคืนแล้ว · เลขอ้างอิง {refund.transferReference ?? "—"}
+              {t("refunds.steps.done", "โอนคืนแล้ว · เลขอ้างอิง {ref}", { ref: refund.transferReference ?? "—" })}
             </p>
           ) : (
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
-                aria-label="เลขอ้างอิงการโอน"
-                placeholder="เลขอ้างอิงการโอน (transferReference)"
+                aria-label={t("refunds.steps.referenceInput", "เลขอ้างอิงการโอน")}
+                placeholder={t("refunds.steps.referencePlaceholder", "เลขอ้างอิงการโอน (transferReference)")}
                 value={reference}
                 disabled={!processing}
                 maxLength={64}
@@ -323,7 +325,7 @@ function RefundSteps({
                 disabled={!processing || busy}
                 onClick={() => setFailOpen(true)}
               >
-                โอนไม่สำเร็จ
+                {t("refunds.steps.failed", "โอนไม่สำเร็จ")}
               </Button>
               <Button
                 size="sm"
@@ -332,7 +334,7 @@ function RefundSteps({
                 onClick={completeTransfer}
               >
                 {complete.isPending && <Spinner data-icon="inline-start" />}
-                ยืนยันว่าโอนแล้ว
+                {t("refunds.steps.confirm", "ยืนยันว่าโอนแล้ว")}
               </Button>
             </div>
           )}
@@ -342,48 +344,49 @@ function RefundSteps({
       <FinanceReasonDialog
         open={failOpen}
         onOpenChange={setFailOpen}
-        title="แจ้งว่าโอนคืนไม่สำเร็จ"
-        description="รายการจะกลับเป็น “พร้อมโอน” และผู้ซื้อจะต้องแก้บัญชีรับเงินคืนก่อนโอนใหม่"
-        placeholder="เช่น บัญชีปลายทางถูกปิดแล้ว ธนาคารตีกลับ"
-        confirmLabel="บันทึกว่าโอนไม่สำเร็จ"
+        title={t("refunds.failDialog.title", "แจ้งว่าโอนคืนไม่สำเร็จ")}
+        description={t("refunds.failDialog.description", "รายการจะกลับเป็น “พร้อมโอน” และผู้ซื้อจะต้องแก้บัญชีรับเงินคืนก่อนโอนใหม่")}
+        placeholder={t("refunds.failDialog.placeholder", "เช่น บัญชีปลายทางถูกปิดแล้ว ธนาคารตีกลับ")}
+        confirmLabel={t("refunds.failDialog.confirm", "บันทึกว่าโอนไม่สำเร็จ")}
         onConfirm={async (reason) => {
           await fail.mutateAsync({ id: refund.id, reason });
-          toast.add({ type: "success", title: "บันทึกว่าโอนไม่สำเร็จแล้ว" });
+          toast.add({ type: "success", title: t("refunds.failDialog.done", "บันทึกว่าโอนไม่สำเร็จแล้ว") });
           onMoved("APPROVED");
         }}
-        errorMessage={(error) => financeErrorMessage(error, "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง")}
+        errorMessage={(error) => financeErrorMessage(error, t("refunds.steps.recordFailedRetry", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"))}
       />
     </Card>
   );
 }
 
 const ATTEMPT_BADGE: Record<string, { label: string; className: string }> = {
-  PROCESSING: { label: "กำลังโอน", className: "bg-[#e8f1fc] text-[#0058bc]" },
-  PROCESSED: { label: "สำเร็จ", className: "bg-[#e3f4ec] text-[#12805c]" },
-  FAILED: { label: "ล้มเหลว", className: "bg-[#fbe9e8] text-[#d0342c]" },
+  PROCESSING: { get label() { return translate("admin", "refunds.attempt.processing", "กำลังโอน"); }, className: "bg-[#e8f1fc] text-[#0058bc]" },
+  PROCESSED: { get label() { return translate("admin", "refunds.attempt.processed", "สำเร็จ"); }, className: "bg-[#e3f4ec] text-[#12805c]" },
+  FAILED: { get label() { return translate("admin", "refunds.attempt.failed", "ล้มเหลว"); }, className: "bg-[#fbe9e8] text-[#d0342c]" },
 };
 
 function RefundHistory({ refundId }: { refundId: number }) {
+  const { t } = useTranslate("admin");
   const history = useRefundTransfers(refundId);
   const attempts = history.data ?? [];
 
   return (
     <Card className="gap-3 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-foreground">ประวัติการโอน</p>
-        <span className="text-xs text-[#9aa5ad]">{attempts.length} ครั้ง</span>
+        <p className="text-sm font-semibold text-foreground">{t("refunds.history.title", "ประวัติการโอน")}</p>
+        <span className="text-xs text-[#9aa5ad]">{t("refunds.history.count", "{count} ครั้ง", { count: attempts.length })}</span>
       </div>
       {history.isPending ? (
         <Skeleton className="h-14 w-full rounded-[10px]" />
       ) : history.isError ? (
         <p role="alert" className="text-xs text-destructive">
-          โหลดประวัติไม่สำเร็จ{" "}
+          {t("refunds.history.loadFailed", "โหลดประวัติไม่สำเร็จ")}{" "}
           <button type="button" className="underline" onClick={() => void history.refetch()}>
-            ลองใหม่
+            {t("actions.retry", "ลองใหม่", { ns: "common" })}
           </button>
         </p>
       ) : attempts.length === 0 ? (
-        <p className="text-xs text-muted-foreground">ยังไม่เคยเริ่มโอน</p>
+        <p className="text-xs text-muted-foreground">{t("refunds.history.empty", "ยังไม่เคยเริ่มโอน")}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {attempts.map((attempt, index) => {
@@ -402,8 +405,8 @@ function RefundHistory({ refundId }: { refundId: number }) {
                   {(attempt.failureReason || attempt.transferReference) && (
                     <span className="text-[11px] text-muted-foreground">
                       {attempt.failureReason
-                        ? `เหตุผล: ${attempt.failureReason}`
-                        : `เลขอ้างอิง: ${attempt.transferReference}`}
+                        ? t("refunds.history.reason", "เหตุผล: {reason}", { reason: attempt.failureReason })
+                        : t("refunds.history.reference", "เลขอ้างอิง: {ref}", { ref: attempt.transferReference })}
                     </span>
                   )}
                 </div>
@@ -420,3 +423,7 @@ function RefundHistory({ refundId }: { refundId: number }) {
     </Card>
   );
 }
+
+// @tolgee-key {"key": "refunds.attempt.processing", "ns": "admin", "defaultValue": "กำลังโอน"}
+// @tolgee-key {"key": "refunds.attempt.processed", "ns": "admin", "defaultValue": "สำเร็จ"}
+// @tolgee-key {"key": "refunds.attempt.failed", "ns": "admin", "defaultValue": "ล้มเหลว"}

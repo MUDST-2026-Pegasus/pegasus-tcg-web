@@ -1,4 +1,5 @@
 import type { CommissionRule, CommissionRuleInput } from "@/features/finance/after-sales.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ฟอร์ม "กฎค่าคอมมิชชั่น" ใน popup — กติกาลอกจาก `CommissionRuleService.validate`
@@ -11,10 +12,42 @@ import type { CommissionRule, CommissionRuleInput } from "@/features/finance/aft
 export type RuleScope = CommissionRule["scope"];
 
 export const SCOPE_OPTIONS: Array<{ value: RuleScope; label: string; hint: string }> = [
-  { value: "GLOBAL", label: "ทั้งแพลตฟอร์ม", hint: "ใช้กับทุกคำสั่งซื้อที่ไม่ตรงกับกฎเฉพาะใด ๆ" },
-  { value: "GAME", label: "เกม", hint: "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในเกมที่เลือก" },
-  { value: "CATEGORY", label: "หมวดหมู่", hint: "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในหมวดที่เลือก ชนะกฎระดับเกม" },
-  { value: "SELLER", label: "ผู้ขาย", hint: "ใช้กับทุกคำสั่งซื้อของผู้ขายรายนี้ ชนะกฎทุกระดับ" },
+  {
+    value: "GLOBAL",
+    get label() {
+      return translate("admin", "commission.scope.global", "ทั้งแพลตฟอร์ม");
+    },
+    get hint() {
+      return translate("admin", "commission.scope.globalHint", "ใช้กับทุกคำสั่งซื้อที่ไม่ตรงกับกฎเฉพาะใด ๆ");
+    },
+  },
+  {
+    value: "GAME",
+    get label() {
+      return translate("admin", "commission.scope.game", "เกม");
+    },
+    get hint() {
+      return translate("admin", "commission.scope.gameHint", "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในเกมที่เลือก");
+    },
+  },
+  {
+    value: "CATEGORY",
+    get label() {
+      return translate("admin", "commission.scope.category", "หมวดหมู่");
+    },
+    get hint() {
+      return translate("admin", "commission.scope.categoryHint", "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในหมวดที่เลือก ชนะกฎระดับเกม");
+    },
+  },
+  {
+    value: "SELLER",
+    get label() {
+      return translate("admin", "commission.scope.seller", "ผู้ขาย");
+    },
+    get hint() {
+      return translate("admin", "commission.scope.sellerHint", "ใช้กับทุกคำสั่งซื้อของผู้ขายรายนี้ ชนะกฎทุกระดับ");
+    },
+  },
 ];
 
 export const scopeLabel = (scope: RuleScope) =>
@@ -76,33 +109,33 @@ export function draftFromRule(rule: CommissionRule): RuleDraft {
 export function validateDraft(draft: RuleDraft): RuleErrors {
   const errors: RuleErrors = {};
   const rate = draft.ratePercent.trim();
-  if (rate === "") errors.ratePercent = "กรอกอัตราค่าคอมมิชชั่น";
-  else if (!RATE.test(rate) || Number(rate) > 100) errors.ratePercent = "อัตราต้องอยู่ระหว่าง 0–100% ทศนิยมไม่เกิน 3 ตำแหน่ง";
+  if (rate === "") errors.ratePercent = translate("admin", "commission.validation.rateRequired", "กรอกอัตราค่าคอมมิชชั่น");
+  else if (!RATE.test(rate) || Number(rate) > 100) errors.ratePercent = translate("admin", "commission.validation.rateRange", "อัตราต้องอยู่ระหว่าง 0–100% ทศนิยมไม่เกิน 3 ตำแหน่ง");
 
   const money = { fixedFee: draft.fixedFee, minFee: draft.minFee, maxFee: draft.maxFee } as const;
   for (const [key, value] of Object.entries(money) as Array<[keyof typeof money, string]>) {
-    if (value.trim() !== "" && !MONEY.test(value.trim())) errors[key] = "จำนวนเงินต้องไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง";
+    if (value.trim() !== "" && !MONEY.test(value.trim())) errors[key] = translate("admin", "commission.validation.money", "จำนวนเงินต้องไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง");
   }
   if (!errors.minFee && !errors.maxFee && draft.minFee.trim() !== "" && draft.maxFee.trim() !== ""
     && Number(draft.minFee) > Number(draft.maxFee)) {
-    errors.maxFee = "ขั้นสูงต้องไม่น้อยกว่าขั้นต่ำ";
+    errors.maxFee = translate("admin", "commission.validation.maxBelowMin", "ขั้นสูงต้องไม่น้อยกว่าขั้นต่ำ");
   }
 
   const priority = draft.priority.trim();
   if (priority !== "" && (!INTEGER.test(priority) || Number(priority) < -32768 || Number(priority) > 32767)) {
-    errors.priority = "ลำดับต้องเป็นจำนวนเต็มระหว่าง -32768 ถึง 32767";
+    errors.priority = translate("admin", "commission.validation.priority", "ลำดับต้องเป็นจำนวนเต็มระหว่าง -32768 ถึง 32767");
   }
 
-  if (draft.scope === "GAME" && draft.gameId == null) errors.target = "กรุณาเลือกเกม";
-  if (draft.scope === "CATEGORY" && draft.categoryId == null) errors.target = "กรุณาเลือกหมวดหมู่";
+  if (draft.scope === "GAME" && draft.gameId == null) errors.target = translate("admin", "commission.validation.gameRequired", "กรุณาเลือกเกม");
+  if (draft.scope === "CATEGORY" && draft.categoryId == null) errors.target = translate("admin", "commission.validation.categoryRequired", "กรุณาเลือกหมวดหมู่");
   if (draft.scope === "SELLER" && !/^[1-9]\d*$/.test(draft.sellerProfileId.trim())) {
-    errors.target = "กรอกรหัสร้านค้า (seller profile ID) เป็นตัวเลข";
+    errors.target = translate("admin", "commission.validation.sellerRequired", "กรอกรหัสร้านค้า (seller profile ID) เป็นตัวเลข");
   }
 
   if (draft.effectiveFrom === "" || Number.isNaN(new Date(draft.effectiveFrom).getTime())) {
-    errors.effectiveFrom = "เลือกวันเวลาที่เริ่มมีผล";
+    errors.effectiveFrom = translate("admin", "commission.validation.fromRequired", "เลือกวันเวลาที่เริ่มมีผล");
   } else if (draft.effectiveTo !== "" && new Date(draft.effectiveTo) <= new Date(draft.effectiveFrom)) {
-    errors.effectiveTo = "วันสิ้นสุดต้องอยู่หลังวันเริ่มมีผล";
+    errors.effectiveTo = translate("admin", "commission.validation.toAfterFrom", "วันสิ้นสุดต้องอยู่หลังวันเริ่มมีผล");
   }
   return errors;
 }
@@ -162,10 +195,18 @@ export function ruleStatus(rule: Pick<CommissionRule, "active" | "effectiveFrom"
 }
 
 export const STATUS_LABEL: Record<RuleStatus, string> = {
-  ACTIVE: "ใช้งานอยู่",
-  SCHEDULED: "ตั้งเวลาไว้",
-  EXPIRED: "หมดอายุ",
-  INACTIVE: "ปิดใช้งาน",
+  get ACTIVE() {
+    return translate("admin", "commission.status.active", "ใช้งานอยู่");
+  },
+  get SCHEDULED() {
+    return translate("admin", "commission.status.scheduled", "ตั้งเวลาไว้");
+  },
+  get EXPIRED() {
+    return translate("admin", "commission.status.expired", "หมดอายุ");
+  },
+  get INACTIVE() {
+    return translate("admin", "commission.status.inactive", "ปิดใช้งาน");
+  },
 };
 
 const sameTarget = (a: CommissionRuleInput, b: CommissionRuleInput) =>
@@ -184,3 +225,26 @@ export function conflictingRules(input: CommissionRuleInput, rules: CommissionRu
   return rules.filter((rule) => rule.id !== editingId && rule.active
     && sameTarget(rule, input) && overlaps(rule, input));
 }
+
+// @tolgee-key {"key": "commission.scope.global", "ns": "admin", "defaultValue": "ทั้งแพลตฟอร์ม"}
+// @tolgee-key {"key": "commission.scope.globalHint", "ns": "admin", "defaultValue": "ใช้กับทุกคำสั่งซื้อที่ไม่ตรงกับกฎเฉพาะใด ๆ"}
+// @tolgee-key {"key": "commission.scope.game", "ns": "admin", "defaultValue": "เกม"}
+// @tolgee-key {"key": "commission.scope.gameHint", "ns": "admin", "defaultValue": "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในเกมที่เลือก"}
+// @tolgee-key {"key": "commission.scope.category", "ns": "admin", "defaultValue": "หมวดหมู่"}
+// @tolgee-key {"key": "commission.scope.categoryHint", "ns": "admin", "defaultValue": "ใช้เมื่อสินค้าทุกชิ้นในคำสั่งซื้ออยู่ในหมวดที่เลือก ชนะกฎระดับเกม"}
+// @tolgee-key {"key": "commission.scope.seller", "ns": "admin", "defaultValue": "ผู้ขาย"}
+// @tolgee-key {"key": "commission.scope.sellerHint", "ns": "admin", "defaultValue": "ใช้กับทุกคำสั่งซื้อของผู้ขายรายนี้ ชนะกฎทุกระดับ"}
+// @tolgee-key {"key": "commission.validation.rateRequired", "ns": "admin", "defaultValue": "กรอกอัตราค่าคอมมิชชั่น"}
+// @tolgee-key {"key": "commission.validation.rateRange", "ns": "admin", "defaultValue": "อัตราต้องอยู่ระหว่าง 0–100% ทศนิยมไม่เกิน 3 ตำแหน่ง"}
+// @tolgee-key {"key": "commission.validation.money", "ns": "admin", "defaultValue": "จำนวนเงินต้องไม่ติดลบ ทศนิยมไม่เกิน 2 ตำแหน่ง"}
+// @tolgee-key {"key": "commission.validation.maxBelowMin", "ns": "admin", "defaultValue": "ขั้นสูงต้องไม่น้อยกว่าขั้นต่ำ"}
+// @tolgee-key {"key": "commission.validation.priority", "ns": "admin", "defaultValue": "ลำดับต้องเป็นจำนวนเต็มระหว่าง -32768 ถึง 32767"}
+// @tolgee-key {"key": "commission.validation.gameRequired", "ns": "admin", "defaultValue": "กรุณาเลือกเกม"}
+// @tolgee-key {"key": "commission.validation.categoryRequired", "ns": "admin", "defaultValue": "กรุณาเลือกหมวดหมู่"}
+// @tolgee-key {"key": "commission.validation.sellerRequired", "ns": "admin", "defaultValue": "กรอกรหัสร้านค้า (seller profile ID) เป็นตัวเลข"}
+// @tolgee-key {"key": "commission.validation.fromRequired", "ns": "admin", "defaultValue": "เลือกวันเวลาที่เริ่มมีผล"}
+// @tolgee-key {"key": "commission.validation.toAfterFrom", "ns": "admin", "defaultValue": "วันสิ้นสุดต้องอยู่หลังวันเริ่มมีผล"}
+// @tolgee-key {"key": "commission.status.active", "ns": "admin", "defaultValue": "ใช้งานอยู่"}
+// @tolgee-key {"key": "commission.status.scheduled", "ns": "admin", "defaultValue": "ตั้งเวลาไว้"}
+// @tolgee-key {"key": "commission.status.expired", "ns": "admin", "defaultValue": "หมดอายุ"}
+// @tolgee-key {"key": "commission.status.inactive", "ns": "admin", "defaultValue": "ปิดใช้งาน"}

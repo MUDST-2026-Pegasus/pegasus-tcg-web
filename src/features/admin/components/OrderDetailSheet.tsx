@@ -33,6 +33,7 @@ import {
 import { useAdminOrder, useDownloadAdminOrderSummary } from "../orders.queries";
 import type { AdminOrderDetail } from "../orders.types";
 import { formatThaiDateTime } from "../verification.format";
+import { useTranslate } from "@/lib/i18n";
 
 type OrderDetailSheetProps = {
   /** `null` = ปิด */
@@ -42,6 +43,7 @@ type OrderDetailSheetProps = {
 
 /** รายละเอียดคำสั่งซื้อหนึ่งใบ (ส่วนของผู้ขายหนึ่งคน) — อ่านอย่างเดียว */
 export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetProps) {
+  const { t } = useTranslate("admin");
   const detail = useAdminOrder(sellerOrderId);
 
   return (
@@ -56,8 +58,8 @@ export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetPro
           <QueryBoundary
             query={detail}
             loading={<OrderDetailSkeleton />}
-            errorTitle="โหลดคำสั่งซื้อไม่สำเร็จ"
-            errorMessage="คำสั่งซื้อนี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้"
+            errorTitle={t("orders.detail.loadFailed", "โหลดคำสั่งซื้อไม่สำเร็จ")}
+            errorMessage={t("orders.detail.loadFailedHint", "คำสั่งซื้อนี้อาจไม่มีอยู่แล้ว หรือเชื่อมต่อไม่ได้")}
           >
             {(order) => <OrderDetailBody detail={order} />}
           </QueryBoundary>
@@ -68,6 +70,7 @@ export function OrderDetailSheet({ sellerOrderId, onClose }: OrderDetailSheetPro
 }
 
 function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
+  const { t } = useTranslate("admin");
   const { summary, order, payment } = detail;
   const downloadSummary = useDownloadAdminOrderSummary();
   const address = parseShippingAddress(detail.shippingAddressSnapshot);
@@ -81,14 +84,14 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
         downloadBlob(blob, downloadFilename);
         toast.add({
           type: "success",
-          title: "ดาวน์โหลด Order Summary แล้ว",
+          title: t("orders.detail.downloaded", "ดาวน์โหลด Order Summary แล้ว"),
           description: downloadFilename,
         });
       },
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "ดาวน์โหลด Order Summary ไม่สำเร็จ",
+          title: t("orders.detail.downloadFailed", "ดาวน์โหลด Order Summary ไม่สำเร็จ"),
           description: adminOrderSummaryDownloadErrorMessage(error),
         }),
     });
@@ -105,8 +108,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           <AuctionSourcePill order={summary} basePath="/admin/auctions" />
         </div>
         <SheetDescription className="pr-8">
-          คำสั่งซื้อ {summary.orderNumber} · สั่งเมื่อ{" "}
-          {formatThaiDateTime(summary.createdAt)}
+          {t("orders.detail.meta", "คำสั่งซื้อ {order} · สั่งเมื่อ {date}", { order: summary.orderNumber, date: formatThaiDateTime(summary.createdAt) })}
         </SheetDescription>
         <div className="flex justify-end">
           <Button
@@ -115,34 +117,34 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
             className="rounded-md px-2.5"
             disabled={downloadSummary.isPending}
             aria-busy={downloadSummary.isPending}
-            aria-label={downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            aria-label={downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "Download Order Summary (PDF)")}
             onClick={handleDownloadSummary}
           >
             {downloadSummary.isPending ? <Spinner /> : null}
-            {downloadSummary.isPending ? "กำลังสร้าง PDF..." : "Download Order Summary (PDF)"}
+            {downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "Download Order Summary (PDF)")}
           </Button>
         </div>
       </SheetHeader>
 
       <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-6 text-sm">
-        <Section title="ผู้ขายและผู้ซื้อ">
-          <Row label="ผู้ขาย">
+        <Section title={t("orders.detail.parties", "ผู้ขายและผู้ซื้อ")}>
+          <Row label={t("orders.detail.seller", "ผู้ขาย")}>
             {summary.seller.displayName} (@{summary.seller.username})
           </Row>
-          <Row label="ผู้ซื้อ">
+          <Row label={t("orders.detail.buyer", "ผู้ซื้อ")}>
             {summary.buyer.displayName} (@{summary.buyer.username})
           </Row>
           {summary.returnReasonCode ? (
-            <Row label="เหตุผลขอคืน">
+            <Row label={t("orders.detail.returnReason", "เหตุผลขอคืน")}>
               {RETURN_REASON_LABEL[summary.returnReasonCode]}
             </Row>
           ) : null}
           {summary.reviewRating !== null ? (
-            <Row label="รีวิว">{summary.reviewRating} ดาว</Row>
+            <Row label={t("orders.detail.review", "รีวิว")}>{t("orders.detail.stars", "{rating} ดาว", { rating: summary.reviewRating })}</Row>
           ) : null}
         </Section>
 
-        <Section title="รายการสินค้า">
+        <Section title={t("orders.detail.items", "รายการสินค้า")}>
           <ul className="flex flex-col gap-2">
             {order.items.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-3">
@@ -162,7 +164,7 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
           </ul>
         </Section>
 
-        <Section title="ยอดเงินคำสั่งซื้อ">
+        <Section title={t("orders.detail.amounts", "ยอดเงินคำสั่งซื้อ")}>
           {hasPromotionDiscount ? (
             <PromotionOrderTable
               rows={[{
@@ -181,61 +183,61 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
             />
           ) : (
             <>
-              <Row label="ค่าสินค้า">{formatBaht(order.itemsSubtotal)}</Row>
-              <Row label="ค่าส่ง">{formatBaht(order.shippingFee)}</Row>
-              {order.discountAmount > 0 ? <Row label="ส่วนลด">− {formatBaht(order.discountAmount)}</Row> : null}
-              <Row label="ยอดรวม" strong>{formatBaht(order.grandTotal)}</Row>
+              <Row label={t("orders.detail.subtotal", "ค่าสินค้า")}>{formatBaht(order.itemsSubtotal)}</Row>
+              <Row label={t("orders.detail.shipping", "ค่าส่ง")}>{formatBaht(order.shippingFee)}</Row>
+              {order.discountAmount > 0 ? <Row label={t("orders.detail.discount", "ส่วนลด")}>− {formatBaht(order.discountAmount)}</Row> : null}
+              <Row label={t("orders.detail.grandTotal", "ยอดรวม")} strong>{formatBaht(order.grandTotal)}</Row>
               <Separator />
-              <Row label="ค่าคอมมิชชั่น">− {formatBaht(order.commissionAmount)}</Row>
-              <Row label="ผู้ขายได้รับ" strong>{formatBaht(order.sellerNetAmount)}</Row>
+              <Row label={t("orders.detail.commission", "ค่าคอมมิชชั่น")}>− {formatBaht(order.commissionAmount)}</Row>
+              <Row label={t("orders.detail.sellerNet", "ผู้ขายได้รับ")} strong>{formatBaht(order.sellerNetAmount)}</Row>
             </>
           )}
           {/* ราคาลดสินค้า — ใครออกเงิน (TCG-683 · Figma SAL-B3 F) */}
           <SaleOrderBreakdown items={order.items} viewer="admin" />
         </Section>
 
-        <Section title="การชำระเงิน">
+        <Section title={t("orders.detail.payment", "การชำระเงิน")}>
           {payment ? (
             <>
-              <Row label="ช่องทาง">{PAYMENT_METHOD_LABEL[payment.method]}</Row>
-              <Row label="สถานะ">{PAYMENT_STATUS_LABEL[payment.status]}</Row>
-              <Row label="จ่ายเมื่อ">
+              <Row label={t("orders.detail.method", "ช่องทาง")}>{PAYMENT_METHOD_LABEL[payment.method]}</Row>
+              <Row label={t("orders.detail.status", "สถานะ")}>{PAYMENT_STATUS_LABEL[payment.status]}</Row>
+              <Row label={t("orders.detail.paidAt", "จ่ายเมื่อ")}>
                 {payment.paidAt ? formatThaiDateTime(payment.paidAt) : NO_VALUE}
               </Row>
               {payment.failureReason ? (
-                <Row label="เหตุผล">{payment.failureReason}</Row>
+                <Row label={t("finance.reason", "เหตุผล")}>{payment.failureReason}</Row>
               ) : null}
             </>
           ) : (
-            <p className="text-muted-foreground">ยังไม่มีการชำระเงิน</p>
+            <p className="text-muted-foreground">{t("orders.detail.noPayment", "ยังไม่มีการชำระเงิน")}</p>
           )}
         </Section>
 
-        <Section title="การจัดส่ง">
+        <Section title={t("orders.detail.delivery", "การจัดส่ง")}>
           {address ? (
             <>
-              <Row label="ผู้รับ">
+              <Row label={t("orders.detail.recipient", "ผู้รับ")}>
                 {address.recipientName ?? NO_VALUE}
                 {address.phone ? ` · ${address.phone}` : ""}
               </Row>
-              <Row label="ที่อยู่">{formatAddressLine(address)}</Row>
+              <Row label={t("orders.detail.address", "ที่อยู่")}>{formatAddressLine(address)}</Row>
             </>
           ) : (
-            <Row label="ที่อยู่">{NO_VALUE}</Row>
+            <Row label={t("orders.detail.address", "ที่อยู่")}>{NO_VALUE}</Row>
           )}
-          <Row label="ขนส่ง">
+          <Row label={t("orders.detail.carrier", "ขนส่ง")}>
             {shipment
               ? `${shipment.carrierName} · ${shipment.trackingNumber}`
               : NO_VALUE}
           </Row>
           {detail.buyerNote ? (
-            <Row label="หมายเหตุผู้ซื้อ">{detail.buyerNote}</Row>
+            <Row label={t("orders.detail.buyerNote", "หมายเหตุผู้ซื้อ")}>{detail.buyerNote}</Row>
           ) : null}
         </Section>
 
-        <Section title="ประวัติสถานะ">
+        <Section title={t("orders.detail.history", "ประวัติสถานะ")}>
           {order.statusHistory.length === 0 ? (
-            <p className="text-muted-foreground">ยังไม่มีประวัติการเปลี่ยนสถานะ</p>
+            <p className="text-muted-foreground">{t("orders.detail.noHistory", "ยังไม่มีประวัติการเปลี่ยนสถานะ")}</p>
           ) : null}
           <ol className="flex flex-col gap-2">
             {order.statusHistory.map((change) => (

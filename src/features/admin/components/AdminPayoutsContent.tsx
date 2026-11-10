@@ -22,6 +22,7 @@ import {
 } from "./FinanceShared";
 import { PayoutDetail } from "./PayoutDetail";
 import { SellerQueueSkeleton } from "./SellerQueueSkeleton";
+import { useTranslate, translate } from "@/lib/i18n";
 
 type PayoutTab = "OPEN" | "REQUESTED" | "APPROVED" | "PROCESSING" | "PAID" | "CLOSED";
 
@@ -35,12 +36,24 @@ const TAB_STATUSES: Record<PayoutTab, PayoutStatus[]> = {
 };
 
 const TAB_LABEL: Record<PayoutTab, string> = {
-  OPEN: "รอดำเนินการ",
-  REQUESTED: "คำขอใหม่",
-  APPROVED: "อนุมัติแล้ว",
-  PROCESSING: "กำลังโอน",
-  PAID: "จ่ายแล้ว",
-  CLOSED: "ปฏิเสธ / ล้มเหลว",
+  get OPEN() {
+    return translate("admin", "payouts.tabs.open", "รอดำเนินการ");
+  },
+  get REQUESTED() {
+    return translate("admin", "payouts.tabs.requested", "คำขอใหม่");
+  },
+  get APPROVED() {
+    return translate("admin", "payouts.tabs.approved", "อนุมัติแล้ว");
+  },
+  get PROCESSING() {
+    return translate("admin", "payouts.tabs.processing", "กำลังโอน");
+  },
+  get PAID() {
+    return translate("admin", "payouts.tabs.paid", "จ่ายแล้ว");
+  },
+  get CLOSED() {
+    return translate("admin", "payouts.tabs.closed", "ปฏิเสธ / ล้มเหลว");
+  },
 };
 
 /** แท็บที่โชว์ตัวเลขข้างชื่อ — แท็บปิดแล้วไม่ต้องนับ */
@@ -54,6 +67,7 @@ const COUNTED_TABS = new Set<PayoutTab>(["OPEN", "REQUESTED", "APPROVED", "PROCE
  * อ้างจาก Figma node 1913:3144
  */
 export function AdminPayoutsContent() {
+  const { t } = useTranslate("admin");
   const [tab, setTab] = useState<PayoutTab>("OPEN");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -96,8 +110,8 @@ export function AdminPayoutsContent() {
   return (
     <div className="flex flex-col gap-6">
       <FinancePageHeader
-        title="ถอนเงินผู้ขาย"
-        description="อนุมัติและโอนเงินให้ผู้ขาย · ยอดถูกจองตั้งแต่ตอนขอถอน และตัดจาก wallet จริงเมื่อยืนยันว่าโอนแล้วเท่านั้น"
+        title={t("payouts.title", "ถอนเงินผู้ขาย")}
+        description={t("payouts.description", "อนุมัติและโอนเงินให้ผู้ขาย · ยอดถูกจองตั้งแต่ตอนขอถอน และตัดจาก wallet จริงเมื่อยืนยันว่าโอนแล้วเท่านั้น")}
         onExport={exportCsv}
         exportDisabled={payouts.length === 0}
       />
@@ -107,22 +121,22 @@ export function AdminPayoutsContent() {
         isError={summary.isError}
         stats={[
           {
-            label: "คำขอใหม่ (REQUESTED)",
+            label: t("payouts.stats.requested", "คำขอใหม่ (REQUESTED)"),
             value: String(counts?.requested ?? 0),
             dotClass: "bg-[#b45309]",
             emphasized: true,
           },
           {
-            label: "จ่ายแล้วเดือนนี้",
+            label: t("payouts.stats.paidThisMonth", "จ่ายแล้วเดือนนี้"),
             value: formatBahtShort(counts?.paidAmountThisMonth ?? 0),
             dotClass: "bg-[#12805c]",
           },
           {
-            label: "ปฏิเสธ / โอนไม่สำเร็จเดือนนี้",
+            label: t("payouts.stats.closedThisMonth", "ปฏิเสธ / โอนไม่สำเร็จเดือนนี้"),
             value: String(counts?.closedThisMonth ?? 0),
             dotClass: "bg-[#d0342c]",
           },
-          { label: "อนุมัติแล้ว + กำลังโอน", value: String(counts?.inProgress ?? 0), dotClass: "bg-[#9aa5ad]" },
+          { label: t("payouts.stats.inProgress", "อนุมัติแล้ว + กำลังโอน"), value: String(counts?.inProgress ?? 0), dotClass: "bg-[#9aa5ad]" },
         ]}
       />
 
@@ -137,7 +151,7 @@ export function AdminPayoutsContent() {
         onChange={changeTab}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="ค้นหา PO / ชื่อร้าน"
+        searchPlaceholder={t("payouts.searchPlaceholder", "ค้นหา PO / ชื่อร้าน")}
       />
 
       <div className="flex flex-col items-start gap-6 lg:flex-row">
@@ -145,14 +159,14 @@ export function AdminPayoutsContent() {
           <QueryBoundary
             query={queue}
             loading={<SellerQueueSkeleton />}
-            errorTitle="โหลดคำขอถอนเงินไม่สำเร็จ"
-            errorMessage="ตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+            errorTitle={t("payouts.loadFailed", "โหลดคำขอถอนเงินไม่สำเร็จ")}
+            errorMessage={t("finance.checkConnection", "ตรวจสอบการเชื่อมต่อแล้วลองใหม่")}
             isEmpty={() => payouts.length === 0}
             empty={
               <EmptyState
                 icon={Inbox}
-                title={search ? "ไม่พบรายการที่ค้นหา" : `ไม่มีรายการใน "${TAB_LABEL[tab]}"`}
-                description={search ? "ลองค้นด้วยเลข PO หรือชื่อร้าน" : "คำขอถอนเงินของผู้ขายจะขึ้นที่นี่"}
+                title={search ? t("finance.noSearchMatch", "ไม่พบรายการที่ค้นหา") : t("payouts.emptyQueue", "ไม่มีรายการใน \"{queue}\"", { queue: TAB_LABEL[tab] })}
+                description={search ? t("payouts.searchHint", "ลองค้นด้วยเลข PO หรือชื่อร้าน") : t("payouts.emptyDescription", "คำขอถอนเงินของผู้ขายจะขึ้นที่นี่")}
               />
             }
           >
@@ -160,7 +174,7 @@ export function AdminPayoutsContent() {
               <>
                 <FinanceQueueHeader
                   title={`${TAB_LABEL[tab]} (${payouts.length})`}
-                  sortLabel={tab === "PAID" || tab === "CLOSED" ? "เรียงตาม: ใหม่สุด" : "เรียงตาม: เก่าสุด"}
+                  sortLabel={tab === "PAID" || tab === "CLOSED" ? t("finance.sortNewest", "เรียงตาม: ใหม่สุด") : t("finance.sortOldest", "เรียงตาม: เก่าสุด")}
                 />
                 <ul className="flex flex-col gap-3">
                   {payouts.map((payout) => {
@@ -170,7 +184,7 @@ export function AdminPayoutsContent() {
                         <FinanceQueueCard
                           party={payout.seller}
                           title={payout.seller.username}
-                          subtitle={`PO-${payout.id} · ขอถอนเมื่อ ${formatAgo(payout.requestedAt)}`}
+                          subtitle={t("payouts.queueSubtitle", "PO-{id} · ขอถอนเมื่อ {ago}", { id: payout.id, ago: formatAgo(payout.requestedAt) })}
                           amount={formatBahtShort(payout.amount)}
                           badges={[{ label: meta.label, className: `rounded-full text-[11px] ${meta.badgeClass}` }]}
                           active={payout.id === selected?.id}
@@ -201,9 +215,16 @@ export function AdminPayoutsContent() {
             }}
           />
         ) : (
-          <FinanceDetailPlaceholder>เลือกคำขอถอนเงินจากคิวทางซ้ายเพื่อตรวจและโอน</FinanceDetailPlaceholder>
+          <FinanceDetailPlaceholder>{t("payouts.placeholder", "เลือกคำขอถอนเงินจากคิวทางซ้ายเพื่อตรวจและโอน")}</FinanceDetailPlaceholder>
         )}
       </div>
     </div>
   );
 }
+
+// @tolgee-key {"key": "payouts.tabs.open", "ns": "admin", "defaultValue": "รอดำเนินการ"}
+// @tolgee-key {"key": "payouts.tabs.requested", "ns": "admin", "defaultValue": "คำขอใหม่"}
+// @tolgee-key {"key": "payouts.tabs.approved", "ns": "admin", "defaultValue": "อนุมัติแล้ว"}
+// @tolgee-key {"key": "payouts.tabs.processing", "ns": "admin", "defaultValue": "กำลังโอน"}
+// @tolgee-key {"key": "payouts.tabs.paid", "ns": "admin", "defaultValue": "จ่ายแล้ว"}
+// @tolgee-key {"key": "payouts.tabs.closed", "ns": "admin", "defaultValue": "ปฏิเสธ / ล้มเหลว"}

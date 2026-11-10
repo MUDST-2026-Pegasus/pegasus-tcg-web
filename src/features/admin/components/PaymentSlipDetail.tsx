@@ -13,6 +13,7 @@ import { formatAccountNumber, formatBaht, formatThaiDateTime } from "../finance.
 import { useTransferAccount } from "../finance.queries";
 import type { PaymentReview } from "../finance.types";
 import { InfoField, PartyAvatar } from "./FinanceShared";
+import { useTranslate } from "@/lib/i18n";
 
 type PaymentSlipDetailProps = {
   payment: PaymentReview;
@@ -29,6 +30,7 @@ type PaymentSlipDetailProps = {
  * ผู้เรียกใส่ `key={payment.id}` ให้ช่องเหตุผลล้างเองเมื่อเปลี่ยนรายการ
  */
 export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }: PaymentSlipDetailProps) {
+  const { t } = useTranslate("admin");
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState(false);
   const platformAccount = useTransferAccount();
@@ -45,28 +47,28 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
 
   const account = platformAccount.data;
   const fields = [
-    { label: "ยอดที่ต้องชำระ", value: formatBaht(payment.amount), large: true },
-    { label: "เลขอ้างอิงที่ผู้ซื้อกรอก", value: payment.referenceCode ?? "—" },
+    { label: t("payments.detail.amount", "ยอดที่ต้องชำระ"), value: formatBaht(payment.amount), large: true },
+    { label: t("payments.detail.reference", "เลขอ้างอิงที่ผู้ซื้อกรอก"), value: payment.referenceCode ?? "—" },
     {
-      label: "โอนเข้าบัญชี (แพลตฟอร์ม)",
+      label: t("payments.detail.platformAccount", "โอนเข้าบัญชี (แพลตฟอร์ม)"),
       value: account?.accountNumber
         ? `${account.bankName ?? ""} · ${formatAccountNumber(account.accountNumber)}`
         : "—",
     },
-    { label: "ชื่อบัญชีปลายทาง", value: account?.accountName ?? "—" },
-    { label: "วิธีชำระ", value: payment.method === "BANK_TRANSFER" ? "โอนผ่านธนาคาร" : payment.method },
-    { label: "สร้างรายการเมื่อ", value: formatThaiDateTime(payment.createdAt) },
+    { label: t("payments.detail.accountName", "ชื่อบัญชีปลายทาง"), value: account?.accountName ?? "—" },
+    { label: t("payments.detail.method", "วิธีชำระ"), value: payment.method === "BANK_TRANSFER" ? t("payments.detail.bankTransfer", "โอนผ่านธนาคาร") : payment.method },
+    { label: t("payments.detail.createdAt", "สร้างรายการเมื่อ"), value: formatThaiDateTime(payment.createdAt) },
   ];
 
   const checks = [
-    { ok: payment.slipUrl !== null, label: "อัปโหลดไฟล์สลิปสำเร็จ", failLabel: "ยังไม่มีไฟล์สลิป" },
+    { ok: payment.slipUrl !== null, label: t("payments.check.slipUploaded", "อัปโหลดไฟล์สลิปสำเร็จ"), failLabel: t("payments.check.noSlip", "ยังไม่มีไฟล์สลิป") },
     {
       ok: amountMatches,
-      label: `ยอดตรงกับยอดค้างชำระ ${formatBaht(payment.unpaidTotal)}`,
-      failLabel: `ยอดไม่ตรงกับยอดค้างชำระ ${formatBaht(payment.unpaidTotal)} — อนุมัติไม่ได้`,
+      label: t("payments.check.amountMatches", "ยอดตรงกับยอดค้างชำระ {amount}", { amount: formatBaht(payment.unpaidTotal) }),
+      failLabel: t("payments.check.amountMismatch", "ยอดไม่ตรงกับยอดค้างชำระ {amount} — อนุมัติไม่ได้", { amount: formatBaht(payment.unpaidTotal) }),
     },
     // ไฟล์สลิปซ้ำถูกกันไว้ตั้งแต่ตอนแนบ (unique index บน slip_image_key) ถ้าอยู่ในคิวแปลว่าผ่านแล้ว
-    { ok: true, label: "สลิปนี้ไม่เคยใช้กับรายการชำระอื่น", failLabel: "" },
+    { ok: true, label: t("payments.check.notDuplicate", "สลิปนี้ไม่เคยใช้กับรายการชำระอื่น"), failLabel: "" },
   ];
   const allPassed = checks.every((check) => check.ok);
 
@@ -79,15 +81,14 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-foreground">{payment.buyer.username}</h2>
               <Badge className="h-5 rounded-full bg-[#fdf0dd] px-2 text-[11px] font-medium text-[#b45309]">
-                รอตรวจสอบ
+                {t("payments.detail.pending", "รอตรวจสอบ")}
               </Badge>
               <Badge className="h-5 rounded-[5px] bg-muted px-2 text-[10px] font-medium text-muted-foreground">
                 {payment.status}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              PAY-{payment.id} · คำสั่งซื้อ {payment.orderNumber} · สร้างรายการเมื่อ{" "}
-              {formatThaiDateTime(payment.createdAt)} · หมดเวลาชำระ {formatThaiDateTime(payment.expiresAt)}
+              {t("payments.detail.meta", "PAY-{id} · คำสั่งซื้อ {order} · สร้างรายการเมื่อ {created} · หมดเวลาชำระ {expires}", { id: payment.id, order: payment.orderNumber, created: formatThaiDateTime(payment.createdAt), expires: formatThaiDateTime(payment.expiresAt) })}
             </p>
           </div>
         </div>
@@ -98,7 +99,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
           <SlipPreview url={payment.slipUrl} paymentId={payment.id} />
 
           <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-            <p className="text-[13px] font-semibold text-foreground">ข้อมูลที่ต้องตรงกับสลิป</p>
+            <p className="text-[13px] font-semibold text-foreground">{t("payments.detail.mustMatch", "ข้อมูลที่ต้องตรงกับสลิป")}</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {fields.map((field) => (
                 <InfoField key={field.label} label={field.label} value={field.value} large={field.large} />
@@ -112,7 +113,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
               )}
             >
               <p className={cn("text-xs font-semibold", allPassed ? "text-[#007a4a]" : "text-[#d0342c]")}>
-                ระบบตรวจให้แล้วตอนแนบสลิป
+                {t("payments.detail.autoChecked", "ระบบตรวจให้แล้วตอนแนบสลิป")}
               </p>
               {checks.map((check) => (
                 <div key={check.label} className="flex items-center gap-2 text-xs text-[#414755]">
@@ -130,7 +131,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
               <div className="flex items-center gap-1.5">
                 <Landmark className="size-[13px] text-foreground" />
                 <p className="text-xs font-semibold text-foreground">
-                  เมื่ออนุมัติ เงินจะถูกพักใน escrow แยกตามร้าน
+                  {t("payments.detail.escrowNote", "เมื่ออนุมัติ เงินจะถูกพักใน escrow แยกตามร้าน")}
                 </p>
               </div>
               {payment.splits.map((split) => (
@@ -143,7 +144,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
                 </div>
               ))}
               <div className="flex items-start gap-2 border-t border-border pt-2 text-xs text-foreground">
-                <span className="flex-1 font-semibold">รวม</span>
+                <span className="flex-1 font-semibold">{t("payments.detail.total", "รวม")}</span>
                 <span className="font-bold">{formatBaht(splitTotal)}</span>
               </div>
             </div>
@@ -153,14 +154,13 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
 
       <Card className="gap-3 rounded-xl border border-border px-5 py-[18px] shadow-none ring-0">
         <div className="flex flex-col gap-[3px]">
-          <p className="text-sm font-semibold text-foreground">ผลการตรวจสอบ</p>
+          <p className="text-sm font-semibold text-foreground">{t("payments.detail.result", "ผลการตรวจสอบ")}</p>
           <p className="text-xs text-muted-foreground">
-            ตรวจยอด วันเวลา และบัญชีปลายทางในสลิปให้ตรงกับข้อมูลด้านบน · ถ้าปฏิเสธต้องระบุเหตุผล
-            และผู้ซื้อต้องสร้างรายการชำระใหม่
+            {t("payments.detail.resultHint", "ตรวจยอด วันเวลา และบัญชีปลายทางในสลิปให้ตรงกับข้อมูลด้านบน · ถ้าปฏิเสธต้องระบุเหตุผล และผู้ซื้อต้องสร้างรายการชำระใหม่")}
           </p>
         </div>
         <Textarea
-          aria-label="เหตุผลที่ปฏิเสธ"
+          aria-label={t("payments.detail.rejectReason", "เหตุผลที่ปฏิเสธ")}
           rows={3}
           maxLength={255}
           value={reason}
@@ -169,12 +169,12 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             setReason(event.target.value);
             setReasonError(false);
           }}
-          placeholder="เหตุผลที่ปฏิเสธ (จำเป็นเมื่อปฏิเสธ) เช่น ยอดในสลิปไม่ตรง, สลิปไม่ชัด, โอนเข้าบัญชีผิด"
+          placeholder={t("payments.detail.rejectReasonPlaceholder", "เหตุผลที่ปฏิเสธ (จำเป็นเมื่อปฏิเสธ) เช่น ยอดในสลิปไม่ตรง, สลิปไม่ชัด, โอนเข้าบัญชีผิด")}
           className="min-h-[72px] rounded-lg border-input bg-background"
         />
         {reasonError && (
           <p role="alert" className="text-xs text-destructive">
-            กรอกเหตุผลก่อนปฏิเสธสลิป
+            {t("payments.detail.reasonRequired", "กรอกเหตุผลก่อนปฏิเสธสลิป")}
           </p>
         )}
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -185,7 +185,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             disabled={onSkip === null || busy !== null}
             onClick={() => onSkip?.()}
           >
-            ข้ามไปรายการถัดไป
+            {t("payments.detail.skip", "ข้ามไปรายการถัดไป")}
           </Button>
           <Button
             variant="destructive"
@@ -195,7 +195,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             onClick={reject}
           >
             {busy === "reject" && <Spinner data-icon="inline-start" />}
-            ปฏิเสธสลิป
+            {t("payments.detail.reject", "ปฏิเสธสลิป")}
           </Button>
           <Button
             size="sm"
@@ -204,7 +204,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
             onClick={onApprove}
           >
             {busy === "approve" && <Spinner data-icon="inline-start" />}
-            อนุมัติการชำระเงิน
+            {t("payments.detail.approve", "อนุมัติการชำระเงิน")}
           </Button>
         </div>
       </Card>
@@ -214,6 +214,7 @@ export function PaymentSlipDetail({ payment, busy, onApprove, onReject, onSkip }
 
 /** รูปสลิปจาก presigned URL — เป็น PDF หรือลิงก์หมดอายุก็ยังมีปุ่มเปิดไฟล์ให้ */
 function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number }) {
+  const { t } = useTranslate("admin");
   const [broken, setBroken] = useState(false);
   const fileName = url ? fileNameOf(url) : null;
 
@@ -223,7 +224,7 @@ function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number
         href={url ?? undefined}
         target="_blank"
         rel="noreferrer"
-        aria-label="เปิดสลิปขนาดเต็ม"
+        aria-label={t("payments.slip.openFull", "เปิดสลิปขนาดเต็ม")}
         className={cn(
           "flex h-[330px] flex-col items-center justify-center gap-2 bg-secondary",
           url === null && "pointer-events-none",
@@ -232,7 +233,7 @@ function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number
         {url && !broken ? (
           <img
             src={url}
-            alt={`สลิปโอนเงินของ PAY-${paymentId}`}
+            alt={t("payments.slip.alt", "สลิปโอนเงินของ PAY-{id}", { id: paymentId })}
             className="size-full object-contain"
             onError={() => setBroken(true)}
           />
@@ -240,9 +241,9 @@ function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number
           <>
             <FileImage className="size-[26px] text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">
-              {url ? "ภาพสลิปโอนเงิน" : "ไม่มีไฟล์สลิป"}
+              {url ? t("payments.slip.image", "ภาพสลิปโอนเงิน") : t("payments.slip.none", "ไม่มีไฟล์สลิป")}
             </span>
-            {url && <span className="text-[10px] text-[#9aa5ad]">คลิกเพื่อเปิดไฟล์</span>}
+            {url && <span className="text-[10px] text-[#9aa5ad]">{t("payments.slip.clickToOpen", "คลิกเพื่อเปิดไฟล์")}</span>}
           </>
         )}
       </a>
@@ -251,10 +252,10 @@ function SlipPreview({ url, paymentId }: { url: string | null; paymentId: number
           <span className="truncate text-xs font-medium text-foreground">
             {fileName || `slip_PAY-${paymentId}`}
           </span>
-          <span className="text-[10px] text-[#9aa5ad]">ลิงก์ชั่วคราว · ดึงคิวใหม่ถ้าเปิดไม่ขึ้น</span>
+          <span className="text-[10px] text-[#9aa5ad]">{t("payments.slip.tempLink", "ลิงก์ชั่วคราว · ดึงคิวใหม่ถ้าเปิดไม่ขึ้น")}</span>
         </div>
         {url && (
-          <a href={url} target="_blank" rel="noreferrer" aria-label="เปิดสลิปในแท็บใหม่">
+          <a href={url} target="_blank" rel="noreferrer" aria-label={t("payments.slip.openNewTab", "เปิดสลิปในแท็บใหม่")}>
             <ExternalLink className="size-[15px] text-muted-foreground" />
           </a>
         )}
