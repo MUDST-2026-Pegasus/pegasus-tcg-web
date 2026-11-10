@@ -18,6 +18,9 @@
     "reload": "Reload",
     "retry": "Retry"
   },
+  "auth": {
+    "checkingSession": "Checking your sign-in"
+  },
   "cardLabels": {
     "edition": {
       "notApplicable": "Not specified"
@@ -41,6 +44,19 @@
     "pickDateTime": "Select date and time",
     "pickRange": "Select date range",
     "time": "Time"
+  },
+  "home": {
+    "eiei": "BoatDiwa"
+  },
+  "listing": {
+    "deliveryByShop": "Shipping per shop terms",
+    "deliveryNotSet": "Shipping not set up yet",
+    "freeShipping": "Free shipping",
+    "newShop": "New shop",
+    "outOfStock": "Out of stock",
+    "sales": "{count} sales",
+    "shipsInDays": "Ships in {days} days",
+    "shipsTomorrow": "Ships tomorrow"
   },
   "nav": {
     "account": "Account",

@@ -15,12 +15,14 @@ import { useGoogleSignIn, useLogin } from "@/features/auth/auth.queries";
 import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/claim-redirect";
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
-import { loginSchema, type LoginFormValues } from "@/features/auth/auth.schema";
+import { useAuthSchemas, type LoginFormValues } from "@/features/auth/auth.schema";
 
 import { applyApiErrors } from "@/lib/form";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export function LoginForm() {
+  const { t } = useTranslate("buyer");
+  const { loginSchema } = useAuthSchemas();
   const navigate = useNavigate();
   const location = useLocation();
   const login = useLogin();
@@ -67,13 +69,13 @@ export function LoginForm() {
   const formAlert = googleSignIn.isError
     ? getAuthErrorAlert(
         googleSignIn.error,
-        "Could not sign you in. Please try again.",
+        t("auth.login.failed", "Could not sign you in. Please try again."),
       )
     : login.isError
       ? {
           description: translateError(
             login.error,
-            "Could not sign you in. Please try again.",
+            t("auth.login.failed", "Could not sign you in. Please try again."),
           ),
         }
       : null;
@@ -90,12 +92,12 @@ export function LoginForm() {
 
       <FieldGroup className="gap-5">
         <Field className="gap-2" data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{t("auth.fields.email", "Email")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="Enter your email"
+            placeholder={t("auth.fields.emailPlaceholder", "Enter your email")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -104,11 +106,11 @@ export function LoginForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field className="gap-2" data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">{t("auth.fields.password", "Password")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="current-password"
-            placeholder="Enter your password"
+            placeholder={t("auth.login.passwordPlaceholder", "Enter your password")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -124,7 +126,7 @@ export function LoginForm() {
         className="h-12 w-full rounded-lg text-base"
       >
         {isSubmitting && <Spinner />}
-        {isSubmitting ? "Signing in…" : "Log in"}
+        {isSubmitting ? t("auth.login.submitting", "Signing in…") : t("auth.login.submit", "Log in")}
       </Button>
 
       <GoogleSignInButton
@@ -136,31 +138,31 @@ export function LoginForm() {
       <div className="flex flex-col gap-2 pt-2">
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("auth.login.noAccount", "Don't have an account?")}{" "}
           <Link to={{ pathname: "/register", search: location.search }} className="font-medium text-primary">
-            Sign up
+            {t("auth.login.signUp", "Sign up")}
           </Link>
         </p>
       </div>
       <BackHomeLink />
       <p className="pt-2 text-center text-xs leading-relaxed tracking-[0.24px] text-muted-foreground">
-        By continuing, you agree to the Pegasus{" "}
+        {t("auth.login.agreePrefix", "By continuing, you agree to the Pegasus")}{" "}
         <Link
           to="/terms-of-service"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-primary hover:underline"
         >
-          Terms of Service
+          {t("auth.terms", "Terms of Service")}
         </Link>{" "}
-        and{" "}
+        {t("auth.and", "and")}{" "}
         <Link
           to="/privacy-policy"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-primary hover:underline"
         >
-          Privacy Policy
+          {t("auth.privacy", "Privacy Policy")}
         </Link>
         .
       </p>

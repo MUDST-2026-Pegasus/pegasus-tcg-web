@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { FormPageSkeleton } from "@/components/common/PageSkeletons";
+import { useTranslate } from "@/lib/i18n";
 import { useAuth } from "@/features/auth/auth.queries";
 import type { RoleCode } from "@/features/auth/auth.types";
 
@@ -26,11 +27,12 @@ export function RequireAuth({
   fallback,
   children,
 }: RequireAuthProps) {
+  const { t } = useTranslate("common");
   const location = useLocation();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
 
   if (isLoading) {
-    return fallback ?? <FormPageSkeleton label="กำลังตรวจสอบการเข้าสู่ระบบ" />;
+    return fallback ?? <FormPageSkeleton label={t("auth.checkingSession", "กำลังตรวจสอบการเข้าสู่ระบบ")} />;
   }
 
   if (!isAuthenticated) {

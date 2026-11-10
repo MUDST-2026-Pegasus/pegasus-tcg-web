@@ -21,7 +21,7 @@ import { clampQuantity, offeredVariants, resolveVariantId, type CardDraft } from
 import { useUpdateCollectionItem } from "../collection.queries";
 import type { CollectionItem } from "../collection.types";
 import { CardDetailsRow } from "./CardDetailsRow";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export function EditCardDialog({ item, onClose }: { item: CollectionItem | null; onClose: () => void }) {
   // Keep showing the card while the dialog animates shut, instead of an empty box.
@@ -43,6 +43,7 @@ export function EditCardDialog({ item, onClose }: { item: CollectionItem | null;
 }
 
 function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => void }) {
+  const { t } = useTranslate("buyer");
   const update = useUpdateCollectionItem();
   const upload = useFileUpload({ purpose: "COLLECTION_IMAGE" });
   const [draft, setDraft] = useState<CardDraft>({
@@ -80,16 +81,16 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
       });
       onClose();
     } catch (cause) {
-      setError(translateError(cause, "Could not save this card. Please try again."));
+      setError(translateError(cause, t("collection.edit.failed", "Could not save this card. Please try again.")));
     }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Edit card</DialogTitle>
+        <DialogTitle>{t("collection.edit.title", "Edit card")}</DialogTitle>
         <DialogDescription>
-          Change the printing, condition, or quantity, or replace your photo.
+          {t("collection.edit.hint", "Change the printing, condition, or quantity, or replace your photo.")}
         </DialogDescription>
       </DialogHeader>
 
@@ -125,11 +126,11 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
 
       <DialogFooter>
         <Button variant="outline" disabled={update.isPending} onClick={onClose}>
-          Cancel
+          {t("collection.cancel", "Cancel")}
         </Button>
         <Button disabled={!ready || update.isPending} onClick={() => void save()}>
           {update.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Save Changes
+          {t("collection.edit.save", "Save Changes")}
         </Button>
       </DialogFooter>
     </>

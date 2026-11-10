@@ -1,1 +1,1 @@
-export { listingText } from "@/lib/listing-detail.messages";
+export { useListingText } from "@/lib/listing-detail.messages";

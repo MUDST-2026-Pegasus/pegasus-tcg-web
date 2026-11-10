@@ -1,9 +1,11 @@
 import loginBackground from "@/assets/auth/login-background.jpg";
 import loginHeader from "@/assets/auth/login-header.jpg";
 import { Card } from "@/components/ui/card";
+import { useTranslate } from "@/lib/i18n";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 
 export function LoginPage() {
+  const { t } = useTranslate("buyer");
   return (
     <>
       <img
@@ -20,7 +22,7 @@ export function LoginPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
           <h1 className="absolute bottom-4 left-6 right-6 text-[32px] leading-10 font-bold tracking-[-0.64px] text-foreground">
-            Log in to Pegasus
+            {t("auth.login.title", "Log in to Pegasus")}
           </h1>
         </div>
         <div className="p-8">

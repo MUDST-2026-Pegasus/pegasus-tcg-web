@@ -11,7 +11,7 @@ import type { PublicReview, PublicReviews } from "@/features/finance/after-sales
 
 import { cn } from "@/lib/utils";
 import { formatReviewDate, getInitials } from "../store.format";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export type StoreReviewsTabProps = {
   summary: PublicReviews["summary"];
@@ -34,6 +34,7 @@ export function StoreReviewsTab({
   error,
   onRetry,
 }: StoreReviewsTabProps) {
+  const { t } = useTranslate("buyer");
   const [filter, setFilter] = useState<FilterChip>("ALL");
   const [displayLimit, setDisplayLimit] = useState(4);
 
@@ -78,18 +79,18 @@ export function StoreReviewsTab({
   ];
 
   const filterOptions: Array<{ key: FilterChip; label: string; count: number }> = [
-    { key: "ALL", label: "ทั้งหมด", count: ratingCount },
-    { key: 5, label: "5 ดาว", count: count5 },
-    { key: 4, label: "4 ดาว", count: count4 },
-    { key: 3, label: "3 ดาว", count: count3 },
-    { key: 2, label: "2 ดาว", count: count2 },
-    { key: 1, label: "1 ดาว", count: count1 },
-    { key: "REPLIED", label: "มีการตอบกลับ", count: replyCount },
+    { key: "ALL", label: t("store.reviews.all", "ทั้งหมด"), count: ratingCount },
+    { key: 5, label: t("store.reviews.stars", "{count} ดาว", { count: 5 }), count: count5 },
+    { key: 4, label: t("store.reviews.stars", "{count} ดาว", { count: 4 }), count: count4 },
+    { key: 3, label: t("store.reviews.stars", "{count} ดาว", { count: 3 }), count: count3 },
+    { key: 2, label: t("store.reviews.stars", "{count} ดาว", { count: 2 }), count: count2 },
+    { key: 1, label: t("store.reviews.stars", "{count} ดาว", { count: 1 }), count: count1 },
+    { key: "REPLIED", label: t("store.reviews.replied", "มีการตอบกลับ"), count: replyCount },
   ];
 
   if (isPending) {
     return (
-      <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว" className="space-y-4">
+      <div role="status" aria-busy="true" aria-label={t("store.reviews.loading", "กำลังโหลดรีวิว")} className="space-y-4">
         <ListRowsSkeleton rows={4} />
       </div>
     );
@@ -99,11 +100,11 @@ export function StoreReviewsTab({
     return (
       <div role="alert" className="rounded-2xl border border-border/80 bg-card p-8 text-center space-y-3">
         <p className="text-sm text-muted-foreground">
-          {translateError(error, "โหลดรีวิวไม่สำเร็จ")}
+          {translateError(error, t("store.reviews.failed", "โหลดรีวิวไม่สำเร็จ"))}
         </p>
         {onRetry && (
           <Button variant="outline" size="sm" onClick={onRetry}>
-            ลองอีกครั้ง
+            {t("store.reviews.retry", "ลองอีกครั้ง")}
           </Button>
         )}
       </div>
@@ -114,7 +115,7 @@ export function StoreReviewsTab({
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
       {/* Left Column: Score Summary Card */}
       <div className="w-full lg:w-[340px] shrink-0 space-y-3">
-        <h2 className="text-lg font-bold text-foreground">คะแนนร้านค้า</h2>
+        <h2 className="text-lg font-bold text-foreground">{t("store.rating", "คะแนนร้านค้า")}</h2>
 
         <div className="space-y-5 rounded-2xl border border-border/80 bg-card p-5 shadow-2xs">
           {/* Top Score Box */}
@@ -127,7 +128,7 @@ export function StoreReviewsTab({
               <ReviewStars rating={ratingAvg} starClassName="size-5" />
             </div>
             <p className="text-xs text-muted-foreground">
-              {ratingCount > 0 ? `จาก ${ratingCount} รีวิวของผู้ซื้อ` : "ยังไม่มีรีวิว"}
+              {ratingCount > 0 ? t("store.fromReviews", "จาก {count} รีวิวของผู้ซื้อ", { count: ratingCount }) : t("store.noReviews", "ยังไม่มีรีวิว")}
             </p>
           </div>
 
@@ -137,7 +138,7 @@ export function StoreReviewsTab({
               const pct = ratingCount > 0 ? (count / ratingCount) * 100 : 0;
               return (
                 <div key={star} className="flex items-center text-xs">
-                  <span className="w-10 shrink-0 text-muted-foreground">{star} ดาว</span>
+                  <span className="w-10 shrink-0 text-muted-foreground">{t("store.reviews.stars", "{count} ดาว", { count: star })}</span>
                   <div className="mx-2 h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full bg-amber-400"
@@ -160,14 +161,14 @@ export function StoreReviewsTab({
               {positivePercent !== null ? `${positivePercent}%` : "—"}
             </span>
             <span className="text-xs font-medium text-foreground">
-              ของผู้ซื้อให้ 4–5 ดาวกับร้านนี้
+              {t("store.reviews.positiveLine", "ของผู้ซื้อให้ 4–5 ดาวกับร้านนี้")}
             </span>
           </div>
 
           {/* Escrow Notice */}
           <div className="flex items-start gap-2.5 rounded-xl bg-muted/40 p-3 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <span>รีวิวทุกรายการมาจากผู้ซื้อที่คำสั่งซื้อเสร็จสมบูรณ์แล้ว</span>
+            <span>{t("store.reviews.verifiedNote", "รีวิวทุกรายการมาจากผู้ซื้อที่คำสั่งซื้อเสร็จสมบูรณ์แล้ว")}</span>
           </div>
 
           {/* Action Button */}
@@ -177,7 +178,7 @@ export function StoreReviewsTab({
             nativeButton={false}
             render={<Link to="/account/orders" role="link" />}
           >
-            รีวิวจากคำสั่งซื้อของฉัน
+            {t("store.reviews.mine", "รีวิวจากคำสั่งซื้อของฉัน")}
           </Button>
         </div>
       </div>
@@ -186,8 +187,8 @@ export function StoreReviewsTab({
       <div className="flex-1 min-w-0 space-y-4">
         {/* Header */}
         <div>
-          <h2 className="text-xl font-bold text-foreground">รีวิวจากผู้ซื้อ</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">เรียงจากรีวิวล่าสุด</p>
+          <h2 className="text-xl font-bold text-foreground">{t("store.buyerReviews", "รีวิวจากผู้ซื้อ")}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t("store.reviews.sortedLatest", "เรียงจากรีวิวล่าสุด")}</p>
         </div>
 
         {/* Filter Chips Row */}
@@ -220,11 +221,11 @@ export function StoreReviewsTab({
         {/* Reviews List */}
         {reviews.length === 0 ? (
           <div className="rounded-2xl border border-border/80 bg-card p-12 text-center text-sm text-muted-foreground">
-            ยังไม่มีรีวิว
+            {t("store.noReviews", "ยังไม่มีรีวิว")}
           </div>
         ) : filteredReviews.length === 0 ? (
           <div className="rounded-2xl border border-border/80 bg-card p-12 text-center text-sm text-muted-foreground">
-            ไม่พบรีวิวที่ตรงกับเงื่อนไข
+            {t("store.reviews.noMatch", "ไม่พบรีวิวที่ตรงกับเงื่อนไข")}
           </div>
         ) : (
           <div className="space-y-4">
@@ -252,7 +253,7 @@ export function StoreReviewsTab({
                           variant="outline"
                           className="h-4.5 gap-1 border-emerald-200/60 bg-emerald-50/50 px-1.5 py-0 text-[11px] font-normal text-emerald-600 dark:bg-emerald-950/20"
                         >
-                          <Check className="size-2.5" /> ผู้ซื้อยืนยันแล้ว
+                          <Check className="size-2.5" /> {t("store.reviews.verifiedBuyer", "ผู้ซื้อยืนยันแล้ว")}
                         </Badge>
                       </div>
                     </div>
@@ -277,7 +278,7 @@ export function StoreReviewsTab({
                   {review.replyComment && (
                     <div className="space-y-1.5 rounded-xl border-l-2 border-primary bg-muted/60 p-4">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="font-semibold text-primary">ร้านค้าตอบกลับ</span>
+                        <span className="font-semibold text-primary">{t("store.reviews.shopReply", "ร้านค้าตอบกลับ")}</span>
                         <span className="text-muted-foreground">•</span>
                         <span className="text-muted-foreground">
                           {formatReviewDate(review.repliedAt || review.createdAt)}
@@ -299,7 +300,7 @@ export function StoreReviewsTab({
                 className="h-11 w-full rounded-xl text-sm font-medium hover:bg-muted"
                 onClick={() => setDisplayLimit((prev) => prev + 4)}
               >
-                แสดงรีวิวเพิ่มเติม ({remainingCount})
+                {t("store.reviews.showMore", "แสดงรีวิวเพิ่มเติม ({count})", { count: remainingCount })}
               </Button>
             )}
           </div>

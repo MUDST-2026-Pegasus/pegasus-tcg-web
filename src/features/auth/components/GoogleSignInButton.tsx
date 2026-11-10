@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { env } from "@/lib/env";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
@@ -24,6 +25,7 @@ function hasGoogleIdentityServices(): boolean {
 }
 
 export function GoogleOrDivider() {
+  const { t } = useTranslate("buyer");
   return (
     <div
       className="flex items-center gap-3"
@@ -31,7 +33,7 @@ export function GoogleOrDivider() {
       aria-orientation="horizontal"
     >
       <Separator className="flex-1" />
-      <span className="text-xs text-muted-foreground">or</span>
+      <span className="text-xs text-muted-foreground">{t("auth.google.or", "or")}</span>
       <Separator className="flex-1" />
     </div>
   );
@@ -48,6 +50,7 @@ export function GoogleSignInButton({
   isLoading = false,
   disabled = false,
 }: GoogleSignInButtonProps) {
+  const { t } = useTranslate("buyer");
   const clientId = getGoogleClientId();
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const onCredentialRef = useRef(onCredential);
@@ -161,7 +164,7 @@ export function GoogleSignInButton({
           className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 text-sm font-medium text-muted-foreground"
         >
           <Spinner className="size-4" />
-          <span>Signing in with Google...</span>
+          <span>{t("auth.google.signingIn", "Signing in with Google...")}</span>
         </button>
       )}
       <div

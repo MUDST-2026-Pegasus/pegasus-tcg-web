@@ -10,8 +10,10 @@ import { PublicSellerReviews } from "@/features/finance/PublicSellerReviews";
 
 import { usePublicCollection } from "../collection.queries";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { useTranslate } from "@/lib/i18n";
 
 export function PublicCollectionPage() {
+  const { t } = useTranslate("buyer");
   const { username = "" } = useParams();
   const { user } = useAuth();
   const isOwn = user?.username.toLowerCase() === username.toLowerCase();
@@ -19,15 +21,15 @@ export function PublicCollectionPage() {
   const cards = collection.data?.pages.flatMap((page) => page.items) ?? [];
   const total = collection.data?.pages[0]?.totalItems ?? 0;
   const name = isOwn ? user.displayName : username;
-  usePageTitle(name && `คอลเลกชันของ ${name}`);
+  usePageTitle(name && t("collection.public.pageTitle", "คอลเลกชันของ {name}", { name }));
   // The collection endpoint carries no owner profile, so only your own picture is known here.
   const avatarUrl = isOwn ? user.avatarUrl : null;
 
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto flex max-w-[1440px] flex-col gap-8">
-      <Button variant="outline" className="self-start" render={<Link to={isOwn ? "/account/collection" : "/search"} />}>{isOwn ? "Back to My Collection" : "Back to products"}</Button>
-      <QueryBoundary query={collection} errorTitle="Could not load this collection" errorRetryLabel="Try again"
-        loading={<div role="status" aria-busy="true" aria-label="Loading collection" className="flex flex-col gap-8">
+      <Button variant="outline" className="self-start" render={<Link to={isOwn ? "/account/collection" : "/search"} />}>{isOwn ? t("collection.public.backToMine", "Back to My Collection") : t("collection.public.backToProducts", "Back to products")}</Button>
+      <QueryBoundary query={collection} errorTitle={t("collection.public.loadFailed", "Could not load this collection")} errorRetryLabel={t("collection.tryAgain", "Try again")}
+        loading={<div role="status" aria-busy="true" aria-label={t("collection.public.loading", "Loading collection")} className="flex flex-col gap-8">
           <ProfileHeaderSkeleton /><HeadingSkeleton /><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" />
         </div>}>
         {() => <>
@@ -36,15 +38,15 @@ export function PublicCollectionPage() {
             <div className="flex-1"><h1 className="text-2xl font-bold">{name}</h1><p className="text-muted-foreground">@{username}</p></div>
             <p className="text-xl font-semibold text-primary">{total} cards</p>
           </CardContent></Card>
-          <div><h2 className="text-xl font-semibold">{isOwn ? "Public collection" : "Collection highlights"}</h2>
-            <p className="text-sm text-muted-foreground">{isOwn ? "Cards you have made public." : `Cards from @${username}'s collection.`}</p></div>
+          <div><h2 className="text-xl font-semibold">{isOwn ? t("collection.public.ownTitle", "Public collection") : t("collection.public.title", "Collection highlights")}</h2>
+            <p className="text-sm text-muted-foreground">{isOwn ? t("collection.public.ownHint", "Cards you have made public.") : t("collection.public.hint", "Cards from @{username}'s collection.", { username: username ?? "" })}</p></div>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
               imageAlt={item.card.productName} badge={item.card.variantLabel} title={item.card.productName}
               className="w-full [&_img]:object-contain" />)}
-          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">No public cards yet.</p>}
+          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.public.empty", "No public cards yet.")}</p>}
           {collection.hasNextPage ? <Button variant="outline" className="self-center" disabled={collection.isFetchingNextPage}
-            onClick={() => void collection.fetchNextPage()}>Load more</Button> : null}
+            onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "Load more")}</Button> : null}
         </>}
       </QueryBoundary>
       <PublicSellerReviews username={username} />

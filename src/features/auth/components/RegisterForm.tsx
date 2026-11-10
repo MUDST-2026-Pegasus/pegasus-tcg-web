@@ -22,14 +22,16 @@ import { authRedirectTarget, rememberPendingClaim } from "@/features/promotions/
 import { BackHomeLink } from "@/features/auth/components/BackHomeLink";
 import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import {
-  registerSchema,
+  useAuthSchemas,
   type RegisterFormValues,
 } from "@/features/auth/auth.schema";
 
 import { applyApiErrors } from "@/lib/form";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export function RegisterForm() {
+  const { t } = useTranslate("buyer");
+  const { registerSchema } = useAuthSchemas();
   const navigate = useNavigate();
   const location = useLocation();
   const registerAccount = useRegister();
@@ -94,13 +96,13 @@ export function RegisterForm() {
   const formAlert = googleSignIn.isError
     ? getAuthErrorAlert(
         googleSignIn.error,
-        "Could not create your account. Please try again.",
+        t("auth.register.failed", "Could not create your account. Please try again."),
       )
     : registerAccount.isError
       ? {
           description: translateError(
             registerAccount.error,
-            "Could not create your account. Please try again.",
+            t("auth.register.failed", "Could not create your account. Please try again."),
           ),
         }
       : null;
@@ -117,11 +119,11 @@ export function RegisterForm() {
 
       <FieldGroup>
         <Field data-invalid={Boolean(errors.username) || undefined}>
-          <FieldLabel htmlFor="username">Username</FieldLabel>
+          <FieldLabel htmlFor="username">{t("auth.fields.username", "Username")}</FieldLabel>
           <Input
             id="username"
             autoComplete="username"
-            placeholder="Create your username"
+            placeholder={t("auth.register.usernamePlaceholder", "Create your username")}
             aria-invalid={Boolean(errors.username)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("username")}
@@ -130,11 +132,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.username]} />
         </Field>
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
-          <FieldLabel htmlFor="displayName">Display name</FieldLabel>
+          <FieldLabel htmlFor="displayName">{t("auth.fields.displayName", "Display name")}</FieldLabel>
           <Input
             id="displayName"
             autoComplete="name"
-            placeholder="Name other members will see"
+            placeholder={t("auth.register.displayNamePlaceholder", "Name other members will see")}
             aria-invalid={Boolean(errors.displayName)}
             {...register("displayName")}
             disabled={isGoogleSigningIn}
@@ -143,12 +145,12 @@ export function RegisterForm() {
           <FieldError errors={[errors.displayName]} />
         </Field>
         <Field data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{t("auth.fields.email", "Email")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="Enter your email"
+            placeholder={t("auth.fields.emailPlaceholder", "Enter your email")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -157,11 +159,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">{t("auth.fields.password", "Password")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="new-password"
-            placeholder="Create a password"
+            placeholder={t("auth.register.passwordPlaceholder", "Create a password")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -170,15 +172,15 @@ export function RegisterForm() {
           {errors.password ? (
             <FieldError errors={[errors.password]} />
           ) : (
-            <FieldDescription>At least 8 characters</FieldDescription>
+            <FieldDescription>{t("auth.register.passwordHint", "At least {min} characters", { min: 8 })}</FieldDescription>
           )}
         </Field>
         <Field data-invalid={Boolean(errors.confirmPassword) || undefined}>
-          <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
+          <FieldLabel htmlFor="confirmPassword">{t("auth.fields.confirmPassword", "Confirm password")}</FieldLabel>
           <PasswordInput
             id="confirmPassword"
             autoComplete="new-password"
-            placeholder="Confirm your password"
+            placeholder={t("auth.register.confirmPasswordPlaceholder", "Confirm your password")}
             aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("confirmPassword")}
@@ -205,14 +207,14 @@ export function RegisterForm() {
           />
           <span className="text-sm leading-snug">
             <FieldLabel htmlFor="terms" className="inline cursor-pointer font-normal">
-              I agree to the Pegasus
+              {t("auth.register.agreePrefix", "I agree to the Pegasus")}
             </FieldLabel>{" "}
             <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Terms of Service
+              {t("auth.terms", "Terms of Service")}
             </Link>{" "}
-            and{" "}
+            {t("auth.and", "and")}{" "}
             <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              Privacy Policy
+              {t("auth.privacy", "Privacy Policy")}
             </Link>
           </span>
         </Field>
@@ -223,7 +225,7 @@ export function RegisterForm() {
           className="h-12 w-full rounded-lg text-base"
         >
           {isSubmitting && <Spinner />}
-          {isSubmitting ? "Creating account…" : "Sign up"}
+          {isSubmitting ? t("auth.register.submitting", "Creating account…") : t("auth.register.submit", "Sign up")}
         </Button>
       </FieldGroup>
 
@@ -233,15 +235,14 @@ export function RegisterForm() {
         disabled={isSubmitting}
       />
       <p className="text-center text-sm text-muted-foreground ">
-        Already have an account? &nbsp;
+        {t("auth.register.haveAccount", "Already have an account?")} &nbsp;
         <Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">
-          Log in
+          {t("auth.register.logIn", "Log in")}
         </Link>
       </p>
       <BackHomeLink />
       <p className="pt-2 text-center text-xs tracking-[0.24px] text-muted-foreground">
-        We keep your information safe. We never use your information outside of
-        Pegasus TCG.
+        {t("auth.register.privacyNote", "We keep your information safe. We never use your information outside of Pegasus TCG.")}
       </p>
     </form>
   );

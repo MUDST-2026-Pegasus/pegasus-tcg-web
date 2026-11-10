@@ -62,7 +62,6 @@ import {
   useSellerListings,
 } from "../catalog.queries";
 import { certificateHref, versionOffers } from "../listing-detail.format";
-import { listingText as t } from "../listing-detail.messages";
 import type {
   PublicListingDetailDto,
   PublicListingDto,
@@ -77,8 +76,10 @@ import {
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { translateError } from "@/lib/i18n";
+import { useListingText } from "@/lib/listing-detail.messages";
 
 export function ListingDetailPage() {
+  const t = useListingText();
   const { listingId } = useParams<{ listingId: string }>();
   const id = Number(listingId);
   const query = useListingDetail(id);
@@ -126,6 +127,7 @@ function ListingDetailContent({
   data: PublicListingDetailDto;
   refresh: () => void;
 }) {
+  const t = useListingText();
   const { listing } = data;
   const productQuery = useProductDetail(listing.card.productSlug);
   const offersQuery = useProductListings(listing.card.productId);
@@ -628,6 +630,7 @@ function ListingDetailContent({
 }
 
 function RelatedListing({ listing }: { listing: PublicListingDto }) {
+  const t = useListingText();
   const addCart = useAddCartItem();
   const navigate = useNavigate();
   const relatedProduct = useProductDetail(listing.card.productSlug);

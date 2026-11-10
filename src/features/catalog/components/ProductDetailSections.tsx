@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { useProductCardEffects } from "../catalog.queries";
 import type { ProductDetailDto } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 // ---------- ส่วนของหน้ารายละเอียดที่ใช้ร่วมกัน [TCG-629] ----------
 // หน้าสินค้า (`ProductDetailPage`) และหน้าประมูล (`AuctionDetailPage`) หน้าตาเหมือนกันตรงนี้
@@ -17,11 +18,12 @@ export type GalleryImage = { id: string | number; url: string; alt: string };
 
 /** รูปที่โหลดพังแล้วขึ้นข้อความแทน ไม่ให้เห็นไอคอนรูปแตก */
 export function ProductImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const { t } = useTranslate("buyer");
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
       <div className="flex min-h-24 items-center justify-center p-4 text-center text-sm text-muted-foreground">
-        โหลดรูปไม่ได้ กรุณาลองโหลดข้อมูลใหม่
+        {t("product.imageFailed", "โหลดรูปไม่ได้ กรุณาลองโหลดข้อมูลใหม่")}
       </div>
     );
   }
@@ -43,6 +45,7 @@ export function ProductGallery({
   onSelect: (id: GalleryImage["id"]) => void;
   emptyAction?: ReactNode;
 }) {
+  const { t } = useTranslate("buyer");
   const current = images.find((image) => image.id === selectedId) ?? images[0];
   return (
     <div className={cn("grid min-w-0 gap-4", images.length > 0 ? "sm:grid-cols-[78px_minmax(0,1fr)]" : "sm:grid-cols-1")}>
@@ -53,7 +56,7 @@ export function ProductGallery({
               key={image.id}
               type="button"
               onClick={() => onSelect(image.id)}
-              aria-label={`ดูรูปสินค้าที่ ${index + 1}`}
+              aria-label={t("product.viewImage", "ดูรูปสินค้าที่ {n}", { n: index + 1 })}
               aria-pressed={current?.id === image.id}
               className={cn(
                 "flex aspect-[3/4] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-card p-1.5 transition sm:w-full",
@@ -74,7 +77,7 @@ export function ProductGallery({
             className="max-h-[560px] w-full object-contain drop-shadow-[0_18px_24px_rgba(24,24,27,0.22)]"
           />
         ) : (
-          <p className="text-center text-sm text-muted-foreground">ยังไม่มีรูปสินค้า</p>
+          <p className="text-center text-sm text-muted-foreground">{t("product.noImage", "ยังไม่มีรูปสินค้า")}</p>
         )}
         {!current && emptyAction}
       </div>
@@ -94,11 +97,12 @@ export function ProductBadges({ game, rarity }: { game: string; rarity: string |
 
 /** แถบ Tracked shipping / Buyer protection / Verified sellers */
 export function TrustStrip() {
+  const { t } = useTranslate("buyer");
   return (
     <div className="grid grid-cols-3 divide-x rounded-2xl border bg-card px-2 py-4 text-center">
-      <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Tracked shipping</p></div>
-      <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Buyer protection</p></div>
-      <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">Verified sellers</p></div>
+      <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.shipping", "Tracked shipping")}</p></div>
+      <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.protection", "Buyer protection")}</p></div>
+      <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.verified", "Verified sellers")}</p></div>
     </div>
   );
 }
@@ -107,22 +111,23 @@ type CatalogProduct = ProductDetailDto["product"];
 
 /** กล่อง Card attributes */
 export function CardAttributesCard({ product }: { product: CatalogProduct }) {
+  const { t } = useTranslate("buyer");
   const attributes = product.attributes ?? {};
   const displayAttribute = (key: string) => {
     const value = attributes[key];
     return typeof value === "string" || typeof value === "number" ? String(value) : "—";
   };
   const rows = [
-    ["Card number", product.cardNumber || "—"],
-    ["Rarity", product.rarityCode || "—"],
-    ["Card type", displayAttribute("card_type")],
-    ["Stage", displayAttribute("stage")],
+    [t("product.attr.cardNumber", "Card number"), product.cardNumber || "—"],
+    [t("product.attr.rarity", "Rarity"), product.rarityCode || "—"],
+    [t("product.attr.cardType", "Card type"), displayAttribute("card_type")],
+    [t("product.attr.stage", "Stage"), displayAttribute("stage")],
     ["HP", displayAttribute("hp")],
-    ["Artist", displayAttribute("artist")],
+    [t("product.attr.artist", "Artist"), displayAttribute("artist")],
   ];
   return (
     <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />Card attributes</h2>
+      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />{t("product.attr.title", "Card attributes")}</h2>
       <dl className="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">
         {rows.map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 font-semibold break-words">{value}</dd></div>)}
       </dl>
@@ -132,24 +137,25 @@ export function CardAttributesCard({ product }: { product: CatalogProduct }) {
 }
 
 /** กล่องความสามารถ / ท่าโจมตี — ใช้กับการ์ดใบเดียว (`SINGLE_CARD`) */
-export function CardEffectsCard({ productId, title = "Abilities & Attacks" }: { productId: number; title?: string }) {
+export function CardEffectsCard({ productId, title }: { productId: number; title?: string }) {
+  const { t } = useTranslate("buyer");
   const effectsQuery = useProductCardEffects(productId);
   const effects = effectsQuery.data ?? [];
   return (
     <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />{title}</h2>
+      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />{title ?? t("product.effect.title", "Abilities & Attacks")}</h2>
       {effectsQuery.isPending ? (
-        <div role="status" aria-busy="true" aria-label="กำลังโหลดความสามารถการ์ด"><TextLinesSkeleton lines={4} /></div>
+        <div role="status" aria-busy="true" aria-label={t("product.effect.loading", "กำลังโหลดความสามารถการ์ด")}><TextLinesSkeleton lines={4} /></div>
       ) : effectsQuery.isError ? (
-        <div role="alert" className="space-y-2 text-sm"><p>โหลดความสามารถการ์ดไม่สำเร็จ</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>ลองใหม่</Button></div>
+        <div role="alert" className="space-y-2 text-sm"><p>{t("product.effect.failed", "โหลดความสามารถการ์ดไม่สำเร็จ")}</p><Button variant="outline" onClick={() => void effectsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button></div>
       ) : effects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลความสามารถและท่าโจมตีของการ์ดใบนี้</p>
+        <p className="text-sm text-muted-foreground">{t("product.effect.empty", "ยังไม่มีข้อมูลความสามารถและท่าโจมตีของการ์ดใบนี้")}</p>
       ) : (
         <div className="divide-y">
           {effects.map((effect, index) => (
             <div key={`${effect.effectType}-${effect.displayOrder}-${index}`} className="py-4 first:pt-0 last:pb-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{effect.effectType === "ABILITY" ? "Ability" : effect.effectType === "ATTACK" ? "Attack" : "Rule"}</Badge>
+                <Badge variant="secondary">{effect.effectType === "ABILITY" ? t("product.effect.ability", "Ability") : effect.effectType === "ATTACK" ? t("product.effect.attack", "Attack") : t("product.effect.rule", "Rule")}</Badge>
                 <h3 className="font-semibold">{effect.name}</h3>
                 {effect.damage !== null && <strong className="ml-auto text-lg">{effect.damage}</strong>}
               </div>
