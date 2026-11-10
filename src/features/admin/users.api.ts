@@ -1,4 +1,4 @@
-import { api, type PageResponse } from "@/lib/api";
+import { api, type FileDownload, type PageResponse } from "@/lib/api";
 
 import type {
   AdminUser,
@@ -25,6 +25,23 @@ export function getAdminUsers(
       page: params.page,
       size: params.size,
     },
+  });
+}
+
+/**
+ * CSV ผู้ใช้ทุกคนที่ตรงตัวกรอง ไม่ใช่แค่หน้าที่เปิดอยู่ [TCG-747/749]
+ * อีเมลถูกปิดบังจาก backend · เกิน 20,000 แถวได้ 400 `EXPORT_TOO_LARGE`
+ */
+export function downloadAdminUsersCsv(
+  params: Omit<AdminUserListParams, "page" | "size">,
+): Promise<FileDownload> {
+  return api.download("/admin/users/export", {
+    query: {
+      q: params.q?.trim() || undefined,
+      role: params.role,
+      status: params.status,
+    },
+    headers: { Accept: "text/csv, application/json" },
   });
 }
 

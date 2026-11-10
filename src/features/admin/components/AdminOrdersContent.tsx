@@ -6,11 +6,6 @@ import { Clock } from "lucide-react";
 
 import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { orderAlertNotice } from "../orders.format";
 import { getAdminOrders } from "../orders.api";
@@ -18,6 +13,7 @@ import { useOrderBoard } from "../orders.queries";
 import type { AdminOrderSummary, OrderBoardColumn } from "../orders.types";
 import { OrderBoardSkeleton } from "./OrderBoardSkeleton";
 import { OrderDetailSheet } from "./OrderDetailSheet";
+import { OrderExportDialog } from "./OrderExportDialog";
 import { OrderKanbanColumn } from "./OrderKanbanColumn";
 import { OrderListSheet } from "./OrderListSheet";
 import { useTranslate } from "@/lib/i18n";
@@ -31,6 +27,7 @@ export function AdminOrdersContent() {
   const board = useOrderBoard();
   const [listColumn, setListColumn] = useState<OrderBoardColumn | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [params] = useSearchParams();
   const searchedOrder = params.get("q")?.trim() || "";
   const orderMatches = useQuery({
@@ -59,15 +56,10 @@ export function AdminOrdersContent() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* backend ยังไม่มี endpoint ส่งออก ปิดไว้พร้อมบอกเหตุผล */}
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button variant="outline" className="rounded-md px-2.5" disabled>
-                {t("finance.exportCsv", "ส่งออก CSV")}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t("orders.exportUnavailable", "ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้")}</TooltipContent>
-          </Tooltip>
+          {/* board ไม่มีตัวกรองวันที่ — dialog ให้เลือกช่วงวันที่และสถานะก่อน [TCG-749] */}
+          <Button variant="outline" className="rounded-md px-2.5" onClick={() => setExportOpen(true)}>
+            {t("finance.exportCsv", "ส่งออก CSV")}
+          </Button>
           <Button
             className="rounded-md px-2.5"
             disabled={!disputes}
@@ -133,6 +125,8 @@ export function AdminOrdersContent() {
         sellerOrderId={selectedId}
         onClose={() => setSelectedId(null)}
       />
+      {/* mount ใหม่ทุกครั้งที่เปิด ค่าเริ่มต้น 30 วันล่าสุดจะนับจากวันที่เปิดจริง */}
+      {exportOpen ? <OrderExportDialog open onOpenChange={setExportOpen} /> : null}
     </div>
   );
 }

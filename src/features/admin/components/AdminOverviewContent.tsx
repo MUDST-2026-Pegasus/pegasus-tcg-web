@@ -8,10 +8,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { downloadCsv } from "@/lib/csv";
+
+import { useFileExport } from "../export";
 
 import {
   gameShareHeadline,
   gameSlices,
+  overviewCsvFilename,
+  overviewCsvRows,
   salesPoints,
   salesTrendDescription,
   statCards,
@@ -23,12 +28,20 @@ import { GameShareChart } from "./GameShareChart";
 import { MonthlySalesChart } from "./MonthlySalesChart";
 import { RecentActivityCard } from "./RecentActivityCard";
 import { AuctionOverviewCards } from "./AuctionOverviewCards";
+import { ExportButton } from "./ExportButton";
 import { StatCard } from "./StatCard";
 import { TopSellersCard } from "./TopSellersCard";
 
 /** หน้าแรกของหลังบ้าน — ตัวเลขเดือนปัจจุบันจาก `/admin/metrics/overview` */
 export function AdminOverviewContent() {
   const overview = useOverviewMetrics();
+  const report = useFileExport();
+  // สร้างจากตัวเลขเดือนที่หน้าแสดงอยู่ ไม่ต้องเรียก backend เพิ่ม [TCG-749]
+  const exportReport = () => {
+    const data = overview.data;
+    if (!data) return;
+    void report.run(async () => downloadCsv(overviewCsvFilename(data), overviewCsvRows(data)));
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,16 +58,14 @@ export function AdminOverviewContent() {
           </p>
         </div>
 
-        {/* ยังไม่มีทั้ง endpoint ส่งออกและหน้าตั้งค่า ปิดไว้พร้อมบอกเหตุผล */}
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <Button variant="outline" className="rounded-md px-2.5" disabled>
-                ส่งออกรายงาน
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>ยังส่งออกรายงานไม่ได้ในตอนนี้</TooltipContent>
-          </Tooltip>
+          <ExportButton
+            label="ส่งออกรายงาน"
+            pending={report.pending}
+            disabled={!overview.data}
+            onClick={exportReport}
+          />
+          {/* ยังไม่มีหน้าตั้งค่าระบบ ปิดไว้พร้อมบอกเหตุผล */}
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button className="rounded-md px-2.5" disabled>

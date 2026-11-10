@@ -29,6 +29,10 @@
       "notApplicable": "ไม่มี (ของซีล/อุปกรณ์)"
     }
   },
+  "carriers": {
+    "thailandPostEms": "ไปรษณีย์ไทย EMS",
+    "thailandPostRegistered": "ไปรษณีย์ไทย ลงทะเบียน"
+  },
   "condition": {
     "dmg": "มีความเสียหาย",
     "hp": "มีรอยจากการใช้งานมาก",
@@ -44,6 +48,9 @@
     "pickDateTime": "เลือกวันและเวลา",
     "pickRange": "เลือกช่วงวัน",
     "time": "เวลา"
+  },
+  "dateTime": {
+    "ago": "{time}ที่แล้ว"
   },
   "home": {
     "eiei": "โบ๊ทdiwa"
@@ -82,6 +89,23 @@
   },
   "pagination": {
     "pageOf": "หน้า {page} จาก {total}"
+  },
+  "publicSellerReviews": {
+    "empty": "ยังไม่มีรีวิว",
+    "loadFailed": "โหลดรีวิวไม่สำเร็จ",
+    "loadingAria": "กำลังโหลดรีวิว",
+    "noSellerReviews": "บัญชีนี้ยังไม่มีรีวิวร้านค้า",
+    "ratingSummary": "คะแนนเฉลี่ย {average} / 5 จาก {count} รีวิว",
+    "reviewFromMyOrders": "รีวิวจากคำสั่งซื้อของฉัน",
+    "sellerReply": "ผู้ขายตอบ: {reply}",
+    "subtitle": "ผู้ซื้อให้คะแนนได้หลังคำสั่งซื้อเสร็จสมบูรณ์",
+    "title": "รีวิวร้านค้า"
+  },
+  "reviewStars": {
+    "legend": "คะแนนรีวิว",
+    "scoreOutOf": "{value} / 5 ดาว",
+    "starScore": "{score} ดาว",
+    "starsOutOf": "{rating} จาก 5 ดาว"
   },
   "routeError": {
     "title": "หน้านี้มีปัญหา"
@@ -163,8 +187,8 @@
         "saleSlug": "สินค้าลดราคา",
         "search": "ค้นหา",
         "termsOfService": "ข้อตกลงการใช้งาน",
-        "usersUsername": "คอลเลกชัน",
-        "uUsername": "ร้านค้า"
+        "uUsername": "ร้านค้า",
+        "usersUsername": "คอลเลกชัน"
       },
       "seller": {
         "auctions": "ประมูลของฉัน",
@@ -261,9 +285,5 @@
     "remove": "ลบ {name}",
     "uploaded": "อัปโหลดแล้ว · {size}",
     "uploading": "กำลังอัปโหลด {name}"
-  },
-  "carriers": {
-    "thailandPostEms": "ไปรษณีย์ไทย EMS",
-    "thailandPostRegistered": "ไปรษณีย์ไทย ลงทะเบียน"
   }
 }

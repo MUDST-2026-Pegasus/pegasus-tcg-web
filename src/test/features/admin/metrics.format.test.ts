@@ -6,6 +6,8 @@ import {
   gameSlices,
   salesTrendDescription,
   sparkBars,
+  overviewCsvFilename,
+  overviewCsvRows,
   statCards,
   thaiMonthRange,
   thaiMonthShort,
@@ -34,6 +36,9 @@ function overview(overrides: Partial<AdminOverview["stats"]> = {}): AdminOvervie
         averageRatePercent: 3,
       },
       promotionCost: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
+      saleSubsidy: { value: 0, previous: 0, sparkline: [0, 0, 0, 0, 0, 0, 0, 0] },
+      liveAuctions: 0,
+      auctionSalesLast30Days: 0,
       ...overrides,
     },
     monthlySales: [],
@@ -154,5 +159,28 @@ describe("top sellers and game share", () => {
     expect(gameSlices(shares).map((slice) => slice.name)).toEqual(["Pokémon", "อื่น ๆ"]);
     expect(gameShareHeadline(shares)).toBe("Pokémon ครองส่วนแบ่ง 46%");
     expect(gameShareHeadline([])).toBeNull();
+  });
+});
+
+describe("overviewCsvRows [TCG-749]", () => {
+  it("lists the month's numbers raw, leaving previous empty where nothing compares", () => {
+    const data = overview({
+      saleSubsidy: { value: 900, previous: 450, sparkline: [] },
+      liveAuctions: 7,
+      auctionSalesLast30Days: 52000,
+    });
+
+    expect(overviewCsvRows(data)).toEqual([
+      ["metric", "value", "previous"],
+      ["ยอดขายรวม (GMV)", 428500, 362400],
+      ["ผู้ขายรายใหม่", 32, 0],
+      ["ประกาศขายที่เปิดอยู่", 6184, null],
+      ["ค่าคอมมิชชัน", 12850, 12850],
+      ["ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)", 0, 0],
+      ["ส่วนลดแคมเปญ", 900, 450],
+      ["ประมูลที่กำลังเปิด", 7, null],
+      ["ยอดขายจากประมูล (30 วัน)", 52000, null],
+    ]);
+    expect(overviewCsvFilename(data)).toBe(`admin-overview-${data.period.month}.csv`);
   });
 });

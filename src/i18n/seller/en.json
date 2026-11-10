@@ -1207,6 +1207,404 @@
       "quantityMax": "You can receive at most {max} cards at a time. Split larger amounts into several lots"
     }
   },
+  "returnErrors": {
+    "defaultFallback": "Please try again",
+    "forbidden": "You do not have permission to perform this action",
+    "refundExceedsRefundable": "Refund amount cannot exceed the sub-order total",
+    "returnNotFound": "Return request not found",
+    "returnState": "The request status has changed or this action cannot be performed",
+    "validationFailed": "Invalid details. Please verify the amount and selected options"
+  },
+  "returnReason": {
+    "counterfeit": "Counterfeit item",
+    "damaged": "Damaged product",
+    "notAsDescribed": "Item not as described",
+    "notReceived": "Item not received",
+    "other": "Other reason",
+    "wrongItem": "Wrong item received"
+  },
+  "returnStatus": {
+    "approved": "Approved, awaiting refund",
+    "awaitingReturnShipment": "Awaiting buyer return shipment",
+    "closed": "Closed",
+    "inTransit": "Return in transit",
+    "other": "Other status",
+    "received": "Item received, awaiting refund",
+    "refunded": "Refunded",
+    "rejected": "Rejected",
+    "requested": "Awaiting decision"
+  },
+  "sellerReturns": {
+    "actions": {
+      "approveSuccessDesc": "Request RT-{id} amount {amount}",
+      "approveSuccessTitle": "Refund request approved",
+      "failedTitle": "Operation failed",
+      "receiveSuccessDesc": "Request RT-{id} received. Refund process will initiate",
+      "receiveSuccessTitle": "Return receipt confirmed",
+      "rejectSuccessDesc": "Request RT-{id} rejected. Escrow funds will be released according to original schedule",
+      "rejectSuccessTitle": "Return request rejected"
+    },
+    "card": {
+      "approvedAgo": "Approved {time}",
+      "buyerLabel": "Buyer:",
+      "buyerNoteLabel": "Buyer note:",
+      "cardAria": "Return request RT-{id}",
+      "createdAt": "Requested on {date}",
+      "evidenceHeader": "Evidence photos ({count} photos)",
+      "noEvidence": "No evidence attached to this request",
+      "partialRefundSubtext": "Partial refund {amount}",
+      "previewEvidenceAria": "Preview evidence image {index}",
+      "reasonLabel": "Reason:",
+      "refundAmountLabel": "Requested refund amount:",
+      "refundTypeFull": "Full refund",
+      "refundTypeLabel": "Return type:",
+      "refundTypePartial": "Partial refund",
+      "requestId": "Request RT-{id}",
+      "requestedAgo": "Requested {time}",
+      "subOrderLabel": "Sub-order:",
+      "subOrderTotalSubtext": "Sub-order total",
+      "viewSubOrderAria": "View sub-order #{id}"
+    },
+    "decision": {
+      "approveButton": "Approve refund {amount}",
+      "approveHint": "You can choose whether the buyer must return the item, or refund without return",
+      "fullRefund": "Full refund",
+      "fullRefundDesc": "{amount} · Equal to sub-order total",
+      "instruction": "Please review the evidence and reason from the buyer, then select an action below",
+      "outcomeFullRefund": "No payout from this order {shipBack, select, true {· Cards returned to stock upon receipt confirmation} other {}}",
+      "outcomePartialRefund": "Receive difference {amount} after platform commission",
+      "partialRefund": "Partial refund",
+      "partialRefundDesc": "Specify an amount less than {amount}",
+      "rejectButton": "Reject request",
+      "rejectHint": "If information is insufficient or does not meet terms, you can reject the request",
+      "shipBackDesc": "Turn off if return shipment is not required, e.g. buyer never received the item — refund is created immediately upon approval",
+      "shipBackLabel": "Require buyer to ship item back before refund",
+      "title": "Seller Decision",
+      "yourOutcome": "Your outcome: "
+    },
+    "emptyCategory": {
+      "desc": "When return requests in this status arrive, they will appear here automatically",
+      "title": "No requests in this category"
+    },
+    "emptySearchDesc": "Try searching with another request ID or order number, or clear search to see all",
+    "emptySearchTitle": "No return requests match your search",
+    "emptyTabDesc": "When new requests in this status arrive, they will appear here automatically",
+    "emptyTabTitle": "No requests in this status",
+    "errors": {
+      "defaultFallback": "Please try again",
+      "forbidden": "You do not have permission to perform this action",
+      "refundExceedsRefundable": "Refund amount cannot exceed the sub-order total",
+      "returnNotFound": "Return request not found",
+      "returnState": "The request status has changed or this action cannot be performed",
+      "validationFailed": "Invalid details. Please verify the amount and selected options"
+    },
+    "evidence": {
+      "alt": "Evidence {number}",
+      "caption": "Evidence {number}",
+      "clickToView": "Click image to view full size",
+      "openAria": "Open evidence {number}",
+      "title": "Evidence from buyer · {count} files",
+      "zoomAria": "Zoom evidence image {index}"
+    },
+    "field": {
+      "fullRefundRadio": "Full refund ({amount})",
+      "partialAmountAria": "Specify partial refund amount",
+      "partialAmountHint": "Must not exceed sub-order amount {amount}",
+      "partialAmountPlaceholder": "0.00",
+      "partialRefundRadio": "Partial refund",
+      "refundAmountLabel": "Refund amount"
+    },
+    "funds": {
+      "payoutDesc": "This amount will be released to your account if return is rejected, or difference after fees in case of partial refund",
+      "payoutLabel": "Seller payout:",
+      "shippingLabel": "Shipping fee:",
+      "subtotalLabel": "Subtotal:",
+      "title": "Funds held in Escrow",
+      "totalLabel": "Total order:",
+      "warning": "Funds in this order are temporarily held pending your decision"
+    },
+    "inTransit": {
+      "confirmReceiptButton": "Confirm item received",
+      "copyButton": "Copy",
+      "copyTrackingAria": "Copy tracking number",
+      "defaultReturnedCards": "Returned cards",
+      "expectedItemsPrefix": "· Expected items: ",
+      "instruction": "Please wait for delivery and inspect the item. Once received, click confirm below to initiate the refund",
+      "noTracking": "No tracking number",
+      "restockDesc": "All items received in good condition · Turn off if cards are damaged and cannot be resold",
+      "restockLabel": "Return cards to inventory",
+      "shippedAt": "Shipped on {date}",
+      "title": "Buyer has shipped the item return",
+      "toastCopied": "Tracking number copied",
+      "trackingCopied": "Tracking number copied",
+      "trackingLabel": "Tracking number:"
+    },
+    "loadFailed": "Failed to load return requests",
+    "loadFailedDesc": "Unable to retrieve requests list at this time",
+    "loadFailedHint": "Please check your connection and try again",
+    "loadFailedTitle": "Failed to load return requests",
+    "loadingAria": "Loading return requests",
+    "modals": {
+      "approve": {
+        "conditionNoShipBack": "⚡ No return shipment required — refund process starts immediately after approval",
+        "conditionShipBack": "✓ Buyer must ship item back before refund is issued, and you will inspect the package upon arrival",
+        "confirmButton": "Confirm refund approval {amount}",
+        "desc": "Select approval type and refund method for this request",
+        "financialImpactLabel": "Impact on your funds:",
+        "fullRefundType": "Full refund",
+        "impactFull": "No payout from this order",
+        "impactPartial": "Receive remaining ~{amount} (before commission)",
+        "partialRefundType": "Partial refund",
+        "refundToBuyerLabel": "Refund to buyer:",
+        "refundWithoutReturnHint": "System will initiate refund immediately. Recommended for heavily damaged items or when return shipping is uneconomical",
+        "refundWithoutReturnRadio": "Refund immediately without requiring return",
+        "returnConditionTitle": "Return shipment condition:",
+        "returnShipmentHint": "Buyer will have 3 business days to ship return and submit tracking. You will inspect the item before refund is issued",
+        "returnShipmentRadio": "Require buyer to ship item back before refund",
+        "shippingAddressDesc": "Buyer will ship the item back to this address. Please verify accuracy",
+        "shippingAddressHeader": "Return Shipping Address",
+        "subOrderTotalLabel": "Sub-order total:",
+        "submitButton": "Confirm approval",
+        "title": "Confirm refund request approval"
+      },
+      "confirmReceipt": {
+        "body": "You have inspected the package and received all returned items in full",
+        "checkboxAgree": "I agree to release refund of {amount} to the buyer",
+        "checkboxCondition": "I have received the returned item and inspected its condition",
+        "confirmButton": "Confirm receipt and release refund",
+        "desc": "Please inspect condition of returned item before confirming",
+        "footerNote": "เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ",
+        "refundAmountLabel": "Refund amount to buyer:",
+        "restockLabel": "Inventory restock:",
+        "restockNo": "Do not return to stock",
+        "restockYes": "Return cards to stock for resale",
+        "submitButton": "Confirm receipt and issue refund",
+        "title": "Confirm Receipt of Return RT-{id}",
+        "warning": "Once confirmed, the refund will be initiated immediately and this decision cannot be undone"
+      },
+      "evidence": {
+        "nextAria": "Next image",
+        "prevAria": "Previous image",
+        "title": "Return request evidence RT-{id} ({current}/{total})"
+      },
+      "evidencePreview": {
+        "fullAlt": "หลักฐานขนาดเต็ม {number}",
+        "thumbAlt": "หลักฐาน {number}",
+        "title": "หลักฐานจากผู้ซื้อ #{number} จาก {total} ไฟล์"
+      },
+      "policy": {
+        "closeButton": "Understood",
+        "contactTeam": "If you have questions or need assistance, contact our team 24/7",
+        "desc": "Terms and process for sellers when managing return requests",
+        "gotIt": "Understood",
+        "intro": "Pegasus TCG provides protection for both buyers and sellers with the following conditions:",
+        "rule1": "Buyers may request returns within 2 days after status becomes DELIVERED",
+        "rule2": "Sellers must decide within 3 business days, otherwise the request will be automatically approved",
+        "rule3": "If return shipment is required, buyer has 3 business days to ship and enter tracking",
+        "rule4": "Escrow funds remain on hold until the return request is resolved",
+        "rule5": "In case of dispute, the team will review evidence from both parties and make a final ruling",
+        "section1Body": "Buyers can submit return requests within the designated timeframe after order is marked delivered, before Escrow releases funds to the seller",
+        "section1Title": "1. Opening a Return Request",
+        "section2Body": "Sellers have the right to inspect photos or videos of card conditions and choose full refund, partial refund, or reject the request",
+        "section2Title": "2. Review and Evidence",
+        "section3Body": "If seller requests item return, buyer must ship and submit tracking number. Seller then inspects and confirms receipt to release refund",
+        "section3Title": "3. Return Shipment",
+        "section4Body": "Funds of orders with active return requests are held in Escrow until resolved. If rejected, funds are released according to original schedule",
+        "section4Title": "4. Financial Impact",
+        "title": "Return and Refund Policy"
+      },
+      "reject": {
+        "checkCarefully": "Please review evidence and messages from the buyer carefully before deciding to reject",
+        "confirmButton": "Confirm rejection",
+        "desc": "Please provide a detailed reason for rejecting this request. This will be shared with the buyer",
+        "explanationHeader": "Additional explanation to buyer (required)",
+        "explanationPlaceholder": "Provide more details to explain the decision to the buyer...",
+        "reasonAria": "Select rejection reason",
+        "reasonBuyerFault": "Damage caused by buyer usage",
+        "reasonConditionMatches": "Item matches condition described in listing",
+        "reasonExpired": "Return window has expired",
+        "reasonHeader": "Reason for rejection",
+        "reasonInvalidProof": "Unclear or insufficient evidence",
+        "reasonOther": "Other reason",
+        "reasonPlaceholder": "Select reason...",
+        "submitButton": "Confirm rejection",
+        "title": "Reject Return Request RT-{id}",
+        "warning": "Once rejected, this reason will be sent to the buyer, and Escrow funds will proceed according to terms",
+        "warning1": "Rejection cannot be cancelled or modified later",
+        "warning2": "Buyer will not be able to open another return request for this sub-order",
+        "warning3": "Escrow system will countdown to release payout to you on original schedule",
+        "warningTitle": "Important Warning:"
+      }
+    },
+    "pageSubtitle": "Manage return requests, approve/reject decisions, and confirm receipt of returned items",
+    "pageTitle": "Returns and Refunds Requests",
+    "pendingFunds": {
+      "fullRefundImpact": "No payout for this order",
+      "fullRefundLabel": "Full refund",
+      "impactTitle": "Impact on your payout when resolved",
+      "partialRefundImpact": "Receive remainder after commission",
+      "partialRefundLabel": "Partial refund",
+      "rejectImpact": "Receive full amount on schedule",
+      "rejectLabel": "Reject",
+      "subOrders": "{count} sub-orders",
+      "title": "Funds pending return resolution"
+    },
+    "policyButton": "Return policy",
+    "refundAmount": {
+      "label": "Refund amount",
+      "lockedHint": "Locked for full refund",
+      "preset25": "25% ({amount})",
+      "preset50": "50% ({amount})",
+      "presetReturnedCards": "By returned items value ({amount})",
+      "shortcuts": "Shortcuts:"
+    },
+    "searchClearAria": "Clear search",
+    "searchPlaceholder": "Search by request ID (RT-...) or sub-order number",
+    "sort": {
+      "ariaLabel": "Sort return requests",
+      "longestFirst": "Sort by: Longest waiting first",
+      "newestFirst": "Sort by: Newest first"
+    },
+    "status": {
+      "awaitingRefund": "Awaiting refund",
+      "awaitingShipment": "Awaiting buyer return",
+      "closed": "Closed",
+      "inTransit": "Return in transit",
+      "refunded": "Refund completed",
+      "rejected": "Rejected",
+      "requested": "Awaiting decision"
+    },
+    "statusCallout": {
+      "approved": "You approved the request. System is processing the refund",
+      "awaitingReturnShipment": "Waiting for buyer to ship returned item within 3 business days",
+      "closed": "This return request has been closed",
+      "received": "You confirmed receipt of the return. System is processing the refund",
+      "refunded": "System has completed the refund to the buyer",
+      "rejected": "You rejected this request. The order will proceed normally",
+      "title": "Current Status",
+      "trackingLabel": "Return tracking number:"
+    },
+    "steps": {
+      "step1Title": "Buyer submits request",
+      "step2Desc": "Approve or reject return request",
+      "step2Title": "Seller reviews request",
+      "step3Desc": "Buyer must ship back within the specified timeframe",
+      "step3Title": "Buyer ships item return",
+      "step4Title": "Seller inspects item",
+      "step5Desc": "System automatically processes the refund",
+      "step5Title": "Refund to buyer",
+      "title": "Return Process Steps"
+    },
+    "subtitle": "{count} requests waiting for your action · Order funds are held until resolved",
+    "summary": {
+      "itemsHeader": "Items in this request ({count} items)",
+      "itemsToReturn": "Items to return · {count} items",
+      "noItemsFound": "No items found in this request",
+      "priceLabel": "Price: {price}",
+      "qtyLabel": "Quantity: {qty} pcs",
+      "reasonFromBuyer": "Reason from buyer",
+      "returnQuantity": "{condition} · Returning {returned} of {ordered} cards",
+      "sellerPayoutAmount": "Seller payout amount: {amount}",
+      "sellerPayoutDesc": "After platform fee deduction",
+      "shippingAmount": "Shipping: {amount}",
+      "subtotalAmount": "Subtotal: {amount}",
+      "totalOrderAmount": "Total order amount: {amount}"
+    },
+    "tabs": {
+      "actionRequired": "Action required",
+      "awaitingRefund": "Awaiting refund",
+      "awaitingShipment": "Awaiting buyer return",
+      "completed": "Completed"
+    },
+    "title": "Return Requests",
+    "validation": {
+      "amountRequired": "Please specify refund amount",
+      "invalidNumber": "Please enter a valid number",
+      "maxTwoDecimals": "Refund amount cannot exceed 2 decimal places",
+      "mustBeLessThanTotal": "Partial refund must be less than order total ({total} Baht)",
+      "mustBePositive": "Refund amount must be greater than 0 Baht"
+    },
+    "warning": {
+      "desc": "Rejection is irreversible and buyer cannot open another request for this sub-order",
+      "title": "Inspect evidence before rejecting"
+    },
+    "warningWidget": {
+      "notice": "This request has no evidence attached. Please review carefully before deciding"
+    }
+  },
+  "sellerReviews": {
+    "aside": {
+      "filterAria": "Filter {score} stars {count} reviews",
+      "filterHint": "Click star bars to filter list",
+      "politeWarningDesc": "Replies are public to everyone and cannot be edited later",
+      "politeWarningTitle": "Respond to low rating reviews politely",
+      "ratingDistribution": "Rating distribution",
+      "reviewCount": "{count} reviews",
+      "rule1": "One reply per review · cannot be edited or deleted once submitted",
+      "rule2": "Store cannot edit, delete, or hide reviews",
+      "rule3": "1 review per COMPLETED sub-order only",
+      "rulesTitle": "Review Response Rules"
+    },
+    "card": {
+      "emptyError": "Please enter a reply before submitting",
+      "onceWarning": "One reply only · cannot be edited or deleted once submitted",
+      "repliedBadge": "Replied",
+      "replyButton": "Reply",
+      "replyFormLabel": "Reply to this review",
+      "replyHeader": "↩ Reply from your store",
+      "replyPlaceholder": "Type your store's reply...",
+      "sendButton": "Send reply",
+      "unrepliedBadge": "Unreplied",
+      "warningText": "Cannot be empty · cannot be edited or deleted once submitted"
+    },
+    "dialog": {
+      "backToEdit": "Back to edit",
+      "confirmSend": "Confirm send reply",
+      "desc": "The reply will be displayed publicly under {username}'s review and cannot be edited or deleted later",
+      "title": "Replies cannot be edited once sent",
+      "yourReply": "Your reply"
+    },
+    "empty": {
+      "description": "Buyers can review your store once orders are completed. New reviews will appear here",
+      "title": "No reviews yet",
+      "viewPublicStore": "View public store"
+    },
+    "loadReviewsFailed": "Failed to load reviews",
+    "noReviewsFiltered": "No reviews match this filter",
+    "ratingFilterAll": "All star ratings",
+    "ratingFilterAria": "Filter by star rating",
+    "showingAllCount": "Showing all {count} reviews · sorted by newest",
+    "stats": {
+      "averageRating": "Average rating",
+      "loadFailed": "Failed to load review summary",
+      "noReviewsYet": "No reviews yet",
+      "onlyVisibleCounted": "Only visible reviews are counted",
+      "outOfFiveStars": "out of 5 stars",
+      "summaryAria": "Review summary",
+      "thisMonth": "Reviews this month",
+      "totalReviews": "Total reviews",
+      "unreplied": "Unreplied",
+      "waitingForReply": "Awaiting store reply"
+    },
+    "subtitle": "View and respond to reviews from buyers · Store replies are public and can only be submitted once",
+    "tabs": {
+      "all": "All",
+      "filterAria": "Filter reviews",
+      "replied": "Replied",
+      "unreplied": "Unreplied"
+    },
+    "title": "Store Reviews",
+    "toast": {
+      "alreadyRepliedDesc": "Latest reply has been loaded",
+      "alreadyRepliedTitle": "This review has already been replied to",
+      "notFoundDesc": "Review may be hidden or does not belong to your store. The list will refresh",
+      "notFoundTitle": "Review not found",
+      "repliedSuccess": "Reply sent successfully",
+      "replyFailed": "Failed to send reply",
+      "tryAgainHint": "Please try again"
+    },
+    "viewPublicStore": "View public store"
+  },
   "sellerStatus": {
     "NOT_APPLIED": "Not yet applied as a seller",
     "PENDING": "Identity documents under review",

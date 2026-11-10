@@ -5,7 +5,7 @@ import type {
   MonthlySales,
   TopSeller,
 } from "./metrics.types";
-import { formatMonth, formatYear, monthStart } from "@/lib/i18n";
+import { formatMonth, formatYear, monthStart, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงตัวเลขจาก `/admin/metrics/overview` → ของที่การ์ดบนหน้าภาพรวมโชว์
@@ -200,4 +200,37 @@ export function gameShareHeadline(shares: GameShare[]): string | null {
     ? leader.percent.toString()
     : leader.percent.toFixed(1);
   return `${leader.gameName ?? "ไม่ระบุเกม"} ครองส่วนแบ่ง ${percent}%`;
+}
+
+// @tolgee-key {"key":"overview.export.gmv","ns":"admin","defaultValue":"ยอดขายรวม (GMV)"}
+// @tolgee-key {"key":"overview.export.newSellers","ns":"admin","defaultValue":"ผู้ขายรายใหม่"}
+// @tolgee-key {"key":"overview.export.activeListings","ns":"admin","defaultValue":"ประกาศขายที่เปิดอยู่"}
+// @tolgee-key {"key":"overview.export.commission","ns":"admin","defaultValue":"ค่าคอมมิชชัน"}
+// @tolgee-key {"key":"overview.export.promotionCost","ns":"admin","defaultValue":"ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)"}
+// @tolgee-key {"key":"overview.export.saleSubsidy","ns":"admin","defaultValue":"ส่วนลดแคมเปญ"}
+// @tolgee-key {"key":"overview.export.liveAuctions","ns":"admin","defaultValue":"ประมูลที่กำลังเปิด"}
+// @tolgee-key {"key":"overview.export.auctionSales","ns":"admin","defaultValue":"ยอดขายจากประมูล (30 วัน)"}
+
+/**
+ * แถวของไฟล์ "ส่งออกรายงาน" หน้าภาพรวม [TCG-749] — ตัวเลขดิบของเดือนที่หน้าแสดง ไม่จัดรูปแบบ
+ * ค่าที่ไม่มียอดเทียบ (ประกาศที่เปิดขาย, ประมูล) เว้น `previous` ว่าง
+ */
+export function overviewCsvRows(overview: AdminOverview): (string | number | null)[][] {
+  const s = overview.stats;
+  return [
+    ["metric", "value", "previous"],
+    [translate("admin", "overview.export.gmv", "ยอดขายรวม (GMV)"), s.gmv.value, s.gmv.previous],
+    [translate("admin", "overview.export.newSellers", "ผู้ขายรายใหม่"), s.newSellers.value, s.newSellers.previous],
+    [translate("admin", "overview.export.activeListings", "ประกาศขายที่เปิดอยู่"), s.activeListings.value, null],
+    [translate("admin", "overview.export.commission", "ค่าคอมมิชชัน"), s.commission.value, s.commission.previous],
+    [translate("admin", "overview.export.promotionCost", "ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)"), s.promotionCost.value, s.promotionCost.previous],
+    [translate("admin", "overview.export.saleSubsidy", "ส่วนลดแคมเปญ"), s.saleSubsidy?.value ?? 0, s.saleSubsidy?.previous ?? 0],
+    [translate("admin", "overview.export.liveAuctions", "ประมูลที่กำลังเปิด"), s.liveAuctions, null],
+    [translate("admin", "overview.export.auctionSales", "ยอดขายจากประมูล (30 วัน)"), s.auctionSalesLast30Days, null],
+  ];
+}
+
+/** "2026-10" → admin-overview-2026-10.csv */
+export function overviewCsvFilename(overview: AdminOverview): string {
+  return `admin-overview-${overview.period.month}.csv`;
 }
