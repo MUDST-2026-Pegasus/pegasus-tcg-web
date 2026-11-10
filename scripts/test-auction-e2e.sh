@@ -37,5 +37,5 @@ for attempt in $(seq 1 30); do curl -fsS http://localhost:5178 >/dev/null 2>&1 &
 for round in $(seq 1 "${AUCTION_ROUNDS:-3}"); do
   # Reset only this throwaway DB so each stability round starts from BE-13 seed.
   if [ "$round" -gt 1 ]; then docker exec "$qa_tag-pg" sh /tmp/seed/run-seed.sh auctionqa postgres http://localhost:59000/pegasus 1 > "$qa_logs/seed-$round.log" 2>&1; fi
-  pnpm exec cypress run --browser "${AUCTION_BROWSER:-electron}" --config baseUrl=http://localhost:5178 --spec 'cypress/e2e/auction/*.cy.ts' --env runAuction=true,apiBaseUrl=http://localhost:8088 2>&1 | tee "$qa_logs/cypress-$round.log"
+  pnpm exec cypress run --browser "${AUCTION_BROWSER:-electron}" --config baseUrl=http://localhost:5178 --spec 'src/test/cypress/e2e/auction/*.cy.ts' --env runAuction=true,apiBaseUrl=http://localhost:8088 2>&1 | tee "$qa_logs/cypress-$round.log"
 done
