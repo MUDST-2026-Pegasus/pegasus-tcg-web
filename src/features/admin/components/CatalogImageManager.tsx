@@ -31,6 +31,7 @@ import type {
 
 import { CatalogImageTile } from "./CatalogImageTile";
 import { DeleteImageDialog } from "./DeleteImageDialog";
+import { useTranslate } from "@/lib/i18n";
 
 /** ค่าที่ Select ใช้แทน "ทุก variant" — Base UI Select ไม่รับ `null` เป็นตัวเลือก */
 const ALL_VARIANTS = "all";
@@ -60,6 +61,7 @@ export function CatalogImageManager({
   images,
   onRefresh,
 }: CatalogImageManagerProps) {
+  const { t } = useTranslate("admin");
   const upload = useFileUpload({
     purpose: "CATALOG_IMAGE",
     multiple: true,
@@ -76,7 +78,7 @@ export function CatalogImageManager({
 
   const ready = upload.items.filter((item) => item.objectKey !== null);
   const scopeItems = [
-    { value: ALL_VARIANTS, label: "ทุก variant (ใช้ร่วมกัน)" },
+    { value: ALL_VARIANTS, label: t("catalog.images.allVariants", "ทุก variant (ใช้ร่วมกัน)") },
     ...variants
       .filter((variant) => variant.active || String(variant.id) === scope)
       .map((variant) => ({
@@ -88,7 +90,7 @@ export function CatalogImageManager({
   const labelOf = (image: CatalogImage): string | null => {
     if (image.catalogVariantId === null) return null;
     const variant = variants.find((v) => v.id === image.catalogVariantId);
-    return variant ? variantLabel(variant) : "variant ที่ไม่พบ";
+    return variant ? variantLabel(variant) : t("catalog.images.unknownVariant", "variant ที่ไม่พบ");
   };
 
   /**
@@ -113,21 +115,21 @@ export function CatalogImageManager({
         attached += 1;
       } catch (error) {
         failures.push(
-          `${item.file.name}: ${catalogErrorMessage(error, "แนบไม่สำเร็จ")}`,
+          `${item.file.name}: ${catalogErrorMessage(error, t("catalog.images.attachOneFailed", "แนบไม่สำเร็จ"))}`,
         );
       }
     }
     setIsAttaching(false);
 
     if (failures.length === 0) {
-      toast.add({ type: "success", title: `แนบรูปแล้ว ${attached} รูป` });
+      toast.add({ type: "success", title: t("catalog.images.attached", "แนบรูปแล้ว {count} รูป", { count: attached }) });
     } else {
       toast.add({
         type: "error",
         title:
           attached > 0
-            ? `แนบได้ ${attached} รูป ไม่สำเร็จ ${failures.length} รูป`
-            : "แนบรูปไม่สำเร็จ",
+            ? t("catalog.images.attachPartial", "แนบได้ {ok} รูป ไม่สำเร็จ {failed} รูป", { ok: attached, failed: failures.length })
+            : t("catalog.images.attachFailed", "แนบรูปไม่สำเร็จ"),
         description: failures.join(" · "),
       });
     }
@@ -135,12 +137,12 @@ export function CatalogImageManager({
 
   function handleMakePrimary(image: CatalogImage) {
     setPrimary.mutate(image.id, {
-      onSuccess: () => toast.add({ type: "success", title: "ตั้งรูปหลักแล้ว" }),
+      onSuccess: () => toast.add({ type: "success", title: t("catalog.images.primarySet", "ตั้งรูปหลักแล้ว") }),
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "ตั้งรูปหลักไม่สำเร็จ",
-          description: catalogErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("catalog.images.primaryFailed", "ตั้งรูปหลักไม่สำเร็จ"),
+          description: catalogErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   }
@@ -156,7 +158,7 @@ export function CatalogImageManager({
     deleteImage.mutate(deleteTarget.id, {
       onSuccess: () => {
         setIsDeleteOpen(false);
-        toast.add({ type: "success", title: "ลบรูปแล้ว" });
+        toast.add({ type: "success", title: t("catalog.images.deleted", "ลบรูปแล้ว") });
       },
     });
   }
@@ -172,8 +174,8 @@ export function CatalogImageManager({
       {images.length === 0 ? (
         <EmptyState
           icon={ImagePlus}
-          title="ยังไม่มีรูป"
-          description="รูปแรกที่แนบจะเป็นรูปหลักที่โชว์บนการ์ดสินค้า"
+          title={t("catalog.images.emptyTitle", "ยังไม่มีรูป")}
+          description={t("catalog.images.emptyDescription", "รูปแรกที่แนบจะเป็นรูปหลักที่โชว์บนการ์ดสินค้า")}
           className="min-h-48"
         />
       ) : (
@@ -194,18 +196,18 @@ export function CatalogImageManager({
       )}
 
       <div className="flex flex-col gap-4 rounded-lg border border-border p-4">
-        <p className="text-sm font-medium">เพิ่มรูป</p>
+        <p className="text-sm font-medium">{t("catalog.images.add", "เพิ่มรูป")}</p>
 
         <FileUpload
           id="catalogImages"
           upload={upload}
-          description="รูปการ์ดทางการ"
+          description={t("catalog.images.official", "รูปการ์ดทางการ")}
           disabled={isAttaching}
         />
 
         <div className="flex flex-wrap items-end justify-between gap-3">
           <Field className="w-full sm:w-72">
-            <FieldLabel htmlFor="imageScope">ใช้กับ</FieldLabel>
+            <FieldLabel htmlFor="imageScope">{t("catalog.images.scope", "ใช้กับ")}</FieldLabel>
             <Select
               items={scopeItems}
               value={scope}
@@ -226,7 +228,7 @@ export function CatalogImageManager({
               </SelectContent>
             </Select>
             <FieldDescription className="text-xs">
-              ส่วนใหญ่ใช้ร่วมกัน เลือก variant เฉพาะเมื่อภาพต่างกันจริง เช่น Alt Art
+              {t("catalog.images.scopeHint", "ส่วนใหญ่ใช้ร่วมกัน เลือก variant เฉพาะเมื่อภาพต่างกันจริง เช่น Alt Art")}
             </FieldDescription>
           </Field>
 
@@ -237,7 +239,7 @@ export function CatalogImageManager({
             onClick={handleAttach}
           >
             {isAttaching && <Spinner data-icon="inline-start" />}
-            {ready.length > 0 ? `แนบรูป ${ready.length} รูป` : "แนบรูป"}
+            {ready.length > 0 ? t("catalog.images.attachCount", "แนบรูป {count} รูป", { count: ready.length }) : t("catalog.images.attach", "แนบรูป")}
           </Button>
         </div>
       </div>

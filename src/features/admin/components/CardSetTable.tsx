@@ -18,6 +18,7 @@ import type { CardSet, Game } from "../catalog.types";
 import { formatReleaseDate } from "../taxonomy.format";
 
 import { CARD_EMPTY_CLASS, HEAD_CLASS, HEAD_ROW_CLASS } from "./taxonomy.styles";
+import { useTranslate } from "@/lib/i18n";
 
 type CardSetTableProps = {
   game: Game;
@@ -36,6 +37,7 @@ export function CardSetTable({
   onEdit,
   onDelete,
 }: CardSetTableProps) {
+  const { t } = useTranslate("admin");
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
   const visible = needle
@@ -50,7 +52,7 @@ export function CardSetTable({
   const columns: DataTableColumn<CardSet>[] = [
     {
       id: "name",
-      header: "ชุดการ์ด",
+      header: t("cardAttributes.sets.col.set", "ชุดการ์ด"),
       meta: { headClassName: cn(HEAD_CLASS, "pl-5"), cellClassName: "py-2.5 pl-5" },
       cell: ({ row: { original: cardSet } }) => (
         <div className="flex items-center gap-2.5">
@@ -70,7 +72,7 @@ export function CardSetTable({
     },
     {
       id: "code",
-      header: "รหัส",
+      header: t("cardAttributes.col.code", "รหัส"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5" },
       cell: ({ row }) => (
         <Badge variant="outline" className="h-5 rounded-[5px] px-1.5 text-[10px] font-medium">
@@ -80,26 +82,26 @@ export function CardSetTable({
     },
     {
       id: "released",
-      header: "วันวางจำหน่าย",
+      header: t("cardAttributes.sets.col.release", "วันวางจำหน่าย"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[140px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
       cell: ({ row }) => formatReleaseDate(row.original.releaseDate) ?? dash,
     },
     {
       id: "total",
-      header: "จำนวนการ์ด",
+      header: t("cardAttributes.sets.col.total", "จำนวนการ์ด"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[110px]"), cellClassName: "py-2.5 text-xs text-muted-foreground" },
-      cell: ({ row }) => (row.original.totalCards === null ? dash : `${formatCount(row.original.totalCards)} ใบ`),
+      cell: ({ row }) => (row.original.totalCards === null ? dash : t("cardAttributes.sets.cards", "{count} ใบ", { count: formatCount(row.original.totalCards) })),
     },
     {
       id: "actions",
-      header: () => <span className="sr-only">จัดการ</span>,
+      header: () => <span className="sr-only">{t("cardAttributes.col.actions", "จัดการ")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, "w-[88px] pr-5"), cellClassName: "py-2 pr-5" },
       cell: ({ row: { original: cardSet } }) => (
         <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon-sm" aria-label={`แก้ไขชุด ${cardSet.name}`} className="rounded-md text-[#9aa5ad]" onClick={() => onEdit(cardSet)}>
+          <Button variant="ghost" size="icon-sm" aria-label={t("cardAttributes.sets.edit", "แก้ไขชุด {name}", { name: cardSet.name })} className="rounded-md text-[#9aa5ad]" onClick={() => onEdit(cardSet)}>
             <Pencil />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={`ลบชุด ${cardSet.name}`} className="rounded-md text-[#9aa5ad] hover:text-destructive" onClick={() => onDelete(cardSet)}>
+          <Button variant="ghost" size="icon-sm" aria-label={t("cardAttributes.sets.delete", "ลบชุด {name}", { name: cardSet.name })} className="rounded-md text-[#9aa5ad] hover:text-destructive" onClick={() => onDelete(cardSet)}>
             <Trash2 />
           </Button>
         </div>
@@ -112,10 +114,10 @@ export function CardSetTable({
       <div className="flex flex-wrap items-center justify-between gap-4 px-5 pt-4 pb-3.5">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-[15px] font-semibold text-foreground">
-            ชุดการ์ดของ {game.name}
+            {t("cardAttributes.sets.heading", "ชุดการ์ดของ {game}", { game: game.name })}
           </h3>
           <p className="text-[11px] text-muted-foreground">
-            {cardSets.length} ชุด · เรียงจากวางจำหน่ายล่าสุด
+            {t("cardAttributes.sets.count", "{count} ชุด · เรียงจากวางจำหน่ายล่าสุด", { count: cardSets.length })}
           </p>
         </div>
 
@@ -129,13 +131,13 @@ export function CardSetTable({
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="ค้นหาชื่อหรือรหัสชุด"
-                aria-label="ค้นหาชุดการ์ด"
+                placeholder={t("cardAttributes.sets.searchPlaceholder", "ค้นหาชื่อหรือรหัสชุด")}
+                aria-label={t("cardAttributes.sets.search", "ค้นหาชุดการ์ด")}
               />
             </InputGroup>
           )}
           <Button variant="outline" className="rounded-md px-2.5" onClick={onAdd}>
-            + เพิ่มชุดการ์ด
+            {t("cardAttributes.sets.add", "+ เพิ่มชุดการ์ด")}
           </Button>
         </div>
       </div>
@@ -143,15 +145,15 @@ export function CardSetTable({
       {cardSets.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="ยังไม่มีชุดการ์ด"
-          description={`เพิ่มชุดแรกของ ${game.name} เพื่อจัดกลุ่มการ์ดตามรุ่นที่วางจำหน่าย`}
+          title={t("cardAttributes.sets.emptyTitle", "ยังไม่มีชุดการ์ด")}
+          description={t("cardAttributes.sets.emptyDescription", "เพิ่มชุดแรกของ {game} เพื่อจัดกลุ่มการ์ดตามรุ่นที่วางจำหน่าย", { game: game.name })}
           className={CARD_EMPTY_CLASS}
         />
       ) : visible.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="ไม่พบชุดที่ค้นหา"
-          description={`ไม่มีชุดที่ชื่อหรือรหัสตรงกับ "${query.trim()}"`}
+          title={t("cardAttributes.sets.noMatchTitle", "ไม่พบชุดที่ค้นหา")}
+          description={t("cardAttributes.sets.noMatchDescription", "ไม่มีชุดที่ชื่อหรือรหัสตรงกับ \"{query}\"", { query: query.trim() })}
           className={CARD_EMPTY_CLASS}
         />
       ) : (

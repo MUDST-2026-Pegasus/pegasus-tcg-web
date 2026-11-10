@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { FileUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import type { FileUploadState } from "@/hooks/use-file-upload";
+import { useTranslate } from "@/lib/i18n";
 
 type LogoUploadFieldProps = {
   /** ผลของ `useFileUpload({ purpose: "CATALOG_IMAGE" })` ที่ฟอร์มถือไว้ */
@@ -27,6 +28,7 @@ export function LogoUploadField({
   saved,
   onRemove,
 }: LogoUploadFieldProps) {
+  const { t } = useTranslate("admin");
   const showCurrent =
     Boolean(saved?.logoImageUrl) &&
     value !== "" &&
@@ -41,7 +43,7 @@ export function LogoUploadField({
           alt=""
           className="size-14 rounded-md bg-card object-contain"
         />
-        <p className="flex-1 text-xs text-muted-foreground">โลโก้ปัจจุบัน</p>
+        <p className="flex-1 text-xs text-muted-foreground">{t("cardAttributes.form.currentLogo", "โลโก้ปัจจุบัน")}</p>
         <Button
           type="button"
           variant="ghost"
@@ -50,7 +52,7 @@ export function LogoUploadField({
           onClick={onRemove}
         >
           <Trash2 data-icon="inline-start" />
-          เอารูปออก
+          {t("cardAttributes.form.removeImage", "เอารูปออก")}
         </Button>
       </div>
     );
@@ -60,7 +62,7 @@ export function LogoUploadField({
     <FileUpload
       upload={upload}
       id={id}
-      title="ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป"
+      title={t("cardAttributes.form.dropImage", "ลากรูปมาวาง หรือคลิกเพื่อเลือกรูป")}
     />
   );
 }

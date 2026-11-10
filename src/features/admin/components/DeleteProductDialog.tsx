@@ -5,6 +5,7 @@ import { hasErrorCode } from "@/lib/api";
 
 import { catalogErrorMessage, productTitle } from "../catalog.format";
 import type { CatalogProduct } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type DeleteProductDialogProps = {
   open: boolean;
@@ -27,6 +28,7 @@ export function DeleteProductDialog({
   error,
   onConfirm,
 }: DeleteProductDialogProps) {
+  const { t } = useTranslate("admin");
   const inUse = hasErrorCode(error, "PRODUCT_IN_USE");
 
   return (
@@ -35,13 +37,13 @@ export function DeleteProductDialog({
       onOpenChange={onOpenChange}
       icon={Trash2}
       variant="destructive"
-      title={`ลบ ${productTitle(product)}?`}
-      description="variant รูป และ Abilities & Attacks ของสินค้านี้จะถูกลบไปด้วย กู้คืนไม่ได้ · ลบได้เฉพาะสินค้าที่ยังไม่มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันอ้างถึง"
-      confirmLabel="ลบสินค้า"
-      cancelLabel={inUse ? "ปิด" : "ยกเลิก"}
+      title={t("catalog.products.deleteTitle", "ลบ {name}?", { name: productTitle(product) })}
+      description={t("catalog.products.deleteDescription", "variant รูป และ Abilities & Attacks ของสินค้านี้จะถูกลบไปด้วย กู้คืนไม่ได้ · ลบได้เฉพาะสินค้าที่ยังไม่มีประกาศขาย คำสั่งซื้อ หรือคอลเลกชันอ้างถึง")}
+      confirmLabel={t("catalog.products.delete", "ลบสินค้า")}
+      cancelLabel={inUse ? t("catalog.form.close", "ปิด") : t("actions.cancel", "ยกเลิก", { ns: "common" })}
       isPending={isPending}
       confirmDisabled={inUse}
-      error={error ? catalogErrorMessage(error, "ลบสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง") : null}
+      error={error ? catalogErrorMessage(error, t("catalog.products.deleteFailed", "ลบสินค้าไม่สำเร็จ ลองใหม่อีกครั้ง")) : null}
       onConfirm={onConfirm}
     />
   );

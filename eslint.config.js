@@ -28,6 +28,12 @@ const I18N_GUARDED = [
   'src/features/store/**/*.{ts,tsx}',
   'src/features/collection/**/*.{ts,tsx}',
   'src/lib/listing-detail.messages.ts',
+  // I18N-16 (TCG-556) — admin: แคตตาล็อก เกม และคุณสมบัติการ์ด
+  'src/features/admin/pages/{AdminCatalogPage,AdminCardAttributesPage}.tsx',
+  'src/features/admin/{catalog,taxonomy,card-listings}.*.ts',
+  'src/features/admin/components/{AdminCatalogContent,AdminCardAttributesContent,AttributeFormDialog,CardAttributesSection,CardSchemaTable,CardSetFormDialog,CardSetTable,CardSetsSection,CategoriesSection,CategoryFormDialog,CategoryTable,ConfirmDeleteDialog,DeleteImageDialog,DeleteProductDialog,FieldTypeBadge,GameAttributeFields,GameAvatar,GameFormDialog,GameInfoCard,GameListPanel,ListingBlockDialog,LogoUploadField,SchemaJsonDialog,VariantFormDialog}.tsx',
+  'src/features/admin/components/Catalog*.tsx',
+  'src/features/admin/components/taxonomy.styles.ts',
 ]
 // ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23)
 const I18N_PENDING = ['src/features/catalog/components/ProductAuctionBox.tsx', 'src/features/store/components/StorePromotionStrip.tsx']

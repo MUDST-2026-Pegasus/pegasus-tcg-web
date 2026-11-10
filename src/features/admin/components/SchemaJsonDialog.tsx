@@ -13,6 +13,7 @@ import {
 import { toast } from "@/components/ui/toast";
 
 import type { Game, GameAttribute } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 type SchemaJsonDialogProps = {
   open: boolean;
@@ -31,6 +32,7 @@ export function SchemaJsonDialog({
   game,
   attributes,
 }: SchemaJsonDialogProps) {
+  const { t } = useTranslate("admin");
   const json = JSON.stringify(
     {
       game: { id: game.id, code: game.code, name: game.name, slug: game.slug },
@@ -51,9 +53,9 @@ export function SchemaJsonDialog({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(json);
-      toast.add({ type: "success", title: "คัดลอก JSON แล้ว" });
+      toast.add({ type: "success", title: t("cardAttributes.json.copied", "คัดลอก JSON แล้ว") });
     } catch {
-      toast.add({ type: "error", title: "คัดลอกไม่สำเร็จ ลองเลือกข้อความเอง" });
+      toast.add({ type: "error", title: t("cardAttributes.json.copyFailed", "คัดลอกไม่สำเร็จ ลองเลือกข้อความเอง") });
     }
   };
 
@@ -61,9 +63,9 @@ export function SchemaJsonDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>schema ของ {game.name}</DialogTitle>
+          <DialogTitle>{t("cardAttributes.json.title", "schema ของ {game}", { game: game.name })}</DialogTitle>
           <DialogDescription>
-            {attributes.length} ฟิลด์ · ตรงกับที่ backend ส่งให้หน้าร้านและฟอร์มเพิ่มการ์ด
+            {t("cardAttributes.json.description", "{count} ฟิลด์ · ตรงกับที่ backend ส่งให้หน้าร้านและฟอร์มเพิ่มการ์ด", { count: attributes.length })}
           </DialogDescription>
         </DialogHeader>
 
@@ -73,11 +75,11 @@ export function SchemaJsonDialog({
 
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>
-            ปิด
+            {t("cardAttributes.json.close", "ปิด")}
           </DialogClose>
           <Button type="button" onClick={copy}>
             <Copy data-icon="inline-start" />
-            คัดลอก
+            {t("cardAttributes.json.copy", "คัดลอก")}
           </Button>
         </DialogFooter>
       </DialogContent>

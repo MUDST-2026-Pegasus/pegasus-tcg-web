@@ -29,6 +29,7 @@ import { GameFormDialog } from "./GameFormDialog";
 import { GameInfoCard } from "./GameInfoCard";
 import { GameListPanel } from "./GameListPanel";
 import { SchemaJsonDialog } from "./SchemaJsonDialog";
+import { useTranslate } from "@/lib/i18n";
 
 /** แท็บของเกมที่เลือก — ค่าใน `?tab=` */
 const TABS = ["fields", "sets", "categories"] as const;
@@ -49,6 +50,7 @@ type GameDialog = { open: boolean; game?: Game };
  * cache ใช้ก้อนเดียวกับหน้าแคตตาล็อก ฟอร์มเพิ่มการ์ดจึงเห็นค่าใหม่ทันที
  */
 export function AdminCardAttributesContent() {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const games = useAdminGames();
   const [gameDialog, setGameDialog] = useState<GameDialog>({ open: false });
@@ -74,11 +76,10 @@ export function AdminCardAttributesContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            เกมและคุณสมบัติการ์ด
+            {t("cardAttributes.page.title", "เกมและคุณสมบัติการ์ด")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
-            จัดการเกม ชุดการ์ด หมวดหมู่ และกำหนดว่าการ์ดแต่ละเกมมีข้อมูลอะไรบ้าง —
-            ใช้สร้างตัวกรองหน้าร้านและฟอร์มเพิ่มการ์ดในแคตตาล็อก
+            {t("cardAttributes.page.subtitle", "จัดการเกม ชุดการ์ด หมวดหมู่ และกำหนดว่าการ์ดแต่ละเกมมีข้อมูลอะไรบ้าง — ใช้สร้างตัวกรองหน้าร้านและฟอร์มเพิ่มการ์ดในแคตตาล็อก")}
           </p>
         </div>
 
@@ -88,7 +89,7 @@ export function AdminCardAttributesContent() {
           disabled={!games.data?.length}
           onClick={() => setJsonOpen(true)}
         >
-          ดูเป็น JSON
+          {t("cardAttributes.page.viewJson", "ดูเป็น JSON")}
         </Button>
       </div>
 
@@ -96,24 +97,23 @@ export function AdminCardAttributesContent() {
       <div className="flex items-center gap-2.5 rounded-[10px] bg-[#e8f1fc] px-4 py-3 text-[#0058bc]">
         <Info aria-hidden="true" className="size-6 shrink-0" />
         <p className="text-xs">
-          ทุกการแก้ไขบันทึกทันที และมีผลกับตัวกรองหน้าร้านกับฟอร์มเพิ่มการ์ดในแคตตาล็อก —
-          ฟิลด์ที่ตั้งเป็น "จำเป็น" ต้องกรอกทุกครั้งที่เพิ่มหรือแก้การ์ด
+          {t("cardAttributes.page.notice", "ทุกการแก้ไขบันทึกทันที และมีผลกับตัวกรองหน้าร้านกับฟอร์มเพิ่มการ์ดในแคตตาล็อก — ฟิลด์ที่ตั้งเป็น \"จำเป็น\" ต้องกรอกทุกครั้งที่เพิ่มหรือแก้การ์ด")}
         </p>
       </div>
 
       <QueryBoundary
         query={games}
         loading={<TaxonomySkeleton />}
-        errorTitle="โหลดรายชื่อเกมไม่สำเร็จ"
+        errorTitle={t("cardAttributes.games.loadFailed", "โหลดรายชื่อเกมไม่สำเร็จ")}
         isEmpty={(list) => list.length === 0}
         empty={
           <EmptyState
             icon={Gamepad2}
-            title="ยังไม่มีเกมในระบบ"
-            description="เพิ่มเกมแรกก่อน แล้วค่อยกำหนดฟิลด์ ชุดการ์ด และหมวดหมู่ของเกมนั้น"
+            title={t("cardAttributes.games.emptyTitle", "ยังไม่มีเกมในระบบ")}
+            description={t("cardAttributes.games.emptyDescription", "เพิ่มเกมแรกก่อน แล้วค่อยกำหนดฟิลด์ ชุดการ์ด และหมวดหมู่ของเกมนั้น")}
           >
             <Button onClick={() => setGameDialog({ open: true })}>
-              + เพิ่มเกม
+              {t("cardAttributes.games.add", "+ เพิ่มเกม")}
             </Button>
           </EmptyState>
         }
@@ -168,6 +168,7 @@ function TaxonomyWorkspace({
   jsonOpen: boolean;
   onJsonOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslate("admin");
   // URL ไม่ได้ระบุเกม หรือระบุเกมที่ไม่มีอยู่ → เกมแรกตามลำดับที่ backend เรียงมา
   const game = games.find((item) => item.id === requestedGameId) ?? games[0];
   const gameIds = games.map((item) => item.id);
@@ -187,14 +188,14 @@ function TaxonomyWorkspace({
           toast.add({
             type: "success",
             title: active
-              ? `${game.name} แสดงบนหน้าร้านแล้ว`
-              : `ซ่อน ${game.name} จากหน้าร้านแล้ว`,
+              ? t("cardAttributes.games.shown", "{name} แสดงบนหน้าร้านแล้ว", { name: game.name })
+              : t("cardAttributes.games.hidden", "ซ่อน {name} จากหน้าร้านแล้ว", { name: game.name }),
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "เปลี่ยนสถานะเกมไม่สำเร็จ",
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("cardAttributes.games.toggleFailed", "เปลี่ยนสถานะเกมไม่สำเร็จ"),
+            description: taxonomyErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -231,14 +232,14 @@ function TaxonomyWorkspace({
             className="w-full justify-start border-b border-border"
           >
             <TabsTrigger value="fields" className="flex-none">
-              คุณสมบัติการ์ด
+              {t("cardAttributes.tabs.fields", "คุณสมบัติการ์ด")}
               {attributes.data ? ` (${attributes.data.length})` : ""}
             </TabsTrigger>
             <TabsTrigger value="sets" className="flex-none">
-              ชุดการ์ด{cardSets.data ? ` (${cardSets.data.length})` : ""}
+              {t("cardAttributes.tabs.sets", "ชุดการ์ด")}{cardSets.data ? ` (${cardSets.data.length})` : ""}
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex-none">
-              หมวดหมู่{categories.data ? ` (${categories.data.length})` : ""}
+              {t("cardAttributes.tabs.categories", "หมวดหมู่")}{categories.data ? ` (${categories.data.length})` : ""}
             </TabsTrigger>
           </TabsList>
 
@@ -246,7 +247,7 @@ function TaxonomyWorkspace({
             <QueryBoundary
               query={attributes}
               loading={<TableSkeleton />}
-              errorTitle="โหลดฟิลด์ของเกมนี้ไม่สำเร็จ"
+              errorTitle={t("cardAttributes.fields.loadFailed", "โหลดฟิลด์ของเกมนี้ไม่สำเร็จ")}
             >
               {(list) => (
                 <CardAttributesSection
@@ -262,7 +263,7 @@ function TaxonomyWorkspace({
             <QueryBoundary
               query={cardSets}
               loading={<TableSkeleton />}
-              errorTitle="โหลดชุดการ์ดของเกมนี้ไม่สำเร็จ"
+              errorTitle={t("cardAttributes.sets.loadFailed", "โหลดชุดการ์ดของเกมนี้ไม่สำเร็จ")}
             >
               {(list) => <CardSetsSection game={game} cardSets={list} />}
             </QueryBoundary>
@@ -272,7 +273,7 @@ function TaxonomyWorkspace({
             <QueryBoundary
               query={categories}
               loading={<TableSkeleton />}
-              errorTitle="โหลดหมวดหมู่ของเกมนี้ไม่สำเร็จ"
+              errorTitle={t("cardAttributes.categories.loadFailed", "โหลดหมวดหมู่ของเกมนี้ไม่สำเร็จ")}
             >
               {(list) => <CategoriesSection game={game} categories={list} />}
             </QueryBoundary>

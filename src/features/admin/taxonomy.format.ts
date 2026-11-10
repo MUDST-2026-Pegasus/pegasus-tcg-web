@@ -6,7 +6,7 @@ import type {
   Game,
   GameAttribute,
 } from "./catalog.types";
-import { dateTimeFormat, translateError } from "@/lib/i18n";
+import { dateTimeFormat, translate, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลงข้อมูลเกม ฟิลด์ ชุด และหมวดหมู่ → ข้อความที่โชว์บนจอ
@@ -32,11 +32,21 @@ export const ATTRIBUTE_TYPE_BADGE: Record<AttributeDataType, string> = {
 };
 
 export const ATTRIBUTE_TYPE_LABEL: Record<AttributeDataType, string> = {
-  STRING: "ข้อความสั้น",
-  NUMBER: "ตัวเลข",
-  ENUM: "ตัวเลือก",
-  BOOLEAN: "ใช่/ไม่ใช่",
-  DATE: "วันที่",
+  get STRING() {
+    return translate("admin", "cardAttributes.types.string", "ข้อความสั้น");
+  },
+  get NUMBER() {
+    return translate("admin", "cardAttributes.types.number", "ตัวเลข");
+  },
+  get ENUM() {
+    return translate("admin", "cardAttributes.types.enum", "ตัวเลือก");
+  },
+  get BOOLEAN() {
+    return translate("admin", "cardAttributes.types.boolean", "ใช่/ไม่ใช่");
+  },
+  get DATE() {
+    return translate("admin", "cardAttributes.types.date", "วันที่");
+  },
 };
 
 /** คอลัมน์ "ค่าที่รับ" — ENUM โชว์ตัวเลือกจริง ชนิดอื่นบอกรูปแบบค่า */
@@ -45,13 +55,13 @@ export function acceptedValues(attribute: GameAttribute): string {
     case "ENUM":
       return attribute.options.join(", ");
     case "BOOLEAN":
-      return "ใช่ / ไม่ใช่";
+      return translate("admin", "cardAttributes.values.boolean", "ใช่ / ไม่ใช่");
     case "DATE":
-      return "วันที่ (ปปปป-ดด-วว)";
+      return translate("admin", "cardAttributes.values.date", "วันที่ (ปปปป-ดด-วว)");
     case "NUMBER":
-      return "ตัวเลข";
+      return translate("admin", "cardAttributes.values.number", "ตัวเลข");
     case "STRING":
-      return "ข้อความ";
+      return translate("admin", "cardAttributes.values.string", "ข้อความ");
   }
 }
 
@@ -106,40 +116,62 @@ export function categoryTree(
 /** error จาก endpoint เกม/ฟิลด์/ชุด/หมวด → ข้อความภาษาไทย ตัวที่ไม่รู้จักใช้ข้อความจาก backend */
 export function taxonomyErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "GAME_NOT_FOUND")) {
-    return "ไม่พบเกมนี้แล้ว ลองโหลดหน้าใหม่";
+    return translate("admin", "cardAttributes.errors.gameNotFound", "ไม่พบเกมนี้แล้ว ลองโหลดหน้าใหม่");
   }
   if (hasErrorCode(error, "ATTRIBUTE_NOT_FOUND")) {
-    return "ฟิลด์นี้ถูกลบไปแล้ว";
+    return translate("admin", "cardAttributes.errors.attributeNotFound", "ฟิลด์นี้ถูกลบไปแล้ว");
   }
   if (hasErrorCode(error, "CARD_SET_NOT_FOUND")) {
-    return "ชุดการ์ดนี้ถูกลบไปแล้ว";
+    return translate("admin", "cardAttributes.errors.cardSetNotFound", "ชุดการ์ดนี้ถูกลบไปแล้ว");
   }
   if (hasErrorCode(error, "CATEGORY_NOT_FOUND")) {
-    return "ไม่พบหมวดหมู่นี้แล้ว";
+    return translate("admin", "cardAttributes.errors.categoryNotFound", "ไม่พบหมวดหมู่นี้แล้ว");
   }
   if (hasErrorCode(error, "GAME_CODE_ALREADY_USED")) {
-    return "รหัสนี้มีเกมอื่นใช้อยู่แล้ว";
+    return translate("admin", "cardAttributes.errors.gameCodeAlreadyUsed", "รหัสนี้มีเกมอื่นใช้อยู่แล้ว");
   }
   if (hasErrorCode(error, "ATTRIBUTE_KEY_ALREADY_USED")) {
-    return "เกมนี้มีฟิลด์ที่ใช้คีย์นี้อยู่แล้ว";
+    return translate("admin", "cardAttributes.errors.attributeKeyAlreadyUsed", "เกมนี้มีฟิลด์ที่ใช้คีย์นี้อยู่แล้ว");
   }
   if (hasErrorCode(error, "CARD_SET_CODE_ALREADY_USED")) {
-    return "เกมนี้มีชุดที่ใช้รหัสนี้อยู่แล้ว";
+    return translate("admin", "cardAttributes.errors.cardSetCodeAlreadyUsed", "เกมนี้มีชุดที่ใช้รหัสนี้อยู่แล้ว");
   }
   if (hasErrorCode(error, "CATEGORY_CODE_ALREADY_USED")) {
-    return "มีหมวดที่ใช้รหัสนี้อยู่แล้ว";
+    return translate("admin", "cardAttributes.errors.categoryCodeAlreadyUsed", "มีหมวดที่ใช้รหัสนี้อยู่แล้ว");
   }
   if (hasErrorCode(error, "CARD_SET_IN_USE")) {
-    return "ยังมีการ์ดในแคตตาล็อกอยู่ในชุดนี้ ย้ายการ์ดไปชุดอื่นก่อนแล้วค่อยลบ";
+    return translate("admin", "cardAttributes.errors.cardSetInUse", "ยังมีการ์ดในแคตตาล็อกอยู่ในชุดนี้ ย้ายการ์ดไปชุดอื่นก่อนแล้วค่อยลบ");
   }
   if (hasErrorCode(error, "INVALID_ATTRIBUTE_DEFINITION")) {
-    return "ฟิลด์ชนิดตัวเลือกต้องมีตัวเลือกอย่างน้อยหนึ่งตัว และชนิดอื่นต้องไม่มีตัวเลือก";
+    return translate("admin", "cardAttributes.errors.invalidAttributeDefinition", "ฟิลด์ชนิดตัวเลือกต้องมีตัวเลือกอย่างน้อยหนึ่งตัว และชนิดอื่นต้องไม่มีตัวเลือก");
   }
   if (hasErrorCode(error, "FILE_NOT_FOUND")) {
-    return "รูปยังอัปโหลดไม่เสร็จหรือหายไปแล้ว ลองอัปใหม่";
+    return translate("admin", "cardAttributes.errors.fileNotFound", "รูปยังอัปโหลดไม่เสร็จหรือหายไปแล้ว ลองอัปใหม่");
   }
   if (hasErrorCode(error, "ACCESS_DENIED")) {
-    return "บัญชีนี้ไม่มีสิทธิ์แก้ข้อมูลเกม";
+    return translate("admin", "cardAttributes.errors.accessDenied", "บัญชีนี้ไม่มีสิทธิ์แก้ข้อมูลเกม");
   }
   return translateError(error, fallback);
 }
+
+// @tolgee-key {"key": "cardAttributes.errors.gameNotFound", "ns": "admin", "defaultValue": "ไม่พบเกมนี้แล้ว ลองโหลดหน้าใหม่"}
+// @tolgee-key {"key": "cardAttributes.errors.attributeNotFound", "ns": "admin", "defaultValue": "ฟิลด์นี้ถูกลบไปแล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.cardSetNotFound", "ns": "admin", "defaultValue": "ชุดการ์ดนี้ถูกลบไปแล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.categoryNotFound", "ns": "admin", "defaultValue": "ไม่พบหมวดหมู่นี้แล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.gameCodeAlreadyUsed", "ns": "admin", "defaultValue": "รหัสนี้มีเกมอื่นใช้อยู่แล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.attributeKeyAlreadyUsed", "ns": "admin", "defaultValue": "เกมนี้มีฟิลด์ที่ใช้คีย์นี้อยู่แล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.cardSetCodeAlreadyUsed", "ns": "admin", "defaultValue": "เกมนี้มีชุดที่ใช้รหัสนี้อยู่แล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.categoryCodeAlreadyUsed", "ns": "admin", "defaultValue": "มีหมวดที่ใช้รหัสนี้อยู่แล้ว"}
+// @tolgee-key {"key": "cardAttributes.errors.cardSetInUse", "ns": "admin", "defaultValue": "ยังมีการ์ดในแคตตาล็อกอยู่ในชุดนี้ ย้ายการ์ดไปชุดอื่นก่อนแล้วค่อยลบ"}
+// @tolgee-key {"key": "cardAttributes.errors.invalidAttributeDefinition", "ns": "admin", "defaultValue": "ฟิลด์ชนิดตัวเลือกต้องมีตัวเลือกอย่างน้อยหนึ่งตัว และชนิดอื่นต้องไม่มีตัวเลือก"}
+// @tolgee-key {"key": "cardAttributes.errors.fileNotFound", "ns": "admin", "defaultValue": "รูปยังอัปโหลดไม่เสร็จหรือหายไปแล้ว ลองอัปใหม่"}
+// @tolgee-key {"key": "cardAttributes.errors.accessDenied", "ns": "admin", "defaultValue": "บัญชีนี้ไม่มีสิทธิ์แก้ข้อมูลเกม"}
+// @tolgee-key {"key": "cardAttributes.values.boolean", "ns": "admin", "defaultValue": "ใช่ / ไม่ใช่"}
+// @tolgee-key {"key": "cardAttributes.values.date", "ns": "admin", "defaultValue": "วันที่ (ปปปป-ดด-วว)"}
+// @tolgee-key {"key": "cardAttributes.values.number", "ns": "admin", "defaultValue": "ตัวเลข"}
+// @tolgee-key {"key": "cardAttributes.values.string", "ns": "admin", "defaultValue": "ข้อความ"}
+// @tolgee-key {"key": "cardAttributes.types.string", "ns": "admin", "defaultValue": "ข้อความสั้น"}
+// @tolgee-key {"key": "cardAttributes.types.number", "ns": "admin", "defaultValue": "ตัวเลข"}
+// @tolgee-key {"key": "cardAttributes.types.enum", "ns": "admin", "defaultValue": "ตัวเลือก"}
+// @tolgee-key {"key": "cardAttributes.types.boolean", "ns": "admin", "defaultValue": "ใช่/ไม่ใช่"}
+// @tolgee-key {"key": "cardAttributes.types.date", "ns": "admin", "defaultValue": "วันที่"}

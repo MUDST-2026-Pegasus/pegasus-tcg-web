@@ -15,6 +15,7 @@ import { attributeWith } from "../taxonomy.schema";
 import { AttributeFormDialog } from "./AttributeFormDialog";
 import { CardSchemaTable, type AttributeFlag } from "./CardSchemaTable";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import { useTranslate } from "@/lib/i18n";
 
 type CardAttributesSectionProps = {
   game: Game;
@@ -31,6 +32,7 @@ export function CardAttributesSection({
   attributes,
   productCount,
 }: CardAttributesSectionProps) {
+  const { t } = useTranslate("admin");
   const saveAttribute = useSaveAttribute(game.id);
   const reorder = useReorderAttributes(game.id);
   const deleteAttribute = useDeleteAttribute(game.id);
@@ -57,8 +59,8 @@ export function CardAttributesSection({
         onError: (error) =>
           toast.add({
             type: "error",
-            title: `บันทึก ${attribute.label} ไม่สำเร็จ`,
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("cardAttributes.fields.saveFailed", "บันทึก {label} ไม่สำเร็จ", { label: attribute.label }),
+            description: taxonomyErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );
@@ -76,8 +78,8 @@ export function CardAttributesSection({
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "เรียงลำดับไม่สำเร็จ",
-          description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("cardAttributes.fields.reorderFailed", "เรียงลำดับไม่สำเร็จ"),
+          description: taxonomyErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
         }),
     });
   };
@@ -88,7 +90,7 @@ export function CardAttributesSection({
     }
     deleteAttribute.mutate(deleteTarget.id, {
       onSuccess: () => {
-        toast.add({ type: "success", title: `ลบฟิลด์ ${deleteTarget.label} แล้ว` });
+        toast.add({ type: "success", title: t("cardAttributes.fields.deleted", "ลบฟิลด์ {label} แล้ว", { label: deleteTarget.label }) });
         setDeleteOpen(false);
       },
     });
@@ -133,18 +135,17 @@ export function CardAttributesSection({
       <ConfirmDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title={`ลบฟิลด์ ${deleteTarget?.label ?? ""}?`}
-        description={`ฟอร์มเพิ่มการ์ดและตัวกรองหน้าร้านจะไม่มีช่องนี้อีก ค่าที่การ์ดเก็บไว้ใต้คีย์ "${deleteTarget?.attrKey ?? ""}" ไม่ถูกลบ แต่จะไม่มีใครอ่าน`}
-        confirmLabel="ลบฟิลด์"
+        title={t("cardAttributes.fields.deleteTitle", "ลบฟิลด์ {label}?", { label: deleteTarget?.label ?? "" })}
+        description={t("cardAttributes.fields.deleteDescription", "ฟอร์มเพิ่มการ์ดและตัวกรองหน้าร้านจะไม่มีช่องนี้อีก ค่าที่การ์ดเก็บไว้ใต้คีย์ \"{key}\" ไม่ถูกลบ แต่จะไม่มีใครอ่าน", { key: deleteTarget?.attrKey ?? "" })}
+        confirmLabel={t("cardAttributes.fields.delete", "ลบฟิลด์")}
         isPending={deleteAttribute.isPending}
         error={deleteAttribute.error}
-        errorFallback="ลบฟิลด์ไม่สำเร็จ ลองใหม่อีกครั้ง"
+        errorFallback={t("cardAttributes.fields.deleteFailed", "ลบฟิลด์ไม่สำเร็จ ลองใหม่อีกครั้ง")}
         onConfirm={confirmDelete}
       >
         {productCount ? (
           <p className="rounded-lg bg-[#fbe9e8] px-3 py-2.5 text-xs text-[#d0342c]">
-            {game.name} มีการ์ดในแคตตาล็อก {formatCount(productCount)} ใบ
-            ที่อาจกรอกฟิลด์นี้ไว้แล้ว
+            {t("cardAttributes.fields.deleteUsage", "{game} มีการ์ดในแคตตาล็อก {count} ใบ ที่อาจกรอกฟิลด์นี้ไว้แล้ว", { game: game.name, count: formatCount(productCount) })}
           </p>
         ) : null}
       </ConfirmDeleteDialog>

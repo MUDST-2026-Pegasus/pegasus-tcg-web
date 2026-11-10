@@ -18,6 +18,7 @@ import {
 
 import type { ProductFormValues } from "../catalog.schema";
 import type { GameAttribute } from "../catalog.types";
+import { useTranslate } from "@/lib/i18n";
 
 /** ค่าที่ Select ใช้แทน "ไม่ระบุ" — Base UI Select ไม่รับ `""` เป็นตัวเลือก */
 const UNSET = "__unset__";
@@ -42,6 +43,7 @@ export function GameAttributeFields({
   errors,
   disabled,
 }: GameAttributeFieldsProps) {
+  const { t } = useTranslate("admin");
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {registry.map((attribute) => {
@@ -64,12 +66,12 @@ export function GameAttributeFields({
               name={`attributes.${attribute.attrKey}`}
               render={({ field }) => {
                 const value = field.value ?? "";
-                const options = choicesOf(attribute);
+                const options = choicesOf(attribute, t);
 
                 if (options) {
                   const items = attribute.required
                     ? options
-                    : [{ value: UNSET, label: "ไม่ระบุ" }, ...options];
+                    : [{ value: UNSET, label: t("cardAttributes.form.unset", "ไม่ระบุ") }, ...options];
                   return (
                     <Select
                       items={items}
@@ -87,7 +89,7 @@ export function GameAttributeFields({
                         onBlur={field.onBlur}
                         className="w-full"
                       >
-                        <SelectValue placeholder={`เลือก${attribute.label}`} />
+                        <SelectValue placeholder={t("cardAttributes.form.choose", "เลือก{label}", { label: attribute.label })} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -135,15 +137,19 @@ export function GameAttributeFields({
 /** ช่องที่เป็นตัวเลือก — `null` = ช่องพิมพ์ */
 function choicesOf(
   attribute: GameAttribute,
+  t: ReturnType<typeof useTranslate<"admin">>["t"],
 ): { value: string; label: string }[] | null {
   if (attribute.dataType === "ENUM") {
     return attribute.options.map((option) => ({ value: option, label: option }));
   }
   if (attribute.dataType === "BOOLEAN") {
     return [
-      { value: "true", label: "ใช่" },
-      { value: "false", label: "ไม่ใช่" },
+      { value: "true", label: t("cardAttributes.form.yes", "ใช่") },
+      { value: "false", label: t("cardAttributes.form.no", "ไม่ใช่") },
     ];
   }
   return null;
 }
+
+// @tolgee-key {"key": "cardAttributes.form.yes", "ns": "admin", "defaultValue": "ใช่"}
+// @tolgee-key {"key": "cardAttributes.form.no", "ns": "admin", "defaultValue": "ไม่ใช่"}

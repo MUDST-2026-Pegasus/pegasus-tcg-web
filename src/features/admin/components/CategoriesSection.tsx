@@ -9,6 +9,7 @@ import { categoryWithActive } from "../taxonomy.schema";
 
 import { CategoryFormDialog } from "./CategoryFormDialog";
 import { CategoryTable } from "./CategoryTable";
+import { useTranslate } from "@/lib/i18n";
 
 type CategoriesSectionProps = {
   game: Game;
@@ -17,6 +18,7 @@ type CategoriesSectionProps = {
 
 /** แท็บ "หมวดหมู่" — ตาราง + หน้าต่างเพิ่ม/แก้ สวิตช์เปิดใช้งานบันทึกทันที */
 export function CategoriesSection({ game, categories }: CategoriesSectionProps) {
+  const { t } = useTranslate("admin");
   const saveCategory = useSaveCategory();
   // ตัว admin ไม่มี URL รูป — รูปพังหรือโหลดไม่ขึ้นก็แค่โชว์ไอคอนแทน ไม่ต้องขวางทั้งตาราง
   const images = useCategoryImages(game.id);
@@ -33,16 +35,16 @@ export function CategoriesSection({ game, categories }: CategoriesSectionProps) 
           toast.add({
             type: "success",
             title: active
-              ? `เปิดใช้หมวด ${category.name} แล้ว`
-              : `ปิดหมวด ${category.name} แล้ว`,
+              ? t("cardAttributes.categories.enabled", "เปิดใช้หมวด {name} แล้ว", { name: category.name })
+              : t("cardAttributes.categories.disabled", "ปิดหมวด {name} แล้ว", { name: category.name }),
             description:
-              category.gameId === null ? "หมวดนี้ใช้ร่วมกันทุกเกม" : undefined,
+              category.gameId === null ? t("cardAttributes.categories.shared", "หมวดนี้ใช้ร่วมกันทุกเกม") : undefined,
           }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: `บันทึก ${category.name} ไม่สำเร็จ`,
-            description: taxonomyErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("cardAttributes.categories.saveFailedNamed", "บันทึก {name} ไม่สำเร็จ", { name: category.name }),
+            description: taxonomyErrorMessage(error, t("common.tryAgain", "ลองใหม่อีกครั้ง")),
           }),
       },
     );

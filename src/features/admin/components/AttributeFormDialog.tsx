@@ -53,6 +53,7 @@ import {
   toAttributePayload,
   type AttributeFormValues,
 } from "../taxonomy.schema";
+import { useTranslate } from "@/lib/i18n";
 
 type AttributeFormDialogProps = {
   open: boolean;
@@ -80,18 +81,18 @@ export function AttributeFormDialog({
   attribute,
   nextDisplayOrder,
 }: AttributeFormDialogProps) {
+  const { t } = useTranslate("admin");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {attribute
-              ? `แก้ไขฟิลด์ ${attribute.label}`
-              : `เพิ่มฟิลด์ · ${game.name}`}
+              ? t("cardAttributes.fieldForm.editTitle", "แก้ไขฟิลด์ {label}", { label: attribute.label })
+              : t("cardAttributes.fieldForm.addTitle", "เพิ่มฟิลด์ · {game}", { game: game.name })}
           </DialogTitle>
           <DialogDescription>
-            ฟิลด์จะโผล่ในฟอร์มเพิ่มการ์ดของเกมนี้ทันที และเป็นตัวกรองในหน้าร้านถ้าเปิด
-            "ใช้กรอง"
+            {t("cardAttributes.fieldForm.description", "ฟิลด์จะโผล่ในฟอร์มเพิ่มการ์ดของเกมนี้ทันที และเป็นตัวกรองในหน้าร้านถ้าเปิด \"ใช้กรอง\"")}
           </DialogDescription>
         </DialogHeader>
         <AttributeForm
@@ -117,6 +118,7 @@ function AttributeForm({
   displayOrder: number;
   onSaved: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const saveAttribute = useSaveAttribute(game.id);
 
   const {
@@ -128,7 +130,7 @@ function AttributeForm({
     getFieldState,
     formState: { errors, isSubmitting },
   } = useForm<AttributeFormValues>({
-    resolver: zodResolver(attributeSchema),
+    resolver: zodResolver(attributeSchema(t)),
     defaultValues: toAttributeForm(attribute),
   });
 
@@ -142,7 +144,7 @@ function AttributeForm({
       });
       toast.add({
         type: "success",
-        title: attribute ? "บันทึกฟิลด์แล้ว" : `เพิ่มฟิลด์ ${values.label} แล้ว`,
+        title: attribute ? t("cardAttributes.fieldForm.saved", "บันทึกฟิลด์แล้ว") : t("cardAttributes.fieldForm.added", "เพิ่มฟิลด์ {label} แล้ว", { label: values.label }),
       });
       onSaved();
     } catch (error) {
@@ -162,7 +164,7 @@ function AttributeForm({
       }
       if (!applyApiErrors(error, setError)) {
         setError("root.server", {
-          message: taxonomyErrorMessage(error, "บันทึกฟิลด์ไม่สำเร็จ ลองใหม่อีกครั้ง"),
+          message: taxonomyErrorMessage(error, t("cardAttributes.fieldForm.saveFailed", "บันทึกฟิลด์ไม่สำเร็จ ลองใหม่อีกครั้ง")),
         });
       }
     }
@@ -179,11 +181,11 @@ function AttributeForm({
       <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.label) || undefined}>
-            <FieldLabel htmlFor="attrLabel">ชื่อฟิลด์ *</FieldLabel>
+            <FieldLabel htmlFor="attrLabel">{t("cardAttributes.fieldForm.label", "ชื่อฟิลด์ *")}</FieldLabel>
             <Input
               id="attrLabel"
               maxLength={100}
-              placeholder="เช่น Card Type"
+              placeholder={t("cardAttributes.fieldForm.labelPlaceholder", "เช่น Card Type")}
               aria-invalid={Boolean(errors.label)}
               {...register("label", {
                 // ฟิลด์ใหม่: เดาคีย์จากชื่อให้ จนกว่าผู้ดูแลจะพิมพ์คีย์เอง
@@ -198,26 +200,26 @@ function AttributeForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.attrKey) || undefined}>
-            <FieldLabel htmlFor="attrKey">คีย์ *</FieldLabel>
+            <FieldLabel htmlFor="attrKey">{t("cardAttributes.fieldForm.key", "คีย์ *")}</FieldLabel>
             <Input
               id="attrKey"
               maxLength={50}
-              placeholder="เช่น card_type"
+              placeholder={t("cardAttributes.fieldForm.keyPlaceholder", "เช่น card_type")}
               className="font-mono"
               aria-invalid={Boolean(errors.attrKey)}
               {...register("attrKey")}
             />
             <FieldDescription className="text-xs">
               {attribute
-                ? "เปลี่ยนคีย์แล้ว ค่าที่การ์ดเก็บไว้ใต้คีย์เดิมจะไม่ถูกอ่าน"
-                : "a-z 0-9 _ · ค่าของการ์ดเก็บใต้คีย์นี้"}
+                ? t("cardAttributes.fieldForm.keyChanged", "เปลี่ยนคีย์แล้ว ค่าที่การ์ดเก็บไว้ใต้คีย์เดิมจะไม่ถูกอ่าน")
+                : t("cardAttributes.fieldForm.keyHint", "a-z 0-9 _ · ค่าของการ์ดเก็บใต้คีย์นี้")}
             </FieldDescription>
             <FieldError errors={[errors.attrKey]} />
           </Field>
         </div>
 
         <Field data-invalid={Boolean(errors.dataType) || undefined}>
-          <FieldLabel htmlFor="attrType">ประเภท *</FieldLabel>
+          <FieldLabel htmlFor="attrType">{t("cardAttributes.fieldForm.type", "ประเภท *")}</FieldLabel>
           <Controller
             control={control}
             name="dataType"
@@ -253,7 +255,7 @@ function AttributeForm({
 
         {dataType === "ENUM" && (
           <Field data-invalid={Boolean(errors.options) || undefined}>
-            <FieldLabel htmlFor="attrOptions">ตัวเลือก *</FieldLabel>
+            <FieldLabel htmlFor="attrOptions">{t("cardAttributes.fieldForm.options", "ตัวเลือก *")}</FieldLabel>
             <Textarea
               id="attrOptions"
               rows={4}
@@ -262,8 +264,8 @@ function AttributeForm({
               {...register("options")}
             />
             <FieldDescription className="text-xs">
-              หนึ่งบรรทัดต่อหนึ่งตัวเลือก
-              {attribute ? " · ตัดตัวเลือกออกแล้ว การ์ดที่ใช้ค่านั้นอยู่ต้องแก้ใหม่ตอนบันทึกครั้งหน้า" : ""}
+              {t("cardAttributes.fieldForm.optionsHint", "หนึ่งบรรทัดต่อหนึ่งตัวเลือก")}
+              {attribute ? ` · ${t("cardAttributes.fieldForm.optionsEditHint", "ตัดตัวเลือกออกแล้ว การ์ดที่ใช้ค่านั้นอยู่ต้องแก้ใหม่ตอนบันทึกครั้งหน้า")}` : ""}
             </FieldDescription>
             <FieldError errors={[errors.options]} />
           </Field>
@@ -272,24 +274,24 @@ function AttributeForm({
         <FlagField
           control={control}
           name="filterable"
-          title="ใช้กรอง"
-          description="แสดงเป็นตัวกรองในหน้าร้านของเกมนี้"
+          title={t("cardAttributes.fields.filterable", "ใช้กรอง")}
+          description={t("cardAttributes.fieldForm.filterableHint", "แสดงเป็นตัวกรองในหน้าร้านของเกมนี้")}
         />
         <FlagField
           control={control}
           name="required"
-          title="จำเป็น"
-          description="ต้องกรอกทุกครั้งที่เพิ่มหรือแก้การ์ดของเกมนี้"
+          title={t("cardAttributes.fields.required", "จำเป็น")}
+          description={t("cardAttributes.fieldForm.requiredHint", "ต้องกรอกทุกครั้งที่เพิ่มหรือแก้การ์ดของเกมนี้")}
         />
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {attribute ? "บันทึก" : "เพิ่มฟิลด์"}
+          {attribute ? t("cardAttributes.form.save", "บันทึก") : t("cardAttributes.fields.addShort", "เพิ่มฟิลด์")}
         </Button>
       </DialogFooter>
     </form>

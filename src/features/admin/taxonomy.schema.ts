@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { AdminT } from "./catalog.schema";
+
 import type {
   CardSet,
   CatalogCategory,
@@ -26,20 +28,21 @@ import type {
 /** `smallint` ฝั่ง database */
 const SMALLINT_MAX = 32767;
 
-const optionalText = (max: number) =>
-  z.string().trim().max(max, `ไม่เกิน ${max} ตัวอักษร`);
+const optionalText = (t: AdminT, max: number) =>
+  z.string().trim().max(max, t("cardAttributes.validation.max", "ไม่เกิน {max} ตัวอักษร", { max }));
 
-const requiredText = (label: string, max: number) =>
-  optionalText(max).min(1, `ต้องระบุ${label}`);
+const requiredText = (t: AdminT, label: string, max: number) =>
+  optionalText(t, max).min(1, t("cardAttributes.validation.required", "ต้องระบุ{label}", { label }));
 
-const displayOrder = z
+const displayOrder = (t: AdminT) =>
+  z
   .string()
   .trim()
   .refine(
     (value) =>
       value === "" ||
       (/^\d+$/.test(value) && Number(value) <= SMALLINT_MAX),
-    `เป็นเลขจำนวนเต็ม 0–${SMALLINT_MAX}`,
+    t("cardAttributes.validation.displayOrder", "เป็นเลขจำนวนเต็ม 0–{max}", { max: SMALLINT_MAX }),
   );
 
 const blankToNull = (value: string): string | null => {
@@ -52,23 +55,24 @@ const toOrder = (value: string): number =>
 
 // ---------- เกม ----------
 
-export const gameSchema = z.object({
-  name: requiredText("ชื่อเกม", 100),
-  nameLocal: optionalText(100),
-  code: requiredText("รหัสเกม", 32).regex(
+export const gameSchema = (t: AdminT) =>
+  z.object({
+  name: requiredText(t, t("cardAttributes.validation.label.gameName", "ชื่อเกม"), 100),
+  nameLocal: optionalText(t, 100),
+  code: requiredText(t, t("cardAttributes.validation.label.gameCode", "รหัสเกม"), 32).regex(
     /^[A-Za-z0-9_]+$/,
-    "ใช้ได้แค่ A-Z 0-9 และ _",
+    t("cardAttributes.validation.codePattern", "ใช้ได้แค่ A-Z 0-9 และ _"),
   ),
-  slug: optionalText(100).regex(
+  slug: optionalText(t, 100).regex(
     /^[a-z0-9-]*$/,
-    "ใช้ได้แค่ a-z 0-9 และ -",
+    t("cardAttributes.validation.slugPattern", "ใช้ได้แค่ a-z 0-9 และ -"),
   ),
-  logoUrl: optionalText(500),
-  displayOrder,
+  logoUrl: optionalText(t, 500),
+  displayOrder: displayOrder(t),
   active: z.boolean(),
 });
 
-export type GameFormValues = z.infer<typeof gameSchema>;
+export type GameFormValues = z.infer<ReturnType<typeof gameSchema>>;
 
 export function toGameForm(game?: Game): GameFormValues {
   return {
@@ -132,12 +136,13 @@ export function parseOptions(text: string): string[] {
     .filter(Boolean);
 }
 
-export const attributeSchema = z
+export const attributeSchema = (t: AdminT) =>
+  z
   .object({
-    label: requiredText("ชื่อฟิลด์", 100),
-    attrKey: requiredText("คีย์", 50).regex(
+    label: requiredText(t, t("cardAttributes.validation.label.fieldLabel", "ชื่อฟิลด์"), 100),
+    attrKey: requiredText(t, t("cardAttributes.validation.label.key", "คีย์"), 50).regex(
       ATTR_KEY,
-      "ขึ้นต้นด้วย a-z แล้วตามด้วย a-z 0-9 หรือ _ เท่านั้น",
+      t("cardAttributes.validation.keyPattern", "ขึ้นต้นด้วย a-z แล้วตามด้วย a-z 0-9 หรือ _ เท่านั้น"),
     ),
     dataType: z.enum(ATTRIBUTE_TYPES),
     options: z.string(),
@@ -153,24 +158,24 @@ export const attributeSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["options"],
-        message: "ฟิลด์ชนิดตัวเลือกต้องมีอย่างน้อยหนึ่งตัวเลือก",
+        message: t("cardAttributes.validation.optionsRequired", "ฟิลด์ชนิดตัวเลือกต้องมีอย่างน้อยหนึ่งตัวเลือก"),
       });
     } else if (options.some((option) => option.length > 100)) {
       ctx.addIssue({
         code: "custom",
         path: ["options"],
-        message: "แต่ละตัวเลือกยาวไม่เกิน 100 ตัวอักษร",
+        message: t("cardAttributes.validation.optionMax", "แต่ละตัวเลือกยาวไม่เกิน {max} ตัวอักษร", { max: 100 }),
       });
     } else if (new Set(options).size !== options.length) {
       ctx.addIssue({
         code: "custom",
         path: ["options"],
-        message: "มีตัวเลือกซ้ำกัน",
+        message: t("cardAttributes.validation.optionsDuplicate", "มีตัวเลือกซ้ำกัน"),
       });
     }
   });
 
-export type AttributeFormValues = z.infer<typeof attributeSchema>;
+export type AttributeFormValues = z.infer<ReturnType<typeof attributeSchema>>;
 
 export function toAttributeForm(attribute?: GameAttribute): AttributeFormValues {
   return {
@@ -221,31 +226,32 @@ export function attributeWith(
 
 // ---------- ชุดการ์ด ----------
 
-export const cardSetSchema = z.object({
-  code: requiredText("รหัสชุด", 32).regex(
+export const cardSetSchema = (t: AdminT) =>
+  z.object({
+  code: requiredText(t, t("cardAttributes.validation.label.setCode", "รหัสชุด"), 32).regex(
     /^[A-Za-z0-9_.-]+$/,
-    "ใช้ได้แค่ A-Z 0-9 . - และ _",
+    t("cardAttributes.validation.setCodePattern", "ใช้ได้แค่ A-Z 0-9 . - และ _"),
   ),
-  name: requiredText("ชื่อชุด", 150),
-  nameLocal: optionalText(150),
+  name: requiredText(t, t("cardAttributes.validation.label.setName", "ชื่อชุด"), 150),
+  nameLocal: optionalText(t, 150),
   /** `<input type="date">` ให้ค่า `yyyy-MM-dd` หรือ `""` */
   releaseDate: z
     .string()
     .refine(
       (value) => value === "" || /^\d{4}-\d{2}-\d{2}$/.test(value),
-      "วันที่ไม่ถูกต้อง",
+      t("cardAttributes.validation.invalidDate", "วันที่ไม่ถูกต้อง"),
     ),
   totalCards: z
     .string()
     .trim()
     .refine(
       (value) => value === "" || (/^\d+$/.test(value) && Number(value) > 0),
-      "เป็นจำนวนเต็มมากกว่า 0",
+      t("cardAttributes.validation.positiveInt", "เป็นจำนวนเต็มมากกว่า 0"),
     ),
-  logoUrl: optionalText(500),
+  logoUrl: optionalText(t, 500),
 });
 
-export type CardSetFormValues = z.infer<typeof cardSetSchema>;
+export type CardSetFormValues = z.infer<ReturnType<typeof cardSetSchema>>;
 
 export function toCardSetForm(cardSet?: CardSet): CardSetFormValues {
   return {
@@ -279,24 +285,25 @@ export const ALL_GAMES = "all";
 /** ไม่มีหมวดแม่ (ระดับบนสุด) */
 export const NO_PARENT = "none";
 
-export const categorySchema = z.object({
-  name: requiredText("ชื่อหมวด", 100),
-  code: requiredText("รหัส", 50).regex(
+export const categorySchema = (t: AdminT) =>
+  z.object({
+  name: requiredText(t, t("cardAttributes.validation.label.categoryName", "ชื่อหมวด"), 100),
+  code: requiredText(t, t("cardAttributes.validation.label.code", "รหัส"), 50).regex(
     /^[A-Za-z0-9_]+$/,
-    "ใช้ได้แค่ A-Z 0-9 และ _",
+    t("cardAttributes.validation.codePattern", "ใช้ได้แค่ A-Z 0-9 และ _"),
   ),
-  slug: optionalText(120).regex(/^[a-z0-9-]*$/, "ใช้ได้แค่ a-z 0-9 และ -"),
+  slug: optionalText(t, 120).regex(/^[a-z0-9-]*$/, t("cardAttributes.validation.slugPattern", "ใช้ได้แค่ a-z 0-9 และ -")),
   /** `gameId` เป็นข้อความ หรือ `ALL_GAMES` */
   scope: z.string().min(1),
   /** `categoryId` เป็นข้อความ หรือ `NO_PARENT` */
   parentId: z.string().min(1),
-  displayOrder,
+  displayOrder: displayOrder(t),
   active: z.boolean(),
   /** key เดิม หรือ key ใหม่จากการอัปโหลด — `""` = ไม่มีรูป */
   imageKey: z.string(),
 });
 
-export type CategoryFormValues = z.infer<typeof categorySchema>;
+export type CategoryFormValues = z.infer<ReturnType<typeof categorySchema>>;
 
 export function toCategoryForm(
   gameId: number,
@@ -347,3 +354,24 @@ export function categoryWithActive(
     imageKey: category.imageKey,
   };
 }
+
+// @tolgee-key {"key": "cardAttributes.validation.max", "ns": "admin", "defaultValue": "ไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "cardAttributes.validation.required", "ns": "admin", "defaultValue": "ต้องระบุ{label}"}
+// @tolgee-key {"key": "cardAttributes.validation.displayOrder", "ns": "admin", "defaultValue": "เป็นเลขจำนวนเต็ม 0–{max}"}
+// @tolgee-key {"key": "cardAttributes.validation.label.gameName", "ns": "admin", "defaultValue": "ชื่อเกม"}
+// @tolgee-key {"key": "cardAttributes.validation.label.gameCode", "ns": "admin", "defaultValue": "รหัสเกม"}
+// @tolgee-key {"key": "cardAttributes.validation.label.fieldLabel", "ns": "admin", "defaultValue": "ชื่อฟิลด์"}
+// @tolgee-key {"key": "cardAttributes.validation.label.key", "ns": "admin", "defaultValue": "คีย์"}
+// @tolgee-key {"key": "cardAttributes.validation.label.setCode", "ns": "admin", "defaultValue": "รหัสชุด"}
+// @tolgee-key {"key": "cardAttributes.validation.label.setName", "ns": "admin", "defaultValue": "ชื่อชุด"}
+// @tolgee-key {"key": "cardAttributes.validation.label.categoryName", "ns": "admin", "defaultValue": "ชื่อหมวด"}
+// @tolgee-key {"key": "cardAttributes.validation.label.code", "ns": "admin", "defaultValue": "รหัส"}
+// @tolgee-key {"key": "cardAttributes.validation.codePattern", "ns": "admin", "defaultValue": "ใช้ได้แค่ A-Z 0-9 และ _"}
+// @tolgee-key {"key": "cardAttributes.validation.slugPattern", "ns": "admin", "defaultValue": "ใช้ได้แค่ a-z 0-9 และ -"}
+// @tolgee-key {"key": "cardAttributes.validation.keyPattern", "ns": "admin", "defaultValue": "ขึ้นต้นด้วย a-z แล้วตามด้วย a-z 0-9 หรือ _ เท่านั้น"}
+// @tolgee-key {"key": "cardAttributes.validation.optionsRequired", "ns": "admin", "defaultValue": "ฟิลด์ชนิดตัวเลือกต้องมีอย่างน้อยหนึ่งตัวเลือก"}
+// @tolgee-key {"key": "cardAttributes.validation.optionMax", "ns": "admin", "defaultValue": "แต่ละตัวเลือกยาวไม่เกิน {max} ตัวอักษร"}
+// @tolgee-key {"key": "cardAttributes.validation.optionsDuplicate", "ns": "admin", "defaultValue": "มีตัวเลือกซ้ำกัน"}
+// @tolgee-key {"key": "cardAttributes.validation.setCodePattern", "ns": "admin", "defaultValue": "ใช้ได้แค่ A-Z 0-9 . - และ _"}
+// @tolgee-key {"key": "cardAttributes.validation.invalidDate", "ns": "admin", "defaultValue": "วันที่ไม่ถูกต้อง"}
+// @tolgee-key {"key": "cardAttributes.validation.positiveInt", "ns": "admin", "defaultValue": "เป็นจำนวนเต็มมากกว่า 0"}
