@@ -13,6 +13,7 @@ import type {
 } from "./listing-form.types";
 import { listingErrorMessage, roundMoney } from "./products.format";
 import type { CardCondition, SellerListing } from "./products.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้าลงขาย / แก้ประกาศ — ไม่มี React ไม่มี state
@@ -32,37 +33,37 @@ export const CONDITION_OPTIONS: ConditionOption[] = [
   {
     value: "NM",
     label: "Near Mint (NM)",
-    description: "ตำหนิเล็กน้อยมองแทบไม่เห็น",
+    get description() { return translate("seller", "listingForm.condition.NM", "ตำหนิเล็กน้อยมองแทบไม่เห็น"); },
     badgeLabel: "NEAR MINT",
   },
   {
     value: "LP",
     label: "Lightly Played (LP)",
-    description: "มีรอยขอบหรือรอยขีดเล็กน้อย",
+    get description() { return translate("seller", "listingForm.condition.LP", "มีรอยขอบหรือรอยขีดเล็กน้อย"); },
     badgeLabel: "LIGHTLY PLAYED",
   },
   {
     value: "MP",
     label: "Moderately Played (MP)",
-    description: "รอยใช้งานเห็นชัด ขอบขาว มีรอยถลอก",
+    get description() { return translate("seller", "listingForm.condition.MP", "รอยใช้งานเห็นชัด ขอบขาว มีรอยถลอก"); },
     badgeLabel: "MODERATELY PLAYED",
   },
   {
     value: "HP",
     label: "Heavily Played (HP)",
-    description: "ใช้งานหนัก มีรอยยับหรือรอยพับเล็กน้อย",
+    get description() { return translate("seller", "listingForm.condition.HP", "ใช้งานหนัก มีรอยยับหรือรอยพับเล็กน้อย"); },
     badgeLabel: "HEAVILY PLAYED",
   },
   {
     value: "DMG",
     label: "Damaged (DMG)",
-    description: "มีรอยพับ ฉีก หรือเปื้อนชัดเจน",
+    get description() { return translate("seller", "listingForm.condition.DMG", "มีรอยพับ ฉีก หรือเปื้อนชัดเจน"); },
     badgeLabel: "DAMAGED",
   },
   {
     value: "SEALED",
     label: "Sealed",
-    description: "ยังไม่แกะซีล — กล่อง ซอง หรือเด็คที่ขายทั้งชิ้น",
+    get description() { return translate("seller", "listingForm.condition.SEALED", "ยังไม่แกะซีล — กล่อง ซอง หรือเด็คที่ขายทั้งชิ้น"); },
     badgeLabel: "SEALED",
   },
 ];
@@ -232,13 +233,24 @@ export function listingFormErrorMessage(
   fallback: string,
 ): string {
   if (hasErrorCode(error, "LISTING_PHOTO_IN_USE")) {
-    return "มีรูปที่ถูกใช้ในประกาศของร้านอื่นอยู่แล้ว เอารูปนั้นออกแล้วอัปรูปของคุณเอง";
+    return translate("seller", "listingForm.errors.photoInUse", "มีรูปที่ถูกใช้ในประกาศของร้านอื่นอยู่แล้ว เอารูปนั้นออกแล้วอัปรูปของคุณเอง");
   }
   if (hasErrorCode(error, "FILE_NOT_FOUND")) {
-    return "มีรูปที่อัปโหลดไม่เสร็จหรือหายไปแล้ว เอาออกแล้วอัปใหม่";
+    return translate("seller", "listingForm.errors.fileNotFound", "มีรูปที่อัปโหลดไม่เสร็จหรือหายไปแล้ว เอาออกแล้วอัปใหม่");
   }
   if (hasErrorCode(error, "VARIANT_NOT_FOUND")) {
-    return "ไม่พบการ์ดพิมพ์นี้ในแคตตาล็อกแล้ว เลือกการ์ดใหม่";
+    return translate("seller", "listingForm.errors.variantNotFound", "ไม่พบการ์ดพิมพ์นี้ในแคตตาล็อกแล้ว เลือกการ์ดใหม่");
   }
   return listingErrorMessage(error, fallback);
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "listingForm.condition.NM", "ns": "seller", "defaultValue": "ตำหนิเล็กน้อยมองแทบไม่เห็น"}
+// @tolgee-key {"key": "listingForm.condition.LP", "ns": "seller", "defaultValue": "มีรอยขอบหรือรอยขีดเล็กน้อย"}
+// @tolgee-key {"key": "listingForm.condition.MP", "ns": "seller", "defaultValue": "รอยใช้งานเห็นชัด ขอบขาว มีรอยถลอก"}
+// @tolgee-key {"key": "listingForm.condition.HP", "ns": "seller", "defaultValue": "ใช้งานหนัก มีรอยยับหรือรอยพับเล็กน้อย"}
+// @tolgee-key {"key": "listingForm.condition.DMG", "ns": "seller", "defaultValue": "มีรอยพับ ฉีก หรือเปื้อนชัดเจน"}
+// @tolgee-key {"key": "listingForm.condition.SEALED", "ns": "seller", "defaultValue": "ยังไม่แกะซีล — กล่อง ซอง หรือเด็คที่ขายทั้งชิ้น"}
+// @tolgee-key {"key": "listingForm.errors.photoInUse", "ns": "seller", "defaultValue": "มีรูปที่ถูกใช้ในประกาศของร้านอื่นอยู่แล้ว เอารูปนั้นออกแล้วอัปรูปของคุณเอง"}
+// @tolgee-key {"key": "listingForm.errors.fileNotFound", "ns": "seller", "defaultValue": "มีรูปที่อัปโหลดไม่เสร็จหรือหายไปแล้ว เอาออกแล้วอัปใหม่"}
+// @tolgee-key {"key": "listingForm.errors.variantNotFound", "ns": "seller", "defaultValue": "ไม่พบการ์ดพิมพ์นี้ในแคตตาล็อกแล้ว เลือกการ์ดใหม่"}

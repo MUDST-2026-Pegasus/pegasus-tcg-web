@@ -2,7 +2,7 @@ import { MAX_UNITS_PER_STOCK_IN } from "./listing-form.schema";
 import type { NewUnitsPayload } from "./listing-form.types";
 import { roundMoney, toNumber } from "./products.format";
 import type { RestockData, RestockDraft } from "./restock.types";
-import { dateTimeFormat } from "@/lib/i18n";
+import { dateTimeFormat, translate } from "@/lib/i18n";
 
 const thaiShortDate = dateTimeFormat({
   day: "2-digit",
@@ -68,7 +68,7 @@ export function calculateRestock(
 
   const quantityError =
     parsedQuantity !== null && parsedQuantity > MAX_UNITS_PER_STOCK_IN
-      ? `รับเข้าได้ครั้งละไม่เกิน ${MAX_UNITS_PER_STOCK_IN} ใบ เกินนี้แบ่งบันทึกเป็นหลายล็อต`
+      ? translate("seller", "restock.validation.quantityMax", "รับเข้าได้ครั้งละไม่เกิน {max} ใบ เกินนี้แบ่งบันทึกเป็นหลายล็อต", { max: MAX_UNITS_PER_STOCK_IN })
       : null;
 
   const isValid =
@@ -133,7 +133,7 @@ export function toNewUnitsPayload(
   const reference = draft.reference.trim();
   const note = [
     sourceLabel,
-    reference ? `อ้างอิง ${reference}` : null,
+    reference ? translate("seller", "restock.noteReference", "อ้างอิง {reference}", { reference }) : null,
     draft.note.trim(),
   ]
     .filter(Boolean)
@@ -146,3 +146,7 @@ export function toNewUnitsPayload(
     unitNote: note || null,
   };
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "restock.validation.quantityMax", "ns": "seller", "defaultValue": "รับเข้าได้ครั้งละไม่เกิน {max} ใบ เกินนี้แบ่งบันทึกเป็นหลายล็อต"}
+// @tolgee-key {"key": "restock.noteReference", "ns": "seller", "defaultValue": "อ้างอิง {reference}"}

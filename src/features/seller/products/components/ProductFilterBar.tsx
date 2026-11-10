@@ -24,6 +24,7 @@ import {
 } from "../products.format";
 import { LISTING_STATUSES, type ListingCounts } from "../products.queries";
 import type { ListingSort, ListingStatus } from "../products.types";
+import { useTranslate, translate } from "@/lib/i18n";
 
 type ProductFilterBarProps = {
   counts: ListingCounts;
@@ -42,7 +43,9 @@ const SEARCH_DELAY_MS = 350;
 
 const SORT_ITEMS = LISTING_SORTS.map((sort) => ({
   value: sort,
-  label: `เรียง: ${LISTING_SORT_LABEL[sort]}`,
+  get label() {
+    return translate("seller", "products.filter.sortItem", "เรียง: {sort}", { sort: LISTING_SORT_LABEL[sort] });
+  },
 }));
 
 /**
@@ -61,6 +64,7 @@ export function ProductFilterBar({
   sort,
   onSortChange,
 }: ProductFilterBarProps) {
+  const { t } = useTranslate("seller");
   const [text, setText] = useState(search);
   const [syncedSearch, setSyncedSearch] = useState(search);
   const timer = useRef<number | undefined>(undefined);
@@ -95,7 +99,7 @@ export function ProductFilterBar({
     label: string;
     count: number;
   }[] = [
-    { status: undefined, label: "ทั้งหมด", count: counts.total },
+    { status: undefined, label: t("products.filter.all", "ทั้งหมด"), count: counts.total },
     ...LISTING_STATUSES.filter(
       (status) =>
         status !== "BLOCKED" ||
@@ -140,8 +144,8 @@ export function ProductFilterBar({
           </InputGroupAddon>
           <InputGroupInput
             type="search"
-            aria-label="ค้นหาสินค้า"
-            placeholder="ชื่อการ์ด, เลขการ์ด, SKU, ล็อต..."
+            aria-label={t("products.filter.search", "ค้นหาสินค้า")}
+            placeholder={t("products.filter.searchPlaceholder", "ชื่อการ์ด, เลขการ์ด, SKU, ล็อต...")}
             value={text}
             onChange={(event) => handleSearchInput(event.target.value)}
             onKeyDown={(event) => {
@@ -158,7 +162,7 @@ export function ProductFilterBar({
           }}
         >
           <SelectTrigger
-            aria-label="เรียงลำดับ"
+            aria-label={t("products.filter.sort", "เรียงลำดับ")}
             className="h-8 w-52 rounded-lg border border-input bg-background text-sm"
           >
             <SelectValue />
@@ -177,3 +181,6 @@ export function ProductFilterBar({
     </div>
   );
 }
+
+// translate() อยู่นอก component — ประกาศ key ให้ tolgee CLI เห็น [TCG-555]
+// @tolgee-key {"key": "products.filter.sortItem", "ns": "seller", "defaultValue": "เรียง: {sort}"}

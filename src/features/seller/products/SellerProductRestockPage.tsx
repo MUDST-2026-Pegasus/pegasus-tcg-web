@@ -11,6 +11,7 @@ import { RestockContent } from "./components/restock/RestockContent";
 import { parseListingId } from "./products.format";
 import { useMyListing } from "./products.queries";
 import { getRestockData } from "./restock.api";
+import { useTranslate } from "@/lib/i18n";
 
 export function SellerProductRestockPage() {
   const { productId } = useParams();
@@ -27,6 +28,7 @@ export function SellerProductRestockPage() {
 }
 
 function ListingRestockLoader({ listingId }: { listingId: number }) {
+  const { t } = useTranslate("seller");
   const listing = useMyListing(listingId);
 
   if (hasErrorCode(listing.error, "LISTING_NOT_FOUND")) {
@@ -37,7 +39,7 @@ function ListingRestockLoader({ listingId }: { listingId: number }) {
     <QueryBoundary
       query={listing}
       loading={
-        <div role="status" aria-busy="true" aria-label="กำลังโหลดสินค้า">
+        <div role="status" aria-busy="true" aria-label={t("products.restock.loading", "กำลังโหลดสินค้า")}>
           <FormBodySkeleton />
         </div>
       }

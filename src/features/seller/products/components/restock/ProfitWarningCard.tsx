@@ -7,6 +7,7 @@ import { formatBaht } from "@/features/seller/shared/seller.format";
 import { formatSignedBaht } from "../../products.format";
 import type { RestockCalculation } from "../../restock.calc";
 import type { RestockData } from "../../restock.types";
+import { useTranslate } from "@/lib/i18n";
 
 type ProfitWarningCardProps = RestockData["profitWarning"] & {
   productId: string;
@@ -22,6 +23,7 @@ export function ProfitWarningCard({
   averageCost,
   result,
 }: ProfitWarningCardProps) {
+  const { t } = useTranslate("seller");
   return (
     <div role="status" className="flex w-full flex-col gap-2 rounded-xl bg-orange-100 p-4">
       <div className="flex items-center gap-2">
@@ -30,11 +32,7 @@ export function ProfitWarningCard({
       </div>
 
       <p className="text-xs leading-4 text-amber-700">
-        ต้นทุนเฉลี่ยขึ้นจาก {formatBaht(averageCost)} เป็น{" "}
-        {formatBaht(result.newAverageCost)} ทำให้กำไรต่อใบลดจาก{" "}
-        {formatSignedBaht(result.previousProfit)} เหลือ{" "}
-        {formatSignedBaht(result.newProfit)} พิจารณาปรับราคาขายเป็น{" "}
-        {formatBaht(result.suggestedPrice)}
+        {t("restock.profitWarning.description", "ต้นทุนเฉลี่ยขึ้นจาก {from} เป็น {to} ทำให้กำไรต่อใบลดจาก {profitFrom} เหลือ {profitTo} พิจารณาปรับราคาขายเป็น {price}", { from: formatBaht(averageCost), to: formatBaht(result.newAverageCost), profitFrom: formatSignedBaht(result.previousProfit), profitTo: formatSignedBaht(result.newProfit), price: formatBaht(result.suggestedPrice) })}
       </p>
 
       {/* ไปหน้าแก้ไขสินค้าแล้วโฟกัสช่องราคา — ค่าที่กรอกในหน้าเติมสต็อกยังไม่ถูกบันทึก */}

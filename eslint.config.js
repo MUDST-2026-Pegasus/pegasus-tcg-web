@@ -36,6 +36,8 @@ const I18N_GUARDED = [
   'src/features/admin/components/taxonomy.styles.ts',
   // I18N-14 (TCG-554)
   'src/features/seller/{shared,dashboard,shop,orders,application,logout}/**/*.{ts,tsx}',
+  // I18N-15 (TCG-555)
+  'src/features/seller/{products,payout}/**/*.{ts,tsx}',
 ]
 // ยังไม่ย้าย: ประมูล (I18N-25), โค้ดร้าน (I18N-23), seller โปรโมชัน / เซลล์ / ประมูล (TCG-743 / 744 / 745)
 const I18N_PENDING = [

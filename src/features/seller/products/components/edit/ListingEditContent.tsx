@@ -55,7 +55,7 @@ import { DetailsCard } from "../create/DetailsCard";
 import { ListingPhotosCard } from "../create/ListingPhotosCard";
 import { PricingCard } from "../create/PricingCard";
 import { PricingTipCard } from "../create/PricingTipCard";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 const PRODUCTS_PATH = "/seller/products";
 
@@ -76,6 +76,7 @@ export function ListingEditContent({
   listing,
   focusPrice,
 }: ListingEditContentProps) {
+  const { t } = useTranslate("seller");
   const { canPublish, reason } = usePublishPermission();
   const [priceLocked, setPriceLocked] = useState<{ price: number | null; details: SalePriceLockedDetails } | null>(null);
   const updateListing = useUpdateListing(listing.id);
@@ -133,7 +134,7 @@ export function ListingEditContent({
       // รูปใหม่กลายเป็นรูปของประกาศแล้ว ไม่ต้องค้างในรายการอัปโหลด
       upload.clear();
       if (latest) reset(toListingForm(latest));
-      toast.add({ type: "success", title: "บันทึกการเปลี่ยนแปลงแล้ว" });
+      toast.add({ type: "success", title: t("products.edit.toast.saved", "บันทึกการเปลี่ยนแปลงแล้ว") });
     } catch (error) {
       if (hasErrorCode(error, "SALE_PRICE_LOCKED")) {
         setPriceLocked({ price: toNumber(submitted.price), details: priceLockedDetails(error) });
@@ -143,7 +144,7 @@ export function ListingEditContent({
         setError("root.server", {
           message: listingFormErrorMessage(
             error,
-            "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง",
+            t("products.edit.toast.failed", "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"),
           ),
         });
       }
@@ -170,7 +171,7 @@ export function ListingEditContent({
         <BreadcrumbList className="gap-1.5 text-xs text-gray-500 sm:gap-1.5">
           <BreadcrumbItem>
             <BreadcrumbLink render={<Link to={PRODUCTS_PATH} />}>
-              จัดการสินค้า
+              {t("products.title", "จัดการสินค้า")}
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
@@ -178,7 +179,7 @@ export function ListingEditContent({
           <BreadcrumbSeparator className="text-slate-500 [&>svg]:size-4" />
           <BreadcrumbItem>
             <BreadcrumbPage className="font-medium text-gray-700">
-              แก้ไขสินค้า
+              {t("products.edit.title", "แก้ไขสินค้า")}
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -187,13 +188,13 @@ export function ListingEditContent({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold text-foreground">
-            แก้ไขสินค้า
+            {t("products.edit.title", "แก้ไขสินค้า")}
             <Badge variant="outline" className="rounded-full text-xs font-medium">
               {LISTING_STATUS_LABEL[listing.status]}
             </Badge>
           </h1>
           <p className="text-xs text-gray-500">
-            แก้ราคา รายละเอียด และรูปของประกาศ — สภาพเปลี่ยนไม่ได้ จำนวนเพิ่มผ่านการเติมสต็อก
+            {t("products.edit.subtitle", "แก้ราคา รายละเอียด และรูปของประกาศ — สภาพเปลี่ยนไม่ได้ จำนวนเพิ่มผ่านการเติมสต็อก")}
           </p>
         </div>
 
@@ -205,7 +206,7 @@ export function ListingEditContent({
             render={<Link to={PRODUCTS_PATH} />}
             nativeButton={false}
           >
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           <Button
             type="submit"
@@ -221,26 +222,26 @@ export function ListingEditContent({
             }
           >
             {formState.isSubmitting ? <Spinner data-icon="inline-start" /> : null}
-            บันทึกการเปลี่ยนแปลง
+            {t("products.edit.save", "บันทึกการเปลี่ยนแปลง")}
           </Button>
         </div>
       </div>
 
       {listing.status === "BLOCKED" ? (
         <Alert variant="destructive">
-          <AlertTitle>แอดมินระงับการขายประกาศนี้</AlertTitle>
+          <AlertTitle>{t("products.edit.blocked.title", "แอดมินระงับการขายประกาศนี้")}</AlertTitle>
           <AlertDescription>
-            {listing.blockReason ?? "ไม่ได้ระบุเหตุผล"}
+            {listing.blockReason ?? t("products.edit.blocked.noReason", "ไม่ได้ระบุเหตุผล")}
             {listing.blockedAt
               ? ` · ${new Date(listing.blockedAt).toLocaleDateString(intlLocale(), { dateStyle: "medium" })}`
               : null}
-            {" · แก้ไขหรือลบไม่ได้ ติดต่อทีมงานเพื่อขอตรวจสอบ"}
+            {t("products.edit.blocked.hint", " · แก้ไขหรือลบไม่ได้ ติดต่อทีมงานเพื่อขอตรวจสอบ")}
           </AlertDescription>
         </Alert>
       ) : isClosed ? (
         <Alert>
           <AlertDescription>
-            ประกาศนี้{LISTING_STATUS_LABEL[listing.status]} แก้ไขไม่ได้แล้ว
+            {t("products.edit.closed", "ประกาศนี้{status} แก้ไขไม่ได้แล้ว", { status: LISTING_STATUS_LABEL[listing.status] })}
           </AlertDescription>
         </Alert>
       ) : blockedReason ? (
@@ -251,9 +252,9 @@ export function ListingEditContent({
       {twin ? (
         <Alert>
           <AlertDescription>
-            ประกาศ #{twin.id}
-            {twin.lotLabel ? ` (${twin.lotLabel})` : ""} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่
-            {twin.samePrice ? " ในราคาเดียวกัน" : ""} — พิจารณารวมเป็นประกาศเดียว
+            {twin.samePrice
+              ? t("products.edit.duplicate.withPrice", "ประกาศ #{id}{lot} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่ ในราคาเดียวกัน — พิจารณารวมเป็นประกาศเดียว", { id: twin.id, lot: twin.lotLabel ? ` (${twin.lotLabel})` : "" })
+              : t("products.edit.duplicate.message", "ประกาศ #{id}{lot} ของคุณขายการ์ดใบนี้สภาพเดียวกันอยู่ — พิจารณารวมเป็นประกาศเดียว", { id: twin.id, lot: twin.lotLabel ? ` (${twin.lotLabel})` : "" })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -265,7 +266,7 @@ export function ListingEditContent({
 
       <div className="flex flex-col items-start gap-5 lg:flex-row">
         <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
-          <CatalogCardSummary title="การ์ดในประกาศนี้" card={card} />
+          <CatalogCardSummary title={t("products.edit.card", "การ์ดในประกาศนี้")} card={card} />
 
           <ConditionCard
             value={listing.condition}
@@ -301,7 +302,7 @@ export function ListingEditContent({
           <div className="flex items-center gap-1.5">
             <Eye aria-hidden="true" className="size-4 text-slate-500" />
             <p className="text-xs font-medium text-gray-500">
-              ตัวอย่างที่ผู้ซื้อจะเห็น
+              {t("products.create.preview", "ตัวอย่างที่ผู้ซื้อจะเห็น")}
             </p>
           </div>
 
@@ -312,7 +313,7 @@ export function ListingEditContent({
                 id: String(listing.id),
                 type: selectedCondition?.badgeLabel ?? "—",
                 title: listing.card.productName,
-                price: price === null ? "฿—" : formatBaht(price),
+                price: price === null ? t("products.create.noPrice", "฿—") : formatBaht(price),
                 image: previewImage,
                 imageAlt: listing.card.productName,
               }}

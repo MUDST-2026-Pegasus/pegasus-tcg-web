@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 import { CONDITION_OPTIONS } from "../../listing-form.format";
 import type { CardCondition } from "../../products.types";
+import { useTranslate } from "@/lib/i18n";
 
 type ConditionCardProps = {
   value: CardCondition | null;
@@ -21,19 +22,20 @@ export function ConditionCard({
   disabled = false,
   error,
 }: ConditionCardProps) {
+  const { t } = useTranslate("seller");
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-[3px]">
-        <h2 className="text-base font-semibold text-foreground">สภาพการ์ด</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("products.create.condition.title", "สภาพการ์ด")}</h2>
         <p className="text-xs text-gray-500">
           {disabled
-            ? "สภาพเปลี่ยนไม่ได้หลังลงประกาศ ถ้าเลือกผิดให้ลงประกาศใหม่ แล้วปิดประกาศนี้"
-            : "ระบุตามจริง — การระบุสภาพไม่ตรงเป็นสาเหตุข้อพิพาทอันดับ 1"}
+            ? t("products.create.condition.locked", "สภาพเปลี่ยนไม่ได้หลังลงประกาศ ถ้าเลือกผิดให้ลงประกาศใหม่ แล้วปิดประกาศนี้")
+            : t("products.create.condition.hint", "ระบุตามจริง — การระบุสภาพไม่ตรงเป็นสาเหตุข้อพิพาทอันดับ 1")}
         </p>
       </div>
 
       <RadioGroup
-        aria-label="สภาพการ์ด"
+        aria-label={t("products.create.condition.title", "สภาพการ์ด")}
         aria-invalid={Boolean(error) || undefined}
         value={value}
         disabled={disabled}

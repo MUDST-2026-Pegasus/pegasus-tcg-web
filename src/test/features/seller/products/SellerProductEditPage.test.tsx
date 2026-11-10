@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import { SellerProductEditPage } from "@/features/seller/products/SellerProductEditPage";
 import * as productsApi from "@/features/seller/products/products.api";
@@ -10,7 +8,7 @@ import * as listingFormApi from "@/features/seller/products/listing-form.api";
 import * as sellerApi from "@/features/seller/shared/seller.api";
 import type { SellerListing } from "@/features/seller/products/products.types";
 import type { SellerProfile } from "@/features/seller/shared/seller.types";
-import { createTestQueryClient } from "@/test/utils";
+import { renderWithProviders, screen, waitFor } from "@/test/utils";
 import { ApiError } from "@/lib/api";
 
 vi.mock("@/features/seller/shared/seller.api", () => ({
@@ -102,15 +100,11 @@ describe("SellerProductEditPage", () => {
   });
 
   function renderPage(productId = "101") {
-    const queryClient = createTestQueryClient();
-    return render(
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[`/seller/products/${productId}/edit`]}>
-          <Routes>
-            <Route path="/seller/products/:productId/edit" element={<SellerProductEditPage />} />
-          </Routes>
-        </MemoryRouter>
-      </QueryClientProvider>,
+    return renderWithProviders(
+      <Routes>
+        <Route path="/seller/products/:productId/edit" element={<SellerProductEditPage />} />
+      </Routes>,
+      { route: `/seller/products/${productId}/edit` },
     );
   }
 
