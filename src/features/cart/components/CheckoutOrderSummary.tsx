@@ -8,6 +8,7 @@ import { checkoutMoney } from "../checkout.format";
 import type { CartItemResponse } from "../cart.types";
 import type { ShippingQuote, ShippingQuoteOption } from "../checkout.types";
 import type { PromoPreview, PromotionSelection } from "../promotions.types";
+import { useTranslate } from "@/lib/i18n";
 
 interface SellerSummaryGroup {
   sellerId: number | null;
@@ -53,25 +54,26 @@ export function CheckoutOrderSummary({
   onPurchase,
   onReturnToCart,
 }: CheckoutOrderSummaryProps) {
+  const { t } = useTranslate("buyer");
   return (
     <Card className={CHECKOUT_CARD_CLASS}>
-      <h2 className="text-[15px] font-semibold">สรุปคำสั่งซื้อ</h2>
+      <h2 className="text-[15px] font-semibold">{t("cart.summary.title", "สรุปคำสั่งซื้อ")}</h2>
 
       {saleTotals && saleTotals.saleDiscount > 0 && (
         <>
           <div className="flex items-center justify-between gap-3 text-[13px]">
-            <span className="text-muted-foreground">ราคาสินค้า (ก่อนลด)</span>
+            <span className="text-muted-foreground">{t("cart.summary.listTotal", "ราคาสินค้า (ก่อนลด)")}</span>
             <span>{checkoutMoney(saleTotals.listTotal)}</span>
           </div>
           <div className="flex items-center justify-between gap-3 text-[13px]">
-            <span className="text-muted-foreground">ส่วนลดราคาสินค้า</span>
+            <span className="text-muted-foreground">{t("cart.summary.saleDiscount", "ส่วนลดราคาสินค้า")}</span>
             <span className="text-[#dc2626]">−{formatSaleBaht(saleTotals.saleDiscount)}</span>
           </div>
         </>
       )}
 
       <div className="flex items-center justify-between gap-3 text-[13px]">
-        <span className="text-muted-foreground">ยอดสินค้า ({itemCount} ใบ)</span>
+        <span className="text-muted-foreground">{t("cart.summary.itemsSubtotal", "ยอดสินค้า ({count} ใบ)", { count: itemCount })}</span>
         <span>
           {previewReady ? checkoutMoney(preview!.itemsSubtotal) : checkoutMoney(subtotal)}
         </span>
@@ -81,7 +83,7 @@ export function CheckoutOrderSummary({
         className="flex items-center justify-between gap-3 text-[13px]"
         aria-live="polite"
       >
-        <span className="text-muted-foreground">ค่าจัดส่ง</span>
+        <span className="text-muted-foreground">{t("cart.summary.shipping", "ค่าจัดส่ง")}</span>
         <span>
           {previewReady && preview?.shippingTotal != null
             ? checkoutMoney(preview.shippingTotal)
@@ -110,7 +112,7 @@ export function CheckoutOrderSummary({
               className="flex items-start justify-between gap-3 text-xs"
             >
               <span className="min-w-0 text-muted-foreground">
-                {quote?.sellerName || items[0]?.sellerName || "ร้านค้า"}
+                {quote?.sellerName || items[0]?.sellerName || t("cart.common.shop", "ร้านค้า")}
                 {option ? ` · ${option.name}` : ""}
               </span>
               <span
@@ -120,7 +122,7 @@ export function CheckoutOrderSummary({
               >
                 {shippingReady && option && authoritativeFee != null
                   ? authoritativeFee === 0
-                    ? "ส่งฟรี"
+                    ? t("cart.common.freeShipping", "ส่งฟรี")
                     : checkoutMoney(authoritativeFee)
                   : "—"}
               </span>
@@ -131,7 +133,7 @@ export function CheckoutOrderSummary({
 
       {!!preview?.sellerDiscountTotal && preview.sellerDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
-          <span className="text-foreground/75">ส่วนลดร้าน</span>
+          <span className="text-foreground/75">{t("cart.summary.shopDiscount", "ส่วนลดร้าน")}</span>
           <span className="font-medium text-teal-700 dark:text-teal-400">
             − {checkoutMoney(preview.sellerDiscountTotal)}
           </span>
@@ -162,7 +164,7 @@ export function CheckoutOrderSummary({
       {!!preview?.platformDiscountTotal && preview.platformDiscountTotal > 0 && (
         <div className="flex justify-between text-[13px]">
           <span className="text-foreground/75">
-            ส่วนลด Pegasus
+            {t("cart.summary.platformDiscount", "ส่วนลด Pegasus")}
             {appliedPlatformCode ? ` · ${appliedPlatformCode}` : ""}
           </span>
           <span className="font-medium text-primary">
@@ -174,7 +176,7 @@ export function CheckoutOrderSummary({
       <Separator className="checkout-divider" />
 
       <div className="flex items-center justify-between gap-3 text-lg" aria-live="polite">
-        <span className="font-semibold">ยอดรวม</span>
+        <span className="font-semibold">{t("cart.summary.total", "ยอดรวม")}</span>
         <strong data-testid="checkout-grand-total">
           {previewReady ? checkoutMoney(preview!.grandTotal) : "—"}
         </strong>
@@ -182,10 +184,7 @@ export function CheckoutOrderSummary({
 
       {!!preview && preview.sellerDiscountTotal + preview.platformDiscountTotal > 0 && (
         <p className="text-right text-xs font-semibold text-teal-700 dark:text-teal-400">
-          ประหยัดไป{" "}
-          {checkoutMoney(
-            preview.sellerDiscountTotal + preview.platformDiscountTotal,
-          )}
+          {t("cart.summary.saving", "ประหยัดไป {amount}", { amount: checkoutMoney(preview.sellerDiscountTotal + preview.platformDiscountTotal) })}
         </p>
       )}
 
@@ -195,11 +194,11 @@ export function CheckoutOrderSummary({
         onClick={onPurchase}
       >
         {isSubmitting && <Spinner />}
-        {isSubmitting ? "กำลังสร้างคำสั่งซื้อ..." : "สั่งซื้อและไปชำระเงิน"}
+        {isSubmitting ? t("checkout.summary.submitting", "กำลังสร้างคำสั่งซื้อ...") : t("checkout.summary.submit", "สั่งซื้อและไปชำระเงิน")}
       </Button>
 
       <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-        ค่าส่งคิดจากตัวเลือกที่เลือกของแต่ละร้าน และยืนยันอีกครั้งตอนสร้างคำสั่งซื้อ
+        {t("checkout.summary.shippingNote", "ค่าส่งคิดจากตัวเลือกที่เลือกของแต่ละร้าน และยืนยันอีกครั้งตอนสร้างคำสั่งซื้อ")}
       </p>
 
       {quotesSettledWithoutShipping && (
@@ -208,7 +207,7 @@ export function CheckoutOrderSummary({
           className="checkout-link text-center text-xs"
           onClick={onReturnToCart}
         >
-          กลับไปแก้ไขรายการที่เลือกในตะกร้า
+          {t("checkout.summary.backToCart", "กลับไปแก้ไขรายการที่เลือกในตะกร้า")}
         </button>
       )}
     </Card>

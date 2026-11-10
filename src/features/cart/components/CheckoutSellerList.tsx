@@ -2,6 +2,7 @@ import { CheckoutSellerCard } from "./CheckoutSellerCard";
 import type { ShippingQuoteOption } from "../checkout.types";
 import type { CheckoutPromotions } from "../useCheckoutPromotions";
 import type { CheckoutSellerGroup } from "../useShippingSelection";
+import { useTranslate } from "@/lib/i18n";
 
 interface CheckoutSellerListProps {
   sellerGroups: CheckoutSellerGroup[];
@@ -23,6 +24,7 @@ export function CheckoutSellerList({
   onSelectShipping,
   promotions,
 }: CheckoutSellerListProps) {
+  const { t } = useTranslate("buyer");
   const {
     promotionList,
     preview,
@@ -49,7 +51,7 @@ export function CheckoutSellerList({
       <CheckoutSellerCard
         key={sellerId ?? "unknown"}
         sellerId={sellerId}
-        sellerName={quote?.sellerName || items[0]?.sellerName || "ร้านค้า"}
+        sellerName={quote?.sellerName || items[0]?.sellerName || t("cart.common.shop", "ร้านค้า")}
         items={items}
         quote={quote}
         selected={selectedOptions[index]}

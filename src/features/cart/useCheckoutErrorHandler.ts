@@ -11,7 +11,7 @@ import type { CartItemResponse } from "./cart.types";
 import type { PromotionSelection } from "./promotions.types";
 import type { CheckoutSellerGroup } from "./useShippingSelection";
 import type { CheckoutPayload } from "./useCheckoutSubmit";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export interface PromotionChange {
   previous: number;
@@ -46,6 +46,7 @@ export function useCheckoutErrorHandler({
   setAddressPickerOpen: (open: boolean) => void;
   hasRedirectedRef: RefObject<boolean>;
 }) {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [shippingNotice, setShippingNotice] = useState<string | null>(null);
@@ -55,8 +56,8 @@ export function useCheckoutErrorHandler({
   const handleError = async (error: unknown, payload: CheckoutPayload) => {
     if (!(error instanceof ApiError)) {
       toast.add({
-        title: "สั่งซื้อไม่สำเร็จ",
-        description: "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง",
+        title: t("checkout.toast.failed", "สั่งซื้อไม่สำเร็จ"),
+        description: t("checkout.error.connection", "กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง"),
         type: "error",
       });
       return;
@@ -71,13 +72,13 @@ export function useCheckoutErrorHandler({
       const sellerNames = changedSeller
         ? changedSeller.quote?.sellerName ||
           changedSeller.items[0]?.sellerName ||
-          "ร้านค้า"
+          t("cart.common.shop", "ร้านค้า")
         : sellerGroups
             .map(
               (group) =>
                 group.quote?.sellerName ||
                 group.items[0]?.sellerName ||
-                "ร้านค้า",
+                t("cart.common.shop", "ร้านค้า"),
             )
             .join(", ");
       setShippingNotice(
@@ -115,8 +116,8 @@ export function useCheckoutErrorHandler({
       await queryClient.invalidateQueries({ queryKey: addressKeys.all });
       setAddressPickerOpen(true);
       toast.add({
-        title: "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง",
-        description: "ที่อยู่เดิมไม่พร้อมใช้งาน",
+        title: t("checkout.toast.addressAgain", "กรุณาเลือกที่อยู่จัดส่งอีกครั้ง"),
+        description: t("checkout.toast.addressAgainHint", "ที่อยู่เดิมไม่พร้อมใช้งาน"),
         type: "warning",
       });
     } else if (error.code === "SALE_QUOTA_REACHED") {
@@ -141,8 +142,8 @@ export function useCheckoutErrorHandler({
       void queryClient.invalidateQueries({ queryKey: cartKeys.all });
       hasRedirectedRef.current = true;
       toast.add({
-        title: "ราคาสินค้ามีการเปลี่ยนแปลง",
-        description: "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง",
+        title: t("checkout.toast.priceChanged", "ราคาสินค้ามีการเปลี่ยนแปลง"),
+        description: t("checkout.toast.priceChangedAgain", "กรุณาตรวจสอบและยอมรับราคาใหม่ในตะกร้าอีกครั้ง"),
         type: "warning",
       });
       navigate("/cart");
@@ -150,8 +151,8 @@ export function useCheckoutErrorHandler({
       toast.add({
         title:
           error.code === "INSUFFICIENT_STOCK"
-            ? "สินค้าไม่เพียงพอ"
-            : "สั่งซื้อไม่สำเร็จ",
+            ? t("checkout.toast.insufficientStock", "สินค้าไม่เพียงพอ")
+            : t("checkout.toast.failed", "สั่งซื้อไม่สำเร็จ"),
         description: translateError(error, error.message),
         type: "error",
       });

@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react";
 
 import { useDeleteAddress } from "../address.queries";
 import type { Address } from "../address.types";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type DeleteAddressDialogProps = {
   open: boolean;
@@ -17,6 +17,7 @@ export function DeleteAddressDialog({
   onOpenChange,
   address,
 }: DeleteAddressDialogProps) {
+  const { t } = useTranslate("buyer");
   const deleteAddress = useDeleteAddress();
 
   // hook อยู่ในตัวนอกที่ไม่ถูก unmount ตอนปิด ต้องล้าง error เอง
@@ -46,18 +47,18 @@ export function DeleteAddressDialog({
       onOpenChange={handleOpenChange}
       icon={Trash2}
       variant="destructive"
-      title="Delete this address?"
+      title={t("account.address.deleteTitle", "Delete this address?")}
       description={
         <>
           {address?.recipientName} · {address?.line1}
           <br />
-          Past orders keep their own copy, so they stay unchanged.
+          {t("account.address.deleteHint", "Past orders keep their own copy, so they stay unchanged.")}
         </>
       }
-      confirmLabel="Delete"
-      cancelLabel="Cancel"
+      confirmLabel={t("account.address.delete", "Delete")}
+      cancelLabel={t("account.orders.cancel", "Cancel")}
       isPending={deleteAddress.isPending}
-      error={deleteAddress.isError ? translateError(deleteAddress.error, "Could not delete this address.") : null}
+      error={deleteAddress.isError ? translateError(deleteAddress.error, t("account.address.deleteFailed", "Could not delete this address.")) : null}
       onConfirm={() => void onConfirm()}
     />
   );

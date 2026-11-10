@@ -1,8 +1,20 @@
 import type { AvailablePromotion } from "./promotions.types";
-import { dateTimeFormat, errorText, intlLocale } from "@/lib/i18n";
+import { dateTimeFormat, errorText, formatNumber, translate } from "@/lib/i18n";
+
+// @tolgee-key {"key": "cart.common.freeShipping", "ns": "buyer", "defaultValue": "ส่งฟรี"}
+// @tolgee-key {"key": "cart.code.minSpend", "ns": "buyer", "defaultValue": "ขั้นต่ำ {amount}"}
+// @tolgee-key {"key": "cart.code.noMinSpend", "ns": "buyer", "defaultValue": "ไม่มีขั้นต่ำ"}
+// @tolgee-key {"key": "cart.code.maxDiscount", "ns": "buyer", "defaultValue": "สูงสุด {amount}"}
+// @tolgee-key {"key": "cart.code.freeShippingRule", "ns": "buyer", "defaultValue": "ส่งฟรี · {conditions}"}
+// @tolgee-key {"key": "cart.code.discountRule", "ns": "buyer", "defaultValue": "ลด {value} · {conditions}"}
+// @tolgee-key {"key": "cart.code.notFound", "ns": "buyer", "defaultValue": "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง"}
+// @tolgee-key {"key": "cart.code.fullyClaimed", "ns": "buyer", "defaultValue": "โค้ดนี้ถูกเก็บครบแล้ว"}
+// @tolgee-key {"key": "cart.code.claimFirst", "ns": "buyer", "defaultValue": "เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้"}
+// @tolgee-key {"key": "cart.code.shortfall", "ns": "buyer", "defaultValue": "ซื้อเพิ่มอีก {amount}"}
+// @tolgee-key {"key": "cart.code.unusable", "ns": "buyer", "defaultValue": "โค้ดนี้ยังใช้ไม่ได้"}
 
 export const checkoutMoney = (value: number) =>
-  `฿${value.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
+  formatNumber(value, { style: "currency", currency: "THB", currencyDisplay: "narrowSymbol", minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
 const dayMonthYear = dateTimeFormat({
   day: "numeric",
@@ -45,7 +57,7 @@ export function formatPromotionValue(promotion: {
   discountType: "PERCENT" | "FIXED" | "FREE_SHIPPING";
   discountValue: number;
 }): string {
-  if (promotion.discountType === "FREE_SHIPPING") return "ส่งฟรี";
+  if (promotion.discountType === "FREE_SHIPPING") return translate("buyer", "cart.common.freeShipping", "ส่งฟรี");
   if (promotion.discountType === "PERCENT") return `${promotion.discountValue}%`;
   return checkoutMoney(promotion.discountValue);
 }
@@ -56,12 +68,12 @@ export function formatPromotionConditions(promotion: {
 }): string {
   const parts: string[] = [];
   if (promotion.minSpend != null && promotion.minSpend > 0) {
-    parts.push(`ขั้นต่ำ ${checkoutMoney(promotion.minSpend)}`);
+    parts.push(translate("buyer", "cart.code.minSpend", "ขั้นต่ำ {amount}", { amount: checkoutMoney(promotion.minSpend) }));
   } else {
-    parts.push("ไม่มีขั้นต่ำ");
+    parts.push(translate("buyer", "cart.code.noMinSpend", "ไม่มีขั้นต่ำ"));
   }
   if (promotion.maxDiscount != null && promotion.maxDiscount > 0) {
-    parts.push(`สูงสุด ${checkoutMoney(promotion.maxDiscount)}`);
+    parts.push(translate("buyer", "cart.code.maxDiscount", "สูงสุด {amount}", { amount: checkoutMoney(promotion.maxDiscount) }));
   }
   return parts.join(" · ");
 }
@@ -75,9 +87,9 @@ export function formatPromotionRuleSummary(promotion: {
   const val = formatPromotionValue(promotion);
   const conditions = formatPromotionConditions(promotion);
   if (promotion.discountType === "FREE_SHIPPING") {
-    return `ส่งฟรี · ${conditions}`;
+    return translate("buyer", "cart.code.freeShippingRule", "ส่งฟรี · {conditions}", { conditions });
   }
-  return `ลด ${val} · ${conditions}`;
+  return translate("buyer", "cart.code.discountRule", "ลด {value} · {conditions}", { value: val, conditions });
 }
 
 export function formatPromotionError(
@@ -88,7 +100,7 @@ export function formatPromotionError(
     startsAt?: string | null;
   },
 ): string {
-  const notFound = errorText("PROMO_NOT_FOUND") ?? "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง";
+  const notFound = errorText("PROMO_NOT_FOUND") ?? translate("buyer", "cart.code.notFound", "ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง");
   if (!code) return notFound;
   const cleanCode = code.trim().toUpperCase();
 
@@ -114,21 +126,21 @@ export function formatPromotionUnavailableReason(
 ): string {
   if (promotion.source === "CLAIMABLE") {
     return promotion.remainingClaims === 0
-      ? "โค้ดนี้ถูกเก็บครบแล้ว"
-      : "เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้";
+      ? translate("buyer", "cart.code.fullyClaimed", "โค้ดนี้ถูกเก็บครบแล้ว")
+      : translate("buyer", "cart.code.claimFirst", "เก็บโค้ดก่อน แล้วจึงเลือกใช้ได้");
   }
   if (
     promotion.reason === "PROMO_MIN_SPEND_NOT_MET" &&
     promotion.shortfall != null &&
     promotion.shortfall > 0
   ) {
-    return `ซื้อเพิ่มอีก ${checkoutMoney(promotion.shortfall)}`;
+    return translate("buyer", "cart.code.shortfall", "ซื้อเพิ่มอีก {amount}", { amount: checkoutMoney(promotion.shortfall) });
   }
-  if (!promotion.reason) return "โค้ดนี้ยังใช้ไม่ได้";
+  if (!promotion.reason) return translate("buyer", "cart.code.unusable", "โค้ดนี้ยังใช้ไม่ได้");
   return (
     formatPromotionError(promotion.reason, {
       sellerName: promotion.sellerName,
       shortfall: promotion.shortfall,
-    }) || "โค้ดนี้ยังใช้ไม่ได้"
+    }) || translate("buyer", "cart.code.unusable", "โค้ดนี้ยังใช้ไม่ได้")
   );
 }

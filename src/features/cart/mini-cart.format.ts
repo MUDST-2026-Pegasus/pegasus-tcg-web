@@ -1,6 +1,9 @@
 import { isOnSale } from "@/components/sale";
 import { cartSaleTotals } from "@/features/sale/sale.cart";
 import type { CartItemResponse } from "./cart.types";
+import { translate } from "@/lib/i18n";
+
+// @tolgee-key {"key": "cart.common.shop", "ns": "buyer", "defaultValue": "ร้านค้า"}
 
 export function groupMiniCart(items: CartItemResponse[]) {
   const groups = new Map<
@@ -17,7 +20,7 @@ export function groupMiniCart(items: CartItemResponse[]) {
     if (!groups.has(key))
       groups.set(key, {
         key,
-        name: item.sellerName || item.sellerUsername || "ร้านค้า",
+        name: item.sellerName || item.sellerUsername || translate("buyer", "cart.common.shop", "ร้านค้า"),
         items: [],
       });
     groups.get(key)!.items.push(item);

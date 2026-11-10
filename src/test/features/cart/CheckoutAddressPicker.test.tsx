@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { renderWithProviders, screen } from "@/test/utils";
 import userEvent from "@testing-library/user-event";
 import { CheckoutAddressPicker } from "@/features/cart/components/CheckoutAddressPicker";
 import { MAX_ADDRESSES } from "@/features/account/address.format";
@@ -21,7 +21,7 @@ function Harness({ addresses, onSelect }: { addresses: Address[]; onSelect: (id:
 describe("CheckoutAddressPicker", () => {
   it("hides the add action when the shared address limit is reached", () => {
     const addresses = Array.from({ length: MAX_ADDRESSES }, (_, i) => ({ ...address, id: i + 1, label: "Address " + (i + 1) }));
-    render(<Harness addresses={addresses} onSelect={vi.fn()} />);
+    renderWithProviders(<Harness addresses={addresses} onSelect={vi.fn()} />);
     expect(screen.getByText("10 / 10")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "+ เพิ่มที่อยู่ใหม่" })).not.toBeInTheDocument();
   });
@@ -29,7 +29,7 @@ describe("CheckoutAddressPicker", () => {
   it("selects a newly saved address in the popup and waits for confirmation", async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
-    const view = render(<Harness addresses={[address]} onSelect={onSelect} />);
+    const view = renderWithProviders(<Harness addresses={[address]} onSelect={onSelect} />);
     await user.click(screen.getByRole("button", { name: "+ เพิ่มที่อยู่ใหม่" }));
     await user.click(screen.getByRole("button", { name: "Save new address" }));
     view.rerender(<Harness addresses={[address, saved as Address]} onSelect={onSelect} />);

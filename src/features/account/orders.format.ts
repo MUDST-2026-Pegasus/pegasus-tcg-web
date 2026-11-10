@@ -3,18 +3,34 @@
  */
 
 import { isApiError, isNetworkError } from "@/lib/api";
-import { translateError } from "@/lib/i18n";
+import { translate, translateError } from "@/lib/i18n";
+
+// @tolgee-key {"key": "account.pdf.network", "ns": "buyer", "defaultValue": "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่"}
+// @tolgee-key {"key": "account.pdf.session", "ns": "buyer", "defaultValue": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่"}
+// @tolgee-key {"key": "account.pdf.forbidden", "ns": "buyer", "defaultValue": "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารคำสั่งซื้อ"}
+// @tolgee-key {"key": "account.pdf.notFound", "ns": "buyer", "defaultValue": "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว"}
+// @tolgee-key {"key": "account.pdf.server", "ns": "buyer", "defaultValue": "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง"}
+// @tolgee-key {"key": "account.pdf.failed", "ns": "buyer", "defaultValue": "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"}
+// @tolgee-key {"key": "account.packageStatus.PENDING_PAYMENT", "ns": "buyer", "defaultValue": "Pending Payment"}
+// @tolgee-key {"key": "account.packageStatus.PAID", "ns": "buyer", "defaultValue": "Paid"}
+// @tolgee-key {"key": "account.packageStatus.PREPARING", "ns": "buyer", "defaultValue": "Processing"}
+// @tolgee-key {"key": "account.packageStatus.PROCESSING", "ns": "buyer", "defaultValue": "Processing"}
+// @tolgee-key {"key": "account.packageStatus.SHIPPED", "ns": "buyer", "defaultValue": "Shipped"}
+// @tolgee-key {"key": "account.packageStatus.DELIVERED", "ns": "buyer", "defaultValue": "Completed"}
+// @tolgee-key {"key": "account.packageStatus.COMPLETED", "ns": "buyer", "defaultValue": "Completed"}
+// @tolgee-key {"key": "account.packageStatus.CANCELLED", "ns": "buyer", "defaultValue": "Cancelled"}
+// @tolgee-key {"key": "account.packageStatus.CANCELED", "ns": "buyer", "defaultValue": "Cancelled"}
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
-  PENDING_PAYMENT: "Pending Payment",
-  PAID: "Paid",
-  PREPARING: "Processing",
-  PROCESSING: "Processing",
-  SHIPPED: "Shipped",
-  DELIVERED: "Completed",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-  CANCELED: "Cancelled",
+  get PENDING_PAYMENT() { return translate("buyer", "account.packageStatus.PENDING_PAYMENT", "Pending Payment"); },
+  get PAID() { return translate("buyer", "account.packageStatus.PAID", "Paid"); },
+  get PREPARING() { return translate("buyer", "account.packageStatus.PREPARING", "Processing"); },
+  get PROCESSING() { return translate("buyer", "account.packageStatus.PROCESSING", "Processing"); },
+  get SHIPPED() { return translate("buyer", "account.packageStatus.SHIPPED", "Shipped"); },
+  get DELIVERED() { return translate("buyer", "account.packageStatus.DELIVERED", "Completed"); },
+  get COMPLETED() { return translate("buyer", "account.packageStatus.COMPLETED", "Completed"); },
+  get CANCELLED() { return translate("buyer", "account.packageStatus.CANCELLED", "Cancelled"); },
+  get CANCELED() { return translate("buyer", "account.packageStatus.CANCELED", "Cancelled"); },
 };
 
 /**
@@ -112,19 +128,19 @@ export function getOrderStatusBadge(status?: string | null): OrderStatusBadgeCon
 
 export function buyerOrderSummaryDownloadErrorMessage(error: unknown): string {
   if (isNetworkError(error)) {
-    return "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่";
+    return translate("buyer", "account.pdf.network", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
   }
   if (isApiError(error)) {
     switch (error.status) {
       case 401:
-        return "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่";
+        return translate("buyer", "account.pdf.session", "เซสชันหมดอายุ กรุณาเข้าสู่ระบบแล้วลองใหม่");
       case 403:
-        return "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารคำสั่งซื้อ";
+        return translate("buyer", "account.pdf.forbidden", "บัญชีนี้ไม่มีสิทธิ์ดาวน์โหลดเอกสารคำสั่งซื้อ");
       case 404:
-        return "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว";
+        return translate("buyer", "account.pdf.notFound", "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว");
       default:
-        if (error.status >= 500) return "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง";
+        if (error.status >= 500) return translate("buyer", "account.pdf.server", "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง");
     }
   }
-  return translateError(error, "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+  return translateError(error, translate("buyer", "account.pdf.failed", "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"));
 }

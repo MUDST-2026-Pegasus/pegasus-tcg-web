@@ -1,11 +1,13 @@
+import { useTranslate } from "@/lib/i18n";
 /** Shown after checkout swapped a delivery option that stopped being available. */
 export function CheckoutShippingNotice({ sellerNames }: { sellerNames: string }) {
+  const { t } = useTranslate("buyer");
   return (
     <div role="alert" className="checkout-alert checkout-alert-warning">
       <p className="font-semibold">
-        ตัวเลือกการจัดส่งของ {sellerNames} มีการเปลี่ยนแปลง
+        {t("checkout.shipping.changed", "ตัวเลือกการจัดส่งของ {names} มีการเปลี่ยนแปลง", { names: sellerNames })}
       </p>
-      <p>เราเลือกวิธีจัดส่งให้ใหม่แล้ว โปรดตรวจสอบค่าส่งและยอดรวมอีกครั้ง</p>
+      <p>{t("checkout.shipping.changedHint", "เราเลือกวิธีจัดส่งให้ใหม่แล้ว โปรดตรวจสอบค่าส่งและยอดรวมอีกครั้ง")}</p>
     </div>
   );
 }

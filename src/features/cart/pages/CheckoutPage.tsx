@@ -23,6 +23,7 @@ import { useCheckoutSubmit } from "../useCheckoutSubmit";
 import { useCheckoutErrorHandler } from "../useCheckoutErrorHandler";
 import { AuctionCheckout } from "@/features/auction/components/AuctionCheckout";
 import "./checkout.css";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * `/checkout` — `?auction={id}` เป็นโหมดประมูล (การ์ดใบเดียวที่ชนะ) [TCG-631]
@@ -38,6 +39,7 @@ export function CheckoutPage() {
 }
 
 function CartCheckout() {
+  const { t } = useTranslate("buyer");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const hasRedirected = useRef(false);
@@ -162,9 +164,9 @@ function CartCheckout() {
     <div className="checkout-page">
       <div className="checkout-container">
         <header className="mb-6">
-          <h1 className="text-[26px] font-bold leading-tight">ตรวจสอบและสั่งซื้อ</h1>
+          <h1 className="text-[26px] font-bold leading-tight">{t("checkout.page.title", "ตรวจสอบและสั่งซื้อ")}</h1>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            เลือกวิธีจัดส่งและโค้ดส่วนลดของแต่ละร้าน
+            {t("checkout.page.subtitle", "เลือกวิธีจัดส่งและโค้ดส่วนลดของแต่ละร้าน")}
           </p>
         </header>
 
@@ -174,21 +176,21 @@ function CartCheckout() {
 
             {quotes.isError && (
               <CheckoutErrorAlert
-                title="โหลดตัวเลือกจัดส่งไม่สำเร็จ"
+                title={t("checkout.page.quotesFailed", "โหลดตัวเลือกจัดส่งไม่สำเร็จ")}
                 error={quotes.error}
                 actions={[
-                  { label: "ลองอีกครั้ง", onClick: () => void quotes.refetch() },
-                  { label: "กลับไปตรวจสอบตะกร้า", onClick: () => navigate("/cart") },
+                  { label: t("cart.common.tryAgain", "ลองอีกครั้ง"), onClick: () => void quotes.refetch() },
+                  { label: t("checkout.page.backToCart", "กลับไปตรวจสอบตะกร้า"), onClick: () => navigate("/cart") },
                 ]}
               />
             )}
 
             {promoPreview.isError && (
               <CheckoutErrorAlert
-                title="คำนวณส่วนลดและยอดรวมไม่สำเร็จ"
+                title={t("checkout.page.previewFailed", "คำนวณส่วนลดและยอดรวมไม่สำเร็จ")}
                 error={promoPreview.error}
                 actions={[
-                  { label: "ลองอีกครั้ง", onClick: () => void promoPreview.refetch() },
+                  { label: t("cart.common.tryAgain", "ลองอีกครั้ง"), onClick: () => void promoPreview.refetch() },
                 ]}
               />
             )}
@@ -206,7 +208,7 @@ function CartCheckout() {
             />
           </div>
 
-          <aside className="flex min-w-0 flex-col gap-4" aria-label="สรุปคำสั่งซื้อ">
+          <aside className="flex min-w-0 flex-col gap-4" aria-label={t("cart.summary.title", "สรุปคำสั่งซื้อ")}>
             <CheckoutAddressSummary
               address={activeAddress}
               loading={isAddressLoading}
@@ -218,8 +220,8 @@ function CartCheckout() {
 
             <Card className={`${CHECKOUT_CARD_CLASS} text-[13px]`}>
               <div className="flex items-center justify-between gap-3">
-                <h2 className="font-semibold">วิธีชำระเงิน</h2>
-                <span className="text-muted-foreground">โอนผ่าน PromptPay</span>
+                <h2 className="font-semibold">{t("checkout.page.paymentMethod", "วิธีชำระเงิน")}</h2>
+                <span className="text-muted-foreground">{t("checkout.page.promptPay", "โอนผ่าน PromptPay")}</span>
               </div>
             </Card>
 
