@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from
 import { cn } from "@/lib/utils";
 
 import { parseTimeInput } from "../auction-form.schema";
+import { useTranslate } from "@/lib/i18n";
 
 /** ความสูงแถวละ 36px โชว์ 5 แถว แถวกลางคือค่าที่เลือก */
 const ROW_HEIGHT = 36;
@@ -25,17 +26,18 @@ type TimeWheelProps = {
  * ลากนิ้ว / หมุนลูกกลิ้ง / คลิกแถว / ปุ่มลูกศรขึ้นลง ได้หมด
  */
 export function TimeWheel({ value, fallback = "21:00", onChange }: TimeWheelProps) {
+  const { t } = useTranslate("auction");
   const [hour, minute] = (parseTimeInput(value) ?? fallback).split(":").map(Number);
 
   return (
     <div className="relative flex items-center justify-center gap-1 px-3 py-2" style={{ height: ROW_HEIGHT * VISIBLE_ROWS + 16 }}>
       {/* แถบไฮไลต์ตรงกลาง */}
       <div aria-hidden className="pointer-events-none absolute inset-x-3 top-1/2 h-9 -translate-y-1/2 rounded-lg bg-muted" />
-      <WheelColumn label="ชั่วโมง" count={24} value={hour} onChange={(next) => onChange(`${pad(next)}:${pad(minute)}`)} />
+      <WheelColumn label={t("seller.timeWheel.label", "ชั่วโมง")} count={24} value={hour} onChange={(next) => onChange(`${pad(next)}:${pad(minute)}`)} />
       <span aria-hidden className="relative text-lg font-semibold">
         :
       </span>
-      <WheelColumn label="นาที" count={60} value={minute} onChange={(next) => onChange(`${pad(hour)}:${pad(next)}`)} />
+      <WheelColumn label={t("seller.timeWheel.label2", "นาที")} count={60} value={minute} onChange={(next) => onChange(`${pad(hour)}:${pad(next)}`)} />
     </div>
   );
 }

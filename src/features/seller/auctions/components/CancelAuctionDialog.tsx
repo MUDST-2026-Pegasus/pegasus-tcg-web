@@ -5,7 +5,7 @@ import { toast } from "@/components/ui/toast";
 import { useCancelAuction } from "@/features/auction/auction.queries";
 import type { SellerAuctionRow } from "@/features/auction/auction.types";
 import { ApiError } from "@/lib/api/errors";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type CancelAuctionDialogProps = {
   /** ประมูลที่จะยกเลิก — เก็บไว้แม้ปิดแล้ว เนื้อหาจะได้ไม่หายระหว่าง animation ปิด */
@@ -16,6 +16,7 @@ type CancelAuctionDialogProps = {
 
 /** S3-B ยืนยันยกเลิกประมูล (ได้เฉพาะตอนยังไม่มีบิด) [TCG-632 · FE-6] */
 export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDialogProps) {
+  const { t } = useTranslate("auction");
   const cancel = useCancelAuction(row?.id ?? 0);
 
   const confirm = () => {
@@ -26,7 +27,7 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
         toast.add({
           type: "error",
           // ข้อความ AUCTION_HAS_BIDS ตาม Figma S3-E
-          title: error instanceof ApiError && error.code === "AUCTION_HAS_BIDS" ? "ยกเลิกไม่ได้ — มีผู้บิดแล้ว" : "ยกเลิกประมูลไม่สำเร็จ",
+          title: error instanceof ApiError && error.code === "AUCTION_HAS_BIDS" ? t("seller.cancelAuctionDialog.text", "ยกเลิกไม่ได้ — มีผู้บิดแล้ว") : t("seller.cancelAuctionDialog.text2", "ยกเลิกประมูลไม่สำเร็จ"),
           description: error instanceof ApiError ? translateError(error, error.message) : undefined,
         }),
     });
@@ -38,10 +39,10 @@ export function CancelAuctionDialog({ row, open, onOpenChange }: CancelAuctionDi
       onOpenChange={onOpenChange}
       icon={Ban}
       variant="destructive"
-      title="ยกเลิกการประมูลนี้?"
-      description={`${row ? `${row.item.card.productName} · ` : ""}ยังไม่มีผู้บิด — การ์ดจะกลับเข้าสต็อกและขายในหน้าร้านได้ตามปกติ`}
-      confirmLabel="ยกเลิกประมูล"
-      cancelLabel="ไม่ยกเลิก"
+      title={t("seller.cancelAuctionDialog.title", "ยกเลิกการประมูลนี้?")}
+      description={t("seller.cancelAuctionDialog.description", "{value}ยังไม่มีผู้บิด — การ์ดจะกลับเข้าสต็อกและขายในหน้าร้านได้ตามปกติ", { value: row ? `${row.item.card.productName} · ` : "" })}
+      confirmLabel={t("seller.cancelAuctionDialog.confirmLabel", "ยกเลิกประมูล")}
+      cancelLabel={t("seller.cancelAuctionDialog.cancelLabel", "ไม่ยกเลิก")}
       isPending={cancel.isPending}
       onConfirm={confirm}
     />

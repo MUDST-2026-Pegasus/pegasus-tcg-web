@@ -11,7 +11,7 @@ import { getMyListings, moveUnit } from "@/features/seller/products/products.api
 import { listingKeys } from "@/features/seller/products/products.queries";
 import type { ListingQuery, ListingStatus, SellerListingSummary } from "@/features/seller/products/products.types";
 import { ApiError } from "@/lib/api/errors";
-import { intlLocale, translateError } from "@/lib/i18n";
+import { intlLocale, translateError, useTranslate } from "@/lib/i18n";
 
 /** ประกาศที่รับการ์ดได้ — ผู้ซื้อเห็นก่อน (ACTIVE / SOLD_OUT) แล้วค่อยที่ยังพักไว้ */
 const TARGET_ORDER: ListingStatus[] = ["ACTIVE", "SOLD_OUT", "PAUSED", "DRAFT"];
@@ -34,6 +34,7 @@ type ReturnToListingButtonProps = {
  * ไม่แสดงเมื่อการ์ดไม่อยู่ในมือแล้ว (ลงขาย / ประมูลใหม่ไปแล้ว) หรือยังไม่มีประกาศที่รับได้
  */
 export function ReturnToListingButton({ detail }: ReturnToListingButtonProps) {
+  const { t } = useTranslate("auction");
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const unitUid = detail.unitUid;
@@ -61,8 +62,8 @@ export function ReturnToListingButton({ detail }: ReturnToListingButtonProps) {
       setOpen(false);
       toast.add({
         type: "success",
-        title: "นำการ์ดกลับไปลงขายแล้ว",
-        description: `${detail.unitLabel} อยู่ในประกาศ ${formatBaht(target?.price ?? 0)} แล้ว`,
+        title: t("seller.returnToListingButton.title", "นำการ์ดกลับไปลงขายแล้ว"),
+        description: t("seller.returnToListingButton.description", "{unitLabel} อยู่ในประกาศ {value} แล้ว", { unitLabel: detail.unitLabel, value: formatBaht(target?.price ?? 0) }),
       });
       void queryClient.invalidateQueries({ queryKey: auctionKeys.seller() });
       void queryClient.invalidateQueries({ queryKey: listingKeys.all });
@@ -70,34 +71,34 @@ export function ReturnToListingButton({ detail }: ReturnToListingButtonProps) {
     onError: (error) => {
       toast.add({
         type: "error",
-        title: "นำกลับไปลงขายไม่สำเร็จ",
-        description: error instanceof ApiError ? translateError(error, error.message) : "ลองใหม่อีกครั้ง",
+        title: t("seller.returnToListingButton.title2", "นำกลับไปลงขายไม่สำเร็จ"),
+        description: error instanceof ApiError ? translateError(error, error.message) : t("seller.returnToListingButton.text", "ลองใหม่อีกครั้ง"),
       });
     },
   });
 
   if (!inHand || !target) return null;
 
-  const statusNote = target.status === "ACTIVE" || target.status === "SOLD_OUT" ? "" : " (ประกาศนี้ยังไม่เปิดขาย — เปิดได้ที่หน้าสินค้า)";
+  const statusNote = target.status === "ACTIVE" || target.status === "SOLD_OUT" ? "" : t("seller.returnToListingButton.text2", " (ประกาศนี้ยังไม่เปิดขาย — เปิดได้ที่หน้าสินค้า)");
 
   return (
     <>
       <Button variant="outline" size="sm" className="rounded-full px-4" onClick={() => setOpen(true)}>
-        นำกลับไปลงขาย
+        {t("seller.returnToListingButton.text3", "นำกลับไปลงขาย")}
       </Button>
       <ConfirmDialog
         open={open}
         onOpenChange={setOpen}
-        title="นำการ์ดกลับไปลงขาย?"
-        description={`${detail.item.card.productName} · ${detail.item.condition} · ใบ ${detail.unitLabel}`}
-        confirmLabel="นำกลับไปลงขาย"
-        cancelLabel="ยกเลิก"
+        title={t("seller.returnToListingButton.title3", "นำการ์ดกลับไปลงขาย?")}
+        description={t("seller.returnToListingButton.description2", "{productName} · {condition} · ใบ {unitLabel}", { productName: detail.item.card.productName, condition: detail.item.condition, unitLabel: detail.unitLabel })}
+        confirmLabel={t("seller.returnToListingButton.text3", "นำกลับไปลงขาย")}
+        cancelLabel={t("seller.returnToListingButton.cancelLabel", "ยกเลิก")}
         isPending={move.isPending}
         onConfirm={() => move.mutate(target.id)}
       >
         <p className="text-sm text-muted-foreground">
-          ย้ายเข้าประกาศราคา {formatBaht(target.price)} (ขายอยู่ {target.quantityAvailable.toLocaleString(intlLocale())} ใบ)
-          {statusNote} — ถ้าจะประมูลใหม่ภายหลังก็ยังเลือกการ์ดใบนี้ได้
+          {t("seller.returnToListingButton.text4", "ย้ายเข้าประกาศราคา")}{" "}{formatBaht(target.price)} {t("seller.returnToListingButton.text5", "(ขายอยู่")}{" "}{target.quantityAvailable.toLocaleString(intlLocale())} {t("seller.returnToListingButton.text6", "ใบ)")}
+          {statusNote} {t("seller.returnToListingButton.text7", "— ถ้าจะประมูลใหม่ภายหลังก็ยังเลือกการ์ดใบนี้ได้")}
         </p>
       </ConfirmDialog>
     </>

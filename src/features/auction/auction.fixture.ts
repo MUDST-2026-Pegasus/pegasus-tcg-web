@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- ข้อมูล mock แทนข้อความจาก backend / ผู้ใช้ (หมายเหตุผู้ขาย, เหตุผลของแอดมิน) ไม่ใช่ข้อความ UI */
 import type {
   AdminAuctionDetail,
   AdminAuctionPage,

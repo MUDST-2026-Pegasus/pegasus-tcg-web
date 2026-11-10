@@ -10,6 +10,7 @@ import { useBuyNow } from "../auction.queries";
 import type { AuctionDetail } from "../auction.types";
 import { AuctionNotice } from "./AuctionNotice";
 import { PriceSummary } from "./PriceSummary";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmBuyNowDialogProps = {
   auction: AuctionDetail;
@@ -19,6 +20,7 @@ type ConfirmBuyNowDialogProps = {
 
 /** B3-C dialog ยืนยันซื้อทันที — สำเร็จแล้วไป checkout โหมดประมูล [TCG-630 · FE-4] */
 export function ConfirmBuyNowDialog({ auction, open, onOpenChange }: ConfirmBuyNowDialogProps) {
+  const { t } = useTranslate("auction");
   const navigate = useNavigate();
   const buyNow = useBuyNow(auction.id);
   const [error, setError] = useState<AuctionErrorMessage | null>(null);
@@ -45,18 +47,18 @@ export function ConfirmBuyNowDialog({ auction, open, onOpenChange }: ConfirmBuyN
     <ConfirmDialog
       open={open}
       onOpenChange={close}
-      title={`ซื้อทันทีในราคา ${formatBaht(price)}?`}
-      description="ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม."
-      confirmLabel="ซื้อทันที"
+      title={t("buyer.confirmBuyNowDialog.title", "ซื้อทันทีในราคา {price}?", { price: formatBaht(price) })}
+      description={t("buyer.confirmBuyNowDialog.description", "ประมูลจะจบทันที และระบบสร้างคำสั่งซื้อให้คุณ — ชำระเงินภายใน 24 ชม.")}
+      confirmLabel={t("buyer.confirmBuyNowDialog.confirmLabel", "ซื้อทันที")}
       isPending={buyNow.isPending}
       onConfirm={confirm}
     >
       <PriceSummary
         rows={[
-          ["ราคาซื้อทันที", price],
-          ["ค่าจัดส่ง", auction.shippingFee],
+          [t("buyer.confirmBuyNowDialog.text", "ราคาซื้อทันที"), price],
+          [t("buyer.confirmBuyNowDialog.text2", "ค่าจัดส่ง"), auction.shippingFee],
         ]}
-        totalLabel="ยอดชำระ"
+        totalLabel={t("buyer.confirmBuyNowDialog.totalLabel", "ยอดชำระ")}
         total={price + auction.shippingFee}
       />
 

@@ -5,6 +5,7 @@ import {
   type AuctionPillKind,
 } from "@/features/auction/auction.format";
 import type { AuctionStatus, SellerAuctionPage, SellerAuctionRow } from "@/features/auction/auction.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ค่าในแต่ละคอลัมน์ของตาราง S1 ตามสถานะ (ตารางในการ์ด FE-6) [TCG-632]
@@ -35,7 +36,7 @@ export type SellerAuctionRowView = {
 const DASH: TextCell = { text: "—", tone: "muted" };
 
 export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowView {
-  const ended: TimeCell = { kind: "ended", text: `จบ ${formatAuctionDayMonth(row.endsAt)}` };
+  const ended: TimeCell = { kind: "ended", text: translate("auction", "seller.auctionsTableFormat.text", "จบ {endsAt}", { endsAt: formatAuctionDayMonth(row.endsAt) }) };
   const hasBids = row.bidCount > 0;
 
   switch (row.status) {
@@ -43,14 +44,14 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
       return hasBids
         ? {
             currentPrice: { text: formatBaht(row.currentPrice), tone: "primary" },
-            buyNow: { text: row.buyNowPrice !== null ? "ปิดแล้ว (มีบิด)" : "ไม่ได้ตั้ง", tone: "muted" },
+            buyNow: { text: row.buyNowPrice !== null ? translate("auction", "seller.auctionsTableFormat.text2", "ปิดแล้ว (มีบิด)") : translate("auction", "seller.auctionsTableFormat.text3", "ไม่ได้ตั้ง"), tone: "muted" },
             time: { kind: "countdown" },
             pill: { kind: "Live" },
             action: "VIEW",
           }
         : {
             currentPrice: DASH,
-            buyNow: row.buyNowPrice !== null ? { text: formatBaht(row.buyNowPrice), tone: "amber" } : { text: "ไม่ได้ตั้ง", tone: "muted" },
+            buyNow: row.buyNowPrice !== null ? { text: formatBaht(row.buyNowPrice), tone: "amber" } : { text: translate("auction", "seller.auctionsTableFormat.text3", "ไม่ได้ตั้ง"), tone: "muted" },
             time: { kind: "countdown" },
             pill: { kind: "Live" },
             action: "CANCEL",
@@ -68,7 +69,7 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
         currentPrice: { text: formatBaht(row.currentPrice), tone: "bold" },
         buyNow: DASH,
         time: ended,
-        pill: { kind: "Won", label: "ขายแล้ว" },
+        pill: { kind: "Won", label: translate("auction", "seller.auctionsTableFormat.label", "ขายแล้ว") },
         action: "VIEW_ORDER",
       };
     case "UNSOLD":
@@ -78,7 +79,7 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
             currentPrice: { text: formatBaht(row.currentPrice), tone: "muted" },
             buyNow: DASH,
             time: ended,
-            pill: { kind: "Unsold", label: "ไม่มีผู้ชำระ" },
+            pill: { kind: "Unsold", label: translate("auction", "seller.auctionsTableFormat.label2", "ไม่มีผู้ชำระ") },
             action: "RELIST",
           }
         : {
@@ -109,7 +110,9 @@ export function sellerAuctionRowView(row: SellerAuctionRow): SellerAuctionRowVie
 
 /** แท็บตามแบบ S1 — `null` = ทั้งหมด */
 export const SELLER_AUCTION_TABS: { status: AuctionStatus | null; label: string }[] = [
-  { status: null, label: "ทั้งหมด" },
+  { status: null, get label() {
+    return translate("auction", "seller.auctionsTableFormat.label3", "ทั้งหมด");
+  } },
   { status: "LIVE", label: AUCTION_STATUS_LABEL.LIVE },
   { status: "AWAITING_PAYMENT", label: AUCTION_STATUS_LABEL.AWAITING_PAYMENT },
   { status: "SOLD", label: AUCTION_STATUS_LABEL.SOLD },
@@ -142,3 +145,10 @@ export function formatHoursMinutes(ms: number): string {
   const minutes = Math.floor((safe % 3_600_000) / 60_000);
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
+
+// @tolgee-key {"key": "seller.auctionsTableFormat.text", "ns": "auction", "defaultValue": "จบ {endsAt}"}
+// @tolgee-key {"key": "seller.auctionsTableFormat.text2", "ns": "auction", "defaultValue": "ปิดแล้ว (มีบิด)"}
+// @tolgee-key {"key": "seller.auctionsTableFormat.text3", "ns": "auction", "defaultValue": "ไม่ได้ตั้ง"}
+// @tolgee-key {"key": "seller.auctionsTableFormat.label", "ns": "auction", "defaultValue": "ขายแล้ว"}
+// @tolgee-key {"key": "seller.auctionsTableFormat.label2", "ns": "auction", "defaultValue": "ไม่มีผู้ชำระ"}
+// @tolgee-key {"key": "seller.auctionsTableFormat.label3", "ns": "auction", "defaultValue": "ทั้งหมด"}

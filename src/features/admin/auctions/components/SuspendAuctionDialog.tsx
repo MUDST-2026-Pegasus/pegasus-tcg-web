@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useSuspendAuction } from "@/features/auction/auction.queries";
 import { ApiError } from "@/lib/api/errors";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export type SuspendTarget = { id: number; cardName: string; auctionNumber: string; bidCount: number };
 
@@ -23,6 +23,7 @@ type SuspendAuctionDialogProps = {
  * หน้าที่เรียกใส่ key ตามใบ เปิดใบใหม่แล้วช่องเหตุผลเริ่มว่าง
  */
 export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuctionDialogProps) {
+  const { t } = useTranslate("auction");
   const suspend = useSuspendAuction(target?.id ?? 0);
   const [reason, setReason] = useState("");
   const trimmed = reason.trim();
@@ -34,7 +35,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) =>
-          toast.add({ type: "error", title: "ระงับประมูลไม่สำเร็จ", description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
+          toast.add({ type: "error", title: t("admin.suspendAuctionDialog.title", "ระงับประมูลไม่สำเร็จ"), description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
       },
     );
   };
@@ -44,15 +45,15 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
       <DialogContent showCloseButton={false} className="gap-0 overflow-hidden rounded-2xl bg-card p-0 sm:max-w-[460px]">
         <div className="flex flex-col gap-4 px-6 pt-6 pb-5">
           <div className="flex flex-col gap-1.5">
-            <DialogTitle className="text-base font-bold text-foreground">ระงับการประมูลนี้?</DialogTitle>
+            <DialogTitle className="text-base font-bold text-foreground">{t("admin.suspendAuctionDialog.text", "ระงับการประมูลนี้?")}</DialogTitle>
             <DialogDescription className="text-xs leading-5 text-muted-foreground">
-              {target ? `${target.cardName} · #${target.auctionNumber} · ${target.bidCount} บิด — ` : ""}
-              บิดทั้งหมดถูกยกเลิก การ์ดกลับเข้าสต็อกผู้ขาย และผู้บิดทุกคนได้รับแจ้ง
+              {target ? t("admin.suspendAuctionDialog.text2", "{cardName} · #{auctionNumber} · {bidCount} บิด — ", { cardName: target.cardName, auctionNumber: target.auctionNumber, bidCount: target.bidCount }) : ""}
+              {t("admin.suspendAuctionDialog.text3", "บิดทั้งหมดถูกยกเลิก การ์ดกลับเข้าสต็อกผู้ขาย และผู้บิดทุกคนได้รับแจ้ง")}
             </DialogDescription>
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="suspend-reason" className="text-xs font-semibold text-foreground">
-              เหตุผล (ผู้ขายและผู้บิดจะเห็น) *
+              {t("admin.suspendAuctionDialog.text4", "เหตุผล (ผู้ขายและผู้บิดจะเห็น) *")}
             </label>
             <Textarea
               id="suspend-reason"
@@ -66,7 +67,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
           </div>
         </div>
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ยกเลิก</DialogClose>
+          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>{t("admin.suspendAuctionDialog.text5", "ยกเลิก")}</DialogClose>
           <Button
             variant="destructive"
             size="sm"
@@ -75,7 +76,7 @@ export function SuspendAuctionDialog({ target, open, onOpenChange }: SuspendAuct
             onClick={confirm}
           >
             {suspend.isPending && <Spinner />}
-            ระงับประมูล
+            {t("admin.suspendAuctionDialog.text6", "ระงับประมูล")}
           </Button>
         </DialogFooter>
       </DialogContent>

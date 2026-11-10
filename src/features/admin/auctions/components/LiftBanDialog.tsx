@@ -7,7 +7,7 @@ import type { BannedBidder } from "@/features/auction/auction.types";
 import { ApiError } from "@/lib/api/errors";
 
 import { formatDayMonth, formatDayMonthYear } from "../admin-auctions.format";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 type LiftBanDialogProps = {
   bidder: BannedBidder | null;
@@ -19,6 +19,7 @@ type LiftBanDialogProps = {
 
 /** A2 ยกเลิกโทษห้ามบิด + รายการประมูลที่ไม่ชำระ [TCG-635 · FE-9] */
 export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialogProps) {
+  const { t } = useTranslate("auction");
   const lift = useLiftBiddingBan();
   const lifting = mode === "lift";
 
@@ -29,13 +30,13 @@ export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialo
       {
         onSuccess: () => onOpenChange(false),
         onError: (error) =>
-          toast.add({ type: "error", title: "ยกเลิกโทษไม่สำเร็จ", description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
+          toast.add({ type: "error", title: t("admin.liftBanDialog.title", "ยกเลิกโทษไม่สำเร็จ"), description: error instanceof ApiError ? translateError(error, error.message) : undefined }),
       },
     );
   };
 
   const summary = bidder
-    ? `ไม่ชำระหลังชนะ ${bidder.strikes.length} ครั้ง${bidder.bannedUntil ? ` · ห้ามบิดถึง ${formatDayMonthYear(bidder.bannedUntil)}` : ""}`
+    ? t("admin.liftBanDialog.text", "ไม่ชำระหลังชนะ {length} ครั้ง{value}", { length: bidder.strikes.length, value: bidder.bannedUntil ? ` · ${t("admin.liftBanDialog.bannedUntil", "ห้ามบิดถึง {date}", { date: formatDayMonthYear(bidder.bannedUntil) })}` : "" })
     : "";
 
   return (
@@ -44,30 +45,30 @@ export function LiftBanDialog({ bidder, mode, open, onOpenChange }: LiftBanDialo
         <div className="flex flex-col gap-4 px-6 pt-6 pb-5">
           <div className="flex flex-col gap-1.5">
             <DialogTitle className="text-base font-bold text-foreground">
-              {lifting ? `ยกเลิกโทษห้ามบิดของ ${bidder?.username ?? ""}?` : (bidder?.username ?? "")}
+              {lifting ? t("admin.liftBanDialog.text2", "ยกเลิกโทษห้ามบิดของ {value}?", { value: bidder?.username ?? "" }) : (bidder?.username ?? "")}
             </DialogTitle>
             <DialogDescription className="text-xs leading-5 text-muted-foreground">
-              {lifting ? `${summary} — ใช้เมื่อการไม่ชำระไม่ใช่ความผิดของผู้ใช้ เช่น ระบบชำระเงินขัดข้อง` : summary}
+              {lifting ? t("admin.liftBanDialog.text3", "{summary} — ใช้เมื่อการไม่ชำระไม่ใช่ความผิดของผู้ใช้ เช่น ระบบชำระเงินขัดข้อง", { summary }) : summary}
             </DialogDescription>
           </div>
           {bidder && bidder.strikes.length > 0 ? (
-            <ul aria-label="ประมูลที่ไม่ชำระ" className="flex flex-col gap-2 rounded-xl bg-muted px-4 py-3">
+            <ul aria-label={t("admin.liftBanDialog.ariaLabel", "ประมูลที่ไม่ชำระ")} className="flex flex-col gap-2 rounded-xl bg-muted px-4 py-3">
               {/* เก่าสุดก่อน ตาม Figma */}
               {[...bidder.strikes].reverse().map((strike) => (
                 <li key={strike.auctionId} className="flex items-center justify-between gap-3 text-xs">
                   <span className="font-semibold text-foreground">#{strike.auctionNumber}</span>
-                  <span className="text-muted-foreground">ไม่ชำระ · {formatDayMonth(strike.at)}</span>
+                  <span className="text-muted-foreground">{t("admin.liftBanDialog.text4", "ไม่ชำระ ·")}{" "}{formatDayMonth(strike.at)}</span>
                 </li>
               ))}
             </ul>
           ) : null}
         </div>
         <DialogFooter className="flex-row items-center justify-end gap-2.5 border-t border-muted bg-muted/30 px-6 py-4">
-          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>ปิด</DialogClose>
+          <DialogClose render={<Button variant="outline" size="sm" className="rounded-md px-2.5" />}>{t("admin.liftBanDialog.text5", "ปิด")}</DialogClose>
           {lifting ? (
             <Button size="sm" className="rounded-md px-2.5" disabled={lift.isPending} onClick={confirm}>
               {lift.isPending && <Spinner />}
-              ยกเลิกโทษ
+              {t("admin.liftBanDialog.text6", "ยกเลิกโทษ")}
             </Button>
           ) : null}
         </DialogFooter>

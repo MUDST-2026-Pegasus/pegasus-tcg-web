@@ -1,6 +1,7 @@
 import type { GameDto } from "@/features/catalog/catalog.types";
 
 import type { AuctionFilter, AuctionListParams, AuctionSort } from "./auction.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ตัวกรองของหน้ารวมประมูล (B1) อยู่ใน URL ทั้งหมด — แชร์ลิงก์ได้ กด back กลับมาที่เดิม [TCG-628]
@@ -12,19 +13,39 @@ export const AUCTION_PAGE_SIZE = 20;
 
 /** แท็บแคปซูล — `null` = "ทั้งหมด" */
 export const AUCTION_TABS: { value: AuctionFilter | null; label: string }[] = [
-  { value: null, label: "ทั้งหมด" },
-  { value: "ENDING_SOON", label: "ใกล้จบ" },
-  { value: "BUY_NOW", label: "ซื้อทันทีได้" },
-  { value: "NO_BIDS", label: "ยังไม่มีบิด" },
-  { value: "NEW", label: "เพิ่งเปิด" },
+  { value: null, get label() {
+    return translate("auction", "buyer.searchParams.label", "ทั้งหมด");
+  } },
+  { value: "ENDING_SOON", get label() {
+    return translate("auction", "buyer.searchParams.label2", "ใกล้จบ");
+  } },
+  { value: "BUY_NOW", get label() {
+    return translate("auction", "buyer.searchParams.label3", "ซื้อทันทีได้");
+  } },
+  { value: "NO_BIDS", get label() {
+    return translate("auction", "buyer.searchParams.label4", "ยังไม่มีบิด");
+  } },
+  { value: "NEW", get label() {
+    return translate("auction", "buyer.searchParams.label5", "เพิ่งเปิด");
+  } },
 ];
 
 export const AUCTION_SORTS: { value: AuctionSort; label: string }[] = [
-  { value: "ENDING_SOON", label: "เรียง: ใกล้จบก่อน" },
-  { value: "NEWEST", label: "เรียง: เพิ่งเปิด" },
-  { value: "PRICE_ASC", label: "เรียง: ราคาต่ำ → สูง" },
-  { value: "PRICE_DESC", label: "เรียง: ราคาสูง → ต่ำ" },
-  { value: "MOST_BIDS", label: "เรียง: บิดมากสุด" },
+  { value: "ENDING_SOON", get label() {
+    return translate("auction", "buyer.searchParams.label6", "เรียง: ใกล้จบก่อน");
+  } },
+  { value: "NEWEST", get label() {
+    return translate("auction", "buyer.searchParams.label7", "เรียง: เพิ่งเปิด");
+  } },
+  { value: "PRICE_ASC", get label() {
+    return translate("auction", "buyer.searchParams.label8", "เรียง: ราคาต่ำ → สูง");
+  } },
+  { value: "PRICE_DESC", get label() {
+    return translate("auction", "buyer.searchParams.label9", "เรียง: ราคาสูง → ต่ำ");
+  } },
+  { value: "MOST_BIDS", get label() {
+    return translate("auction", "buyer.searchParams.label10", "เรียง: บิดมากสุด");
+  } },
 ];
 
 const DEFAULT_SORT: AuctionSort = "ENDING_SOON";
@@ -99,3 +120,14 @@ export function toAuctionQuery(
     },
   };
 }
+
+// @tolgee-key {"key": "buyer.searchParams.label", "ns": "auction", "defaultValue": "ทั้งหมด"}
+// @tolgee-key {"key": "buyer.searchParams.label2", "ns": "auction", "defaultValue": "ใกล้จบ"}
+// @tolgee-key {"key": "buyer.searchParams.label3", "ns": "auction", "defaultValue": "ซื้อทันทีได้"}
+// @tolgee-key {"key": "buyer.searchParams.label4", "ns": "auction", "defaultValue": "ยังไม่มีบิด"}
+// @tolgee-key {"key": "buyer.searchParams.label5", "ns": "auction", "defaultValue": "เพิ่งเปิด"}
+// @tolgee-key {"key": "buyer.searchParams.label6", "ns": "auction", "defaultValue": "เรียง: ใกล้จบก่อน"}
+// @tolgee-key {"key": "buyer.searchParams.label7", "ns": "auction", "defaultValue": "เรียง: เพิ่งเปิด"}
+// @tolgee-key {"key": "buyer.searchParams.label8", "ns": "auction", "defaultValue": "เรียง: ราคาต่ำ → สูง"}
+// @tolgee-key {"key": "buyer.searchParams.label9", "ns": "auction", "defaultValue": "เรียง: ราคาสูง → ต่ำ"}
+// @tolgee-key {"key": "buyer.searchParams.label10", "ns": "auction", "defaultValue": "เรียง: บิดมากสุด"}

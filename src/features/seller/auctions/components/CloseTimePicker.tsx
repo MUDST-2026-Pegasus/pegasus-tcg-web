@@ -16,7 +16,7 @@ import {
 } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
 import { TimeWheel } from "./TimeWheel";
-import { dateTimeFormat, dayPickerLocale } from "@/lib/i18n";
+import { dateTimeFormat, dayPickerLocale, useTranslate } from "@/lib/i18n";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -48,6 +48,7 @@ type CloseTimePickerProps = {
  * วันก่อนวันนี้และหลัง 30 วันกดไม่ได้ — ส่วนเวลาที่เร็ว/ไกลเกินไป schema เป็นคนบอก
  */
 export function CloseTimePicker({ date, time, onChange, now, error, defaultTime = "21:00" }: CloseTimePickerProps) {
+  const { t } = useTranslate("auction");
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
 
@@ -65,7 +66,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
       <div className="flex flex-col gap-2 sm:flex-row">
         <Popover open={dateOpen} onOpenChange={setDateOpen}>
           <PopoverTrigger
-            aria-label="วันปิดประมูล"
+            aria-label={t("seller.closeTimePicker.ariaLabel", "วันปิดประมูล")}
             aria-invalid={Boolean(error) || undefined}
             render={
               <Button
@@ -76,7 +77,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
             }
           >
             <CalendarIcon aria-hidden className="text-muted-foreground" />
-            <span className={cn("flex-1 truncate", !date && "text-muted-foreground")}>{date ? formatCloseDate(date) : "เลือกวัน"}</span>
+            <span className={cn("flex-1 truncate", !date && "text-muted-foreground")}>{date ? formatCloseDate(date) : t("seller.closeTimePicker.text", "เลือกวัน")}</span>
             <ChevronDown aria-hidden className="text-muted-foreground" />
           </PopoverTrigger>
           <PopoverContent align="start" className="w-auto gap-0 rounded-xl p-0">
@@ -94,19 +95,19 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
                 }}
               />
               <div className="flex w-40 flex-col justify-center border-l">
-                <p className="px-3 pt-3 text-xs text-muted-foreground">เวลา</p>
+                <p className="px-3 pt-3 text-xs text-muted-foreground">{t("seller.closeTimePicker.text2", "เวลา")}</p>
                 <TimeWheel value={time} fallback={defaultTime} onChange={pickTime} />
               </div>
             </div>
             <p className="border-t px-3 py-2.5 text-[11px] text-muted-foreground">
-              วันที่ก่อนวันนี้และหลัง 30 วันกดเลือกไม่ได้ · เลื่อนวงล้อขึ้นลงเพื่อตั้งเวลา
+              {t("seller.closeTimePicker.text3", "วันที่ก่อนวันนี้และหลัง 30 วันกดเลือกไม่ได้ · เลื่อนวงล้อขึ้นลงเพื่อตั้งเวลา")}
             </p>
           </PopoverContent>
         </Popover>
 
         <Popover open={timeOpen} onOpenChange={setTimeOpen}>
           <PopoverTrigger
-            aria-label="เวลาปิดประมูล"
+            aria-label={t("seller.closeTimePicker.ariaLabel2", "เวลาปิดประมูล")}
             aria-invalid={Boolean(error) || undefined}
             render={
               <Button
@@ -117,14 +118,14 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
             }
           >
             <Clock aria-hidden className="text-muted-foreground" />
-            <span className={cn("flex-1", !time && "text-muted-foreground")}>{time || "เลือกเวลา"}</span>
+            <span className={cn("flex-1", !time && "text-muted-foreground")}>{time || t("seller.closeTimePicker.text4", "เลือกเวลา")}</span>
             <ChevronDown aria-hidden className="text-muted-foreground" />
           </PopoverTrigger>
           <PopoverContent align="end" className="w-48 gap-0 rounded-xl p-0">
             <TimeWheel value={time} fallback={defaultTime} onChange={pickTime} />
             <div className="border-t p-2">
               <Button type="button" size="sm" className="w-full rounded-lg" onClick={() => setTimeOpen(false)}>
-                เสร็จ
+                {t("seller.closeTimePicker.text5", "เสร็จ")}
               </Button>
             </div>
           </PopoverContent>
@@ -132,7 +133,7 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground">ตั้งเร็ว:</span>
+        <span className="text-xs text-muted-foreground">{t("seller.closeTimePicker.text6", "ตั้งเร็ว:")}</span>
         {CLOSE_TIME_SHORTCUTS.map((shortcut) => (
           <Button
             key={shortcut.hours}
@@ -152,11 +153,11 @@ export function CloseTimePicker({ date, time, onChange, now, error, defaultTime 
       <div className="flex flex-col gap-0.5 rounded-lg bg-teal-50 px-3.5 py-2.5 text-xs">
         {closeAt !== null && closeAt > now ? (
           <p className="font-semibold text-teal-700">
-            เปิดทันทีเมื่อกด "เปิดประมูล" · ปิด {formatCloseDate(date)} เวลา {time} น. (อีก {formatCloseDuration(closeAt - now)})
+            {t("seller.closeTimePicker.text7", "เปิดทันทีเมื่อกด \"เปิดประมูล\" · ปิด")}{" "}{formatCloseDate(date)} {t("seller.closeTimePicker.text2", "เวลา")}{" "}{time} {t("seller.closeTimePicker.text8", "น. (อีก")}{" "}{formatCloseDuration(closeAt - now)})
           </p>
         ) : null}
         <p className="text-teal-700/80">
-          ตั้งได้ตั้งแต่ 1 ชม. ถึง 30 วันจากตอนนี้ · เวลาประเทศไทย (GMT+7) · ถ้ามีคนบิดใน 2 นาทีสุดท้าย ระบบจะต่อเวลาให้อัตโนมัติ
+          {t("seller.closeTimePicker.text9", "ตั้งได้ตั้งแต่ 1 ชม. ถึง 30 วันจากตอนนี้ · เวลาประเทศไทย (GMT+7) · ถ้ามีคนบิดใน 2 นาทีสุดท้าย ระบบจะต่อเวลาให้อัตโนมัติ")}
         </p>
       </div>
     </div>

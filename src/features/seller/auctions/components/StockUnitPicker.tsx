@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 import { isSelectableUnit } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
-import { intlLocale } from "@/lib/i18n";
+import { useTranslate } from "@/lib/i18n";
 
 const RESTOCK_PATH = "/seller/products";
 const ALL = "ALL";
@@ -32,6 +32,7 @@ type StockUnitPickerProps = {
 
 /** ขั้น 1 · เลือกการ์ดจากสต็อก (Figma S2a) [TCG-633 · FE-7] */
 export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps) {
+  const { t } = useTranslate("auction");
   const [text, setText] = useState("");
   const [q, setQ] = useState("");
   const [gameId, setGameId] = useState<string>(ALL);
@@ -58,25 +59,25 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
     return (
       <EmptyState
         icon={Lock}
-        title="ไม่มีการ์ดที่นำมาประมูลได้"
-        description="การ์ดทุกใบอยู่ในคำสั่งซื้อหรือประมูลอื่น หรือสต็อกยังว่าง"
+        title={t("seller.stockUnitPicker.title", "ไม่มีการ์ดที่นำมาประมูลได้")}
+        description={t("seller.stockUnitPicker.description", "การ์ดทุกใบอยู่ในคำสั่งซื้อหรือประมูลอื่น หรือสต็อกยังว่าง")}
         className="min-h-80 rounded-xl bg-card"
       >
         <Button variant="outline" size="sm" className="rounded-md px-2.5" nativeButton={false} render={<Link to={RESTOCK_PATH} />}>
-          เติมสต็อก
+          {t("seller.stockUnitPicker.text", "เติมสต็อก")}
         </Button>
       </EmptyState>
     );
   }
 
-  const gameItems = [{ value: ALL, label: "เกม: ทั้งหมด" }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: `เกม: ${game.name}` }))];
-  const conditionItems = [{ value: ALL, label: "สภาพ: ทั้งหมด" }, ...CARD_CONDITIONS.map((code) => ({ value: code, label: `สภาพ: ${code}` }))];
+  const gameItems = [{ value: ALL, label: t("seller.stockUnitPicker.label", "เกม: ทั้งหมด") }, ...(games.data ?? []).map((game) => ({ value: String(game.id), label: t("seller.stockUnitPicker.label2", "เกม: {name}", { name: game.name }) }))];
+  const conditionItems = [{ value: ALL, label: t("seller.stockUnitPicker.label3", "สภาพ: ทั้งหมด") }, ...CARD_CONDITIONS.map((code) => ({ value: code, label: t("seller.stockUnitPicker.label4", "สภาพ: {code}", { code }) }))];
 
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-bold text-foreground">เลือกการ์ดจากสต็อกของคุณ</h2>
-        <p className="text-xs text-muted-foreground">เลือกได้ 1 ใบต่อการประมูล · แสดงเฉพาะการ์ดที่อยู่กับคุณและยังไม่ได้ขายหรือประมูล</p>
+        <h2 className="text-sm font-bold text-foreground">{t("seller.stockUnitPicker.text2", "เลือกการ์ดจากสต็อกของคุณ")}</h2>
+        <p className="text-xs text-muted-foreground">{t("seller.stockUnitPicker.text3", "เลือกได้ 1 ใบต่อการประมูล · แสดงเฉพาะการ์ดที่อยู่กับคุณและยังไม่ได้ขายหรือประมูล")}</p>
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
@@ -84,15 +85,15 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
           <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            aria-label="ค้นหาการ์ดในสต็อก"
-            placeholder="ค้นหาชื่อการ์ด เลขการ์ด หรือรหัสใบ…"
+            aria-label={t("seller.stockUnitPicker.ariaLabel", "ค้นหาการ์ดในสต็อก")}
+            placeholder={t("seller.stockUnitPicker.placeholder", "ค้นหาชื่อการ์ด เลขการ์ด หรือรหัสใบ…")}
             value={text}
             onChange={(event) => setText(event.target.value)}
             className="h-9 rounded-lg border-input bg-background pl-9 text-sm"
           />
         </div>
-        <FilterSelect label="เกม" items={gameItems} value={gameId} onChange={setGameId} />
-        <FilterSelect label="สภาพ" items={conditionItems} value={condition} onChange={setCondition} />
+        <FilterSelect label={t("seller.stockUnitPicker.label5", "เกม")} items={gameItems} value={gameId} onChange={setGameId} />
+        <FilterSelect label={t("seller.stockUnitPicker.label6", "สภาพ")} items={conditionItems} value={condition} onChange={setCondition} />
       </div>
 
       {units.isPending ? (
@@ -102,12 +103,12 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
           ))}
         </div>
       ) : units.isError ? (
-        <p className="rounded-lg bg-red-50 px-3.5 py-3 text-xs text-destructive">โหลดการ์ดในสต็อกไม่สำเร็จ ลองใหม่อีกครั้ง</p>
+        <p className="rounded-lg bg-red-50 px-3.5 py-3 text-xs text-destructive">{t("seller.stockUnitPicker.text4", "โหลดการ์ดในสต็อกไม่สำเร็จ ลองใหม่อีกครั้ง")}</p>
       ) : items.length === 0 ? (
-        <p className="rounded-lg bg-neutral-50 px-3.5 py-6 text-center text-xs text-muted-foreground">ไม่พบการ์ดที่ตรงกับคำค้นหรือตัวกรอง</p>
+        <p className="rounded-lg bg-neutral-50 px-3.5 py-6 text-center text-xs text-muted-foreground">{t("seller.stockUnitPicker.text5", "ไม่พบการ์ดที่ตรงกับคำค้นหรือตัวกรอง")}</p>
       ) : (
         <RadioGroup
-          aria-label="การ์ดในสต็อก"
+          aria-label={t("seller.stockUnitPicker.ariaLabel2", "การ์ดในสต็อก")}
           value={value ?? ""}
           onValueChange={(next) => {
             const unit = items.find((item) => item.unitUid === next);
@@ -125,10 +126,10 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
 
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <p className="text-muted-foreground">
-          {units.data ? `แสดง ${items.length.toLocaleString(intlLocale())} จาก ${units.data.totalInStock.toLocaleString(intlLocale())} ใบในสต็อก` : null}
+          {units.data ? t("seller.stockUnitPicker.text6", "แสดง {length} จาก {totalInStock} ใบในสต็อก", { length: items.length, totalInStock: units.data.totalInStock }) : null}
         </p>
         <Link to={RESTOCK_PATH} className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
-          ไม่มีการ์ดที่ต้องการ? เติมสต็อก
+          {t("seller.stockUnitPicker.text7", "ไม่มีการ์ดที่ต้องการ? เติมสต็อก")}
           <ArrowRight aria-hidden className="size-3.5" />
         </Link>
       </div>
@@ -137,6 +138,7 @@ export function StockUnitPicker({ value, onSelect, error }: StockUnitPickerProps
 }
 
 function UnitRow({ unit, selected }: { unit: EligibleUnit; selected: boolean }) {
+  const { t } = useTranslate("auction");
   const selectable = isSelectableUnit(unit);
   const { item } = unit;
   return (
@@ -154,23 +156,25 @@ function UnitRow({ unit, selected }: { unit: EligibleUnit; selected: boolean }) 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="truncate text-sm font-semibold text-foreground">{item.card.productName}</p>
         <p className="truncate text-xs text-muted-foreground">
-          {item.cardNumber} · {item.condition} · ใบ {unit.unitLabel}
+          {item.cardNumber} · {item.condition} {t("seller.stockUnitPicker.text8", "· ใบ")}{" "}{unit.unitLabel}
         </p>
         {unit.availability === "LISTED" ? (
           <p className="w-fit rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-800">
-            วางขายในหน้าร้านอยู่ — จะถูกถอดออกจากประกาศขายเมื่อเปิดประมูล
+            {t("seller.stockUnitPicker.text9", "วางขายในหน้าร้านอยู่ — จะถูกถอดออกจากประกาศขายเมื่อเปิดประมูล")}
           </p>
         ) : null}
       </div>
       {selectable ? (
         <div className="flex shrink-0 flex-col items-end gap-0.5 text-right">
-          <p className="text-sm font-bold text-foreground tabular-nums">ตลาด {unit.marketGuide ? formatBaht(unit.marketGuide.median) : "—"}</p>
-          {unit.unitCost !== null ? <p className="text-xs text-muted-foreground tabular-nums">ทุน {formatBaht(unit.unitCost)}</p> : null}
+          <p className="text-sm font-bold text-foreground tabular-nums">{t("seller.stockUnitPicker.text10", "ตลาด")}{" "}{unit.marketGuide ? formatBaht(unit.marketGuide.median) : "—"}</p>
+          {unit.unitCost !== null ? <p className="text-xs text-muted-foreground tabular-nums">{t("seller.stockUnitPicker.text11", "ทุน")}{" "}{formatBaht(unit.unitCost)}</p> : null}
         </div>
       ) : (
         <p className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
           <Lock aria-hidden className="size-3.5" />
-          {unit.availability === "IN_AUCTION" ? "อยู่ในประมูล" : "จองในคำสั่งซื้อ"} {unit.heldBy ?? ""}
+          {unit.availability === "IN_AUCTION" ? t("seller.stockUnitPicker.text12", "อยู่ในประมูล") : t("seller.stockUnitPicker.text13", "จองในคำสั่งซื้อ")}
+          {/* แสดงเฉพาะเลขอ้างอิง (#AUC-… / #ORD-…) — ข้อความอื่นจาก BE ไม่แสดง เพราะ FE แปลจาก availability เอง [TCG-746] */}
+          {unit.heldBy?.startsWith("#") ? ` ${unit.heldBy}` : ""}
         </p>
       )}
     </label>

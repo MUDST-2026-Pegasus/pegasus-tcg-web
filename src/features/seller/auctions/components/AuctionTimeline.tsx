@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import type { TimelineStep, TimelineTone } from "../seller-auction-detail.format";
+import { useTranslate } from "@/lib/i18n";
 
 /** สีจุด: เขียว = ผ่านแล้ว · primary = ตอนนี้ · เทา = ยังไม่ถึง · แดง = ผู้ชนะไม่ชำระ / ถูกระงับ */
 const DOT: Record<TimelineTone, string> = {
@@ -22,9 +23,10 @@ const LABEL: Record<TimelineTone, string> = {
 
 /** การ์ด "ขั้นตอน" ข้างขวาของ S4 [TCG-634 · FE-8] */
 export function AuctionTimeline({ steps }: { steps: TimelineStep[] }) {
+  const { t } = useTranslate("auction");
   return (
     <Card className="w-full gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
-      <p className="text-base font-semibold text-foreground">ขั้นตอน</p>
+      <p className="text-base font-semibold text-foreground">{t("seller.auctionTimeline.text", "ขั้นตอน")}</p>
       <ol className="flex flex-col gap-3.5">
         {steps.map((step) => (
           <li key={step.id} data-tone={step.tone} className="flex items-start gap-2.5">

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { conditionAndShop, formatBaht, formatBidCount, priceLabel } from "../auction.format";
 import type { AuctionSummary } from "../auction.types";
 import { AuctionCountdown } from "./AuctionCountdown";
+import { useTranslate } from "@/lib/i18n";
 
 type AuctionCardProps = {
   auction: AuctionSummary;
@@ -34,6 +35,7 @@ export function AuctionCard({ auction, serverTime, className, preview = false }:
 }
 
 function AuctionCardBody({ auction, serverTime }: { auction: AuctionSummary; serverTime?: string }) {
+  const { t } = useTranslate("auction");
   const { item } = auction;
   return (
     <>
@@ -72,7 +74,7 @@ function AuctionCardBody({ auction, serverTime }: { auction: AuctionSummary; ser
 
       {auction.buyNowPrice !== null ? (
         <div className="flex items-center gap-1.5 rounded-[10px] bg-amber-50 px-2.5 py-1.5 text-xs leading-[15px] text-amber-800">
-          <span className="font-semibold">ซื้อทันที</span>
+          <span className="font-semibold">{t("buyer.auctionCard.text", "ซื้อทันที")}</span>
           <span className="font-bold tabular-nums">{formatBaht(auction.buyNowPrice)}</span>
         </div>
       ) : null}

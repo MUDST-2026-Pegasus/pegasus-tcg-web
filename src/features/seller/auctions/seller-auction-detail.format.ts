@@ -1,5 +1,6 @@
 import { formatAuctionShortDateTime, formatBaht } from "@/features/auction/auction.format";
 import type { AuctionBid, SellerAuctionDetail, SellerAuctionRow } from "@/features/auction/auction.types";
+import { translate } from "@/lib/i18n";
 
 /**
  * ตรรกะของหน้า S4 รายละเอียดประมูลฝั่งผู้ขาย [TCG-634 · FE-8]
@@ -42,14 +43,14 @@ export function relistPath(auctionId: number): string {
 
 /** "{สภาพ} · ใบ {รหัสใบ} · ปิด {วันเวลา} (ต่อเวลาแล้ว {n} ครั้ง)" ใต้ชื่อการ์ด */
 export function headerMeta(detail: SellerAuctionDetail): string {
-  const extended = detail.extensionCount > 0 ? ` (ต่อเวลาแล้ว ${detail.extensionCount} ครั้ง)` : "";
-  return `${detail.item.condition} · ใบ ${detail.unitLabel} · ปิด ${formatAuctionShortDateTime(detail.endsAt)}${extended}`;
+  const extended = detail.extensionCount > 0 ? translate("auction", "seller.sellerAuctionDetailFormat.text", " (ต่อเวลาแล้ว {extensionCount} ครั้ง)", { extensionCount: detail.extensionCount }) : "";
+  return translate("auction", "seller.sellerAuctionDetailFormat.text2", "{condition} · ใบ {unitLabel} · ปิด {endsAt}{extended}", { condition: detail.item.condition, unitLabel: detail.unitLabel, endsAt: formatAuctionShortDateTime(detail.endsAt), extended });
 }
 
 /** แถว "ซื้อทันที" ในการ์ดการตั้งค่า */
 export function buyNowSetting(detail: SellerAuctionDetail): string {
-  if (detail.buyNowPrice === null) return "ไม่ได้ตั้ง";
-  if (!detail.buyNowAvailable && detail.firstBidAt !== null) return `${formatBaht(detail.buyNowPrice)} · ปิดแล้ว (มีบิดแรก)`;
+  if (detail.buyNowPrice === null) return translate("auction", "seller.sellerAuctionDetailFormat.text3", "ไม่ได้ตั้ง");
+  if (!detail.buyNowAvailable && detail.firstBidAt !== null) return translate("auction", "seller.sellerAuctionDetailFormat.text4", "{buyNowPrice} · ปิดแล้ว (มีบิดแรก)", { buyNowPrice: formatBaht(detail.buyNowPrice) });
   return formatBaht(detail.buyNowPrice);
 }
 
@@ -65,33 +66,33 @@ export type TimelineTone = "done" | "current" | "pending" | "failed" | "ended";
 
 export type TimelineStep = { id: string; label: string; detail: string | null; tone: TimelineTone };
 
-const CLOSE_STEP = "ปิดประมูล → ผู้ชนะชำระใน 24 ชม.";
-const SHIP_STEP = "จัดส่งการ์ด";
-const RECEIVE_STEP = "ผู้ซื้อยืนยันรับ → รับเงิน";
+const CLOSE_STEP = () => translate("auction", "seller.sellerAuctionDetailFormat.text5", "ปิดประมูล → ผู้ชนะชำระใน 24 ชม.");
+const SHIP_STEP = () => translate("auction", "seller.sellerAuctionDetailFormat.text6", "จัดส่งการ์ด");
+const RECEIVE_STEP = () => translate("auction", "seller.sellerAuctionDetailFormat.text7", "ผู้ซื้อยืนยันรับ → รับเงิน");
 
 /** ขั้นตอนของประมูลตามสถานะ — โครงตาม Figma S4 */
 export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
   const time = (iso: string | null) => (iso ? formatAuctionShortDateTime(iso) : null);
   const live = detail.status === "LIVE";
 
-  const steps: TimelineStep[] = [{ id: "open", label: "เปิดประมูล", detail: time(detail.startedAt), tone: "done" }];
+  const steps: TimelineStep[] = [{ id: "open", label: translate("auction", "seller.sellerAuctionDetailFormat.label", "เปิดประมูล"), detail: time(detail.startedAt), tone: "done" }];
 
   if (detail.firstBidAt !== null) {
     steps.push({
       id: "first-bid",
-      label: detail.buyNowPrice !== null ? "บิดแรก — ปุ่มซื้อทันทีหายไป" : "บิดแรก",
+      label: detail.buyNowPrice !== null ? translate("auction", "seller.sellerAuctionDetailFormat.text8", "บิดแรก — ปุ่มซื้อทันทีหายไป") : translate("auction", "seller.sellerAuctionDetailFormat.text9", "บิดแรก"),
       detail: time(detail.firstBidAt),
       tone: "done",
     });
   }
 
-  const extended = detail.extensionCount > 0 ? ` · ต่อเวลา ${detail.extensionCount} ครั้ง` : "";
+  const extended = detail.extensionCount > 0 ? translate("auction", "seller.sellerAuctionDetailFormat.text10", " · ต่อเวลา {extensionCount} ครั้ง", { extensionCount: detail.extensionCount }) : "";
   // ขายด้วยซื้อทันที = ไม่ได้ประมูลจนหมดเวลา ข้ามขั้น "กำลังประมูล"
   if (!soldByBuyNow(detail)) {
     steps.push({
       id: "live",
-      label: `กำลังประมูล${extended}`,
-      detail: live ? "ตอนนี้" : null,
+      label: translate("auction", "seller.sellerAuctionDetailFormat.label2", "กำลังประมูล{extended}", { extended }),
+      detail: live ? translate("auction", "seller.sellerAuctionDetailFormat.text11", "ตอนนี้") : null,
       tone: live ? "current" : "done",
     });
   }
@@ -100,41 +101,41 @@ export function timelineSteps(detail: SellerAuctionDetail): TimelineStep[] {
     case "LIVE":
       return [
         ...steps,
-        { id: "close", label: CLOSE_STEP, detail: null, tone: "pending" },
-        { id: "ship", label: SHIP_STEP, detail: null, tone: "pending" },
-        { id: "receive", label: RECEIVE_STEP, detail: null, tone: "pending" },
+        { id: "close", label: CLOSE_STEP(), detail: null, tone: "pending" },
+        { id: "ship", label: SHIP_STEP(), detail: null, tone: "pending" },
+        { id: "receive", label: RECEIVE_STEP(), detail: null, tone: "pending" },
       ];
     case "AWAITING_PAYMENT":
       return [
         ...steps,
         {
           id: "close",
-          label: soldByBuyNow(detail) ? `ขายด้วยซื้อทันที ${formatBaht(detail.currentPrice)}` : CLOSE_STEP,
-          detail: "ตอนนี้",
+          label: soldByBuyNow(detail) ? translate("auction", "seller.sellerAuctionDetailFormat.text12", "ขายด้วยซื้อทันที {currentPrice}", { currentPrice: formatBaht(detail.currentPrice) }) : CLOSE_STEP(),
+          detail: translate("auction", "seller.sellerAuctionDetailFormat.text11", "ตอนนี้"),
           tone: "current",
         },
-        { id: "ship", label: SHIP_STEP, detail: null, tone: "pending" },
-        { id: "receive", label: RECEIVE_STEP, detail: null, tone: "pending" },
+        { id: "ship", label: SHIP_STEP(), detail: null, tone: "pending" },
+        { id: "receive", label: RECEIVE_STEP(), detail: null, tone: "pending" },
       ];
     case "SOLD":
       return [
         ...steps,
-        { id: "close", label: CLOSE_STEP, detail: time(detail.endsAt), tone: "done" },
-        { id: "ship", label: SHIP_STEP, detail: "ตอนนี้", tone: "current" },
-        { id: "receive", label: RECEIVE_STEP, detail: null, tone: "pending" },
+        { id: "close", label: CLOSE_STEP(), detail: time(detail.endsAt), tone: "done" },
+        { id: "ship", label: SHIP_STEP(), detail: translate("auction", "seller.sellerAuctionDetailFormat.text11", "ตอนนี้"), tone: "current" },
+        { id: "receive", label: RECEIVE_STEP(), detail: null, tone: "pending" },
       ];
     case "UNSOLD":
       return hadWinner(detail)
         ? [
             ...steps,
-            { id: "close", label: CLOSE_STEP, detail: time(detail.endsAt), tone: "done" },
-            { id: "unpaid", label: "ผู้ชนะไม่ชำระใน 24 ชม. → ยกเลิกคำสั่งซื้อ · การ์ดกลับเข้าสต็อก", detail: null, tone: "failed" },
+            { id: "close", label: CLOSE_STEP(), detail: time(detail.endsAt), tone: "done" },
+            { id: "unpaid", label: translate("auction", "seller.sellerAuctionDetailFormat.label3", "ผู้ชนะไม่ชำระใน 24 ชม. → ยกเลิกคำสั่งซื้อ · การ์ดกลับเข้าสต็อก"), detail: null, tone: "failed" },
           ]
-        : [...steps, { id: "no-bids", label: "ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว", detail: time(detail.endsAt), tone: "ended" }];
+        : [...steps, { id: "no-bids", label: translate("auction", "seller.sellerAuctionDetailFormat.label4", "ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว"), detail: time(detail.endsAt), tone: "ended" }];
     case "CANCELLED":
-      return [...steps, { id: "cancelled", label: "ยกเลิกประมูล", detail: null, tone: "ended" }];
+      return [...steps, { id: "cancelled", label: translate("auction", "seller.sellerAuctionDetailFormat.label5", "ยกเลิกประมูล"), detail: null, tone: "ended" }];
     case "SUSPENDED":
-      return [...steps, { id: "suspended", label: "ถูกระงับ", detail: null, tone: "failed" }];
+      return [...steps, { id: "suspended", label: translate("auction", "seller.sellerAuctionDetailFormat.label6", "ถูกระงับ"), detail: null, tone: "failed" }];
   }
 }
 
@@ -161,3 +162,22 @@ export function sellerNoticeKind(detail: SellerAuctionDetail, newBid: boolean): 
       return null;
   }
 }
+
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text", "ns": "auction", "defaultValue": " (ต่อเวลาแล้ว {extensionCount} ครั้ง)"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text2", "ns": "auction", "defaultValue": "{condition} · ใบ {unitLabel} · ปิด {endsAt}{extended}"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text3", "ns": "auction", "defaultValue": "ไม่ได้ตั้ง"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text4", "ns": "auction", "defaultValue": "{buyNowPrice} · ปิดแล้ว (มีบิดแรก)"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text5", "ns": "auction", "defaultValue": "ปิดประมูล → ผู้ชนะชำระใน 24 ชม."}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text6", "ns": "auction", "defaultValue": "จัดส่งการ์ด"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text7", "ns": "auction", "defaultValue": "ผู้ซื้อยืนยันรับ → รับเงิน"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label", "ns": "auction", "defaultValue": "เปิดประมูล"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text8", "ns": "auction", "defaultValue": "บิดแรก — ปุ่มซื้อทันทีหายไป"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text9", "ns": "auction", "defaultValue": "บิดแรก"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text10", "ns": "auction", "defaultValue": " · ต่อเวลา {extensionCount} ครั้ง"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label2", "ns": "auction", "defaultValue": "กำลังประมูล{extended}"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text11", "ns": "auction", "defaultValue": "ตอนนี้"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.text12", "ns": "auction", "defaultValue": "ขายด้วยซื้อทันที {currentPrice}"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label3", "ns": "auction", "defaultValue": "ผู้ชนะไม่ชำระใน 24 ชม. → ยกเลิกคำสั่งซื้อ · การ์ดกลับเข้าสต็อก"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label4", "ns": "auction", "defaultValue": "ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label5", "ns": "auction", "defaultValue": "ยกเลิกประมูล"}
+// @tolgee-key {"key": "seller.sellerAuctionDetailFormat.label6", "ns": "auction", "defaultValue": "ถูกระงับ"}

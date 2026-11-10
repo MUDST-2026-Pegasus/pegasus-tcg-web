@@ -9,6 +9,7 @@ import { toNumber } from "@/features/seller/products/products.format";
 
 import { closeAtMs, formatCloseDate, formatCloseDuration } from "../auction-form.schema";
 import type { AuctionFormValues } from "../auction-form.types";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmOpenAuctionDialogProps = {
   open: boolean;
@@ -22,6 +23,7 @@ type ConfirmOpenAuctionDialogProps = {
 
 /** ขั้น 3 · ยืนยันเปิดประมูล (Figma S3-A) — ต้องติ๊กรับทราบก่อนกด [TCG-633 · FE-7] */
 export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now, pending, onConfirm }: ConfirmOpenAuctionDialogProps) {
+  const { t } = useTranslate("auction");
   const [acknowledged, setAcknowledged] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
   // เปิดใหม่ทุกครั้งต้องติ๊กใหม่
@@ -36,24 +38,24 @@ export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now
   const closeAt = closeAtMs(values.closeDate, values.closeTime);
 
   const rows: [string, string][] = [
-    ["ราคาเริ่มต้น", start === null ? "—" : formatBaht(start)],
-    ["บิดขั้นต่ำครั้งละ", increment === null ? "—" : `+${formatBaht(increment)}`],
+    [t("seller.confirmOpenAuctionDialog.text", "ราคาเริ่มต้น"), start === null ? "—" : formatBaht(start)],
+    [t("seller.confirmOpenAuctionDialog.text2", "บิดขั้นต่ำครั้งละ"), increment === null ? "—" : `+${formatBaht(increment)}`],
     [
-      "ปิดประมูล",
-      closeAt === null ? "—" : `${formatCloseDate(values.closeDate)} ${values.closeTime} (อีก ${formatCloseDuration(closeAt - now)})`,
+      t("seller.confirmOpenAuctionDialog.text3", "ปิดประมูล"),
+      closeAt === null ? "—" : t("seller.confirmOpenAuctionDialog.text4", "{closeDate} {closeTime} (อีก {value})", { closeDate: formatCloseDate(values.closeDate), closeTime: values.closeTime, value: formatCloseDuration(closeAt - now) }),
     ],
-    ["ซื้อทันที", buyNow === null ? "ไม่เปิด" : `${formatBaht(buyNow)} (จนกว่าจะมีบิดแรก)`],
-    ["ค่าคอมมิชชั่น", `${ESTIMATED_COMMISSION_PERCENT}% เท่าการขายปกติ`],
+    [t("seller.confirmOpenAuctionDialog.text5", "ซื้อทันที"), buyNow === null ? t("seller.confirmOpenAuctionDialog.text6", "ไม่เปิด") : t("seller.confirmOpenAuctionDialog.text7", "{buyNow} (จนกว่าจะมีบิดแรก)", { buyNow: formatBaht(buyNow) })],
+    [t("seller.confirmOpenAuctionDialog.text8", "ค่าคอมมิชชั่น"), t("seller.confirmOpenAuctionDialog.text9", "{ESTIMATED_COMMISSION_PERCENT}% เท่าการขายปกติ", { ESTIMATED_COMMISSION_PERCENT })],
   ];
 
   return (
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="เปิดประมูลการ์ดใบนี้?"
+      title={t("seller.confirmOpenAuctionDialog.title", "เปิดประมูลการ์ดใบนี้?")}
       description={unit ? `${unit.item.card.productName} · ${unit.item.condition}` : undefined}
-      confirmLabel="เปิดประมูล"
-      cancelLabel="ย้อนกลับ"
+      confirmLabel={t("seller.confirmOpenAuctionDialog.confirmLabel", "เปิดประมูล")}
+      cancelLabel={t("seller.confirmOpenAuctionDialog.cancelLabel", "ย้อนกลับ")}
       isPending={pending}
       confirmDisabled={!acknowledged}
       onConfirm={onConfirm}
@@ -69,7 +71,7 @@ export function ConfirmOpenAuctionDialog({ open, onOpenChange, unit, values, now
 
       <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
         <Checkbox checked={acknowledged} onCheckedChange={(checked) => setAcknowledged(checked === true)} className="mt-0.5" />
-        ฉันเข้าใจว่าเมื่อมีผู้บิดแล้ว จะยกเลิกการประมูลไม่ได้
+        {t("seller.confirmOpenAuctionDialog.text10", "ฉันเข้าใจว่าเมื่อมีผู้บิดแล้ว จะยกเลิกการประมูลไม่ได้")}
       </label>
     </ConfirmDialog>
   );
