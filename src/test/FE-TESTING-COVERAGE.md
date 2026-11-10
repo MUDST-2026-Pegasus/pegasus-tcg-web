@@ -41,3 +41,47 @@ Vitest emitted pre-existing console warnings in unrelated tests (Base UI button 
 ## Known bugs / issues found
 
 - None in production behavior. Initial test runs exposed incorrect test assumptions (Thai Buddhist-calendar formatting, toast delivery, and query invalidation settling) and a forecast fixture type that was too narrow; the test setup/assertions/types were corrected without changing production code.
+
+## Istanbul follow-up review (TCG-767 coverage expansion)
+
+### Coverage gaps reviewed
+
+The supplied Istanbul baseline flagged weaker areas in cart/payment, catalog/restock, promotions, and seller returns. File-level review found these unasserted or lightly asserted paths:
+
+| Flow | Coverage gap found in targeted code | Tests added or already added on this branch |
+| --- | --- | --- |
+| Cart, checkout and payment | Payment `PaymentSteps.tsx` was at 22.22% statements / 29.82% branches / 15.38% functions / 26.31% lines before this expansion; cart quantity update needed a rendered response assertion. Existing cart grouping/totals, removal, checkout cancellation/error and promotion contract tests were already present. | Cart integration now asserts API quantity response updates the rendered quantity/subtotal. `PaymentSteps.test.tsx` covers API amount display, reference edits, upload progress/retry/error, disabled submission state and uploaded-slip preview/removal. |
+| Catalog stock and seller restock | `ListingDetailPage.tsx` was 0% covered before this expansion, including query loading, invalid id, API 404 and retryable non-404 error branches. Catalog stock caps/out-of-stock and restock success/cache refresh/422 duplicate submission had existing tests from the first expansion. | `ListingDetailPage.test.tsx` covers loading, not-found and retryable error. Existing `ProductDetailCart`, `SellerProductRestockPage` and `StockForecast` tests continue to cover stock cap/out-of-stock, successful restock refresh, insufficient-stock response, forecast values and modal states. |
+| Promotions and refunds/returns | `PromotionTermsDialog.tsx` was at 41.66% statements / 9.75% branches / 12.5% functions / 41.66% lines; `ReturnStatusCallout.tsx` and `ReturnInTransitBox.tsx` were uncovered. | `claim.format.test.ts`, `PromotionTermsDialog.test.tsx`, and `SellerReturnComponents.test.tsx` cover API contract display, claim state/error mapping, terms loading/retry/claiming/owner states, return status labels, restock choice, receipt confirmation, busy disabling and reject modal behavior. |
+
+### New test cases in this expansion
+
+- **Flow 1:** `PaymentSteps.test.tsx` checks deterministic API amount formatting, reference callback updates, upload in-progress/error/retry, disabled controls after submit and uploaded slip preview/removal. The existing CartPage and checkout suites cover multi-shop grouping/totals, quantity update/removal, cancel/error states, API promotion totals, and duplicate checkout blocking.
+- **Flow 2:** `ListingDetailPage.test.tsx` verifies loading, invalid/not-found (404), and retryable server error states. The existing seller restock and catalog tests verify stock limits/out-of-stock, refreshed listing/query data after restock, insufficient-stock errors and pending duplicate-submit prevention.
+- **Flow 3:** `claim.format.test.ts` verifies terms/value mapping, claim eligibility/error mapping and deterministic date formatting; `PromotionTermsDialog.test.tsx` covers loading/error retry, API terms display, claim callback, pending disable and owner view; `SellerReturnComponents.test.tsx` covers all seller return status callouts and receipt/reject interactions with loading guards.
+
+All added cases use mocked hooks/APIs and fixed date fixtures where time is relevant. No backend formula, production behavior, E2E, or coverage configuration was changed. Tests remain in the existing Vitest/jsdom/Testing Library setup.
+
+### Coverage comparison
+
+Baseline below is the Istanbul baseline supplied for this review. After values are from the full `pnpm test:coverage` run on this branch.
+
+| Metric | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| Statements | 62.16% | 62.52% | +0.36 pp |
+| Branches | 55.54% | 55.95% | +0.41 pp |
+| Functions | 57.90% | 58.15% | +0.25 pp |
+| Lines | 68.02% | 68.50% | +0.48 pp |
+
+### Verification update
+
+| Command | Result |
+| --- | --- |
+| Focused expansion tests | Passed: 5 files, 22 tests. |
+| `pnpm test:coverage` | Passed: 188 files, 1,317 tests. V8/Istanbul summary: statements 62.52% (27,902/44,622), branches 55.95% (24,229/43,298), functions 58.15% (3,430/5,898), lines 68.50% (18,054/26,356). |
+| `pnpm lint` | Passed: 0 errors, 1 existing warning at `EditProfileDialog.tsx:96` (`react-hooks/incompatible-library`). |
+| `pnpm build` | Passed: `tsc -b` and Vite build; 5,596 modules transformed. |
+
+## Known bugs / issues found in expansion
+
+- No production bugs were confirmed. Coverage run emits existing React Compiler, Base UI, and mocked-query warnings in unrelated tests; these did not fail the test or coverage run.
