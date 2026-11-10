@@ -29,6 +29,10 @@
       "notApplicable": "None (sealed product / accessory)"
     }
   },
+  "carriers": {
+    "thailandPostEms": "Thailand Post EMS",
+    "thailandPostRegistered": "Thailand Post Registered Mail"
+  },
   "condition": {
     "dmg": "Damaged",
     "hp": "Heavily played",
@@ -44,6 +48,9 @@
     "pickDateTime": "Select date and time",
     "pickRange": "Select date range",
     "time": "Time"
+  },
+  "dateTime": {
+    "ago": "{time} ago"
   },
   "home": {
     "eiei": "BoatDiwa"
@@ -82,6 +89,23 @@
   },
   "pagination": {
     "pageOf": "Page {page} of {total}"
+  },
+  "publicSellerReviews": {
+    "empty": "No reviews yet",
+    "loadFailed": "Failed to load reviews",
+    "loadingAria": "Loading reviews",
+    "noSellerReviews": "This account does not have store reviews yet",
+    "ratingSummary": "Average rating {average} / 5 from {count} reviews",
+    "reviewFromMyOrders": "Reviews from my orders",
+    "sellerReply": "Seller replied: {reply}",
+    "subtitle": "Buyers can review after the order is completed",
+    "title": "Store Reviews"
+  },
+  "reviewStars": {
+    "legend": "Review score",
+    "scoreOutOf": "{value} / 5 stars",
+    "starScore": "{score} stars",
+    "starsOutOf": "{rating} out of 5 stars"
   },
   "routeError": {
     "title": "There’s a problem with this page"
@@ -163,8 +187,8 @@
         "saleSlug": "Sale items",
         "search": "Search",
         "termsOfService": "Terms of Service",
-        "usersUsername": "Collection",
-        "uUsername": "Store"
+        "uUsername": "Store",
+        "usersUsername": "Collection"
       },
       "seller": {
         "auctions": "My auctions",
@@ -261,9 +285,5 @@
     "remove": "Remove {name}",
     "uploaded": "Uploaded · {size}",
     "uploading": "Uploading {name}"
-  },
-  "carriers": {
-    "thailandPostEms": "Thailand Post EMS",
-    "thailandPostRegistered": "Thailand Post Registered Mail"
   }
 }

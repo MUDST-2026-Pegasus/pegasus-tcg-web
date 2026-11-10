@@ -779,7 +779,7 @@
       "text3": "One card per auction · only cards you hold that are not sold or auctioned are shown",
       "text4": "Could not load cards in stock. Please try again",
       "text5": "No cards match the search or filters",
-      "text6": "Showing {length} of {totalInStock, plural, one {# card} other {# cards}} in stock",
+      "text6": "{totalInStock, plural, one {Showing {length} of # card in stock} other {Showing {length} of # cards in stock}}",
       "text7": "Can't find the card? Add stock",
       "text8": "· unit",
       "text9": "Listed in the shop — it will be removed from the listing when the auction opens",
