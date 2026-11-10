@@ -35,10 +35,11 @@ import { ConfirmBidDialog } from "../components/ConfirmBidDialog";
 import { ConfirmBuyNowDialog } from "../components/ConfirmBuyNowDialog";
 import { SellerNote } from "../components/SellerNote";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 /** `/auctions/:auctionId` — หน้ารายละเอียดการประมูล ตาม Figma B2 (2291:7862) + สถานะ B3/B4 [TCG-629 · TCG-630] */
 export function AuctionDetailPage() {
+  const { t } = useTranslate("auction");
   const { auctionId } = useParams<{ auctionId: string }>();
   const id = auctionId && /^\d+$/.test(auctionId) ? Number(auctionId) : null;
   const auction = useAuction(id);
@@ -47,13 +48,13 @@ export function AuctionDetailPage() {
   if (id === null || (auction.isError && auction.error instanceof ApiError && auction.error.status === 404)) {
     return (
       <div className="flex-1 space-y-4 p-8 text-center">
-        <h1 className="text-xl font-bold">ไม่พบการประมูลนี้</h1>
-        <p className="text-muted-foreground">การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง</p>
-        <Link to="/auctions" className="inline-block underline">กลับหน้ารวมการประมูล</Link>
+        <h1 className="text-xl font-bold">{t("buyer.auctionDetailPage.text", "ไม่พบการประมูลนี้")}</h1>
+        <p className="text-muted-foreground">{t("buyer.auctionDetailPage.text2", "การประมูลอาจถูกนำออก หรือ URL ไม่ถูกต้อง")}</p>
+        <Link to="/auctions" className="inline-block underline">{t("buyer.auctionDetailPage.text3", "กลับหน้ารวมการประมูล")}</Link>
       </div>
     );
   }
-  if (auction.isPending) return <DetailPageSkeleton label="กำลังโหลดการประมูล" />;
+  if (auction.isPending) return <DetailPageSkeleton label={t("buyer.auctionDetailPage.label", "กำลังโหลดการประมูล")} />;
   if (auction.isError) {
     return (
       <div className="flex-1 p-8">
@@ -70,6 +71,7 @@ function compactCount(count: number): string {
 }
 
 function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
+  const { t } = useTranslate("auction");
   const { item, seller } = auction;
   const [selectedImageId, setSelectedImageId] = useState<GalleryImage["id"] | null>(null);
   const [confirmAmount, setConfirmAmount] = useState<number | null>(null);
@@ -82,7 +84,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
   const product = useProductDetail(item.card.productSlug);
 
   const gallery: GalleryImage[] = [
-    ...auction.photoUrls.map((url, index) => ({ id: `photo-${index}`, url, alt: `${item.card.productName} รูปที่ ${index + 1}` })),
+    ...auction.photoUrls.map((url, index) => ({ id: `photo-${index}`, url, alt: t("buyer.auctionDetailPage.alt", "{productName} รูปที่ {value}", { productName: item.card.productName, value: index + 1 }) })),
     ...(item.card.officialImageUrl ? [{ id: "official", url: item.card.officialImageUrl, alt: item.card.productName }] : []),
   ];
 
@@ -95,7 +97,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
           <BreadcrumbList className="text-sm">
             <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/auctions" />}>ประมูล</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/auctions" />}>{t("buyer.auctionDetailPage.text4", "ประมูล")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>{item.gameName}</BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -112,12 +114,12 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{item.card.productName}</h1>
               <p className="mt-2 text-muted-foreground">{[item.setName, item.cardNumber].filter(Boolean).join(" · ")}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                ขายโดย{" "}
+                {t("buyer.auctionDetailPage.text5", "ขายโดย")}{" "}
                 <Link to={`/u/${encodeURIComponent(seller.username)}`} className="font-semibold text-primary hover:underline">
                   {seller.shopName}
                 </Link>
                 {seller.rating !== null ? <> <span className="text-amber-500">★</span> {seller.rating.toFixed(1)}</> : null}
-                {" · "}{compactCount(seller.soldCount)} ขาย · <span className="font-semibold text-foreground">สภาพ {item.condition} ({CONDITION_LABELS[item.condition]})</span>
+                {" · "}{compactCount(seller.soldCount)} {t("buyer.auctionDetailPage.text6", "ขาย ·")}{" "}<span className="font-semibold text-foreground">{t("buyer.auctionDetailPage.text7", "สภาพ")}{" "}{item.condition} ({CONDITION_LABELS[item.condition]})</span>
               </p>
             </div>
 

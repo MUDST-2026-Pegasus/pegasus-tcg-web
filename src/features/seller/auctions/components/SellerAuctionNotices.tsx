@@ -9,6 +9,7 @@ import { useCountdown } from "@/features/auction/useCountdown";
 
 import { relistPath, sellerNoticeKind } from "../seller-auction-detail.format";
 import { ReturnToListingButton } from "./ReturnToListingButton";
+import { useTranslate } from "@/lib/i18n";
 
 type SellerAuctionNoticesProps = {
   detail: SellerAuctionDetail;
@@ -18,6 +19,7 @@ type SellerAuctionNoticesProps = {
 
 /** แบนเนอร์แจ้งเตือนฝั่งผู้ขาย ตาม Figma S3-C [TCG-634 · FE-8] */
 export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesProps) {
+  const { t } = useTranslate("auction");
   const kind = sellerNoticeKind(detail, newBid);
   const name = detail.item.card.productName;
 
@@ -27,8 +29,8 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
       <AuctionNotice
         tone="red"
         icon={<ShieldAlert />}
-        title="แอดมินระงับประมูลนี้ — การ์ดกลับเข้าสต็อกแล้ว"
-        detail={detail.suspendReason ? `เหตุผล: ${detail.suspendReason}` : name}
+        title={t("seller.sellerAuctionNotices.title", "แอดมินระงับประมูลนี้ — การ์ดกลับเข้าสต็อกแล้ว")}
+        detail={detail.suspendReason ? t("seller.sellerAuctionNotices.text", "เหตุผล: {suspendReason}", { suspendReason: detail.suspendReason }) : name}
       />
     );
   }
@@ -39,10 +41,10 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="sky"
           icon={<Gavel />}
-          title={`มีบิดใหม่ ${formatBaht(detail.currentPrice)}`}
+          title={t("seller.sellerAuctionNotices.title2", "มีบิดใหม่ {currentPrice}", { currentPrice: formatBaht(detail.currentPrice) })}
           detail={
             <>
-              {name} · {detail.bidCount} บิด · เหลือ <Remaining target={detail.endsAt} serverTime={detail.serverTime} />
+              {name} · {detail.bidCount} {t("seller.sellerAuctionNotices.text2", "บิด · เหลือ")}{" "}<Remaining target={detail.endsAt} serverTime={detail.serverTime} />
             </>
           }
         />
@@ -52,8 +54,8 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="emerald"
           icon={<CircleCheck />}
-          title={`ขายด้วยซื้อทันที ${formatBaht(detail.currentPrice)}`}
-          detail={`${name} · ประมูลจบแล้ว รอผู้ซื้อชำระเงินก่อนจัดส่ง`}
+          title={t("seller.sellerAuctionNotices.title3", "ขายด้วยซื้อทันที {currentPrice}", { currentPrice: formatBaht(detail.currentPrice) })}
+          detail={t("seller.sellerAuctionNotices.detail", "{name} · ประมูลจบแล้ว รอผู้ซื้อชำระเงินก่อนจัดส่ง", { name })}
         />
       );
     case "AWAITING_PAYMENT":
@@ -61,14 +63,14 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="amber"
           icon={<Clock />}
-          title="ประมูลจบ — รอผู้ชนะชำระเงิน"
+          title={t("seller.sellerAuctionNotices.title4", "ประมูลจบ — รอผู้ชนะชำระเงิน")}
           detail={
             <>
               {name} · {formatBaht(detail.currentPrice)}
               {detail.paymentDueAt ? (
                 <>
                   {" "}
-                  · ครบกำหนดใน <Remaining target={detail.paymentDueAt} serverTime={detail.serverTime} />
+                  {t("seller.sellerAuctionNotices.text3", "· ครบกำหนดใน")}{" "}<Remaining target={detail.paymentDueAt} serverTime={detail.serverTime} />
                 </>
               ) : null}
             </>
@@ -80,8 +82,8 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="amber"
           icon={<UserX />}
-          title="ผู้ชนะไม่ชำระ — การ์ดกลับเข้าสต็อกแล้ว"
-          detail={`${name} · คำสั่งซื้อถูกยกเลิก · ผู้ชนะถูกบันทึกไม่ชำระ 1 ครั้ง`}
+          title={t("seller.sellerAuctionNotices.title5", "ผู้ชนะไม่ชำระ — การ์ดกลับเข้าสต็อกแล้ว")}
+          detail={t("seller.sellerAuctionNotices.detail2", "{name} · คำสั่งซื้อถูกยกเลิก · ผู้ชนะถูกบันทึกไม่ชำระ 1 ครั้ง", { name })}
           action={<BackInStockActions detail={detail} relistVariant="default" />}
         />
       );
@@ -90,7 +92,7 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="slate"
           icon={<Undo2 />}
-          title="ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว"
+          title={t("seller.sellerAuctionNotices.title6", "ไม่มีผู้บิด — การ์ดกลับเข้าสต็อกแล้ว")}
           detail={name}
           action={<BackInStockActions detail={detail} relistVariant="outline" />}
         />
@@ -100,7 +102,7 @@ export function SellerAuctionNotices({ detail, newBid }: SellerAuctionNoticesPro
         <AuctionNotice
           tone="slate"
           icon={<CircleX />}
-          title="ยกเลิกประมูลแล้ว — การ์ดกลับเข้าสต็อกแล้ว"
+          title={t("seller.sellerAuctionNotices.title7", "ยกเลิกประมูลแล้ว — การ์ดกลับเข้าสต็อกแล้ว")}
           detail={name}
           action={<BackInStockActions detail={detail} relistVariant="outline" />}
         />
@@ -126,6 +128,7 @@ function BackInStockActions({ detail, relistVariant }: { detail: SellerAuctionDe
 }
 
 function RelistButton({ auctionId, variant }: { auctionId: number; variant: "default" | "outline" }) {
+  const { t } = useTranslate("auction");
   return (
     <Button
       variant={variant}
@@ -134,7 +137,7 @@ function RelistButton({ auctionId, variant }: { auctionId: number; variant: "def
       nativeButton={false}
       render={<Link to={relistPath(auctionId)} />}
     >
-      ประมูลใหม่
+      {t("seller.sellerAuctionNotices.text4", "ประมูลใหม่")}
     </Button>
   );
 }

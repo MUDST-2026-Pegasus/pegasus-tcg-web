@@ -5,12 +5,14 @@ import { useAdminAuctions } from "@/features/auction/auction.queries";
 
 import { formatCount } from "../catalog.format";
 import { StatCard } from "./StatCard";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * ภาพรวมแพลตฟอร์ม · ตัวเลขประมูล "กำลังประมูล" / "ยอดขายจากประมูล (30 วัน)" [TCG-636 · FE-10]
  * ระหว่างโหลดหรือโหลดไม่สำเร็จไม่แสดง — ตัวเลขเดิมของหน้ายังใช้ได้ตามปกติ
  */
 export function AuctionOverviewCards() {
+  const { t } = useTranslate("auction");
   const query = useAdminAuctions();
   if (!query.data) return null;
   const { kpis } = query.data;
@@ -21,10 +23,10 @@ export function AuctionOverviewCards() {
       <Link to="/admin/auctions" className={link}>
         <StatCard
           id="auctions-live"
-          label="กำลังประมูล"
+          label={t("admin.auctionOverviewCards.label", "กำลังประมูล")}
           value={formatCount(kpis.live)}
           delta={null}
-          footnote={`จบภายใน 1 ชม. ${formatCount(kpis.endingWithinHour)}`}
+          footnote={t("admin.auctionOverviewCards.footnote", "จบภายใน 1 ชม. {endingWithinHour}", { endingWithinHour: formatCount(kpis.endingWithinHour) })}
           bars={null}
           accent="primary"
         />
@@ -32,10 +34,10 @@ export function AuctionOverviewCards() {
       <Link to="/admin/auctions" className={link}>
         <StatCard
           id="auctions-sold"
-          label="ยอดขายจากประมูล (30 วัน)"
+          label={t("admin.auctionOverviewCards.label2", "ยอดขายจากประมูล (30 วัน)")}
           value={formatBaht(kpis.soldLast30Days)}
           delta={null}
-          footnote={`รอผู้ชนะชำระ ${formatCount(kpis.awaitingPayment)}`}
+          footnote={t("admin.auctionOverviewCards.footnote2", "รอผู้ชนะชำระ {awaitingPayment}", { awaitingPayment: formatCount(kpis.awaitingPayment) })}
           bars={null}
           accent="green"
         />

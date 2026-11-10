@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { SELLER_AUCTION_TABS, formatPercentChange, hoursUntil, totalAuctionCount } from "./auctions-table.format";
 import { AuctionsTable } from "./components/AuctionsTable";
 import { CancelAuctionDialog } from "./components/CancelAuctionDialog";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 const PAGE_SIZE = 20;
 
@@ -35,6 +35,7 @@ function readPage(value: string | null): number {
  * สถานะ คำค้น และเลขหน้าอยู่ใน URL (`?status=LIVE&q=charizard&page=2`)
  */
 export function SellerAuctionsPage() {
+  const { t } = useTranslate("auction");
   const [searchParams, setSearchParams] = useSearchParams();
   const status = readStatus(searchParams.get("status"));
   const search = searchParams.get("q")?.trim() ?? "";
@@ -78,8 +79,8 @@ export function SellerAuctionsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">การประมูลของฉัน</h1>
-          <p className="text-xs text-muted-foreground">เปิดประมูลการ์ดจากสต็อกของคุณ ผู้ซื้อที่บิดสูงสุดเมื่อหมดเวลาได้การ์ดไป</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("seller.sellerAuctionsPage.text", "การประมูลของฉัน")}</h1>
+          <p className="text-xs text-muted-foreground">{t("seller.sellerAuctionsPage.text2", "เปิดประมูลการ์ดจากสต็อกของคุณ ผู้ซื้อที่บิดสูงสุดเมื่อหมดเวลาได้การ์ดไป")}</p>
         </div>
         <NewAuctionButton />
       </div>
@@ -88,17 +89,17 @@ export function SellerAuctionsPage() {
 
       <p className="flex items-start gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs leading-5 text-sky-800">
         <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
-        การ์ดที่นำมาประมูลจะถูกล็อก ไม่ขายในหน้าร้านจนกว่าประมูลจะจบ · ยกเลิกได้เฉพาะตอนยังไม่มีบิด · ไม่มีผู้บิดหรือผู้ชนะไม่ชำระ การ์ดกลับเข้าสต็อกอัตโนมัติ · ค่าคอมมิชชั่นเท่าการขายปกติ
+        {t("seller.sellerAuctionsPage.text3", "การ์ดที่นำมาประมูลจะถูกล็อก ไม่ขายในหน้าร้านจนกว่าประมูลจะจบ · ยกเลิกได้เฉพาะตอนยังไม่มีบิด · ไม่มีผู้บิดหรือผู้ชนะไม่ชำระ การ์ดกลับเข้าสต็อกอัตโนมัติ · ค่าคอมมิชชั่นเท่าการขายปกติ")}
       </p>
 
       {neverOpened ? (
-        <EmptyState icon={Gavel} title="เปิดประมูลแรกของร้านคุณ" description="เลือกการ์ดจากสต็อก ตั้งราคาเริ่มต้นและเวลา ผู้ซื้อจะบิดสู้กันเอง">
+        <EmptyState icon={Gavel} title={t("seller.sellerAuctionsPage.title", "เปิดประมูลแรกของร้านคุณ")} description={t("seller.sellerAuctionsPage.description", "เลือกการ์ดจากสต็อก ตั้งราคาเริ่มต้นและเวลา ผู้ซื้อจะบิดสู้กันเอง")}>
           <NewAuctionButton />
         </EmptyState>
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div role="tablist" aria-label="สถานะการประมูล" className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
+            <div role="tablist" aria-label={t("seller.sellerAuctionsPage.ariaLabel", "สถานะการประมูล")} className="flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
               {SELLER_AUCTION_TABS.map((tab) => {
                 const active = (status ?? null) === tab.status;
                 const count = data ? (tab.status ? data.statusCounts[tab.status] : totalAuctionCount(data.statusCounts)) : null;
@@ -123,7 +124,7 @@ export function SellerAuctionsPage() {
             <SearchBox value={search} onChange={(q) => updateParams({ q })} />
           </div>
 
-          <QueryBoundary query={auctions} loading={<ProductTableSkeleton />} errorTitle="โหลดรายการประมูลไม่สำเร็จ">
+          <QueryBoundary query={auctions} loading={<ProductTableSkeleton />} errorTitle={t("seller.sellerAuctionsPage.errorTitle", "โหลดรายการประมูลไม่สำเร็จ")}>
             {(result) => (
               <AuctionsTable
                 rows={result.page.items}
@@ -156,15 +157,17 @@ export function SellerAuctionsPage() {
 }
 
 function NewAuctionButton() {
+  const { t } = useTranslate("auction");
   return (
     <Button className="rounded-lg px-4" nativeButton={false} render={<Link to="/seller/auctions/new" />}>
-      + เปิดประมูลใหม่
+      {t("seller.sellerAuctionsPage.text4", "+ เปิดประมูลใหม่")}
     </Button>
   );
 }
 
 /** 4 การ์ดตัวเลขบนหัวหน้า S1 */
 function KpiCards({ data }: { data: SellerAuctionPage }) {
+  const { t } = useTranslate("auction");
   const { kpis } = data;
   const offset = clockOffset(data.serverTime);
   const percentTone =
@@ -172,15 +175,15 @@ function KpiCards({ data }: { data: SellerAuctionPage }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <Kpi label="กำลังประมูล" value={kpis.liveCount.toLocaleString(intlLocale())} note={`มีบิดแล้ว ${kpis.liveWithBids} รายการ`} />
+      <Kpi label={t("seller.sellerAuctionsPage.label", "กำลังประมูล")} value={kpis.liveCount.toLocaleString(intlLocale())} note={t("seller.sellerAuctionsPage.note", "มีบิดแล้ว {liveWithBids} รายการ", { liveWithBids: kpis.liveWithBids })} />
       <Kpi
-        label="รอผู้ชนะชำระเงิน"
+        label={t("seller.sellerAuctionsPage.label2", "รอผู้ชนะชำระเงิน")}
         value={kpis.awaitingPaymentCount.toLocaleString(intlLocale())}
         valueClass="text-amber-800"
-        note={kpis.nextPaymentDueAt ? `ครบกำหนดใน ${hoursUntil(kpis.nextPaymentDueAt, offset)} ชม.` : null}
+        note={kpis.nextPaymentDueAt ? t("seller.sellerAuctionsPage.text5", "ครบกำหนดใน {nextPaymentDueAt} ชม.", { nextPaymentDueAt: hoursUntil(kpis.nextPaymentDueAt, offset) }) : null}
       />
-      <Kpi label="ขายผ่านประมูล (30 วัน)" value={formatBaht(kpis.soldLast30Days)} note={`จาก ${kpis.closedLast30Days} รายการ`} />
-      <Kpi label="ราคาปิดเทียบราคาตลาด" value={formatPercentChange(kpis.closeVsMarketPercent)} valueClass={percentTone} note="เฉลี่ย 30 วันล่าสุด" />
+      <Kpi label={t("seller.sellerAuctionsPage.label3", "ขายผ่านประมูล (30 วัน)")} value={formatBaht(kpis.soldLast30Days)} note={t("seller.sellerAuctionsPage.note2", "จาก {closedLast30Days} รายการ", { closedLast30Days: kpis.closedLast30Days })} />
+      <Kpi label={t("seller.sellerAuctionsPage.label4", "ราคาปิดเทียบราคาตลาด")} value={formatPercentChange(kpis.closeVsMarketPercent)} valueClass={percentTone} note={t("seller.sellerAuctionsPage.note3", "เฉลี่ย 30 วันล่าสุด")} />
     </div>
   );
 }
@@ -197,6 +200,7 @@ function Kpi({ label, value, note, valueClass }: { label: string; value: string;
 
 /** ช่องค้นหา — ส่งค่าเมื่อหยุดพิมพ์ 300ms */
 function SearchBox({ value, onChange }: { value: string; onChange: (q: string) => void }) {
+  const { t } = useTranslate("auction");
   const [text, setText] = useState(value);
   const [synced, setSynced] = useState(value);
   // URL เปลี่ยนจากที่อื่น (กด back) → ตามค่าใหม่
@@ -217,8 +221,8 @@ function SearchBox({ value, onChange }: { value: string; onChange: (q: string) =
       <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
-        aria-label="ค้นหาการ์ด"
-        placeholder="ค้นหาการ์ด…"
+        aria-label={t("seller.sellerAuctionsPage.ariaLabel2", "ค้นหาการ์ด")}
+        placeholder={t("seller.sellerAuctionsPage.placeholder", "ค้นหาการ์ด…")}
         value={text}
         onChange={(event) => setText(event.target.value)}
         className="h-9 rounded-lg bg-card pl-9 text-sm"

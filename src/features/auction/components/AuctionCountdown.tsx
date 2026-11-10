@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 import { URGENT_THRESHOLD_MS, formatRemaining } from "../auction.format";
 import { useCountdown } from "../useCountdown";
+import { useTranslate } from "@/lib/i18n";
 
 export type CountdownTone = "normal" | "urgent" | "warning";
 
@@ -36,11 +37,14 @@ type AuctionCountdownProps = {
 export function AuctionCountdown({
   target,
   serverTime,
-  prefix = "เหลือ",
+  prefix: prefixProp,
   tone,
-  endedLabel = "หมดเวลา",
+  endedLabel: endedLabelProp,
   className,
 }: AuctionCountdownProps) {
+  const { t } = useTranslate("auction");
+  const prefix = prefixProp ?? t("buyer.auctionCountdown.text", "เหลือ");
+  const endedLabel = endedLabelProp ?? t("buyer.auctionCountdown.text2", "หมดเวลา");
   const remaining = useCountdown(target, serverTime) ?? 0;
   const resolved: CountdownTone = tone ?? (remaining < URGENT_THRESHOLD_MS ? "urgent" : "normal");
 

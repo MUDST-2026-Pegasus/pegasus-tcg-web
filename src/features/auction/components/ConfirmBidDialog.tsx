@@ -10,6 +10,7 @@ import { usePlaceBid } from "../auction.queries";
 import type { AuctionDetail, BidPlaced } from "../auction.types";
 import { AuctionNotice } from "./AuctionNotice";
 import { PriceSummary } from "./PriceSummary";
+import { useTranslate } from "@/lib/i18n";
 
 type ConfirmBidDialogProps = {
   auction: AuctionDetail;
@@ -22,6 +23,7 @@ type ConfirmBidDialogProps = {
 
 /** B3-A dialog ยืนยันการบิด (บิดแล้วถอนไม่ได้) [TCG-630 · FE-4] */
 export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: ConfirmBidDialogProps) {
+  const { t } = useTranslate("auction");
   const placeBid = usePlaceBid(auction.id);
   const [error, setError] = useState<AuctionErrorMessage | null>(null);
   // key เดียวต่อราคาที่ยืนยัน: กดซ้ำหลังเน็ตกระตุกได้ผลบิดเดิมกลับมา ไม่ใช่ "คุณนำอยู่แล้ว"
@@ -59,18 +61,18 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
     <ConfirmDialog
       open={open}
       onOpenChange={close}
-      title={`ยืนยันการบิด ${formatBaht(value)}?`}
+      title={t("buyer.confirmBidDialog.title", "ยืนยันการบิด {value}?", { value: formatBaht(value) })}
       description={`${auction.item.card.productName} · ${auction.item.condition} · ${auction.seller.shopName}`}
-      confirmLabel={`ยืนยันบิด ${formatBaht(value)}`}
+      confirmLabel={t("buyer.confirmBidDialog.confirmLabel", "ยืนยันบิด {value}", { value: formatBaht(value) })}
       isPending={placeBid.isPending}
       onConfirm={confirm}
     >
       <PriceSummary
         rows={[
-          ["ราคาบิดของคุณ", value],
-          ["ค่าจัดส่ง (ถ้าชนะ)", auction.shippingFee],
+          [t("buyer.confirmBidDialog.text", "ราคาบิดของคุณ"), value],
+          [t("buyer.confirmBidDialog.text2", "ค่าจัดส่ง (ถ้าชนะ)"), auction.shippingFee],
         ]}
-        totalLabel="ยอดที่ต้องชำระถ้าชนะ"
+        totalLabel={t("buyer.confirmBidDialog.totalLabel", "ยอดที่ต้องชำระถ้าชนะ")}
         total={value + auction.shippingFee}
       />
 
@@ -80,8 +82,8 @@ export function ConfirmBidDialog({ auction, amount, onOpenChange, onPlaced }: Co
         <AuctionNotice
           tone="amber"
           icon={<TriangleAlert />}
-          title="บิดแล้วถอนไม่ได้"
-          detail={`ถ้าชนะต้องชำระภายใน ${formatPaymentWindow(rules.paymentHours)} ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ ${rules.strikeLimit} ครั้งห้ามบิด ${rules.banDays} วัน)`}
+          title={t("buyer.confirmBidDialog.title2", "บิดแล้วถอนไม่ได้")}
+          detail={t("buyer.confirmBidDialog.detail", "ถ้าชนะต้องชำระภายใน {paymentHours} ไม่ชำระจะถูกบันทึก 1 ครั้ง (ครบ {strikeLimit} ครั้งห้ามบิด {banDays} วัน)", { paymentHours: formatPaymentWindow(rules.paymentHours), strikeLimit: rules.strikeLimit, banDays: rules.banDays })}
         />
       )}
     </ConfirmDialog>
