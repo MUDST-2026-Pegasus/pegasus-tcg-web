@@ -10,24 +10,26 @@ export const TAB_STATUS_MAP: Record<TabCategory, string[]> = {
   completed: ["REJECTED", "REFUNDED", "CLOSED"],
 };
 
-export function getTabLabel(tab: TabCategory, t: (key: string, def: string) => string = (_, def) => def): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getTabLabel(tab: TabCategory, t: (key: any, def: string, options?: any) => string = (_, def) => def): string {
   switch (tab) {
     case "action_required":
-      return t("sellerReturns.tabs.actionRequired", "ต้องดำเนินการ");
+      return t("sellerReturns.tabs.actionRequired", "ต้องดำเนินการ", { ns: "seller" });
     case "awaiting_shipment":
-      return t("sellerReturns.tabs.awaitingShipment", "รอผู้ซื้อส่งคืน");
+      return t("sellerReturns.tabs.awaitingShipment", "รอผู้ซื้อส่งคืน", { ns: "seller" });
     case "awaiting_refund":
-      return t("sellerReturns.tabs.awaitingRefund", "รอคืนเงิน");
+      return t("sellerReturns.tabs.awaitingRefund", "รอคืนเงิน", { ns: "seller" });
     case "completed":
-      return t("sellerReturns.tabs.completed", "เสร็จสิ้น");
+      return t("sellerReturns.tabs.completed", "เสร็จสิ้น", { ns: "seller" });
   }
 }
 
-export const tabLabels = (t: (key: string, def: string) => string = (_, def) => def): Record<TabCategory, string> => ({
-  action_required: t("sellerReturns.tabs.actionRequired", "ต้องดำเนินการ"),
-  awaiting_shipment: t("sellerReturns.tabs.awaitingShipment", "รอผู้ซื้อส่งคืน"),
-  awaiting_refund: t("sellerReturns.tabs.awaitingRefund", "รอคืนเงิน"),
-  completed: t("sellerReturns.tabs.completed", "เสร็จสิ้น"),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const tabLabels = (t: (key: any, def: string, options?: any) => string = (_, def) => def): Record<TabCategory, string> => ({
+  action_required: t("sellerReturns.tabs.actionRequired", "ต้องดำเนินการ", { ns: "seller" }),
+  awaiting_shipment: t("sellerReturns.tabs.awaitingShipment", "รอผู้ซื้อส่งคืน", { ns: "seller" }),
+  awaiting_refund: t("sellerReturns.tabs.awaitingRefund", "รอคืนเงิน", { ns: "seller" }),
+  completed: t("sellerReturns.tabs.completed", "เสร็จสิ้น", { ns: "seller" }),
 });
 
 /**
@@ -80,16 +82,16 @@ export function validatePartialRefundAmount(
   t: (key: any, def: string, ...args: any[]) => string = (_, def) => def
 ): { valid: boolean; error?: string } {
   if (amount === "" || amount === null || amount === undefined) {
-    return { valid: false, error: t("sellerReturns.validation.amountRequired", "กรุณาระบุยอดเงินคืน") };
+    return { valid: false, error: t("sellerReturns.validation.amountRequired", "กรุณาระบุยอดเงินคืน", { ns: "seller" }) };
   }
   const str = String(amount).trim();
   const num = parseFloat(str);
 
   if (isNaN(num)) {
-    return { valid: false, error: t("sellerReturns.validation.invalidNumber", "กรุณาระบุตัวเลขที่ถูกต้อง") };
+    return { valid: false, error: t("sellerReturns.validation.invalidNumber", "กรุณาระบุตัวเลขที่ถูกต้อง", { ns: "seller" }) };
   }
   if (num <= 0) {
-    return { valid: false, error: t("sellerReturns.validation.mustBePositive", "ยอดคืนเงินต้องมากกว่า 0 บาท") };
+    return { valid: false, error: t("sellerReturns.validation.mustBePositive", "ยอดคืนเงินต้องมากกว่า 0 บาท", { ns: "seller" }) };
   }
   if (num >= grandTotal) {
     return {
@@ -97,14 +99,14 @@ export function validatePartialRefundAmount(
       error: t(
         "sellerReturns.validation.mustBeLessThanTotal",
         "ยอดคืนเงินบางส่วนต้องน้อยกว่ายอดรวมคำสั่งซื้อ ({total} บาท)",
-        { total: grandTotal.toLocaleString(intlLocale()) }
+        { total: grandTotal.toLocaleString(intlLocale()), ns: "seller" }
       ),
     };
   }
 
   const parts = str.split(".");
   if (parts.length > 1 && parts[1].length > 2) {
-    return { valid: false, error: t("sellerReturns.validation.maxTwoDecimals", "ยอดคืนเงินต้องไม่เกิน 2 ตำแหน่งทศนิยม") };
+    return { valid: false, error: t("sellerReturns.validation.maxTwoDecimals", "ยอดคืนเงินต้องไม่เกิน 2 ตำแหน่งทศนิยม", { ns: "seller" }) };
   }
 
   return { valid: true };
