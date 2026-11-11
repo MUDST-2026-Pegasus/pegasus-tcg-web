@@ -31,7 +31,7 @@ describe("bulk percent → per-row price (rounded to baht)", () => {
     expect(priceFromPercent(99.5, 10)).toBe(90); // 89.55
   });
 
-  it("stays at least ฿1 and below the current price", () => {
+  it("stays at least THB 1.00 and below the current price", () => {
     expect(priceFromPercent(1, 50)).toBe(1);
     expect(priceFromPercent(3, 90)).toBe(1);
     expect(priceFromPercent(2, 1)).toBe(1);
@@ -52,7 +52,7 @@ describe("per-row validation", () => {
     expect(validateRow(row(1, 2600, true, 2600))).toBe("not-lower");
   });
 
-  it("flags missing and below ฿1", () => {
+  it("flags missing and below THB 1.00", () => {
     expect(validateRow(row(1, 2600, true, null))).toBe("missing");
     expect(validateRow(row(1, 2600, true, 0))).toBe("too-low");
   });

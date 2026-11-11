@@ -162,7 +162,7 @@ export function OrderRefunds({ salesOrderId }: { salesOrderId: number }) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="font-semibold text-foreground">
-                {t("buyerRefunds.refundTitle", "การคืนเงิน ฿{amount}", {
+                {t("buyerRefunds.refundTitle", "การคืนเงิน THB {amount}", {
                   amount: Number(refund.amount).toLocaleString(intlLocale(), { minimumFractionDigits: 2 }),
                 })}
               </p>

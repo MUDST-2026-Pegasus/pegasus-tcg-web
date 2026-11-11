@@ -142,11 +142,11 @@ describe("SellerOrderDetailPage", () => {
     expect(await screen.findByText("ส่วนลดร้าน · MINMIN50")).toBeInTheDocument();
     expect(screen.getByText("ส่วนลด Pegasus · PEGASUS10")).toBeInTheDocument();
     expect(screen.getByText("ลูกค้าจ่าย")).toBeInTheDocument();
-    expect(screen.getByText("คอมมิชชั่น 5% ของ ฿780")).toBeInTheDocument();
+    expect(screen.getByText("คอมมิชชั่น 5% ของ THB 780.00")).toBeInTheDocument();
     expect(screen.getByText("Pegasus ชดเชยส่วนลด")).toBeInTheDocument();
     expect(screen.getByText("ร้านได้รับ")).toBeInTheDocument();
-    expect(screen.getByText("฿786")).toBeInTheDocument();
-    expect(screen.getByText("+ ฿49.06")).toBeInTheDocument();
+    expect(screen.getByText("THB 786.00")).toBeInTheDocument();
+    expect(screen.getByText("+ THB 49.06")).toBeInTheDocument();
     expect(screen.getByText(/โค้ด Pegasus ไม่ลดรายได้ร้าน/)).toBeInTheDocument();
   });
 

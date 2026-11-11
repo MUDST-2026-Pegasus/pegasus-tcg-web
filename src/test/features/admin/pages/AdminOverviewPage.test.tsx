@@ -92,9 +92,9 @@ describe("AdminOverviewPage", () => {
     expect(screen.getByText(/สรุปผลประกอบการและกิจกรรมทั้งหมดบน Pegasus TCG/i)).toBeInTheDocument();
 
     // Stat Cards
-    expect(await screen.findByText(/฿428,500/i)).toBeInTheDocument();
+    expect(await screen.findByText(/THB 428,500.00/i)).toBeInTheDocument();
     expect(screen.getByText("6,184")).toBeInTheDocument();
-    expect(screen.getByText(/฿12,850/i)).toBeInTheDocument();
+    expect(screen.getByText(/THB 12,850.00/i)).toBeInTheDocument();
 
     // Top sellers
     expect(screen.getByText("cardmaster")).toBeInTheDocument();

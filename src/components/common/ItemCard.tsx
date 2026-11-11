@@ -20,7 +20,7 @@ export type ItemCardProps = {
   badge: string;
   /** ชื่อรายการ รองรับได้สูงสุดสองบรรทัดตาม Design System */
   title: string;
-  /** ข้อความราคา เช่น ฿2,450; Collection cards intentionally have no price. */
+  /** ข้อความราคา เช่น THB 2,450; Collection cards intentionally have no price. */
   price?: string;
   footer?: ReactNode;
   /** path ในแอปสำหรับเปิดรายละเอียดรายการ (นำทางด้วย router ไม่รีโหลดหน้า); เมื่อไม่ระบุ Card จะเป็นข้อมูลแบบไม่คลิก */

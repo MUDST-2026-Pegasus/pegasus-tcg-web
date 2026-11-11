@@ -56,9 +56,9 @@ describe("payout helpers", () => {
 describe("seller payout page", () => {
   it("shows real wallet values and submits only a valid request", async () => {
     renderPage();
-    expect(await screen.findByText("฿3,420.00")).toBeTruthy();
+    expect(await screen.findByText("THB 3,420.00")).toBeTruthy();
     expect(await screen.findByText("••••7890")).toBeTruthy();
-    expect(screen.getByText("฿5,420.00")).toBeTruthy();
+    expect(screen.getByText("THB 5,420.00")).toBeTruthy();
     expect(screen.getByRole("button", { name: "ส่งยืนยันบัญชีใหม่" }).hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "ขอถอนเงิน" }));
     const dialog = screen.getByRole("dialog", { name: "ขอถอนเงิน" });
@@ -78,7 +78,7 @@ describe("seller payout page", () => {
     expect(screen.getByText("คำขอถอน #13")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
-    expect(screen.getByText("+฿500.00")).toBeTruthy();
+    expect(screen.getByText("+THB 500.00")).toBeTruthy();
     expect(screen.getByText("แสดง 1–1 จาก 1 รายการ")).toBeTruthy();
   });
   it("keeps the payout page visible while the next wallet ledger page loads", async () => {
@@ -87,10 +87,10 @@ describe("seller payout page", () => {
       ? Promise.resolve({ ...wallet, entries: { ...wallet.entries, totalItems: 21 } })
       : new Promise<Wallet>((resolve) => { resolveNext = resolve; }));
     renderPage();
-    await screen.findByText("฿3,420.00");
+    await screen.findByText("THB 3,420.00");
     fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
     fireEvent.click(screen.getByRole("button", { name: "ถัดไป" }));
-    expect(screen.getByText("฿3,420.00")).toBeTruthy();
+    expect(screen.getByText("THB 3,420.00")).toBeTruthy();
     expect(screen.getByText("กำลังโหลดรายการ...")).toBeTruthy();
     expect(screen.queryByRole("status", { name: "กำลังโหลดข้อมูลการเงิน" })).toBeNull();
     await act(async () => resolveNext({ ...wallet, entries: { items: [], totalItems: 21 } }));
@@ -107,12 +107,12 @@ describe("seller payout page", () => {
     vi.mocked(financeApi.wallet).mockResolvedValueOnce(wallet).mockResolvedValue({ ...wallet, withdrawable: 250 });
     vi.mocked(financeApi.requestPayout).mockRejectedValue(new ApiError({ status: 409, code: "INSUFFICIENT_BALANCE", message: "Insufficient balance" }));
     renderPage();
-    await screen.findByText("฿3,420.00");
+    await screen.findByText("THB 3,420.00");
     fireEvent.click(screen.getByRole("button", { name: "ขอถอนเงิน" }));
     const dialog = screen.getByRole("dialog", { name: "ขอถอนเงิน" });
     fireEvent.change(within(dialog).getByRole("textbox", { name: "จำนวนเงินที่ต้องการถอน" }), { target: { value: "300" } });
     fireEvent.click(within(dialog).getByRole("button", { name: /ยืนยันขอถอน/ }));
-    expect(await within(dialog).findByText(/ยอดล่าสุดคือ ฿250.00/)).toBeTruthy();
+    expect(await within(dialog).findByText(/ยอดล่าสุดคือ THB 250.00/)).toBeTruthy();
     expect(within(dialog).getByRole("textbox", { name: "จำนวนเงินที่ต้องการถอน" })).toBeTruthy();
   });
   it("shows the normal page with a locked action when the payout account is missing", async () => {
@@ -135,7 +135,7 @@ describe("seller payout page", () => {
     vi.mocked(financeApi.payoutAccount).mockRejectedValue(unavailable);
     renderPage();
     expect(await screen.findByText("ยังโหลดรายการคำขอถอนเงินไม่ได้ กรุณาลองอีกครั้งเมื่อบัญชีผู้ขายได้รับการยืนยัน")).toBeTruthy();
-    expect(screen.queryByText("฿0.00")).toBeNull();
+    expect(screen.queryByText("THB 0.00")).toBeNull();
     expect(screen.queryByText("ยังไม่มีคำขอถอนเงิน")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
     expect(screen.getByText("ยังโหลดรายการเคลื่อนไหวกระเป๋าไม่ได้")).toBeTruthy();

@@ -107,8 +107,8 @@ describe("salesSummary", () => {
   it("highlights the selected month and averages per order", () => {
     const summary = salesSummary(dashboard());
     expect(summary.label).toBe("ยอดขายเดือนตุลาคม (ไม่รวมค่าส่ง)");
-    expect(summary.amount).toBe("฿24,850");
-    expect(summary.description).toBe("จาก 56 คำสั่งซื้อ · เฉลี่ย ฿444 ต่อออเดอร์");
+    expect(summary.amount).toBe("THB 24,850.00");
+    expect(summary.description).toBe("จาก 56 คำสั่งซื้อ · เฉลี่ย THB 444.00 ต่อออเดอร์");
     expect(summary.bars.map((bar) => bar.highlighted)).toEqual([false, true]);
     expect(summary.rangeStart).toBe("ก.ย. 69");
     expect(summary.rangeEnd).toBe("ต.ค. 69");
@@ -167,9 +167,9 @@ describe("statCards", () => {
   it("words listings, escrow, rating and the withdrawable balance", () => {
     expect(statCards(dashboard()).map((card) => [card.id, card.value, card.footnote])).toEqual([
       ["listings", "142", "+5 เดือนนี้"],
-      ["escrow", "฿1,850.50", "ปล่อยเมื่อผู้ซื้อยืนยันรับสินค้า"],
+      ["escrow", "THB 1,850.50", "ปล่อยเมื่อผู้ซื้อยืนยันรับสินค้า"],
       ["rating", "4.8 / 5.0", "จาก 312 รีวิว"],
-      ["withdrawable", "฿3,420", "หักยอดที่กำลังถอนแล้ว"],
+      ["withdrawable", "THB 3,420.00", "หักยอดที่กำลังถอนแล้ว"],
     ]);
   });
 
@@ -187,7 +187,7 @@ describe("recentOrders and lowStock", () => {
       id: 41,
       item: "Charizard ex · 2 ชิ้น",
       imageUrl: "https://example.com/order-item.png",
-      price: "฿1,850",
+      price: "THB 1,850.00",
       statusLabel: "รอแพ็ค",
     });
   });

@@ -33,8 +33,7 @@ export function PayoutRequestDialog({ open, onOpenChange, amount, onAmountChange
         <div className="min-w-0 space-y-2">
           <label htmlFor="payout-amount" className="text-sm font-medium">{t("payout.request.amount", "จำนวนเงินที่ต้องการถอน")}</label>
           <div className="flex min-w-0 items-center rounded-lg border-2 border-teal-600 bg-card px-4 focus-within:ring-2 focus-within:ring-teal-100">
-            {/* eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน */}
-            <span className="text-2xl font-semibold text-muted-foreground">฿</span>
+            <span className="text-2xl font-semibold text-muted-foreground">THB</span>
             <input
               id="payout-amount"
               aria-label={t("payout.request.amount", "จำนวนเงินที่ต้องการถอน")}

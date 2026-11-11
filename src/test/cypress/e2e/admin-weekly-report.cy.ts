@@ -141,10 +141,10 @@ describe('Admin weekly stock and profit report', () => {
     cy.contains('a', 'รายงานสต็อก/กำไรรายสัปดาห์').should('have.attr', 'href', ROUTE);
 
     cy.contains('p', 'กำไรสุทธิสัปดาห์นี้').parents('[data-slot="card"]').within(() => {
-      cy.contains('฿12,855');
+      cy.contains('THB 12,855.00');
     });
     cy.contains('p', 'ยอดขายรวมรายสัปดาห์').parents('[data-slot="card"]').within(() => {
-      cy.contains('฿428,500');
+      cy.contains('THB 428,500.00');
       cy.contains('+18.2%');
       cy.contains('1,470 รายการ');
     });
@@ -154,7 +154,7 @@ describe('Admin weekly stock and profit report', () => {
     });
     cy.contains('td', 'รวมทั้งหมด').parent().within(() => {
       cy.contains('7,654');
-      cy.contains('฿428,500');
+      cy.contains('THB 428,500.00');
     });
     cy.contains('td', 'Other TCG').parent().contains('1,745');
     cy.contains('td', 'One Piece').parent().next().contains('สต็อกต่ำ');
@@ -204,7 +204,7 @@ describe('Admin weekly stock and profit report', () => {
     cy.visit(`${ROUTE}?week=2026-08-03`);
 
     cy.contains('button', 'ส่งออกรายงาน').click();
-    cy.contains('5 หมวดหมู่ (ยอดขายรวม ฿428,500)').should('be.visible');
+    cy.contains('5 หมวดหมู่ (ยอดขายรวม THB 428,500.00)').should('be.visible');
     cy.screenshot('weekly-report-export-dialog');
     cy.contains('button', 'ดาวน์โหลดรายงาน').click();
     cy.contains('button', 'กำลังสร้างไฟล์').should('be.disabled');

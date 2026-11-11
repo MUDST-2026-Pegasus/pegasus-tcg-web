@@ -7,7 +7,7 @@ import type {
   ListingStatus,
   SellerListingSummary,
 } from "./products.types";
-import { numberFormat, translateError, translate } from "@/lib/i18n";
+import { translateError, translate, formatMoney } from "@/lib/i18n";
 
 /**
  * ตัวช่วยเรื่องตัวเลขที่ใช้ร่วมกันในหน้าลงขายสินค้าและหน้าเติมสต็อก
@@ -80,20 +80,14 @@ export function groupThousands(value: string): string {
   return fraction === undefined ? grouped : `${grouped}.${fraction}`;
 }
 
-/** กำไรติดลบแสดงเป็น "−฿120" แทน "฿-120" */
+/** กำไรติดลบแสดงเป็น "−THB 120.00" */
 export function formatSignedBaht(amount: number): string {
   return amount < 0 ? `−${formatBaht(-amount)}` : formatBaht(amount);
 }
 
-const bahtWithSatang = numberFormat({
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-/** แสดงสตางค์เสมอ เช่น "฿1,028.00" — ใช้ตรงที่ดีไซน์ต้องการเทียบทศนิยม */
+/** "THB 1,028.00" */
 export function formatBahtWithSatang(amount: number): string {
-  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน
-  return `฿${bahtWithSatang.format(amount)}`;
+  return formatMoney(amount);
 }
 
 /** ชื่อสถานะประกาศ — ใช้ทั้งชิปตัวกรอง badge ในตาราง และเมนูเปลี่ยนสถานะ */

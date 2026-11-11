@@ -1,5 +1,5 @@
 import type { Payout } from "@/features/finance/finance.types";
-import { intlLocale, translate } from "@/lib/i18n";
+import { intlLocale, translate, formatMoney } from "@/lib/i18n";
 
 // The seller API does not expose payout.minimum_amount yet.
 export const PAYOUT_MINIMUM = 100;
@@ -14,8 +14,7 @@ export const payoutStatuses: Record<string, { label: string; className: string }
 };
 
 export const payoutStatus = (status: string) => payoutStatuses[status] ?? { label: status, className: "bg-secondary text-slate-600" };
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน
-export const money = (value: number | string) => `฿${Number(value).toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const money = (value: number | string) => formatMoney(Number(value));
 export const formatThaiDateTime = (value: string | null | undefined) => value ? new Intl.DateTimeFormat(intlLocale(), {
   day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Bangkok",
 }).format(new Date(value)).replace(/\s+(\d{2}:\d{2})$/, " · $1") : "—";

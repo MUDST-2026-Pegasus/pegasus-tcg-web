@@ -274,7 +274,7 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
     });
   });
 
-  it("Scenario 1 & 2: admin and seller create PEGASUS10 & MINMIN50, buyer claims, cart auto-picks ฿2,980, checkouts B1 ฿3,025, pays, ships, confirms, and seller sees O1", () => {
+  it("Scenario 1 & 2: admin and seller create PEGASUS10 & MINMIN50, buyer claims, cart auto-picks THB 2,980,.00 checkouts B1 THB 3,025,.00 pays, ships, confirms, and seller sees O1", () => {
     return login("admin@example.com")
       .then(() => createPegasus10())
       .then(() => login("tcgcorner@example.com"))
@@ -297,22 +297,22 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
         cy.get('button[aria-label*="MINMIN50"]').last().click();
         cy.wait("@claimSellerCode").its("response.statusCode").should("eq", 200);
 
-        // Cart auto-picks PEGASUS10 (-฿200) and MINMIN50 (-฿50) -> ฿3,230 - ฿250 = ฿2,980
+        // Cart auto-picks PEGASUS10 (-THB 200.00) and MINMIN50 (-THB 50.00) -> THB 3,230.00 - THB 250.00 = THB 2,980.00
         cy.intercept("POST", "**/api/v1/checkout/promo-preview").as("cartPromoPreview");
         cy.visit("/cart");
         cy.wait("@cartPromoPreview");
         cy.get("body")
           .should("contain.text", "PEGASUS10")
           .and("contain.text", "MINMIN50")
-          .and("contain.text", "฿2,980");
+          .and("contain.text", "THB 2,980.00");
 
-        // Proceed to 2-store checkout -> B1 total ฿3,025 (฿2,980 + ฿45 shipping)
+        // Proceed to 2-store checkout -> B1 total THB 3,025.00 (THB 2,980.00 + THB 45.00 shipping)
         cy.contains("button", "ไปชำระเงิน").click();
         cy.url().should("include", "/checkout");
         cy.get("body")
           .should("contain.text", "PEGASUS10")
           .and("contain.text", "MINMIN50")
-          .and("contain.text", "฿3,025");
+          .and("contain.text", "THB 3,025.00");
 
         cy.intercept("POST", "**/api/v1/checkout").as("placeB1Order");
         // Stub PaymentPage's automatic payment-intent creation so mock gateway payment can settle cleanly
@@ -379,12 +379,12 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
         cy.get("main")
           .should("contain.text", "ส่วนลดร้าน · MINMIN50")
           .and("contain.text", "ส่วนลด Pegasus · PEGASUS10")
-          .and("contain.text", "฿775.94")
+          .and("contain.text", "THB 775.94")
           .and("contain.text", "Pegasus ชดเชยส่วนลด")
-          .and("contain.text", "+ ฿49.06")
-          .and("contain.text", "คอมมิชชั่น 5% ของ ฿780")
-          .and("contain.text", "− ฿39")
-          .and("contain.text", "฿786");
+          .and("contain.text", "+ THB 49.06")
+          .and("contain.text", "คอมมิชชั่น 5% ของ THB 780.00")
+          .and("contain.text", "− THB 39.00")
+          .and("contain.text", "THB 786.00");
       });
   });
 
@@ -638,7 +638,7 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
         cy.wait("@buyer2Last100Preview").then(({ response }) => {
           expect(response?.body.data.grandTotal).to.eq(3250);
         });
-        cy.get("body").should("contain.text", "฿3,250");
+        cy.get("body").should("contain.text", "THB 3,250.00");
 
         // Buyer 1 checks out and pays for LAST100 while Buyer 2 is viewing checkout
         return apiLogin("buyer@example.com")
@@ -680,8 +680,8 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
             // Buyer 2 clicks purchase and receives the PROMO_CHANGED dialog
             cy.contains("button", "สั่งซื้อและไปชำระเงิน").click();
             cy.contains('[role="dialog"]', "ยอดชำระเปลี่ยนไป").should("be.visible");
-            cy.contains('[role="dialog"]', "฿3,250").should("be.visible");
-            cy.contains('[role="dialog"]', "฿3,350").should("be.visible");
+            cy.contains('[role="dialog"]', "THB 3,250.00").should("be.visible");
+            cy.contains('[role="dialog"]', "THB 3,350.00").should("be.visible");
           });
       });
   });
@@ -799,8 +799,8 @@ describePromotionE2E("TCG-565 real promotion and ledger journeys", () => {
       )
       .then(() => apiLogin("ploy@example.com"))
       .then((ployToken) =>
-        // ploy_collects cart item #4: 2 x ฿175 (฿350) from grand_line_cards (sellerProfileId=6, shipping=฿45)
-        // With RETURN50 (-฿50), allocated discount is ฿50 across 2 units (฿25/unit), so 1 returned unit refunds ฿150.00
+        // ploy_collects cart item #4: 2 x THB 175.00 (THB 350.00) from grand_line_cards (sellerProfileId=6, shipping=THB 45.00)
+        // With RETURN50 (-THB 50.00), allocated discount is THB 50.00 across 2 units (THB 25.00/unit), so 1 returned unit refunds THB 150.00
         apiRequest<CheckoutOrderResponse>(
           ployToken,
           "POST",

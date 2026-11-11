@@ -94,18 +94,10 @@ export function dateTimeFormat(options?: Intl.DateTimeFormatOptions, localeOptio
 type DateInput = Date | number | string;
 const toDate = (value: DateInput) => (value instanceof Date ? value : new Date(value));
 
-/** "฿1,234.50" ทั้งสองภาษา — satang: false = ไม่แสดงสตางค์ ("฿1,235") */
-export function formatMoney(value: number, { satang = true, lang }: { satang?: boolean; lang?: Language } = {}): string {
-  return getNumberFormat(
-    {
-      style: "currency",
-      currency: "THB",
-      currencyDisplay: "narrowSymbol",
-      minimumFractionDigits: satang ? 2 : 0,
-      maximumFractionDigits: satang ? 2 : 0,
-    },
-    intlLocale({ lang }),
-  ).format(value);
+/** "THB 1,234.50" ทั้งสองภาษา ทุกหน้าใช้รูปแบบเดียวกัน [TCG-560] · ติดลบ = "-THB 120.00" */
+export function formatMoney(value: number, { lang }: { lang?: Language } = {}): string {
+  const amount = getNumberFormat({ minimumFractionDigits: 2, maximumFractionDigits: 2 }, intlLocale({ lang })).format(Math.abs(value));
+  return `${value < 0 ? "-" : ""}THB ${amount}`;
 }
 
 export function formatNumber(value: number, options?: Intl.NumberFormatOptions, lang?: Language): string {

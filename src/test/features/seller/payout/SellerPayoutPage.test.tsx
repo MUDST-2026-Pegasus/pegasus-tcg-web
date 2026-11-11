@@ -87,7 +87,7 @@ describe("SellerPayoutPage", () => {
 
     // Balance
     expect(await screen.findByText("ยอดถอนได้ตอนนี้")).toBeInTheDocument();
-    expect(screen.getByText("฿3,800.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,800.00")).toBeInTheDocument();
 
     // Account info
     expect(screen.getByText("สมชาย ใจดี")).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe("SellerPayoutPage", () => {
     await user.click(screen.getByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
 
     expect(await screen.findByText("รายได้จากออเดอร์")).toBeInTheDocument();
-    expect(screen.getByText("+฿1,500.00")).toBeInTheDocument();
+    expect(screen.getByText("+THB 1,500.00")).toBeInTheDocument();
   });
 
   it("shows Pegasus subsidy postings in the wallet ledger", async () => {
@@ -137,7 +137,7 @@ describe("SellerPayoutPage", () => {
     await user.click(await screen.findByRole("button", { name: "รายการเคลื่อนไหวกระเป๋า" }));
 
     expect(await screen.findByText("Pegasus ชดเชยส่วนลด")).toBeInTheDocument();
-    expect(screen.getByText("+฿49.06")).toBeInTheDocument();
+    expect(screen.getByText("+THB 49.06")).toBeInTheDocument();
   });
 
   it("opens request payout dialog and submits a withdrawal request", async () => {

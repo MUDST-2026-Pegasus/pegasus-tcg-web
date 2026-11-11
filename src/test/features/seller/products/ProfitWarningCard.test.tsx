@@ -21,11 +21,11 @@ describe("ProfitWarningCard", () => {
     );
 
     expect(screen.getByRole("status")).toHaveTextContent("Profit margin changed");
-    expect(screen.getByRole("status")).toHaveTextContent("฿600");
-    expect(screen.getByRole("status")).toHaveTextContent("฿750");
-    expect(screen.getByRole("status")).toHaveTextContent("฿400");
-    expect(screen.getByRole("status")).toHaveTextContent("฿250");
-    expect(screen.getByRole("status")).toHaveTextContent("฿1,200");
+    expect(screen.getByRole("status")).toHaveTextContent("THB 600.00");
+    expect(screen.getByRole("status")).toHaveTextContent("THB 750.00");
+    expect(screen.getByRole("status")).toHaveTextContent("THB 400.00");
+    expect(screen.getByRole("status")).toHaveTextContent("THB 250.00");
+    expect(screen.getByRole("status")).toHaveTextContent("THB 1,200.00");
     expect(screen.getByRole("button", { name: "Adjust price" })).toHaveAttribute("href", "/seller/products/101/edit?focus=price");
   });
 });

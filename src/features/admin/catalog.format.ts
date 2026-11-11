@@ -93,7 +93,7 @@ export const CARD_FINISHES: CardFinish[] = [
 
 export { CARD_FINISH_LABEL } from "@/lib/card-labels";
 import { CARD_FINISH_LABEL, CARD_EDITION_LABEL } from "@/lib/card-labels";
-import { numberFormat, translate, translateError } from "@/lib/i18n";
+import { numberFormat, translate, translateError, formatMoney } from "@/lib/i18n";
 
 export const CARD_EDITIONS: CardEdition[] = [
   "NOT_APPLICABLE",
@@ -129,20 +129,15 @@ export function variantLabel(variant: {
 }
 
 const NUMBER = numberFormat();
-const BAHT = numberFormat({
-  style: "currency",
-  currency: "THB",
-  maximumFractionDigits: 2,
-});
 
 /** 18940 → "18,940" */
 export function formatCount(value: number): string {
   return NUMBER.format(value);
 }
 
-/** 1290 → "฿1,290" */
+/** 1290 → "THB 1,290.00" */
 export function formatBaht(amount: number): string {
-  return BAHT.format(amount);
+  return formatMoney(amount);
 }
 
 /** "Charizard ex · 006/197" — เลขการ์ดช่วยแยกใบชื่อซ้ำคนละชุด */

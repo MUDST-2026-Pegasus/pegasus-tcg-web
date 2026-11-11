@@ -117,7 +117,7 @@ describe("CartPage Integration Flow", () => {
 
     expect(screen.getByText("ยอดสินค้า (3 ใบ)")).toBeInTheDocument();
     expect(screen.getByText("ค่าจัดส่ง").nextSibling).toHaveTextContent("คิดในหน้าถัดไป");
-    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿1,300");
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 1,300.00");
   });
 
   it("allows increasing and decreasing item quantity", async () => {
@@ -147,7 +147,7 @@ describe("CartPage Integration Flow", () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText("จำนวน Blue-Eyes White Dragon")).toHaveTextContent("3");
-      expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿1,800");
+      expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 1,800.00");
     });
     expect(cartApi.updateQuantity).toHaveBeenCalledWith(1, { quantity: 3 });
   });

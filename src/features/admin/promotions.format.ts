@@ -7,7 +7,7 @@ import type {
   PromotionStatus,
   RedemptionStatus,
 } from "./promotions.types";
-import { dateTimeFormat, formatNumber, intlLocale, translate } from "@/lib/i18n";
+import { dateTimeFormat, intlLocale, translate, formatMoney } from "@/lib/i18n";
 
 // @tolgee-key {"key":"admin.promotionsFormat.label","ns":"promotions","defaultValue":"ทั้งหมด"}
 // @tolgee-key {"key":"admin.promotionsFormat.label2","ns":"promotions","defaultValue":"ใช้งานอยู่"}
@@ -131,7 +131,7 @@ export const sellerPauseReasons = () => [
 ];
 
 export function formatBaht(amount: number | null | undefined): string {
-  return formatNumber(Number(amount ?? 0), { style: "currency", currency: "THB", currencyDisplay: "narrowSymbol", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  return formatMoney(Number(amount ?? 0));
 }
 
 // ปีตาม Figma เป็น ค.ศ. ("1 พ.ย. 2026") จึงบังคับปฏิทินเกรกอเรียน
@@ -191,7 +191,7 @@ export function periodHint(promotion: AdminPromotion, now: number): string {
 
 type DiscountFields = Pick<AdminPromotionInput, "discountType" | "discountValue" | "maxDiscount">;
 
-/** "ลด 10%" / "ลด ฿150" / "ส่งฟรี" */
+/** "ลด 10%" / "ลด THB 150.00" / "ส่งฟรี" */
 export function discountLabel(promotion: DiscountFields): string {
   if (promotion.discountType === "FREE_SHIPPING") return translate("promotions", "admin.promotionsFormat.discountLabel", "ส่งฟรี");
   if (promotion.discountType === "PERCENT") return translate("promotions", "admin.promotionsFormat.discountLabel2", "ลด {discountValue}%", { discountValue: promotion.discountValue });
@@ -288,7 +288,7 @@ export function budgetLabel(input: DiscountFields & Pick<AdminPromotionInput, "u
 
 /**
  * ที่มาของงบสูงสุด ใช้ตัวเลขชุดเดียวกับ `campaignBudget` เสมอ
- * สั้น "500 × ฿200" ใน modal ยืนยัน · ยาว "500 สิทธิ์ × ส่วนลดสูงสุด ฿200" ในการ์ดข้างฟอร์ม
+ * สั้น "500 × THB 200.00" ใน modal ยืนยัน · ยาว "500 สิทธิ์ × ส่วนลดสูงสุด THB 200.00" ในการ์ดข้างฟอร์ม
  */
 export function budgetFormula(
   input: DiscountFields & Pick<AdminPromotionInput, "usageLimitTotal">,
@@ -300,7 +300,7 @@ export function budgetFormula(
   return verbose ? translate("promotions", "admin.promotionsFormat.budgetFormula", "{limit} สิทธิ์ × ส่วนลดสูงสุด {amount}", { limit, amount }) : `${limit} × ${amount}`;
 }
 
-/** ตะกร้า ฿2,400 ตามการ์ดใน Figma PRM-A2 */
+/** ตะกร้า THB 2,400 ตามการ์ดใน Figma PRM-A2 */
 export function sampleCalculation(input: DiscountFields) {
   const subtotal = SAMPLE_SUBTOTAL;
   let discount: number;
@@ -393,7 +393,7 @@ export const FIELD_LABEL: Record<keyof AdminPromotionInput, string> = {
 const DISCOUNT_TYPE_LABEL = { get PERCENT() { return translate("promotions", "admin.promotionsFormat.PERCENT", "เปอร์เซ็นต์"); }, get FIXED() { return translate("promotions", "admin.promotionsFormat.FIXED", "จำนวนเงิน"); }, get FREE_SHIPPING() { return translate("promotions", "admin.promotionsFormat.discountLabel", "ส่งฟรี"); } } as const;
 const SCOPE_TYPE_LABEL = { get ALL() { return translate("promotions", "admin.promotionsFormat.scopeLabel2", "ทุกเกม"); }, get GAME() { return translate("promotions", "admin.promotionsFormat.scopeLabel3", "เลือกเกม"); }, get CATEGORY() { return translate("promotions", "admin.promotionsFormat.scopeLabel4", "เลือกหมวดหมู่"); } } as const;
 
-/** ค่าหนึ่งฟิลด์ในรูปที่คนอ่าน — "30 พ.ย. 2026" แทน ISO, "฿200" แทน 200 */
+/** ค่าหนึ่งฟิลด์ในรูปที่คนอ่าน — "30 พ.ย. 2026" แทน ISO, "THB 200.00" แทน 200 */
 export function formatFieldValue(key: keyof AdminPromotionInput, input: AdminPromotionInput, names: ScopeNames): string {
   const value = input[key];
   if (value == null || value === "") {

@@ -207,14 +207,14 @@ describe("payment, timeline and profit", () => {
     expect(rows("SUCCEEDED", "2026-10-13T03:00:00Z")).toEqual([
       ["ช่องทาง", "โอนผ่านธนาคาร"],
       ["สถานะ", "ชำระสำเร็จ"],
-      ["ยอดที่ชำระ (ทั้งคำสั่งซื้อ)", "฿3,300"],
+      ["ยอดที่ชำระ (ทั้งคำสั่งซื้อ)", "THB 3,300.00"],
       ["เวลาที่ชำระ", "13 ต.ค. 2569 10:00"],
     ]);
     // รายการถูกสร้างตั้งแต่ผู้ซื้อเปิดหน้าโอนเงิน — ยังไม่มีเงินเข้า
     expect(rows("PENDING")).toEqual([
       ["ช่องทาง", "โอนผ่านธนาคาร"],
       ["สถานะ", "รอชำระ"],
-      ["ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)", "฿3,300"],
+      ["ยอดที่ต้องชำระ (ทั้งคำสั่งซื้อ)", "THB 3,300.00"],
     ]);
     // ยกเลิกก่อนจ่าย ไม่มีเงินเข้า จึงไม่มียอดและเวลาที่ชำระ
     expect(rows("CANCELLED")).toEqual([
@@ -343,11 +343,11 @@ describe("payment, timeline and profit", () => {
   it("takes commission and the frozen cost off the total", () => {
     expect(profitSummary(detail())).toEqual({
       rows: [
-        { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: "฿1,850" },
-        { id: "commission", label: "− ค่าคอมมิชชั่น", value: "฿92.50" },
-        { id: "cost", label: "− ต้นทุนสินค้า", value: "฿980" },
+        { id: "sales", label: "ยอดขาย (รวมค่าส่ง)", value: "THB 1,850.00" },
+        { id: "commission", label: "− ค่าคอมมิชชั่น", value: "THB 92.50" },
+        { id: "cost", label: "− ต้นทุนสินค้า", value: "THB 980.00" },
       ],
-      net: "฿777.50",
+      net: "THB 777.50",
     });
     expect(profitSummary(detail({ status: "CANCELLED" }))).toBeNull();
   });
@@ -363,7 +363,7 @@ describe("payment, timeline and profit", () => {
       ],
     }));
     expect(summary?.rows).toEqual([
-      { id: "cost", label: "− ต้นทุนสินค้า", value: "฿980" },
+      { id: "cost", label: "− ต้นทุนสินค้า", value: "THB 980.00" },
     ]);
     expect(summary?.rows.some((row) => row.id === "sales")).toBe(false);
   });
@@ -372,11 +372,11 @@ describe("payment, timeline and profit", () => {
     expect(monthlySummary({ revenue: 26000, cost: 16420, commission: 1242.5, net: 8337.5 })).toMatchObject({
       rows: [
         // แดชบอร์ดแสดงยอดเดียวกันแบบไม่รวมค่าส่ง ป้ายต้องบอกว่ายอดนี้รวม
-        { label: "ยอดขาย (รวมค่าส่ง)", value: "฿26,000" },
-        { value: "− ฿16,420" },
-        { value: "− ฿1,242.50" },
+        { label: "ยอดขาย (รวมค่าส่ง)", value: "THB 26,000.00" },
+        { value: "− THB 16,420.00" },
+        { value: "− THB 1,242.50" },
       ],
-      netValue: "฿8,337.50",
+      netValue: "THB 8,337.50",
     });
   });
 });

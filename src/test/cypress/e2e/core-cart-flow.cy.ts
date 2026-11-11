@@ -129,7 +129,7 @@ describe('Core Shopping Cart Flow', () => {
     // Verify summary: 2 + 1 cards for 1300; shipping is worked out at checkout
     cy.contains('ยอดสินค้า (3 ใบ)').should('be.visible');
     cy.contains('คิดในหน้าถัดไป').should('be.visible');
-    cy.get('[aria-label="ยอดรวม"]').should('contain.text', '฿1,300');
+    cy.get('[aria-label="ยอดรวม"]').should('contain.text', 'THB 1,300.00');
 
     // Checkout button should be enabled
     cy.contains('button', 'ไปชำระเงิน (3)').should('not.be.disabled');
@@ -207,6 +207,6 @@ describe('Core Shopping Cart Flow', () => {
     cy.contains('Dark Magician').should('not.exist');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
     cy.contains('ยอดสินค้า (2 ใบ)').should('be.visible');
-    cy.get('[aria-label="ยอดรวม"]').should('contain.text', '฿1,000');
+    cy.get('[aria-label="ยอดรวม"]').should('contain.text', 'THB 1,000.00');
   });
 });
