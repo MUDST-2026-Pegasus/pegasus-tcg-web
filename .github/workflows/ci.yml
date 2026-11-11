@@ -62,12 +62,12 @@ jobs:
         run: pnpm lint --cache --cache-strategy content --cache-location node_modules/.cache/eslint/
 
       # i18n [TCG-549]: warning ของ extractor ขึ้นเป็น annotation, key ที่โค้ดใช้ต้อง pull เข้า JSON แล้ว,
-      # en ที่ขาดเป็น warning (I18N_STRICT=1 ใน I18N-21 = fail) — ไม่ต่อ Tolgee ไม่ใช้ API key
+      # en ที่ขาดเป็น warning (--strict ตั้งแต่ TCG-561 = fail) — ไม่ต่อ Tolgee ไม่ใช้ API key
       - name: i18n extract check
         run: pnpm i18n:extract-check
 
       - name: i18n check
-        run: pnpm i18n:check
+        run: pnpm i18n:check --strict
 
       - name: Type check
         run: pnpm exec tsc -b --noEmit
