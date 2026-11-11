@@ -46,7 +46,7 @@ export function AddressCard({
         </CardTitle>
         {address.defaultShipping && (
           <CardAction>
-            <Badge>{t("account.address.defaultBadge", "DEFAULT")}</Badge>
+            <Badge>{t("account.address.defaultBadge", "ค่าเริ่มต้น")}</Badge>
           </CardAction>
         )}
       </CardHeader>
@@ -69,7 +69,7 @@ export function AddressCard({
       <CardFooter className="justify-between gap-3">
         <div className="flex gap-1">
           <Button variant="link" size="sm" onClick={() => onEdit(address)}>
-            <Pencil data-icon="inline-start" /> {t("account.address.edit", "Edit")}
+            <Pencil data-icon="inline-start" /> {t("account.address.edit", "แก้ไข")}
           </Button>
           <Separator orientation="vertical" />
           <Button
@@ -77,7 +77,7 @@ export function AddressCard({
             size="sm"
             onClick={() => onDelete(address)}
           >
-            <Trash2 data-icon="inline-start" /> {t("account.address.delete", "Delete")}
+            <Trash2 data-icon="inline-start" /> {t("account.address.delete", "ลบ")}
           </Button>
         </div>
         {!address.defaultShipping && (
@@ -88,7 +88,7 @@ export function AddressCard({
             onClick={() => onSetDefault(address)}
           >
             {isSettingDefault && <Spinner data-icon="inline-start" />}
-            {t("account.address.setDefault", "Set as Default")}
+            {t("account.address.setDefault", "ตั้งเป็นค่าเริ่มต้น")}
           </Button>
         )}
       </CardFooter>

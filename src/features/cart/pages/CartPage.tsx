@@ -510,7 +510,7 @@ export function CartPage() {
         open={priceDialogOpen}
         items={saleEndedItems.map((item) => ({
           id: item.id,
-          name: item.productName || t("cart.common.listingFallback", "Listing #{id}", { id: item.listingId }),
+          name: item.productName || t("cart.common.listingFallback", "ประกาศ #{id}", { id: item.listingId }),
           from: item.unitPriceAtAdd,
           to: item.currentPrice,
         }))}

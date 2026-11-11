@@ -179,7 +179,7 @@ function SectionHeader({
           nativeButton={false}
           render={<Link to={actionHref} />}
         >
-          {actionLabel ?? t("home.sections.viewAll", "View All")}
+          {actionLabel ?? t("home.sections.viewAll", "ดูทั้งหมด")}
         </Button>
       ) : null}
     </div>
@@ -343,7 +343,7 @@ function NewReleases({ products }: { products: HomeProduct[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="new-releases-title">
-          <SectionHeader title={t("home.sections.newReleases", "New Releases")} actionHref="/search?sort=newest" />
+          <SectionHeader title={t("home.sections.newReleases", "มาใหม่")} actionHref="/search?sort=newest" />
         </div>
         <div className="mt-[18px] grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-[repeat(5,225.347px)]">
           {products.map((product) => (
@@ -364,7 +364,7 @@ function BrowseByGame({ games }: { games: GameCategory[] }) {
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="browse-by-game-title">
-          <SectionHeader title={t("home.sections.shopByGame", "Shop by Game")} actionHref="/search" />
+          <SectionHeader title={t("home.sections.shopByGame", "ช้อปตามเกม")} actionHref="/search" />
         </div>
         <div className="-mx-1 mt-[14px] -mb-1 flex gap-4 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {games.map((game) => (
@@ -468,7 +468,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title={t("home.sections.featured", "Featured")} />
+          <SectionHeader title={t("home.sections.featured", "แนะนำ")} />
         </div>
         <Carousel
           setApi={setApi}
@@ -539,8 +539,8 @@ function ExploreGrid({ products }: { products: HomeProduct[] }) {
       <div className="mx-auto max-w-[1216px]">
         <div id="explore-title">
           <SectionHeader
-            title={t("home.sections.explore", "More to Explore")}
-            actionLabel={t("home.sections.more", "more")}
+            title={t("home.sections.explore", "สำรวจเพิ่มเติม")}
+            actionLabel={t("home.sections.more", "เพิ่มเติม")}
             actionHref="/search"
           />
         </div>
@@ -596,12 +596,12 @@ function HeroSection() {
   // ข้อความของสไลด์ตั้งต้นแปลที่นี่ (ค่าคงที่ใน home.mappers แปลเองไม่ได้)
   const fallback = {
     ...FALLBACK_HERO_SLIDE,
-    eyebrow: t("home.hero.fallback.eyebrow", "NEW FROM PEGASUS"),
-    title: t("home.hero.fallback.title", "FRESH CARDS.\nREADY TO PLAY."),
-    description: t("home.hero.fallback.description", "Discover the newest singles and sealed releases from verified sellers."),
+    eyebrow: t("home.hero.fallback.eyebrow", "ใหม่จาก PEGASUS"),
+    title: t("home.hero.fallback.title", "การ์ดใหม่\nพร้อมเล่น"),
+    description: t("home.hero.fallback.description", "พบกับการ์ดใบเดี่ยวและสินค้าซีลใหม่ล่าสุดจากผู้ขายที่ยืนยันตัวตนแล้ว"),
     imageAlt: t("home.hero.fallback.imageAlt", "การ์ดสะสม Pegasus รุ่นใหม่จัดแสดงบนโต๊ะ"),
-    primaryAction: { label: t("home.hero.fallback.primary", "Shop New Releases"), href: "/search?sort=newest" },
-    secondaryAction: { label: t("home.hero.fallback.secondary", "Explore Cards"), href: "/search" },
+    primaryAction: { label: t("home.hero.fallback.primary", "ช้อปสินค้าใหม่"), href: "/search?sort=newest" },
+    secondaryAction: { label: t("home.hero.fallback.secondary", "สำรวจการ์ด"), href: "/search" },
   };
   return <HeroCarousel slides={data?.length ? data : [fallback]} />;
 }
@@ -637,7 +637,7 @@ function NewReleasesSection() {
   const query = useNewReleases();
 
   if (query.isPending) return <ProductGridSkeleton />;
-  if (query.isError) return <SectionError title={t("home.sections.newReleases", "New Releases")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.newReleases", "มาใหม่")} query={query} />;
   if (query.data.length === 0) return null;
   return <NewReleases products={query.data} />;
 }
@@ -647,7 +647,7 @@ function GamesSection() {
   const query = useGames();
 
   if (query.isPending) return <GamesSkeleton />;
-  if (query.isError) return <SectionError title={t("home.sections.shopByGame", "Shop by Game")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.shopByGame", "ช้อปตามเกม")} query={query} />;
   if (query.data.length === 0) return null;
   return <BrowseByGame games={query.data} />;
 }
@@ -686,10 +686,10 @@ function TrendingSection() {
   const query = useTrending();
 
   if (query.isPending) return <ProductRailSkeleton />;
-  if (query.isError) return <SectionError title={t("home.sections.trending", "Trending Now")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.trending", "กำลังมาแรง")} query={query} />;
   if (query.data.length === 0) return null;
   return (
-    <ProductRail title={t("home.sections.trending", "Trending Now")} actionHref="/search" products={query.data} />
+    <ProductRail title={t("home.sections.trending", "กำลังมาแรง")} actionHref="/search" products={query.data} />
   );
 }
 
@@ -698,7 +698,7 @@ function FeaturedSection() {
   const query = useFeaturedCategories();
 
   if (query.isPending) return <FeaturedSkeleton />;
-  if (query.isError) return <SectionError title={t("home.sections.featured", "Featured")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.featured", "แนะนำ")} query={query} />;
   if (query.data.length === 0) return null;
   return <FeaturedCategories categories={query.data} />;
 }
@@ -708,13 +708,13 @@ function PegasusPicksSection() {
   const query = usePegasusPicks();
 
   if (query.isPending) return <ProductRailSkeleton description />;
-  if (query.isError) return <SectionError title={t("home.sections.pegasusPicks", "Pegasus Picks")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.pegasusPicks", "Pegasus คัดให้")} query={query} />;
   if (query.data.length === 0) return null;
   return (
     <ProductRail
-      title={t("home.sections.pegasusPicks", "Pegasus Picks")}
-      description={t("home.picks.description", "Curated, verified, and shipped by Pegasus.")}
-      actionLabel={t("home.picks.action", "Shop Pegasus")}
+      title={t("home.sections.pegasusPicks", "Pegasus คัดให้")}
+      description={t("home.picks.description", "คัดสรร ตรวจสอบ และจัดส่งโดย Pegasus")}
+      actionLabel={t("home.picks.action", "ช้อปกับ Pegasus")}
       actionHref={`/u/${encodeURIComponent(env.pegasusStoreUsername)}`}
       products={query.data}
     />
@@ -726,7 +726,7 @@ function ExploreSection() {
   const query = useExploreMore();
 
   if (query.isPending) return <ProductGridSkeleton explore />;
-  if (query.isError) return <SectionError title={t("home.sections.explore", "More to Explore")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.explore", "สำรวจเพิ่มเติม")} query={query} />;
   if (query.data.length === 0) return null;
   return <ExploreGrid products={query.data} />;
 }

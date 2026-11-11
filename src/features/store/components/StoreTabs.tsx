@@ -23,7 +23,7 @@ export function StoreTabs({
   const { t } = useTranslate("buyer");
   return (
     <TabsList
-      aria-label={t("store.tabs", "Store tabs")}
+      aria-label={t("store.tabs", "แท็บร้านค้า")}
       className="flex h-auto! w-full items-center justify-start gap-6 sm:gap-8 rounded-none border-b border-border bg-transparent p-0 overflow-x-auto"
     >
       <TabsTrigger

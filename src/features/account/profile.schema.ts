@@ -24,11 +24,11 @@ const buildEditProfileSchema = (m: ProfileMessages) =>
 export function useEditProfileSchema() {
   const { t } = useTranslate("buyer");
   return buildEditProfileSchema({
-    nameBlank: t("account.profile.validation.nameBlank", "Name must not be blank"),
-    nameMax: t("account.profile.validation.nameMax", "Name must be at most 100 characters"),
-    phoneMax: t("account.profile.validation.phoneMax", "Phone number must be at most 20 characters"),
-    phoneInvalid: t("account.profile.validation.phoneInvalid", "Enter a valid phone number"),
-    bioMax: t("account.profile.validation.bioMax", "Bio must be at most 1000 characters"),
+    nameBlank: t("account.profile.validation.nameBlank", "กรุณากรอกชื่อ"),
+    nameMax: t("account.profile.validation.nameMax", "ชื่อต้องไม่เกิน 100 ตัวอักษร"),
+    phoneMax: t("account.profile.validation.phoneMax", "เบอร์โทรศัพท์ต้องไม่เกิน 20 ตัวอักษร"),
+    phoneInvalid: t("account.profile.validation.phoneInvalid", "กรอกเบอร์โทรศัพท์ให้ถูกต้อง"),
+    bioMax: t("account.profile.validation.bioMax", "คำแนะนำตัวต้องไม่เกิน 1000 ตัวอักษร"),
   });
 }
 

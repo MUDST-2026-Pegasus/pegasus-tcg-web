@@ -100,9 +100,9 @@ export function TrustStrip() {
   const { t } = useTranslate("buyer");
   return (
     <div className="grid grid-cols-3 divide-x rounded-2xl border bg-card px-2 py-4 text-center">
-      <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.shipping", "Tracked shipping")}</p></div>
-      <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.protection", "Buyer protection")}</p></div>
-      <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.verified", "Verified sellers")}</p></div>
+      <div className="px-2"><Truck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.shipping", "จัดส่งแบบมีเลขพัสดุ")}</p></div>
+      <div className="px-2"><ShieldCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.protection", "คุ้มครองผู้ซื้อ")}</p></div>
+      <div className="px-2"><BadgeCheck className="mx-auto mb-2 size-5 text-primary" /><p className="text-xs font-semibold">{t("product.trust.verified", "ผู้ขายที่ยืนยันตัวตนแล้ว")}</p></div>
     </div>
   );
 }
@@ -118,16 +118,16 @@ export function CardAttributesCard({ product }: { product: CatalogProduct }) {
     return typeof value === "string" || typeof value === "number" ? String(value) : "—";
   };
   const rows = [
-    [t("product.attr.cardNumber", "Card number"), product.cardNumber || "—"],
-    [t("product.attr.rarity", "Rarity"), product.rarityCode || "—"],
-    [t("product.attr.cardType", "Card type"), displayAttribute("card_type")],
-    [t("product.attr.stage", "Stage"), displayAttribute("stage")],
+    [t("product.attr.cardNumber", "หมายเลขการ์ด"), product.cardNumber || "—"],
+    [t("product.attr.rarity", "ความหายาก"), product.rarityCode || "—"],
+    [t("product.attr.cardType", "ประเภทการ์ด"), displayAttribute("card_type")],
+    [t("product.attr.stage", "ระดับวิวัฒนาการ"), displayAttribute("stage")],
     ["HP", displayAttribute("hp")],
-    [t("product.attr.artist", "Artist"), displayAttribute("artist")],
+    [t("product.attr.artist", "ผู้วาดภาพ"), displayAttribute("artist")],
   ];
   return (
     <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />{t("product.attr.title", "Card attributes")}</h2>
+      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><Sparkles className="size-5 text-primary" />{t("product.attr.title", "คุณสมบัติการ์ด")}</h2>
       <dl className="grid grid-cols-2 gap-x-8 gap-y-5 text-sm">
         {rows.map(([label, value]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="mt-1 font-semibold break-words">{value}</dd></div>)}
       </dl>
@@ -143,7 +143,7 @@ export function CardEffectsCard({ productId, title }: { productId: number; title
   const effects = effectsQuery.data ?? [];
   return (
     <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none"><CardContent className="p-6 sm:p-7">
-      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />{title ?? t("product.effect.title", "Abilities & Attacks")}</h2>
+      <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold"><PackageCheck className="size-5 text-primary" />{title ?? t("product.effect.title", "ความสามารถและท่าโจมตี")}</h2>
       {effectsQuery.isPending ? (
         <div role="status" aria-busy="true" aria-label={t("product.effect.loading", "กำลังโหลดความสามารถการ์ด")}><TextLinesSkeleton lines={4} /></div>
       ) : effectsQuery.isError ? (
@@ -155,7 +155,7 @@ export function CardEffectsCard({ productId, title }: { productId: number; title
           {effects.map((effect, index) => (
             <div key={`${effect.effectType}-${effect.displayOrder}-${index}`} className="py-4 first:pt-0 last:pb-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{effect.effectType === "ABILITY" ? t("product.effect.ability", "Ability") : effect.effectType === "ATTACK" ? t("product.effect.attack", "Attack") : t("product.effect.rule", "Rule")}</Badge>
+                <Badge variant="secondary">{effect.effectType === "ABILITY" ? t("product.effect.ability", "ความสามารถ") : effect.effectType === "ATTACK" ? t("product.effect.attack", "ท่าโจมตี") : t("product.effect.rule", "กฎ")}</Badge>
                 <h3 className="font-semibold">{effect.name}</h3>
                 {effect.damage !== null && <strong className="ml-auto text-lg">{effect.damage}</strong>}
               </div>

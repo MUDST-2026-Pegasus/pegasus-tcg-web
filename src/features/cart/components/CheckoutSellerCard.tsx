@@ -72,7 +72,7 @@ export function CheckoutSellerCard({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-medium leading-snug">
-              {item.productName || t("cart.common.listingFallback", "Listing #{id}", { id: item.listingId })}
+              {item.productName || t("cart.common.listingFallback", "ประกาศ #{id}", { id: item.listingId })}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">
               {[item.variantLabel, item.condition, `×${item.quantity}`].filter(Boolean).join(" · ")}

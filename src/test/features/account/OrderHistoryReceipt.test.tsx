@@ -57,16 +57,16 @@ it("confirms shipped seller orders through the parent order and updates the dial
   const user = userEvent.setup();
 
   renderWithProviders(<OrderHistoryPage />, { route: "/account/orders" });
-  await user.click(screen.getByRole("button", { name: "View Details" }));
-  await user.click(screen.getByRole("button", { name: "Confirm receipt" }));
-  expect(screen.getByRole("alertdialog", { name: "Confirm receipt?" })).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "ดูรายละเอียด" }));
+  await user.click(screen.getByRole("button", { name: "ยืนยันรับสินค้า" }));
+  expect(screen.getByRole("alertdialog", { name: "ยืนยันรับสินค้า?" })).toBeInTheDocument();
   expect(ordersApi.confirmReceived).not.toHaveBeenCalled();
-  await user.click(screen.getByRole("button", { name: "Confirm receipt" }));
+  await user.click(screen.getByRole("button", { name: "ยืนยันรับสินค้า" }));
 
   await waitFor(() => expect(ordersApi.confirmReceived).toHaveBeenCalledWith(12));
   expect(nativeConfirm).not.toHaveBeenCalled();
-  await waitFor(() => expect(screen.queryByRole("button", { name: "Confirm receipt" })).not.toBeInTheDocument());
-  expect(screen.getByText(/Package Status:\s*(Completed|COMPLETED)/i)).toBeInTheDocument();
+  await waitFor(() => expect(screen.queryByRole("button", { name: "ยืนยันรับสินค้า" })).not.toBeInTheDocument());
+  expect(screen.getByText(/สถานะพัสดุ:\s*สำเร็จ/)).toBeInTheDocument();
 });
 
 it("does not offer receipt confirmation before a seller ships", async () => {
@@ -77,7 +77,7 @@ it("does not offer receipt confirmation before a seller ships", async () => {
   const user = userEvent.setup();
 
   renderWithProviders(<OrderHistoryPage />, { route: "/account/orders" });
-  await user.click(screen.getByRole("button", { name: "View Details" }));
+  await user.click(screen.getByRole("button", { name: "ดูรายละเอียด" }));
 
-  expect(screen.queryByRole("button", { name: "Confirm receipt" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "ยืนยันรับสินค้า" })).not.toBeInTheDocument();
 });

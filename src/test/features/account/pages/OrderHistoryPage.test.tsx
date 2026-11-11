@@ -140,8 +140,8 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     // Unpaid order and a paid one the seller has not shipped yet
-    expect(screen.getByText("Awaiting Payment")).toBeInTheDocument();
-    expect(screen.getByText("Preparing")).toBeInTheDocument();
+    expect(screen.getByText("รอชำระเงิน")).toBeInTheDocument();
+    expect(screen.getByText("กำลังเตรียมสินค้า")).toBeInTheDocument();
   });
 
   it("notifies the buyer when a pending order times out and its code is released", async () => {
@@ -203,7 +203,7 @@ describe("OrderHistoryPage", () => {
     } as unknown as ReturnType<typeof orderQueries.useBuyerOrders>);
 
     renderWithProviders(<OrderHistoryPage />);
-    await userEvent.click(screen.getAllByRole("button", { name: /view details/i })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: "ดูรายละเอียด" })[0]);
 
     expect(screen.getAllByText(/ส่วนลดร้าน · MINMIN50/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/ส่วนลด Pegasus · PEGASUS10/).length).toBeGreaterThan(0);
@@ -217,7 +217,7 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />, { route: "/account/orders?orderId=101" });
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(ordersApi.getOrder).toHaveBeenCalledWith(101);
-    await user.click(screen.getByRole("button", { name: /close/i }));
+    await user.click(screen.getByRole("button", { name: "ปิดหน้าต่าง" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
@@ -248,13 +248,13 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    expect(screen.getByText("In Transit")).toBeInTheDocument();
+    expect(screen.getByText("กำลังจัดส่ง")).toBeInTheDocument();
     expect(screen.getByText("Kerry Express KEX123")).toBeInTheDocument();
-    expect(screen.getByText(/auto-confirms on/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /cancel order/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/ยืนยันรับอัตโนมัติวันที่/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" })).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: /confirm received/i }));
-    await userEvent.click(screen.getByRole("button", { name: /^confirm receipt$/i }));
+    await userEvent.click(screen.getByRole("button", { name: "ยืนยันรับสินค้า" }));
+    await userEvent.click(screen.getByRole("button", { name: "ยืนยันรับสินค้า" }));
 
     await waitFor(() => expect(confirmSpy).toHaveBeenCalledWith(103));
   });
@@ -280,8 +280,8 @@ describe("OrderHistoryPage", () => {
 
     await waitFor(() => expect(mine).toHaveBeenCalledWith(204));
     expect(mine).not.toHaveBeenCalledWith(205);
-    expect(screen.getByText("Completed")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /write a review/i })).not.toBeInTheDocument();
+    expect(screen.getByText("สำเร็จ")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "เขียนรีวิว" })).not.toBeInTheDocument();
   });
 
   it("shows Write a Review when a completed seller has no review yet", async () => {
@@ -296,12 +296,12 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    expect(await screen.findByRole("button", { name: /write a review/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "เขียนรีวิว" })).toBeInTheDocument();
   });
 
   it("shows a refund inside the card of the order it belongs to", async () => {
     vi.spyOn(financeApi, "myRefunds").mockResolvedValue([{
-      id: 9, salesOrderId: 102, sellerOrderId: null, amount: 840, reason: "Out of stock",
+      id: 9, salesOrderId: 102, sellerOrderId: null, amount: 840, reason: "สินค้าหมด",
       status: "PROCESSED", method: "BANK_TRANSFER", bankName: null, accountName: null,
       accountNumber: null, transferReference: "TRX-1", requestedAt: "2026-10-09T11:00:00Z", processedAt: null,
     }]);
@@ -321,9 +321,9 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    expect(screen.getByText("Verifying Payment")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /pay now/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /cancel order/i })).not.toBeInTheDocument();
+    expect(screen.getByText("กำลังตรวจสอบการชำระเงิน")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ชำระเงิน" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "ยกเลิกคำสั่งซื้อ" })).not.toBeInTheDocument();
   });
 
   it("opens custom CancelOrderConfirmationDialog without window.confirm when Cancel Order is clicked", async () => {
@@ -350,8 +350,8 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    // Click "Cancel Order" on the pending order card
-    const cancelBtn = screen.getByRole("button", { name: /cancel order/i });
+    // Click "ยกเลิกคำสั่งซื้อ" on the pending order card
+    const cancelBtn = screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" });
     await userEvent.click(cancelBtn);
 
     // Verify window.confirm was NOT called
@@ -382,7 +382,7 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    await userEvent.click(screen.getByRole("button", { name: /cancel order/i }));
+    await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
     await userEvent.click(screen.getByRole("button", { name: "ยกเลิกคำสั่งซื้อ" }));
 
     expect(await screen.findByRole("textbox", { name: "เลขบัญชีสำหรับคืนเงิน 11" })).toBeInTheDocument();
@@ -391,25 +391,25 @@ describe("OrderHistoryPage", () => {
   it("opens View Details modal with sticky close button, formatted status, and no bottom close button", async () => {
     renderWithProviders(<OrderHistoryPage />);
 
-    const viewDetailsButtons = screen.getAllByRole("button", { name: /view details/i });
+    const viewDetailsButtons = screen.getAllByRole("button", { name: "ดูรายละเอียด" });
     await userEvent.click(viewDetailsButtons[0]);
 
     // Modal should be open
-    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
-    expect(screen.getByText("Order #ORD-101")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" })).toBeInTheDocument();
+    expect(screen.getByText("คำสั่งซื้อ #ORD-101")).toBeInTheDocument();
 
     // Package status in modal body should be formatted (PREPARING -> Processing)
-    expect(screen.getByText(/package status: processing/i)).toBeInTheDocument();
+    expect(screen.getByText(/สถานะพัสดุ: กำลังเตรียมสินค้า/)).toBeInTheDocument();
 
     // Only one Close button should exist in the modal (the top-right close icon button)
-    const closeButtons = screen.getAllByRole("button", { name: /close/i });
+    const closeButtons = screen.getAllByRole("button", { name: "ปิดหน้าต่าง" });
     expect(closeButtons).toHaveLength(1);
 
     // Clicking top-right close icon button closes the modal
     await userEvent.click(closeButtons[0]);
 
     await waitFor(() => {
-      expect(screen.queryByText("Order #ORD-101")).not.toBeInTheDocument();
+      expect(screen.queryByText("คำสั่งซื้อ #ORD-101")).not.toBeInTheDocument();
     });
   });
 
@@ -452,10 +452,10 @@ describe("OrderHistoryPage", () => {
     await user.click(cancelledTab);
     expect(screen.queryByText("ORD-101")).not.toBeInTheDocument();
     expect(screen.queryByText("ORD-102")).not.toBeInTheDocument();
-    expect(screen.getByText("No orders found")).toBeInTheDocument();
+    expect(screen.getByText("ไม่พบคำสั่งซื้อ")).toBeInTheDocument();
 
-    // Click "View all orders" button in empty state
-    await user.click(screen.getByRole("button", { name: /view all orders/i }));
+    // Click "ดูคำสั่งซื้อทั้งหมด" button in empty state
+    await user.click(screen.getByRole("button", { name: "ดูคำสั่งซื้อทั้งหมด" }));
     expect(screen.getByText("ORD-101")).toBeInTheDocument();
     expect(screen.getByText("ORD-102")).toBeInTheDocument();
   });
@@ -466,16 +466,16 @@ describe("OrderHistoryPage", () => {
 
     renderWithProviders(<OrderHistoryPage />);
 
-    const viewDetailsButtons = screen.getAllByRole("button", { name: /view details/i });
+    const viewDetailsButtons = screen.getAllByRole("button", { name: "ดูรายละเอียด" });
     await userEvent.click(viewDetailsButtons[0]);
 
-    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" })).toBeInTheDocument();
 
-    const closeBtn = screen.getByRole("button", { name: /close/i });
+    const closeBtn = screen.getByRole("button", { name: "ปิดหน้าต่าง" });
     await userEvent.click(closeBtn);
 
     await waitFor(() => {
-      expect(screen.queryByRole("heading", { name: /order details/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" })).not.toBeInTheDocument();
     });
 
     expect(scrollToSpy).toHaveBeenCalledWith(
@@ -516,7 +516,7 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     // Reorder button should exist only for completed order
-    const reorderButtons = screen.getAllByRole("button", { name: /^reorder$/i });
+    const reorderButtons = screen.getAllByRole("button", { name: "สั่งซื้ออีกครั้ง" });
     expect(reorderButtons).toHaveLength(1);
 
     // Clicking Reorder directly opens ReorderPreviewModal without opening OrderDetailsModal
@@ -554,11 +554,11 @@ describe("OrderHistoryPage", () => {
     renderWithProviders(<OrderHistoryPage />);
 
     // Open View Details
-    await user.click(screen.getByRole("button", { name: /view details/i }));
-    expect(screen.getByRole("heading", { name: /order details/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "ดูรายละเอียด" }));
+    expect(screen.getByRole("heading", { name: "รายละเอียดคำสั่งซื้อ" })).toBeInTheDocument();
 
     // Reorder button should exist inside the details modal (card is inert while modal is open)
-    const reorderInModal = screen.getByRole("button", { name: /^reorder$/i });
+    const reorderInModal = screen.getByRole("button", { name: "สั่งซื้ออีกครั้ง" });
     expect(reorderInModal).toBeInTheDocument();
 
     // Click Reorder inside the modal

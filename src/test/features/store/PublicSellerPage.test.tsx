@@ -112,7 +112,7 @@ describe("PublicSellerPage V3", () => {
     renderStore();
     expect(await screen.findByRole("heading", { name: "CardVault BKK" })).toBeInTheDocument();
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
-    expect(screen.getByRole("link", { name: /Back to product detail/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "กลับไปหน้ารายละเอียดสินค้า" })).toHaveAttribute(
       "href",
       "/products/charizard",
     );
@@ -188,7 +188,7 @@ describe("PublicSellerPage V3", () => {
     renderStore("/u/empty?tab=collection");
     expect(await screen.findByRole("heading", { name: "empty" })).toBeInTheDocument();
     expect(await screen.findByText("ยังไม่มีคอลเลกชันสาธารณะ")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Back to products/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "กลับหน้าสินค้า" })).toHaveAttribute(
       "href",
       "/products",
     );
@@ -215,7 +215,7 @@ describe("PublicSellerPage V3", () => {
       "href",
       "tel:0812345678",
     );
-    expect(screen.getByText("Phone number :")).toBeInTheDocument();
+    expect(screen.getByText("เบอร์โทรศัพท์ :")).toBeInTheDocument();
   });
 
   it("does not render a private phone", async () => {
@@ -227,7 +227,7 @@ describe("PublicSellerPage V3", () => {
     });
     renderStore();
     await screen.findByRole("heading", { name: "CardVault BKK" });
-    expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
+    expect(screen.queryByText("เบอร์โทรศัพท์")).not.toBeInTheDocument();
   });
 
   it("shows real seller reviews in the reviews tab", async () => {

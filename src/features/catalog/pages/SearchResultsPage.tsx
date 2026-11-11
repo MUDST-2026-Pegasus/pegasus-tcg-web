@@ -104,7 +104,7 @@ function SearchProductCard({ product }: { product: ProductSummaryDto }) {
         </CardContent>
         <CardHeader className="gap-2 px-[19px]">
           <Badge variant="secondary" className="h-4 rounded-full px-2 text-[9px]">
-            {PRODUCT_TYPE_LABELS[product.productType] ?? t("search.typeOther", "Other")}
+            {PRODUCT_TYPE_LABELS[product.productType] ?? t("search.typeOther", "อื่น ๆ")}
           </Badge>
           <CardTitle className="line-clamp-2 h-[37px] text-xs leading-[18px] font-semibold">
             {product.name}
@@ -161,12 +161,12 @@ export function SearchResultsPage() {
   const filters = readFilters(params);
 
   const sortLabels: Record<SearchSort, string> = {
-    relevance: t("search.sort.relevance", "Most relevant"),
-    featured: t("search.sort.featured", "Featured"),
-    newest: t("search.sort.newest", "Newest"),
-    price_asc: t("search.sort.priceAsc", "Price: Low to High"),
-    price_desc: t("search.sort.priceDesc", "Price: High to Low"),
-    name: t("search.sort.name", "Name: A to Z"),
+    relevance: t("search.sort.relevance", "เกี่ยวข้องที่สุด"),
+    featured: t("search.sort.featured", "แนะนำ"),
+    newest: t("search.sort.newest", "ใหม่ล่าสุด"),
+    price_asc: t("search.sort.priceAsc", "ราคา: ต่ำไปสูง"),
+    price_desc: t("search.sort.priceDesc", "ราคา: สูงไปต่ำ"),
+    name: t("search.sort.name", "ชื่อ: ก–ฮ / A–Z"),
   };
   const sorts = SEARCH_SORTS.map((value) => ({ value, label: sortLabels[value] }));
 
@@ -264,20 +264,20 @@ export function SearchResultsPage() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-[21px] px-[21px] pt-8 pb-14">
         <Breadcrumb>
           <BreadcrumbList className="text-[12px]">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("nav.home", "Home", { ns: "common" })}</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("nav.home", "หน้าแรก", { ns: "common" })}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>{t("search.breadcrumb", "Search Results")}</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbPage>{t("search.breadcrumb", "ผลการค้นหา")}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         <header className="flex flex-col gap-[7px] border-b border-border pb-[22px]">
-          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">{t("search.title", "All products")}</h1>
+          <h1 className="text-[32px] leading-[39px] font-bold tracking-[-0.02em] text-foreground">{t("search.title", "สินค้าทั้งหมด")}</h1>
           <p className="text-[12px] leading-[18px] text-muted-foreground" aria-live="polite">
             {lookupFailure
               ? ""
               : data && !waiting
-                ? t("search.resultCount", "{count, plural, =1 {# result} other {# results}}", { count: data.totalItems })
-                : t("search.searching", "Searching…")}
+                ? t("search.resultCount", "{count, plural, other {# รายการ}}", { count: data.totalItems })
+                : t("search.searching", "กำลังค้นหา…")}
           </p>
           {data?.correctedQuery && !waiting ? (
             <p className="text-sm text-primary" aria-live="polite">
@@ -287,9 +287,9 @@ export function SearchResultsPage() {
         </header>
 
         <div className="grid items-start gap-[28px] pt-[7px] lg:grid-cols-[228px_minmax(0,1fr)]">
-          <aside className="flex flex-col gap-[28px]" aria-label={t("search.filters", "Search filters")}>
+          <aside className="flex flex-col gap-[28px]" aria-label={t("search.filters", "ตัวกรองการค้นหา")}>
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">{t("search.game", "Game")}</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.game", "เกม")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {games.isPending ? (
                   Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-40" />)
@@ -317,7 +317,7 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">{t("search.category", "Category")}</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.category", "หมวดหมู่")}</FieldLegend>
               {categories.isPending ? (
                 <div className="flex flex-col gap-3">
                   {Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-5 w-32" />)}
@@ -333,7 +333,7 @@ export function SearchResultsPage() {
                 >
                   <Field orientation="horizontal">
                     <RadioGroupItem id="category-all" value={ALL_CATEGORIES} />
-                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">{t("search.allCategories", "All categories")}</FieldLabel>
+                    <FieldLabel htmlFor="category-all" className="font-normal text-muted-foreground">{t("search.allCategories", "ทุกหมวดหมู่")}</FieldLabel>
                   </Field>
                   {orderedCategories(categories.data).map(({ category, child }) => {
                     const id = `category-${category.slug}`;
@@ -351,24 +351,24 @@ export function SearchResultsPage() {
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">{t("search.priceRange", "Price Range")}</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("search.priceRange", "ช่วงราคา")}</FieldLegend>
               <form onSubmit={applyPrice} className="flex flex-col gap-3">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.minPrice", "Minimum price")} placeholder={t("search.minPlaceholder", "฿ Min")} value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.minPrice", "ราคาต่ำสุด")} placeholder={t("search.minPlaceholder", "฿ Min")} value={minimumPrice} onChange={(event) => setMinimumPrice(event.target.value)} className="border-border bg-background" />
                   <span className="text-muted-foreground">-</span>
-                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.maxPrice", "Maximum price")} placeholder={t("search.maxPlaceholder", "฿ Max")} value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
+                  <Input type="number" inputMode="numeric" min="0" aria-label={t("search.maxPrice", "ราคาสูงสุด")} placeholder={t("search.maxPlaceholder", "฿ Max")} value={maximumPrice} onChange={(event) => setMaximumPrice(event.target.value)} className="border-border bg-background" />
                 </div>
                 {priceRangeInvalid ? (
                   <p role="alert" className="text-xs text-destructive">{t("search.priceRangeInvalid", "ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด")}</p>
                 ) : null}
-                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>{t("search.applyFilter", "Apply Filter")}</Button>
+                <Button type="submit" className="w-full rounded-md" disabled={priceRangeInvalid}>{t("search.applyFilter", "ใช้ตัวกรอง")}</Button>
               </form>
             </FieldSet>
 
             <Separator />
 
             <FieldSet>
-              <FieldLegend className="text-lg font-semibold">{t("product.condition", "Condition")}</FieldLegend>
+              <FieldLegend className="text-lg font-semibold">{t("product.condition", "สภาพ")}</FieldLegend>
               <div className="flex flex-col gap-3">
                 {SEARCH_CONDITIONS.map((condition: CardCondition) => {
                   const id = `condition-${condition.toLowerCase()}`;
@@ -398,7 +398,7 @@ export function SearchResultsPage() {
                 onCheckedChange={() => update({ inStock: !filters.inStock })}
                 className="rounded-none"
               />
-              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">{t("search.inStockOnly", "In stock only")}</FieldLabel>
+              <FieldLabel htmlFor="in-stock" className="font-normal text-muted-foreground">{t("search.inStockOnly", "เฉพาะสินค้าที่มีของ")}</FieldLabel>
             </Field>
 
             {filtered ? (
@@ -408,26 +408,26 @@ export function SearchResultsPage() {
                 className="w-full rounded-md"
                 onClick={clearFilters}
               >
-                {t("search.clearFilters", "Clear filters")}
+                {t("search.clearFilters", "ล้างตัวกรอง")}
               </Button>
             ) : null}
           </aside>
 
-          <section className="min-w-0" aria-label={t("search.results", "Search results")}>
+          <section className="min-w-0" aria-label={t("search.results", "ผลการค้นหา")}>
             <div className="mb-[21px] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative w-full sm:max-w-[341px]">
                 <SearchIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
-                  aria-label={t("search.inputLabel", "Search products")}
-                  placeholder={t("search.inputPlaceholder", "Search cards, sets or card numbers")}
+                  aria-label={t("search.inputLabel", "ค้นหาสินค้า")}
+                  placeholder={t("search.inputPlaceholder", "ค้นหาการ์ด ชุด หรือหมายเลขการ์ด")}
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
                   className="rounded-md border-border bg-background pl-10"
                 />
               </div>
               <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
-                <span>{t("search.sortBy", "Sort by:")}</span>
+                <span>{t("search.sortBy", "เรียงตาม:")}</span>
                 <Select
                   value={filters.sort}
                   onValueChange={(value) => update({ sort: (value ?? "featured") as SearchSort })}
@@ -462,12 +462,12 @@ export function SearchResultsPage() {
                 empty={
                   <EmptyState
                     icon={SearchIcon}
-                    title={filters.q ? t("search.noMatch", "No products match \"{query}\"", { query: filters.q }) : t("search.empty", "No products found")}
-                    description={filtered ? t("search.emptyHint", "Try removing a filter or two.") : undefined}
+                    title={filters.q ? t("search.noMatch", "ไม่พบสินค้าที่ตรงกับ \"{query}\"", { query: filters.q }) : t("search.empty", "ไม่พบสินค้า")}
+                    description={filtered ? t("search.emptyHint", "ลองเอาตัวกรองออกสักหนึ่งหรือสองตัว") : undefined}
                   >
                     {filtered ? (
                       <Button type="button" variant="outline" onClick={clearFilters}>
-                        {t("search.clearFilters", "Clear filters")}
+                        {t("search.clearFilters", "ล้างตัวกรอง")}
                       </Button>
                     ) : null}
                   </EmptyState>

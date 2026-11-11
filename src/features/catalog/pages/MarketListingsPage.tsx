@@ -113,17 +113,17 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
   return (
     <div className="min-h-full bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1050px] flex-col gap-6 px-5 py-8 pb-12 sm:px-6">
-        <nav aria-label={t("product.breadcrumb", "Breadcrumb")} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-primary">{t("nav.home", "Home", { ns: "common" })}</Link>
+        <nav aria-label={t("product.breadcrumb", "เส้นทางนำทาง")} className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-primary">{t("nav.home", "หน้าแรก", { ns: "common" })}</Link>
           <ChevronRight className="size-3.5" />
           <Link to={productHref(product.slug)} className="hover:text-primary">{title}</Link>
           <ChevronRight className="size-3.5" />
-          <span className="font-medium text-foreground">{t("product.marketListings", "Market listings")}</span>
+          <span className="font-medium text-foreground">{t("product.marketListings", "ประกาศขายในตลาด")}</span>
         </nav>
 
-        <h1 className="text-[30px] font-bold leading-9 tracking-tight">{t("product.marketListings", "Market listings")}</h1>
+        <h1 className="text-[30px] font-bold leading-9 tracking-tight">{t("product.marketListings", "ประกาศขายในตลาด")}</h1>
 
-        <section aria-label={t("market.summary", "Product summary")} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
+        <section aria-label={t("market.summary", "สรุปสินค้า")} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-[22px]">
           <div className="flex min-w-0 flex-col items-start gap-[18px] sm:flex-row sm:items-center">
             <div className="flex h-[140px] w-[130px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-secondary">
               {imageUrl ? <img src={imageUrl} alt={image?.altText || product.name} className="h-full w-full object-contain" /> : <span className="px-3 text-center text-xs text-muted-foreground">{t("product.noImage", "ยังไม่มีรูปสินค้า")}</span>}
@@ -139,7 +139,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
             </div>
           </div>
           <div className="shrink-0 text-left sm:text-right">
-            <p className="text-xs text-muted-foreground">{t("product.marketPrice", "Market price")}</p>
+            <p className="text-xs text-muted-foreground">{t("product.marketPrice", "ราคาตลาด")}</p>
             <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatMarketPrice(market.medianPrice, listings[0].currency) : "—"}</p>
             {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">{t("market.lowSample", "ข้อมูลราคายังน้อย")}</p>}
           </div>
@@ -148,7 +148,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
         <section aria-labelledby="listing-heading" className="rounded-2xl border border-border bg-card p-4 sm:p-[22px]">
           <div className="mb-2">
             <p className="text-xs font-semibold text-primary">{listingsQuery.isSuccess ? `${listings.length} available` : "— available"}</p>
-            <h2 id="listing-heading" className="text-[22px] font-bold leading-7">{t("product.marketListings", "Market listings")}</h2>
+            <h2 id="listing-heading" className="text-[22px] font-bold leading-7">{t("product.marketListings", "ประกาศขายในตลาด")}</h2>
           </div>
           {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label={t("product.loadingListings", "กำลังโหลดประกาศขาย")}><ListRowsSkeleton rows={6} className="divide-border" /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-10 text-center text-sm"><p>{t("product.listingsFailed", "โหลดประกาศขายไม่สำเร็จ")}</p><Button onClick={() => void listingsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button></div>
@@ -157,10 +157,10 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 py-3 sm:grid-cols-[minmax(0,1fr)_130px_170px_110px_139px] sm:gap-6 sm:py-2">
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
-                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.condition", "Condition")}</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
-                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.delivery", "Delivery")}</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
+                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.condition", "สภาพ")}</span><span className="block truncate text-xs font-semibold">{CONDITION_LABELS[listing.condition]}</span></div>
+                  <div className="min-w-0"><span className="block text-[10px] font-medium uppercase text-muted-foreground">{t("product.delivery", "การจัดส่ง")}</span><span className="block text-xs font-semibold">{formatListingDelivery(listing.delivery)}</span></div>
                   <ListingRowPrice price={listing.price} pricing={listing.pricing} />
-                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={t("market.addSellerItem", "เพิ่มสินค้าของ {seller} ลงรถเข็น", { seller: listing.seller.displayName || listing.seller.username })} onClick={(event) => void addListingToCart(listing, event.currentTarget)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : t("product.add", "Add")}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "more")}</Button></div>
+                  <div className="flex gap-2"><Button type="button" className="h-10 min-w-16 rounded-full px-4 text-sm font-semibold" disabled={addCartItem.isPending || listing.quantityAvailable < 1 || listing.delivery?.optionCount === 0} aria-label={t("market.addSellerItem", "เพิ่มสินค้าของ {seller} ลงรถเข็น", { seller: listing.seller.displayName || listing.seller.username })} onClick={(event) => void addListingToCart(listing, event.currentTarget)}>{addingListingId === listing.id ? <Loader2 className="size-3.5 animate-spin" /> : t("product.add", "เพิ่ม")}</Button><Button nativeButton={false} className="h-10 min-w-16 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "เพิ่มเติม")}</Button></div>
                 </article>
               ))}
             </div>

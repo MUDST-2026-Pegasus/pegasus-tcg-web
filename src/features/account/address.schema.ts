@@ -15,30 +15,30 @@ export function useAddressSchema() {
 
   /** ช่องที่ backend ปล่อยว่างได้ — ส่งเป็น `null` ไม่ใช่สตริงว่าง */
   const optional = (max: number, field: string) =>
-    z.string().trim().max(max, t("account.address.validation.max", "{field} must be at most {max} characters", { field, max }));
+    z.string().trim().max(max, t("account.address.validation.max", "{field} ต้องไม่เกิน {max} ตัวอักษร", { field, max }));
 
   const required = (max: number, field: string) =>
     z
       .string()
       .trim()
-      .min(1, t("account.address.validation.required", "{field} is required", { field }))
-      .max(max, t("account.address.validation.max", "{field} must be at most {max} characters", { field, max }));
+      .min(1, t("account.address.validation.required", "กรุณากรอก{field}", { field }))
+      .max(max, t("account.address.validation.max", "{field} ต้องไม่เกิน {max} ตัวอักษร", { field, max }));
 
   return z.object({
-    label: optional(50, t("account.address.field.label", "Label")),
-    recipientName: required(150, t("account.address.field.recipientName", "Recipient name")),
-    phone: required(20, t("account.address.field.phone", "Phone number")).regex(
+    label: optional(50, t("account.address.field.label", "ชื่อที่อยู่")),
+    recipientName: required(150, t("account.address.field.recipientName", "ชื่อผู้รับ")),
+    phone: required(20, t("account.address.field.phone", "เบอร์โทรศัพท์")).regex(
       /^[0-9+()\-\s]+$/,
-      t("account.address.validation.phone", "Enter a valid phone number"),
+      t("account.address.validation.phone", "กรอกเบอร์โทรศัพท์ให้ถูกต้อง"),
     ),
-    line1: required(255, t("account.address.field.line1", "Address line 1")),
-    line2: optional(255, t("account.address.field.line2", "Address line 2")),
-    subdistrict: optional(100, t("account.address.field.subdistrict", "Subdistrict")),
-    district: optional(100, t("account.address.field.district", "District")),
-    province: required(100, t("account.address.field.province", "Province")),
-    postalCode: required(10, t("account.address.field.postalCode", "Postal code")).regex(
+    line1: required(255, t("account.address.field.line1", "ที่อยู่บรรทัดที่ 1")),
+    line2: optional(255, t("account.address.field.line2", "ที่อยู่บรรทัดที่ 2")),
+    subdistrict: optional(100, t("account.address.field.subdistrict", "ตำบล / แขวง")),
+    district: optional(100, t("account.address.field.district", "อำเภอ / เขต")),
+    province: required(100, t("account.address.field.province", "จังหวัด")),
+    postalCode: required(10, t("account.address.field.postalCode", "รหัสไปรษณีย์")).regex(
       /^[0-9]{5}$/,
-      t("account.address.validation.postalCode", "Postal code must be 5 digits"),
+      t("account.address.validation.postalCode", "รหัสไปรษณีย์ต้องมี 5 หลัก"),
     ),
     /** ในหน้านี้ "default" หมายถึงที่อยู่จัดส่งหลัก ส่วน billing ไม่ได้ให้ผู้ใช้เลือก */
     defaultShipping: z.boolean(),

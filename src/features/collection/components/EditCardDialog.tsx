@@ -81,16 +81,16 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
       });
       onClose();
     } catch (cause) {
-      setError(translateError(cause, t("collection.edit.failed", "Could not save this card. Please try again.")));
+      setError(translateError(cause, t("collection.edit.failed", "บันทึกการ์ดนี้ไม่สำเร็จ กรุณาลองอีกครั้ง")));
     }
   };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{t("collection.edit.title", "Edit card")}</DialogTitle>
+        <DialogTitle>{t("collection.edit.title", "แก้ไขการ์ด")}</DialogTitle>
         <DialogDescription>
-          {t("collection.edit.hint", "Change the printing, condition, or quantity, or replace your photo.")}
+          {t("collection.edit.hint", "เปลี่ยนเวอร์ชัน สภาพ หรือจำนวน หรือเปลี่ยนรูปของคุณ")}
         </DialogDescription>
       </DialogHeader>
 
@@ -126,11 +126,11 @@ function EditCardForm({ item, onClose }: { item: CollectionItem; onClose: () => 
 
       <DialogFooter>
         <Button variant="outline" disabled={update.isPending} onClick={onClose}>
-          {t("collection.cancel", "Cancel")}
+          {t("collection.cancel", "ยกเลิก")}
         </Button>
         <Button disabled={!ready || update.isPending} onClick={() => void save()}>
           {update.isPending ? <Spinner data-icon="inline-start" /> : null}
-          {t("collection.edit.save", "Save Changes")}
+          {t("collection.edit.save", "บันทึกการเปลี่ยนแปลง")}
         </Button>
       </DialogFooter>
     </>

@@ -143,8 +143,8 @@ describe("MarketListingsPage Add button", () => {
     renderPage();
 
     expect(screen.getByLabelText("ร้านค้ายืนยันแล้ว")).toBeInTheDocument();
-    expect(screen.getByText("★ 4.9 · 1.2k sales")).toBeInTheDocument();
-    expect(screen.getByText("Ships in 1–2 days")).toBeInTheDocument();
+    expect(screen.getByText("★ 4.9 · ขายแล้ว 1.2k ชิ้น")).toBeInTheDocument();
+    expect(screen.getByText("ส่งภายใน 1–2 วัน")).toBeInTheDocument();
     expect(screen.getByText("5,590")).toBeInTheDocument();
   });
 

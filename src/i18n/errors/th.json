@@ -22,46 +22,46 @@
   "PROMO_WRONG_SELLER": "โค้ดนี้เป็นของร้านค้าอื่น — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น",
   "authAlert": {
     "ACCOUNT_DEACTIVATED": {
-      "description": "Please contact support for help.",
-      "title": "Account is deactivated"
+      "description": "กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอความช่วยเหลือ",
+      "title": "บัญชีถูกปิดใช้งาน"
     },
     "ACCOUNT_SUSPENDED": {
-      "description": "Please contact support for help.",
-      "title": "Account is suspended"
+      "description": "กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอความช่วยเหลือ",
+      "title": "บัญชีถูกระงับ"
     },
     "EMAIL_ALREADY_USED": {
-      "description": "Please contact support for help.",
-      "title": "This email can't be used"
+      "description": "กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอความช่วยเหลือ",
+      "title": "ใช้อีเมลนี้ไม่ได้"
     },
     "GOOGLE_ALREADY_LINKED": {
-      "description": "Please contact support for help.",
-      "title": "This email is linked to another Google account"
+      "description": "กรุณาติดต่อฝ่ายบริการลูกค้าเพื่อขอความช่วยเหลือ",
+      "title": "อีเมลนี้ผูกกับบัญชี Google อื่นอยู่แล้ว"
     },
     "GOOGLE_EMAIL_NOT_VERIFIED": {
-      "description": "Verify your email with Google, then try again.",
-      "title": "Google email not verified"
+      "description": "ยืนยันอีเมลกับ Google ก่อน แล้วลองอีกครั้ง",
+      "title": "อีเมล Google ยังไม่ได้ยืนยัน"
     },
     "GOOGLE_LINK_NOT_ALLOWED": {
-      "description": "An account with this email already exists and can't be linked to Google automatically.",
-      "title": "Please log in with your email and password"
+      "description": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว และผูกกับ Google อัตโนมัติไม่ได้",
+      "title": "กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน"
     },
     "GOOGLE_SIGNIN_DISABLED": {
-      "description": "Please use your email and password.",
-      "title": "Google sign-in is unavailable"
+      "description": "กรุณาใช้อีเมลและรหัสผ่าน",
+      "title": "เข้าสู่ระบบด้วย Google ไม่ได้ในขณะนี้"
     },
     "GOOGLE_SIGNIN_NOT_ALLOWED": {
-      "description": "Please log in with your email and password.",
-      "title": "Google sign-in isn't available for this account"
+      "description": "กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน",
+      "title": "บัญชีนี้เข้าสู่ระบบด้วย Google ไม่ได้"
     },
     "GOOGLE_TOKEN_INVALID": {
-      "description": "Please continue with Google again.",
-      "title": "Google sign-in expired"
+      "description": "กรุณาดำเนินการต่อด้วย Google อีกครั้ง",
+      "title": "การเข้าสู่ระบบด้วย Google หมดอายุ"
     }
   },
   "cart": {
     "mergeFailed": {
-      "description": "รายการ guest ยังถูกเก็บไว้ กรุณาลองออกแล้วเข้าสู่ระบบใหม่",
-      "title": "เข้าสู่ระบบแล้ว แต่รวมรถเข็นไม่สำเร็จ"
+      "description": "สินค้าที่หยิบไว้ก่อนเข้าสู่ระบบยังอยู่ กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่",
+      "title": "เข้าสู่ระบบแล้ว แต่รวมตะกร้าไม่สำเร็จ"
     }
   },
   "promo": {
@@ -77,7 +77,7 @@
     "maxSize": "ไม่เกิน {max}",
     "networkError": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
     "storageFailed": "อัปโหลดไฟล์ไม่สำเร็จ",
-    "storageRejected": "ที่เก็บไฟล์ไม่รับไฟล์นี้ ลองใหม่อีกครั้ง",
+    "storageRejected": "บันทึกไฟล์นี้ไม่ได้ ลองใหม่อีกครั้ง",
     "storageUnreachable": "เชื่อมต่อที่เก็บไฟล์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",
     "tooLarge": "ไฟล์ \"{name}\" ใหญ่เกิน {max}",
     "tooLargeWithSize": "ไฟล์ \"{name}\" ขนาด {size} ใหญ่เกิน {max}",

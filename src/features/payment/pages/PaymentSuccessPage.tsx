@@ -50,14 +50,14 @@ export function PaymentSuccessPage() {
   const items = order.data?.sellerOrders.flatMap((seller) => seller.items) ?? [];
   const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const productNames = [...new Set(items.map((item) => item.productName).filter(Boolean))];
-  const itemDescription = productNames.length === 1 ? `${quantity} ${productNames[0]}` : t("payment.success.items", "{count} items", { count: quantity });
+  const itemDescription = productNames.length === 1 ? `${quantity} ${productNames[0]}` : t("payment.success.items", "{count} รายการ", { count: quantity });
   const amount = payment.data?.amount ?? order.data?.grandTotal;
   const amountText = amount == null ? "—" : `${order.data?.currency ?? "THB"} ${amount.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const hasOrderPromotions = (order.data?.discountTotal ?? 0) > 0
     || (order.data?.promotions?.length ?? 0) > 0
     || order.data?.sellerOrders.some((seller) => (seller.sellerDiscount ?? 0) > 0 || (seller.platformDiscount ?? 0) > 0) === true;
-  const heading = loading ? t("payment.success.checking", "Checking Payment") : failedRequest ? t("payment.success.unableToVerify", "Unable to Verify Payment")
-    : paid ? t("payment.success.paid", "Payment Successful") : terminal ? t("payment.success.notCompleted", "Payment Not Completed") : t("payment.status.underReview", "Payment Under Review");
+  const heading = loading ? t("payment.success.checking", "กำลังตรวจสอบการชำระเงิน") : failedRequest ? t("payment.success.unableToVerify", "ตรวจสอบการชำระเงินไม่ได้")
+    : paid ? t("payment.success.paid", "ชำระเงินสำเร็จ") : terminal ? t("payment.success.notCompleted", "การชำระเงินยังไม่สำเร็จ") : t("payment.status.underReview", "กำลังตรวจสอบการชำระเงิน");
   const statusMessage = !validRequest ? t("payment.success.invalid", "ไม่พบข้อมูลคำสั่งซื้อ กรุณาเปิดจากประวัติคำสั่งซื้อ")
     : mismatch ? t("payment.success.mismatch", "รายการชำระเงินนี้ไม่ตรงกับคำสั่งซื้อ กรุณาตรวจสอบอีกครั้ง")
     : failedRequest ? t("payment.success.failed", "โหลดสถานะการชำระเงินไม่สำเร็จ กรุณาลองอีกครั้ง")
@@ -82,17 +82,17 @@ export function PaymentSuccessPage() {
         </div>
         <h1 id="payment-success-title" className="payment-success-title">{heading}</h1>
         <p className="payment-success-order">
-          {order.data && !mismatch ? t("payment.success.orderNumber", "Order Number: #{number}", { number: order.data.orderNumber.replace(/^#/, "") }) : validOrder ? t("payment.success.orderId", "Order #{id}", { id: orderId }) : t("payment.success.orderNotFound", "Order not found")}
+          {order.data && !mismatch ? t("payment.success.orderNumber", "เลขคำสั่งซื้อ: #{number}", { number: order.data.orderNumber.replace(/^#/, "") }) : validOrder ? t("payment.success.orderId", "คำสั่งซื้อ #{id}", { id: orderId }) : t("payment.success.orderNotFound", "ไม่พบคำสั่งซื้อ")}
         </p>
         {auctionNumber && validRequest && !mismatch && <AuctionOrderBadge auctionNumber={auctionNumber} className="mx-auto" />}
         {paid ? (
           <>
             <section className="payment-success-summary" aria-labelledby="transaction-summary-title">
-              <h2 id="transaction-summary-title">{t("payment.success.summary", "Transaction Summary")}</h2>
+              <h2 id="transaction-summary-title">{t("payment.success.summary", "สรุปรายการ")}</h2>
               <dl>
-                <div className="payment-success-row"><dt>{t("payment.success.date", "Date")}</dt><dd>{paymentSuccessDate(order.data?.paidAt)}</dd></div>
-                <div className="payment-success-row"><dt>{t("payment.success.method", "Payment Method")}</dt><dd>{paymentMethodName(payment.data?.method)}</dd></div>
-                <div className="payment-success-row"><dt>{t("payment.success.itemsLabel", "Items")}</dt><dd>{items.length ? itemDescription : "—"}</dd></div>
+                <div className="payment-success-row"><dt>{t("payment.success.date", "วันที่")}</dt><dd>{paymentSuccessDate(order.data?.paidAt)}</dd></div>
+                <div className="payment-success-row"><dt>{t("payment.success.method", "ช่องทางชำระเงิน")}</dt><dd>{paymentMethodName(payment.data?.method)}</dd></div>
+                <div className="payment-success-row"><dt>{t("payment.success.itemsLabel", "สินค้า")}</dt><dd>{items.length ? itemDescription : "—"}</dd></div>
                 {hasOrderPromotions && order.data && (
                   <PromotionDiscountLines
                     sellerDiscount={order.data.sellerDiscountTotal}
@@ -113,10 +113,10 @@ export function PaymentSuccessPage() {
                   && order.data.sellerDiscountTotal == null && order.data.platformDiscountTotal == null && (
                     <div className="payment-success-row"><dt>{t("payment.success.discount", "ส่วนลด")}</dt><dd>−{checkoutMoney(order.data.discountTotal)}</dd></div>
                   )}
-                <div className="payment-success-row payment-success-total"><dt>{t("payment.success.total", "Total Amount")}</dt><dd>{amountText}</dd></div>
+                <div className="payment-success-row payment-success-total"><dt>{t("payment.success.total", "ยอดรวม")}</dt><dd>{amountText}</dd></div>
               </dl>
             </section>
-            <p className="payment-success-thanks">{t("payment.success.thanks", "Thank you for using Pegasus TCG")}</p>
+            <p className="payment-success-thanks">{t("payment.success.thanks", "ขอบคุณที่ใช้บริการ Pegasus TCG")}</p>
           </>
         ) : (
           <div className="payment-success-status" role={failedRequest || terminal ? "alert" : "status"}>
@@ -128,10 +128,10 @@ export function PaymentSuccessPage() {
         )}
         <div className="payment-success-actions">
           <Button nativeButton={false} className="h-9 rounded-full text-sm" render={<Link to={validRequest && !mismatch ? `/account/orders?orderId=${orderId}` : "/account/orders"} />}>
-            {validRequest && !mismatch ? t("payment.success.viewOrder", "View Order Details") : t("payment.success.viewOrders", "View Orders")}
+            {validRequest && !mismatch ? t("payment.success.viewOrder", "ดูรายละเอียดคำสั่งซื้อ") : t("payment.success.viewOrders", "ดูคำสั่งซื้อ")}
           </Button>
           <Button nativeButton={false} variant="outline" className="h-9 rounded-full text-sm text-[#636366] opacity-50 hover:opacity-100" render={<Link to="/products" />}>
-            {t("payment.success.continue", "Continue Shopping")}
+            {t("payment.success.continue", "ช้อปต่อ")}
           </Button>
         </div>
       </Card>

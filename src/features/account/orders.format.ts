@@ -11,26 +11,26 @@ import { translate, translateError } from "@/lib/i18n";
 // @tolgee-key {"key": "account.pdf.notFound", "ns": "buyer", "defaultValue": "ไม่พบคำสั่งซื้อที่เลือก หรือรายการถูกลบแล้ว"}
 // @tolgee-key {"key": "account.pdf.server", "ns": "buyer", "defaultValue": "ระบบสร้าง PDF ขัดข้อง กรุณาลองใหม่อีกครั้ง"}
 // @tolgee-key {"key": "account.pdf.failed", "ns": "buyer", "defaultValue": "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"}
-// @tolgee-key {"key": "account.packageStatus.PENDING_PAYMENT", "ns": "buyer", "defaultValue": "Pending Payment"}
-// @tolgee-key {"key": "account.packageStatus.PAID", "ns": "buyer", "defaultValue": "Paid"}
-// @tolgee-key {"key": "account.packageStatus.PREPARING", "ns": "buyer", "defaultValue": "Processing"}
-// @tolgee-key {"key": "account.packageStatus.PROCESSING", "ns": "buyer", "defaultValue": "Processing"}
-// @tolgee-key {"key": "account.packageStatus.SHIPPED", "ns": "buyer", "defaultValue": "Shipped"}
-// @tolgee-key {"key": "account.packageStatus.DELIVERED", "ns": "buyer", "defaultValue": "Completed"}
-// @tolgee-key {"key": "account.packageStatus.COMPLETED", "ns": "buyer", "defaultValue": "Completed"}
-// @tolgee-key {"key": "account.packageStatus.CANCELLED", "ns": "buyer", "defaultValue": "Cancelled"}
-// @tolgee-key {"key": "account.packageStatus.CANCELED", "ns": "buyer", "defaultValue": "Cancelled"}
+// @tolgee-key {"key": "account.packageStatus.PENDING_PAYMENT", "ns": "buyer", "defaultValue": "รอชำระเงิน"}
+// @tolgee-key {"key": "account.packageStatus.PAID", "ns": "buyer", "defaultValue": "ชำระแล้ว"}
+// @tolgee-key {"key": "account.packageStatus.PREPARING", "ns": "buyer", "defaultValue": "กำลังเตรียมสินค้า"}
+// @tolgee-key {"key": "account.packageStatus.PROCESSING", "ns": "buyer", "defaultValue": "กำลังเตรียมสินค้า"}
+// @tolgee-key {"key": "account.packageStatus.SHIPPED", "ns": "buyer", "defaultValue": "จัดส่งแล้ว"}
+// @tolgee-key {"key": "account.packageStatus.DELIVERED", "ns": "buyer", "defaultValue": "สำเร็จ"}
+// @tolgee-key {"key": "account.packageStatus.COMPLETED", "ns": "buyer", "defaultValue": "สำเร็จ"}
+// @tolgee-key {"key": "account.packageStatus.CANCELLED", "ns": "buyer", "defaultValue": "ยกเลิกแล้ว"}
+// @tolgee-key {"key": "account.packageStatus.CANCELED", "ns": "buyer", "defaultValue": "ยกเลิกแล้ว"}
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
-  get PENDING_PAYMENT() { return translate("buyer", "account.packageStatus.PENDING_PAYMENT", "Pending Payment"); },
-  get PAID() { return translate("buyer", "account.packageStatus.PAID", "Paid"); },
-  get PREPARING() { return translate("buyer", "account.packageStatus.PREPARING", "Processing"); },
-  get PROCESSING() { return translate("buyer", "account.packageStatus.PROCESSING", "Processing"); },
-  get SHIPPED() { return translate("buyer", "account.packageStatus.SHIPPED", "Shipped"); },
-  get DELIVERED() { return translate("buyer", "account.packageStatus.DELIVERED", "Completed"); },
-  get COMPLETED() { return translate("buyer", "account.packageStatus.COMPLETED", "Completed"); },
-  get CANCELLED() { return translate("buyer", "account.packageStatus.CANCELLED", "Cancelled"); },
-  get CANCELED() { return translate("buyer", "account.packageStatus.CANCELED", "Cancelled"); },
+  get PENDING_PAYMENT() { return translate("buyer", "account.packageStatus.PENDING_PAYMENT", "รอชำระเงิน"); },
+  get PAID() { return translate("buyer", "account.packageStatus.PAID", "ชำระแล้ว"); },
+  get PREPARING() { return translate("buyer", "account.packageStatus.PREPARING", "กำลังเตรียมสินค้า"); },
+  get PROCESSING() { return translate("buyer", "account.packageStatus.PROCESSING", "กำลังเตรียมสินค้า"); },
+  get SHIPPED() { return translate("buyer", "account.packageStatus.SHIPPED", "จัดส่งแล้ว"); },
+  get DELIVERED() { return translate("buyer", "account.packageStatus.DELIVERED", "สำเร็จ"); },
+  get COMPLETED() { return translate("buyer", "account.packageStatus.COMPLETED", "สำเร็จ"); },
+  get CANCELLED() { return translate("buyer", "account.packageStatus.CANCELLED", "ยกเลิกแล้ว"); },
+  get CANCELED() { return translate("buyer", "account.packageStatus.CANCELED", "ยกเลิกแล้ว"); },
 };
 
 /**

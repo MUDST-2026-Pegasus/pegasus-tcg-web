@@ -27,9 +27,9 @@ export function PublicCollectionPage() {
 
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto flex max-w-[1440px] flex-col gap-8">
-      <Button variant="outline" className="self-start" render={<Link to={isOwn ? "/account/collection" : "/search"} />}>{isOwn ? t("collection.public.backToMine", "Back to My Collection") : t("collection.public.backToProducts", "Back to products")}</Button>
-      <QueryBoundary query={collection} errorTitle={t("collection.public.loadFailed", "Could not load this collection")} errorRetryLabel={t("collection.tryAgain", "Try again")}
-        loading={<div role="status" aria-busy="true" aria-label={t("collection.public.loading", "Loading collection")} className="flex flex-col gap-8">
+      <Button variant="outline" className="self-start" render={<Link to={isOwn ? "/account/collection" : "/search"} />}>{isOwn ? t("collection.public.backToMine", "กลับไปคอลเลกชันของฉัน") : t("collection.public.backToProducts", "กลับหน้าสินค้า")}</Button>
+      <QueryBoundary query={collection} errorTitle={t("collection.public.loadFailed", "โหลดคอลเลกชันนี้ไม่สำเร็จ")} errorRetryLabel={t("collection.tryAgain", "ลองอีกครั้ง")}
+        loading={<div role="status" aria-busy="true" aria-label={t("collection.public.loading", "กำลังโหลดคอลเลกชัน")} className="flex flex-col gap-8">
           <ProfileHeaderSkeleton /><HeadingSkeleton /><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" />
         </div>}>
         {() => <>
@@ -38,15 +38,15 @@ export function PublicCollectionPage() {
             <div className="flex-1"><h1 className="text-2xl font-bold">{name}</h1><p className="text-muted-foreground">@{username}</p></div>
             <p className="text-xl font-semibold text-primary">{total} cards</p>
           </CardContent></Card>
-          <div><h2 className="text-xl font-semibold">{isOwn ? t("collection.public.ownTitle", "Public collection") : t("collection.public.title", "Collection highlights")}</h2>
-            <p className="text-sm text-muted-foreground">{isOwn ? t("collection.public.ownHint", "Cards you have made public.") : t("collection.public.hint", "Cards from @{username}'s collection.", { username: username ?? "" })}</p></div>
+          <div><h2 className="text-xl font-semibold">{isOwn ? t("collection.public.ownTitle", "คอลเลกชันสาธารณะ") : t("collection.public.title", "การ์ดเด่นในคอลเลกชัน")}</h2>
+            <p className="text-sm text-muted-foreground">{isOwn ? t("collection.public.ownHint", "การ์ดที่คุณเปิดเป็นสาธารณะ") : t("collection.public.hint", "การ์ดจากคอลเลกชันของ @{username}", { username: username ?? "" })}</p></div>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
               imageAlt={item.card.productName} badge={item.card.variantLabel} title={item.card.productName}
               className="w-full [&_img]:object-contain" />)}
-          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.public.empty", "No public cards yet.")}</p>}
+          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.public.empty", "ยังไม่มีการ์ดที่เปิดเป็นสาธารณะ")}</p>}
           {collection.hasNextPage ? <Button variant="outline" className="self-center" disabled={collection.isFetchingNextPage}
-            onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "Load more")}</Button> : null}
+            onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "โหลดเพิ่ม")}</Button> : null}
         </>}
       </QueryBoundary>
       <PublicSellerReviews username={username} />

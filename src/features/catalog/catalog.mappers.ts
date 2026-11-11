@@ -36,7 +36,7 @@ const priceFormatter = numberFormat({
 /** null หรือไม่มีค่า = ไม่มีใครขาย */
 export function formatPrice(price: number | null | undefined): string {
   return price === null || price === undefined
-    ? translate("common", "listing.outOfStock", "Out of stock")
+    ? translate("common", "listing.outOfStock", "สินค้าหมด")
     : priceFormatter.format(price);
 }
 export function marketForListing(market: ProductMarketDto[] | undefined, listing: PublicListingDto | undefined) {
@@ -44,4 +44,4 @@ export function marketForListing(market: ProductMarketDto[] | undefined, listing
   return market?.find((row) => row.catalogVariantId === listing.card.variantId && row.condition === listing.condition);
 }
 
-// @tolgee-key {"key":"listing.outOfStock","ns":"common","defaultValue":"Out of stock"}
+// @tolgee-key {"key":"listing.outOfStock","ns":"common","defaultValue":"สินค้าหมด"}

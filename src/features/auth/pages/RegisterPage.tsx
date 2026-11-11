@@ -23,10 +23,10 @@ export function RegisterPage() {
           <div className="absolute inset-0 bg-linear-to-t from-white via-white/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-1 p-6">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              {t("auth.register.title", "Sign up to continue")}
+              {t("auth.register.title", "สมัครสมาชิกเพื่อดำเนินการต่อ")}
             </h1>
             <p className="text-sm text-foreground/80">
-              {t("auth.register.subtitle", "To like or purchase an item, or to chat with the seller, please create your account.")}
+              {t("auth.register.subtitle", "สร้างบัญชีเพื่อกดถูกใจ ซื้อสินค้า หรือแชทกับผู้ขาย")}
             </p>
           </div>
         </div>

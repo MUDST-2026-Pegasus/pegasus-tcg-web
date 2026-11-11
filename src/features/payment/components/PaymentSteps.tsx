@@ -89,9 +89,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="pb-4">
-          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.scanTitle", "Scan & pay")}</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.scanTitle", "สแกนและชำระเงิน")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            {t("payment.steps.scanHint", "Pay exactly THB {amount}, then save the slip from your banking app.", { amount: formattedAmount })}
+            {t("payment.steps.scanHint", "ชำระ {amount} บาทให้ตรงทุกสตางค์ แล้วบันทึกสลิปจากแอปธนาคาร", { amount: formattedAmount })}
           </p>
         </div>
       </div>
@@ -111,9 +111,9 @@ export function PaymentSteps({
           <div className="w-px bg-slate-200 flex-1 my-1.5" />
         </div>
         <div className="flex-1 pb-4">
-          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.uploadTitle", "Upload your slip")}</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.uploadTitle", "อัปโหลดสลิป")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {t("payment.steps.uploadHint", "We use it to verify your transfer.")}
+            {t("payment.steps.uploadHint", "เราใช้สลิปเพื่อตรวจสอบการโอนเงิน")}
           </p>
 
           {/* Dropzone Container */}
@@ -162,18 +162,18 @@ export function PaymentSteps({
               <div className="min-w-0">
                 <p className="text-xs">
                   {disabled ? (
-                    <span className="text-slate-500 font-medium">{t("payment.steps.submitted", "Payment submitted")}</span>
+                    <span className="text-slate-500 font-medium">{t("payment.steps.submitted", "ส่งการชำระเงินแล้ว")}</span>
                   ) : (
                     <>
                       <span className="text-primary font-semibold hover:underline">
-                        {t("payment.steps.clickUpload", "Click to upload")}
+                        {t("payment.steps.clickUpload", "คลิกเพื่ออัปโหลด")}
                       </span>{" "}
-                      <span className="text-slate-500 font-normal">{t("payment.steps.dragDrop", "or drag & drop")}</span>
+                      <span className="text-slate-500 font-normal">{t("payment.steps.dragDrop", "หรือลากไฟล์มาวาง")}</span>
                     </>
                   )}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {t("payment.steps.fileRule", "JPG, PNG or PDF · up to 5 MB")}
+                  {t("payment.steps.fileRule", "JPG, PNG หรือ PDF · ไม่เกิน 5 MB")}
                 </p>
               </div>
             </div>
@@ -184,7 +184,7 @@ export function PaymentSteps({
                 {uploadedItem.previewUrl ? (
                   <img
                     src={uploadedItem.previewUrl}
-                    alt={t("payment.steps.preview", "Slip preview")}
+                    alt={t("payment.steps.preview", "ตัวอย่างสลิป")}
                     className="w-10 h-10 rounded-lg object-cover border border-muted shrink-0"
                   />
                 ) : (
@@ -202,17 +202,17 @@ export function PaymentSteps({
                     </span>
                     {uploadedItem.status === "uploading" && (
                       <span className="text-[11px] text-primary flex items-center gap-1 font-medium">
-                        <Loader2 className="size-3 animate-spin" /> {t("payment.steps.uploading", "Uploading...")}
+                        <Loader2 className="size-3 animate-spin" /> {t("payment.steps.uploading", "กำลังอัปโหลด...")}
                       </span>
                     )}
                     {uploadedItem.status === "done" && (
                       <span className="text-[11px] text-emerald-600 flex items-center gap-1 font-medium">
-                        <FileCheck2 className="size-3" /> {t("payment.steps.ready", "Ready")}
+                        <FileCheck2 className="size-3" /> {t("payment.steps.ready", "พร้อม")}
                       </span>
                     )}
                     {uploadedItem.status === "error" && (
                       <span className="text-[11px] text-destructive font-medium">
-                        {t("payment.steps.failed", "Failed")}
+                        {t("payment.steps.failed", "ไม่สำเร็จ")}
                       </span>
                     )}
                   </div>
@@ -228,7 +228,7 @@ export function PaymentSteps({
                       size="icon"
                       className="size-8 text-slate-500 hover:text-slate-800"
                       onClick={() => slip.retry(uploadedItem.id)}
-                      title={t("payment.steps.retry", "Retry upload")}
+                      title={t("payment.steps.retry", "อัปโหลดอีกครั้ง")}
                     >
                       <RefreshCw className="size-3.5" />
                     </Button>
@@ -242,7 +242,7 @@ export function PaymentSteps({
                       slip.remove(uploadedItem.id);
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
-                    title={t("payment.steps.remove", "Remove file")}
+                    title={t("payment.steps.remove", "ลบไฟล์")}
                   >
                     <Trash2 className="size-3.5" />
                   </Button>
@@ -273,9 +273,9 @@ export function PaymentSteps({
           </div>
         </div>
         <div className="flex-1 pb-2">
-          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.refTitle", "Enter reference no.")}</h3>
+          <h3 className="font-semibold text-sm text-foreground">{t("payment.steps.refTitle", "กรอกเลขอ้างอิง")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {t("payment.steps.refHint", "Find it on your slip as \"Ref. No.\"")}
+            {t("payment.steps.refHint", "ดูได้จาก \"เลขที่อ้างอิง\" บนสลิป")}
           </p>
 
           <Input

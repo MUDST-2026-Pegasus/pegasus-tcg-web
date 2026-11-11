@@ -150,14 +150,14 @@ function Storefront({ username }: { username: string }) {
               <Link
                 to={backHref}
                 role="link"
-                aria-label={from ? t("store.backToProduct", "Back to product detail") : t("store.backToProducts", "Back to products")}
+                aria-label={from ? t("store.backToProduct", "กลับไปหน้ารายละเอียดสินค้า") : t("store.backToProducts", "กลับหน้าสินค้า")}
               />
             }
           >
             <ArrowLeft className="mr-1.5 size-4" />
             <span>{t("store.backToList", "กลับไปหน้ารายการสินค้า")}</span>
             <span className="sr-only">
-              {from ? t("store.backToProduct", "Back to product detail") : t("store.backToProducts", "Back to products")}
+              {from ? t("store.backToProduct", "กลับไปหน้ารายละเอียดสินค้า") : t("store.backToProducts", "กลับหน้าสินค้า")}
             </span>
           </Button>
         </div>

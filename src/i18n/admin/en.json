@@ -791,6 +791,12 @@
   "common": {
     "tryAgain": "Please try again"
   },
+  "export": {
+    "failed": "Could not export the file",
+    "pending": "Creating file...",
+    "retry": "Please try again.",
+    "success": "File downloaded"
+  },
   "finance": {
     "ago": "{time} ago",
     "checkConnection": "Check your connection and try again",
@@ -894,6 +900,18 @@
       "hours": "{n} h",
       "minutes": "{n} min"
     },
+    "export": {
+      "allStatuses": "All statuses",
+      "cancel": "Cancel",
+      "description": "One row per shop sub-order, newest first · up to 20,000 rows",
+      "from": "From",
+      "noStatus": "Select at least one status",
+      "rangeInvalid": "Pick both dates, and the start date can't be after the end date",
+      "statuses": "Statuses",
+      "submit": "Download CSV",
+      "title": "Export orders as CSV",
+      "to": "To"
+    },
     "exportUnavailable": "Exporting to a file is not available yet",
     "itemCount": "{count} cards",
     "list": {
@@ -955,6 +973,18 @@
     },
     "title": "Order overview"
   },
+  "overview": {
+    "export": {
+      "activeListings": "Active listings",
+      "auctionSales": "Auction sales (30 days)",
+      "commission": "Commission",
+      "gmv": "Gross sales (GMV)",
+      "liveAuctions": "Live auctions",
+      "newSellers": "New sellers",
+      "promotionCost": "Promotion cost (Pegasus code subsidy)",
+      "saleSubsidy": "Campaign discounts"
+    }
+  },
   "payments": {
     "approveFailed": "Could not approve",
     "approved": "Payment approved",
@@ -966,7 +996,7 @@
       "notDuplicate": "This slip has not been used for another payment",
       "slipUploaded": "Slip file uploaded"
     },
-    "description": "Review buyers' transfer slips before confirming orders · once approved, the money is held in escrow per shop",
+    "description": "Review buyers' payment slips before confirming orders · once approved, the money is held in escrow per shop",
     "detail": {
       "accountName": "Destination account name",
       "amount": "Amount due",
@@ -1013,9 +1043,9 @@
     "rejectedHint": "The buyer must create a new payment",
     "shops": "{count} shops",
     "slip": {
-      "alt": "Transfer slip of PAY-{id}",
+      "alt": "Payment slip of PAY-{id}",
       "clickToOpen": "Click to open the file",
-      "image": "Transfer slip image",
+      "image": "Payment slip image",
       "none": "No slip file",
       "openFull": "Open the full-size slip",
       "openNewTab": "Open the slip in a new tab",
@@ -1055,20 +1085,20 @@
       "verified": "Identity verified"
     },
     "done": {
-      "approve": "Withdrawal request approved",
+      "approve": "Payout request approved",
       "fail": "Transfer marked as failed",
       "paid": "Payment recorded",
-      "reject": "Withdrawal request rejected",
+      "reject": "Payout request rejected",
       "start": "Transfer started"
     },
-    "emptyDescription": "Sellers' withdrawal requests appear here",
+    "emptyDescription": "Sellers' payout requests appear here",
     "emptyQueue": "Nothing in \"{queue}\"",
-    "loadFailed": "Could not load withdrawal requests",
+    "loadFailed": "Could not load payout requests",
     "orders": {
       "completedAt": "completed {date}",
       "hint": "COMPLETED · oldest to newest until the amount is covered",
-      "linked": "Orders linked to this withdrawal",
-      "toLink": "Orders to be linked to this withdrawal",
+      "linked": "Orders linked to this payout",
+      "toLink": "Orders to be linked to this payout",
       "total": "Total (after commission)"
     },
     "paid": {
@@ -1079,7 +1109,7 @@
       "slip": "Transfer slip (PAYOUT_SLIP)",
       "title": "Confirm payment"
     },
-    "placeholder": "Choose a withdrawal request from the queue on the left to review and transfer it",
+    "placeholder": "Choose a payout request from the queue on the left to review and transfer it",
     "queueSubtitle": "PO-{id} · requested {ago}",
     "reason": {
       "description": "The seller will see this reason, and the reserved amount becomes withdrawable again · this is not recorded in the ledger",
@@ -1087,12 +1117,12 @@
       "failTitle": "Report failed transfer",
       "rejectConfirm": "Confirm rejection",
       "rejectPlaceholder": "e.g. account under review",
-      "rejectTitle": "Reject withdrawal request"
+      "rejectTitle": "Reject payout request"
     },
     "review": {
       "approve": "Approve",
       "description": "Check the amount against the wallet and the verified account before approving · rejecting returns the reserved amount to the seller immediately",
-      "title": "Review withdrawal request"
+      "title": "Review payout request"
     },
     "searchHint": "Try searching by PO number or shop name",
     "searchPlaceholder": "Search PO / shop name",
@@ -1122,7 +1152,7 @@
       "processing": "Transferring",
       "requested": "New requests"
     },
-    "title": "Seller withdrawals",
+    "title": "Seller payouts",
     "transferFailed": "Transfer failed"
   },
   "refunds": {

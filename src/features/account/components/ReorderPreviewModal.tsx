@@ -165,7 +165,7 @@ export function ReorderPreviewModal({
               >
                 {t("account.reorder.title", "สั่งซื้อสินค้าอีกครั้ง")}{" "}
                 <span className="font-normal text-slate-500 text-sm">
-                  {t("account.reorder.titleEn", "(Reorder Items)")}
+                  {t("account.reorder.titleEn", "(สั่งซื้ออีกครั้ง)")}
                 </span>
               </DialogTitle>
               <p className="text-xs sm:text-[13px] text-slate-500 mt-1">
@@ -179,7 +179,7 @@ export function ReorderPreviewModal({
             type="button"
             onClick={handleClose}
             className="size-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer transition-colors"
-            aria-label={t("account.details.close", "Close")}
+            aria-label={t("account.details.close", "ปิดหน้าต่าง")}
           >
             <X className="size-4" />
           </button>
@@ -190,7 +190,7 @@ export function ReorderPreviewModal({
           {isLoading ? (
             <div
               data-testid="reorder-skeleton"
-              aria-label={t("account.reorder.loading", "Loading reorder preview")}
+              aria-label={t("account.reorder.loading", "กำลังโหลดตัวอย่างการสั่งซื้ออีกครั้ง")}
               className="flex flex-col gap-3 animate-pulse"
             >
               <div className="h-24 bg-slate-100 rounded-xl" />

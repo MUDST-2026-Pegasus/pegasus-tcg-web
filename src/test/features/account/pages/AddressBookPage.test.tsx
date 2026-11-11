@@ -35,7 +35,7 @@ const mockAddresses: Address[] = [
   {
     id: 1,
     userId: 1,
-    label: "Home",
+    label: "หน้าแรก",
     recipientName: "Ash Ketchum",
     phone: "0812345678",
     line1: "123 Pallet Town",
@@ -90,8 +90,8 @@ describe("AddressBookPage", () => {
 
     renderWithProviders(<AddressBookPage />);
 
-    expect(await screen.findByText("No saved addresses yet")).toBeInTheDocument();
-    expect(screen.getByText("Save a shipping destination now and checkout will be one step shorter.")).toBeInTheDocument();
+    expect(await screen.findByText("ยังไม่มีที่อยู่ที่บันทึกไว้")).toBeInTheDocument();
+    expect(screen.getByText("บันทึกที่อยู่จัดส่งไว้ตอนนี้ ตอนชำระเงินจะได้สั้นลงหนึ่งขั้น")).toBeInTheDocument();
   });
 
   it("renders address cards when addresses are loaded", async () => {
@@ -99,7 +99,7 @@ describe("AddressBookPage", () => {
 
     renderWithProviders(<AddressBookPage />);
 
-    expect(await screen.findByRole("heading", { name: "Address Book" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "สมุดที่อยู่" })).toBeInTheDocument();
     expect(await screen.findByText("Misty Waterflower")).toBeInTheDocument();
     expect(screen.getByText(/123 Pallet Town/)).toBeInTheDocument();
   });
@@ -112,11 +112,11 @@ describe("AddressBookPage", () => {
 
     expect(await screen.findByText("Misty Waterflower")).toBeInTheDocument();
 
-    const addButtons = screen.getAllByRole("button", { name: /Add New Address/i });
+    const addButtons = screen.getAllByRole("button", { name: "เพิ่มที่อยู่ใหม่" });
     await user.click(addButtons[0]);
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Add New Address" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "เพิ่มที่อยู่ใหม่" })).toBeInTheDocument();
   });
 
   it("opens delete confirmation dialog when Delete is clicked on an address card", async () => {
@@ -127,12 +127,12 @@ describe("AddressBookPage", () => {
 
     expect(await screen.findByText("Misty Waterflower")).toBeInTheDocument();
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
+    const deleteButtons = screen.getAllByRole("button", { name: "ลบ" });
     await user.click(deleteButtons[0]);
 
     const dialog = await screen.findByRole("alertdialog");
     expect(dialog).toBeInTheDocument();
-    expect(screen.getByText("Delete this address?")).toBeInTheDocument();
-    expect(screen.getByText(/Past orders keep their own copy/)).toBeInTheDocument();
+    expect(screen.getByText("ลบที่อยู่นี้?")).toBeInTheDocument();
+    expect(screen.getByText(/คำสั่งซื้อเดิมเก็บสำเนาที่อยู่ไว้แล้ว/)).toBeInTheDocument();
   });
 });

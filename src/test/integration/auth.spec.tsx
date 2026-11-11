@@ -48,11 +48,11 @@ describe("Auth Flow Integration", () => {
     );
 
     // 1. Fill out the form
-    await user.type(screen.getByLabelText(/email/i), "test@pegasus.com");
-    await user.type(screen.getByLabelText(/^password$/i), "password123");
+    await user.type(screen.getByLabelText("อีเมล"), "test@pegasus.com");
+    await user.type(screen.getByLabelText("รหัสผ่าน"), "password123");
 
     // 2. Submit
-    await user.click(screen.getByRole("button", { name: /log in/i }));
+    await user.click(screen.getByRole("button", { name: "เข้าสู่ระบบ" }));
 
     // 3. Verify API was called correctly
     await waitFor(() => {

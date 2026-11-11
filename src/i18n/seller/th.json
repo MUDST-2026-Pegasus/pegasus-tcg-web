@@ -1634,7 +1634,7 @@
     "preview": {
       "authentic": "รับประกันของแท้",
       "handling": "จัดส่งภายใน {days} วัน",
-      "phone": "Phone number : {phone}",
+      "phone": "เบอร์โทรศัพท์ : {phone}",
       "returns": "รับคืน 7 วัน",
       "title": "ตัวอย่างหน้าร้านที่ผู้ซื้อเห็น"
     },
@@ -1751,6 +1751,6 @@
     "viewShop": "ดูหน้าร้าน"
   },
   "sidebar": {
-    "title": "DASHBOARD"
+    "title": "แดชบอร์ดผู้ขาย"
   }
 }
