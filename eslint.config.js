@@ -62,6 +62,8 @@ const I18N_PENDING = [
   'src/features/admin/verification.schema.ts',
   'src/features/admin/weekly-report.format.ts',
   'src/features/admin/weekly-report.schema.ts',
+  // TCG-559 I18N-19 หน้า Terms / Privacy ฉบับไทย (แยกไฟล์ per-language)
+  'src/features/legal/**/*.th.tsx',
   // ยังไม่มีการ์ด
   'src/hooks/use-file-upload.ts',
   // จบรายการ
