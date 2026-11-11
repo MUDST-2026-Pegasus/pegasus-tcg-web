@@ -144,6 +144,28 @@ describe("ProductDetailPage cart actions", () => {
     expect(increase).toBeDisabled();
   });
 
+  it("skips an empty cheaper listing and caps checkout quantity to the next available seller's stock", async () => {
+    vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
+      data: [
+        { ...listing, id: 54, price: 50, quantityAvailable: 0 },
+        { ...listing, id: 56, price: 100, quantityAvailable: 2 },
+      ],
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      refetch: vi.fn(),
+    } as never);
+    renderPage();
+
+    expect(screen.getByLabelText("จำนวน 1")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มจำนวนสินค้า" }));
+    expect(screen.getByLabelText("จำนวน 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "เพิ่มจำนวนสินค้า" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มลงตะกร้า" }));
+
+    await waitFor(() => expect(addItem).toHaveBeenCalledWith({ listingId: 56, quantity: 2 }));
+  });
+
   it("disables purchase actions when stock is empty", () => {
     vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({
       data: [{ ...listing, quantityAvailable: 0 }],
