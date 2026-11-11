@@ -215,7 +215,7 @@ describe('Core Search & Navigation Flow', () => {
 
     cy.visit('/search?q=pokamon');
     cy.wait('@correctedProducts');
-    cy.contains('Showing results for “Pokemon” · You searched “pokamon”').should('be.visible');
+    cy.contains('แสดงผลลัพธ์ของ “Pokemon” · คุณค้นหา “pokamon”').should('be.visible');
     cy.get('input[aria-label="ค้นหาสินค้า"]').should('have.value', 'pokamon');
     cy.contains('Pikachu').should('be.visible');
   });

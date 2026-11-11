@@ -184,7 +184,7 @@ describe('Core Collection Management Flow', () => {
 
     cy.wait('@getPublicCollection');
     cy.contains('@collector_pro').should('be.visible');
-    cy.contains('1 cards').should('be.visible');
+    cy.contains('1 ใบ').should('be.visible');
     cy.contains('การ์ดเด่นในคอลเลกชัน').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });

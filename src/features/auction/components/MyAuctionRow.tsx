@@ -44,7 +44,7 @@ export function MyAuctionRow({ auction, serverTime }: MyAuctionRowProps) {
       <CardHeader className="flex flex-row items-center justify-between gap-4 rounded-none border-b bg-muted/40 px-4 py-3">
         <div className="flex gap-6">
           <div>
-            <p className="text-[10px] font-medium text-muted-foreground">AUCTION</p>
+            <p className="text-[10px] font-medium text-muted-foreground">{t("myAuctions.auctionLabel", "ประมูล")}</p>
             <p className="text-sm font-semibold">#{auction.auctionNumber}</p>
           </div>
           <div>

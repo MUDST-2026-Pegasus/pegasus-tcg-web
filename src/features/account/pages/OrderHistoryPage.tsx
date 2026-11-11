@@ -507,7 +507,7 @@ function OrderCardItem({
       <CardHeader className="rounded-none border-b bg-[#faf9fe] px-4 py-3">
         <div className="flex gap-6 items-center">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">ORDER ID</p>
+            <p className="text-xs text-muted-foreground font-medium">{t("account.orders.orderId", "เลขคำสั่งซื้อ")}</p>
             <p className="font-semibold text-sm">{order.orderNumber}</p>
             {/* มาจากการประมูล [TCG-636] */}
             <AuctionSourcePill order={order} className="mt-1" />
@@ -609,7 +609,7 @@ function OrderCardItem({
         </div>
 
         <div className="sm:text-right">
-          <p className="text-xs font-medium text-muted-foreground">Order Total</p>
+          <p className="text-xs font-medium text-muted-foreground">{t("account.orders.orderTotal", "ยอดรวมคำสั่งซื้อ")}</p>
           <p className="text-2xl font-bold font-heading text-foreground">
             {formatPrice(order.grandTotal)}
           </p>
@@ -629,7 +629,7 @@ function OrderCardItem({
                     className="w-full h-full object-contain"
                   />
                 ) : (
-                  <span className="text-[10px] text-muted-foreground">Card</span>
+                  <span className="text-[10px] text-muted-foreground">{t("listing.card", "การ์ด")}</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">

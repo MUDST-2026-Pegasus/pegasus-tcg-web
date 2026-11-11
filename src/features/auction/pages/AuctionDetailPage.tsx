@@ -95,7 +95,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-8 sm:px-6 lg:py-10">
         <Breadcrumb>
           <BreadcrumbList className="text-sm">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("breadcrumb.home", "หน้าแรก")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink render={<Link to="/auctions" />}>{t("buyer.auctionDetailPage.text4", "ประมูล")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -147,7 +147,7 @@ function AuctionDetailContent({ auction }: { auction: AuctionDetail }) {
         {product.isSuccess ? (
           <section className="grid gap-6 lg:grid-cols-2">
             <CardAttributesCard product={product.data.product} />
-            {product.data.product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.data.product.id} title="Attacks" />}
+            {product.data.product.productType === "SINGLE_CARD" && <CardEffectsCard productId={product.data.product.id} title={t("detail.attacksTitle", "ท่าโจมตี")} />}
           </section>
         ) : null}
       </main>

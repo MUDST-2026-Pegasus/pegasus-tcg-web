@@ -167,6 +167,9 @@
       "title": "ระงับประมูลไม่สำเร็จ"
     }
   },
+  "breadcrumb": {
+    "home": "หน้าแรก"
+  },
   "buyer": {
     "auctionCard": {
       "text": "ซื้อทันที"
@@ -463,6 +466,12 @@
       "title": "ถูกห้ามบิดถึง {value}",
       "title2": "คุณไม่ชำระเงินภายในเวลา ({unpaidStrikes}/{strikeLimit})"
     }
+  },
+  "detail": {
+    "attacksTitle": "ท่าโจมตี"
+  },
+  "myAuctions": {
+    "auctionLabel": "ประมูล"
   },
   "seller": {
     "auctionFormSchema": {

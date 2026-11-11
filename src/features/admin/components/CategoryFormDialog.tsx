@@ -237,7 +237,7 @@ function CategoryForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.slug) || undefined}>
-            <FieldLabel htmlFor="categorySlug">Slug</FieldLabel>
+            <FieldLabel htmlFor="categorySlug">{t("catalog.form.slug", "Slug (ชื่อใน URL)")}</FieldLabel>
             <Input
               id="categorySlug"
               maxLength={120}

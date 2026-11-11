@@ -244,6 +244,7 @@
         "weeklyReport": "Weekly stock/profit report"
       }
     },
+    "dashboardTitle": "DASHBOARD",
     "seller": {
       "groups": {
         "finance": "Finance",

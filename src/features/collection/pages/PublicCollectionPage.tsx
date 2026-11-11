@@ -36,7 +36,7 @@ export function PublicCollectionPage() {
           <Card className="rounded-xl shadow-none"><CardContent className="flex flex-wrap items-center gap-6 p-8">
             <Avatar className="size-20">{avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
             <div className="flex-1"><h1 className="text-2xl font-bold">{name}</h1><p className="text-muted-foreground">@{username}</p></div>
-            <p className="text-xl font-semibold text-primary">{total} cards</p>
+            <p className="text-xl font-semibold text-primary">{t("product.cardCount", "{count, plural, other {# ใบ}}", { count: total })}</p>
           </CardContent></Card>
           <div><h2 className="text-xl font-semibold">{isOwn ? t("collection.public.ownTitle", "คอลเลกชันสาธารณะ") : t("collection.public.title", "การ์ดเด่นในคอลเลกชัน")}</h2>
             <p className="text-sm text-muted-foreground">{isOwn ? t("collection.public.ownHint", "การ์ดที่คุณเปิดเป็นสาธารณะ") : t("collection.public.hint", "การ์ดจากคอลเลกชันของ @{username}", { username: username ?? "" })}</p></div>

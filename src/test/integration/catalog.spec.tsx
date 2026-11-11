@@ -150,7 +150,7 @@ describe("Catalog Search and Filter Integration Flow", () => {
 
     renderWithProviders(<SearchResultsPage />, { route: "/search?q=pokamon" });
 
-    expect(await screen.findByText(/Showing results for “Pokemon” · You searched “pokamon”/)).toBeInTheDocument();
+    expect(await screen.findByText(/แสดงผลลัพธ์ของ “Pokemon” · คุณค้นหา “pokamon”/)).toBeInTheDocument();
     expect(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" })).toHaveValue("pokamon");
     expect(catalogApi.getProducts).toHaveBeenCalledWith(expect.objectContaining({ q: "pokamon", sort: "relevance" }));
   });

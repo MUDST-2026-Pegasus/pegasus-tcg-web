@@ -535,7 +535,8 @@
       "close": "ปิด",
       "description": "คำอธิบาย",
       "optional": "ไม่บังคับ",
-      "save": "บันทึก"
+      "save": "บันทึก",
+      "slug": "Slug (ชื่อใน URL)"
     },
     "games": {
       "activeCount": "{count} เกมที่เปิดใช้งาน",
@@ -660,7 +661,8 @@
         "shopCount": "{count} ร้าน",
         "shops": "ร้านที่ขาย"
       },
-      "unblock": "ปลดการระงับ"
+      "unblock": "ปลดการระงับ",
+      "variant": "เวอร์ชัน"
     },
     "page": {
       "addProduct": "+ เพิ่มการ์ดใหม่",
@@ -673,6 +675,9 @@
     "pagination": {
       "label": "เปลี่ยนหน้า",
       "page": "หน้า {page} จาก {last}"
+    },
+    "product": {
+      "tabEffects": "ความสามารถและท่าโจมตี"
     },
     "productForm": {
       "activeHint": "เปิดใช้งาน — ปิดแล้วผู้ซื้อหาไม่เจอ และผู้ขายลงขายเพิ่มไม่ได้",
@@ -799,6 +804,10 @@
       "slugMax": "slug ต้องไม่เกิน {max} ตัวอักษร",
       "slugPattern": "ใช้ได้แค่ a-z ตัวเล็ก ตัวเลข และขีดกลาง (-)",
       "sourceUrlMax": "ลิงก์ต้องไม่เกิน {max} ตัวอักษร"
+    },
+    "variant": {
+      "edition": "รุ่นพิมพ์",
+      "finish": "ผิวการ์ด"
     },
     "variants": {
       "activeHint": "เปิดใช้งาน — ปิดแล้วผู้ขายลงขาย variant นี้เพิ่มไม่ได้",
@@ -1979,6 +1988,7 @@
       "fastMovingPercent": "ระบุเปอร์เซ็นต์เป็นเลขจำนวนเต็ม 1-100",
       "lowStockThreshold": "ระบุจำนวนชิ้นเป็นเลขจำนวนเต็มตั้งแต่ 0 ขึ้นไป"
     },
+    "weekNumber": "สัปดาห์ที่ {range}",
     "weekday": {
       "fri": "ศ.",
       "mon": "จ.",
@@ -1987,7 +1997,6 @@
       "thu": "พฤ.",
       "tue": "อ.",
       "wed": "พ."
-    },
-    "weekNumber": "สัปดาห์ที่ {range}"
+    }
   }
 }
