@@ -1,4 +1,4 @@
-import { PromotionTicketFrame, StubAmount } from "@/features/promotions/PromotionTicketFrame";
+import { PromotionTicketFrame, StubAmount, StubText } from "@/features/promotions/PromotionTicketFrame";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import type { SellerPromotion, SellerPromotionInput } from "@/features/seller/promotions/promotions.types";
 import { discountCapLabel, minSpendLabel, thaiDate } from "@/features/seller/promotions/promotions.format";
@@ -36,7 +36,7 @@ export function CouponTicket({
   const { t } = useTranslate("promotions");
   if ("scopeType" in promotion) {
     const value = promotion.discountType === "FREE_SHIPPING"
-      ? t("buyer.couponTicket.value", "ส่งฟรี") : promotion.discountType === "PERCENT"
+      ? <StubText>{t("buyer.couponTicket.value", "ส่งฟรี")}</StubText> : promotion.discountType === "PERCENT"
         ? `${promotion.discountValue || 0}%` : <StubAmount amount={promotion.discountValue} />;
     const endsAt = Number.isFinite(Date.parse(promotion.endsAt))
       ? formatPromoDate(promotion.endsAt) : "—";
@@ -98,7 +98,7 @@ export function CouponTicket({
   const needsClaim = promotion.source === "CLAIMABLE";
   const disabled = propDisabled ?? (!promotion.applicable || needsClaim);
   const platform = promotion.ownerType === "PLATFORM";
-  const value = promotion.discountType === "FIXED" ? <StubAmount amount={promotion.discountValue} /> : formatPromotionValue(promotion);
+  const value = promotion.discountType === "FIXED" ? <StubAmount amount={promotion.discountValue} /> : promotion.discountType === "FREE_SHIPPING" ? <StubText>{formatPromotionValue(promotion)}</StubText> : formatPromotionValue(promotion);
 
   const disabledReason = formatPromotionUnavailableReason(promotion);
 

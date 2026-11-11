@@ -5,6 +5,11 @@ import { formatNumber } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /** มูลค่าบนหัวคูปอง: "THB" ตัวเล็กเหนือเลขเต็ม (100) ไม่ให้ล้นกรอบ — ข้อความอื่นยังใช้ THB 100.00 */
+/** ข้อความยาวบนหัวคูปอง ("Free shipping") ย่อและตัดบรรทัดได้ ไม่ล้นกรอบ */
+export function StubText({ children }: { children: ReactNode }) {
+  return <span className="block text-[0.6em] leading-tight text-balance">{children}</span>;
+}
+
 export function StubAmount({ amount }: { amount: number }) {
   return (
     <span className="flex flex-col items-center">
