@@ -605,6 +605,21 @@
       "tryAgain": "Please try again"
     }
   },
+  "category": {
+    "accessory": "Accessories",
+    "binders": "Binders",
+    "boosterBoxes": "Booster Boxes",
+    "boosterPacks": "Booster Packs",
+    "cardProtection": "Toploaders & Cases",
+    "deckBoxes": "Deck Boxes",
+    "eliteTrainerBoxes": "Elite Trainer Boxes",
+    "other": "Other",
+    "playmats": "Playmats",
+    "sealed": "Sealed Products",
+    "singles": "Single Cards",
+    "sleeves": "Card Sleeves",
+    "starterDecks": "Starter Decks"
+  },
   "checkout": {
     "address": {
       "add": "+ Add new address",
