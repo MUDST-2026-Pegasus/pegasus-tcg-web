@@ -1,4 +1,4 @@
-import type { AvailablePromotion } from "./promotions.types";
+import type { AvailablePromotion, PromoCodeOutcome } from "./promotions.types";
 import { dateTimeFormat, errorText, translate, formatMoney } from "@/lib/i18n";
 
 // @tolgee-key {"key": "cart.common.freeShipping", "ns": "buyer", "defaultValue": "ส่งฟรี"}
@@ -29,6 +29,19 @@ export function formatPromotionDate(value: string): string {
 
 export function normalizePromotionCode(code: string): string {
   return code.trim().toUpperCase();
+}
+
+/**
+ * The slot (Pegasus or a shop) a preview outcome belongs to: where the code was
+ * typed, not who owns it, so an unknown or wrong-slot code still finds its slot
+ * [TCG-769]. Without the slot fields (older API) an outcome with no owner is the
+ * Pegasus slot's.
+ */
+export function promotionOutcomeSlot(outcome: PromoCodeOutcome): "PLATFORM" | number | null {
+  if (outcome.slotOwnerType === "PLATFORM") return "PLATFORM";
+  if (outcome.slotOwnerType === "SELLER") return outcome.slotSellerProfileId ?? null;
+  if (outcome.ownerType === "PLATFORM") return "PLATFORM";
+  return outcome.sellerProfileId ?? (outcome.ownerType == null ? "PLATFORM" : null);
 }
 
 export function findPromotionOwnerForCode(

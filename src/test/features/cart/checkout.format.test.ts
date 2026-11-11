@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkoutMoney,
   findPromotionOwnerForCode,
+  promotionOutcomeSlot,
   formatPromotionConditions,
   formatPromotionDate,
   formatPromotionError,
@@ -23,6 +24,28 @@ describe("checkout.format", () => {
     it("trims and converts to uppercase", () => {
       expect(normalizePromotionCode("  pegasus10 ")).toBe("PEGASUS10");
       expect(normalizePromotionCode("Store_a")).toBe("STORE_A");
+    });
+  });
+
+  describe("promotionOutcomeSlot [TCG-769]", () => {
+    const base = {
+      code: "X", sellerName: null, status: "PROMO_NOT_FOUND", discount: null, shortfall: null, pendingShipping: false,
+    };
+
+    it("uses the slot the code was typed in, not its owner", () => {
+      expect(promotionOutcomeSlot({ ...base, ownerType: "SELLER", sellerProfileId: 7,
+        slotOwnerType: "PLATFORM", slotSellerProfileId: null })).toBe("PLATFORM");
+      expect(promotionOutcomeSlot({ ...base, ownerType: "PLATFORM", sellerProfileId: null,
+        slotOwnerType: "SELLER", slotSellerProfileId: 3 })).toBe(3);
+      expect(promotionOutcomeSlot({ ...base, ownerType: null, sellerProfileId: null,
+        slotOwnerType: "PLATFORM", slotSellerProfileId: null })).toBe("PLATFORM");
+    });
+
+    it("falls back to the owner on an older API, an ownerless code being Pegasus's slot", () => {
+      expect(promotionOutcomeSlot({ ...base, ownerType: "PLATFORM", sellerProfileId: null })).toBe("PLATFORM");
+      expect(promotionOutcomeSlot({ ...base, ownerType: "SELLER", sellerProfileId: 5 })).toBe(5);
+      expect(promotionOutcomeSlot({ ...base, ownerType: null, sellerProfileId: null })).toBe("PLATFORM");
+      expect(promotionOutcomeSlot({ ...base, ownerType: null, sellerProfileId: 9 })).toBe(9);
     });
   });
 

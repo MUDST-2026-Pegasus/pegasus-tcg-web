@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CartItemResponse } from "./cart.types";
 import { useCheckoutPromotionList, useCheckoutPromotionPreview } from "./cart.queries";
-import { formatPromotionError, normalizePromotionCode } from "./checkout.format";
+import { formatPromotionError, normalizePromotionCode, promotionOutcomeSlot } from "./checkout.format";
 import { readPromotionSelection, savePromotionSelection } from "./promotions.storage";
 import type { PromotionSelection } from "./promotions.types";
 
@@ -88,7 +88,7 @@ export function useCheckoutPromotions({
     debouncedSelection === promotionSelection;
 
   const appliedPlatformCode = preview?.codes.find(
-    (code) => code.ownerType === "PLATFORM" && code.status === "APPLIED",
+    (code) => promotionOutcomeSlot(code) === "PLATFORM" && code.status === "APPLIED",
   )?.code;
 
   const appliedPlatformPromotion = useMemo(() => {
@@ -150,18 +150,17 @@ export function useCheckoutPromotions({
             sellerName: invalid.sellerName,
             shortfall: invalid.shortfall,
           });
-          if (
-            invalid.ownerType === "PLATFORM" &&
-            promotionSelection.platformCode === invalid.code
-          ) {
+          // Matched by the slot it was typed in, so unknown and wrong-slot codes drop out too [TCG-769].
+          const slot = promotionOutcomeSlot(invalid);
+          if (slot === "PLATFORM" && promotionSelection.platformCode === invalid.code) {
             removePlatform = true;
             setPlatformError(message);
           } else if (
-            invalid.sellerProfileId != null &&
-            promotionSelection.sellerCodes[invalid.sellerProfileId] === invalid.code
+            typeof slot === "number" &&
+            promotionSelection.sellerCodes[slot] === invalid.code
           ) {
-            sellerIdsToRemove.add(invalid.sellerProfileId);
-            nextSellerErrors[invalid.sellerProfileId] = message;
+            sellerIdsToRemove.add(slot);
+            nextSellerErrors[slot] = message;
           }
         }
 
@@ -191,9 +190,7 @@ export function useCheckoutPromotions({
           if (outcome.code !== pendingTypedCode.code || outcome.status !== "APPLIED") {
             return false;
           }
-          return pendingTypedCode.owner === "PLATFORM"
-            ? outcome.ownerType === "PLATFORM"
-            : outcome.sellerProfileId === pendingTypedCode.owner;
+          return promotionOutcomeSlot(outcome) === pendingTypedCode.owner;
         });
         if (applied) {
           setPendingTypedCode(null);
