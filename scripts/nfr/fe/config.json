@@ -1,0 +1,18 @@
+{
+  "cypressVersion": "16.1.0",
+  "lighthouseVersion": "12.2.1",
+  "timeoutSeconds": 2700,
+  "runsPerPage": 3,
+  "requiredBrowserTargets": ["chrome", "edge", "firefox", "webkit"],
+  "pages": [
+    { "name": "home", "path": "/" },
+    { "name": "catalog", "path": "/search" },
+    { "name": "detail", "path": "/products/1" },
+    { "name": "cart", "path": "/cart" },
+    { "name": "checkout", "path": "/checkout" },
+    { "name": "auction", "path": "/auctions" },
+    { "name": "seller-dashboard", "path": "/seller" },
+    { "name": "admin-report", "path": "/admin/reports/weekly-stock-profit" }
+  ],
+  "thresholds": { "lcpMs": 2500, "cls": 0.1, "interactionLatencyMs": 200, "axeCritical": 0, "axeSerious": 0, "touchTargetCssPx": 24 }
+}
