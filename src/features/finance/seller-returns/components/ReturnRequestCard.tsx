@@ -11,6 +11,7 @@ import { ReturnDecisionBox } from "./ReturnDecisionBox";
 import { ReturnInTransitBox } from "./ReturnInTransitBox";
 import { ReturnRequestSummary } from "./ReturnRequestSummary";
 import { ReturnStatusCallout } from "./ReturnStatusCallout";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * One return request as an accordion card; the body depends on the status.
@@ -40,7 +41,8 @@ export function ReturnRequestCard({
   onReceive: () => void;
   onEvidenceClick: (link: ReturnEvidenceLink, list: ReturnEvidenceLink[]) => void;
 }) {
-  const statusConf = sellerReturnStatusConfig(item.status);
+  const { t } = useTranslate("seller");
+  const statusConf = sellerReturnStatusConfig(item.status, t);
 
   return (
     <Card
@@ -89,8 +91,12 @@ export function ReturnRequestCard({
             <span className="mx-1.5">·</span>
             <span>
               {item.status === "IN_TRANSIT"
-                ? `อนุมัติเมื่อ ${formatAgo(item.reviewedAt ?? item.requestedAt)}`
-                : `เปิดคำขอเมื่อ ${formatAgo(item.requestedAt)}`}
+                ? t("sellerReturns.card.approvedAgo", "อนุมัติเมื่อ {time}", {
+                    time: formatAgo(item.reviewedAt ?? item.requestedAt),
+                  })
+                : t("sellerReturns.card.requestedAgo", "เปิดคำขอเมื่อ {time}", {
+                    time: formatAgo(item.requestedAt),
+                  })}
             </span>
           </div>
         </div>
@@ -102,8 +108,10 @@ export function ReturnRequestCard({
             </div>
             <div className="text-[11px] text-muted-foreground">
               {item.refundAmount && item.resolution === "PARTIAL_REFUND"
-                ? `คืนบางส่วน ${formatBahtShort(item.refundAmount)}`
-                : "ยอดออเดอร์ย่อย"}
+                ? t("sellerReturns.card.partialRefundSubtext", "คืนบางส่วน {amount}", {
+                    amount: formatBahtShort(item.refundAmount),
+                  })
+                : t("sellerReturns.card.subOrderTotalSubtext", "ยอดออเดอร์ย่อย")}
             </div>
           </div>
           <div className="text-muted-foreground hover:text-foreground transition-colors">

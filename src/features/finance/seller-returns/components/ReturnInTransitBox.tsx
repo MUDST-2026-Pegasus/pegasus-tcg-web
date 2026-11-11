@@ -5,16 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 
 import type { SellerReturnRequest } from "../../after-sales.types";
-
-// Copy tracking number helper
-function handleCopyTracking(tracking: string) {
-  void navigator.clipboard.writeText(tracking);
-  toast.add({
-    type: "success",
-    title: "คัดลอกเลขพัสดุแล้ว",
-    description: tracking,
-  });
-}
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * IN_TRANSIT card body: buyer's return tracking, restock toggle, confirm receipt.
@@ -32,6 +23,21 @@ export function ReturnInTransitBox({
   onRestockChange: (restock: boolean) => void;
   onReceive: () => void;
 }) {
+  const { t } = useTranslate("seller");
+
+  function handleCopyTracking(tracking: string) {
+    void navigator.clipboard.writeText(tracking);
+    toast.add({
+      type: "success",
+      title: t("sellerReturns.inTransit.toastCopied", "คัดลอกเลขพัสดุแล้ว"),
+      description: tracking,
+    });
+  }
+
+  const expectedCards =
+    item.items?.map((i) => `${i.cardName} ×${i.quantityReturned}`).join(", ") ||
+    t("sellerReturns.inTransit.defaultReturnedCards", "การ์ดที่ส่งคืน");
+
   return (
     <div className="space-y-4">
       {/* Tracking Box */}
@@ -42,14 +48,13 @@ export function ReturnInTransitBox({
           </div>
           <div className="space-y-0.5">
             <div className="text-xs font-semibold text-muted-foreground">
-              เลขพัสดุส่งคืนจากผู้ซื้อ
+              {t("sellerReturns.inTransit.title", "เลขพัสดุส่งคืนจากผู้ซื้อ")}
             </div>
             <div className="text-xs sm:text-sm font-bold text-foreground">
-              {item.returnTrackingNumber ?? "ไม่มีเลขพัสดุ"}
+              {item.returnTrackingNumber ?? t("sellerReturns.inTransit.noTracking", "ไม่มีเลขพัสดุ")}
               <span className="font-normal text-muted-foreground ml-2">
-                · ของที่ต้องได้รับ:{" "}
-                {item.items?.map((i) => `${i.cardName} ×${i.quantityReturned}`).join(", ") ||
-                  "การ์ดที่ส่งคืน"}
+                {t("sellerReturns.inTransit.expectedItemsPrefix", "· ของที่ต้องได้รับ: ")}
+                {expectedCards}
               </span>
             </div>
           </div>
@@ -62,7 +67,7 @@ export function ReturnInTransitBox({
             className="self-start sm:self-auto text-xs"
           >
             <Copy className="size-3.5 mr-1.5" />
-            คัดลอก
+            {t("sellerReturns.inTransit.copyButton", "คัดลอก")}
           </Button>
         )}
       </div>
@@ -80,10 +85,10 @@ export function ReturnInTransitBox({
               htmlFor={`restock-${item.id}`}
               className="text-xs sm:text-sm font-semibold text-foreground cursor-pointer"
             >
-              นำการ์ดกลับเข้าสต็อก
+              {t("sellerReturns.inTransit.restockLabel", "นำการ์ดกลับเข้าสต็อก")}
             </label>
             <p className="text-[11px] text-muted-foreground">
-              ได้รับทุกใบในสภาพดี · ปิดไว้ถ้าการ์ดเสียหายจนขายต่อไม่ได้
+              {t("sellerReturns.inTransit.restockDesc", "ได้รับทุกใบในสภาพดี · ปิดไว้ถ้าการ์ดเสียหายจนขายต่อไม่ได้")}
             </p>
           </div>
         </div>
@@ -94,7 +99,7 @@ export function ReturnInTransitBox({
           onClick={onReceive}
           className="text-xs font-semibold px-4 shadow-xs self-end sm:self-auto"
         >
-          ยืนยันได้รับสินค้าคืน
+          {t("sellerReturns.inTransit.confirmReceiptButton", "ยืนยันได้รับสินค้าคืน")}
         </Button>
       </div>
     </div>

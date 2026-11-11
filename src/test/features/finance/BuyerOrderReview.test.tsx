@@ -39,4 +39,11 @@ describe('BuyerOrderReview', () => {
     expect(screen.getByLabelText('ข้อความรีวิว')).toHaveValue('แพ็กไม่ดี');
     expect(screen.getByRole('radio', { name: '2 ดาว' })).toBeChecked();
   });
+  it('renders review form in English with zero Thai text when language is en', async () => {
+    vi.spyOn(afterSalesApi, 'myReview').mockResolvedValue(null);
+    renderWithProviders(<BuyerOrderReview orderId={41} status="COMPLETED" />, { language: "en" });
+    expect(await screen.findByRole('button', { name: 'Submit review' })).toBeInTheDocument();
+    expect(screen.getByText('Review Seller')).toBeInTheDocument();
+    expect(screen.getByLabelText('Review comment')).toBeInTheDocument();
+  });
 });

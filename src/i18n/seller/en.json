@@ -1395,7 +1395,7 @@
       "policy": {
         "closeButton": "Understood",
         "contactTeam": "If you have questions or need assistance, contact our team 24/7",
-        "desc": "Terms and process for sellers when managing return requests",
+        "desc": "Terms and conditions for return requests on the Pegasus TCG platform",
         "gotIt": "Understood",
         "intro": "Pegasus TCG provides protection for both buyers and sellers with the following conditions:",
         "rule1": "Buyers may request returns within 2 days after status becomes DELIVERED",
@@ -1411,7 +1411,7 @@
         "section3Title": "3. Return Shipment",
         "section4Body": "Funds of orders with active return requests are held in Escrow until resolved. If rejected, funds are released according to original schedule",
         "section4Title": "4. Financial Impact",
-        "title": "Return and Refund Policy"
+        "title": "Return Policy and Procedures"
       },
       "reject": {
         "checkCarefully": "Please review evidence and messages from the buyer carefully before deciding to reject",

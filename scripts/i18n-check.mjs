@@ -11,7 +11,8 @@
  */
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const I18N_DIR = "src/i18n";
 const DEFAULT_NS = "common";
@@ -84,7 +85,8 @@ function main() {
   const th = Object.fromEntries(namespaces.map((ns) => [ns, readNamespace(ns, "th") ?? {}]));
 
   // 1 + 3: key ที่โค้ดใช้
-  const output = execFileSync("pnpm", ["exec", "tolgee", "extract", "print"], { encoding: "utf8" });
+  const pnpmCmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+  const output = execFileSync(pnpmCmd, ["exec", "tolgee", "extract", "print"], { encoding: "utf8", shell: true });
   const { keys, warnings: extractorWarnings } = parseExtractOutput(output);
   for (const w of extractorWarnings) report("warning", `tolgee extract: ${w.message}`, w.file, w.line);
   for (const { file, line, key, ns } of keys) {
@@ -109,4 +111,4 @@ function main() {
   process.exitCode = errors > 0 ? 1 : 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) main();

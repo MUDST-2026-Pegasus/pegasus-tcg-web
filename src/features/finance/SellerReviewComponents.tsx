@@ -15,6 +15,7 @@ import {
   formatReviewDate,
   reviewerInitials,
 } from "./reviews.format";
+import { useTranslate } from "@/lib/i18n";
 
 const panel = "rounded-xl border border-border bg-card";
 
@@ -58,15 +59,15 @@ export function Stat({
 }
 
 export function EmptyReviews({ username }: { username: string }) {
+  const { t } = useTranslate("seller");
   return (
     <div className={`${panel} mx-auto max-w-xl px-6 py-12 text-center`}>
       <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-[#fdf0dd]">
         <Star className="size-6 text-orange-500" />
       </span>
-      <h2 className="font-semibold">ยังไม่มีรีวิว</h2>
+      <h2 className="font-semibold">{t("sellerReviews.empty.title", "ยังไม่มีรีวิว")}</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        ผู้ซื้อจะรีวิวร้านได้หลังออเดอร์เป็น COMPLETED แล้ว
-        รีวิวใหม่จะแสดงที่นี่
+        {t("sellerReviews.empty.description", "ผู้ซื้อจะรีวิวร้านได้หลังออเดอร์เป็น COMPLETED แล้ว รีวิวใหม่จะแสดงที่นี่")}
       </p>
       {username && (
         <Button
@@ -82,7 +83,7 @@ export function EmptyReviews({ username }: { username: string }) {
             />
           }
         >
-          ดูหน้าร้านสาธารณะ
+          {t("sellerReviews.empty.viewPublicStore", "ดูหน้าร้านสาธารณะ")}
         </Button>
       )}
     </div>
@@ -106,6 +107,7 @@ export function ReviewCard({
   onDraft: (value: string) => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslate("seller");
   const replied = review.replyComment !== null;
   return (
     <article
@@ -128,7 +130,7 @@ export function ReviewCard({
         <span
           className={`rounded-full px-2 py-0.5 text-[11px] ${replied ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}
         >
-          {replied ? "ตอบแล้ว" : "ยังไม่ตอบ"}
+          {replied ? t("sellerReviews.card.repliedBadge", "ตอบแล้ว") : t("sellerReviews.card.unrepliedBadge", "ยังไม่ตอบ")}
         </span>
       </div>
       {review.title?.trim() && (
@@ -140,7 +142,7 @@ export function ReviewCard({
       {replied ? (
         <div className="mt-4 rounded-lg bg-[#fafbfb] p-3 text-xs">
           <p className="mb-1 font-semibold text-primary">
-            ↩ คำตอบจากร้านของคุณ
+            {t("sellerReviews.card.replyHeader", "↩ คำตอบจากร้านของคุณ")}
           </p>
           <p className="whitespace-pre-wrap text-[#414755]">
             {review.replyComment}
@@ -154,45 +156,45 @@ export function ReviewCard({
                 htmlFor={`reply-${review.id}`}
                 className="text-xs font-semibold"
               >
-                ตอบกลับรีวิวนี้
+                {t("sellerReviews.card.replyFormLabel", "ตอบกลับรีวิวนี้")}
               </label>
               <Textarea
                 id={`reply-${review.id}`}
                 value={draft}
                 onChange={(event) => onDraft(event.target.value)}
-                placeholder="พิมพ์คำตอบของร้าน..."
+                placeholder={t("sellerReviews.card.replyPlaceholder", "พิมพ์คำตอบของร้าน...")}
                 aria-invalid={error}
                 className="min-h-24 rounded-md border bg-card text-sm"
               />
               {error ? (
                 <p role="alert" className="text-xs text-destructive">
-                  กรุณาพิมพ์คำตอบก่อนส่ง
+                  {t("sellerReviews.card.emptyError", "กรุณาพิมพ์คำตอบก่อนส่ง")}
                 </p>
               ) : (
                 <p className="text-xs text-orange-700">
-                  ห้ามเว้นว่าง · ส่งแล้วแก้ไขหรือลบไม่ได้
+                  {t("sellerReviews.card.warningText", "ห้ามเว้นว่าง · ส่งแล้วแก้ไขหรือลบไม่ได้")}
                 </p>
               )}
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" size="sm" onClick={onToggle}>
-                  ยกเลิก
+                  {t("actions.cancel", "ยกเลิก", { ns: "common" })}
                 </Button>
                 <Button
                   size="sm"
                   disabled={!canSendReply(draft)}
                   onClick={onConfirm}
                 >
-                  ส่งคำตอบ
+                  {t("sellerReviews.card.sendButton", "ส่งคำตอบ")}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] text-[#9aa5ad]">
-                ตอบได้ครั้งเดียว · ส่งแล้วแก้ไขหรือลบไม่ได้
+                {t("sellerReviews.card.onceWarning", "ตอบได้ครั้งเดียว · ส่งแล้วแก้ไขหรือลบไม่ได้")}
               </p>
               <Button variant="outline" size="sm" onClick={onToggle}>
-                ตอบกลับ
+                {t("sellerReviews.card.replyButton", "ตอบกลับ")}
               </Button>
             </div>
           )}
@@ -211,6 +213,7 @@ export function ReviewAside({
   rating: number | null;
   onRating: (rating: number | null) => void;
 }) {
+  const { t } = useTranslate("seller");
   const summary = data.summary;
   const counts = [
     summary?.count5 ?? 0,
@@ -224,9 +227,9 @@ export function ReviewAside({
     <aside className="space-y-3">
       <section className={`${panel} p-5`}>
         <div className="flex justify-between gap-2 text-xs">
-          <h2 className="font-semibold">การกระจายคะแนน</h2>
+          <h2 className="font-semibold">{t("sellerReviews.aside.ratingDistribution", "การกระจายคะแนน")}</h2>
           <span className="text-[#9aa5ad]">
-            {summary?.ratingCount ?? 0} รีวิว
+            {t("sellerReviews.aside.reviewCount", "{count} รีวิว", { count: summary?.ratingCount ?? 0 })}
           </span>
         </div>
         <div className="mt-3 flex items-center gap-2">
@@ -243,7 +246,7 @@ export function ReviewAside({
                 type="button"
                 key={score}
                 onClick={() => onRating(rating === score ? null : score)}
-                aria-label={`กรอง ${score} ดาว ${count} รีวิว`}
+                aria-label={t("sellerReviews.aside.filterAria", "กรอง {score} ดาว {count} รีวิว", { score, count })}
                 aria-pressed={rating === score}
                 className="flex w-full items-center gap-2 text-[11px] hover:text-orange-700"
               >
@@ -260,31 +263,31 @@ export function ReviewAside({
           })}
         </div>
         <p className="mt-3 text-[11px] text-[#9aa5ad]">
-          กดแถบดาวเพื่อกรองรายการ
+          {t("sellerReviews.aside.filterHint", "กดแถบดาวเพื่อกรองรายการ")}
         </p>
       </section>
       <section className={`${panel} space-y-3 p-5 text-xs`}>
-        <h2 className="font-semibold">กฎการตอบรีวิว</h2>
+        <h2 className="font-semibold">{t("sellerReviews.aside.rulesTitle", "กฎการตอบรีวิว")}</h2>
         <p className="flex gap-2">
           <MessageSquare className="size-4 shrink-0 text-primary" />
-          ตอบได้ 1 ครั้งต่อรีวิว · ส่งแล้วแก้ไขหรือลบไม่ได้
+          {t("sellerReviews.aside.rule1", "ตอบได้ 1 ครั้งต่อรีวิว · ส่งแล้วแก้ไขหรือลบไม่ได้")}
         </p>
         <p className="flex gap-2">
           <StarOff className="size-4 shrink-0 text-primary" />
-          ร้านแก้ ลบ หรือซ่อนรีวิวไม่ได้
+          {t("sellerReviews.aside.rule2", "ร้านแก้ ลบ หรือซ่อนรีวิวไม่ได้")}
         </p>
         <p className="flex gap-2">
-          <Info className="size-4 shrink-0 text-primary" />1 รีวิว ต่อ 1
-          ออเดอร์ย่อยที่ COMPLETED เท่านั้น
+          <Info className="size-4 shrink-0 text-primary" />
+          {t("sellerReviews.aside.rule3", "1 รีวิว ต่อ 1 ออเดอร์ย่อยที่ COMPLETED เท่านั้น")}
         </p>
       </section>
       <section className="rounded-xl bg-[#fdf0dd] p-4 text-xs text-orange-700">
         <p className="flex items-center gap-2 font-semibold">
           <AlertTriangle className="size-4" />
-          ตอบรีวิวคะแนนต่ำอย่างสุภาพ
+          {t("sellerReviews.aside.politeWarningTitle", "ตอบรีวิวคะแนนต่ำอย่างสุภาพ")}
         </p>
         <p className="mt-1">
-          คำตอบแสดงต่อสาธารณะให้ทุกคนเห็น และแก้ไขภายหลังไม่ได้
+          {t("sellerReviews.aside.politeWarningDesc", "คำตอบแสดงต่อสาธารณะให้ทุกคนเห็น และแก้ไขภายหลังไม่ได้")}
         </p>
       </section>
     </aside>

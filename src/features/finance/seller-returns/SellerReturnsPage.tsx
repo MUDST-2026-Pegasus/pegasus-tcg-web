@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import type { ReturnEvidenceLink } from "../after-sales.types";
+import { getTabLabel } from "../after-sales.helpers";
 import { EvidenceWarningWidget } from "./components/EvidenceWarningWidget";
 import { PendingFundsWidget } from "./components/PendingFundsWidget";
 import { ReturnRequestCard } from "./components/ReturnRequestCard";
@@ -18,11 +19,13 @@ import { ReturnPolicyModal } from "./modals/ReturnPolicyModal";
 import { getRefundAmount } from "./return-draft";
 import { useReturnActions } from "./useReturnActions";
 import { useSellerReturns } from "./useSellerReturns";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Main Seller Returns Page Component
  */
 export function SellerReturnsPage() {
+  const { t } = useTranslate("seller");
   const {
     isLoading,
     isError,
@@ -69,10 +72,12 @@ export function SellerReturnsPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold text-foreground">
-              คำขอคืนสินค้า
+              {t("sellerReturns.title", "คำขอคืนสินค้า")}
             </h1>
             <p className="text-xs text-gray-500">
-              {tabCounts.action_required} คำขอรอคุณดำเนินการ · เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกพักไว้จนกว่าจะจบเรื่อง
+              {t("sellerReturns.subtitle", "{count} คำขอรอคุณดำเนินการ · เงินของออเดอร์ที่มีคำขอเปิดอยู่จะถูกพักไว้จนกว่าจะจบเรื่อง", {
+                count: tabCounts.action_required,
+              })}
             </p>
           </div>
           <Button
@@ -81,7 +86,7 @@ export function SellerReturnsPage() {
             onClick={() => setPolicyModalOpen(true)}
             className="self-start sm:self-auto rounded-lg bg-background text-xs font-medium"
           >
-            นโยบายการคืนสินค้า
+            {t("sellerReturns.policyButton", "นโยบายการคืนสินค้า")}
           </Button>
         </div>
 
@@ -98,7 +103,7 @@ export function SellerReturnsPage() {
                   : "border border-border bg-card font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
-              ต้องดำเนินการ ({tabCounts.action_required})
+              {getTabLabel("action_required", t)} ({tabCounts.action_required})
             </button>
             <button
               type="button"
@@ -110,7 +115,7 @@ export function SellerReturnsPage() {
                   : "border border-border bg-card font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
-              รอผู้ซื้อส่งคืน ({tabCounts.awaiting_shipment})
+              {getTabLabel("awaiting_shipment", t)} ({tabCounts.awaiting_shipment})
             </button>
             <button
               type="button"
@@ -122,7 +127,7 @@ export function SellerReturnsPage() {
                   : "border border-border bg-card font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
-              รอคืนเงิน ({tabCounts.awaiting_refund})
+              {getTabLabel("awaiting_refund", t)} ({tabCounts.awaiting_refund})
             </button>
             <button
               type="button"
@@ -134,7 +139,7 @@ export function SellerReturnsPage() {
                   : "border border-border bg-card font-normal text-gray-700 hover:bg-gray-50"
               )}
             >
-              เสร็จสิ้น ({tabCounts.completed})
+              {getTabLabel("completed", t)} ({tabCounts.completed})
             </button>
           </div>
 
@@ -157,15 +162,19 @@ export function SellerReturnsPage() {
             className="flex flex-col items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center"
           >
             <XCircle className="size-8 text-destructive mb-2" />
-            <p className="text-sm font-semibold text-destructive">โหลดคำขอคืนสินค้าไม่สำเร็จ</p>
-            <p className="text-xs text-muted-foreground mt-1">กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง</p>
+            <p className="text-sm font-semibold text-destructive">
+              {t("sellerReturns.loadFailed", "โหลดคำขอคืนสินค้าไม่สำเร็จ")}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t("sellerReturns.loadFailedHint", "กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง")}
+            </p>
             <Button
               variant="outline"
               size="sm"
               onClick={() => void refetch()}
               className="mt-4 border-destructive/30 text-destructive hover:bg-destructive/10"
             >
-              ลองอีกครั้ง
+              {t("actions.retry", "ลองอีกครั้ง", { ns: "common" })}
             </Button>
           </div>
         )}
@@ -180,9 +189,11 @@ export function SellerReturnsPage() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                     <RotateCcw className="size-6" />
                   </div>
-                  <h3 className="mt-3 text-sm font-semibold text-foreground">ไม่มีคำขอในหมวดนี้</h3>
+                  <h3 className="mt-3 text-sm font-semibold text-foreground">
+                    {t("sellerReturns.emptyCategory.title", "ไม่มีคำขอในหมวดนี้")}
+                  </h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    เมื่อมีคำขอคืนสินค้าในสถานะนี้ รายการจะปรากฏที่นี่โดยอัตโนมัติ
+                    {t("sellerReturns.emptyCategory.desc", "เมื่อมีคำขอคืนสินค้าในสถานะนี้ รายการจะปรากฏที่นี่โดยอัตโนมัติ")}
                   </p>
                 </div>
               ) : (
