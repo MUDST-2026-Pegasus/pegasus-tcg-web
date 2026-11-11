@@ -1,7 +1,18 @@
 import type { ReactNode } from "react";
 import notch from "@/assets/promotions/notch.svg";
 import scallop from "@/assets/promotions/scallop.svg";
+import { formatNumber } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+/** มูลค่าบนหัวคูปอง: "THB" ตัวเล็กเหนือเลขเต็ม (100) ไม่ให้ล้นกรอบ — ข้อความอื่นยังใช้ THB 100.00 */
+export function StubAmount({ amount }: { amount: number }) {
+  return (
+    <span className="flex flex-col items-center">
+      <span className="text-[0.45em] font-semibold tracking-widest">THB</span>
+      {formatNumber(amount, { maximumFractionDigits: 2 })}
+    </span>
+  );
+}
 
 export type PromotionTicketFrameProps = {
   variant: "platform" | "shop";

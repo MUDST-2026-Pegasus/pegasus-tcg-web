@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { checkoutMoney, formatPromotionValue } from "@/features/cart/checkout.format";
 import { cn } from "@/lib/utils";
-import { PromotionTicketFrame } from "./PromotionTicketFrame";
+import { PromotionTicketFrame, StubAmount } from "./PromotionTicketFrame";
 import { claimTicketState } from "./claim.format";
 import type { ClaimableCode } from "./claim.types";
 import { intlLocale, useTranslate } from "@/lib/i18n";
@@ -81,7 +81,7 @@ export function ClaimTicket({
           <small className="text-[8px] font-semibold uppercase tracking-[0.18em] text-white/80">
             {platform ? "PEGASUS" : "SHOP"}
           </small>
-          <strong className="text-[24px] font-black leading-7">{formatPromotionValue(promotion)}</strong>
+          <strong className="text-[24px] font-black leading-7">{promotion.discountType === "FIXED" ? <StubAmount amount={promotion.discountValue} /> : formatPromotionValue(promotion)}</strong>
           {stubNote && <span className="max-w-full truncate text-[9px] text-white/85">{stubNote}</span>}
         </>
       }

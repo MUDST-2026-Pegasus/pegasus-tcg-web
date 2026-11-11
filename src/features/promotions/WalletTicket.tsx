@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { checkoutMoney, formatPromotionDate, formatPromotionValue } from "@/features/cart/checkout.format";
 import { cn } from "@/lib/utils";
-import { PromotionTicketFrame } from "./PromotionTicketFrame";
+import { PromotionTicketFrame, StubAmount } from "./PromotionTicketFrame";
 import { daysUntil, isExpiringSoon, walletRuleSummary } from "./claim.format";
 import type { WalletCode, WalletTab } from "./claim.types";
 import { useTranslate, translate } from "@/lib/i18n";
@@ -56,7 +56,7 @@ export function WalletTicket({ code, tab, onOpenTerms }: WalletTicketProps) {
       stub={
         <>
           {code.discountType !== "FREE_SHIPPING" && <span className="text-[10px] text-white/80">{t("buyer.walletTicket.span", "ลด")}</span>}
-          <strong className="text-[22px] font-black leading-7">{formatPromotionValue(code)}</strong>
+          <strong className="text-[22px] font-black leading-7">{code.discountType === "FIXED" ? <StubAmount amount={code.discountValue} /> : formatPromotionValue(code)}</strong>
           <small className="text-[8px] font-semibold uppercase tracking-[0.12em] text-white/80">
             {platform ? "PEGASUS" : "SHOP"}
           </small>

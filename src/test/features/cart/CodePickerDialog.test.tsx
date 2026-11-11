@@ -54,7 +54,8 @@ describe("CouponTicket", () => {
 
     rerender(<CouponTicket promotion={shopPromo} />);
     expect(screen.getByText("SHOP")).toBeInTheDocument();
-    expect(screen.getByText("THB 50.00")).toBeInTheDocument();
+    expect(screen.getByText("THB")).toBeInTheDocument();
+    expect(screen.getByText("50")).toBeInTheDocument();
   });
 
   it("shows default, selected, and disabled coupon states", () => {

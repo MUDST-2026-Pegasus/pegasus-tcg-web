@@ -1,7 +1,7 @@
-import { PromotionTicketFrame } from "@/features/promotions/PromotionTicketFrame";
+import { PromotionTicketFrame, StubAmount } from "@/features/promotions/PromotionTicketFrame";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import type { SellerPromotion, SellerPromotionInput } from "@/features/seller/promotions/promotions.types";
-import { discountCapLabel, minSpendLabel, money, thaiDate } from "@/features/seller/promotions/promotions.format";
+import { discountCapLabel, minSpendLabel, thaiDate } from "@/features/seller/promotions/promotions.format";
 import type { AdminPromotionInput } from "@/features/admin/promotions.types";
 import { formatBaht, formatPromoDate } from "@/features/admin/promotions.format";
 import {
@@ -37,7 +37,7 @@ export function CouponTicket({
   if ("scopeType" in promotion) {
     const value = promotion.discountType === "FREE_SHIPPING"
       ? t("buyer.couponTicket.value", "ส่งฟรี") : promotion.discountType === "PERCENT"
-        ? `${promotion.discountValue || 0}%` : formatBaht(promotion.discountValue);
+        ? `${promotion.discountValue || 0}%` : <StubAmount amount={promotion.discountValue} />;
     const endsAt = Number.isFinite(Date.parse(promotion.endsAt))
       ? formatPromoDate(promotion.endsAt) : "—";
     const cap = promotion.discountType === "PERCENT" && promotion.maxDiscount
@@ -66,7 +66,7 @@ export function CouponTicket({
 
   if (!("ownerType" in promotion)) {
     const value = promotion.discountType === "PERCENT"
-      ? `${promotion.discountValue || 0}%` : money(promotion.discountValue || 0);
+      ? `${promotion.discountValue || 0}%` : <StubAmount amount={promotion.discountValue || 0} />;
     const isScheduled = "status" in promotion && promotion.status === "SCHEDULED";
     const isAdminPaused = "pausedBy" in promotion && promotion.pausedBy === "ADMIN";
     const visibility = promotion.visibility === "PUBLIC" ? t("buyer.couponTicket.visibility", "สาธารณะ") : t("buyer.couponTicket.visibility2", "ส่วนตัว");
@@ -98,7 +98,7 @@ export function CouponTicket({
   const needsClaim = promotion.source === "CLAIMABLE";
   const disabled = propDisabled ?? (!promotion.applicable || needsClaim);
   const platform = promotion.ownerType === "PLATFORM";
-  const value = formatPromotionValue(promotion);
+  const value = promotion.discountType === "FIXED" ? <StubAmount amount={promotion.discountValue} /> : formatPromotionValue(promotion);
 
   const disabledReason = formatPromotionUnavailableReason(promotion);
 
