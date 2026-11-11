@@ -109,7 +109,7 @@ export function toHomeProduct(product: ProductSummaryDto): HomeProduct {
   return {
     id: String(product.id),
     name: product.name,
-    type: PRODUCT_TYPE_LABELS[product.productType] ?? "Other",
+    type: PRODUCT_TYPE_LABELS[product.productType] ?? PRODUCT_TYPE_LABELS.OTHER,
     price: product.lowestPrice,
     pricing: product.pricing ?? null,
     image: product.primaryImageUrl ?? undefined,

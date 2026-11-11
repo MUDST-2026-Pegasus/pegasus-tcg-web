@@ -40,7 +40,7 @@ describe("catalog.mappers unit tests", () => {
   });
 
   describe("PRODUCT_TYPE_LABELS", () => {
-    it("maps all standard product types to human-readable English labels", () => {
+    it("maps all standard product types to labels in the current language", () => {
       const types: ProductType[] = [
         "SINGLE_CARD",
         "BOOSTER_PACK",
@@ -57,8 +57,8 @@ describe("catalog.mappers unit tests", () => {
         expect(typeof PRODUCT_TYPE_LABELS[type]).toBe("string");
       }
 
-      expect(PRODUCT_TYPE_LABELS.SINGLE_CARD).toBe("Single Card");
-      expect(PRODUCT_TYPE_LABELS.BOOSTER_BOX).toBe("Booster Box");
+      expect(PRODUCT_TYPE_LABELS.SINGLE_CARD).toBe("การ์ดใบเดี่ยว");
+      expect(PRODUCT_TYPE_LABELS.BOOSTER_BOX).toBe("กล่องสุ่ม");
     });
   });
 
@@ -76,7 +76,7 @@ describe("catalog.mappers unit tests", () => {
       expect(CONDITION_LABELS.MP).toBe("Moderately Played");
       expect(CONDITION_LABELS.HP).toBe("Heavily Played");
       expect(CONDITION_LABELS.DMG).toBe("Damaged");
-      expect(CONDITION_LABELS.SEALED).toBe("Sealed");
+      expect(CONDITION_LABELS.SEALED).toBe("ซีล");
     });
   });
 });

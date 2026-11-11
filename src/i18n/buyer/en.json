@@ -788,6 +788,9 @@
     "profile": "Collector profile",
     "userNotFound": "User not found"
   },
+  "condition": {
+    "sealed": "Sealed"
+  },
   "home": {
     "auctions": {
       "description": "Bid before time runs out — if someone bids near the end, the auction will be extended by 2 minutes",
@@ -1206,6 +1209,16 @@
     "viewImage": "View product image {n}",
     "viewProfile": "View profile",
     "viewSellerListing": "View {seller}'s listing details"
+  },
+  "productType": {
+    "accessory": "Accessory",
+    "boosterBox": "Booster Box",
+    "boosterPack": "Booster Pack",
+    "bundle": "Bundle",
+    "eliteTrainerBox": "Elite Trainer Box",
+    "other": "Other",
+    "singleCard": "Single Card",
+    "starterDeck": "Starter Deck"
   },
   "refundMethod": {
     "bankTransfer": "Bank transfer",
