@@ -97,9 +97,9 @@ describe("OrderDetailSheet", () => {
     expect(table).toHaveTextContent("minmin_tcg");
     expect(table).toHaveTextContent("MINMIN50");
     expect(table).toHaveTextContent("PEGASUS10");
-    expect(table).toHaveTextContent("฿775.94");
-    expect(table).toHaveTextContent("฿39.00");
-    expect(table).toHaveTextContent("฿786.00");
+    expect(table).toHaveTextContent("THB 775.94");
+    expect(table).toHaveTextContent("THB 39.00");
+    expect(table).toHaveTextContent("THB 786.00");
     expect(screen.queryByText("ส่วนลด", { exact: true })).not.toBeInTheDocument();
   });
 

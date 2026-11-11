@@ -766,7 +766,7 @@
       },
       "duplicate": "Your listing #{id} already sells this card in the same condition — consider merging them into one listing",
       "noCard": "No card selected yet",
-      "noPrice": "฿—",
+      "noPrice": "THB —",
       "photos": {
         "alt": "Image {number}",
         "cancelUpload": "Cancel uploading {name}",

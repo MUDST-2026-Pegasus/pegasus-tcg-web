@@ -66,8 +66,7 @@ const CONDITIONS: Array<{ value: CardCondition; label: string }> = (
 ).map((value) => ({ value, label: conditionLabel(value) }));
 
 /** เริ่มพรุ่งนี้ 00:00 จบ 23:59 วันเดียวกัน (Flash 24 ชม. ตาม Figma SAL-A2) */
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน ไม่ใช่ข้อความ
-const BAHT = "฿";
+const BAHT = "THB";
 
 function emptySale(): AdminSaleInput {
   const start = new Date();
@@ -496,7 +495,7 @@ function SaleEditor({ existing }: { existing?: AdminSale }) {
                 htmlFor="sale-discountValue"
                 label={t("admin.form.discount", "ลด")}
                 required
-                hint={form.discountType === "PERCENT" ? "1–90%" : t("admin.form.discountFixedHint", "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1")}
+                hint={form.discountType === "PERCENT" ? "1–90%" : t("admin.form.discountFixedHint", "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า THB 1.00")}
                 error={errors.discountValue}
               >
                 <NumberInput

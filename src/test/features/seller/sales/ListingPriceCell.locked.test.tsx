@@ -66,7 +66,7 @@ describe("ListingPriceCell — SALE_PRICE_LOCKED", () => {
 
     expect(await screen.findByText("ขึ้นราคาไม่ได้ระหว่างการลดราคา")).toBeInTheDocument();
     expect(screen.getByText(/อยู่ใน “Pokémon Month” \(Pegasus\)/)).toBeInTheDocument();
-    expect(screen.getByText("฿4,900")).toBeInTheDocument();
+    expect(screen.getByText("THB 4,900.00")).toBeInTheDocument();
     await waitFor(() => expect(toastSpy).not.toHaveBeenCalledWith(expect.objectContaining({ type: "error" })));
   });
 });

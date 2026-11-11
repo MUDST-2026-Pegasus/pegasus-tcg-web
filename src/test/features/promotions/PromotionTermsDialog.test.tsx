@@ -59,8 +59,8 @@ describe("PromotionTermsDialog", () => {
 
     expect(screen.getByRole("heading", { name: "ลดการ์ด 10%" })).toBeInTheDocument();
     const list = screen.getByRole("list", { name: "เงื่อนไข" });
-    expect(within(list).getByText("฿500 จากสินค้าของ Card Corner")).toBeInTheDocument();
-    expect(within(list).getByText("฿250 ต่อคำสั่งซื้อ")).toBeInTheDocument();
+    expect(within(list).getByText("THB 500.00 จากสินค้าของ Card Corner")).toBeInTheDocument();
+    expect(within(list).getByText("THB 250.00 ต่อคำสั่งซื้อ")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "เก็บโค้ด" }));
     expect(onClaim).toHaveBeenCalledWith(terms);
     baseView.unmount();

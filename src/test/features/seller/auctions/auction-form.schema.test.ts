@@ -51,17 +51,17 @@ describe("auctionFormIssues", () => {
     expect(messages(emptyAuctionForm())).toEqual([
       ["unitUid", "เลือกการ์ดจากสต็อกก่อน", undefined],
       ["startingPrice", "กรอกราคาเริ่มต้น", undefined],
-      ["bidIncrement", "ขั้นบิดต้องมากกว่า ฿0", "กรอกขั้นบิดขั้นต่ำครั้งละ"],
+      ["bidIncrement", "ขั้นบิดต้องมากกว่า THB 0.00", "กรอกขั้นบิดขั้นต่ำครั้งละ"],
       ["closeDate", "เลือกวันปิดประมูล", undefined],
     ]);
   });
 
   it("rejects a zero starting price", () => {
-    expect(messages(filled({ startingPrice: "0" }))).toEqual([["startingPrice", "ราคาเริ่มต้นต้องมากกว่า ฿0", undefined]]);
+    expect(messages(filled({ startingPrice: "0" }))).toEqual([["startingPrice", "ราคาเริ่มต้นต้องมากกว่า THB 0.00", undefined]]);
   });
 
   it.each(["0", ""])("rejects an increment of %j", (bidIncrement) => {
-    expect(messages(filled({ bidIncrement }))).toEqual([["bidIncrement", "ขั้นบิดต้องมากกว่า ฿0", "กรอกขั้นบิดขั้นต่ำครั้งละ"]]);
+    expect(messages(filled({ bidIncrement }))).toEqual([["bidIncrement", "ขั้นบิดต้องมากกว่า THB 0.00", "กรอกขั้นบิดขั้นต่ำครั้งละ"]]);
   });
 
   describe("buy now", () => {
@@ -74,9 +74,9 @@ describe("auctionFormIssues", () => {
     });
 
     it.each(["900", "1000"])("must be above the starting price (%s)", (buyNowPrice) => {
-      const shown = buyNowPrice === "900" ? "฿900" : "฿1,000";
+      const shown = buyNowPrice === "900" ? "THB 900.00" : "THB 1,000.00";
       expect(messages(filled({ buyNowEnabled: true, buyNowPrice }))).toEqual([
-        ["buyNowPrice", "ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น", `ตอนนี้ ${shown} ≤ ฿1,000`],
+        ["buyNowPrice", "ราคาซื้อทันทีต้องสูงกว่าราคาเริ่มต้น", `ตอนนี้ ${shown} ≤ THB 1,000.00`],
       ]);
     });
 
@@ -124,7 +124,7 @@ describe("auctionFormSchema", () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues[0]).toMatchObject({
       path: ["bidIncrement"],
-      message: "ขั้นบิดต้องมากกว่า ฿0\nกรอกขั้นบิดขั้นต่ำครั้งละ",
+      message: "ขั้นบิดต้องมากกว่า THB 0.00\nกรอกขั้นบิดขั้นต่ำครั้งละ",
     });
   });
 });

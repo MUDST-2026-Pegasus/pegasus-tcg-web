@@ -64,7 +64,7 @@ describe("PaymentPage", () => {
     vi.mocked(financeApi.getPayment).mockResolvedValue(promptPay);
     vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "ORD-42", grandTotal: 9999 } as never);
     renderPaymentPage();
-    expect(await screen.findByText("สแกนเพื่อชำระ | ฿1,450.00")).toBeInTheDocument();
+    expect(await screen.findByText("สแกนเพื่อชำระ | THB 1,450.00")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" })).toBeInTheDocument();
     expect(screen.queryByText(/129.99 USD/)).not.toBeInTheDocument();
   });

@@ -203,7 +203,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
       const value = form.discountValue;
       if (value == null) next.discountValue = t("seller.form.errors.discountRequired", "กรอกส่วนลด");
       else if (form.discountType === "PERCENT" && (value < 1 || value > 90)) next.discountValue = t("seller.form.errors.percentRange", "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90");
-      else if (form.discountType === "FIXED_OFF" && value <= 0) next.discountValue = t("seller.form.errors.fixedPositive", "ต้องมากกว่า ฿0");
+      else if (form.discountType === "FIXED_OFF" && value <= 0) next.discountValue = t("seller.form.errors.fixedPositive", "ต้องมากกว่า THB 0.00");
       if (form.scopeType === "CATEGORY" && form.scopeIds.length === 0) next.scopeIds = t("seller.form.errors.categoryRequired", "เลือกหมวดอย่างน้อยหนึ่งหมวด");
     }
     setFormErrors(next);
@@ -330,8 +330,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
         return (
           <InputGroup className={cn("h-9", error && error !== "overlap" && "border-destructive")}>
             <InputGroupAddon>
-              {/* eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน */}
-              <InputGroupText>฿</InputGroupText>
+              <InputGroupText>THB</InputGroupText>
             </InputGroupAddon>
             <InputGroupInput
               aria-label={t("seller.form.table.salePriceFor", "ราคาลด {name}", { name: rowName(row) })}
@@ -464,7 +463,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                     htmlFor="seller-sale-value"
                     label={t("seller.form.table.percent", "ลด")}
                     required
-                    hint={form.discountType === "PERCENT" ? t("seller.form.hintPercent", "1–90% · ไม่รวมสินค้าประมูล") : t("seller.form.hintFixed", "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า ฿1")}
+                    hint={form.discountType === "PERCENT" ? t("seller.form.hintPercent", "1–90% · ไม่รวมสินค้าประมูล") : t("seller.form.hintFixed", "บาทต่อชิ้น · ราคาลดไม่ต่ำกว่า THB 1.00")}
                     error={formErrors.discountValue}
                   >
                     <InputGroup>
@@ -477,8 +476,7 @@ function SellerSaleEditor({ existing, listings }: { existing?: SellerSaleDetail;
                         onChange={(event) => change("discountValue", event.target.value === "" ? null : Number(event.target.value))}
                       />
                       <InputGroupAddon align="inline-end">
-                        {/* eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน */}
-                        <InputGroupText>{form.discountType === "PERCENT" ? "%" : "฿"}</InputGroupText>
+                        <InputGroupText>{form.discountType === "PERCENT" ? "%" : "THB"}</InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>
                   </FormField>

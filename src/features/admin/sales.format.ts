@@ -148,7 +148,7 @@ export function isPausedByAdmin(sale: Pick<AdminSale, "ownerType" | "pauseReason
   return sale.ownerType === "PLATFORM" || sale.pauseReason != null;
 }
 
-/** "ลด 30%" / "ลด ฿50/ชิ้น" / "ราคาใหม่รายชิ้น" */
+/** "ลด 30%" / "ลด THB 50.00/ชิ้น" / "ราคาใหม่รายชิ้น" */
 export function saleDiscountLabel(sale: Pick<AdminSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return translate("sale", "admin.discount.percent", "ลด {percent}%", { percent: sale.discountValue ?? 0 });
   if (sale.discountType === "FIXED_OFF") return translate("sale", "admin.discount.fixedOff", "ลด {amount}/ชิ้น", { amount: formatBaht(sale.discountValue) });
@@ -257,7 +257,7 @@ export function saleTypeBadge(sale: Pick<AdminSale, "saleType" | "scopeType">): 
 
 /**
  * ตัวอย่างการคำนวณของ listing ราคา `listPrice` (การ์ดขวาของ A2) — คิดที่หน้าเว็บเพื่อแสดงเท่านั้น
- * ราคาจริงคิดที่ server (`SalePriceResolver`) · ไม่ต่ำกว่า ฿1
+ * ราคาจริงคิดที่ server (`SalePriceResolver`) · ไม่ต่ำกว่า THB 1.00
  */
 export function sampleSaleCalculation(
   input: { discountType: "PERCENT" | "FIXED_OFF"; discountValue: number | null; maxDiscountPerUnit: number | null },
@@ -276,12 +276,10 @@ export function sampleSaleCalculation(
   return { listPrice, discount, buyerPays, commission, sellerReceives: listPrice - commission, subsidy: discount };
 }
 
-/** "฿4.82M" — ยอดรวมก้อนใหญ่ในแถบผล preview */
+/** "THB 4.82M" — ยอดรวมก้อนใหญ่ในแถบผล preview */
 export function compactBaht(amount: number): string {
-  /* eslint-disable no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน */
-  if (amount >= 1_000_000) return `฿${(amount / 1_000_000).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}M`;
-  if (amount >= 10_000) return `฿${(amount / 1000).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}K`;
-  /* eslint-enable no-restricted-syntax */
+  if (amount >= 1_000_000) return `THB ${(amount / 1_000_000).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}M`;
+  if (amount >= 10_000) return `THB ${(amount / 1000).toLocaleString(intlLocale(), { maximumFractionDigits: 1 })}K`;
   return formatBaht(amount);
 }
 

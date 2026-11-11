@@ -20,7 +20,7 @@ import {
 import type { CategoryDto, GameDto } from "@/features/catalog/catalog.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRule } from "@/features/finance/after-sales.types";
-import { intlLocale, translateError, translate, useTranslate } from "@/lib/i18n";
+import { intlLocale, translateError, translate, useTranslate, formatMoney } from "@/lib/i18n";
 
 /** popup เปิดได้ 2 แบบ: ดูรายการกฎทั้งหมด หรือเข้าฟอร์มเพิ่ม/แก้ไขกฎทันที */
 export type CommissionRuleDialogRequest =
@@ -47,10 +47,9 @@ const STATUS_STYLE: Record<RuleStatus, string> = {
   INACTIVE: "bg-muted text-[#9aa5ad]",
 };
 
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-const BAHT_SIGN = "฿";
+const BAHT_SIGN = "THB";
 const baht = (value: number) =>
-  `${BAHT_SIGN}${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  formatMoney(value);
 const dateTime = (iso: string) =>
   new Date(iso).toLocaleString(intlLocale(), { dateStyle: "medium", timeStyle: "short" });
 const FIELD = "h-9 rounded-md border-border bg-card";

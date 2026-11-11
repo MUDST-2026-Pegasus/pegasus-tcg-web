@@ -134,7 +134,7 @@ describe("admin finance API contracts", () => {
 
 describe("admin finance format", () => {
   it("formats money, accounts and initials", () => {
-    expect(formatBaht(1850)).toBe("฿1,850.00");
+    expect(formatBaht(1850)).toBe("THB 1,850.00");
     expect(formatAccountNumber("1234567890")).toBe("123-4-56789-0");
     expect(formatAccountNumber("12345")).toBe("12345");
     expect(initialsOf("somchai.k")).toBe("SK");
@@ -163,7 +163,7 @@ describe("admin finance pages", () => {
     renderWithClient(<AdminPaymentReviewContent />);
 
     fireEvent.click(await screen.findByRole("button", { name: /somchai\.k/ }));
-    expect(await screen.findByText("ยอดตรงกับยอดค้างชำระ ฿1,850.00")).toBeTruthy();
+    expect(await screen.findByText("ยอดตรงกับยอดค้างชำระ THB 1,850.00")).toBeTruthy();
     expect(screen.getByText("minmin_tcg")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "ปฏิเสธสลิป" }));
     expect(screen.getByRole("alert").textContent).toContain("กรอกเหตุผล");

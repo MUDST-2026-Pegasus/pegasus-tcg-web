@@ -37,7 +37,7 @@ describe("SellerAuctionDetailContent — มีบิดแล้ว", () => {
     expect(screen.getByText("จาก 7 ผู้บิด")).toBeInTheDocument();
     expect(screen.getByText("34")).toBeInTheDocument();
     expect(screen.getByText("หลังค่าคอมมิชชั่น 5%")).toBeInTheDocument();
-    expect(screen.getByText("฿12,000 · ปิดแล้ว (มีบิดแรก)")).toBeInTheDocument();
+    expect(screen.getByText("THB 12,000.00 · ปิดแล้ว (มีบิดแรก)")).toBeInTheDocument();
 
     const rows = screen.getAllByRole("row").slice(1);
     expect(rows).toHaveLength(withBids.bids.length);
@@ -51,7 +51,7 @@ describe("SellerAuctionDetailContent — มีบิดแล้ว", () => {
 
     rerender(<SellerAuctionDetailContent detail={{ ...withBids, bidCount: 13, currentPrice: 8550 }} />);
 
-    expect(screen.getByText("มีบิดใหม่ ฿8,550")).toBeInTheDocument();
+    expect(screen.getByText("มีบิดใหม่ THB 8,550.00")).toBeInTheDocument();
   });
 });
 
@@ -75,8 +75,8 @@ describe("SellerAuctionDetailContent — ยังไม่มีบิด", () 
 
     await user.click(screen.getByRole("button", { name: "แก้ไข" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Pikachu VMAX — Rainbow · ยังไม่มีผู้บิด · ราคาเริ่มต้น ฿2,400")).toBeInTheDocument();
-    expect(within(dialog).getByText("เดิม ฿3,500 · ต้องสูงกว่าราคาเริ่มต้น ฿2,400")).toBeInTheDocument();
+    expect(within(dialog).getByText("Pikachu VMAX — Rainbow · ยังไม่มีผู้บิด · ราคาเริ่มต้น THB 2,400.00")).toBeInTheDocument();
+    expect(within(dialog).getByText("เดิม THB 3,500.00 · ต้องสูงกว่าราคาเริ่มต้น THB 2,400.00")).toBeInTheDocument();
 
     const input = within(dialog).getByLabelText("ราคาซื้อทันที");
     await user.clear(input);
@@ -162,6 +162,6 @@ describe("SellerAuctionDetailContent — จบแล้ว", () => {
 
   it("bought with buy-now: buy-now notice", () => {
     renderDetail(SELLER_AUCTION_DETAIL_FIXTURES[158]);
-    expect(within(screen.getByRole("status")).getByText("ขายด้วยซื้อทันที ฿3,500")).toBeInTheDocument();
+    expect(within(screen.getByRole("status")).getByText("ขายด้วยซื้อทันที THB 3,500.00")).toBeInTheDocument();
   });
 });

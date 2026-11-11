@@ -198,7 +198,7 @@ describe("CartPage", () => {
     });
     renderCart();
     expect(await screen.findByText("ราคาสินค้าบางรายการเปลี่ยนแปลง")).toBeInTheDocument();
-    expect(screen.getByText(`ราคาเปลี่ยน: ฿100 → ฿${price}`)).toBeInTheDocument();
+    expect(screen.getByText(`ราคาเปลี่ยน: THB 100.00 → THB ${price}.00`)).toBeInTheDocument();
     expect(checkoutButton()).toBeDisabled();
     expect(screen.getByText("กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "ยอมรับราคาใหม่" }));
@@ -206,7 +206,7 @@ describe("CartPage", () => {
     await waitFor(() => expect(checkoutButton()).toBeEnabled());
     expect(screen.queryByText(/ราคาเปลี่ยน:/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "ยอมรับราคาใหม่" })).not.toBeInTheDocument();
-    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent(`฿${price}`);
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent(`THB ${price}.00`);
   });
 
   it.each([
@@ -250,7 +250,7 @@ describe("CartPage", () => {
     expect(screen.getByRole("checkbox", { name: "เลือก Pikachu ex" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "เลือก Charizard ex" })).toBeChecked();
     expect(screen.getByText("ยอดสินค้า (1 ใบ)")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿200"));
+    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 200.00"));
   });
 });
 
@@ -315,15 +315,15 @@ describe("CartPage codes", () => {
     previewPromotions.mockImplementation(async (request) => c1Preview(request));
   });
 
-  it("auto-picks the best codes on first load and totals C1 to ฿2,980", async () => {
+  it("auto-picks the best codes on first load and totals C1 to THB 2,980.00", async () => {
     renderCart();
-    expect(await screen.findByText("ประหยัดไป ฿250")).toBeInTheDocument();
-    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿2,980");
-    expect(screen.getByText("ยอดสินค้า (3 ใบ)").nextSibling).toHaveTextContent("฿3,230");
+    expect(await screen.findByText("ประหยัดไป THB 250.00")).toBeInTheDocument();
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 2,980.00");
+    expect(screen.getByText("ยอดสินค้า (3 ใบ)").nextSibling).toHaveTextContent("THB 3,230.00");
     expect(screen.getByRole("button", { name: "โค้ด Pegasus PEGASUS10 — เปลี่ยนโค้ด" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "โค้ดร้าน MINMIN50 — เปลี่ยนโค้ด" })).toBeInTheDocument();
     expect(screen.getByText("เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว")).toBeInTheDocument();
-    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "เลือกโค้ดที่ลดมากที่สุดให้แล้ว (– ฿250)" }));
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "เลือกโค้ดที่ลดมากที่สุดให้แล้ว (– THB 250.00)" }));
     expect(previewPromotions).toHaveBeenCalledWith(expect.objectContaining({ autoPick: true }), expect.anything());
     // CheckoutPage picks the same codes up from sessionStorage.
     await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!))
@@ -337,7 +337,7 @@ describe("CartPage codes", () => {
     const dialog = await screen.findByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: "ไม่ใช้โค้ด" }));
 
-    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿3,180"));
+    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 3,180.00"));
     expect(sessionStorage.getItem(PROMOTION_MANUAL_KEY)).toBe("1");
     expect(screen.queryByText("เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว")).not.toBeInTheDocument();
 
@@ -360,7 +360,7 @@ describe("CartPage codes", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "เลือก Gengar · Holo Rare" }));
 
-    expect(await screen.findByText("นำ MINMIN50 ออกแล้ว: ซื้อสินค้าเพิ่มอีก ฿50 เพื่อใช้โค้ดนี้ (ยังอยู่ในกระเป๋าโค้ด)"))
+    expect(await screen.findByText("นำ MINMIN50 ออกแล้ว: ซื้อสินค้าเพิ่มอีก THB 50.00 เพื่อใช้โค้ดนี้ (ยังอยู่ในกระเป๋าโค้ด)"))
       .toBeInTheDocument();
     await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).sellerCodes).toEqual({}));
   });

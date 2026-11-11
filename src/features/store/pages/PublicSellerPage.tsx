@@ -30,7 +30,7 @@ import { AuctionCard } from "@/features/auction/components/AuctionCard";
 import { StoreTabs } from "../components/StoreTabs";
 import { calculatePositivePercent } from "../store.format";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale, useTranslate } from "@/lib/i18n";
+import { useTranslate, formatMoney } from "@/lib/i18n";
 
 const PAGE_SIZE = 6;
 const cardClassName = "w-full [&_img]:object-contain";
@@ -277,12 +277,7 @@ function Storefront({ username }: { username: string }) {
                           badge={
                             CONDITION_LABELS[listing.condition] ?? listing.condition
                           }
-                          price={isOnSale(listing.pricing) ? undefined : new Intl.NumberFormat(intlLocale(), {
-                            style: "currency",
-                            currency: listing.currency,
-                            maximumFractionDigits: 2,
-                            minimumFractionDigits: 0,
-                          }).format(listing.price)}
+                          price={isOnSale(listing.pricing) ? undefined : formatMoney(listing.price)}
                           footer={isOnSale(listing.pricing) ? <PriceTag pricing={listing.pricing} /> : undefined}
                           className={cardClassName}
                         />

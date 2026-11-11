@@ -259,7 +259,7 @@ describe("TCG-663 listing detail v2", () => {
     cy.get('[role="progressbar"]').should("not.exist");
     cy.get("[data-market-hint]").should("not.exist");
     cy.get('button[aria-label="เพิ่มจำนวน"]').click();
-    cy.contains("รวม ฿4,845").should("be.visible");
+    cy.contains("รวม THB 4,845.00").should("be.visible");
     cy.get('button[aria-label="เพิ่มจำนวน"]').should("be.enabled");
   });
   it("graded cards show cert, hide condition row and limit quantity to one", () => {

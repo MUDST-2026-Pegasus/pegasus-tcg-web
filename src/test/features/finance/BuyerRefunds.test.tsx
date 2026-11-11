@@ -74,8 +74,8 @@ describe("buyer refunds", () => {
 
   it("shows only the refunds of its own order", async () => {
     setup(refund, [{ ...refund, id: 14, salesOrderId: 99, amount: 777 }]);
-    expect(await screen.findByText("การคืนเงิน ฿500.00")).toBeTruthy();
-    expect(screen.queryByText(/฿777/)).toBeNull();
+    expect(await screen.findByText("การคืนเงิน THB 500.00")).toBeTruthy();
+    expect(screen.queryByText(/THB 777.00/)).toBeNull();
   });
 
   it("renders nothing for an order without refunds", async () => {

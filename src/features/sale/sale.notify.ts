@@ -30,7 +30,7 @@ export function notifyAddedAtSalePrice(
   return true;
 }
 
-/** "ราคา Flash จำกัดคนละ 1 ชิ้น · ชิ้นที่ 2 คิดราคาปกติ ฿1,990" */
+/** "ราคา Flash จำกัดคนละ 1 ชิ้น · ชิ้นที่ 2 คิดราคาปกติ THB 1,990" */
 export function notifyBuyerLimit(limit: number, listPrice: number) {
   toast.add({
     title: "SALE_BUYER_LIMIT_REACHED",

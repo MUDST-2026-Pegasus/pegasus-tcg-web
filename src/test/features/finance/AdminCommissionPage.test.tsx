@@ -35,7 +35,7 @@ describe("admin commission settings", () => {
 
     expect(await screen.findByText("กล่อง/ซองสุ่ม")).toBeTruthy();
     expect(screen.getByText("Pokémon")).toBeTruthy();
-    expect(screen.getByText("฿1,225.50")).toBeTruthy();
+    expect(screen.getByText("THB 1,225.50")).toBeTruthy();
     fireEvent.change(screen.getByRole("spinbutton", { name: "อัตราค่าคอมมิชชั่น (%)" }),
       { target: { value: "6" } });
     fireEvent.click(screen.getByRole("button", { name: "บันทึกการตั้งค่า" }));
@@ -92,7 +92,7 @@ describe("admin commission settings", () => {
     fireEvent.change(within(dialog).getByLabelText("เก็บสูงสุด"), { target: { value: "500" } });
     fireEvent.change(within(dialog).getByLabelText("ลำดับความสำคัญ"), { target: { value: "101" } });
     // 1,290 × 8% = 103.20 + 2.50 = 105.70 → ผู้ขายได้ 1,184.30
-    expect(within(dialog).getByText("฿1,184.30")).toBeTruthy();
+    expect(within(dialog).getByText("THB 1,184.30")).toBeTruthy();
     await user.click(within(dialog).getByRole("button", { name: "สร้างกฎ" }));
     await waitFor(() => expect(afterSalesApi.createCommissionRule).toHaveBeenCalledWith(expect.objectContaining({
       scope: "GAME", gameId: 4, categoryId: null, sellerProfileId: null,

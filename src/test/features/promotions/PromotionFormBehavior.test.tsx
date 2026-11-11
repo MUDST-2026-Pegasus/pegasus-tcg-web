@@ -315,7 +315,7 @@ describe("seller promotion form — errors and states", () => {
   it("refuses a fixed discount over the minimum spend and an end before the start", async () => {
     const { user } = await renderSeller({ ...sellerExisting, endsAt: "2026-11-30T00:00:00.000Z", discountValue: 2000 });
     await user.click(screen.getByRole("button", { name: "บันทึก" }));
-    expect(await screen.findByText("ส่วนลดต้องไม่เกินยอดขั้นต่ำ ฿1,000")).toBeInTheDocument();
+    expect(await screen.findByText("ส่วนลดต้องไม่เกินยอดขั้นต่ำ THB 1,000.00")).toBeInTheDocument();
     expect(screen.getByText("วันสิ้นสุดต้องหลังวันเริ่ม")).toBeInTheDocument();
     expect(sellerPromotionApi.update).not.toHaveBeenCalled();
   });

@@ -40,8 +40,8 @@ const terms: PromotionTerms = {
 describe("promotion API display transforms", () => {
   it("maps API terms to visible rows and handles optional limits and invalid dates", () => {
     expect(termsRows(terms)).toEqual(expect.arrayContaining([
-      { label: "ยอดขั้นต่ำ", value: expect.stringContaining("฿500") },
-      { label: "ส่วนลดสูงสุด", value: "฿200 ต่อคำสั่งซื้อ" },
+      { label: "ยอดขั้นต่ำ", value: expect.stringContaining("THB 500.00") },
+      { label: "ส่วนลดสูงสุด", value: "THB 200.00 ต่อคำสั่งซื้อ" },
       { label: "ใช้กับ", value: "เฉพาะเกม Pokemon ในร้าน Card Corner" },
       { label: "ผู้ใช้", value: "เฉพาะผู้ซื้อใหม่ (คำสั่งซื้อแรก)" },
       { label: "ใช้ร่วมกับ", value: "โค้ด Pegasus ได้" },
@@ -54,10 +54,10 @@ describe("promotion API display transforms", () => {
 
   it("formats fixed, percentage, and free-shipping wallet summaries from the API contract", () => {
     const base = { ownerType: "SELLER" as const, shop: terms.shop, discountValue: 100, minSpend: 500 };
-    expect(walletRuleSummary({ ...base, discountType: "FIXED", maxDiscount: null })).toBe("ขั้นต่ำ ฿500 · เฉพาะ Card Corner");
-    expect(walletRuleSummary({ ...base, discountType: "PERCENT", maxDiscount: 200 })).toContain("ลด 100% สูงสุด ฿200");
-    expect(walletRuleSummary({ ...base, discountType: "FREE_SHIPPING", maxDiscount: null })).toContain("ส่งฟรี · ขั้นต่ำ ฿500");
-    expect(walletRuleSummary({ ...base, ownerType: "PLATFORM", shop: null, discountType: "FREE_SHIPPING", maxDiscount: 50 })).toContain("ส่งฟรีสูงสุด ฿50/ร้าน");
+    expect(walletRuleSummary({ ...base, discountType: "FIXED", maxDiscount: null })).toBe("ขั้นต่ำ THB 500.00 · เฉพาะ Card Corner");
+    expect(walletRuleSummary({ ...base, discountType: "PERCENT", maxDiscount: 200 })).toContain("ลด 100% สูงสุด THB 200.00");
+    expect(walletRuleSummary({ ...base, discountType: "FREE_SHIPPING", maxDiscount: null })).toContain("ส่งฟรี · ขั้นต่ำ THB 500.00");
+    expect(walletRuleSummary({ ...base, ownerType: "PLATFORM", shop: null, discountType: "FREE_SHIPPING", maxDiscount: 50 })).toContain("ส่งฟรีสูงสุด THB 50.00/ร้าน");
   });
 
   it("uses deterministic time for claim windows and maps known API claim errors", () => {

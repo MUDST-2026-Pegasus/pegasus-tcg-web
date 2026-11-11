@@ -16,7 +16,7 @@ beforeEach(() => vi.restoreAllMocks());
 describe('shop formatting and validation', () => {
   it('formats actual fees, nullable delivery estimates and masks bank accounts', () => {
     expect(extraFeeLabel(0)).toBe('ไม่คิดเพิ่มต่อใบ');
-    expect(extraFeeLabel(5.5)).toBe('+ ฿5.50 ต่อใบถัดไป');
+    expect(extraFeeLabel(5.5)).toBe('+ THB 5.50 ต่อใบถัดไป');
     expect(shippingDays(1, 3)).toBe('1–3 วัน');
     expect(shippingDays(null, null)).toBe('—');
     expect(shippingDays(null, 3)).toBe('ไม่เกิน 3 วัน');

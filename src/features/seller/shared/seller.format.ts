@@ -2,21 +2,11 @@ import { initialsOf } from "@/features/account/account.format";
 import type { AuthUser } from "@/features/auth/auth.types";
 
 import type { SellerProfile, SellerStatus } from "./seller.types";
-import { numberFormat, translate } from "@/lib/i18n";
+import { translate, formatMoney } from "@/lib/i18n";
 
-const bahtWhole = numberFormat({ maximumFractionDigits: 0 });
-const bahtSatang = numberFormat({
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-/**
- * ฿1,850 เมื่อเป็นจำนวนเต็ม และ ฿92.50 เมื่อมีเศษสตางค์ — ตรงกับที่ดีไซน์ใช้
- * ใช้ทั้งหน้าจัดการคำสั่งซื้อและหน้าลงขายสินค้า
- */
+/** "THB 1,850.00" — ใช้ทั้งหน้าจัดการคำสั่งซื้อและหน้าลงขายสินค้า */
 export function formatBaht(amount: number): string {
-  const formatter = Number.isInteger(amount) ? bahtWhole : bahtSatang;
-  return `฿${formatter.format(amount)}`; // eslint-disable-line no-restricted-syntax -- ฿ คือสัญลักษณ์เงิน ไม่ใช่ข้อความ
+  return formatMoney(amount);
 }
 
 /**

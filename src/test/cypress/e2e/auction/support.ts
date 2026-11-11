@@ -154,7 +154,7 @@ export function bid(id: number, amount: number) {
   cy.contains("label", "ราคาที่จะบิด").invoke("attr", "for").then((inputId) => {
     cy.get(`#${inputId}`).clear().type(String(amount));
   });
-  cy.contains("button", /^บิด ฿/).click();
+  cy.contains("button", /^บิด THB/).click();
   cy.get('[role="alertdialog"], [role="dialog"]').within(() => cy.contains("button", /^ยืนยันบิด/).click());
   cy.wait("@placedBid").its("response.statusCode").should("be.oneOf", [200, 201]);
 }

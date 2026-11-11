@@ -123,7 +123,7 @@ describe("PublicSellerPage V3", () => {
     await user.click(await screen.findByRole("tab", { name: /คอลเลกชัน/i }));
     const panel = screen.getByRole("tabpanel");
     expect(within(panel).getByText("Pikachu")).toBeInTheDocument();
-    expect(within(panel).queryByText(/฿/)).not.toBeInTheDocument();
+    expect(within(panel).queryByText(/THB/)).not.toBeInTheDocument();
   });
 
   it("shows listing and collection photos like the collector profile", async () => {

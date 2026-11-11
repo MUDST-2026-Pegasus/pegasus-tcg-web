@@ -13,7 +13,7 @@ import { translate } from "@/lib/i18n";
 // @tolgee-key {"key":"admin.promotionsSchema.error2","ns":"promotions","defaultValue":"กรอกมูลค่าส่วนลด"}
 // @tolgee-key {"key":"admin.promotionsSchema.nonnegative","ns":"promotions","defaultValue":"ต้องไม่ติดลบ"}
 // @tolgee-key {"key":"admin.promotionsSchema.error3","ns":"promotions","defaultValue":"กรอกเป็นตัวเลข"}
-// @tolgee-key {"key":"admin.promotionsSchema.positive","ns":"promotions","defaultValue":"ต้องมากกว่า ฿0"}
+// @tolgee-key {"key":"admin.promotionsSchema.positive","ns":"promotions","defaultValue":"ต้องมากกว่า THB 0.00"}
 // @tolgee-key {"key":"admin.promotionsSchema.error4","ns":"promotions","defaultValue":"กรอกยอดขั้นต่ำ (ใส่ 0 ถ้าไม่มี)"}
 // @tolgee-key {"key":"admin.promotionsSchema.count","ns":"promotions","defaultValue":"จำนวนสิทธิ์"}
 // @tolgee-key {"key":"admin.promotionsSchema.min2","ns":"promotions","defaultValue":"จำนวนสิทธิ์ต้องอย่างน้อย 1"}
@@ -101,7 +101,7 @@ const promotionShape = () => z.object({
   description: z.string().max(500, translate("promotions", "admin.promotionsSchema.max2", "ไม่เกิน 500 ตัวอักษร")).nullable(),
   discountType: z.enum(["PERCENT", "FIXED", "FREE_SHIPPING"]),
   discountValue: z.number({ error: translate("promotions", "admin.promotionsSchema.error2", "กรอกมูลค่าส่วนลด") }).nonnegative(translate("promotions", "admin.promotionsSchema.nonnegative", "ต้องไม่ติดลบ")),
-  maxDiscount: z.number({ error: translate("promotions", "admin.promotionsSchema.error3", "กรอกเป็นตัวเลข") }).positive(translate("promotions", "admin.promotionsSchema.positive", "ต้องมากกว่า ฿0")).nullable(),
+  maxDiscount: z.number({ error: translate("promotions", "admin.promotionsSchema.error3", "กรอกเป็นตัวเลข") }).positive(translate("promotions", "admin.promotionsSchema.positive", "ต้องมากกว่า THB 0.00")).nullable(),
   minSpend: z.number({ error: translate("promotions", "admin.promotionsSchema.error4", "กรอกยอดขั้นต่ำ (ใส่ 0 ถ้าไม่มี)") }).nonnegative(translate("promotions", "admin.promotionsSchema.nonnegative", "ต้องไม่ติดลบ")),
   scopeType: z.enum(["ALL", "GAME", "CATEGORY"]),
   scopeIds: z.array(z.number()),
@@ -133,7 +133,7 @@ export function createPromotionSchema({ existing, featuredCount, now = Date.now(
       issue("discountValue", translate("promotions", "admin.promotionsSchema.issue", "เปอร์เซ็นต์ต้องอยู่ระหว่าง 1–90"));
     }
     if (value.discountType === "FIXED" && value.discountValue <= 0) {
-      issue("discountValue", translate("promotions", "admin.promotionsSchema.positive", "ต้องมากกว่า ฿0"));
+      issue("discountValue", translate("promotions", "admin.promotionsSchema.positive", "ต้องมากกว่า THB 0.00"));
     }
     if (value.scopeType !== "ALL" && value.scopeIds.length === 0) {
       issue("scopeIds", translate("promotions", "admin.promotionsSchema.issue2", "กรุณาเลือกเกมหรือหมวดหมู่อย่างน้อยหนึ่งรายการ"));

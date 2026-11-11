@@ -29,8 +29,7 @@ import { AuctionStatusPill } from "./AuctionStatusPill";
 import { PriceSummary } from "./PriceSummary";
 import { intlLocale, useTranslate, translate } from "@/lib/i18n";
 
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-const BAHT_SIGN = "฿";
+const BAHT_SIGN = "THB";
 
 type BidPanelProps = {
   auction: AuctionDetail;
@@ -197,7 +196,7 @@ function BidForm({ auction, state, onBid, onBuyNow }: { auction: AuctionDetail; 
                 setTyped(digits === "" ? Number.NaN : Number(digits));
               }}
               aria-invalid={!valid}
-              className="h-11 rounded-xl border-primary bg-background pl-7 text-base font-bold tabular-nums"
+              className="h-11 rounded-xl border-primary bg-background pl-12 text-base font-bold tabular-nums"
             />
           </div>
           {BID_SHORTCUTS.map((step) => (
