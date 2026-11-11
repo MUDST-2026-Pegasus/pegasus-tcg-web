@@ -7,6 +7,7 @@ import { EmptyState, QueryBoundary, DataTable, type DataTableColumn } from "@/co
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AUCTION_STATUS_LABEL, formatBaht, formatRemaining, pillForStatus } from "@/features/auction/auction.format";
+import { getAllAdminAuctions } from "@/features/auction/auction.api";
 import { useAdminAuctions, useBannedBidders } from "@/features/auction/auction.queries";
 import type { AdminAuctionPage, AdminAuctionRow, AdminAuctionTab } from "@/features/auction/auction.types";
 import { AuctionCountdown } from "@/features/auction/components/AuctionCountdown";
@@ -15,6 +16,9 @@ import { useCountdown } from "@/features/auction/useCountdown";
 import { ProductPagination } from "@/features/seller/products/components/ProductPagination";
 import { ProductTableSkeleton } from "@/features/seller/products/components/ProductTableSkeleton";
 import { downloadCsv } from "@/lib/csv";
+
+import { useFileExport } from "../export";
+import { ExportButton } from "../components/ExportButton";
 
 import {
   ADMIN_AUCTION_TABS,
@@ -82,13 +86,16 @@ export function AdminAuctionsPage() {
   const data = auctions.data;
   const bannedCount = banned.data?.tabCounts.BANNED;
 
-  const exportCsv = () => {
-    if (!data) return;
-    downloadCsv(`auctions-${tab.toLowerCase()}.csv`, [
-      [t("admin.adminAuctionsPage.text3", "รหัสประมูล"), t("admin.adminAuctionsPage.text4", "การ์ด"), t("admin.adminAuctionsPage.text5", "ผู้ขาย"), t("admin.adminAuctionsPage.text6", "ราคาปัจจุบัน"), t("admin.adminAuctionsPage.text7", "บิด"), t("admin.adminAuctionsPage.text8", "ผู้บิด"), t("admin.adminAuctionsPage.text9", "สถานะ"), t("admin.adminAuctionsPage.text10", "ปิด")],
-      ...data.page.items.map((row) => [row.auctionNumber, row.cardName, row.shopName, row.currentPrice, row.bidCount, row.bidderCount, row.status, row.endsAt]),
-    ]);
-  };
+  const auctionsExport = useFileExport();
+  // ดึงครบทุกหน้าของแท็บและคำค้นนี้ก่อน หน้าใดล้มเหลวไม่ดาวน์โหลดไฟล์ที่ไม่ครบ [TCG-749]
+  const exportCsv = () =>
+    void auctionsExport.run(async () => {
+      const rows = await getAllAdminAuctions({ tab, q: search || undefined });
+      downloadCsv(`auctions-${tab.toLowerCase()}.csv`, [
+        [t("admin.adminAuctionsPage.text3", "รหัสประมูล"), t("admin.adminAuctionsPage.text4", "การ์ด"), t("admin.adminAuctionsPage.text5", "ผู้ขาย"), t("admin.adminAuctionsPage.text6", "ราคาปัจจุบัน"), t("admin.adminAuctionsPage.text7", "บิด"), t("admin.adminAuctionsPage.text8", "ผู้บิด"), t("admin.adminAuctionsPage.text9", "สถานะ"), t("admin.adminAuctionsPage.text10", "ปิด")],
+        ...rows.map((row) => [row.auctionNumber, row.cardName, row.shopName, row.currentPrice, row.bidCount, row.bidderCount, row.status, row.endsAt]),
+      ]);
+    });
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,9 +105,12 @@ export function AdminAuctionsPage() {
           <p className="text-[13px] text-muted-foreground">{t("admin.adminAuctionsPage.text12", "ดูประมูลทั้งแพลตฟอร์ม ระงับประมูลที่ผิดกฎ และจัดการผู้ใช้ที่ติดโทษห้ามบิด")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="rounded-md px-2.5" disabled={!data} onClick={exportCsv}>
-            {t("admin.adminAuctionsPage.text13", "ส่งออก CSV")}
-          </Button>
+          <ExportButton
+            label={t("admin.adminAuctionsPage.text13", "ส่งออก CSV")}
+            pending={auctionsExport.pending}
+            disabled={!data}
+            onClick={exportCsv}
+          />
           <Button className="rounded-md px-2.5" nativeButton={false} render={<Link to="/admin/auctions/banned-bidders" />}>
             {t("admin.adminAuctionsPage.text14", "ผู้ใช้ที่ห้ามบิด")}{bannedCount !== undefined ? ` (${bannedCount.toLocaleString(intlLocale())})` : ""}
           </Button>

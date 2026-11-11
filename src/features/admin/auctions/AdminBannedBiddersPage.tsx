@@ -12,12 +12,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getAllBannedBidders } from "@/features/auction/auction.api";
 import { useBannedBidders } from "@/features/auction/auction.queries";
 import type { BannedBidder, BanTab } from "@/features/auction/auction.types";
 import { ProductTableSkeleton } from "@/features/seller/products/components/ProductTableSkeleton";
 import { downloadCsv } from "@/lib/csv";
+
+import { useFileExport } from "../export";
+import { ExportButton } from "../components/ExportButton";
 
 import { BAN_TABS, canLiftBan, formatDayMonthYear, latestStrike, memberAge, readBanTab } from "./admin-auctions.format";
 import { AdminKpi, AdminSearchBox, AdminTabs } from "./components/AdminAuctionShared";
@@ -62,13 +65,16 @@ export function AdminBannedBiddersPage() {
 
   const data = bidders.data;
 
-  const exportCsv = () => {
-    if (!data) return;
-    downloadCsv(`banned-bidders-${tab.toLowerCase()}.csv`, [
-      [t("admin.adminBannedBiddersPage.text", "ผู้ใช้"), t("admin.adminBannedBiddersPage.text2", "อีเมล"), t("admin.adminBannedBiddersPage.text3", "ไม่ชำระ"), t("admin.adminBannedBiddersPage.text4", "ครั้งล่าสุด"), t("admin.adminBannedBiddersPage.text5", "ห้ามบิดถึง")],
-      ...data.page.items.map((b) => [b.username, b.maskedEmail, `${b.strikeCount}/${b.strikeLimit}`, latestStrike(b), b.bannedUntil ? formatDayMonthYear(b.bannedUntil) : ""]),
-    ]);
-  };
+  const biddersExport = useFileExport();
+  // ดึงครบทุกหน้าของแท็บและคำค้นนี้ก่อน หน้าใดล้มเหลวไม่ดาวน์โหลดไฟล์ที่ไม่ครบ [TCG-749]
+  const exportCsv = () =>
+    void biddersExport.run(async () => {
+      const rows = await getAllBannedBidders({ tab, q: search || undefined });
+      downloadCsv(`banned-bidders-${tab.toLowerCase()}.csv`, [
+        [t("admin.adminBannedBiddersPage.text", "ผู้ใช้"), t("admin.adminBannedBiddersPage.text2", "อีเมล"), t("admin.adminBannedBiddersPage.text3", "ไม่ชำระ"), t("admin.adminBannedBiddersPage.text4", "ครั้งล่าสุด"), t("admin.adminBannedBiddersPage.text5", "ห้ามบิดถึง")],
+        ...rows.map((b) => [b.username, b.maskedEmail, `${b.strikeCount}/${b.strikeLimit}`, latestStrike(b), b.bannedUntil ? formatDayMonthYear(b.bannedUntil) : ""]),
+      ]);
+    });
 
   return (
     <div className="flex flex-col gap-6">
@@ -91,9 +97,12 @@ export function AdminBannedBiddersPage() {
             {t("admin.adminBannedBiddersPage.text8", "ระบบห้ามบิดอัตโนมัติเมื่อไม่ชำระหลังชนะครบ 3 ครั้ง · แอดมินยกเลิกโทษได้ถ้าไม่ใช่ความผิดของผู้ใช้")}
           </p>
         </div>
-        <Button variant="outline" className="rounded-md px-2.5" disabled={!data} onClick={exportCsv}>
-          {t("admin.adminBannedBiddersPage.text9", "ส่งออก CSV")}
-        </Button>
+        <ExportButton
+          label={t("admin.adminBannedBiddersPage.text9", "ส่งออก CSV")}
+          pending={biddersExport.pending}
+          disabled={!data}
+          onClick={exportCsv}
+        />
       </div>
 
       <p className="flex items-start gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs leading-5 text-sky-800">

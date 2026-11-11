@@ -13,6 +13,7 @@ vi.mock("@/features/admin/users.api", () => ({
   updateUserStatus: vi.fn(),
   grantRole: vi.fn(),
   revokeRole: vi.fn(),
+  downloadAdminUsersCsv: vi.fn(),
 }));
 
 vi.mock("@/features/auth/auth.queries", () => ({
@@ -316,6 +317,66 @@ describe("AdminUsersPage", () => {
       await user.click(radios[0]);
       await user.click(within(dialog).getByRole("button", { name: "ถัดไป" }));
       expect(await screen.findByText("ตั้ง @somchai_s เป็นผู้ดูแล?")).toBeInTheDocument();
+    });
+  });
+
+  describe("CSV export [TCG-749]", () => {
+    beforeEach(() => {
+      Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:users") });
+      Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    });
+
+    it("sends the current filters and downloads the file under the server's name", async () => {
+      mockApi();
+      const toastSpy = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+      const csv = new Blob(["csv"], { type: "text/csv" });
+      vi.mocked(usersApi.downloadAdminUsersCsv).mockResolvedValue({ blob: csv, filename: "admin-users-2026-11-11.csv" });
+      const user = userEvent.setup();
+      renderWithProviders(<AdminUsersPage />, { route: "/admin/users?q=som&role=SELLER&status=ACTIVE&page=2" });
+
+      await user.click(await screen.findByRole("button", { name: "ส่งออก CSV" }));
+
+      await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalledWith(csv));
+      expect(usersApi.downloadAdminUsersCsv).toHaveBeenCalledWith({ q: "som", role: "SELLER", status: "ACTIVE" });
+      expect(toastSpy).toHaveBeenCalledWith(expect.objectContaining({ type: "success" }));
+      expect(screen.queryByText("ยังส่งออกเป็นไฟล์ไม่ได้ในตอนนี้")).not.toBeInTheDocument();
+    });
+
+    it("cannot be clicked again while the file is being made", async () => {
+      mockApi();
+      vi.spyOn(toast, "add").mockImplementation(vi.fn());
+      vi.mocked(usersApi.downloadAdminUsersCsv).mockReturnValue(new Promise(() => {}));
+      const user = userEvent.setup();
+      renderWithProviders(<AdminUsersPage />, { route: "/admin/users" });
+
+      await user.click(await screen.findByRole("button", { name: "ส่งออก CSV" }));
+
+      const busy = await screen.findByRole("button", { name: /กำลังสร้างไฟล์/ });
+      expect(busy).toBeDisabled();
+      await user.click(busy);
+      expect(usersApi.downloadAdminUsersCsv).toHaveBeenCalledOnce();
+    });
+
+    it("shows EXPORT_TOO_LARGE as a toast and downloads nothing", async () => {
+      mockApi();
+      const toastSpy = vi.spyOn(toast, "add").mockImplementation(vi.fn());
+      vi.mocked(usersApi.downloadAdminUsersCsv).mockRejectedValue(
+        new ApiError({ status: 400, code: "EXPORT_TOO_LARGE", message: "Too many rows" }),
+      );
+      const user = userEvent.setup();
+      renderWithProviders(<AdminUsersPage />, { route: "/admin/users" });
+
+      await user.click(await screen.findByRole("button", { name: "ส่งออก CSV" }));
+
+      await waitFor(() =>
+        expect(toastSpy).toHaveBeenCalledWith({
+          type: "error",
+          title: "ส่งออกไฟล์ไม่สำเร็จ",
+          description: "ข้อมูลมากเกินไป กรุณาลดช่วงหรือเพิ่มตัวกรอง",
+        }),
+      );
+      expect(URL.createObjectURL).not.toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "ส่งออก CSV" })).toBeEnabled();
     });
   });
 });
