@@ -72,8 +72,18 @@ jobs:
       - name: Run Cypress E2E Tests
         run: pnpm exec cypress run --browser chrome --headless --reporter junit --reporter-options "mochaFile=test-results/e2e-[hash].xml"
 
+      - name: Verify Cypress test reports
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: python3 .github/scripts/check_junit.py 'test-results/e2e-*.xml' | tee test-results/cypress-summary.txt
+
+      - name: Check report text for secrets
+        id: report-safety
+        if: ${{ !cancelled() }}
+        run: python3 .github/scripts/check_report_secrets.py test-results
+
       - name: Publish Cypress E2E Test Results
-        if: always()
+        if: ${{ !cancelled() && steps.report-safety.outcome == 'success' }}
         continue-on-error: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
@@ -81,8 +91,17 @@ jobs:
           files: test-results/e2e-*.xml
           comment_mode: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && 'always' || 'off' }}
 
+      - name: Upload Cypress result counts
+        if: ${{ !cancelled() && steps.report-safety.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-result-counts
+          path: test-results/cypress-summary.txt
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Upload Cypress Screenshots
-        if: failure()
+        if: ${{ failure() && steps.report-safety.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
