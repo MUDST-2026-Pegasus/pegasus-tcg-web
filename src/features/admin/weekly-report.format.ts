@@ -12,7 +12,7 @@ import type {
   WeeklyReport,
   WeeklyStockStatus,
 } from "./weekly-report.types";
-import { formatDate, formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
+import { dateTimeFormat, formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -221,9 +221,11 @@ export function weeklyStatCards(
 
 export type WeeklyTrendPoint = { day: string; singles: number; sealed: number; other: number };
 
+const weekdayFormat = dateTimeFormat({ weekday: "short" });
+
 export function weeklyTrendPoints(report: WeeklyReport): WeeklyTrendPoint[] {
   return report.chartData.map(({ date, singles, sealed, other }) => ({
-    day: formatDate(parseISO(date), { weekday: "short" }),
+    day: weekdayFormat.format(parseISO(date)),
     singles,
     sealed,
     other,

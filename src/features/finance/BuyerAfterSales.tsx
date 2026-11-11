@@ -13,11 +13,12 @@ import { afterSalesApi } from "./after-sales.api";
 import { BuyerOrderReview } from "./BuyerOrderReview";
 import { BuyerReturnConfirmationDialog } from "./components/BuyerReturnConfirmationDialog";
 import { returnReasonLabel, returnStatusLabel } from "./after-sales.format";
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 const reasons = ["NOT_AS_DESCRIBED", "DAMAGED", "WRONG_ITEM", "NOT_RECEIVED", "COUNTERFEIT", "OTHER"];
 
 export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
+  const { t } = useTranslate("buyer");
   const cache = useQueryClient();
   const returns = useQuery({
     queryKey: ["finance", "buyer-returns", order.id],
@@ -43,8 +44,8 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
     } catch (error) {
       toast.add({
         type: "error",
-        title: "ดำเนินการไม่สำเร็จ",
-        description: translateError(error, "กรุณาลองอีกครั้ง"),
+        title: t("buyerAfterSales.actionFailed", "ดำเนินการไม่สำเร็จ"),
+        description: translateError(error, t("buyerAfterSales.retryHint", "กรุณาลองอีกครั้ง")),
       });
     } finally {
       setBusy(false);
@@ -64,33 +65,43 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
         evidenceKeys: evidence.objectKeys,
         items,
       }),
-      "ส่งคำขอคืนสินค้าแล้ว",
+      t("buyerAfterSales.requestReturnSuccess", "ส่งคำขอคืนสินค้าแล้ว"),
     );
   }
 
   return (
     <section className="space-y-3 border-t pt-3 text-sm">
-      <h4 className="font-semibold">คืนสินค้าและรีวิวร้าน</h4>
+      <h4 className="font-semibold">{t("buyerAfterSales.sectionTitle", "คืนสินค้าและรีวิวร้าน")}</h4>
       {returns.isPending && (
-        <div role="status" aria-busy="true" aria-label="กำลังโหลดคำขอคืนสินค้า">
+        <div role="status" aria-busy="true" aria-label={t("buyerAfterSales.loadingReturnsAria", "กำลังโหลดคำขอคืนสินค้า")}>
           <TextLinesSkeleton lines={2} />
         </div>
       )}
       {returns.isError && (
         <p role="alert">
-          โหลดคำขอคืนสินค้าไม่สำเร็จ{" "}
-          <Button variant="outline" size="sm" onClick={() => void returns.refetch()}>ลองอีกครั้ง</Button>
+          {t("buyerAfterSales.loadReturnsFailed", "โหลดคำขอคืนสินค้าไม่สำเร็จ")}{" "}
+          <Button variant="outline" size="sm" onClick={() => void returns.refetch()}>
+            {t("actions.retry", "ลองอีกครั้ง", { ns: "common" })}
+          </Button>
         </p>
       )}
       {returns.data?.map((item) => (
         <div key={item.id} className="space-y-2 rounded border p-3">
-          <p>คำขอคืน #{item.id} · {returnStatusLabel(item.status)} · {returnReasonLabel(item.reasonCode)}</p>
-          {item.refundAmount != null && <p>ยอดคืน ฿{item.refundAmount}</p>}
+          <p>
+            {t("buyerAfterSales.returnItemTitle", "คำขอคืน #{id} · {status} · {reason}", {
+              id: item.id,
+              status: returnStatusLabel(item.status, t),
+              reason: returnReasonLabel(item.reasonCode, t),
+            })}
+          </p>
+          {item.refundAmount != null && (
+            <p>{t("buyerAfterSales.refundAmount", "ยอดคืน ฿{amount}", { amount: item.refundAmount })}</p>
+          )}
           {item.status === "AWAITING_RETURN_SHIPMENT" && (
             <div className="flex gap-2">
               <Input
-                aria-label={`เลขพัสดุคืน ${item.id}`}
-                placeholder="เลขพัสดุส่งคืน"
+                aria-label={t("buyerAfterSales.trackingInputAria", "เลขพัสดุคืน {id}", { id: item.id })}
+                placeholder={t("buyerAfterSales.trackingPlaceholder", "เลขพัสดุส่งคืน")}
                 value={tracking[item.id] ?? ""}
                 onChange={(event) => setTracking((old) => ({ ...old, [item.id]: event.target.value }))}
               />
@@ -98,10 +109,10 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
                 disabled={busy || !tracking[item.id]?.trim()}
                 onClick={() => void act(
                   () => afterSalesApi.shipReturn(order.id, item.id, tracking[item.id].trim()),
-                  "บันทึกเลขพัสดุแล้ว",
+                  t("buyerAfterSales.trackingSavedSuccess", "บันทึกเลขพัสดุแล้ว"),
                 )}
               >
-                แจ้งส่งคืน
+                {t("buyerAfterSales.shipReturnButton", "แจ้งส่งคืน")}
               </Button>
             </div>
           )}
@@ -109,11 +120,16 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
       ))}
       {canReturn && returns.data?.length === 0 && (
         <div className="space-y-3 rounded border p-3">
-          <p className="font-medium">ขอคืนสินค้า (ก่อนสิ้นสุดระยะคืนสินค้า)</p>
-          <Input aria-label="รายละเอียดการคืน" placeholder="รายละเอียด" value={description} onChange={(event) => setDescription(event.target.value)} />
+          <p className="font-medium">{t("buyerAfterSales.requestReturnCardTitle", "ขอคืนสินค้า (ก่อนสิ้นสุดระยะคืนสินค้า)")}</p>
+          <Input
+            aria-label={t("buyerAfterSales.descriptionAria", "รายละเอียดการคืน")}
+            placeholder={t("buyerAfterSales.descriptionPlaceholder", "รายละเอียด")}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
           {order.items.map((item) => (
             <label key={item.id} className="flex items-center gap-2">
-              {item.productName} (สูงสุด {item.quantity})
+              {t("buyerAfterSales.productMaxQuantity", "{name} (สูงสุด {max})", { name: item.productName, max: item.quantity })}
               <Input
                 className="max-w-24"
                 type="number"
@@ -128,7 +144,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
             </label>
           ))}
           <label>
-            หลักฐานประกอบ (ไม่บังคับ)
+            {t("buyerAfterSales.evidenceLabel", "หลักฐานประกอบ (ไม่บังคับ)")}
             <Input
               type="file"
               multiple
@@ -140,14 +156,14 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
           </label>
           {evidence.items.map((item) => (
             <p key={item.id}>
-              {item.file.name}: {item.status === "error" ? item.error : item.status === "done" ? "อัปโหลดแล้ว" : "กำลังอัปโหลด"}
+              {item.file.name}: {item.status === "error" ? item.error : item.status === "done" ? t("buyerAfterSales.uploaded", "อัปโหลดแล้ว") : t("buyerAfterSales.uploading", "กำลังอัปโหลด")}
             </p>
           ))}
           <Button
             disabled={busy || evidence.isUploading || !Object.values(quantities).some((value) => value > 0)}
             onClick={() => setConfirmReturn(true)}
           >
-            ส่งคำขอคืนสินค้า
+            {t("buyerAfterSales.sendRequestButton", "ส่งคำขอคืนสินค้า")}
           </Button>
         </div>
       )}

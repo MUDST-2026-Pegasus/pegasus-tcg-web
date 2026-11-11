@@ -10,6 +10,7 @@ import {
 } from "../../after-sales.helpers";
 import type { SellerReturnRequest } from "../../after-sales.types";
 import type { ReturnResolution } from "../return-draft";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Refund amount row: locked for a full refund, editable with presets for a partial one.
@@ -27,6 +28,7 @@ export function RefundAmountField({
   partialVal: { valid: boolean; error?: string };
   onPartialAmountChange: (value: string) => void;
 }) {
+  const { t } = useTranslate("seller");
   const returnedCardsTotal = calculateReturnedCardsTotal(item.items);
 
   return (
@@ -35,7 +37,7 @@ export function RefundAmountField({
         htmlFor={`amount-${item.id}`}
         className="text-xs font-semibold text-foreground"
       >
-        ยอดคืนเงิน
+        {t("sellerReturns.refundAmount.label", "ยอดคืนเงิน")}
       </label>
 
       {resolution === "FULL_REFUND" ? (
@@ -51,7 +53,7 @@ export function RefundAmountField({
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Lock className="size-3.5" />
-            <span>ล็อคไว้เมื่อคืนเต็มจำนวน</span>
+            <span>{t("sellerReturns.refundAmount.lockedHint", "ล็อคไว้เมื่อคืนเต็มจำนวน")}</span>
           </div>
         </div>
       ) : (
@@ -77,7 +79,7 @@ export function RefundAmountField({
 
           {/* Quick Preset Buttons */}
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-[11px] text-muted-foreground">ลัดยอด:</span>
+            <span className="text-[11px] text-muted-foreground">{t("sellerReturns.refundAmount.shortcuts", "ลัดยอด:")}</span>
             <button
               type="button"
               onClick={() =>
@@ -87,7 +89,9 @@ export function RefundAmountField({
               }
               className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              25% ({formatBahtShort(calculatePresetPercentage(25, item.sellerOrderGrandTotal))})
+              {t("sellerReturns.refundAmount.preset25", "25% ({amount})", {
+                amount: formatBahtShort(calculatePresetPercentage(25, item.sellerOrderGrandTotal)),
+              })}
             </button>
             <button
               type="button"
@@ -98,7 +102,9 @@ export function RefundAmountField({
               }
               className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              50% ({formatBahtShort(calculatePresetPercentage(50, item.sellerOrderGrandTotal))})
+              {t("sellerReturns.refundAmount.preset50", "50% ({amount})", {
+                amount: formatBahtShort(calculatePresetPercentage(50, item.sellerOrderGrandTotal)),
+              })}
             </button>
             {returnedCardsTotal < item.sellerOrderGrandTotal && returnedCardsTotal > 0 && (
               <button
@@ -106,7 +112,9 @@ export function RefundAmountField({
                 onClick={() => onPartialAmountChange(String(returnedCardsTotal))}
                 className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
               >
-                ตามราคาสินค้าที่ขอคืน ({formatBahtShort(returnedCardsTotal)})
+                {t("sellerReturns.refundAmount.presetReturnedCards", "ตามราคาสินค้าที่ขอคืน ({amount})", {
+                  amount: formatBahtShort(returnedCardsTotal),
+                })}
               </button>
             )}
           </div>

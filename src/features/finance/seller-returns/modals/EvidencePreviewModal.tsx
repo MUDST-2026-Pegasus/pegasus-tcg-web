@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 
 import type { ReturnEvidenceLink } from "../../after-sales.types";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Image Preview Modal for evidence
@@ -19,6 +20,8 @@ export function EvidencePreviewModal({
   allLinks: ReturnEvidenceLink[];
   onSelectLink: (link: ReturnEvidenceLink) => void;
 }) {
+  const { t } = useTranslate("seller");
+
   if (!activeLink) return null;
 
   return (
@@ -26,14 +29,19 @@ export function EvidencePreviewModal({
       <DialogContent className="max-w-2xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-base font-medium text-foreground">
-            หลักฐานจากผู้ซื้อ #{activeLink.number} จาก {allLinks.length} ไฟล์
+            {t("sellerReturns.modals.evidencePreview.title", "หลักฐานจากผู้ซื้อ #{number} จาก {total} ไฟล์", {
+              number: activeLink.number,
+              total: allLinks.length,
+            })}
           </DialogTitle>
         </DialogHeader>
 
         <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-lg bg-muted/40 p-2">
           <img
             src={activeLink.url}
-            alt={`หลักฐานขนาดเต็ม ${activeLink.number}`}
+            alt={t("sellerReturns.modals.evidencePreview.fullAlt", "หลักฐานขนาดเต็ม {number}", {
+              number: activeLink.number,
+            })}
             className="max-h-[60vh] w-auto max-w-full rounded object-contain"
           />
         </div>
@@ -54,7 +62,9 @@ export function EvidencePreviewModal({
               >
                 <img
                   src={link.url}
-                  alt={`หลักฐาน ${link.number}`}
+                  alt={t("sellerReturns.modals.evidencePreview.thumbAlt", "หลักฐาน {number}", {
+                    number: link.number,
+                  })}
                   className="h-full w-full object-cover"
                 />
               </button>

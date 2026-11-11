@@ -187,6 +187,7 @@
       "systemSetting": "System Setting",
       "user": "User"
     },
+    "timeSuffix": " ICT",
     "tone": {
       "attention": "Notice",
       "auto": "Automated",
@@ -1002,6 +1003,12 @@
   "common": {
     "tryAgain": "Please try again"
   },
+  "export": {
+    "failed": "Failed to export file",
+    "pending": "Generating file...",
+    "retry": "Please try again",
+    "success": "File downloaded successfully"
+  },
   "finance": {
     "ago": "{time} ago",
     "checkConnection": "Check your connection and try again",
@@ -1147,6 +1154,18 @@
       "hours": "{n} h",
       "minutes": "{n} min"
     },
+    "export": {
+      "allStatuses": "All Statuses",
+      "cancel": "Cancel",
+      "description": "1 row per shop sub-order, newest first · up to 20,000 rows",
+      "from": "From Date",
+      "noStatus": "Select at least 1 status",
+      "rangeInvalid": "Select both dates, and start date must not be after end date",
+      "statuses": "Statuses",
+      "submit": "Download CSV",
+      "title": "Export Orders to CSV",
+      "to": "To Date"
+    },
     "exportUnavailable": "Exporting to a file is not available yet",
     "itemCount": "{count} cards",
     "list": {
@@ -1209,6 +1228,16 @@
     "title": "Order overview"
   },
   "overview": {
+    "export": {
+      "activeListings": "Active Listings",
+      "auctionSales": "Auction Sales (30 Days)",
+      "commission": "Commission",
+      "gmv": "Gross Merchandise Value (GMV)",
+      "liveAuctions": "Live Auctions",
+      "newSellers": "New Sellers",
+      "promotionCost": "Promotion Cost (Pegasus Code Subsidy)",
+      "saleSubsidy": "Campaign Subsidy"
+    },
     "exportReport": "Export Report",
     "lastUpdated": " · Last updated at {time}",
     "loadErrorTitle": "Failed to load platform overview",
@@ -1840,6 +1869,7 @@
       "underReview": "Under Review",
       "underReviewShort": "Reviewing"
     },
+    "timeSuffix": " ICT",
     "validation": {
       "reasonMax": "Reason must not exceed 255 characters.",
       "reasonRequired": "Specify rejection reason so seller knows what to correct."

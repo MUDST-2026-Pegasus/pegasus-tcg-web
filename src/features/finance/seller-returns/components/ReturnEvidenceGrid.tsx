@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { afterSalesApi } from "../../after-sales.api";
 import type { ReturnEvidenceLink } from "../../after-sales.types";
+import { useTranslate } from "@/lib/i18n";
 
 /**
  * Evidence thumbnail viewer with click-to-preview
@@ -15,6 +16,7 @@ export function ReturnEvidenceGrid({
   count: number;
   onImageClick: (link: ReturnEvidenceLink, list: ReturnEvidenceLink[]) => void;
 }) {
+  const { t } = useTranslate("seller");
   const { data: evidence, isLoading } = useQuery({
     queryKey: ["finance", "return-evidence", returnId],
     queryFn: () => afterSalesApi.sellerReturnEvidence(returnId),
@@ -26,8 +28,10 @@ export function ReturnEvidenceGrid({
   return (
     <div className="space-y-2 pt-1">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">หลักฐานจากผู้ซื้อ · {count} ไฟล์</span>
-        <span>กดรูปเพื่อดูขนาดเต็ม</span>
+        <span className="font-medium text-foreground">
+          {t("sellerReturns.evidence.title", "หลักฐานจากผู้ซื้อ · {count} ไฟล์", { count })}
+        </span>
+        <span>{t("sellerReturns.evidence.clickToView", "กดรูปเพื่อดูขนาดเต็ม")}</span>
       </div>
       {isLoading ? (
         <div className="flex gap-2">
@@ -43,18 +47,18 @@ export function ReturnEvidenceGrid({
               type="button"
               onClick={() => onImageClick(file, evidence)}
               className="group relative flex h-20 w-20 flex-col items-center justify-center rounded-lg border border-border bg-muted/40 p-1.5 transition-all hover:border-primary hover:shadow-xs focus:outline-hidden"
-              aria-label={`เปิดดูหลักฐาน ${file.number}`}
+              aria-label={t("sellerReturns.evidence.openAria", "เปิดดูหลักฐาน {number}", { number: file.number })}
             >
               <img
                 src={file.url}
-                alt={`หลักฐาน ${file.number}`}
+                alt={t("sellerReturns.evidence.alt", "หลักฐาน {number}", { number: file.number })}
                 className="h-12 w-12 rounded object-cover transition-transform group-hover:scale-105"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = "none";
                 }}
               />
               <span className="mt-1 text-[10px] text-muted-foreground group-hover:text-primary">
-                หลักฐาน {file.number}
+                {t("sellerReturns.evidence.caption", "หลักฐาน {number}", { number: file.number })}
               </span>
             </button>
           ))}

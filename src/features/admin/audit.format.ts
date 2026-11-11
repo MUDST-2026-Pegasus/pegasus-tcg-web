@@ -174,7 +174,7 @@ export function countImportant(byAction: Record<string, number>): number {
 
 // ---------- ผู้ทำ ----------
 
-// @tolgee-key admin.audit.actor.system
+// @tolgee-key {"key": "audit.actor.system", "ns": "admin", "defaultValue": "ระบบ"}
 export const SYSTEM_ACTOR_LABEL = translate("admin", "audit.actor.system", "ระบบ");
 
 export function actorName(entry: Pick<AuditLogEntry, "actor">): string {

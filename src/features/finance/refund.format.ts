@@ -1,17 +1,48 @@
-const refundStatusLabels: Record<string, string> = {
-  PENDING: "รอดำเนินการ",
-  APPROVED: "อนุมัติแล้ว",
-  PROCESSING: "กำลังโอนเงินคืน",
-  PROCESSED: "คืนเงินแล้ว",
-  REJECTED: "ปฏิเสธคำขอ",
-};
+import { useTranslate } from "@/lib/i18n";
 
-const refundMethodLabels: Record<string, string> = {
-  BANK_TRANSFER: "โอนเข้าบัญชีธนาคาร",
-  MOCK_GATEWAY: "คืนผ่านช่องทางชำระเงิน",
-  WALLET: "คืนเข้ากระเป๋าเงิน",
-  CASH_ON_DELIVERY: "เก็บเงินปลายทาง",
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Translator = (key: any, defaultValue: string, options?: any) => string;
 
-export const refundStatusLabel = (status: string) => refundStatusLabels[status] ?? "สถานะอื่น";
-export const refundMethodLabel = (method: string) => refundMethodLabels[method] ?? "ช่องทางอื่น";
+const fallbackTranslator: Translator = (_, defaultValue) => defaultValue;
+
+export function refundStatusLabel(status: string, t: Translator = fallbackTranslator): string {
+  switch (status) {
+    case "PENDING":
+      return t("refundStatus.pending", "รอดำเนินการ", { ns: "buyer" });
+    case "APPROVED":
+      return t("refundStatus.approved", "อนุมัติแล้ว", { ns: "buyer" });
+    case "PROCESSING":
+      return t("refundStatus.processing", "กำลังโอนเงินคืน", { ns: "buyer" });
+    case "PROCESSED":
+      return t("refundStatus.processed", "คืนเงินแล้ว", { ns: "buyer" });
+    case "REJECTED":
+      return t("refundStatus.rejected", "ปฏิเสธคำขอ", { ns: "buyer" });
+    default:
+      return t("refundStatus.other", "สถานะอื่น", { ns: "buyer" });
+  }
+}
+
+export function refundMethodLabel(method: string, t: Translator = fallbackTranslator): string {
+  switch (method) {
+    case "BANK_TRANSFER":
+      return t("refundMethod.bankTransfer", "โอนเข้าบัญชีธนาคาร", { ns: "buyer" });
+    case "MOCK_GATEWAY":
+      return t("refundMethod.mockGateway", "คืนผ่านช่องทางชำระเงิน", { ns: "buyer" });
+    case "WALLET":
+      return t("refundMethod.wallet", "คืนเข้ากระเป๋าเงิน", { ns: "buyer" });
+    case "CASH_ON_DELIVERY":
+      return t("refundMethod.cashOnDelivery", "เก็บเงินปลายทาง", { ns: "buyer" });
+    default:
+      return t("refundMethod.other", "ช่องทางอื่น", { ns: "buyer" });
+  }
+}
+
+export function useRefundStatusLabel() {
+  const { t } = useTranslate("buyer");
+  return (status: string) => refundStatusLabel(status, t);
+}
+
+export function useRefundMethodLabel() {
+  const { t } = useTranslate("buyer");
+  return (method: string) => refundMethodLabel(method, t);
+}

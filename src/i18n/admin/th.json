@@ -94,7 +94,7 @@
       "orderId": "หมายเลขคำสั่งซื้อ",
       "priority": "ลำดับความสำคัญ",
       "rarityCode": "ระดับความหายาก",
-      "ratePercent": "อัตราค่าคอม (%)",
+      "ratePercent": "อัตรา (%)",
       "reason": "เหตุผล",
       "redacted": "ซ่อนค่า",
       "required": "บังคับกรอก",

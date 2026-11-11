@@ -16,7 +16,8 @@
     "next": "Next",
     "previous": "Previous",
     "reload": "Reload",
-    "retry": "Retry"
+    "retry": "Retry",
+    "save": "Save"
   },
   "auth": {
     "checkingSession": "Checking your sign-in"
