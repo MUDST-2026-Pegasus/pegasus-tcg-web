@@ -25,13 +25,15 @@ const expectNoThai = () => {
   cy.wait(1000);
   cy.get("body").invoke("prop", "innerText").should((text: string) => {
     const hit = text.split("\n").find((line) => THAI.test(line));
-    expect(hit, "line with Thai text").to.be.undefined;
+    expect(hit, "line with Thai text").to.equal(undefined);
   });
 };
 
 describe("i18n EN smoke [TCG-561]", () => {
   beforeEach(() => {
-    cy.intercept("**/api/**", (req) => {
+    // guest — no backend needed for the session bootstrap
+    cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 401, body: { success: false } });
+    cy.intercept({ method: "GET", url: "**/api/**" }, (req) => {
       req.continue((res) => {
         if (res.body && typeof res.body === "object") res.body = scrub(res.body);
       });
