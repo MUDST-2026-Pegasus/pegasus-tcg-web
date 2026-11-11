@@ -11,6 +11,8 @@ export default defineConfig({
     video: false,
     setupNodeEvents(_on, config) {
       config.expose = config.expose || {};
+      config.expose.nfrRunId = config.env?.nfrRunId;
+      config.expose.mobile = config.env?.mobile;
       config.expose.runAuction = config.env?.runAuction === true || config.env?.runAuction === "true";
       if (config.env?.runPromotions !== undefined) {
         config.expose.runPromotions = config.env.runPromotions;

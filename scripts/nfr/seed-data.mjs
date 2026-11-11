@@ -80,7 +80,12 @@ async function main() {
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
 }
 
+const cliTimeout = setTimeout(() => {
+  process.stderr.write("NFR setup timed out after 10 seconds\n");
+  process.exit(1);
+}, 10_000);
+cliTimeout.unref();
 main().catch((error) => {
   process.stderr.write(`NFR setup failed: ${error.message}\n`);
   process.exitCode = 1;
-});
+}).finally(() => clearTimeout(cliTimeout));

@@ -1,4 +1,8 @@
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const PINNED_NODE_VERSION = "22.20.0";
+if (process.versions.node !== PINNED_NODE_VERSION) {
+  throw new Error(`Pinned Node.js ${PINNED_NODE_VERSION} is required; found ${process.versions.node}`);
+}
 
 /**
  * Accept only loopback targets or explicitly configured test-only hostnames.

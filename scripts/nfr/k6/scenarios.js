@@ -49,8 +49,11 @@ const journeys = [
 
 export function journey() {
   const selected = journeys[__ITER % journeys.length];
-  const requestHeaders = selected.authenticated && !headers.Authorization ? {} : headers;
-  const response = http.get(`${target}${selected.path}`, { headers: requestHeaders, tags: { kind: selected.label, journey: selected.authenticated ? "authenticated-or-anonymous" : "anonymous" }, timeout: "10s" });
+  const cacheMode = __ITER === 0 ? "cold" : "warm";
+  const authenticated = Boolean(headers.Authorization && selected.authenticated);
+  const requestHeaders = selected.authenticated && headers.Authorization ? { ...headers } : {};
+  if (cacheMode === "cold") requestHeaders["Cache-Control"] = "no-cache";
+  const response = http.get(`${target}${selected.path}`, { headers: requestHeaders, tags: { kind: selected.label, journey: authenticated ? "authenticated" : "anonymous", cache_mode: cacheMode }, timeout: "10s" });
   const expected = [400, 401, 403, 404, 409, 422, 429].includes(response.status);
   if (expected) expectedBusinessOutcomes.add(1, { status: String(response.status), endpoint: selected.path });
   const unexpected = response.status === 0 || response.status >= 500 || (response.status >= 400 && !expected);

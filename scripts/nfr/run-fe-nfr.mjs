@@ -22,10 +22,31 @@ const args = [cypress, "run", "--spec", "src/test/cypress/e2e/nfr/tcg-753-nfr.cy
 const result = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8", timeout: config.timeoutSeconds * 1000, windowsHide: true, maxBuffer: 30 * 1024 * 1024 });
 const log = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
 await writeFile(path.join(output, "cypress.log"), log);
+let summary = { status: "Blocked", reasons: ["Cypress NFR measurements were not produced"], measurements: 0, thresholdBreaches: [] };
+try {
+  const measurements = JSON.parse(await readFile(path.join(output, "measurements.json"), "utf8"));
+  const expectedMeasurements = config.pages.length * config.runsPerPage;
+  const missingLcp = measurements.filter((item) => item.lcpMs === null || item.lcpMs === undefined).length;
+  const missingInteraction = measurements.filter((item) => item.interactionLatencyMs === null || item.interactionLatencyMs === undefined).length;
+  const incompletePage = measurements.filter((item) => !item.mainContentVisible).length;
+  const thresholdBreaches = measurements.filter((item) => item.lcpMs > 2500 || item.cls > 0.1 || item.interactionLatencyMs > 200).map(({ page, run, lcpMs, cls, interactionLatencyMs }) => ({ page, run, lcpMs, cls, interactionLatencyMs }));
+  const reasons = [];
+  if (result.status !== 0) reasons.push(`Cypress exited with ${result.status}; review cypress.log for failed UI/a11y assertions`);
+  if (measurements.length !== expectedMeasurements) reasons.push(`Expected ${expectedMeasurements} page runs; captured ${measurements.length}`);
+  if (missingLcp) reasons.push(`LCP unavailable in ${missingLcp} page runs`);
+  if (missingInteraction) reasons.push(`Interaction latency unavailable in ${missingInteraction} page runs`);
+  if (incompletePage) reasons.push(`Main app content unavailable in ${incompletePage} page runs`);
+  if (thresholdBreaches.length) reasons.push(`${thresholdBreaches.length} frozen performance budget breaches`);
+  summary = { status: thresholdBreaches.length || result.status !== 0 ? "Fail" : reasons.length ? "Blocked" : "Pass", reasons, measurements: measurements.length, expectedMeasurements, missingLcp, missingInteraction, incompletePage, thresholdBreaches };
+} catch (error) {
+  summary.reasons = [`Could not read measurement evidence: ${error.message}`];
+}
+await writeFile(path.join(output, "summary.json"), `${JSON.stringify({ runId, target: target.origin, browser, cypressVersion: config.cypressVersion, cypressExitCode: result.status, ...summary }, null, 2)}\n`);
 if (result.error) {
   process.stderr.write(`Frontend NFR execution failed: ${result.error.message}\n`);
   process.exitCode = 1;
 } else {
   process.stdout.write(log);
-  process.exitCode = result.status ?? 1;
+  process.stdout.write(`\nFrontend NFR summary: ${JSON.stringify(summary)}\n`);
+  process.exitCode = result.status === 0 && summary.status === "Pass" ? 0 : 1;
 }

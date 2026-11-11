@@ -24,7 +24,12 @@ async function main() {
   process.stdout.write(`Removed NFR run data: ${path.relative(repositoryRoot, runDirectory).replaceAll(path.sep, "/")}\n`);
 }
 
+const cliTimeout = setTimeout(() => {
+  process.stderr.write("NFR cleanup timed out after 10 seconds\n");
+  process.exit(1);
+}, 10_000);
+cliTimeout.unref();
 main().catch((error) => {
   process.stderr.write(`NFR cleanup failed: ${error.message}\n`);
   process.exitCode = 1;
-});
+}).finally(() => clearTimeout(cliTimeout));
