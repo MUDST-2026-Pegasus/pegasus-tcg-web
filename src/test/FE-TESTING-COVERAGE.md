@@ -85,3 +85,64 @@ Baseline below is the Istanbul baseline supplied for this review. After values a
 ## Known bugs / issues found in expansion
 
 - No production bugs were confirmed. Coverage run emits existing React Compiler, Base UI, and mocked-query warnings in unrelated tests; these did not fail the test or coverage run.
+
+## Targeted folder coverage follow-up
+
+### Gap findings and coverage movement
+
+The next report identified `MiniCartDrawer.tsx` as the largest uncovered Cart component (before this follow-up: 22.75% statements, 17.31% branches, 12.5% functions, 22.64% lines). `ProfitWarningCard.tsx` in restock had 0% coverage. Existing `CartSellerGroup` UI behavior also had unasserted quantity and remove disabled branches. The follow-up adds component coverage for those paths, a Cart API 409/pending integration case, and restock 401/403 and successful-submit cases.
+
+| Target folder | Statements Before → After | Branches Before → After | Functions Before → After | Lines Before → After |
+| --- | ---: | ---: | ---: | ---: |
+| `features/cart/components` | 74.38% (595/800) → 86.00% (688/800) | 70.13% (763/1,088) → 77.39% (842/1,088) | 66.02% (68/103) → 73.79% (76/103) | 77.82% (372/478) → 91.42% (437/478) |
+| `features/cart/pages` | 87.26% (459/526) → 87.64% (461/526) | 82.69% (468/566) → 83.39% (472/566) | 77.19% (44/57) → 77.19% (44/57) | 90.49% (276/305) → 91.15% (278/305) |
+| `features/seller/products/components/restock` | 85.98% (509/592) → 90.71% (537/592) | 80.59% (490/608) → 82.89% (504/608) | 71.43% (20/28) → 75.00% (21/28) | 92.58% (287/310) → 98.39% (305/310) |
+
+### Tests added in this follow-up
+
+- `MiniCartDrawer.test.tsx`: grouped multi-shop UI, recent item/cart summary, purchasable checkout URL, loading/error/retry/empty states and unavailable-line review state.
+- `CartSellerGroup.test.tsx`: quantity bounds, quantity/remove busy disabling and selected row callback arguments.
+- `integration/cart.spec.tsx`: a deferred quantity update blocks repeated submissions; a 409 `INSUFFICIENT_STOCK` response leaves the previous quantity in place, reports an error and unlocks retry.
+- `ProfitWarningCard.test.tsx`: API-provided warning values and the edit-price destination.
+- `SellerProductRestockPage.test.tsx`: listing access denied responses (401/403), successful restock payload and return to product management. Existing pending-submit and 422 error cases remain covered.
+
+### Verification for this follow-up
+
+| Command | Result |
+| --- | --- |
+| Focused changed tests | Passed: 5 files, 19 tests. |
+| `pnpm test:coverage` | All 1,326 tests passed, but Vitest exited 1 because of 2 `EnvironmentTeardownError` events from `NavbarCartBadge.test.tsx` while its console log callback was pending. No test assertions failed. |
+| `pnpm exec vitest run --coverage --passWithNoTests --silent` | Passed: 191 files, 1,326 tests. Overall statements 62.79% (28,022/44,622), branches 56.16% (24,318/43,298), functions 58.37% (3,443/5,898), lines 68.83% (18,143/26,356). Uses the existing Vitest configuration with a CLI-only console-silence flag. |
+| `pnpm lint` | Passed: 0 errors, 1 existing React Compiler warning at `EditProfileDialog.tsx:96`. |
+| `pnpm build` | Passed: TypeScript and Vite production build; 5,596 modules transformed. |
+
+No production files or Vitest/Coverage config were changed. No business logic defects were found.
+
+## TCG-767 cart and restock verification (2026-11-11)
+
+### Latest targeted folder coverage
+
+The latest full V8 run includes the cart multi-shop, quantity/removal, pending/stock-conflict tests and restock submit success, duplicate-submit, validation and permission/server-error cases.
+
+| Target folder | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| `features/cart/components` | 86.00% (688/800) | 77.38% (842/1,088) | 73.78% (76/103) | 91.42% (437/478) |
+| `features/cart/pages` | 87.64% (461/526) | 83.39% (472/566) | 77.19% (44/57) | 91.14% (278/305) |
+| `features/seller/products/components/restock` | 90.71% (537/592) | 82.89% (504/608) | 75.00% (21/28) | 98.38% (305/310) |
+
+Against the reported starting figures (595/800 statements for cart components and 509/592 statements for restock), the latest coverage is up by 93 cart statements and 28 restock statements. The remaining uncovered counts are 112 cart component statements, 246 cart component branches, 27 cart component functions, and 55 restock statements, 104 restock branches, 7 restock functions.
+
+### Added API failure cases
+
+`SellerProductRestockPage.test.tsx` now exercises failed restock mutations for 401, 403, and 500 responses, asserts that the API error is surfaced through the existing error toast, and verifies the save action becomes available again. The existing success test checks the submitted payload and navigation; the pending test verifies repeated submits send one request.
+
+### Verification
+
+| Command | Result |
+| --- | --- |
+| Focused `SellerProductRestockPage` suite | Passed: 10 tests. |
+| `vitest run --coverage --passWithNoTests --silent` | Passed cleanly: 191 files, 1,329 tests, no unhandled errors. Statements 62.81% (28,030/44,622), branches 56.19% (24,333/43,298), functions 58.37% (3,443/5,898), lines 68.83% (18,143/26,356). The unsilenced run also reported four `EnvironmentTeardownError` events in `legacy-redirects.spec.tsx`; the clean rerun used Vitest's CLI `--silent` option. |
+| `pnpm lint` | Passed: 0 errors, 1 existing React Compiler warning at `EditProfileDialog.tsx:96`. |
+| `pnpm build` | Passed: TypeScript and Vite production build; 5,596 modules transformed. |
+
+The machine's `pnpm` shim was missing, so the equivalent commands were run with `corepack pnpm@10.18.3`. No production code or coverage configuration was changed.

@@ -5,6 +5,8 @@ import { CartPage } from "@/features/cart/pages/CartPage";
 import { cartApi } from "@/features/cart/cart.api";
 import type { CartResponse, CartItemResponse } from "@/features/cart/cart.types";
 import { renderWithProviders } from "../utils";
+import { toast } from "@/components/ui/toast";
+import { ApiError } from "@/lib/api";
 
 vi.mock("@/components/ui/toast", () => ({
   toast: { add: vi.fn() },
@@ -148,6 +150,26 @@ describe("CartPage Integration Flow", () => {
       expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿1,800");
     });
     expect(cartApi.updateQuantity).toHaveBeenCalledWith(1, { quantity: 3 });
+  });
+
+  it("disables repeated quantity updates while pending and preserves the cart after insufficient-stock response", async () => {
+    let rejectUpdate!: (reason: unknown) => void;
+    const toastSpy = vi.mocked(toast.add);
+    vi.mocked(cartApi.updateQuantity).mockImplementation(() => new Promise((_, reject) => { rejectUpdate = reject; }));
+    const user = userEvent.setup();
+    renderWithProviders(<CartPage />);
+
+    await screen.findByText("Blue-Eyes White Dragon");
+    const increase = screen.getByRole("button", { name: "เพิ่มจำนวน Blue-Eyes White Dragon" });
+    await user.click(increase);
+    expect(increase).toBeDisabled();
+    expect(cartApi.updateQuantity).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText("จำนวน Blue-Eyes White Dragon")).toHaveTextContent("2");
+
+    rejectUpdate(new ApiError({ status: 409, code: "INSUFFICIENT_STOCK", message: "Only 2 items remain" }));
+    await waitFor(() => expect(toastSpy).toHaveBeenCalledWith(expect.objectContaining({ title: "สินค้าเหลือไม่พอ", type: "error" })));
+    expect(screen.getByLabelText("จำนวน Blue-Eyes White Dragon")).toHaveTextContent("2");
+    expect(screen.getByRole("button", { name: "เพิ่มจำนวน Blue-Eyes White Dragon" })).toBeEnabled();
   });
 
   it("removes an item when Remove button is clicked", async () => {
