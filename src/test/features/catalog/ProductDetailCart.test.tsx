@@ -270,14 +270,14 @@ describe("ProductDetailPage cart actions", () => {
 
     const dropdown = screen.getByRole("combobox", { name: "เลือกเวอร์ชัน" });
     expect(dropdown).toHaveTextContent("ทุกเวอร์ชัน");
-    expect(screen.getByText("฿3,000.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,000.00")).toBeInTheDocument();
     expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Seller")).toBeInTheDocument();
 
     await user.click(dropdown);
     await user.click(await screen.findByRole("option", { name: "JA" }));
 
     expect(dropdown).toHaveTextContent("JA");
-    expect(screen.getByText("฿2,500.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 2,500.00")).toBeInTheDocument();
     expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Tokyo Shop")).toBeInTheDocument();
     expect(screen.queryByLabelText("ดูรายละเอียดสินค้าของ Seller")).not.toBeInTheDocument();
   });
@@ -290,13 +290,13 @@ describe("ProductDetailPage cart actions", () => {
     vi.spyOn(catalogQueries, "useProductListings").mockReturnValue({ data: [listing, { ...listing, id: 56, condition: "LP", price: 90 }], isPending: false, isError: false, isSuccess: true } as never);
     renderPage();
 
-    expect(screen.getByText("฿3,000.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,000.00")).toBeInTheDocument();
     expect(screen.getByText("↑ 4.8%")).toBeInTheDocument();
-    expect(screen.getByText("฿2,900.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 2,900.00")).toBeInTheDocument();
     expect(screen.getByText(/ข้อมูลราคายังน้อย/)).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByText("Lightly Played")[0].closest("button")!);
-    expect(screen.getByText("฿2,000.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 2,000.00")).toBeInTheDocument();
     expect(screen.getByText("↓ 5%")).toBeInTheDocument();
     expect(screen.getByText("ขายล่าสุด").parentElement).toHaveTextContent("—");
   });

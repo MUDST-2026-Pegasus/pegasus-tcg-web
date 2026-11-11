@@ -33,16 +33,13 @@ import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale, useTranslate } from "@/lib/i18n";
+import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
 const ALL_VARIANTS = "all";
 
-function formatPrice(amount: number, currency = "THB") {
-  return new Intl.NumberFormat(intlLocale(), {
-    style: "currency",
-    currency,
-  }).format(amount);
+function formatPrice(amount: number) {
+  return formatMoney(amount);
 }
 
 export function ProductDetailPage() {
@@ -313,13 +310,13 @@ function ProductDetailContent({
             <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div><p className="text-sm font-medium text-muted-foreground">{t("product.marketPrice", "ราคาตลาด")}</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
+                  <div><p className="text-sm font-medium text-muted-foreground">{t("product.marketPrice", "ราคาตลาด")}</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice) : "—"}</p></div>
                   <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}%`}</span>{t("product.last30Days", "30 วันล่าสุด")}</div>
                 </div>
                 {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">{t("product.lowSampleDetail", "ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)")}</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
-                  <div><span className="block text-xs text-muted-foreground">{t("product.lastSold", "ขายล่าสุด")}</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">{t("product.listedFrom", "ราคาเริ่มต้น")}</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price), firstListing.currency) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.lastSold", "ขายล่าสุด")}</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.listedFrom", "ราคาเริ่มต้น")}</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price)) : "—"}</strong></div>
                   <div><span className="block text-xs text-muted-foreground">{t("product.available", "พร้อมขาย")}</span><strong>{listingsReady ? itemCount(availableQuantity) : "—"}</strong></div>
                 </div>
               </CardContent>
@@ -361,7 +358,7 @@ function ProductDetailContent({
                       className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-card p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
                       <span className="text-sm font-bold">{condition}</span>
                       <span className="text-xs text-muted-foreground">{CONDITION_LABELS[condition]}</span>
-                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price), offer.currency) : "—"}</span>
+                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price)) : "—"}</span>
                     </button>
                   );
                 })}
@@ -388,7 +385,7 @@ function ProductDetailContent({
             <div className="grid grid-cols-2 gap-3">
               <Button type="button" className="h-14 text-base font-bold shadow-md" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing || isAuthLoading} onClick={() => void handleBuyNow()}>
                 {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : isAuthLoading ? t("product.loadingButton", "กำลังโหลด…") : t("product.buyNow", "ซื้อทันที")}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price), purchasableListing.currency)}` : ""}
+                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : isAuthLoading ? t("product.loadingButton", "กำลังโหลด…") : t("product.buyNow", "ซื้อทันที")}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price))}` : ""}
               </Button>
               <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={(event) => void handleAddToCart(event.currentTarget)}>
                 {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}

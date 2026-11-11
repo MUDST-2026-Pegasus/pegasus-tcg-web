@@ -41,7 +41,7 @@ describe("restock preview", () => {
   it("weighs a new lot the way the backend will", () => {
     const data = getRestockData(listing());
 
-    // 3 ใบ × ฿2,500 + 2 ใบ ฿6,000 = ฿13,500 ÷ 5 ใบ — ตัวเดียวกับที่ออเดอร์ใช้เป็นต้นทุนตอนขาย
+    // 3 ใบ × THB 2,500.00 + 2 ใบ THB 6,000.00 = THB 13,500.00 ÷ 5 ใบ — ตัวเดียวกับที่ออเดอร์ใช้เป็นต้นทุนตอนขาย
     const result = calculateRestock(data.product, data.commissionPercent, draft("2", "6000"));
 
     expect(result).toMatchObject({

@@ -17,7 +17,7 @@ describe("PriceTag", () => {
   it("Default: one price in the primary colour, nothing struck", () => {
     const { container } = renderWithProviders(<PriceTag pricing={{ listPrice: 4200, salePrice: 4200, discountPercent: null, sale: null }} />);
     expect(container.querySelector("[data-slot=price-tag]")).toHaveAttribute("data-state", "default");
-    expect(screen.getByText("฿4,200")).toHaveClass("text-primary");
+    expect(screen.getByText("THB 4,200.00")).toHaveClass("text-primary");
     expect(container.querySelector("s")).toBeNull();
     expect(screen.queryByText(/^-\d+%$/)).toBeNull();
   });
@@ -27,9 +27,9 @@ describe("PriceTag", () => {
       <PriceTag pricing={{ listPrice: 4200, salePrice: 3360, discountPercent: 20, sale: sale("CATEGORY_SALE") }} />,
     );
     expect(container.querySelector("[data-slot=price-tag]")).toHaveAttribute("data-state", "sale");
-    expect(screen.getByText("฿3,360")).toHaveClass("text-[#dc2626]");
+    expect(screen.getByText("THB 3,360.00")).toHaveClass("text-[#dc2626]");
     expect(screen.getByText("-20%")).toBeInTheDocument();
-    expect(container.querySelector("s")).toHaveTextContent("฿4,200");
+    expect(container.querySelector("s")).toHaveTextContent("THB 4,200.00");
   });
 
   it("Flash: same tag with flash state", () => {
@@ -48,7 +48,7 @@ describe("PriceTag", () => {
 
   it("falls back to the plain price without pricing (older API)", () => {
     renderWithProviders(<PriceTag price={1990} />);
-    expect(screen.getByText("฿1,990")).toBeInTheDocument();
+    expect(screen.getByText("THB 1,990.00")).toBeInTheDocument();
   });
 
   it("treats a sale without a lower price as default", () => {

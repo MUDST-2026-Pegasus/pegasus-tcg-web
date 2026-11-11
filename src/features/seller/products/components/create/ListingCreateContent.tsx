@@ -403,7 +403,7 @@ export function ListingCreateContent() {
                 id: "preview",
                 type: selectedCondition?.badgeLabel ?? "—",
                 title: card?.productName ?? t("products.create.noCard", "ยังไม่ได้เลือกการ์ด"),
-                price: price === null ? t("products.create.noPrice", "฿—") : formatBaht(price),
+                price: price === null ? t("products.create.noPrice", "THB —") : formatBaht(price),
                 image: previewImage,
                 imageAlt: card?.productName,
               }}

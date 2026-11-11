@@ -112,8 +112,8 @@ describe("Flash Sale: add to cart → checkout total", () => {
     // Buy box แบบ Flash (Figma SAL-B3 B)
     cy.contains("⚡ FLASH SALE").should("be.visible");
     cy.contains(/จบใน \d{2}:\d{2}:\d{2}/).should("be.visible");
-    cy.contains("฿1,393").should("be.visible");
-    cy.contains("s", "฿1,990").should("exist");
+    cy.contains("THB 1,393.00").should("be.visible");
+    cy.contains("s", "THB 1,990.00").should("exist");
     cy.contains("ขายแล้ว 17/20 · ราคานี้เหลือ 3 ใบ · คนละ 1 ชิ้น").should("be.visible");
 
     cy.contains("button", "เพิ่มลงตะกร้า").click();
@@ -123,8 +123,8 @@ describe("Flash Sale: add to cart → checkout total", () => {
     // ตะกร้า: ราคาก่อนลด / ส่วนลดราคาสินค้า
     cy.visit("/cart");
     cy.wait("@getCart");
-    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "฿1,990");
-    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "฿597");
+    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "THB 1,990.00");
+    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "THB 597.00");
     cy.contains("ยอดสินค้า (1 ใบ)").parent().should("contain.text", "1,393");
 
     // checkout: ยอดสินค้าเท่าราคา Flash (ค่าที่ server ส่งมา) + ค่าส่ง
@@ -173,7 +173,7 @@ describe("Flash Sale: add to cart → checkout total", () => {
     cy.visit("/checkout?items=701");
     cy.wait(["@getAddresses", "@getQuotes"]);
     cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "1,990");
-    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "฿597");
+    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "THB 597.00");
     cy.get('[data-testid="checkout-grand-total"]').should("contain.text", "1,443");
 
     cy.contains("button", "สั่งซื้อและไปชำระเงิน").should("be.enabled").click();

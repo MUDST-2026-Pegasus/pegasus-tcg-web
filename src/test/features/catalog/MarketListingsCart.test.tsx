@@ -136,7 +136,7 @@ describe("MarketListingsPage Add button", () => {
       { catalogVariantId: 10, condition: "SEALED", medianPrice: 3000, statDate: "2026-10-15", change30dPercent: 1, lastSold: null, lowSample: false },
     ] } as never);
     renderPage();
-    expect(screen.getByText("฿3,000")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,000.00")).toBeInTheDocument();
   });
 
   it("shows seller reputation and delivery from the listing API", () => {

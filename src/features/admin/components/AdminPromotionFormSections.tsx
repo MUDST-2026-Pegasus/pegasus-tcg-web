@@ -185,7 +185,7 @@ export function AdminPromotionFormSections({
               field="discountValue"
               label={t("admin.adminPromotionFormSections.label7", "มูลค่าส่วนลด")}
               required
-              hint={form.discountType === "PERCENT" ? "1–90%" : t("admin.adminPromotionFormSections.hint8", "ต้องมากกว่า ฿0")}
+              hint={form.discountType === "PERCENT" ? "1–90%" : t("admin.adminPromotionFormSections.hint8", "ต้องมากกว่า THB 0.00")}
               error={errors.discountValue}
               id="promotion-discountValue"
               ariaLabel={t("admin.adminPromotionFormSections.label7", "มูลค่าส่วนลด")}
@@ -203,7 +203,7 @@ export function AdminPromotionFormSections({
               label={form.discountType === "FREE_SHIPPING" ? t("admin.adminPromotionFormSections.label8", "ลดค่าส่งสูงสุดต่อร้าน") : t("admin.adminPromotionFormSections.label9", "ส่วนลดสูงสุด")}
               hint={
                 form.discountType === "FREE_SHIPPING"
-                  ? t("admin.adminPromotionFormSections.hint9", "เว้นว่าง = ส่งฟรีเต็มจำนวน (งบประเมินจาก ฿60 / ร้าน)")
+                  ? t("admin.adminPromotionFormSections.hint9", "เว้นว่าง = ส่งฟรีเต็มจำนวน (งบประเมินจาก THB 60.00 / ร้าน)")
                   : t("admin.adminPromotionFormSections.hint10", "เว้นว่าง = ไม่จำกัด (แนะนำให้ใส่)")
               }
               error={errors.maxDiscount}
@@ -211,7 +211,7 @@ export function AdminPromotionFormSections({
               ariaLabel={t("admin.adminPromotionFormSections.label9", "ส่วนลดสูงสุด")}
               value={form.maxDiscount}
               onChange={(value) => change("maxDiscount", value)}
-              prefix={t("admin.adminPromotionFormSections.prefix", "฿")}
+              prefix={t("admin.adminPromotionFormSections.prefix", "THB")}
               locked={locked("maxDiscount")}
             />
           ) : null}
@@ -228,7 +228,7 @@ export function AdminPromotionFormSections({
             ariaLabel={t("admin.adminPromotionFormSections.label10", "ยอดสั่งซื้อขั้นต่ำ")}
             value={form.minSpend}
             onChange={(value) => change("minSpend", value as number)}
-            prefix={t("admin.adminPromotionFormSections.prefix", "฿")}
+            prefix={t("admin.adminPromotionFormSections.prefix", "THB")}
             locked={locked("minSpend")}
           />
           <FormField field="scopeType" label={t("admin.adminPromotionFormSections.label11", "ใช้กับสินค้า")}>

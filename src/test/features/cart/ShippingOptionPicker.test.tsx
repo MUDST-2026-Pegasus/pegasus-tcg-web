@@ -26,15 +26,15 @@ describe("ShippingOptionPicker", () => {
     const freeOption = { ...standard, fee: 0, free: true, amountToFree: null };
     renderWithProviders(<ShippingOptionPicker sellerName="Demo" itemCount={3} quote={{ ...quote, itemCount: 3, options: [freeOption] }} loading={false} failed={false} disabled={false} onSelect={vi.fn()} />);
     expect(screen.getByText("ส่งฟรี", { exact: true })).toBeInTheDocument();
-    expect(screen.getByText("฿50")).toHaveClass("line-through");
-    expect(screen.getByText(/ยอดถึง ฿500 แล้ว/)).toBeInTheDocument();
+    expect(screen.getByText("THB 50.00")).toHaveClass("line-through");
+    expect(screen.getByText(/ยอดถึง THB 500.00 แล้ว/)).toBeInTheDocument();
   });
 
   it("uses the computed API fee and the shared carrier label", () => {
     renderWithProviders(<ShippingOptionPicker sellerName="Demo" itemCount={3} quote={{ ...quote, options: [{ ...standard, carrierCode: "THAILAND_POST_EMS", fee: 17 }] }} loading={false} failed={false} disabled={false} onSelect={vi.fn()} />);
-    expect(screen.getByText("฿17")).toBeInTheDocument();
+    expect(screen.getByText("THB 17.00")).toBeInTheDocument();
     expect(screen.getByText("ไปรษณีย์ไทย EMS")).toBeInTheDocument();
-    expect(screen.getByText(/ซื้อเพิ่มอีก ฿100/)).toBeInTheDocument();
+    expect(screen.getByText(/ซื้อเพิ่มอีก THB 100.00/)).toBeInTheDocument();
     expect(screen.getByText(/ร้านนี้มีวิธีจัดส่งเดียว/)).toBeInTheDocument();
   });
 });

@@ -7,7 +7,7 @@ describe('ProductCard', () => {
     id: 'p-1',
     type: 'Single Card',
     title: 'Blue-Eyes White Dragon',
-    price: '฿5,000.00',
+    price: 'THB 5,000.00',
     image: 'https://example.com/blue-eyes.jpg',
     imageAlt: 'Blue-Eyes Dragon Card',
   };
@@ -17,7 +17,7 @@ describe('ProductCard', () => {
 
     expect(screen.getByText('Single Card')).toBeInTheDocument();
     expect(screen.getByText('Blue-Eyes White Dragon')).toBeInTheDocument();
-    expect(screen.getByText('฿5,000.00')).toBeInTheDocument();
+    expect(screen.getByText('THB 5,000.00')).toBeInTheDocument();
     
     const image = screen.getByRole('img');
     expect(image).toHaveAttribute('src', 'https://example.com/blue-eyes.jpg');

@@ -138,7 +138,7 @@ export async function copyPromotionCode(code: string) {
   }
 }
 
-/** "ลด 10% สูงสุด ฿200 · ขั้นต่ำ ฿500 · เฉพาะ CardVault BKK" — W1's second line. */
+/** "ลด 10% สูงสุด THB 200.00 · ขั้นต่ำ THB 500.00 · เฉพาะ CardVault BKK" — W1's second line. */
 export function walletRuleSummary(code: {
   ownerType: PromotionOwnerType;
   shop: { name: string } | null;

@@ -19,10 +19,10 @@ const names = {
 describe("promotion format", () => {
   it("budgets a free-shipping code from the same cap it shows", () => {
     const freeShip = { discountType: "FREE_SHIPPING", discountValue: 0, maxDiscount: 200, usageLimitTotal: 500 } as const;
-    expect(budgetLabel(freeShip)).toBe("฿100,000");
-    expect(budgetFormula(freeShip)).toBe("500 × ฿200");
-    expect(budgetFormula({ ...freeShip, maxDiscount: null })).toBe("500 × ฿60");
-    expect(budgetLabel({ ...freeShip, maxDiscount: null })).toBe("฿30,000");
+    expect(budgetLabel(freeShip)).toBe("THB 100,000.00");
+    expect(budgetFormula(freeShip)).toBe("500 × THB 200.00");
+    expect(budgetFormula({ ...freeShip, maxDiscount: null })).toBe("500 × THB 60.00");
+    expect(budgetLabel({ ...freeShip, maxDiscount: null })).toBe("THB 30,000.00");
   });
 
   it("calls a budget unlimited when there is no cap or no usage limit", () => {
@@ -32,8 +32,8 @@ describe("promotion format", () => {
 
   it("matches the Figma table wording", () => {
     expect(minSpendLabel(0)).toBe("ไม่มีขั้นต่ำ");
-    expect(minSpendLabel(1000)).toBe("ขั้นต่ำ ฿1,000");
-    expect(discountCapLabel({ discountType: "FREE_SHIPPING", discountValue: 0, maxDiscount: 60 })).toBe("สูงสุด ฿60 / ร้าน");
+    expect(minSpendLabel(1000)).toBe("ขั้นต่ำ THB 1,000.00");
+    expect(discountCapLabel({ discountType: "FREE_SHIPPING", discountValue: 0, maxDiscount: 60 })).toBe("สูงสุด THB 60.00 / ร้าน");
     expect(discountCapLabel({ discountType: "FIXED", discountValue: 150, maxDiscount: null })).toBe("—");
   });
 

@@ -71,8 +71,8 @@ describe("PaymentSuccessPage", () => {
     expect(screen.getByText(/ส่วนลดร้าน · MINMIN50/)).toBeInTheDocument();
     expect(screen.getByText(/ส่วนลด Pegasus · PEGASUS10/)).toBeInTheDocument();
     expect(screen.getByText("ลูกค้าจ่ายร้านนี้ · minmin_tcg")).toBeInTheDocument();
-    expect(screen.getByText("฿775.94")).toBeInTheDocument();
-    expect(screen.getByText("฿2,249.06")).toBeInTheDocument();
+    expect(screen.getByText("THB 775.94")).toBeInTheDocument();
+    expect(screen.getByText("THB 2,249.06")).toBeInTheDocument();
   });
 
   it("uses the actual bank transfer method instead of hardcoding QR", async () => {

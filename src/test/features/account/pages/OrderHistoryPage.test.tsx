@@ -208,7 +208,7 @@ describe("OrderHistoryPage", () => {
     expect(screen.getAllByText(/ส่วนลดร้าน · MINMIN50/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/ส่วนลด Pegasus · PEGASUS10/).length).toBeGreaterThan(0);
     expect(screen.getByText("ลูกค้าจ่ายร้านนี้")).toBeInTheDocument();
-    expect(screen.getAllByText("฿775.94").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("THB 775.94").length).toBeGreaterThan(0);
   });
 
   it("opens the linked order details and closes without reopening the query link", async () => {

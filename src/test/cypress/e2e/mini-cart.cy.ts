@@ -229,7 +229,7 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
     cy.get("[data-mini-cart-body]").should("contain.text", "2 ชิ้น · 2 ร้าน");
     cy.get("[data-upsell-listing]").should("have.length", 3);
     cy.get('[data-upsell-listing="877"]').should("not.exist");
-    cy.get("[data-mini-cart-footer]").should("contain.text", "฿150");
+    cy.get("[data-mini-cart-footer]").should("contain.text", "THB 150.00");
     cy.screenshot("TCG-664-desktop", { capture: "viewport" });
     cy.get("body").type("{esc}");
     cy.get('[data-slot="sheet-content"]').should("not.exist");
@@ -251,11 +251,11 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
     mocks([row({ id: 1901, listingId: 901, currentPrice: 50 })], sale);
     open();
     cy.get('[data-mini-cart-state="sale"]').should("exist");
-    cy.get("[data-mini-cart-body] s").should("contain.text", "฿100");
+    cy.get("[data-mini-cart-body] s").should("contain.text", "THB 100.00");
     cy.get("[data-mini-cart-footer]")
-      .should("contain.text", "฿150")
-      .and("contain.text", "−฿30")
-      .and("contain.text", "฿120");
+      .should("contain.text", "THB 150.00")
+      .and("contain.text", "−THB 30.00")
+      .and("contain.text", "THB 120.00");
   });
   it("prices quantities above the Flash buyer limit consistently in rows and subtotal", () => {
     const flash = { ...sale, listPrice: 2850, salePrice: 1995,
@@ -263,10 +263,10 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
     mocks([row({ quantity: 2, pricing: flash })], flash);
     open();
     cy.get('[data-mini-cart-item="877"]').each(($row) => {
-      cy.wrap($row).should("contain.text", "฿7,695");
+      cy.wrap($row).should("contain.text", "THB 7,695.00");
     });
-    cy.get("[data-mini-cart-footer]").should("contain.text", "฿8,550")
-      .and("contain.text", "−฿855").and("contain.text", "฿7,695");
+    cy.get("[data-mini-cart-footer]").should("contain.text", "THB 8,550.00")
+      .and("contain.text", "−THB 855.00").and("contain.text", "THB 7,695.00");
   });
   it("blocks checkout for changed/unavailable items and excludes unavailable value", () => {
     mocks([
@@ -286,7 +286,7 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
     cy.contains("ขายหมดแล้ว · ไม่นับในยอดรวม").should("be.visible");
     cy.get("[data-mini-cart-footer]")
       .should("contain.text", "มี 2 รายการ")
-      .and("contain.text", "฿250");
+      .and("contain.text", "THB 250.00");
     cy.get('[data-slot="sheet-content"] a[href^="/checkout"]').should(
       "not.exist",
     );

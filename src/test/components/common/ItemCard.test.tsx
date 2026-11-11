@@ -7,7 +7,7 @@ describe('ItemCard', () => {
   const mockItem: ItemCardProps = {
     badge: 'Sealed',
     title: 'Booster Box',
-    price: '฿3,500',
+    price: 'THB 3,500.00',
     imageSrc: 'https://example.com/booster.jpg',
     imageAlt: 'Pokemon Booster Box',
   };
@@ -17,7 +17,7 @@ describe('ItemCard', () => {
 
     expect(screen.getByText('Sealed')).toBeInTheDocument();
     expect(screen.getByText('Booster Box')).toBeInTheDocument();
-    expect(screen.getByText('฿3,500')).toBeInTheDocument();
+    expect(screen.getByText('THB 3,500.00')).toBeInTheDocument();
     
     const image = screen.getByRole('img');
     expect(image).toHaveAttribute('src', 'https://example.com/booster.jpg');
@@ -30,7 +30,7 @@ describe('ItemCard', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/product/123');
     // Ensure aria-label is present
-    expect(link).toHaveAttribute('aria-label', 'Booster Box ฿3,500');
+    expect(link).toHaveAttribute('aria-label', 'Booster Box THB 3,500.00');
   });
 
   it('renders footer when provided and no price', () => {
@@ -43,6 +43,6 @@ describe('ItemCard', () => {
     );
 
     expect(screen.getByTestId('custom-footer')).toBeInTheDocument();
-    expect(screen.queryByText(/฿/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/THB/)).not.toBeInTheDocument();
   });
 });

@@ -104,7 +104,7 @@ describe("sales.schema — validation", () => {
   });
 
   it("fixed baht off must be positive", () => {
-    expect(getSaleErrors({ ...valid, discountType: "FIXED_OFF", discountValue: 0 }).discountValue).toBe("ต้องมากกว่า ฿0");
+    expect(getSaleErrors({ ...valid, discountType: "FIXED_OFF", discountValue: 0 }).discountValue).toBe("ต้องมากกว่า THB 0.00");
     expect(getSaleErrors({ ...valid, discountType: "FIXED_OFF", discountValue: 150 })).toEqual({});
   });
 });
@@ -163,7 +163,7 @@ describe("sales.schema — payload", () => {
 });
 
 describe("sampleSaleCalculation", () => {
-  it("matches the Figma example: ฿4,200 · 30% capped at ฿1,500", () => {
+  it("matches the Figma example: THB 4,200.00 · 30% capped at THB 1,500.00", () => {
     const sample = sampleSaleCalculation({ discountType: "PERCENT", discountValue: 30, maxDiscountPerUnit: 1500 });
     expect(sample).toMatchObject({ discount: 1260, buyerPays: 2940, commission: 210, sellerReceives: 3990, subsidy: 1260 });
   });

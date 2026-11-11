@@ -25,8 +25,8 @@ afterEach(() => {
 
 describe("format (th)", () => {
   it("formats money, numbers and dates in Thai with the Buddhist year", () => {
-    expect(formatMoney(1234.5, { lang: "th" })).toBe("฿1,234.50");
-    expect(formatMoney(1234.5, { satang: false, lang: "th" })).toBe("฿1,235");
+    expect(formatMoney(1234.5, { lang: "th" })).toBe("THB 1,234.50");
+    expect(formatMoney(-120)).toBe("-THB 120.00");
     expect(formatNumber(1234567, undefined, "th")).toBe("1,234,567");
     expect(formatDate(DATE, undefined, "th")).toBe("19 ต.ค. 2569");
     expect(formatDateTime(DATE, undefined, "th")).toBe("19 ต.ค. 2569 14:05");
@@ -35,8 +35,8 @@ describe("format (th)", () => {
 });
 
 describe("format (en)", () => {
-  it("keeps the ฿ symbol and uses en-GB dates", () => {
-    expect(formatMoney(1234.5, { lang: "en" })).toBe("฿1,234.50");
+  it("uses THB and uses en-GB dates", () => {
+    expect(formatMoney(1234.5, { lang: "en" })).toBe("THB 1,234.50");
     expect(formatNumber(1234567, undefined, "en")).toBe("1,234,567");
     expect(formatDate(DATE, undefined, "en")).toBe("19 Oct 2026");
     expect(formatDateTime(DATE, undefined, "en")).toBe("19 Oct 2026, 14:05");

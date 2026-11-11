@@ -119,7 +119,7 @@ describe("ProfilePage", () => {
     expect(ordersSpy).toHaveBeenCalledWith(0, 1);
     expect(screen.getByText("คำสั่งซื้อ #ORD-15")).toBeInTheDocument();
     expect(screen.getByText("กำลังจัดส่ง")).toBeInTheDocument();
-    expect(screen.getByText("฿1,050")).toBeInTheDocument();
+    expect(screen.getByText("THB 1,050.00")).toBeInTheDocument();
     expect(screen.getByText("ดูรายละเอียดคำสั่งซื้อ").closest("a")).toHaveAttribute(
       "href",
       "/account/orders?orderId=15",
