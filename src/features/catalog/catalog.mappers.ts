@@ -3,15 +3,32 @@ import { numberFormat, translate } from "@/lib/i18n";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
+// getter: อ่านภาษาปัจจุบันทุกครั้งที่ใช้ [TCG-560]
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
-  SINGLE_CARD: "Single Card",
-  BOOSTER_PACK: "Booster Pack",
-  BOOSTER_BOX: "Booster Box",
-  ELITE_TRAINER_BOX: "Elite Trainer Box",
-  STARTER_DECK: "Starter Deck",
-  BUNDLE: "Bundle",
-  ACCESSORY: "Accessory",
-  OTHER: "Other",
+  get SINGLE_CARD() {
+    return translate("buyer", "productType.singleCard", "การ์ดใบเดี่ยว");
+  },
+  get BOOSTER_PACK() {
+    return translate("buyer", "productType.boosterPack", "ซองสุ่ม");
+  },
+  get BOOSTER_BOX() {
+    return translate("buyer", "productType.boosterBox", "กล่องสุ่ม");
+  },
+  get ELITE_TRAINER_BOX() {
+    return translate("buyer", "productType.eliteTrainerBox", "Elite Trainer Box");
+  },
+  get STARTER_DECK() {
+    return translate("buyer", "productType.starterDeck", "เด็คพร้อมเล่น");
+  },
+  get BUNDLE() {
+    return translate("buyer", "productType.bundle", "ชุดรวม");
+  },
+  get ACCESSORY() {
+    return translate("buyer", "productType.accessory", "อุปกรณ์เสริม");
+  },
+  get OTHER() {
+    return translate("buyer", "productType.other", "อื่น ๆ");
+  },
 };
 
 export const CONDITION_LABELS: Record<CardCondition, string> = {
@@ -20,7 +37,10 @@ export const CONDITION_LABELS: Record<CardCondition, string> = {
   MP: "Moderately Played",
   HP: "Heavily Played",
   DMG: "Damaged",
-  SEALED: "Sealed",
+  // NM–DMG เป็นชื่อเกรดสากล ใช้อังกฤษทั้งสองภาษา [GLOSSARY]
+  get SEALED() {
+    return translate("buyer", "condition.sealed", "ซีล");
+  },
 };
 
 export function productHref(slug: string): string {

@@ -790,6 +790,9 @@
     "profile": "โปรไฟล์นักสะสม",
     "userNotFound": "ไม่พบผู้ใช้"
   },
+  "condition": {
+    "sealed": "ซีล"
+  },
   "home": {
     "auctions": {
       "description": "บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที",
@@ -1221,6 +1224,16 @@
     "viewImage": "ดูรูปสินค้าที่ {n}",
     "viewProfile": "ดูโปรไฟล์",
     "viewSellerListing": "ดูรายละเอียดสินค้าของ {seller}"
+  },
+  "productType": {
+    "accessory": "อุปกรณ์เสริม",
+    "boosterBox": "กล่องสุ่ม",
+    "boosterPack": "ซองสุ่ม",
+    "bundle": "ชุดรวม",
+    "eliteTrainerBox": "Elite Trainer Box",
+    "other": "อื่น ๆ",
+    "singleCard": "การ์ดใบเดี่ยว",
+    "starterDeck": "เด็คพร้อมเล่น"
   },
   "refundMethod": {
     "bankTransfer": "โอนเข้าบัญชีธนาคาร",

@@ -163,7 +163,7 @@ describe("Home Mappers", () => {
       const result = toHomeProduct(product);
       expect(result.id).toBe("55");
       expect(result.name).toBe("Dark Magician Girl");
-      expect(result.type).toBe("Single Card");
+      expect(result.type).toBe("การ์ดใบเดี่ยว");
       expect(result.price).toBe(2500);
       expect(result.href).toBe("/products/dark-magician-girl");
     });
