@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CartItemResponse } from "./cart.types";
 import { useCheckoutPromotionList, useCheckoutPromotionPreview } from "./cart.queries";
-import { formatPromotionError, normalizePromotionCode } from "./checkout.format";
+import { formatPromotionError, normalizePromotionCode, promotionOutcomeSlot } from "./checkout.format";
 import {
   readPromotionManual,
   readPromotionSelection,
@@ -37,8 +37,9 @@ function withCode(selection: PromotionSelection, owner: PromotionOwnerKey, code:
   return { ...selection, sellerCodes };
 }
 
+/** The slot an outcome belongs to — where it was typed, which a wrong-slot code's owner is not [TCG-769]. */
 function ownerOf(outcome: PromoPreview["codes"][number]): PromotionOwnerKey | null {
-  return outcome.ownerType === "PLATFORM" ? "PLATFORM" : outcome.sellerProfileId;
+  return promotionOutcomeSlot(outcome);
 }
 
 interface CartPromotionsOptions {

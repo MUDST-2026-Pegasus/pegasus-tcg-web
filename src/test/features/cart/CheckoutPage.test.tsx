@@ -798,14 +798,17 @@ describe("CheckoutPage", () => {
       shippingEstimated: false,
       codes: [
         {
+          // A Store A code typed in the Pegasus slot, as the API sends it [TCG-769].
           code: "WRONGSHOP",
-          ownerType: "PLATFORM",
+          ownerType: "SELLER",
           sellerProfileId: 1,
           sellerName: "Store A",
           status: "PROMO_WRONG_SELLER",
           discount: null,
           shortfall: null,
           pendingShipping: false,
+          slotOwnerType: "PLATFORM",
+          slotSellerProfileId: null,
         },
       ],
       bestPick: null,
@@ -815,6 +818,10 @@ describe("CheckoutPage", () => {
     expect(
       await screen.findByText("โค้ดนี้เป็นของร้าน Store A — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น"),
     ).toBeInTheDocument();
+    // Dropped before it can reach POST /checkout [TCG-769].
+    await waitFor(() =>
+      expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull(),
+    );
   });
 
   it("displays Thai shortfall error when min spend is not met and drops invalid code while keeping valid code", async () => {

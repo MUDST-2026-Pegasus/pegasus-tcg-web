@@ -281,12 +281,15 @@ describe("CartPage codes", () => {
     if (shopCode) {
       codes.push({ code: shopCode, ownerType: "SELLER", sellerProfileId: 5, sellerName: "minmin_tcg Cards",
         status: shopApplied ? "APPLIED" : "PROMO_MIN_SPEND_NOT_MET", discount: shopApplied ? 50 : null,
-        shortfall: shopApplied ? null : 500 - shop5, pendingShipping: false });
+        shortfall: shopApplied ? null : 500 - shop5, pendingShipping: false,
+        slotOwnerType: "SELLER", slotSellerProfileId: 5 });
     }
     if (platformCode) {
-      codes.push({ code: platformCode, ownerType: "PLATFORM", sellerProfileId: null, sellerName: null,
-        status: platformCode === "PEGASUS10" ? "APPLIED" : "PROMO_NOT_FOUND", discount: platformDiscount || null,
-        shortfall: null, pendingShipping: false });
+      // As the API sends it: an unknown code has no owner, only the slot it was typed in [TCG-769].
+      const known = platformCode === "PEGASUS10";
+      codes.push({ code: platformCode, ownerType: known ? "PLATFORM" : null, sellerProfileId: null, sellerName: null,
+        status: known ? "APPLIED" : "PROMO_NOT_FOUND", discount: platformDiscount || null,
+        shortfall: null, pendingShipping: false, slotOwnerType: "PLATFORM", slotSellerProfileId: null });
     }
     return {
       sellers: shop5 ? [{ sellerProfileId: 5, sellerName: "minmin_tcg Cards", itemsSubtotal: shop5, shippingFee: null,
@@ -379,5 +382,19 @@ describe("CartPage codes", () => {
     await waitFor(() => expect(previewPromotions).toHaveBeenCalledWith(
       expect.objectContaining({ platformCode: "PEGASUS10" }), expect.anything()));
     expect(await screen.findByRole("button", { name: "โค้ด Pegasus PEGASUS10 — เปลี่ยนโค้ด" })).toBeInTheDocument();
+  });
+
+  it("shows why an unknown code failed and does not keep it [TCG-769]", async () => {
+    const user = userEvent.setup();
+    signedIn(false);
+    getPromotions.mockResolvedValue([]);
+    previewPromotions.mockImplementation(async (request) => c1Preview({ ...request, autoPick: false }));
+    renderCart();
+
+    await user.type(await screen.findByRole("textbox", { name: "กรอกโค้ดอื่นที่ไม่ได้เก็บไว้" }), "nosuch");
+    await user.click(screen.getByRole("button", { name: "ใช้โค้ด" }));
+
+    expect(await screen.findByText("ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง")).toBeInTheDocument();
+    await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull());
   });
 });
