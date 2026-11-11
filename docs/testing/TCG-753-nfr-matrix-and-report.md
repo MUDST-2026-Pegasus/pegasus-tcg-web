@@ -104,4 +104,17 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 
 ## Findings / defects to date
 
+### Phase 2 — k6 performance and capacity
+
+- Added seven configurable profiles in `scripts/nfr/k6/profiles.json` and the loopback-only k6 journey in `scripts/nfr/k6/scenarios.js`; `scripts/nfr/run-k6.mjs` enforces the pinned k6 `0.55.0`, allowlisted target, per-mode timeout, and writes a summary under the ignored `artifacts/nfr/<run-id>/performance/` directory.
+- `smoke` is 3 VUs / 5 min; `baseline` is 15 VUs / 15 min; `load` ramps 25 → 50 → 100 VUs and holds at 100 for 15 min; `stress`, `spike`, `soak` (4 h), and `cooldown` use arrival-rate executors and report `dropped_iterations` separately. `--dry-run` shortens scenario durations for validation only and must not be reported as a measurement.
+- Read and search thresholds are applied to their tagged requests. Write/report thresholds are frozen in the config/matrix; no mutating checkout/payment or report endpoint is exercised by default to avoid non-disposable side effects.
+- Syntax checks: `node --check scripts/nfr/k6/scenarios.js` and `node --check scripts/nfr/run-k6.mjs` **Pass**.
+- Smoke/dry-run execution: **Blocked**. k6 `0.55.0` is not installed (`spawnSync k6.exe ENOENT`); the local API at `127.0.0.1:8080` was also unavailable at discovery. No latency or capacity result is claimed.
+
+### Phase 1 — seed/cleanup validation
+
+- Seeded and removed `tcg753-phase1-seedcheck` (25 synthetic rows); setup and cleanup both **Pass**. An attempted public `https://example.com` seed target was rejected with exit code 1, confirming the default allowlist.
+- Seed/cleanup perform local filesystem operations only; there is no API or database seed. For an external process the runner timeout is explicit; local seed/cleanup are synchronous bounded filesystem operations.
+
 No application defect has been validated in this phase. NFR execution gaps are environment blockers, not passes: API unavailable; no disposable DB/MinIO/JVM; Docker daemon unavailable; NFR runner binaries not installed. Further findings and evidence will be appended phase by phase. Secrets or unredacted PII must not be committed; raw scanner output stays under ignored `artifacts/nfr/`.
