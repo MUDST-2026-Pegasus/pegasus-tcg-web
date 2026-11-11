@@ -93,7 +93,7 @@ export function useCheckoutErrorHandler({
       await refetchQuotes();
     } else if (
       error.code === "PROMO_CHANGED" ||
-      error.code === "PROMO_USED_UP"
+      (error.code === "PROMO_USED_UP" && hasGrandTotal(error))
     ) {
       const details = error.details as Record<string, unknown> | undefined;
       const droppedCode =
@@ -106,6 +106,16 @@ export function useCheckoutErrorHandler({
         next: Number(details?.grandTotal) || payload.expectedGrandTotal,
         code: droppedCode,
         owner: targetOwner,
+      });
+      await refetchPreview();
+    } else if (error.code?.startsWith("PROMO_")) {
+      // The order refused a code (ended, paused, limit reached, …) [TCG-770]. A fresh
+      // preview reports it too, so the code drops out with its reason on its slot and
+      // the total updates; the next tap goes through without it.
+      toast.add({
+        title: t("checkout.toast.codeRefused", "โค้ดส่วนลดใช้ไม่ได้แล้ว"),
+        description: translateError(error, error.message),
+        type: "warning",
       });
       await refetchPreview();
     } else if (
@@ -167,4 +177,10 @@ export function useCheckoutErrorHandler({
     quotaItem,
     setQuotaItem,
   };
+}
+
+/** A PROMO_USED_UP with a new total gets the "total changed" dialog; one without is a refused code. */
+function hasGrandTotal(error: ApiError): boolean {
+  const details = error.details as Record<string, unknown> | undefined;
+  return details?.grandTotal != null && Number.isFinite(Number(details.grandTotal));
 }

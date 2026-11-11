@@ -688,6 +688,7 @@
     "toast": {
       "addressAgain": "Please choose a shipping address again",
       "addressAgainHint": "The previous address is no longer available",
+      "codeRefused": "A discount code can no longer be used",
       "created": "Order created",
       "createdOrder": "Order {number}",
       "emptyHint": "Please select the items you want to order from your cart",

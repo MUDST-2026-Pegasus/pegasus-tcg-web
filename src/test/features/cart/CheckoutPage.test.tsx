@@ -235,6 +235,55 @@ describe("CheckoutPage", () => {
     expect(submit.mock.calls[1][0].expectedGrandTotal).toBe(300);
   });
 
+  it("drops a code the order refused and lets the buyer order without it [TCG-770]", async () => {
+    sessionStorage.setItem(
+      PROMOTION_SELECTION_KEY,
+      JSON.stringify({ platformCode: "PEGASUS10", sellerCodes: {} }),
+    );
+    let ended = false;
+    const previewSpy = vi.spyOn(checkoutApi, "previewPromotions").mockImplementation(async (request) => {
+      const applied = !!request.platformCode && !ended;
+      return {
+        sellers: [{ sellerProfileId: 1, sellerName: "Store A", itemsSubtotal: 300, shippingFee: 40, sellerDiscount: 0, platformDiscount: applied ? 40 : 0, grandTotal: applied ? 300 : 340 }],
+        itemsSubtotal: 300, shippingTotal: 40, sellerDiscountTotal: 0,
+        platformDiscountTotal: applied ? 40 : 0, grandTotal: applied ? 300 : 340,
+        shippingEstimated: false,
+        codes: request.platformCode
+          ? [{ code: request.platformCode, ownerType: "PLATFORM", sellerProfileId: null, sellerName: null,
+              status: applied ? "APPLIED" : "PROMO_EXPIRED", discount: applied ? 40 : null, shortfall: null,
+              pendingShipping: false, slotOwnerType: "PLATFORM", slotSellerProfileId: null }]
+          : [],
+        bestPick: null,
+      };
+    });
+    const submit = vi.spyOn(checkoutApi, "checkout")
+      .mockImplementationOnce(async () => {
+        ended = true;
+        throw new ApiError({ status: 400, code: "PROMO_EXPIRED", message: "expired", details: { code: "PEGASUS10" } });
+      })
+      .mockResolvedValue(orderResponse);
+
+    renderCheckout("/checkout?items=42");
+    await ready();
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+    previewSpy.mockClear();
+    await userEvent.setup().click(purchase());
+
+    await waitFor(() => expect(toast.add).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "โค้ดส่วนลดใช้ไม่ได้แล้ว", type: "warning" }),
+    ));
+    expect(screen.queryByRole("dialog", { name: "ยอดชำระเปลี่ยนไป" })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull(),
+    );
+    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340"));
+
+    await waitFor(() => expect(purchase()).toBeEnabled());
+    await userEvent.setup().click(purchase());
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
+    expect(submit.mock.calls[1][0]).toEqual(expect.objectContaining({ platformCode: null, expectedGrandTotal: 340 }));
+  });
+
   it("opens the seller picker when PROMO_CHANGED identifies a selected seller code", async () => {
     sessionStorage.setItem(
       PROMOTION_SELECTION_KEY,
