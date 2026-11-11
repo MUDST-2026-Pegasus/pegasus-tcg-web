@@ -849,6 +849,19 @@
       "title": "Recommended shops"
     }
   },
+  "legal": {
+    "center": "LEGAL CENTER",
+    "lastUpdatedLabel": "Last updated",
+    "onThisPage": "On this page",
+    "privacy": {
+      "subtitle": "How PEGASUS collects, uses, protects, and respects your personal information.",
+      "title": "Privacy Policy"
+    },
+    "terms": {
+      "subtitle": "Clear, practical terms for using PEGASUS, managing your account, and purchasing products.",
+      "title": "Terms of Service"
+    }
+  },
   "listing": {
     "ability": "Ability",
     "above": "Above market",
