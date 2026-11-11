@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -68,6 +69,7 @@ type WeekFilterProps = {
 
 /** เมนูเลือกสัปดาห์ — ปุ่มล่างสุดเปิดปฏิทิน เลือกวันไหนก็ได้สัปดาห์ของวันนั้น */
 export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
+  const { t } = useTranslate("admin");
   const [open, setOpen] = useState(false);
   const [picking, setPicking] = useState(false);
   const today = bangkokToday();
@@ -87,7 +89,9 @@ export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
       }}
     >
       <FilterTrigger open={open} disabled={disabled}>
-        สัปดาห์ที่ {weekRangeLabel(weekStart)}
+        {t("weeklyReport.weekNumber", "สัปดาห์ที่ {range}", {
+          range: weekRangeLabel(weekStart),
+        })}
       </FilterTrigger>
       <PopoverContent align="start" className="w-[340px] max-w-[calc(100vw-2rem)] gap-0 rounded-xl p-1.5">
         {picking ? (
@@ -132,7 +136,7 @@ export function WeekFilter({ weekStart, disabled, onChange }: WeekFilterProps) {
               onClick={() => setPicking(true)}
               className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-primary outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
             >
-              กำหนดช่วงสัปดาห์เอง...
+              {t("weeklyReport.filter.customWeek", "กำหนดช่วงสัปดาห์เอง...")}
             </button>
           </>
         )}
@@ -156,6 +160,7 @@ type GameFilterProps = {
 };
 
 export function GameFilter({ game, options, disabled, onChange }: GameFilterProps) {
+  const { t } = useTranslate("admin");
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.slug === game);
 
@@ -167,11 +172,11 @@ export function GameFilter({ game, options, disabled, onChange }: GameFilterProp
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <FilterTrigger open={open} disabled={disabled}>
-        {current?.name ?? (game ? game : "ทุกเกม")}
+        {current?.name ?? (game ? game : t("weeklyReport.filter.allGames", "ทุกเกม"))}
       </FilterTrigger>
       <PopoverContent align="start" className="w-[260px] gap-0 rounded-xl p-1.5">
         <OptionButton selected={game === null} onSelect={() => choose(null)}>
-          ทุกเกม
+          {t("weeklyReport.filter.allGames", "ทุกเกม")}
         </OptionButton>
         {options.map((option) => (
           <OptionButton

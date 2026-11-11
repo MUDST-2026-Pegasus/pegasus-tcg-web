@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Area, AreaChart, XAxis } from "recharts";
 
 import { Card } from "@/components/ui/card";
@@ -9,12 +10,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslate } from "@/lib/i18n";
 import type { SalesPoint } from "../metrics.format";
-
-const chartConfig = {
-  singles: { label: "การ์ดเดี่ยว", color: "var(--chart-1)" },
-  sealed: { label: "กล่อง/ซองสุ่ม", color: "var(--chart-2)" },
-} satisfies ChartConfig;
 
 type MonthlySalesChartProps = {
   title: string;
@@ -27,6 +24,17 @@ export function MonthlySalesChart({
   description,
   points,
 }: MonthlySalesChartProps) {
+  const { t } = useTranslate("admin");
+
+  const chartConfig = useMemo(
+    () =>
+      ({
+        singles: { label: t("metrics.chart.singles", "การ์ดเดี่ยว"), color: "var(--chart-1)" },
+        sealed: { label: t("metrics.chart.sealed", "กล่อง/ซองสุ่ม"), color: "var(--chart-2)" },
+      }) satisfies ChartConfig,
+    [t],
+  );
+
   return (
     <Card className="min-w-0 flex-1 gap-3.5 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-1">
@@ -36,7 +44,7 @@ export function MonthlySalesChart({
 
       {points.every((point) => point.singles === 0 && point.sealed === 0) ? (
         <p className="flex h-[200px] items-center justify-center text-xs text-muted-foreground">
-          ยังไม่มียอดขายในช่วงนี้
+          {t("metrics.chart.noSales", "ยังไม่มียอดขายในช่วงนี้")}
         </p>
       ) : (
         <ChartContainer config={chartConfig} className="h-[200px] w-full">

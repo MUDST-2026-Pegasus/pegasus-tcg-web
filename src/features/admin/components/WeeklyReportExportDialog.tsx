@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { downloadBlob } from "@/lib/download";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { formatCount } from "../catalog.format";
@@ -24,16 +25,6 @@ import type {
   WeeklyReportExportFormat,
   WeeklyReportFilters,
 } from "../weekly-report.types";
-
-const FORMATS: { value: WeeklyReportExportFormat; label: string; hint: string }[] = [
-  { value: "csv", label: "CSV (.csv)", hint: "เหมาะสำหรับนำเข้าฐานข้อมูลหรือ Google Sheets" },
-  { value: "xlsx", label: "Excel (.xlsx)", hint: "เปิดดูต่อใน Excel ได้ทันที" },
-];
-
-const DATASETS: { value: WeeklyReportExportDataset; label: string }[] = [
-  { value: "kpi", label: "รวมข้อมูลสรุป KPI รายสัปดาห์" },
-  { value: "breakdown", label: "รวมตารางแยกตามเกมและประเภทสินค้า" },
-];
 
 type WeeklyReportExportDialogProps = {
   open: boolean;
@@ -50,11 +41,42 @@ export function WeeklyReportExportDialog({
   gameLabel,
   report,
 }: WeeklyReportExportDialogProps) {
+  const { t } = useTranslate("admin");
   const [format, setFormat] = useState<WeeklyReportExportFormat>("csv");
   const [datasets, setDatasets] = useState<WeeklyReportExportDataset[]>(["kpi", "breakdown"]);
   const exportReport = useExportWeeklyReport();
   // `isPending` อัปเดตหลังเรนเดอร์รอบถัดไป คลิกซ้อนในจังหวะนั้นต้องกันด้วย ref
   const inFlight = useRef(false);
+
+  const formats = useMemo<{ value: WeeklyReportExportFormat; label: string; hint: string }[]>(
+    () => [
+      {
+        value: "csv",
+        label: "CSV (.csv)",
+        hint: t("weeklyReport.export.csvHint", "เหมาะสำหรับนำเข้าฐานข้อมูลหรือ Google Sheets"),
+      },
+      {
+        value: "xlsx",
+        label: "Excel (.xlsx)",
+        hint: t("weeklyReport.export.xlsxHint", "เปิดดูต่อใน Excel ได้ทันที"),
+      },
+    ],
+    [t],
+  );
+
+  const datasetsList = useMemo<{ value: WeeklyReportExportDataset; label: string }[]>(
+    () => [
+      {
+        value: "kpi",
+        label: t("weeklyReport.export.datasetKpi", "รวมข้อมูลสรุป KPI รายสัปดาห์"),
+      },
+      {
+        value: "breakdown",
+        label: t("weeklyReport.export.datasetBreakdown", "รวมตารางแยกตามเกมและประเภทสินค้า"),
+      },
+    ],
+    [t],
+  );
 
   const download = () => {
     if (inFlight.current || datasets.length === 0) return;
@@ -67,14 +89,17 @@ export function WeeklyReportExportDialog({
         },
         onSuccess: ({ blob, filename }) => {
           downloadBlob(blob, filename ?? `pegasus_weekly_report_${filters.weekStart}.${format}`);
-          toast.add({ type: "success", title: "ดาวน์โหลดรายงานสำเร็จ" });
+          toast.add({
+            type: "success",
+            title: t("weeklyReport.export.successToast", "ดาวน์โหลดรายงานสำเร็จ"),
+          });
           onOpenChange(false);
         },
         onError: () => {
           toast.add({
             type: "error",
-            title: "ส่งออกรายงานไม่สำเร็จ",
-            description: "กรุณาลองใหม่อีกครั้ง",
+            title: t("weeklyReport.export.errorToastTitle", "ส่งออกรายงานไม่สำเร็จ"),
+            description: t("weeklyReport.export.errorToastDesc", "กรุณาลองใหม่อีกครั้ง"),
           });
         },
       },
@@ -82,11 +107,23 @@ export function WeeklyReportExportDialog({
   };
 
   const summaryRows = [
-    { label: "ช่วงเวลา", value: `สัปดาห์ที่ ${weekRangeLabel(filters.weekStart)}` },
-    { label: "หมวดหมู่", value: gameLabel },
     {
-      label: "จำนวนรายการ",
-      value: `${formatCount(report.breakdownByGameAndType.length)} หมวดหมู่ (ยอดขายรวม ${formatReportBaht(report.totals.gmv)})`,
+      label: t("weeklyReport.export.periodLabel", "ช่วงเวลา"),
+      value: t("weeklyReport.weekNumber", "สัปดาห์ที่ {range}", {
+        range: weekRangeLabel(filters.weekStart),
+      }),
+    },
+    { label: t("weeklyReport.export.categoryLabel", "หมวดหมู่"), value: gameLabel },
+    {
+      label: t("weeklyReport.export.itemCountLabel", "จำนวนรายการ"),
+      value: t(
+        "weeklyReport.export.itemCountValue",
+        "{count} หมวดหมู่ (ยอดขายรวม {total})",
+        {
+          count: formatCount(report.breakdownByGameAndType.length),
+          total: formatReportBaht(report.totals.gmv),
+        },
+      ),
     },
   ];
 
@@ -101,7 +138,7 @@ export function WeeklyReportExportDialog({
       <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-[480px]">
         <DialogHeader className="border-b border-border px-6 py-5">
           <DialogTitle className="text-lg font-semibold">
-            ส่งออกรายงานสต็อกและกำไรรายสัปดาห์
+            {t("weeklyReport.export.title", "ส่งออกรายงานสต็อกและกำไรรายสัปดาห์")}
           </DialogTitle>
         </DialogHeader>
 
@@ -116,7 +153,7 @@ export function WeeklyReportExportDialog({
           </dl>
 
           <p id="weekly-export-format" className="pt-2 text-[13px] font-medium text-foreground">
-            รูปแบบไฟล์
+            {t("weeklyReport.export.formatLabel", "รูปแบบไฟล์")}
           </p>
           <RadioGroup
             aria-labelledby="weekly-export-format"
@@ -124,7 +161,7 @@ export function WeeklyReportExportDialog({
             onValueChange={(value) => setFormat(value as WeeklyReportExportFormat)}
             className="grid grid-cols-2 gap-3"
           >
-            {FORMATS.map((option) => (
+            {formats.map((option) => (
               <label
                 key={option.value}
                 className={cn(
@@ -143,8 +180,10 @@ export function WeeklyReportExportDialog({
             ))}
           </RadioGroup>
 
-          <p className="pt-3 text-[13px] font-medium text-foreground">ข้อมูลที่ต้องการรวม</p>
-          {DATASETS.map((dataset) => (
+          <p className="pt-3 text-[13px] font-medium text-foreground">
+            {t("weeklyReport.export.datasetLabel", "ข้อมูลที่ต้องการรวม")}
+          </p>
+          {datasetsList.map((dataset) => (
             <label
               key={dataset.value}
               className="flex cursor-pointer items-center gap-2.5 py-0.5 text-sm text-foreground"
@@ -154,9 +193,9 @@ export function WeeklyReportExportDialog({
                 onCheckedChange={(checked) =>
                   setDatasets((current) =>
                     checked
-                      ? DATASETS.map((item) => item.value).filter(
-                          (value) => value === dataset.value || current.includes(value),
-                        )
+                      ? datasetsList
+                          .map((item) => item.value)
+                          .filter((value) => value === dataset.value || current.includes(value))
                       : current.filter((value) => value !== dataset.value),
                   )
                 }
@@ -165,7 +204,9 @@ export function WeeklyReportExportDialog({
             </label>
           ))}
           {datasets.length === 0 ? (
-            <p className="text-xs text-destructive">เลือกข้อมูลอย่างน้อย 1 ชุด</p>
+            <p className="text-xs text-destructive">
+              {t("weeklyReport.export.datasetRequired", "เลือกข้อมูลอย่างน้อย 1 ชุด")}
+            </p>
           ) : null}
         </div>
 
@@ -176,7 +217,7 @@ export function WeeklyReportExportDialog({
             disabled={exportReport.isPending}
             onClick={() => onOpenChange(false)}
           >
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           <Button
             className="h-[41px] rounded-lg px-4"
@@ -185,10 +226,10 @@ export function WeeklyReportExportDialog({
           >
             {exportReport.isPending ? (
               <>
-                <Spinner /> กำลังสร้างไฟล์...
+                <Spinner /> {t("weeklyReport.export.generating", "กำลังสร้างไฟล์...")}
               </>
             ) : (
-              "ดาวน์โหลดรายงาน"
+              t("weeklyReport.export.submit", "ดาวน์โหลดรายงาน")
             )}
           </Button>
         </DialogFooter>

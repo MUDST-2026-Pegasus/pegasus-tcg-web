@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { TolgeeProvider } from '@tolgee/react';
 
 import type { Language } from '@/lib/i18n';
+import { registerErrorTranslator } from '@/lib/i18n/errors';
 import { testTolgee } from '@/test/i18n';
 
 export const createTestQueryClient = () =>
@@ -25,6 +26,9 @@ export function renderWithProviders(
 ) {
   const testQueryClient = createTestQueryClient();
   window.history.pushState({}, 'Test page', route);
+
+  document.documentElement.lang = language;
+  registerErrorTranslator(testTolgee(language));
 
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={testQueryClient}>

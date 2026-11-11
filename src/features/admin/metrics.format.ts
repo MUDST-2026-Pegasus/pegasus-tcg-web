@@ -48,7 +48,7 @@ export type Delta = { label: string; trend: Trend };
  */
 export function formatDelta(value: number, previous: number): Delta | null {
   if (previous === 0) {
-    return value === 0 ? null : { label: "ใหม่", trend: "new" };
+    return value === 0 ? null : { label: translate("admin", "metrics.delta.new", "ใหม่"), trend: "new" };
   }
   return percentDelta(((value - previous) / previous) * 100);
 }
@@ -98,45 +98,62 @@ export function statCards(overview: AdminOverview): StatCardModel[] {
   const { gmv, newSellers, activeListings, commission, promotionCost } = overview.stats;
   const commissionNote =
     commission.averageRatePercent === null
-      ? "ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้"
-      : `เฉลี่ย ${commission.averageRatePercent.toFixed(1)}% ของยอดขายที่สำเร็จ`;
+      ? translate("admin", "metrics.commission.noCompletedOrders", "ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้")
+      : translate(
+          "admin",
+          "metrics.commission.averageRate",
+          "เฉลี่ย {rate}% ของยอดขายที่สำเร็จ",
+          { rate: commission.averageRatePercent.toFixed(1) },
+        );
   return [
     {
       id: "gmv",
-      label: "ยอดขายรวมเดือนนี้",
+      label: translate("admin", "metrics.stat.gmv", "ยอดขายรวมเดือนนี้"),
       value: formatBaht(gmv.value),
       delta: formatDelta(gmv.value, gmv.previous),
-      footnote: `เทียบกับ ${formatBaht(gmv.previous)} เดือนก่อน`,
+      footnote: translate("admin", "metrics.stat.gmvFootnote", "เทียบกับ {amount} เดือนก่อน", {
+        amount: formatBaht(gmv.previous),
+      }),
       bars: sparkBars(gmv.sparkline),
       accent: "primary",
     },
     {
       id: "new-sellers",
-      label: "ผู้ขายรายใหม่",
+      label: translate("admin", "metrics.stat.newSellers", "ผู้ขายรายใหม่"),
       value: formatCount(newSellers.value),
       delta: formatDelta(newSellers.value, newSellers.previous),
-      footnote: "ผ่านการยืนยันตัวตนแล้ว",
+      footnote: translate("admin", "metrics.stat.newSellersFootnote", "ผ่านการยืนยันตัวตนแล้ว"),
       bars: sparkBars(newSellers.sparkline),
       accent: "teal",
     },
     {
       id: "active-listings",
-      label: "ประกาศขายที่ใช้งานอยู่",
+      label: translate("admin", "metrics.stat.activeListings", "ประกาศขายที่ใช้งานอยู่"),
       value: formatCount(activeListings.value),
       delta: null,
-      footnote: `จาก ${formatCount(activeListings.sellerCount)} ร้านค้าทั่วแพลตฟอร์ม`,
+      footnote: translate(
+        "admin",
+        "metrics.stat.activeListingsFootnote",
+        "จาก {count} ร้านค้าทั่วแพลตฟอร์ม",
+        { count: formatCount(activeListings.sellerCount) },
+      ),
       bars: null,
       accent: "primary",
     },
     {
       id: "commission",
-      label: "ค่าคอมมิชชั่นที่เก็บได้",
+      label: translate("admin", "metrics.stat.commission", "ค่าคอมมิชชั่นที่เก็บได้"),
       value: formatBaht(commission.value),
       delta: formatDelta(commission.value, commission.previous),
       // ต้นทุนโค้ด Pegasus ไม่หักจากค่าคอม แต่แสดงคู่กันให้เห็นว่าเดือนนี้จ่ายชดเชยร้านไปเท่าไร
       footnote:
         promotionCost.value > 0
-          ? `${commissionNote} · ชดเชยโค้ด Pegasus ${formatBaht(promotionCost.value)}`
+          ? translate(
+              "admin",
+              "metrics.stat.commissionFootnoteWithPromo",
+              "{note} · ชดเชยโค้ด Pegasus {amount}",
+              { note: commissionNote, amount: formatBaht(promotionCost.value) },
+            )
           : commissionNote,
       bars: sparkBars(commission.sparkline),
       accent: "green",
@@ -157,9 +174,14 @@ export function salesPoints(trend: MonthlySales[]): SalesPoint[] {
 
 export function salesTrendDescription(trend: MonthlySales[]): string {
   if (trend.length === 0) {
-    return "ยอดขายรวมรายเดือน (บาท)";
+    return translate("admin", "metrics.salesTrend.defaultDesc", "ยอดขายรวมรายเดือน (บาท)");
   }
-  return `ยอดขายรวม ${thaiMonthRange(trend[0].month, trend[trend.length - 1].month)} (บาท)`;
+  return translate(
+    "admin",
+    "metrics.salesTrend.rangeDesc",
+    "ยอดขายรวม {range} (บาท)",
+    { range: thaiMonthRange(trend[0].month, trend[trend.length - 1].month) },
+  );
 }
 
 export type TopSellerBar = {
@@ -185,7 +207,9 @@ export type GameSlice = { id: string; name: string; value: number };
 export function gameSlices(shares: GameShare[]): GameSlice[] {
   return shares.map((share) => ({
     id: share.others ? "others" : `game-${share.gameId}`,
-    name: share.others ? "อื่น ๆ" : (share.gameName ?? "ไม่ระบุเกม"),
+    name: share.others
+      ? translate("admin", "metrics.gameShare.others", "อื่น ๆ")
+      : (share.gameName ?? translate("admin", "metrics.gameShare.unspecified", "ไม่ระบุเกม")),
     value: share.percent,
   }));
 }
@@ -199,9 +223,33 @@ export function gameShareHeadline(shares: GameShare[]): string | null {
   const percent = Number.isInteger(leader.percent)
     ? leader.percent.toString()
     : leader.percent.toFixed(1);
-  return `${leader.gameName ?? "ไม่ระบุเกม"} ครองส่วนแบ่ง ${percent}%`;
+  return translate(
+    "admin",
+    "metrics.gameShare.headline",
+    "{game} ครองส่วนแบ่ง {percent}%",
+    {
+      game: leader.gameName ?? translate("admin", "metrics.gameShare.unspecified", "ไม่ระบุเกม"),
+      percent,
+    },
+  );
 }
 
+// @tolgee-key {"key":"metrics.delta.new","ns":"admin","defaultValue":"ใหม่"}
+// @tolgee-key {"key":"metrics.commission.noCompletedOrders","ns":"admin","defaultValue":"ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้"}
+// @tolgee-key {"key":"metrics.commission.averageRate","ns":"admin","defaultValue":"เฉลี่ย {rate}% ของยอดขายที่สำเร็จ"}
+// @tolgee-key {"key":"metrics.stat.gmv","ns":"admin","defaultValue":"ยอดขายรวมเดือนนี้"}
+// @tolgee-key {"key":"metrics.stat.gmvFootnote","ns":"admin","defaultValue":"เทียบกับ {amount} เดือนก่อน"}
+// @tolgee-key {"key":"metrics.stat.newSellers","ns":"admin","defaultValue":"ผู้ขายรายใหม่"}
+// @tolgee-key {"key":"metrics.stat.newSellersFootnote","ns":"admin","defaultValue":"ผ่านการยืนยันตัวตนแล้ว"}
+// @tolgee-key {"key":"metrics.stat.activeListings","ns":"admin","defaultValue":"ประกาศขายที่ใช้งานอยู่"}
+// @tolgee-key {"key":"metrics.stat.activeListingsFootnote","ns":"admin","defaultValue":"จาก {count} ร้านค้าทั่วแพลตฟอร์ม"}
+// @tolgee-key {"key":"metrics.stat.commission","ns":"admin","defaultValue":"ค่าคอมมิชชั่นที่เก็บได้"}
+// @tolgee-key {"key":"metrics.stat.commissionFootnoteWithPromo","ns":"admin","defaultValue":"{note} · ชดเชยโค้ด Pegasus {amount}"}
+// @tolgee-key {"key":"metrics.salesTrend.defaultDesc","ns":"admin","defaultValue":"ยอดขายรวมรายเดือน (บาท)"}
+// @tolgee-key {"key":"metrics.salesTrend.rangeDesc","ns":"admin","defaultValue":"ยอดขายรวม {range} (บาท)"}
+// @tolgee-key {"key":"metrics.gameShare.others","ns":"admin","defaultValue":"อื่น ๆ"}
+// @tolgee-key {"key":"metrics.gameShare.unspecified","ns":"admin","defaultValue":"ไม่ระบุเกม"}
+// @tolgee-key {"key":"metrics.gameShare.headline","ns":"admin","defaultValue":"{game} ครองส่วนแบ่ง {percent}%"}
 // @tolgee-key {"key":"overview.export.gmv","ns":"admin","defaultValue":"ยอดขายรวม (GMV)"}
 // @tolgee-key {"key":"overview.export.newSellers","ns":"admin","defaultValue":"ผู้ขายรายใหม่"}
 // @tolgee-key {"key":"overview.export.activeListings","ns":"admin","defaultValue":"ประกาศขายที่เปิดอยู่"}

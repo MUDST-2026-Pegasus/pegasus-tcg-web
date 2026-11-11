@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { downloadCsv } from "@/lib/csv";
+import { useTranslate } from "@/lib/i18n";
 
 import { useFileExport } from "../export";
 
@@ -34,6 +35,7 @@ import { TopSellersCard } from "./TopSellersCard";
 
 /** หน้าแรกของหลังบ้าน — ตัวเลขเดือนปัจจุบันจาก `/admin/metrics/overview` */
 export function AdminOverviewContent() {
+  const { t } = useTranslate("admin");
   const overview = useOverviewMetrics();
   const report = useFileExport();
   // สร้างจากตัวเลขเดือนที่หน้าแสดงอยู่ ไม่ต้องเรียก backend เพิ่ม [TCG-749]
@@ -48,19 +50,21 @@ export function AdminOverviewContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            ภาพรวมแพลตฟอร์ม
+            {t("overview.pageTitle", "ภาพรวมแพลตฟอร์ม")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
-            สรุปผลประกอบการและกิจกรรมทั้งหมดบน Pegasus TCG
+            {t("overview.pageDesc", "สรุปผลประกอบการและกิจกรรมทั้งหมดบน Pegasus TCG")}
             {overview.dataUpdatedAt
-              ? ` · อัปเดตล่าสุด ${format(overview.dataUpdatedAt, "HH:mm")} น.`
+              ? t("overview.lastUpdated", " · อัปเดตล่าสุด {time} น.", {
+                  time: format(overview.dataUpdatedAt, "HH:mm"),
+                })
               : ""}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <ExportButton
-            label="ส่งออกรายงาน"
+            label={t("overview.exportReport", "ส่งออกรายงาน")}
             pending={report.pending}
             disabled={!overview.data}
             onClick={exportReport}
@@ -69,10 +73,12 @@ export function AdminOverviewContent() {
           <Tooltip>
             <TooltipTrigger render={<span className="inline-flex" />}>
               <Button className="rounded-md px-2.5" disabled>
-                ตั้งค่าระบบ
+                {t("overview.systemSettings", "ตั้งค่าระบบ")}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>ยังไม่มีหน้าตั้งค่าระบบ</TooltipContent>
+            <TooltipContent>
+              {t("overview.systemSettingsNotAvailable", "ยังไม่มีหน้าตั้งค่าระบบ")}
+            </TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -80,7 +86,7 @@ export function AdminOverviewContent() {
       <QueryBoundary
         query={overview}
         loading={<OverviewSkeleton />}
-        errorTitle="โหลดภาพรวมแพลตฟอร์มไม่สำเร็จ"
+        errorTitle={t("overview.loadErrorTitle", "โหลดภาพรวมแพลตฟอร์มไม่สำเร็จ")}
       >
         {(data) => {
           const trend = data.monthlySales;
@@ -97,7 +103,7 @@ export function AdminOverviewContent() {
 
               <div className="flex flex-col items-start gap-4 lg:flex-row">
                 <MonthlySalesChart
-                  title="ยอดขายรายเดือน"
+                  title={t("metrics.chart.monthlySalesTitle", "ยอดขายรายเดือน")}
                   description={salesTrendDescription(trend)}
                   points={salesPoints(trend)}
                 />
@@ -106,16 +112,21 @@ export function AdminOverviewContent() {
 
               <div className="flex flex-col items-start gap-4 lg:flex-row">
                 <TopSellersCard
-                  title="ร้านค้าที่ทำยอดขายสูงสุด"
-                  description={`จัดอันดับตามยอดขายเดือน${thaiMonthYear(data.period.month)}`}
+                  title={t("metrics.topSellers.title", "ร้านค้าที่ทำยอดขายสูงสุด")}
+                  description={t("metrics.topSellers.desc", "จัดอันดับตามยอดขายเดือน{monthYear}", {
+                    monthYear: thaiMonthYear(data.period.month),
+                  })}
                   items={topSellerBars(data.topSellers)}
                 />
                 <GameShareChart
-                  title="สัดส่วนยอดขายตามเกม"
+                  title={t("metrics.gameShare.title", "สัดส่วนยอดขายตามเกม")}
                   description={thaiMonthYear(data.period.month)}
                   slices={gameSlices(data.gameShare)}
                   footnoteTitle={gameShareHeadline(data.gameShare)}
-                  footnoteDescription="ข้อมูลจากคำสั่งซื้อที่ชำระเงินแล้วและไม่ถูกยกเลิก"
+                  footnoteDescription={t(
+                    "metrics.gameShare.footnoteDesc",
+                    "ข้อมูลจากคำสั่งซื้อที่ชำระเงินแล้วและไม่ถูกยกเลิก",
+                  )}
                 />
               </div>
             </>

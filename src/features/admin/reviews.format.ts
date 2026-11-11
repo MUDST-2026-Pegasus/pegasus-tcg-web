@@ -1,5 +1,5 @@
 import type { AdminReview } from "./reviews.types";
-import { formatDate } from "@/lib/i18n";
+import { formatDate, translate } from "@/lib/i18n";
 
 export type ReviewFilter = "ALL" | "VISIBLE" | "HIDDEN" | "UNREPLIED" | "LOW";
 
@@ -74,15 +74,15 @@ export function filterLabel(filter: ReviewFilter, counts: ReviewCounts | null): 
   const withCount = (label: string, value: number) => (counts ? `${label} (${value})` : label);
   switch (filter) {
     case "VISIBLE":
-      return "แสดงอยู่";
+      return translate("admin", "reviews.filter.visible", "แสดงอยู่");
     case "HIDDEN":
-      return withCount("ซ่อนอยู่", counts?.hidden ?? 0);
+      return withCount(translate("admin", "reviews.filter.hidden", "ซ่อนอยู่"), counts?.hidden ?? 0);
     case "UNREPLIED":
-      return withCount("ยังไม่ตอบกลับ", counts?.unreplied ?? 0);
+      return withCount(translate("admin", "reviews.filter.unreplied", "ยังไม่ตอบกลับ"), counts?.unreplied ?? 0);
     case "LOW":
-      return "1–2 ดาว";
+      return translate("admin", "reviews.filter.low", "1–2 ดาว");
     default:
-      return withCount("ทั้งหมด", counts?.total ?? 0);
+      return withCount(translate("admin", "reviews.filter.all", "ทั้งหมด"), counts?.total ?? 0);
   }
 }
 
@@ -90,3 +90,9 @@ export function filterLabel(filter: ReviewFilter, counts: ReviewCounts | null): 
 export function formatAverage(average: number): string {
   return average.toFixed(1);
 }
+
+// @tolgee-key {"key": "reviews.filter.visible", "ns": "admin", "defaultValue": "แสดงอยู่"}
+// @tolgee-key {"key": "reviews.filter.hidden", "ns": "admin", "defaultValue": "ซ่อนอยู่"}
+// @tolgee-key {"key": "reviews.filter.unreplied", "ns": "admin", "defaultValue": "ยังไม่ตอบกลับ"}
+// @tolgee-key {"key": "reviews.filter.low", "ns": "admin", "defaultValue": "1–2 ดาว"}
+// @tolgee-key {"key": "reviews.filter.all", "ns": "admin", "defaultValue": "ทั้งหมด"}

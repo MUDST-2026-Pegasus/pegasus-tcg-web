@@ -121,7 +121,7 @@ describe("audit.format — time", () => {
 
   it("says how long ago, in Thai", () => {
     expect(formatRelative(new Date(2026, 7, 14, 9, 59, 30).toISOString(), now)).toBe("เมื่อสักครู่");
-    expect(formatRelative(new Date(2026, 7, 14, 9, 55).toISOString(), now)).toBe("5 นาทีที่แล้ว");
+    expect(formatRelative(new Date(2026, 7, 14, 9, 55).toISOString(), now)).toBe("5 นาทีที่ผ่านมา");
   });
 
   it("heads day groups with today and yesterday in Buddhist years", () => {

@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { SellerAvatar } from "@/features/admin/components/SellerAvatar";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -12,7 +13,6 @@ import {
   VERIFICATION_STATUS_META,
 } from "../verification.format";
 import type { Verification, VerificationStatus } from "../verification.types";
-import { intlLocale } from "@/lib/i18n";
 
 type SellerQueueListProps = {
   status: VerificationStatus;
@@ -39,6 +39,7 @@ export function SellerQueueList({
   viewingLabel,
   sortLabel,
 }: SellerQueueListProps) {
+  const { t } = useTranslate("admin");
   const title = VERIFICATION_STATUS_META[status].label;
 
   return (
@@ -84,7 +85,9 @@ export function SellerQueueList({
                       {legalName(verification)}
                     </span>
                     <span className="text-[11px] text-muted-foreground">
-                      ยื่นเมื่อ {formatThaiDateTime(verification.submittedAt)}
+                      {t("sellers.queue.submittedAt", "ยื่นเมื่อ {dateTime}", {
+                        dateTime: formatThaiDateTime(verification.submittedAt),
+                      })}
                     </span>
                   </div>
 
@@ -110,8 +113,10 @@ export function SellerQueueList({
                     >
                       <Lock data-icon="inline-start" />
                       {claimedBy === currentAdminId
-                        ? "คุณกำลังตรวจ"
-                        : `แอดมิน #${claimedBy} กำลังตรวจ`}
+                        ? t("sellers.queue.youReviewing", "คุณกำลังตรวจ")
+                        : t("sellers.queue.adminReviewing", "แอดมิน #{id} กำลังตรวจ", {
+                            id: claimedBy,
+                          })}
                     </Badge>
                   )}
                 </div>

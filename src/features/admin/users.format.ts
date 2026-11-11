@@ -2,15 +2,23 @@ import { hasErrorCode, isApiError } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { AdminUser, RoleCode, UserStatus } from "./users.types";
-import { formatDate, intlLocale, translateError } from "@/lib/i18n";
+import { currentLanguage, formatDate, intlLocale, translate, translateError } from "@/lib/i18n";
 
 /** ตัวช่วยแปลงข้อมูลผู้ใช้จาก `/admin/users` → ข้อความบนตาราง ไม่มีการ log PII */
 
 export const ROLE_LABEL: Record<RoleCode, string> = {
-  BUYER: "ผู้ซื้อ",
-  SELLER: "ผู้ขาย",
-  ADMIN: "ผู้ดูแล",
-  SUPPORT: "ทีมซัพพอร์ต",
+  get BUYER() {
+    return translate("admin", "users.role.buyer", "ผู้ซื้อ");
+  },
+  get SELLER() {
+    return translate("admin", "users.role.seller", "ผู้ขาย");
+  },
+  get ADMIN() {
+    return translate("admin", "users.role.admin", "ผู้ดูแล");
+  },
+  get SUPPORT() {
+    return translate("admin", "users.role.support", "ทีมซัพพอร์ต");
+  },
 };
 
 /** ลำดับที่โชว์ badge — บทบาทที่มีอำนาจมากกว่าขึ้นก่อน */
@@ -21,9 +29,15 @@ export function sortedRoles(roles: RoleCode[]): RoleCode[] {
 }
 
 export const USER_STATUS_LABEL: Record<UserStatus, string> = {
-  ACTIVE: "ใช้งานปกติ",
-  SUSPENDED: "ถูกระงับ",
-  DEACTIVATED: "ปิดบัญชี",
+  get ACTIVE() {
+    return translate("admin", "users.status.active", "ใช้งานปกติ");
+  },
+  get SUSPENDED() {
+    return translate("admin", "users.status.suspended", "ถูกระงับ");
+  },
+  get DEACTIVATED() {
+    return translate("admin", "users.status.deactivated", "ปิดบัญชี");
+  },
 };
 
 /** ตัวย่อจากชื่อที่แสดง (ไม่มีก็ใช้ username) เช่น "Ton Deckbuilder" → "TD" */
@@ -62,18 +76,22 @@ export function formatPhone(value: string | null): string {
 }
 
 export function formatLastLogin(value: string | null): string {
-  return value ? formatThaiDate(value) : "ยังไม่เคยเข้าใช้";
+  return value ? formatThaiDate(value) : translate("admin", "users.lastLogin.never", "ยังไม่เคยเข้าใช้");
 }
 
 /** "แสดง 21–40 จาก 4,982 บัญชี" — page เริ่มที่ 0 */
 export function pageSummary(page: number, size: number, total: number): string {
   if (total === 0) {
-    return "ไม่พบบัญชี";
+    return translate("admin", "users.pageSummaryEmpty", "ไม่พบบัญชี");
   }
   const from = page * size + 1;
   const to = Math.min(total, (page + 1) * size);
   const number = new Intl.NumberFormat(intlLocale());
-  return `แสดง ${number.format(from)}–${number.format(to)} จาก ${number.format(total)} บัญชี`;
+  return translate("admin", "users.pageSummary", "แสดง {from}–{to} จาก {total} บัญชี", {
+    from: number.format(from),
+    to: number.format(to),
+    total: currentLanguage() === "th" ? number.format(total) : total,
+  });
 }
 
 /**
@@ -105,13 +123,27 @@ export function isUserNotFound(error: unknown): boolean {
 
 export function userErrorMessage(error: unknown, fallback: string): string {
   if (hasErrorCode(error, "ACCESS_DENIED")) {
-    return "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้";
+    return translate("admin", "users.error.accessDenied", "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้");
   }
   if (hasErrorCode(error, "USER_NOT_FOUND")) {
-    return "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ";
+    return translate("admin", "users.error.notFound", "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ");
   }
   if (hasErrorCode(error, "ROLE_REQUIRES_PASSWORD")) {
-    return "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้";
+    return translate("admin", "users.error.roleRequiresPassword", "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้");
   }
   return translateError(error, fallback);
 }
+
+// @tolgee-key {"key": "users.role.buyer", "ns": "admin", "defaultValue": "ผู้ซื้อ"}
+// @tolgee-key {"key": "users.role.seller", "ns": "admin", "defaultValue": "ผู้ขาย"}
+// @tolgee-key {"key": "users.role.admin", "ns": "admin", "defaultValue": "ผู้ดูแล"}
+// @tolgee-key {"key": "users.role.support", "ns": "admin", "defaultValue": "ทีมซัพพอร์ต"}
+// @tolgee-key {"key": "users.status.active", "ns": "admin", "defaultValue": "ใช้งานปกติ"}
+// @tolgee-key {"key": "users.status.suspended", "ns": "admin", "defaultValue": "ถูกระงับ"}
+// @tolgee-key {"key": "users.status.deactivated", "ns": "admin", "defaultValue": "ปิดบัญชี"}
+// @tolgee-key {"key": "users.lastLogin.never", "ns": "admin", "defaultValue": "ยังไม่เคยเข้าใช้"}
+// @tolgee-key {"key": "users.pageSummaryEmpty", "ns": "admin", "defaultValue": "ไม่พบบัญชี"}
+// @tolgee-key {"key": "users.pageSummary", "ns": "admin", "defaultValue": "แสดง {from}–{to} จาก {total} บัญชี"}
+// @tolgee-key {"key": "users.error.accessDenied", "ns": "admin", "defaultValue": "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้"}
+// @tolgee-key {"key": "users.error.notFound", "ns": "admin", "defaultValue": "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ"}
+// @tolgee-key {"key": "users.error.roleRequiresPassword", "ns": "admin", "defaultValue": "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้"}
