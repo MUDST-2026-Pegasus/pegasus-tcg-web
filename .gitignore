@@ -35,3 +35,7 @@ QA/
 test-results/
 coverage/
 
+# TCG-753 NFR run data and raw evidence (may contain sensitive scan output)
+.nfr-runs/
+artifacts/nfr/
+
