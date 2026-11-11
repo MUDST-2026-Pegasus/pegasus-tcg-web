@@ -182,7 +182,7 @@ describe('Core Account Orders Flow', () => {
     cy.contains('123 Sukhumvit Road').should('be.visible');
 
     // Close details modal
-    cy.get('button[aria-label="ปิด"]').click();
+    cy.get('button[aria-label="ปิดหน้าต่าง"]').click();
     cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('not.exist');
   });
 
