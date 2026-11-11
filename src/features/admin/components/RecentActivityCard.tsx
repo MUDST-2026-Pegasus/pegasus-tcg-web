@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -29,21 +30,30 @@ const SHOWN = 5;
  * ใช้ query และ formatter ชุดเดียวกับหน้าบันทึกกิจกรรม
  */
 export function RecentActivityCard() {
+  const { t } = useTranslate("admin");
   const logs = useAuditLogs({ page: 0, size: SHOWN });
 
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-0 shadow-none ring-0 lg:w-[400px]">
       <div className="flex flex-col gap-0.5 px-[18px] pt-[18px] pb-3.5">
-        <p className="text-[15px] font-semibold text-foreground">กิจกรรมล่าสุด</p>
-        <p className="text-xs text-muted-foreground">การกระทำล่าสุดของผู้ดูแลและระบบ</p>
+        <p className="text-[15px] font-semibold text-foreground">
+          {t("audit.recentCard.title", "กิจกรรมล่าสุด")}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {t("audit.recentCard.desc", "การกระทำล่าสุดของผู้ดูแลและระบบ")}
+        </p>
       </div>
 
       <QueryBoundary
         query={logs}
         loading={<ActivitySkeleton />}
-        errorTitle="โหลดกิจกรรมล่าสุดไม่สำเร็จ"
+        errorTitle={t("audit.recentCard.loadError", "โหลดกิจกรรมล่าสุดไม่สำเร็จ")}
         isEmpty={(page) => page.items.length === 0}
-        empty={<p className="px-[18px] py-6 text-center text-xs text-muted-foreground">ยังไม่มีกิจกรรม</p>}
+        empty={
+          <p className="px-[18px] py-6 text-center text-xs text-muted-foreground">
+            {t("audit.recentCard.empty", "ยังไม่มีกิจกรรม")}
+          </p>
+        }
       >
         {(page) => (
           <ul className="flex flex-col">
@@ -78,7 +88,7 @@ export function RecentActivityCard() {
 
       <div className="px-[18px] pt-3 pb-4">
         <Button variant="ghost" className="rounded-md px-2.5" render={<Link to="/admin/activity-log" />}>
-          ดูบันทึกกิจกรรมทั้งหมด
+          {t("audit.recentCard.viewAll", "ดูบันทึกกิจกรรมทั้งหมด")}
         </Button>
       </div>
     </Card>

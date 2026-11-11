@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SearchIcon, X } from "lucide-react";
 
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslate } from "@/lib/i18n";
 
 import { ROLE_LABEL, USER_STATUS_LABEL } from "../users.format";
 import type { RoleCode, UserStatus } from "../users.types";
@@ -35,24 +36,31 @@ type UsersToolbarProps = {
   onClear: () => void;
 };
 
-const ROLE_ITEMS: Record<string, string> = {
-  [ALL]: "บทบาท: ทั้งหมด",
-  ...ROLE_LABEL,
-};
-
-const STATUS_ITEMS: Record<string, string> = {
-  [ALL]: "สถานะ: ทั้งหมด",
-  ...USER_STATUS_LABEL,
-};
-
 /**
  * ส่วนหัวของการ์ดตาราง — ค้นหา + กรองบทบาท/สถานะ และชิปของตัวกรองที่ใช้อยู่
  * ค่าทั้งหมดเก็บใน URL (หน้าเจ้าของเป็นคนอ่าน/เขียน) reload แล้วยังอยู่ที่เดิม
  */
 export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) {
+  const { t } = useTranslate("admin");
   const [text, setText] = useState(filters.q);
   const [syncedQ, setSyncedQ] = useState(filters.q);
   const timer = useRef<number | undefined>(undefined);
+
+  const roleItems = useMemo<Record<string, string>>(
+    () => ({
+      [ALL]: t("users.toolbar.allRoles", "บทบาท: ทั้งหมด"),
+      ...ROLE_LABEL,
+    }),
+    [t],
+  );
+
+  const statusItems = useMemo<Record<string, string>>(
+    () => ({
+      [ALL]: t("users.toolbar.allStatuses", "สถานะ: ทั้งหมด"),
+      ...USER_STATUS_LABEL,
+    }),
+    [t],
+  );
 
   // URL เปลี่ยนจากที่อื่น (กด back, ล้างตัวกรอง) — เอาค่าในช่องตามไปด้วย
   if (filters.q !== syncedQ) {
@@ -74,7 +82,9 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
   }
 
   const chips = [
-    filters.q ? { id: "q", label: `ค้นหา: ${filters.q}`, clear: { q: "" } } : null,
+    filters.q
+      ? { id: "q", label: t("users.toolbar.searchChip", "ค้นหา: {q}", { q: filters.q }), clear: { q: "" } }
+      : null,
     filters.role
       ? { id: "role", label: ROLE_LABEL[filters.role], clear: { role: null } }
       : null,
@@ -96,13 +106,13 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
             type="search"
             value={text}
             onChange={(event) => handleSearchInput(event.target.value)}
-            aria-label="ค้นหาชื่อผู้ใช้หรืออีเมล"
-            placeholder="ค้นหาชื่อผู้ใช้, ชื่อที่แสดง, อีเมล..."
+            aria-label={t("users.toolbar.searchAria", "ค้นหาชื่อผู้ใช้หรืออีเมล")}
+            placeholder={t("users.toolbar.searchPlaceholder", "ค้นหาชื่อผู้ใช้, ชื่อที่แสดง, อีเมล...")}
           />
         </InputGroup>
 
         <Select
-          items={ROLE_ITEMS}
+          items={roleItems}
           value={filters.role ?? ALL}
           onValueChange={(value) =>
             onChange({ role: value === ALL ? null : (value as RoleCode) })
@@ -110,14 +120,14 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
         >
           <SelectTrigger
             size="sm"
-            aria-label="กรองตามบทบาท"
+            aria-label={t("users.toolbar.roleFilterAria", "กรองตามบทบาท")}
             className="w-full rounded-lg border-input bg-background text-sm sm:w-[200px]"
           >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {Object.entries(ROLE_ITEMS).map(([value, label]) => (
+              {Object.entries(roleItems).map(([value, label]) => (
                 <SelectItem key={value} value={value}>
                   {label}
                 </SelectItem>
@@ -127,7 +137,7 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
         </Select>
 
         <Select
-          items={STATUS_ITEMS}
+          items={statusItems}
           value={filters.status ?? ALL}
           onValueChange={(value) =>
             onChange({ status: value === ALL ? null : (value as UserStatus) })
@@ -135,14 +145,14 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
         >
           <SelectTrigger
             size="sm"
-            aria-label="กรองตามสถานะ"
+            aria-label={t("users.toolbar.statusFilterAria", "กรองตามสถานะ")}
             className="w-full rounded-lg border-input bg-background text-sm sm:w-[200px]"
           >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {Object.entries(STATUS_ITEMS).map(([value, label]) => (
+              {Object.entries(statusItems).map(([value, label]) => (
                 <SelectItem key={value} value={value}>
                   {label}
                 </SelectItem>
@@ -154,7 +164,9 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
 
       {chips.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2 px-5 pb-3.5">
-          <p className="text-[11px] text-muted-foreground">ตัวกรองที่ใช้:</p>
+          <p className="text-[11px] text-muted-foreground">
+            {t("users.toolbar.activeFilters", "ตัวกรองที่ใช้:")}
+          </p>
           {chips.map((chip) => (
             <span
               key={chip.id}
@@ -163,7 +175,7 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
               {chip.label}
               <button
                 type="button"
-                aria-label={`ลบตัวกรอง: ${chip.label}`}
+                aria-label={t("users.toolbar.removeFilterAria", "ลบตัวกรอง: {label}", { label: chip.label })}
                 onClick={() => onChange(chip.clear)}
                 className="rounded-sm opacity-80 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
@@ -177,7 +189,7 @@ export function UsersToolbar({ filters, onChange, onClear }: UsersToolbarProps) 
             onClick={onClear}
             className="h-auto px-1 text-[11px] font-medium text-muted-foreground"
           >
-            ล้างทั้งหมด
+            {t("users.toolbar.clearAll", "ล้างทั้งหมด")}
           </Button>
         </div>
       ) : null}

@@ -757,7 +757,7 @@ describe('Core Admin Management Flow', () => {
     cy.wait('@getAdminReviews');
     cy.contains('h1', 'จัดการรีวิว').should('be.visible');
     cy.contains('จัดส่งไวมาก แพ็คดีเยี่ยม').should('be.visible');
-    cy.get('[role="switch"]').first().click();
+    cy.get('main [role="switch"]').first().click();
     cy.wait('@toggleReviewVisibility').its('request.body').should('deep.equal', { visible: false });
   });
 });

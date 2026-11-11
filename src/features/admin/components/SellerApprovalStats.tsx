@@ -1,10 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { VERIFICATION_STATUS_META } from "../verification.format";
 import { VERIFICATION_STATUSES } from "../verification.queries";
 import type { VerificationStatus } from "../verification.types";
-import { intlLocale } from "@/lib/i18n";
 
 type SellerApprovalStatsProps = {
   counts: Record<VerificationStatus, number>;
@@ -25,10 +25,12 @@ export function SellerApprovalStats({
   onSelect,
   isLoading,
 }: SellerApprovalStatsProps) {
+  const { t } = useTranslate("admin");
+
   return (
     <div
       role="tablist"
-      aria-label="กรองคำขอตามสถานะ"
+      aria-label={t("sellers.stats.ariaLabel", "กรองคำขอตามสถานะ")}
       className="grid w-full grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-muted xl:grid-cols-4"
     >
       {VERIFICATION_STATUSES.map((status, index) => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SearchIcon } from "lucide-react";
 
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslate } from "@/lib/i18n";
 
 import {
   AUDIT_CATEGORIES,
@@ -33,19 +34,25 @@ type ActivityLogToolbarProps = {
   onChange: (changes: Partial<ActivityFilters>) => void;
 };
 
-const CATEGORY_ITEMS: Record<string, string> = {
-  [ALL]: "ทุกประเภท",
-  ...Object.fromEntries(Object.entries(AUDIT_CATEGORIES).map(([key, value]) => [key, value.label])),
-};
-
 /**
  * แถบกรองเหนือ timeline — ค้นหา (หน่วง 300ms แบบ `CatalogToolbar`), ประเภท และช่วงเวลา
  * ค่าทั้งหมดเก็บใน URL (หน้าเจ้าของเป็นคนอ่าน/เขียน) reload แล้วยังอยู่ที่เดิม
  */
 export function ActivityLogToolbar({ filters, onChange }: ActivityLogToolbarProps) {
+  const { t } = useTranslate("admin");
   const [text, setText] = useState(filters.q);
   const [syncedQ, setSyncedQ] = useState(filters.q);
   const timer = useRef<number | undefined>(undefined);
+
+  const categoryItems: Record<string, string> = useMemo(
+    () => ({
+      [ALL]: t("audit.category.all", "ทุกประเภท"),
+      ...Object.fromEntries(
+        Object.entries(AUDIT_CATEGORIES).map(([key, value]) => [key, value.label]),
+      ),
+    }),
+    [t],
+  );
 
   // URL เปลี่ยนจากที่อื่น (กด back) — เอาค่าในช่องตามไปด้วย
   if (filters.q !== syncedQ) {
@@ -73,13 +80,13 @@ export function ActivityLogToolbar({ filters, onChange }: ActivityLogToolbarProp
           type="search"
           value={text}
           onChange={(event) => handleSearchInput(event.target.value)}
-          aria-label="ค้นหาในบันทึกกิจกรรม"
-          placeholder="ค้นหาชื่อสินค้า, รหัส, ข้อความบันทึก..."
+          aria-label={t("audit.toolbar.searchAria", "ค้นหาในบันทึกกิจกรรม")}
+          placeholder={t("audit.toolbar.searchPlaceholder", "ค้นหาชื่อสินค้า, รหัส, ข้อความบันทึก...")}
         />
       </InputGroup>
 
       <Select
-        items={CATEGORY_ITEMS}
+        items={categoryItems}
         value={filters.category ?? ALL}
         onValueChange={(value) =>
           onChange({ category: value === ALL ? null : (value as AuditCategory) })
@@ -87,14 +94,14 @@ export function ActivityLogToolbar({ filters, onChange }: ActivityLogToolbarProp
       >
         <SelectTrigger
           size="sm"
-          aria-label="กรองตามประเภท"
+          aria-label={t("audit.toolbar.filterCategoryAria", "กรองตามประเภท")}
           className="w-full rounded-lg border-input bg-background text-sm sm:w-[200px]"
         >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {Object.entries(CATEGORY_ITEMS).map(([value, label]) => (
+            {Object.entries(categoryItems).map(([value, label]) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>
@@ -110,7 +117,7 @@ export function ActivityLogToolbar({ filters, onChange }: ActivityLogToolbarProp
       >
         <SelectTrigger
           size="sm"
-          aria-label="ช่วงเวลา"
+          aria-label={t("audit.toolbar.rangeAria", "ช่วงเวลา")}
           className="w-full rounded-lg border-input bg-background text-sm sm:w-[140px]"
         >
           <SelectValue />

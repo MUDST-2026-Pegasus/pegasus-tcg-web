@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 /** แถวดาว 5 ดวง เติมสีตามคะแนน (ปัดลงสำหรับค่าเฉลี่ย) */
@@ -12,9 +13,14 @@ export function ReviewStars({
   className?: string;
   starClassName?: string;
 }) {
+  const { t } = useTranslate("admin");
   const filled = Math.floor(rating);
   return (
-    <span role="img" aria-label={`${rating} จาก 5 ดาว`} className={cn("flex items-center gap-0.5", className)}>
+    <span
+      role="img"
+      aria-label={t("reviews.starsAria", "{rating} จาก 5 ดาว", { rating })}
+      className={cn("flex items-center gap-0.5", className)}
+    >
       {[1, 2, 3, 4, 5].map((value) => (
         <Star
           key={value}

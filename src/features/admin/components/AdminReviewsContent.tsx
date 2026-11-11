@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { hasErrorCode } from "@/lib/api";
+import { intlLocale, translateError, useTranslate } from "@/lib/i18n";
 
 import {
   countReviews,
@@ -24,7 +25,6 @@ import {
 import { FinanceStatStrip, type FinanceStat } from "./FinanceShared";
 import { ReviewModerationCard } from "./ReviewModerationCard";
 import { ReviewSellerCard } from "./ReviewSellerCard";
-import { intlLocale, translateError } from "@/lib/i18n";
 
 const PAGE_SIZE = 10;
 const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"];
@@ -36,6 +36,7 @@ const FILTERS: ReviewFilter[] = ["ALL", "VISIBLE", "HIDDEN", "UNREPLIED", "LOW"]
  * อ้างจาก Figma "V2 · Admin / จัดการรีวิว" node 1931:2926
  */
 export function AdminReviewsContent() {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const username = searchParams.get("seller")?.trim() ?? "";
   const [draft, setDraft] = useState(username);
@@ -69,30 +70,57 @@ export function AdminReviewsContent() {
       { id, visible },
       {
         onSuccess: () =>
-          toast.add({ type: "success", title: visible ? "แสดงรีวิวบนโปรไฟล์แล้ว" : "ซ่อนรีวิวแล้ว" }),
+          toast.add({
+            type: "success",
+            title: visible
+              ? t("reviews.toast.showSuccess", "แสดงรีวิวบนโปรไฟล์แล้ว")
+              : t("reviews.toast.hideSuccess", "ซ่อนรีวิวแล้ว"),
+          }),
         onError: (error) =>
           toast.add({
             type: "error",
-            title: "เปลี่ยนการแสดงรีวิวไม่สำเร็จ",
-            description: translateError(error, "กรุณาลองอีกครั้ง"),
+            title: t("reviews.toast.visibilityErrorTitle", "เปลี่ยนการแสดงรีวิวไม่สำเร็จ"),
+            description: translateError(error, t("actions.retry", "กรุณาลองอีกครั้ง", { ns: "common" })),
           }),
       },
     );
 
   const stats: FinanceStat[] = [
-    { label: "ยังไม่ได้ตอบกลับ", value: String(counts?.unreplied ?? 0), dotClass: "bg-[#f59e0a]", emphasized: true },
-    { label: "แสดงอยู่", value: String(counts?.visible ?? 0), dotClass: "bg-[#12805c]" },
-    { label: "ซ่อนอยู่", value: String(counts?.hidden ?? 0), dotClass: "bg-[#d0342c]" },
-    { label: "รีวิวทั้งหมด", value: String(counts?.total ?? 0), dotClass: "bg-[#9aa5ad]" },
+    {
+      label: t("reviews.filter.unreplied", "ยังไม่ได้ตอบกลับ"),
+      value: String(counts?.unreplied ?? 0),
+      dotClass: "bg-[#f59e0a]",
+      emphasized: true,
+    },
+    {
+      label: t("reviews.filter.visible", "แสดงอยู่"),
+      value: String(counts?.visible ?? 0),
+      dotClass: "bg-[#12805c]",
+    },
+    {
+      label: t("reviews.filter.hidden", "ซ่อนอยู่"),
+      value: String(counts?.hidden ?? 0),
+      dotClass: "bg-[#d0342c]",
+    },
+    {
+      label: t("reviews.filter.allReviews", "รีวิวทั้งหมด"),
+      value: String(counts?.total ?? 0),
+      dotClass: "bg-[#9aa5ad]",
+    },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">จัดการรีวิว</h1>
+          <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
+            {t("reviews.pageTitle", "จัดการรีวิว")}
+          </h1>
           <p className="text-[13px] text-muted-foreground">
-            ดูรีวิวทั้งหมดของผู้ขาย รวมรีวิวที่ถูกซ่อน · ซ่อนรีวิวที่ไม่เหมาะสมออกจากหน้าโปรไฟล์สาธารณะ
+            {t(
+              "reviews.pageDesc",
+              "ดูรีวิวทั้งหมดของผู้ขาย รวมรีวิวที่ถูกซ่อน · ซ่อนรีวิวที่ไม่เหมาะสมออกจากหน้าโปรไฟล์สาธารณะ",
+            )}
           </p>
         </div>
         {username ? (
@@ -103,11 +131,11 @@ export function AdminReviewsContent() {
             render={<Link to={`/u/${encodeURIComponent(username)}`} target="_blank" rel="noreferrer" />}
             nativeButton={false}
           >
-            ดูหน้าโปรไฟล์สาธารณะ
+            {t("reviews.viewPublicProfile", "ดูหน้าโปรไฟล์สาธารณะ")}
           </Button>
         ) : (
           <Button variant="outline" size="sm" className="rounded-md px-2.5" disabled>
-            ดูหน้าโปรไฟล์สาธารณะ
+            {t("reviews.viewPublicProfile", "ดูหน้าโปรไฟล์สาธารณะ")}
           </Button>
         )}
       </div>
@@ -123,19 +151,23 @@ export function AdminReviewsContent() {
           <div className="relative w-full sm:w-[260px]">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              aria-label="ชื่อผู้ใช้ผู้ขาย"
-              placeholder="ชื่อผู้ใช้ผู้ขาย"
+              aria-label={t("reviews.search.inputAria", "ชื่อผู้ใช้ผู้ขาย")}
+              placeholder={t("reviews.search.inputPlaceholder", "ชื่อผู้ใช้ผู้ขาย")}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               className="h-8 rounded-lg bg-background pl-8"
             />
           </div>
           <Button type="submit" size="sm" className="rounded-md px-2.5" disabled={!draft.trim()}>
-            ค้นหาผู้ขาย
+            {t("reviews.search.submitButton", "ค้นหาผู้ขาย")}
           </Button>
         </form>
         <div className="hidden flex-1 lg:block" />
-        <div role="tablist" aria-label="กรองรีวิว" className="flex flex-wrap items-center gap-1">
+        <div
+          role="tablist"
+          aria-label={t("reviews.tablistAria", "กรองรีวิว")}
+          className="flex flex-wrap items-center gap-1"
+        >
           {FILTERS.map((value) => (
             <Button
               key={value}
@@ -156,14 +188,20 @@ export function AdminReviewsContent() {
       {!username ? (
         <EmptyState
           icon={Star}
-          title="ค้นหาผู้ขายเพื่อดูรีวิว"
-          description="พิมพ์ชื่อผู้ใช้ของผู้ขาย แล้วกด “ค้นหาผู้ขาย”"
+          title={t("reviews.empty.searchPromptTitle", "ค้นหาผู้ขายเพื่อดูรีวิว")}
+          description={t(
+            "reviews.empty.searchPromptDesc",
+            "พิมพ์ชื่อผู้ใช้ของผู้ขาย แล้วกด “ค้นหาผู้ขาย”",
+          )}
         />
       ) : reviews.isPending ? (
         <ReviewsSkeleton />
       ) : reviews.isError ? (
         hasErrorCode(reviews.error, "SELLER_NOT_FOUND") ? (
-          <EmptyState title={`ไม่พบผู้ขาย “${username}”`} description="ตรวจสอบชื่อผู้ใช้อีกครั้ง" />
+          <EmptyState
+            title={t("reviews.empty.sellerNotFoundTitle", "ไม่พบผู้ขาย “{username}”", { username })}
+            description={t("reviews.empty.sellerNotFoundDesc", "ตรวจสอบชื่อผู้ใช้อีกครั้ง")}
+          />
         ) : (
           <ErrorState error={reviews.error} onRetry={() => void reviews.refetch()} />
         )
@@ -174,16 +212,28 @@ export function AdminReviewsContent() {
             profile={profile.isPending ? undefined : (profile.data ?? null)}
             summary={summarizeRatings(all)}
           />
-          <section aria-label="รายการรีวิว" className="flex w-full min-w-0 flex-1 flex-col gap-3">
+          <section
+            aria-label={t("reviews.sectionAria", "รายการรีวิว")}
+            className="flex w-full min-w-0 flex-1 flex-col gap-3"
+          >
             <div className="flex items-center gap-2">
               <h2 className="flex-1 text-sm font-semibold text-foreground">
-                รีวิวของ {username} ({filtered.length.toLocaleString(intlLocale())})
+                {t("reviews.sectionTitle", "รีวิวของ {username} ({count})", {
+                  username,
+                  count: filtered.length.toLocaleString(intlLocale()),
+                })}
               </h2>
-              <p className="text-[11px] text-[#9aa5ad]">เรียงตาม: ใหม่ไปเก่า</p>
+              <p className="text-[11px] text-[#9aa5ad]">
+                {t("reviews.sortNewest", "เรียงตาม: ใหม่ไปเก่า")}
+              </p>
             </div>
             {shown.length === 0 ? (
               <EmptyState
-                title={all.length === 0 ? "ผู้ขายรายนี้ยังไม่มีรีวิว" : "ไม่มีรีวิวในตัวกรองนี้"}
+                title={
+                  all.length === 0
+                    ? t("reviews.empty.noReviewsEver", "ผู้ขายรายนี้ยังไม่มีรีวิว")
+                    : t("reviews.empty.noReviewsInFilter", "ไม่มีรีวิวในตัวกรองนี้")
+                }
               />
             ) : (
               shown.map((review) => (
@@ -203,7 +253,7 @@ export function AdminReviewsContent() {
                   className="rounded-md px-2.5"
                   onClick={() => setLimit((current) => current + PAGE_SIZE)}
                 >
-                  โหลดเพิ่ม
+                  {t("reviews.loadMore", "โหลดเพิ่ม")}
                 </Button>
               </div>
             )}
@@ -215,8 +265,13 @@ export function AdminReviewsContent() {
 }
 
 function ReviewsSkeleton() {
+  const { t } = useTranslate("admin");
   return (
-    <div aria-busy="true" aria-label="กำลังโหลดรีวิว" className="flex flex-col items-start gap-6 lg:flex-row">
+    <div
+      aria-busy="true"
+      aria-label={t("reviews.skeletonAria", "กำลังโหลดรีวิว")}
+      className="flex flex-col items-start gap-6 lg:flex-row"
+    >
       <Skeleton className="h-[340px] w-full rounded-xl lg:w-[340px]" />
       <div className="flex w-full flex-1 flex-col gap-3">
         <Skeleton className="h-5 w-48" />

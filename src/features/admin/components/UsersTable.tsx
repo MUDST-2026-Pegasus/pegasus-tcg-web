@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useTranslate } from "@/lib/i18n";
 
 import {
   formatLastLogin,
@@ -65,10 +66,12 @@ export function UsersTable({
   onPageChange,
   onAction,
 }: UsersTableProps) {
+  const { t } = useTranslate("admin");
+
   const columns: DataTableColumn<AdminUser>[] = [
     {
       id: "user",
-      header: "ผู้ใช้",
+      header: t("users.table.user", "ผู้ใช้"),
       meta: { headClassName: cn(HEAD_CLASS, "w-[320px] pl-5"), cellClassName: cn(CELL_CLASS, "pl-5") },
       cell: ({ row: { original: user } }) => (
         <div className="flex items-center gap-2.5">
@@ -80,26 +83,50 @@ export function UsersTable({
                 event.stopPropagation();
                 onAction(user, "view");
               }}
-              aria-label={`ดูรายละเอียด: ${user.username}`}
+              aria-label={t("users.table.viewDetailAria", "ดูรายละเอียด: {username}", { username: user.username })}
               className="truncate rounded-sm text-left font-medium text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               {user.displayName}
               <span className="ml-1.5 font-normal text-muted-foreground">@{user.username}</span>
-              {user.id === currentUserId ? <span className="ml-1.5 text-[10px] font-normal text-primary">(คุณ)</span> : null}
+              {user.id === currentUserId ? (
+                <span className="ml-1.5 text-[10px] font-normal text-primary">
+                  {t("users.table.you", "(คุณ)")}
+                </span>
+              ) : null}
             </button>
             <span className="truncate text-[10px] text-[#9aa5ad]">{user.email}</span>
           </div>
         </div>
       ),
     },
-    { id: "roles", header: "บทบาท", meta: { headClassName: cn(HEAD_CLASS, "w-[200px]"), cellClassName: CELL_CLASS }, cell: ({ row }) => <RoleBadges roles={row.original.roles} /> },
-    { id: "created", header: "สมัครเมื่อ", meta: { headClassName: cn(HEAD_CLASS, "w-[130px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") }, cell: ({ row }) => formatThaiDate(row.original.createdAt) },
-    { id: "lastLogin", header: "เข้าใช้ล่าสุด", meta: { headClassName: cn(HEAD_CLASS, "w-[140px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") }, cell: ({ row }) => formatLastLogin(row.original.lastLoginAt) },
-    { id: "status", header: "สถานะ", meta: { headClassName: cn(HEAD_CLASS, "w-[120px]"), cellClassName: CELL_CLASS }, cell: ({ row }) => <StatusBadge status={row.original.status} /> },
+    {
+      id: "roles",
+      header: t("users.table.roles", "บทบาท"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-[200px]"), cellClassName: CELL_CLASS },
+      cell: ({ row }) => <RoleBadges roles={row.original.roles} />,
+    },
+    {
+      id: "created",
+      header: t("users.table.created", "สมัครเมื่อ"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-[130px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") },
+      cell: ({ row }) => formatThaiDate(row.original.createdAt),
+    },
+    {
+      id: "lastLogin",
+      header: t("users.table.lastLogin", "เข้าใช้ล่าสุด"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-[140px]"), cellClassName: cn(CELL_CLASS, "text-muted-foreground") },
+      cell: ({ row }) => formatLastLogin(row.original.lastLoginAt),
+    },
+    {
+      id: "status",
+      header: t("users.table.status", "สถานะ"),
+      meta: { headClassName: cn(HEAD_CLASS, "w-[120px]"), cellClassName: CELL_CLASS },
+      cell: ({ row }) => <StatusBadge status={row.original.status} />,
+    },
     {
       // คอลัมน์สุดท้ายไม่มีหัวตารางในดีไซน์ และกินพื้นที่ที่เหลือแทน spacer
       id: "menu",
-      header: () => <span className="sr-only">ตัวเลือกเพิ่มเติม</span>,
+      header: () => <span className="sr-only">{t("users.table.moreOptions", "ตัวเลือกเพิ่มเติม")}</span>,
       meta: { headClassName: cn(HEAD_CLASS, "pr-5"), cellClassName: cn(CELL_CLASS, "pr-5 text-right") },
       cell: ({ row: { original: user } }) => (
         // เมนูอยู่ใน portal แต่ event ยังไหลตาม React tree — กันไม่ให้ไปเปิด Sidebar ซ้อน
@@ -127,14 +154,14 @@ export function UsersTable({
         <p className="text-xs text-muted-foreground">
           {pageSummary(page, size, totalItems)}
         </p>
-        <nav aria-label="เลขหน้า" className="flex items-center gap-1.5">
+        <nav aria-label={t("users.table.paginationAria", "เลขหน้า")} className="flex items-center gap-1.5">
           <Button
             variant="outline"
             className="rounded-md px-2.5"
             disabled={disabled || page <= 0}
             onClick={() => onPageChange(page - 1)}
           >
-            ก่อนหน้า
+            {t("actions.previous", "ก่อนหน้า", { ns: "common" })}
           </Button>
           {pageNumbers(page, totalPages).map((value, index) =>
             value === null ? (
@@ -163,7 +190,7 @@ export function UsersTable({
             disabled={disabled || page + 1 >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
-            ถัดไป
+            {t("actions.next", "ถัดไป", { ns: "common" })}
           </Button>
         </nav>
       </div>
@@ -182,6 +209,7 @@ type UserRowMenuProps = {
  * แถวของตัวเองเปิดได้ แต่ใช้ได้แค่ "ดูรายละเอียด" พร้อมบอกเหตุผล
  */
 function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
+  const { t } = useTranslate("admin");
   const locked = isSelf;
   return (
     <DropdownMenu>
@@ -190,7 +218,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`ตัวเลือกเพิ่มเติม: ${user.username}`}
+            aria-label={t("users.table.moreOptionsAria", "ตัวเลือกเพิ่มเติม: {username}", { username: user.username })}
             className="rounded-md text-[#9aa5ad]"
           />
         }
@@ -200,7 +228,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
       <DropdownMenuContent align="end" className="w-[232px] gap-0.5 rounded-xl p-1.5">
         <DropdownMenuItem className={MENU_ITEM_CLASS} onClick={() => onAction(user, "view")}>
           <User />
-          ดูรายละเอียด
+          {t("users.menu.viewDetail", "ดูรายละเอียด")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className={MENU_ITEM_CLASS}
@@ -208,7 +236,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
           onClick={() => onAction(user, "roles")}
         >
           <Shield />
-          จัดการบทบาท…
+          {t("users.menu.manageRoles", "จัดการบทบาท…")}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="my-1 bg-muted" />
         {user.status === "ACTIVE" ? (
@@ -219,7 +247,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "suspend")}
           >
             <CircleX />
-            ระงับบัญชี
+            {t("users.menu.suspend", "ระงับบัญชี")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
@@ -228,7 +256,7 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "restore")}
           >
             <RotateCw />
-            เปิดใช้งานอีกครั้ง
+            {t("users.menu.restore", "เปิดใช้งานอีกครั้ง")}
           </DropdownMenuItem>
         )}
         {user.status !== "DEACTIVATED" ? (
@@ -239,12 +267,15 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
             onClick={() => onAction(user, "deactivate")}
           >
             <UserX />
-            ปิดบัญชี
+            {t("users.menu.deactivate", "ปิดบัญชี")}
           </DropdownMenuItem>
         ) : null}
         {locked ? (
           <p className="px-2.5 py-1.5 text-[10px] leading-[14px] text-[#9aa5ad]">
-            นี่คือบัญชีของคุณ — เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้
+            {t(
+              "users.menu.selfAccountHint",
+              "นี่คือบัญชีของคุณ — เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้",
+            )}
           </p>
         ) : null}
       </DropdownMenuContent>
@@ -254,8 +285,13 @@ function UserRowMenu({ user, isSelf, onAction }: UserRowMenuProps) {
 
 /** skeleton โหลดครั้งแรก — รูปทรงเดียวกับแถวจริง */
 export function UsersTableSkeleton() {
+  const { t } = useTranslate("admin");
   return (
-    <div aria-busy="true" aria-label="กำลังโหลดรายชื่อผู้ใช้" className="border-t border-muted">
+    <div
+      aria-busy="true"
+      aria-label={t("users.table.skeletonAria", "กำลังโหลดรายชื่อผู้ใช้")}
+      className="border-t border-muted"
+    >
       {Array.from({ length: 8 }, (_, index) => (
         <div
           key={index}

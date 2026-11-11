@@ -2,13 +2,13 @@ import { Info } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 import { initialsOf } from "../finance.format";
 import { formatAverage, type RatingSummary } from "../reviews.format";
 import type { ReviewSellerProfile } from "../reviews.types";
 import { ReviewStars } from "./ReviewStars";
 import { SellerAvatar } from "./SellerAvatar";
-import { intlLocale } from "@/lib/i18n";
 
 /**
  * การ์ดคะแนนผู้ขายทางซ้าย — ชื่อร้าน ค่าเฉลี่ย และการกระจาย 1–5 ดาว
@@ -23,10 +23,12 @@ export function ReviewSellerCard({
   profile: ReviewSellerProfile | null | undefined;
   summary: RatingSummary;
 }) {
+  const { t } = useTranslate("admin");
   const displayName = profile?.displayName?.trim();
+
   return (
     <section
-      aria-label="คะแนนผู้ขาย"
+      aria-label={t("reviews.sellerCard.ariaLabel", "คะแนนผู้ขาย")}
       className="flex w-full shrink-0 flex-col gap-4 rounded-xl border border-border bg-background p-5 lg:w-[340px]"
     >
       <div className="flex items-center gap-3">
@@ -57,7 +59,9 @@ export function ReviewSellerCard({
         <div className="flex flex-col gap-1">
           <ReviewStars rating={summary.average} starClassName="size-[15px]" />
           <p className="text-[11px] text-muted-foreground">
-            จาก {summary.count.toLocaleString(intlLocale())} รีวิวที่แสดงอยู่
+            {t("reviews.sellerCard.fromReviews", "จาก {count} รีวิวที่แสดงอยู่", {
+              count: summary.count.toLocaleString(intlLocale()),
+            })}
           </p>
         </div>
       </div>
@@ -84,7 +88,10 @@ export function ReviewSellerCard({
       <div className="flex items-start gap-2 rounded-lg bg-[#e8f1fc] px-3 py-2.5">
         <Info aria-hidden="true" className="mt-px size-3.5 shrink-0 text-[#0058bc]" />
         <p className="text-[11px] text-[#0058bc]">
-          คะแนนนับเฉพาะรีวิวที่แสดงอยู่ · ซ่อน/แสดงรีวิวแล้วระบบคำนวณใหม่ทันที (เฉพาะเมื่อค่าเปลี่ยนจริง)
+          {t(
+            "reviews.sellerCard.infoNote",
+            "คะแนนนับเฉพาะรีวิวที่แสดงอยู่ · ซ่อน/แสดงรีวิวแล้วระบบคำนวณใหม่ทันที (เฉพาะเมื่อค่าเปลี่ยนจริง)",
+          )}
         </p>
       </div>
     </section>

@@ -18,6 +18,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { LanguageSwitch } from "@/lib/i18n/LanguageSwitch";
 import { AccountAvatar, useAccountLinks } from "@/components/layout/nav-shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,23 +34,6 @@ import { useGameList } from "@/features/catalog/catalog.queries";
 import { useSales } from "@/features/sale/sale.queries";
 import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-
-export function LanguageSwitch() {
-  return (
-    <button
-      type="button"
-      disabled
-      aria-label="Switch language"
-      className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"
-    >
-      <span className="text-primary">TH</span>
-      <span className="flex h-[22px] w-10 items-center rounded-full bg-primary p-[3px]">
-        <span className="size-4 rounded-full bg-background" />
-      </span>
-      <span>EN</span>
-    </button>
-  );
-}
 
 function Logo({ onClick }: { onClick?: () => void }) {
   const { t } = useTranslate();
@@ -399,6 +383,7 @@ export function Navbar() {
           </kbd>
         </form>
         <div className="ml-auto flex items-center gap-1">
+          <LanguageSwitch className="mr-2" />
           <AccountMenu />
           {cartButton}
         </div>

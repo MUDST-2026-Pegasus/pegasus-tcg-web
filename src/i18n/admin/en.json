@@ -1,4 +1,216 @@
 {
+  "audit": {
+    "action": {
+      "activity": "Activity",
+      "cardSetCreated": "Created card set",
+      "cardSetDeleted": "Deleted card set",
+      "cardSetUpdated": "Updated card set",
+      "catalogCategoryCreated": "Created category",
+      "catalogCategoryUpdated": "Updated category",
+      "catalogImageAdded": "Added product image",
+      "catalogImageDeleted": "Deleted product image",
+      "catalogImagePrimarySet": "Set primary product image",
+      "catalogProductCreated": "Created catalog product",
+      "catalogProductDeleted": "Deleted catalog product",
+      "catalogProductEffectsReplaced": "Updated abilities and attacks",
+      "catalogProductUpdated": "Updated catalog product",
+      "catalogVariantCreated": "Created product variant",
+      "catalogVariantUpdated": "Updated product variant",
+      "commissionRuleCreated": "Created commission rule",
+      "commissionRuleDeactivated": "Deactivated commission rule",
+      "commissionRuleDeleted": "Deleted commission rule",
+      "commissionRuleUpdated": "Updated commission rule",
+      "gameAttributeCreated": "Created schema attribute",
+      "gameAttributeDeleted": "Deleted schema attribute",
+      "gameAttributeUpdated": "Updated schema attribute",
+      "gameCreated": "Created game",
+      "gameUpdated": "Updated game",
+      "marketPricingRun": "Ran market pricing calculation",
+      "ordersAutoReleased": "Auto-released orders and payout",
+      "paymentApproved": "Approved payment slip",
+      "paymentRejected": "Rejected payment slip",
+      "payoutApproved": "Approved payout request",
+      "payoutFailed": "Recorded payout failure",
+      "payoutPaid": "Recorded seller payout",
+      "payoutProcessing": "Processing payout to seller",
+      "payoutRejected": "Rejected payout request",
+      "refundFailed": "Recorded refund failure",
+      "refundProcessed": "Processed buyer refund",
+      "refundProcessing": "Processing buyer refund",
+      "sellerVerificationApproved": "Approved store application",
+      "sellerVerificationRejected": "Rejected store application",
+      "sellerVerificationReviewStarted": "Claimed store application for review",
+      "sellerVerificationSubmitted": "Submitted store application",
+      "settingUpdated": "Updated system setting",
+      "unpaidOrdersExpired": "Expired unpaid orders automatically",
+      "userRoleGranted": "Granted user role",
+      "userRoleRevoked": "Revoked user role",
+      "userStatusChanged": "Changed user status"
+    },
+    "actor": {
+      "system": "System"
+    },
+    "category": {
+      "all": "All Categories",
+      "catalog": "Catalog",
+      "finance": "Finance",
+      "sellers": "Sellers",
+      "settings": "Settings",
+      "system": "System Automation",
+      "users": "Users"
+    },
+    "day": {
+      "todayWithDate": "Today · {date}",
+      "yesterdayWithDate": "Yesterday · {date}"
+    },
+    "empty": {
+      "desc": "Events will appear here as admins or system perform actions.",
+      "filteredDesc": "Try changing your search term, category, or expanding time range.",
+      "filteredTitle": "No activities matching filters",
+      "title": "No activity yet"
+    },
+    "entryTime": "{date} · {time}",
+    "field": {
+      "active": "Active",
+      "amount": "Amount (THB)",
+      "attrKey": "Attribute Key",
+      "attributes": "Card Attributes",
+      "cardNumber": "Card Number",
+      "cardSetId": "Card Set",
+      "categoryId": "Category",
+      "code": "Code",
+      "description": "Description",
+      "displayOrder": "Display Order",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "filterable": "Filterable",
+      "fixedFee": "Fixed Fee (THB)",
+      "label": "Label",
+      "maxFee": "Maximum Fee (THB)",
+      "minFee": "Minimum Fee (THB)",
+      "name": "Name",
+      "nameLocal": "Local Name",
+      "options": "Options",
+      "orderId": "Order ID",
+      "priority": "Priority",
+      "rarityCode": "Rarity",
+      "ratePercent": "Commission Rate (%)",
+      "reason": "Reason",
+      "redacted": "Redacted",
+      "required": "Required",
+      "role": "Role",
+      "sku": "SKU",
+      "slug": "Slug",
+      "value": "Value"
+    },
+    "filter": {
+      "clear": "Clear filters"
+    },
+    "hint": {
+      "role": "Role {role}"
+    },
+    "loadErrorDesc": "Network error or session expired — your selected filters remain in the URL.",
+    "loadErrorTitle": "Failed to load activity log",
+    "pageDesc": "Logs all admin and system actions · Immutable and cannot be deleted",
+    "pageTitle": "Activity Log",
+    "range": {
+      "30d": "Last 30 days",
+      "7d": "Last 7 days",
+      "all": "All",
+      "today": "Today"
+    },
+    "recentCard": {
+      "desc": "Latest actions by admins and the system",
+      "empty": "No recent activity",
+      "loadError": "Failed to load recent activity",
+      "title": "Recent Activity",
+      "viewAll": "View full activity log"
+    },
+    "relative": {
+      "justNow": "Just now"
+    },
+    "setting": {
+      "commissionDefaultRate": "Base Commission Rate",
+      "escrowAutoReleaseDays": "Escrow Auto-Release Days",
+      "marketPricing": "Market pricing cron",
+      "orderCancelWindowHours": "Order Cancellation Window (Hours)",
+      "orderPaymentTimeoutMinutes": "Order Payment Timeout (Minutes)",
+      "paymentSlipAutoApprove": "Slip Auto-Approval",
+      "paymentTransferAccount": "Platform Transfer Account",
+      "payoutMinimumAmount": "Minimum Payout Amount",
+      "system": "System Setting"
+    },
+    "sheet": {
+      "actorLabel": "Actor",
+      "arrowChangedTo": "changed to",
+      "close": "Close",
+      "desc": "Activity details",
+      "goToRelatedPage": "Go to related page",
+      "ipLabel": "IP Address",
+      "logNumber": "Log #{id}",
+      "rawSystemSummary": "Original system message: {summary}",
+      "recordedDetails": "Recorded Details",
+      "systemAutomated": "System (Automated Job)",
+      "targetLabel": "Target",
+      "timeLabel": "Time",
+      "title": "Activity Details"
+    },
+    "summary": {
+      "actionsCount": "{count, plural, one {# action} other {# actions}}",
+      "adminActions": "Admin Actions",
+      "immutableDesc": "All events are written append-only. Admins cannot delete or modify them, ensuring an audit trail.",
+      "immutableTitle": "This log is immutable",
+      "importantEvents": "Important Events",
+      "loadError": "Failed to load summary",
+      "noAdminsToday": "No admin actions recorded today",
+      "systemJobs": "System Automation Jobs",
+      "todayTitle": "Today's Summary",
+      "topAdminsTitle": "Most Active Admins",
+      "totalEvents": "Total Events"
+    },
+    "target": {
+      "cardSet": "Card Set",
+      "catalogCategory": "Category",
+      "catalogProduct": "Product",
+      "catalogVariant": "Variant",
+      "commissionRule": "Commission Rule",
+      "game": "Game",
+      "gameAttribute": "Schema Attribute",
+      "job": "Automated Job",
+      "marketPricing": "Market Pricing",
+      "order": "Order",
+      "payment": "Payment",
+      "payout": "Payout",
+      "refund": "Refund",
+      "sellerVerification": "Store Application",
+      "setting": "Setting",
+      "systemSetting": "System Setting",
+      "user": "User"
+    },
+    "timeSuffix": " ICT",
+    "tone": {
+      "attention": "Notice",
+      "auto": "Automated",
+      "important": "Important",
+      "normal": "Normal"
+    },
+    "toolbar": {
+      "filterCategoryAria": "Filter by category",
+      "rangeAria": "Time range",
+      "searchAria": "Search in activity log",
+      "searchPlaceholder": "Search product name, code, log entry..."
+    },
+    "totalEventsCount": "Total {count} events",
+    "userStatus": {
+      "active": "Reactivated user account",
+      "deactivated": "Deactivated user account",
+      "suspended": "Suspended user account"
+    },
+    "value": {
+      "no": "No",
+      "yes": "Yes"
+    }
+  },
   "cardAttributes": {
     "categories": {
       "activeToggle": "Active: {name}",
@@ -834,6 +1046,48 @@
     "sortNewest": "Sort by: newest",
     "sortOldest": "Sort by: oldest"
   },
+  "metrics": {
+    "chart": {
+      "monthlySalesTitle": "Monthly Sales",
+      "noSales": "No sales during this period",
+      "noSalesThisMonth": "No sales yet this month",
+      "sealed": "Sealed Products",
+      "singles": "Single Cards"
+    },
+    "commission": {
+      "averageRate": "Average {rate}% of completed sales",
+      "noCompletedOrders": "No completed orders this month"
+    },
+    "delta": {
+      "new": "New"
+    },
+    "gameShare": {
+      "footnoteDesc": "Data from paid and non-cancelled orders",
+      "headline": "{game} holds {percent}% share",
+      "others": "Others",
+      "title": "Sales Share by Game",
+      "unspecified": "Unspecified Game"
+    },
+    "salesTrend": {
+      "defaultDesc": "Monthly Total Sales (THB)",
+      "rangeDesc": "Total Sales {range} (THB)"
+    },
+    "stat": {
+      "activeListings": "Active Listings",
+      "activeListingsFootnote": "Across {count} shops on platform",
+      "commission": "Commission Collected",
+      "commissionFootnoteWithPromo": "{note} · Pegasus code compensation {amount}",
+      "gmv": "Total Sales This Month",
+      "gmvFootnote": "Compared to {amount} last month",
+      "newSellers": "New Sellers",
+      "newSellersFootnote": "Identity verified"
+    },
+    "topSellers": {
+      "desc": "Ranked by sales for {monthYear}",
+      "noSales": "No stores with sales this month",
+      "title": "Top Selling Stores"
+    }
+  },
   "orders": {
     "alert": {
       "disputeHint": "Buyers requested returns; the money for these orders is held until it is resolved",
@@ -983,7 +1237,14 @@
       "newSellers": "New sellers",
       "promotionCost": "Promotion cost (Pegasus code subsidy)",
       "saleSubsidy": "Campaign discounts"
-    }
+    },
+    "exportReport": "Export Report",
+    "lastUpdated": " · Last updated at {time}",
+    "loadErrorTitle": "Failed to load platform overview",
+    "pageDesc": "Summary of performance and all activities on Pegasus TCG",
+    "pageTitle": "Platform Overview",
+    "systemSettings": "System Settings",
+    "systemSettingsNotAvailable": "System settings page not available yet"
   },
   "payments": {
     "approveFailed": "Could not approve",
@@ -1255,5 +1516,478 @@
       "ready": "Ready to transfer ({count})"
     },
     "title": "Buyer refunds"
+  },
+  "reviews": {
+    "empty": {
+      "noReviewsEver": "This seller has no reviews yet.",
+      "noReviewsInFilter": "No reviews in this filter.",
+      "searchPromptDesc": "Enter seller username and click \"Search Seller\"",
+      "searchPromptTitle": "Search for a seller to view reviews",
+      "sellerNotFoundDesc": "Please check the username again",
+      "sellerNotFoundTitle": "Seller \"{username}\" not found"
+    },
+    "filter": {
+      "all": "All",
+      "allReviews": "All Reviews",
+      "hidden": "Hidden",
+      "low": "1–2 Stars",
+      "unreplied": "Not Replied",
+      "visible": "Visible"
+    },
+    "loadMore": "Load More",
+    "moderationCard": {
+      "ariaLabel": "Review by {username}",
+      "hiddenNote": "Hidden from profile and excluded from rating.",
+      "sellerReply": "Seller Reply",
+      "showOnProfile": "Show on Profile",
+      "subOrder": "Not replied yet"
+    },
+    "pageDesc": "View all reviews for sellers including hidden ones · Hide inappropriate reviews from public profiles.",
+    "pageTitle": "Review Moderation",
+    "search": {
+      "inputAria": "Seller username",
+      "inputPlaceholder": "Seller username",
+      "submitButton": "Search Seller"
+    },
+    "sectionAria": "Review list",
+    "sectionTitle": "Reviews of {username} ({count})",
+    "sellerCard": {
+      "ariaLabel": "Seller Rating",
+      "fromReviews": "From {count} visible reviews",
+      "infoNote": "Rating includes only visible reviews · Moderating reviews recalculates immediately."
+    },
+    "skeletonAria": "Loading reviews",
+    "sortNewest": "Sort: Newest first",
+    "starsAria": "{rating} out of 5 stars",
+    "tablistAria": "Filter reviews",
+    "toast": {
+      "hideSuccess": "Review hidden.",
+      "showSuccess": "Review displayed on profile.",
+      "visibilityErrorTitle": "Hidden"
+    },
+    "viewPublicProfile": "View Public Profile"
+  },
+  "sellers": {
+    "bankBook": {
+      "alt": "Bankbook cover image attached by applicant",
+      "altFull": "Full-size bankbook cover image attached by applicant",
+      "clickToExpand": "Click to expand",
+      "dialogDesc": "Compare account name and number in image with applicant details.",
+      "dialogTitle": "Bankbook Cover Image",
+      "loadFailed": "Failed to load image",
+      "noImageAttached": "This application was submitted before bankbook uploads were enabled, so no image is attached.",
+      "requestingNewImage": "Requesting new image…"
+    },
+    "decision": {
+      "approveButton": "Approve Store",
+      "approvedBanner": "Approved — seller has been granted store permissions on the platform.",
+      "claiming": "Claiming application for review...",
+      "otherReviewingDesc": "Feel free to pick another application. Only take over if certain the reviewer has stopped.",
+      "otherReviewingTitle": "{reviewer} is currently reviewing this application",
+      "rejectButton": "Reject Application",
+      "rejectedReason": "Reason: {reason}",
+      "rejectedTitle": "Application Rejected",
+      "reviewResultDesc": "Verify account name matches legal name before approving — approval grants seller role immediately.",
+      "reviewResultTitle": "Review Result",
+      "submittedErrorFallback": "This application may have been claimed by another admin or decided. Try refreshing the queue.",
+      "takeOver": "Take Over"
+    },
+    "detail": {
+      "applicationMeta": "{appNumber} · Submitted {submittedAt}",
+      "bankAccountLabel": "Bank Account Number",
+      "bankBookLabel": "Bankbook Cover / Banking App Screenshot",
+      "bankLabel": "Bank",
+      "emptyPrompt": "Select an application from the queue on the left to view details and decide.",
+      "legalNameLabel": "Full Name (as on Account)",
+      "piiNotice": "Failed to claim application for review",
+      "reviewedAtLabel": "Reviewed At",
+      "reviewerAdminId": "Admin #{id}",
+      "reviewerLabel": "Reviewer (Admin)",
+      "reviewerYou": "You",
+      "sellerProfileIdLabel": "Seller Profile ID"
+    },
+    "pageDesc": "Verify identity and bank accounts before authorizing store openings on the platform.",
+    "pageTitle": "Seller Approvals",
+    "pagination": {
+      "pageIndicator": "Page {current} of {total}"
+    },
+    "queue": {
+      "adminReviewing": "Admin #{id} reviewing",
+      "emptyDesc": "When applications arrive, they will appear here sorted oldest first.",
+      "emptyTitle": "No applications in \"{status}\" status",
+      "loadErrorDesc": "Check your connection and try again",
+      "loadErrorTitle": "Failed to load application queue",
+      "sortOldest": "Sort: Oldest first",
+      "submittedAt": "Submitted {dateTime}",
+      "viewingBadge": "Viewing",
+      "youReviewing": "You are reviewing"
+    },
+    "rejectDialog": {
+      "confirmReject": "Confirm Rejection",
+      "desc": "Seller will see this reason in their application page and can resubmit later.",
+      "errorFallback": "Failed to reject application. Please try again.",
+      "reasonLabel": "Rejection Reason",
+      "reasonPlaceholder": "e.g. Account name does not match legal name. Please provide a bankbook matching your registered name.",
+      "successToast": "Application rejected.",
+      "title": "Reject Store Application"
+    },
+    "stats": {
+      "ariaLabel": "Filter applications by status"
+    },
+    "toast": {
+      "approveErrorTitle": "Approval Failed",
+      "approveSuccessDesc": "This seller now has store permissions on the platform.",
+      "approveSuccessTitle": "Approved",
+      "claimErrorFallback": "This application may have been claimed or decided. Try refreshing the queue.",
+      "claimErrorTitle": "Failed to claim application"
+    }
+  },
+  "users": {
+    "actions": {
+      "addAdmin": "Add Admin",
+      "deactivate": "Deactivate Account",
+      "exportCsv": "Export CSV",
+      "restore": "Reactivate Account",
+      "suspend": "Suspend Account"
+    },
+    "addAdmin": {
+      "alreadyAdmin": "Already an Admin",
+      "desc": "Search for existing accounts to grant Admin privileges (does not create new account).",
+      "failedTitle": "Action Failed",
+      "footerConfirmNext": "Proceed with \"Set as Admin\" confirmation.",
+      "grantedSuccess": "Granted Admin role to @{username}.",
+      "noMatchDesc": "User must register first before they can be assigned Admin role.",
+      "noMatchTitle": "No accounts matching \"{query}\"",
+      "radioGroupAria": "Select account to grant Admin role",
+      "searchAria": "Search account by email, username, or display name",
+      "searchFailed": "Search failed. Please try again.",
+      "searchPlaceholder": "Email, username, or display name",
+      "searchResultsCount": "Search results: {total} accounts · showing up to {max} items searched by email / username / display name",
+      "title": "Add Admin",
+      "typeToSearch": "Type to search · displaying up to {max} items"
+    },
+    "counts": {
+      "loading": "Counting accounts…",
+      "summary": "Total users: {total} · Sellers: {sellers} · Suspended: {suspended}"
+    },
+    "detail": {
+      "accountInfo": "Account Information",
+      "accountSection": "Account",
+      "accountStatusTitle": "Account Status",
+      "activateFirstToManageRoles": "Activate account first to manage roles",
+      "backToList": "Back to list",
+      "bannerDeactivatedDesc": "User cannot access the account until reactivated.",
+      "bannerDeactivatedTitle": "This account is deactivated",
+      "bannerSelfDesc": "Cannot change status or revoke admin role from yourself — edit profile settings on your profile page.",
+      "bannerSelfTitle": "This is your account",
+      "bannerSuspendedDesc": "User has been logged out and cannot sign in until reactivated.",
+      "bannerSuspendedTitle": "This account is suspended",
+      "bioEmpty": "No bio provided",
+      "bioSection": "Bio",
+      "btnDeactivate": "Deactivate Account…",
+      "btnRestore": "Reactivate Account…",
+      "btnSuspend": "Suspend Account…",
+      "cannotRemoveOwnAdmin": "Cannot remove your own ADMIN role",
+      "close": "Close",
+      "contactSection": "Contact Information",
+      "copiedEmail": "Email copied",
+      "copyEmailAria": "Copy email",
+      "copyFailed": "Failed to copy",
+      "emailLabel": "Email",
+      "googleLinked": "Connected via Google account",
+      "hasPassword": "Password configured (can log in with email + password)",
+      "isSelf": "(You)",
+      "lastLogin": "Last Login",
+      "lastLoginLabel": "Last Login",
+      "loadError": "Failed to load user details",
+      "manageButtonsDisabledSelf": "Management buttons are disabled for your own account",
+      "manageReviews": "Manage Reviews",
+      "manageRoles": "Manage Roles",
+      "manageRolesAction": "Manage Roles…",
+      "noReviewsYet": "No reviews yet",
+      "notFoundDesc": "The link may be outdated or the user ID is invalid.",
+      "notFoundTitle": "Account Not Found",
+      "passwordAuth": "Password Authentication",
+      "personalDataBadge": "Personal Data",
+      "phoneLabel": "Phone Number",
+      "phonePrivate": "Private",
+      "phonePublic": "Shown on storefront",
+      "registered": "Registered",
+      "registeredAtLabel": "Registered",
+      "registeredWithGoogle": "Registered with Google",
+      "reviewsCount": "({count} reviews)",
+      "rolesSection": "Roles",
+      "rolesTitle": "Roles ({count})",
+      "selfStatusLockHint": "This is your account — cannot change your own status.",
+      "sellerAccount": "Account Number",
+      "sellerBank": "Payout Bank",
+      "sellerHolder": "Account Holder",
+      "sellerName": "Store Name",
+      "sellerRating": "Average Rating",
+      "sellerSlug": "Store Slug",
+      "shopId": "Store ID: #{id}",
+      "shopInfoTitle": "Store Information (Seller Role)",
+      "statusCurrent": "Current Status",
+      "statusLabel": "Status",
+      "title": "User Details",
+      "userId": "User ID #{id}",
+      "viewPublicStore": "View Public Storefront"
+    },
+    "empty": {
+      "clearFilters": "Clear all filters",
+      "filteredDesc": "Try adjusting filters or search by email / username instead.",
+      "filteredTitle": "No users matching filters",
+      "unfilteredDesc": "Accounts will appear here when users register.",
+      "unfilteredTitle": "No users yet"
+    },
+    "error": {
+      "accessDenied": "Cannot change status or revoke admin role from your own account.",
+      "notFound": "Account not found — list refreshed automatically.",
+      "roleRequiresPassword": "Accounts authenticated only via Google cannot receive Admin or Support roles."
+    },
+    "lastLogin": {
+      "never": "Never logged in"
+    },
+    "menu": {
+      "deactivate": "Deactivate Account",
+      "manageRoles": "Manage Roles…",
+      "restore": "Reactivate Account",
+      "selfAccountHint": "This is your account — cannot change status or revoke admin role from yourself.",
+      "suspend": "Suspend Account",
+      "viewDetail": "View Details"
+    },
+    "pageSummary": "{total, plural, one {Showing {from}–{to} of # account} other {Showing {from}–{to} of # accounts}}",
+    "pageSummaryEmpty": "No accounts found",
+    "query": {
+      "errorMessage": "Network error or session expired — your search query remains in the URL.",
+      "errorTitle": "Failed to load user list"
+    },
+    "role": {
+      "admin": "Admin",
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "support": "Support Team"
+    },
+    "roles": {
+      "adminDesc": "Access all admin pages, approve sellers, adjust commission, and suspend users.",
+      "buyerDesc": "Assigned automatically upon registration",
+      "cannotRemoveOwnAdmin": "Cannot revoke admin privileges from your own account",
+      "changedBadge": "Modified",
+      "changedCount": "{count, plural, one {Changed # item} other {Changed # items}}",
+      "changedGrantConfirm": "{count, plural, one {Changed # item · Admin grant requires confirmation} other {Changed # items · Admin grant requires confirmation}}",
+      "changedRevokeConfirm": "{count, plural, one {Changed # item · Admin revoke requires confirmation} other {Changed # items · Admin revoke requires confirmation}}",
+      "confirmAdminAction": "Confirm: {action}",
+      "confirmAdminSubtitle": "{action} @{username}",
+      "confirmGrantDesc": "Will have access to all admin views, seller approvals, commission rules, and user suspensions. Takes effect next session.",
+      "confirmGrantTitle": "Set {name} as Admin?",
+      "confirmRevokeDesc": "Will lose back-office access. Takes effect on next session refresh.",
+      "confirmRevokeTitle": "Revoke Admin privileges from {name}?",
+      "defaultLocked": "Default",
+      "dialogDesc": "New roles take effect when user refreshes their session, not immediately.",
+      "dialogTitle": "Manage Roles: @{username}",
+      "failedTitle": "Action Failed",
+      "footerAdminConfirmNext": "Proceed with \"Admin Role\" confirmation.",
+      "footerRoleCount": "Will change {count} roles.",
+      "fromApprovalLocked": "Via Approval",
+      "grantAction": "Grant Admin",
+      "grantEffect1": "Only grant to verified and trusted team members.",
+      "grantEffect2": "Can be revoked later from \"Manage Roles\".",
+      "grantSuccess": "Granted Admin role to {name}.",
+      "multipleSuccess": "Updated roles for {name}.",
+      "noChanges": "No changes made",
+      "revokeAction": "Revoke Privileges",
+      "revokeSuccess": "Revoked Admin role from {name}.",
+      "saveSuccess": "Saved roles for {name}.",
+      "sellerDesc": "Granted via KYC on \"Seller Approvals\" page, not granted here.",
+      "supportDesc": "Support team role — granted/revoked on this page only.",
+      "supportGrantSuccess": "Granted Support role to {name}.",
+      "supportRevokeSuccess": "Revoked Support role from {name}."
+    },
+    "status": {
+      "active": "Active",
+      "deactivateConfirm": "Deactivate Account",
+      "deactivateDesc": "User will be logged out and cannot log in. For closed or unused accounts; can be restored later.",
+      "deactivateSaving": "Deactivating…",
+      "deactivateTitle": "Deactivate account {name}?",
+      "deactivated": "Deactivated",
+      "failedTitle": "Action Failed",
+      "restoreConfirm": "Reactivate",
+      "restoreDesc": "User will be able to sign in and use the platform normally.",
+      "restoreSaving": "Reactivating…",
+      "restoreTitle": "Reactivate {name}?",
+      "successToast": "@{username} is now {status}.",
+      "suspendConfirm": "Suspend Account",
+      "suspendDesc": "User will be logged out on all devices within minutes and unable to sign in until reactivated.",
+      "suspendEffect1": "Revokes all refresh tokens for this account immediately.",
+      "suspendEffect2": "Existing listings and orders are not deleted.",
+      "suspendEffect3": "Can be reactivated later from the ⋯ menu.",
+      "suspendSaving": "Suspending…",
+      "suspendTitle": "Suspend account {name}?",
+      "suspended": "Suspended"
+    },
+    "table": {
+      "created": "Registered",
+      "lastLogin": "Last Login",
+      "moreOptions": "More options",
+      "moreOptionsAria": "More options: {username}",
+      "paginationAria": "Pagination",
+      "roles": "Roles",
+      "skeletonAria": "Loading user list",
+      "status": "Status",
+      "user": "User",
+      "viewDetailAria": "View details: {username}",
+      "you": "(You)"
+    },
+    "title": "User Management",
+    "toolbar": {
+      "activeFilters": "Active filters:",
+      "allRoles": "Roles: All",
+      "allStatuses": "Status: All",
+      "clearAll": "Clear all",
+      "removeFilterAria": "Remove filter: {label}",
+      "roleFilterAria": "Filter by role",
+      "searchAria": "Search username or email",
+      "searchChip": "Search: {q}",
+      "searchPlaceholder": "Search username, display name, email...",
+      "statusFilterAria": "Filter by status"
+    }
+  },
+  "verification": {
+    "dateTime": "{date} · {time}",
+    "error": {
+      "alreadyDecided": "Another admin has already claimed or decided on this application. The queue will update automatically.",
+      "bankAccountAlreadyUsed": "This bank account is already linked to another approved store. Please reject this application and ask the seller to re-apply with their own account.",
+      "notFound": "Application not found."
+    },
+    "status": {
+      "approved": "Approved",
+      "approvedShort": "Approved",
+      "rejected": "Rejected",
+      "rejectedShort": "Rejected",
+      "submitted": "Pending Review",
+      "submittedShort": "Pending",
+      "underReview": "Under Review",
+      "underReviewShort": "Reviewing"
+    },
+    "timeSuffix": " ICT",
+    "validation": {
+      "reasonMax": "Reason must not exceed 255 characters.",
+      "reasonRequired": "Specify rejection reason so seller knows what to correct."
+    }
+  },
+  "weeklyReport": {
+    "chart": {
+      "gameShareTitle": "Stock & Profit Share by Game",
+      "leaderShareNote": "{game} holds highest market share {percentage} · based on completed orders",
+      "noGameShare": "No game share data for this week",
+      "other": "Others",
+      "sealed": "Sealed Products",
+      "singles": "Single Cards",
+      "trendDescription": "Showing 7-day sales of selected week (THB)",
+      "trendTitle": "Daily Stock & Profit Trend (Mon - Sun)"
+    },
+    "empty": {
+      "backToCurrent": "Back to current week",
+      "desc": "No completed orders or stock entries during this time. Please select another week or change game filter.",
+      "title": "No stock or profit movements found for the selected week"
+    },
+    "export": {
+      "categoryLabel": "Category",
+      "csvHint": "Suitable for database import or Google Sheets",
+      "datasetBreakdown": "Include table breakdown by game and product type",
+      "datasetKpi": "Include weekly KPI summary",
+      "datasetLabel": "Datasets to Include",
+      "datasetRequired": "Select at least 1 dataset",
+      "errorToastDesc": "Please try again",
+      "errorToastTitle": "Failed to export report",
+      "formatLabel": "File Format",
+      "generating": "Generating file...",
+      "itemCountLabel": "Number of Items",
+      "itemCountValue": "{count} categories (total sales {total})",
+      "periodLabel": "Period",
+      "submit": "Download Report",
+      "successToast": "Report downloaded successfully.",
+      "title": "Export Weekly Stock & Profit Report",
+      "xlsxHint": "Open directly in Microsoft Excel"
+    },
+    "exportReport": "Export Report",
+    "filter": {
+      "allGames": "All Games",
+      "currentWeek": "Current Week",
+      "customWeek": "Custom week range...",
+      "nextWeekNoData": "Next Week (No data)",
+      "previousWeek": "Previous Week",
+      "twoWeeksAgo": "2 Weeks Ago"
+    },
+    "lastUpdated": " · Last updated at {time}",
+    "loadError": "Failed to load weekly report",
+    "productType": {
+      "other": "Other",
+      "sealed": "Sealed Product",
+      "singleCard": "Single Card"
+    },
+    "settings": {
+      "fastMovingBadge": "Fast-Moving Stock",
+      "fastMovingLabel": "Fast-Moving Stock Threshold (weekly sales > %)",
+      "loadError": "Failed to load report thresholds",
+      "lowStockLabel": "Low Stock Alert Threshold (pieces)",
+      "saveButton": "Save Settings",
+      "saveErrorTitle": "Failed to save settings",
+      "saveSuccess": "Settings saved successfully.",
+      "saving": "Saving...",
+      "standardCommissionHint": "Referenced from commission rule system",
+      "standardCommissionLabel": "Standard Commission Rate (%)",
+      "title": "Stock & Profit Report Threshold Settings"
+    },
+    "stat": {
+      "avgShare": "Averaging",
+      "commission": "Commission Collected",
+      "commissionFootnote": "{prefix} {share}% of weekly sales",
+      "gmv": "Weekly Total Sales",
+      "gmvFootnote": "From {count} completed orders",
+      "isShare": "Equal to",
+      "netProfit": "Net Profit This Week",
+      "netProfitFootnote": "Platform commission revenue",
+      "netProfitFootnoteCompared": "Platform commission revenue (vs {amount} last week)",
+      "netProfitNoOrders": "No order items in selected week",
+      "stock": "Active Available Stock",
+      "stockOther": "Others: {count}",
+      "stockSealed": "Sealed: {count}",
+      "stockSingles": "Single Cards: {count}"
+    },
+    "stockStatus": {
+      "fastMoving": "Fast-Moving Stock",
+      "lowStock": "Low Stock",
+      "normal": "Normal"
+    },
+    "subtitle": "Summary of inventory movement and net profits weekly on Pegasus TCG",
+    "systemSettings": "System Settings",
+    "table": {
+      "gameCategory": "Game Category",
+      "gmv": "Total GMV",
+      "initialStock": "Initial Stock",
+      "netProfit": "Net Profit",
+      "productType": "Product Type",
+      "remainingStock": "Remaining Stock",
+      "soldCount": "Sold This Week",
+      "stockStatus": "Stock Status",
+      "title": "Stock & Profit Summary by Game and Product Type",
+      "totalAll": "Grand Total"
+    },
+    "title": "Weekly Stock & Profit Report",
+    "validation": {
+      "fastMovingPercent": "Enter percentage as an integer from 1 to 100.",
+      "lowStockThreshold": "Enter unit quantity as an integer 0 or greater."
+    },
+    "weekday": {
+      "fri": "Fri",
+      "mon": "Mon",
+      "sat": "Sat",
+      "sun": "Sun",
+      "thu": "Thu",
+      "tue": "Tue",
+      "wed": "Wed"
+    },
+    "weekNumber": "Week of {range}"
   }
 }

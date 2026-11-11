@@ -136,3 +136,7 @@
     scrollbar-gutter: stable;
     }
 }
+
+/* TCG-561: uppercase / letter-spacing only suit Latin text — turn them off while the page is Thai */
+:lang(th) .uppercase { text-transform: none; }
+:lang(th) [class*="tracking-"] { letter-spacing: normal; }
