@@ -178,12 +178,12 @@ describe('Core Account Orders Flow', () => {
     // Click View Details to open modal
     cy.contains('button', 'ดูรายละเอียด').click();
 
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('be.visible');
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('be.visible');
     cy.contains('123 Sukhumvit Road').should('be.visible');
 
     // Close details modal
     cy.get('button[aria-label="ปิด"]').click();
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('not.exist');
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('not.exist');
   });
 
   it('cancels a pending order with confirmation', () => {
@@ -286,7 +286,7 @@ describe('Core Account Orders Flow', () => {
     cy.wait('@getCompletedOrders');
 
     cy.contains('button', 'ดูรายละเอียด').click();
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('be.visible');
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('be.visible');
     cy.wait('@getMyReview');
 
     cy.contains('h4', 'รีวิวผู้ขาย').scrollIntoView().should('be.visible');

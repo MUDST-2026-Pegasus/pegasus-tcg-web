@@ -174,7 +174,7 @@ describe('Core Payment & Checkout Flow', () => {
     cy.contains('THB 1,050.00').should('be.visible');
 
     // Link to order history
-    cy.contains('a', 'View Order Details')
+    cy.contains('a', 'ดูรายละเอียดคำสั่งซื้อ')
       .should('be.visible')
       .should('have.attr', 'href', '/account/orders?orderId=101');
   });

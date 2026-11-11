@@ -226,7 +226,7 @@ describe('Authentication Flow', () => {
       cy.wait('@googleAuthError');
 
       cy.contains('กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน').should('be.visible');
-      cy.contains("An account with this email already exists and can't be linked to Google automatically.").should('be.visible');
+      cy.contains("มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว และผูกกับ Google อัตโนมัติไม่ได้").should('be.visible');
     });
   });
 });

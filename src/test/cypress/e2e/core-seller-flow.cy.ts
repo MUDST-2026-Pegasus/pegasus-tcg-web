@@ -213,9 +213,9 @@ describe('Core Seller Portal Flow', () => {
 
     // Sidebar navigation checks
     cy.get('[data-slot="sidebar"]').should('be.visible');
-    cy.contains('แดชบอร์ด').should('be.visible');
+    cy.contains('DASHBOARD').should('be.visible');
     cy.contains('SELLER').should('be.visible');
-    cy.contains('แดชบอร์ด').should('be.visible');
+    cy.contains('DASHBOARD').should('be.visible');
     cy.contains('จัดการสินค้า').should('be.visible');
     cy.contains('จัดการร้านค้า').should('be.visible');
 

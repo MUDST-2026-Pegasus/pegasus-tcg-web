@@ -26,7 +26,7 @@ describe('Core Legal and About Pages Flow', () => {
     cy.visit('/terms-of-service');
 
     cy.contains('LEGAL CENTER').should('be.visible');
-    cy.contains('h1', 'ข้อกำหนดการใช้บริการ').should('be.visible');
+    cy.contains('h1', 'Terms of Service').should('be.visible');
 
     // Key clauses
     cy.contains('Introduction').should('be.visible');
@@ -44,7 +44,7 @@ describe('Core Legal and About Pages Flow', () => {
   it('renders privacy policy with data protection sections', () => {
     cy.visit('/privacy-policy');
 
-    cy.contains('h1', 'นโยบายความเป็นส่วนตัว').should('be.visible');
+    cy.contains('h1', 'Privacy Policy').should('be.visible');
     cy.contains('Information We Collect').should('be.visible');
     cy.contains('How We Use Your Information').should('be.visible');
     cy.contains('Information Sharing').should('be.visible');
@@ -58,12 +58,12 @@ describe('Core Legal and About Pages Flow', () => {
     cy.get('footer').scrollIntoView();
     cy.get('footer').contains('a', 'Terms of Service').click();
     cy.url().should('include', '/terms-of-service');
-    cy.contains('h1', 'ข้อกำหนดการใช้บริการ').should('be.visible');
+    cy.contains('h1', 'Terms of Service').should('be.visible');
 
     cy.get('footer').scrollIntoView();
     cy.get('footer').contains('a', 'Privacy Policy').click();
     cy.url().should('include', '/privacy-policy');
-    cy.contains('h1', 'นโยบายความเป็นส่วนตัว').should('be.visible');
+    cy.contains('h1', 'Privacy Policy').should('be.visible');
   });
 
   it('renders 404 Not Found page on unknown routes and navigates back', () => {

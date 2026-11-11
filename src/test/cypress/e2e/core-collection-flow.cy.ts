@@ -92,7 +92,7 @@ describe('Core Collection Management Flow', () => {
 
     // Heading & card count
     cy.contains('h1', 'คอลเลกชันของฉัน').should('be.visible');
-    cy.contains('2 cards in your collection.').should('be.visible');
+    cy.contains('มีการ์ด 2 ใบในคอลเลกชัน').should('be.visible');
 
     // Cards
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
@@ -140,7 +140,7 @@ describe('Core Collection Management Flow', () => {
     cy.contains('Dark Magician').should('be.visible');
 
     // Click trash button on Dark Magician
-    cy.get('button[aria-label="Remove Dark Magician"]').click();
+    cy.get('button[aria-label="นำ Dark Magician ออก"]').click();
 
     // Confirm alert dialog appears
     cy.contains('นำการ์ดออก?').should('be.visible');
@@ -151,7 +151,7 @@ describe('Core Collection Management Flow', () => {
 
     // Dark Magician should disappear and total items update
     cy.contains('Dark Magician').should('not.exist');
-    cy.contains('1 cards in your collection.').should('be.visible');
+    cy.contains('มีการ์ด 1 ใบในคอลเลกชัน').should('be.visible');
   });
 
   it('renders public user collection showcase at /users/:username', () => {
@@ -184,7 +184,7 @@ describe('Core Collection Management Flow', () => {
 
     cy.wait('@getPublicCollection');
     cy.contains('@collector_pro').should('be.visible');
-    cy.contains('1 cards').should('be.visible');
+    cy.contains('1 ใบ').should('be.visible');
     cy.contains('การ์ดเด่นในคอลเลกชัน').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
@@ -208,7 +208,7 @@ describe('Core Collection Management Flow', () => {
 
     cy.wait('@getCollectorCollection');
     cy.contains('@collector_pro').should('be.visible');
-    cy.contains('1 card').should('be.visible');
+    cy.contains('1 ใบ').should('be.visible');
     cy.contains('การ์ดเด่นในคอลเลกชัน').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });

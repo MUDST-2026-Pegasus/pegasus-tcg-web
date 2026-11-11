@@ -124,7 +124,7 @@ describe('Core Search & Navigation Flow', () => {
 
     // Verify search page contents
     cy.contains('สินค้าทั้งหมด').should('be.visible');
-    cy.contains('2 results').should('be.visible');
+    cy.contains('2 รายการ').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Yu-Gi-Oh!').should('be.visible');

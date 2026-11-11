@@ -142,7 +142,7 @@ describe('Core Account Addresses Flow', () => {
     cy.get('input#postalCode').type('10120');
 
     // Click Add Address
-    cy.contains('button', /เพิ่มที่อยู่/i).click();
+    cy.contains('button', /^เพิ่มที่อยู่$/).click();
 
     cy.wait('@createAddress');
 
