@@ -1,0 +1,8 @@
+{
+  "gitleaks": "8.21.2",
+  "semgrep": "1.99.0",
+  "trivy": "0.58.1",
+  "zapImage": "ghcr.io/zaproxy/zaproxy:2.16.0",
+  "timeoutSeconds": 900,
+  "targetTimeoutSeconds": 5
+}

@@ -117,4 +117,12 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 - Seeded and removed `tcg753-phase1-seedcheck` (25 synthetic rows); setup and cleanup both **Pass**. An attempted public `https://example.com` seed target was rejected with exit code 1, confirming the default allowlist.
 - Seed/cleanup perform local filesystem operations only; there is no API or database seed. For an external process the runner timeout is explicit; local seed/cleanup are synchronous bounded filesystem operations.
 
+### Phase 3 — security and privacy
+
+- Added pinned scanner runner `scripts/nfr/security/run-scans.mjs`: Gitleaks `8.21.2`, Semgrep `1.99.0`, Trivy `0.58.1`, and ZAP image `ghcr.io/zaproxy/zaproxy:2.16.0`. Each host scan has a 900 s timeout; ZAP is target-guarded and runs a 5-minute baseline scan. Raw JSON goes only to ignored `artifacts/nfr/<run-id>/security/`.
+- Added `scripts/nfr/security/attack-probes.mjs`, loopback-only with a 5 s per-request timeout. It checks anonymous profile/seller/admin access, injection/XSS query handling, actuator/metrics/Swagger/debug exposure, CORS, basic response headers, and obvious token/secret leakage. It records response bodies by byte count only, never their contents.
+- Scanner run: **Blocked** for all four tools: Gitleaks, Semgrep, and Trivy executables are not installed; Docker daemon is unavailable for pinned ZAP. Evidence: `artifacts/nfr/tcg753-security-local/security/scan-run.json` (ignored runtime artifact).
+- Attack probes: all 9 local requests **Blocked** because API `127.0.0.1:8080` refused/unavailable. Cross-user IDOR, JWT replay/refresh, CSRF, upload/KYC/payment-slip ownership, mass assignment, oversized payload, and rate-limit checks are **Blocked** pending explicitly disposable local accounts/entity IDs; no destructive probe was sent. Evidence: `artifacts/nfr/tcg753-attacks-local/security/attack-probes.json`.
+- Findings: no security pass/fail conclusion can be made without the tools and backend. No secrets or PII were emitted by the probe report. Static scanner findings are **Not Run**, not zero findings.
+
 No application defect has been validated in this phase. NFR execution gaps are environment blockers, not passes: API unavailable; no disposable DB/MinIO/JVM; Docker daemon unavailable; NFR runner binaries not installed. Further findings and evidence will be appended phase by phase. Secrets or unredacted PII must not be committed; raw scanner output stays under ignored `artifacts/nfr/`.
