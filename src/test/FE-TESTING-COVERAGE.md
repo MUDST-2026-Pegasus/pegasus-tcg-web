@@ -146,3 +146,18 @@ Against the reported starting figures (595/800 statements for cart components an
 | `pnpm build` | Passed: TypeScript and Vite production build; 5,596 modules transformed. |
 
 The machine's `pnpm` shim was missing, so the equivalent commands were run with `corepack pnpm@10.18.3`. No production code or coverage configuration was changed.
+
+## TCG-767 focused coverage follow-up (2026-11-11)
+
+Added tests only for promotion API wrappers, seller return actions, seller product stock indicators, and catalog product detail presentation. Product code and coverage configuration were not changed.
+
+| Target folder | Statements | Branches | Functions | Lines |
+| --- | ---: | ---: | ---: | ---: |
+| `features/promotions` | 80.64% (621/770), up from 79.87% | 72.70% (642/883), up from 72.48% | 88.18% (112/127) | 91.70% (398/434) |
+| `features/finance/seller-returns` | 83.46% (212/254), up from 75.98% | 60.77% (141/232), up from 57.32% | 68.00% (34/50), up from 52.00% | 90.60% (164/181) |
+| `features/seller/products/components` | 83.21% (734/882), up from 81.29% | 75.77% (613/809), up from 74.16% | 68.06% (81/119), unchanged | 87.92% (488/555) |
+| `features/catalog/components` | 40.85% (192/470), up from 37.02% | 27.38% (152/555), up from 22.70% | 50.00% (17/34) | 39.91% (95/238) |
+
+`claim.api.test.ts` covers featured/shop/terms requests, encoded paths, optional claim source, claim-by-code and wallet query filters. `useReturnActions.test.tsx` exercises return draft merging, approval/rejection/receipt actions, no-modal guards, API failure toast and busy-state cleanup. `ProductTable.test.tsx` covers out-of-stock, low-stock and healthy stock indicators. `ProductDetailSections.test.tsx` covers image fallback/gallery selection, missing attributes, and card-effects loading/error/retry/empty/detail states; `ProductDetailCart.test.tsx` checks skipping an out-of-stock listing and enforcing the selected seller's stock maximum.
+
+The full silent V8 coverage run passed 195 files / 1,339 tests. Overall coverage was 62.96% statements (28,097/44,622), 56.32% branches (24,389/43,298), 58.76% functions (3,466/5,898), and 69.01% lines (18,190/26,356). Focused tests passed 5 files / 23 tests. Lint passed with 0 errors and the existing React Compiler warning at `EditProfileDialog.tsx:96`. Build and typecheck passed after aligning the wallet test fixture with the `WalletTab` enum.
