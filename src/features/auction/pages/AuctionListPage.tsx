@@ -97,7 +97,7 @@ export function AuctionListPage() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-[21px] pt-8 pb-14 xl:px-[64px]">
         <Breadcrumb>
           <BreadcrumbList className="text-[12px]">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("breadcrumb.home", "หน้าแรก")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{t("buyer.auctionListPage.text", "ประมูล")}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>

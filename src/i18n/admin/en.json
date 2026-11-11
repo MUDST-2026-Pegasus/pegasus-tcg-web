@@ -535,7 +535,8 @@
       "close": "Close",
       "description": "Description",
       "optional": "Optional",
-      "save": "Save"
+      "save": "Save",
+      "slug": "Slug"
     },
     "games": {
       "activeCount": "{count} active games",
@@ -660,7 +661,8 @@
         "shopCount": "{count} shops",
         "shops": "Shops selling"
       },
-      "unblock": "Lift suspension"
+      "unblock": "Lift suspension",
+      "variant": "Variant"
     },
     "page": {
       "addProduct": "+ Add new card",
@@ -673,6 +675,9 @@
     "pagination": {
       "label": "Change page",
       "page": "Page {page} of {last}"
+    },
+    "product": {
+      "tabEffects": "Abilities & Attacks"
     },
     "productForm": {
       "activeHint": "Active — when off, buyers cannot find it and sellers cannot list more",
@@ -799,6 +804,10 @@
       "slugMax": "Slug must be at most {max} characters",
       "slugPattern": "Only lowercase a-z, digits and hyphens (-) are allowed",
       "sourceUrlMax": "Link must be at most {max} characters"
+    },
+    "variant": {
+      "edition": "Edition",
+      "finish": "Finish"
     },
     "variants": {
       "activeHint": "Active — when off, sellers cannot list more of this variant",
@@ -1979,6 +1988,7 @@
       "fastMovingPercent": "Enter percentage as an integer from 1 to 100.",
       "lowStockThreshold": "Enter unit quantity as an integer 0 or greater."
     },
+    "weekNumber": "Week of {range}",
     "weekday": {
       "fri": "Fri",
       "mon": "Mon",
@@ -1987,7 +1997,6 @@
       "thu": "Thu",
       "tue": "Tue",
       "wed": "Wed"
-    },
-    "weekNumber": "Week of {range}"
+    }
   }
 }

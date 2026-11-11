@@ -244,6 +244,7 @@
         "weeklyReport": "รายงานสต็อก/กำไรรายสัปดาห์"
       }
     },
+    "dashboardTitle": "แดชบอร์ด",
     "seller": {
       "groups": {
         "finance": "การเงิน",

@@ -167,6 +167,9 @@
       "title": "Could not suspend the auction"
     }
   },
+  "breadcrumb": {
+    "home": "Home"
+  },
   "buyer": {
     "auctionCard": {
       "text": "Buy now"
@@ -463,6 +466,12 @@
       "title": "Banned from bidding until {value}",
       "title2": "You did not pay in time ({unpaidStrikes}/{strikeLimit})"
     }
+  },
+  "detail": {
+    "attacksTitle": "Attacks"
+  },
+  "myAuctions": {
+    "auctionLabel": "AUCTION"
   },
   "seller": {
     "auctionFormSchema": {

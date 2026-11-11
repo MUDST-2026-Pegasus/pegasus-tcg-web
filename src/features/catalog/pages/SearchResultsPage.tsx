@@ -281,7 +281,7 @@ export function SearchResultsPage() {
           </p>
           {data?.correctedQuery && !waiting ? (
             <p className="text-sm text-primary" aria-live="polite">
-              Showing results for “{data.correctedQuery}” · You searched “{filters.q}”
+              {t("search.corrected", "แสดงผลลัพธ์ของ “{corrected}” · คุณค้นหา “{query}”", { corrected: data.correctedQuery, query: filters.q ?? "" })}
             </p>
           ) : null}
         </header>
