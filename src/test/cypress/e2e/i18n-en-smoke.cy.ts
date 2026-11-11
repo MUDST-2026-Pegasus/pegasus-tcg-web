@@ -3,14 +3,6 @@
 // Thai letters only — ฿ (U+0E3F) is the currency sign and stays in English too
 const THAI = /[฀-฾เ-๿]/;
 
-// DB content (category names, banners, product names) is out of scope [TCG-560] — blank its Thai so only UI text is checked
-function scrub(v: unknown): unknown {
-  if (typeof v === "string") return THAI.test(v) ? "db" : v;
-  if (Array.isArray(v)) return v.map(scrub);
-  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, scrub(x)]));
-  return v;
-}
-
 const visitEn = (path: string) =>
   cy.visit(path, {
     onBeforeLoad(win) {
@@ -33,11 +25,8 @@ describe("i18n EN smoke [TCG-561]", () => {
   beforeEach(() => {
     // guest — no backend needed for the session bootstrap
     cy.intercept("POST", "**/api/v1/auth/refresh", { statusCode: 401, body: { success: false } });
-    cy.intercept({ method: "GET", url: "**/api/**" }, (req) => {
-      req.continue((res) => {
-        if (res.body && typeof res.body === "object") res.body = scrub(res.body);
-      });
-    });
+    // no backend: API calls fail, so pages show their own empty / error states (UI text). DB content is out of scope [TCG-560]
+    cy.intercept("GET", "**/api/v1/**", { statusCode: 503, body: { success: false } });
   });
 
   it("keeps English after reload", () => {
