@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -64,6 +65,7 @@ export function UserDetailSheet({
   onStatusAction,
   onManageRoles,
 }: UserDetailSheetProps) {
+  const { t } = useTranslate("admin");
   const detail = useAdminUser(userId, preview);
 
   return (
@@ -79,9 +81,13 @@ export function UserDetailSheet({
       >
         <header className="flex items-center border-b border-muted py-[18px] pr-4 pl-6">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <SheetTitle className="text-[15px] font-bold text-foreground">รายละเอียดผู้ใช้</SheetTitle>
+            <SheetTitle className="text-[15px] font-bold text-foreground">
+              {t("users.detail.title", "รายละเอียดผู้ใช้")}
+            </SheetTitle>
             <SheetDescription className={cn("text-[11px] text-[#9aa5ad]", !detail.data && "sr-only")}>
-              {detail.data ? `รหัสผู้ใช้ #${detail.data.id}` : "ข้อมูลบัญชีผู้ใช้"}
+              {detail.data
+                ? t("users.detail.userId", "รหัสผู้ใช้ #{id}", { id: detail.data.id })
+                : t("users.detail.accountInfo", "ข้อมูลบัญชีผู้ใช้")}
             </SheetDescription>
           </div>
           <SheetClose
@@ -89,7 +95,7 @@ export function UserDetailSheet({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="ปิด"
+                aria-label={t("users.detail.close", "ปิด")}
                 className="size-7 rounded-[7px] text-muted-foreground"
               />
             }
@@ -114,7 +120,7 @@ export function UserDetailSheet({
           <div className="flex flex-1 items-center p-6">
             <ErrorState
               error={detail.error}
-              title="โหลดข้อมูลผู้ใช้ไม่สำเร็จ"
+              title={t("users.detail.loadError", "โหลดข้อมูลผู้ใช้ไม่สำเร็จ")}
               onRetry={() => void detail.refetch()}
               className="min-h-0 border-0"
             />
@@ -133,13 +139,14 @@ type UserDetailBodyProps = {
 };
 
 function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDetailBodyProps) {
+  const { t } = useTranslate("admin");
   const isSeller = user.roles.includes("SELLER");
 
   function copyEmail() {
     navigator.clipboard
       .writeText(user.email)
-      .then(() => toast.add({ type: "success", title: "คัดลอกอีเมลแล้ว" }))
-      .catch(() => toast.add({ type: "error", title: "คัดลอกไม่สำเร็จ" }));
+      .then(() => toast.add({ type: "success", title: t("users.detail.copiedEmail", "คัดลอกอีเมลแล้ว") }))
+      .catch(() => toast.add({ type: "error", title: t("users.detail.copyFailed", "คัดลอกไม่สำเร็จ") }));
   }
 
   return (
@@ -156,7 +163,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           <div className="flex min-w-0 flex-col gap-1">
             <p className="flex items-center gap-1.5">
               <span className="truncate text-[17px] font-bold text-foreground">{user.displayName}</span>
-              {isSelf ? <span className="text-[11px] font-medium text-[#0058bc]">(คุณ)</span> : null}
+              {isSelf ? <span className="text-[11px] font-medium text-[#0058bc]">{t("users.detail.isSelf", "(คุณ)")}</span> : null}
             </p>
             <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
             <div className="flex flex-wrap items-center gap-1">
@@ -170,49 +177,49 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           <Banner
             tone="info"
             icon={<Info />}
-            title="นี่คือบัญชีของคุณ"
-            description="เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้ — แก้ข้อมูลส่วนตัวที่หน้าโปรไฟล์"
+            title={t("users.detail.bannerSelfTitle", "นี่คือบัญชีของคุณ")}
+            description={t("users.detail.bannerSelfDesc", "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้ — แก้ข้อมูลส่วนตัวที่หน้าโปรไฟล์")}
           />
         ) : user.status === "SUSPENDED" ? (
           <Banner
             tone="danger"
             icon={<CircleX />}
-            title="บัญชีนี้ถูกระงับ"
-            description="ผู้ใช้ถูกออกจากระบบแล้วและเข้าสู่ระบบไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง"
+            title={t("users.detail.bannerSuspendedTitle", "บัญชีนี้ถูกระงับ")}
+            description={t("users.detail.bannerSuspendedDesc", "ผู้ใช้ถูกออกจากระบบแล้วและเข้าสู่ระบบไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง")}
           />
         ) : user.status === "DEACTIVATED" ? (
           <Banner
             tone="muted"
             icon={<UserX />}
-            title="บัญชีนี้ถูกปิดแล้ว"
-            description="ผู้ใช้เข้าใช้ไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง"
+            title={t("users.detail.bannerDeactivatedTitle", "บัญชีนี้ถูกปิดแล้ว")}
+            description={t("users.detail.bannerDeactivatedDesc", "ผู้ใช้เข้าใช้ไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง")}
           />
         ) : null}
 
         <Section
-          title="ข้อมูลติดต่อ"
+          title={t("users.detail.contactSection", "ข้อมูลติดต่อ")}
           aside={
             <span className="rounded-full bg-[#fdf1e3] px-2 py-[3px] text-[10px] font-medium text-[#c2620a]">
-              ข้อมูลส่วนบุคคล
+              {t("users.detail.personalDataBadge", "ข้อมูลส่วนบุคคล")}
             </span>
           }
         >
-          <Row label="อีเมล">
+          <Row label={t("users.detail.emailLabel", "อีเมล")}>
             <span className="truncate">{user.email}</span>
             <button
               type="button"
-              aria-label="คัดลอกอีเมล"
+              aria-label={t("users.detail.copyEmailAria", "คัดลอกอีเมล")}
               onClick={copyEmail}
               className="shrink-0 rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               <Copy aria-hidden="true" className="size-[13px]" />
             </button>
           </Row>
-          <Row label="เบอร์โทร">
+          <Row label={t("users.detail.phoneLabel", "เบอร์โทร")}>
             <span>{formatPhone(user.phone)}</span>
             {user.phone ? (
               <span className="shrink-0 rounded-full bg-[#f1f3f4] px-2 py-[3px] text-[10px] font-medium text-muted-foreground">
-                {user.phonePublic ? "แสดงบนหน้าร้าน" : "ไม่แสดงต่อสาธารณะ"}
+                {user.phonePublic ? t("users.detail.phonePublic", "แสดงบนหน้าร้าน") : t("users.detail.phonePrivate", "ไม่แสดงต่อสาธารณะ")}
               </span>
             ) : null}
           </Row>
@@ -220,40 +227,40 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
 
         <Divider />
 
-        <Section title="บัญชี">
-          <Row label="สมัครเมื่อ">{formatThaiDate(user.createdAt)}</Row>
-          <Row label="เข้าใช้ล่าสุด">{formatLastLogin(user.lastLoginAt)}</Row>
+        <Section title={t("users.detail.accountSection", "บัญชี")}>
+          <Row label={t("users.detail.registeredAtLabel", "สมัครเมื่อ")}>{formatThaiDate(user.createdAt)}</Row>
+          <Row label={t("users.detail.lastLoginLabel", "เข้าใช้ล่าสุด")}>{formatLastLogin(user.lastLoginAt)}</Row>
           {user.status === "ACTIVE" && !isSelf ? (
-            <Row label="สถานะ">{USER_STATUS_LABEL[user.status]}</Row>
+            <Row label={t("users.detail.statusLabel", "สถานะ")}>{USER_STATUS_LABEL[user.status]}</Row>
           ) : null}
         </Section>
 
         <Divider />
 
-        <Section title="แนะนำตัว">
+        <Section title={t("users.detail.bioSection", "แนะนำตัว")}>
           {user.bio ? (
             <p className="text-xs leading-[18px] whitespace-pre-line text-[#414755]">{user.bio}</p>
           ) : (
-            <p className="text-xs leading-[18px] text-[#9aa5ad]">ยังไม่ได้เขียนแนะนำตัว</p>
+            <p className="text-xs leading-[18px] text-[#9aa5ad]">{t("users.detail.bioEmpty", "ยังไม่ได้เขียนแนะนำตัว")}</p>
           )}
         </Section>
 
         <Divider />
 
         <Section
-          title="บทบาท"
+          title={t("users.detail.rolesSection", "บทบาท")}
           aside={
             isSelf ? (
-              <span className="text-[11px] font-medium text-[#9aa5ad]">ถอน ADMIN ตัวเองไม่ได้</span>
+              <span className="text-[11px] font-medium text-[#9aa5ad]">{t("users.detail.cannotRemoveOwnAdmin", "ถอน ADMIN ตัวเองไม่ได้")}</span>
             ) : user.status === "DEACTIVATED" ? (
-              <span className="text-[11px] font-medium text-[#9aa5ad]">เปิดใช้งานก่อนจึงจัดการบทบาทได้</span>
+              <span className="text-[11px] font-medium text-[#9aa5ad]">{t("users.detail.activateFirstToManageRoles", "เปิดใช้งานก่อนจึงจัดการบทบาทได้")}</span>
             ) : (
               <button
                 type="button"
                 onClick={() => onManageRoles(user)}
                 className="rounded-sm text-[11px] font-medium text-[#0058bc] hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
-                จัดการบทบาท…
+                {t("users.detail.manageRolesAction", "จัดการบทบาท…")}
               </button>
             )
           }
@@ -270,7 +277,7 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
           >
             <Store aria-hidden="true" className="size-4 text-[#0d9488]" />
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-xs font-medium text-foreground">ดูหน้าร้านสาธารณะ</span>
+              <span className="text-xs font-medium text-foreground">{t("users.detail.viewPublicStore", "ดูหน้าร้านสาธารณะ")}</span>
               <span className="truncate text-[10px] text-[#9aa5ad]">/u/{user.username}</span>
             </span>
             <ExternalLink aria-hidden="true" className="size-3.5 text-muted-foreground" />
@@ -281,16 +288,16 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
       <footer className="flex items-center gap-2.5 border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         {isSelf ? (
           <>
-            <p className="text-[11px] text-[#9aa5ad]">ปุ่มจัดการถูกปิดสำหรับบัญชีตัวเอง</p>
+            <p className="text-[11px] text-[#9aa5ad]">{t("users.detail.manageButtonsDisabledSelf", "ปุ่มจัดการถูกปิดสำหรับบัญชีตัวเอง")}</p>
             <Button size="sm" className={cn("ml-auto", USER_DANGER_BUTTON)} disabled>
-              ระงับบัญชี
+              {t("users.actions.suspend", "ระงับบัญชี")}
             </Button>
           </>
         ) : (
           <>
             {user.status !== "DEACTIVATED" ? (
               <Button variant="ghost" size="sm" onClick={() => onStatusAction(user, "deactivate")}>
-                ปิดบัญชี
+                {t("users.actions.deactivate", "ปิดบัญชี")}
               </Button>
             ) : null}
             {user.status === "ACTIVE" ? (
@@ -299,11 +306,11 @@ function UserDetailBody({ user, isSelf, onStatusAction, onManageRoles }: UserDet
                 className={cn("ml-auto", USER_DANGER_BUTTON)}
                 onClick={() => onStatusAction(user, "suspend")}
               >
-                ระงับบัญชี
+                {t("users.actions.suspend", "ระงับบัญชี")}
               </Button>
             ) : (
               <Button size="sm" className="ml-auto" onClick={() => onStatusAction(user, "restore")}>
-                เปิดใช้งานอีกครั้ง
+                {t("users.actions.restore", "เปิดใช้งานอีกครั้ง")}
               </Button>
             )}
           </>
@@ -383,21 +390,22 @@ function Banner({
 }
 
 function UserNotFound({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslate("admin");
   return (
     <>
       <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 pt-5 pb-6 text-center">
         <div className="grid size-11 place-items-center rounded-full bg-muted">
           <UserRoundX aria-hidden="true" className="size-5 text-muted-foreground" />
         </div>
-        <p className="text-[13px] font-semibold text-foreground">ไม่พบบัญชีนี้แล้ว</p>
-        <p className="text-[11px] text-muted-foreground">ลิงก์อาจเก่า หรือรหัสผู้ใช้ไม่ถูกต้อง</p>
+        <p className="text-[13px] font-semibold text-foreground">{t("users.detail.notFoundTitle", "ไม่พบบัญชีนี้แล้ว")}</p>
+        <p className="text-[11px] text-muted-foreground">{t("users.detail.notFoundDesc", "ลิงก์อาจเก่า หรือรหัสผู้ใช้ไม่ถูกต้อง")}</p>
         <Button variant="outline" size="sm" onClick={onClose}>
-          กลับไปที่รายการ
+          {t("users.detail.backToList", "กลับไปที่รายการ")}
         </Button>
       </div>
       <footer className="flex justify-end border-t border-muted bg-[#fafbfb] px-6 py-3.5">
         <Button variant="outline" size="sm" onClick={onClose}>
-          ปิด
+          {t("users.detail.close", "ปิด")}
         </Button>
       </footer>
     </>

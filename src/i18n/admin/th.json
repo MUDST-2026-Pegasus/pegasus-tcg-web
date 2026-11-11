@@ -1,4 +1,216 @@
 {
+  "audit": {
+    "action": {
+      "activity": "กิจกรรม",
+      "cardSetCreated": "เพิ่มชุดการ์ด",
+      "cardSetDeleted": "ลบชุดการ์ด",
+      "cardSetUpdated": "แก้ไขชุดการ์ด",
+      "catalogCategoryCreated": "เพิ่มหมวดหมู่",
+      "catalogCategoryUpdated": "แก้ไขหมวดหมู่",
+      "catalogImageAdded": "เพิ่มรูปสินค้า",
+      "catalogImageDeleted": "ลบรูปสินค้า",
+      "catalogImagePrimarySet": "ตั้งรูปหลักของสินค้า",
+      "catalogProductCreated": "เพิ่มสินค้าในแคตตาล็อก",
+      "catalogProductDeleted": "ลบสินค้า",
+      "catalogProductEffectsReplaced": "แก้ไขความสามารถและท่าโจมตี",
+      "catalogProductUpdated": "แก้ไขสินค้า",
+      "catalogVariantCreated": "เพิ่มรุ่นย่อยของสินค้า",
+      "catalogVariantUpdated": "แก้ไขรุ่นย่อยของสินค้า",
+      "commissionRuleCreated": "เพิ่มกฎค่าคอมมิชชั่น",
+      "commissionRuleDeactivated": "ปิดใช้กฎค่าคอมมิชชั่น",
+      "commissionRuleDeleted": "ลบกฎค่าคอมมิชชั่น",
+      "commissionRuleUpdated": "แก้ไขกฎค่าคอมมิชชั่น",
+      "gameAttributeCreated": "เพิ่มฟิลด์ในสคีมา",
+      "gameAttributeDeleted": "ลบฟิลด์ในสคีมา",
+      "gameAttributeUpdated": "แก้ไขฟิลด์ในสคีมา",
+      "gameCreated": "เพิ่มเกม",
+      "gameUpdated": "แก้ไขเกม",
+      "marketPricingRun": "สั่งคำนวณราคาตลาด",
+      "ordersAutoReleased": "ปิดคำสั่งซื้อและปล่อยเงินอัตโนมัติ",
+      "paymentApproved": "อนุมัติสลิปโอนเงิน",
+      "paymentRejected": "ปฏิเสธสลิปโอนเงิน",
+      "payoutApproved": "อนุมัติคำขอถอนเงิน",
+      "payoutFailed": "บันทึกการโอนเงินให้ผู้ขายล้มเหลว",
+      "payoutPaid": "บันทึกการโอนเงินให้ผู้ขาย",
+      "payoutProcessing": "เริ่มโอนเงินให้ผู้ขาย",
+      "payoutRejected": "ปฏิเสธคำขอถอนเงิน",
+      "refundFailed": "บันทึกการคืนเงินล้มเหลว",
+      "refundProcessed": "โอนเงินคืนผู้ซื้อแล้ว",
+      "refundProcessing": "เริ่มโอนเงินคืนผู้ซื้อ",
+      "sellerVerificationApproved": "อนุมัติคำขอเปิดร้าน",
+      "sellerVerificationRejected": "ปฏิเสธคำขอเปิดร้าน",
+      "sellerVerificationReviewStarted": "รับตรวจคำขอเปิดร้าน",
+      "sellerVerificationSubmitted": "ส่งคำขอเปิดร้าน",
+      "settingUpdated": "แก้ไขการตั้งค่าระบบ",
+      "unpaidOrdersExpired": "ยกเลิกคำสั่งซื้อค้างชำระอัตโนมัติ",
+      "userRoleGranted": "ให้บทบาทผู้ใช้",
+      "userRoleRevoked": "ถอนบทบาทผู้ใช้",
+      "userStatusChanged": "เปลี่ยนสถานะบัญชีผู้ใช้"
+    },
+    "actor": {
+      "system": "ระบบ"
+    },
+    "category": {
+      "all": "ทุกประเภท",
+      "catalog": "แคตตาล็อก",
+      "finance": "การเงิน",
+      "sellers": "ผู้ขาย",
+      "settings": "การตั้งค่า",
+      "system": "ระบบอัตโนมัติ",
+      "users": "ผู้ใช้"
+    },
+    "day": {
+      "todayWithDate": "วันนี้ · {date}",
+      "yesterdayWithDate": "เมื่อวาน · {date}"
+    },
+    "empty": {
+      "desc": "เมื่อผู้ดูแลหรือระบบทำรายการ เหตุการณ์จะขึ้นที่นี่",
+      "filteredDesc": "ลองเปลี่ยนคำค้นหา ประเภท หรือขยายช่วงเวลา",
+      "filteredTitle": "ไม่พบกิจกรรมที่ตรงกับตัวกรอง",
+      "title": "ยังไม่มีกิจกรรม"
+    },
+    "entryTime": "{date} · {time} น.",
+    "field": {
+      "active": "เปิดใช้งาน",
+      "amount": "จำนวนเงิน (บาท)",
+      "attrKey": "คีย์ของฟิลด์",
+      "attributes": "คุณสมบัติของการ์ด",
+      "cardNumber": "หมายเลขการ์ด",
+      "cardSetId": "ชุดการ์ด",
+      "categoryId": "หมวดหมู่",
+      "code": "รหัส",
+      "description": "คำอธิบาย",
+      "displayOrder": "ลำดับการแสดงผล",
+      "effectiveFrom": "มีผลตั้งแต่",
+      "effectiveTo": "มีผลถึง",
+      "filterable": "ใช้กรองหน้าร้าน",
+      "fixedFee": "ค่าธรรมเนียมคงที่ (บาท)",
+      "label": "ป้ายกำกับ",
+      "maxFee": "ค่าธรรมเนียมสูงสุด (บาท)",
+      "minFee": "ค่าธรรมเนียมขั้นต่ำ (บาท)",
+      "name": "ชื่อ",
+      "nameLocal": "ชื่อภาษาไทย",
+      "options": "ตัวเลือก",
+      "orderId": "หมายเลขคำสั่งซื้อ",
+      "priority": "ลำดับความสำคัญ",
+      "rarityCode": "ระดับความหายาก",
+      "ratePercent": "อัตราค่าคอม (%)",
+      "reason": "เหตุผล",
+      "redacted": "ซ่อนค่า",
+      "required": "บังคับกรอก",
+      "role": "บทบาท",
+      "sku": "SKU",
+      "slug": "slug",
+      "value": "ค่า"
+    },
+    "filter": {
+      "clear": "ล้างตัวกรอง"
+    },
+    "hint": {
+      "role": "บทบาท {role}"
+    },
+    "loadErrorDesc": "เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ตัวกรองที่เลือกไว้ยังอยู่ใน URL",
+    "loadErrorTitle": "โหลดบันทึกกิจกรรมไม่สำเร็จ",
+    "pageDesc": "บันทึกทุกการกระทำของผู้ดูแลและระบบ · แก้ไขหรือลบไม่ได้",
+    "pageTitle": "บันทึกกิจกรรม",
+    "range": {
+      "30d": "30 วันล่าสุด",
+      "7d": "7 วันล่าสุด",
+      "all": "ทั้งหมด",
+      "today": "วันนี้"
+    },
+    "recentCard": {
+      "desc": "การกระทำล่าสุดของผู้ดูแลและระบบ",
+      "empty": "ยังไม่มีกิจกรรม",
+      "loadError": "โหลดกิจกรรมล่าสุดไม่สำเร็จ",
+      "title": "กิจกรรมล่าสุด",
+      "viewAll": "ดูบันทึกกิจกรรมทั้งหมด"
+    },
+    "relative": {
+      "justNow": "เมื่อสักครู่"
+    },
+    "setting": {
+      "commissionDefaultRate": "ค่าคอมมิชชั่นพื้นฐาน",
+      "escrowAutoReleaseDays": "วันปล่อยเงินอัตโนมัติ",
+      "marketPricing": "งานคำนวณราคาตลาด",
+      "orderCancelWindowHours": "ชั่วโมงที่ยกเลิกคำสั่งซื้อได้",
+      "orderPaymentTimeoutMinutes": "นาทีที่รอชำระเงิน",
+      "paymentSlipAutoApprove": "อนุมัติสลิปอัตโนมัติ",
+      "paymentTransferAccount": "บัญชีรับโอนของแพลตฟอร์ม",
+      "payoutMinimumAmount": "ยอดถอนขั้นต่ำ",
+      "system": "การตั้งค่าระบบ"
+    },
+    "sheet": {
+      "actorLabel": "ผู้ทำ",
+      "arrowChangedTo": "เปลี่ยนเป็น",
+      "close": "ปิด",
+      "desc": "รายละเอียดกิจกรรม",
+      "goToRelatedPage": "ไปที่หน้าที่เกี่ยวข้อง",
+      "ipLabel": "IP",
+      "logNumber": "บันทึก #{id}",
+      "rawSystemSummary": "ข้อความต้นฉบับจากระบบ: {summary}",
+      "recordedDetails": "รายละเอียดที่บันทึกไว้",
+      "systemAutomated": "ระบบ (งานอัตโนมัติ)",
+      "targetLabel": "เป้าหมาย",
+      "timeLabel": "เวลา",
+      "title": "รายละเอียดกิจกรรม"
+    },
+    "summary": {
+      "actionsCount": "{count, plural, other {{count} การกระทำ}}",
+      "adminActions": "การกระทำของผู้ดูแล",
+      "immutableDesc": "ทุกเหตุการณ์ถูกเขียนแบบ append-only ผู้ดูแลไม่สามารถลบหรือแก้ไขได้ เพื่อใช้ตรวจสอบย้อนหลัง",
+      "immutableTitle": "บันทึกนี้แก้ไขไม่ได้",
+      "importantEvents": "เหตุการณ์สำคัญ",
+      "loadError": "โหลดสรุปไม่สำเร็จ",
+      "noAdminsToday": "วันนี้ยังไม่มีผู้ดูแลทำรายการ",
+      "systemJobs": "งานอัตโนมัติของระบบ",
+      "todayTitle": "สรุปวันนี้",
+      "topAdminsTitle": "ผู้ดูแลที่ใช้งานมากสุด",
+      "totalEvents": "เหตุการณ์ทั้งหมด"
+    },
+    "target": {
+      "cardSet": "ชุดการ์ด",
+      "catalogCategory": "หมวดหมู่",
+      "catalogProduct": "สินค้า",
+      "catalogVariant": "รุ่นย่อย",
+      "commissionRule": "กฎค่าคอมมิชชั่น",
+      "game": "เกม",
+      "gameAttribute": "ฟิลด์ในสคีมา",
+      "job": "งานอัตโนมัติ",
+      "marketPricing": "ราคาตลาด",
+      "order": "คำสั่งซื้อ",
+      "payment": "การชำระเงิน",
+      "payout": "การถอนเงิน",
+      "refund": "การคืนเงิน",
+      "sellerVerification": "คำขอเปิดร้าน",
+      "setting": "การตั้งค่า",
+      "systemSetting": "การตั้งค่าระบบ",
+      "user": "ผู้ใช้"
+    },
+    "timeSuffix": " น.",
+    "tone": {
+      "attention": "ปกติ",
+      "auto": "อัตโนมัติ",
+      "important": "สำคัญ",
+      "normal": "ปกติ"
+    },
+    "toolbar": {
+      "filterCategoryAria": "กรองตามประเภท",
+      "rangeAria": "ช่วงเวลา",
+      "searchAria": "ค้นหาในบันทึกกิจกรรม",
+      "searchPlaceholder": "ค้นหาชื่อสินค้า, รหัส, ข้อความบันทึก..."
+    },
+    "totalEventsCount": "ทั้งหมด {count} เหตุการณ์",
+    "userStatus": {
+      "active": "คืนสถานะบัญชีผู้ใช้",
+      "deactivated": "ปิดบัญชีผู้ใช้",
+      "suspended": "ระงับบัญชีผู้ใช้"
+    },
+    "value": {
+      "no": "ไม่ใช่",
+      "yes": "ใช่"
+    }
+  },
   "cardAttributes": {
     "categories": {
       "activeToggle": "เปิดใช้งาน: {name}",
@@ -834,6 +1046,48 @@
     "sortNewest": "เรียงตาม: ใหม่สุด",
     "sortOldest": "เรียงตาม: เก่าสุด"
   },
+  "metrics": {
+    "chart": {
+      "monthlySalesTitle": "ยอดขายรายเดือน",
+      "noSales": "ยังไม่มียอดขายในช่วงนี้",
+      "noSalesThisMonth": "ยังไม่มียอดขายในเดือนนี้",
+      "sealed": "กล่อง/ซองสุ่ม",
+      "singles": "การ์ดเดี่ยว"
+    },
+    "commission": {
+      "averageRate": "เฉลี่ย {rate}% ของยอดขายที่สำเร็จ",
+      "noCompletedOrders": "ยังไม่มีคำสั่งซื้อที่สำเร็จในเดือนนี้"
+    },
+    "delta": {
+      "new": "ใหม่"
+    },
+    "gameShare": {
+      "footnoteDesc": "ข้อมูลจากคำสั่งซื้อที่ชำระเงินแล้วและไม่ถูกยกเลิก",
+      "headline": "{game} ครองส่วนแบ่ง {percent}%",
+      "others": "อื่น ๆ",
+      "title": "สัดส่วนยอดขายตามเกม",
+      "unspecified": "ไม่ระบุเกม"
+    },
+    "salesTrend": {
+      "defaultDesc": "ยอดขายรวมรายเดือน (บาท)",
+      "rangeDesc": "ยอดขายรวม {range} (บาท)"
+    },
+    "stat": {
+      "activeListings": "ประกาศขายที่ใช้งานอยู่",
+      "activeListingsFootnote": "จาก {count} ร้านค้าทั่วแพลตฟอร์ม",
+      "commission": "ค่าคอมมิชชั่นที่เก็บได้",
+      "commissionFootnoteWithPromo": "{note} · ชดเชยโค้ด Pegasus {amount}",
+      "gmv": "ยอดขายรวมเดือนนี้",
+      "gmvFootnote": "เทียบกับ {amount} เดือนก่อน",
+      "newSellers": "ผู้ขายรายใหม่",
+      "newSellersFootnote": "ผ่านการยืนยันตัวตนแล้ว"
+    },
+    "topSellers": {
+      "desc": "จัดอันดับตามยอดขายเดือน{monthYear}",
+      "noSales": "ยังไม่มีร้านค้าที่มียอดขายในเดือนนี้",
+      "title": "ร้านค้าที่ทำยอดขายสูงสุด"
+    }
+  },
   "orders": {
     "alert": {
       "disputeHint": "ผู้ซื้อขอคืนสินค้า เงินของคำสั่งซื้อเหล่านี้ถูกพักไว้จนกว่าจะตกลงกันได้",
@@ -983,7 +1237,14 @@
       "newSellers": "ผู้ขายรายใหม่",
       "promotionCost": "ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)",
       "saleSubsidy": "ส่วนลดแคมเปญ"
-    }
+    },
+    "exportReport": "ส่งออกรายงาน",
+    "lastUpdated": " · อัปเดตล่าสุด {time} น.",
+    "loadErrorTitle": "โหลดภาพรวมแพลตฟอร์มไม่สำเร็จ",
+    "pageDesc": "สรุปผลประกอบการและกิจกรรมทั้งหมดบน Pegasus TCG",
+    "pageTitle": "ภาพรวมแพลตฟอร์ม",
+    "systemSettings": "ตั้งค่าระบบ",
+    "systemSettingsNotAvailable": "ยังไม่มีหน้าตั้งค่าระบบ"
   },
   "payments": {
     "approveFailed": "อนุมัติไม่สำเร็จ",
@@ -1255,5 +1516,469 @@
       "ready": "พร้อมโอน ({count})"
     },
     "title": "คืนเงินผู้ซื้อ"
+  },
+  "reviews": {
+    "empty": {
+      "noReviewsEver": "ผู้ขายรายนี้ยังไม่มีรีวิว",
+      "noReviewsInFilter": "ไม่มีรีวิวในตัวกรองนี้",
+      "searchPromptDesc": "พิมพ์ชื่อผู้ใช้ของผู้ขาย แล้วกด “ค้นหาผู้ขาย”",
+      "searchPromptTitle": "ค้นหาผู้ขายเพื่อดูรีวิว",
+      "sellerNotFoundDesc": "ตรวจสอบชื่อผู้ใช้อีกครั้ง",
+      "sellerNotFoundTitle": "ไม่พบผู้ขาย “{username}”"
+    },
+    "filter": {
+      "all": "ทั้งหมด",
+      "allReviews": "รีวิวทั้งหมด",
+      "hidden": "ซ่อนอยู่",
+      "low": "1–2 ดาว",
+      "unreplied": "ยังไม่ตอบกลับ",
+      "visible": "แสดงอยู่"
+    },
+    "loadMore": "โหลดเพิ่ม",
+    "moderationCard": {
+      "ariaLabel": "รีวิวจาก {username}",
+      "hiddenNote": "ไม่แสดงบนหน้าโปรไฟล์และไม่นับในคะแนน",
+      "sellerReply": "ผู้ขายตอบกลับ",
+      "showOnProfile": "แสดงบนโปรไฟล์",
+      "subOrder": "ยังไม่ตอบกลับ"
+    },
+    "pageDesc": "ดูรีวิวทั้งหมดของผู้ขาย รวมรีวิวที่ถูกซ่อน · ซ่อนรีวิวที่ไม่เหมาะสมออกจากหน้าโปรไฟล์สาธารณะ",
+    "pageTitle": "จัดการรีวิว",
+    "search": {
+      "inputAria": "ชื่อผู้ใช้ผู้ขาย",
+      "inputPlaceholder": "ชื่อผู้ใช้ผู้ขาย",
+      "submitButton": "ค้นหาผู้ขาย"
+    },
+    "sectionAria": "รายการรีวิว",
+    "sectionTitle": "รีวิวของ {username} ({count})",
+    "sellerCard": {
+      "ariaLabel": "คะแนนผู้ขาย",
+      "fromReviews": "จาก {count} รีวิวที่แสดงอยู่",
+      "infoNote": "คะแนนนับเฉพาะรีวิวที่แสดงอยู่ · ซ่อน/แสดงรีวิวแล้วระบบคำนวณใหม่ทันที (เฉพาะเมื่อค่าเปลี่ยนจริง)"
+    },
+    "skeletonAria": "กำลังโหลดรีวิว",
+    "sortNewest": "เรียงตาม: ใหม่ไปเก่า",
+    "starsAria": "{rating} จาก 5 ดาว",
+    "tablistAria": "กรองรีวิว",
+    "toast": {
+      "hideSuccess": "ซ่อนรีวิวแล้ว",
+      "showSuccess": "แสดงรีวิวบนโปรไฟล์แล้ว",
+      "visibilityErrorTitle": "ซ่อนอยู่"
+    },
+    "viewPublicProfile": "ดูหน้าโปรไฟล์สาธารณะ"
+  },
+  "sellers": {
+    "bankBook": {
+      "alt": "รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา",
+      "altFull": "รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา ขนาดเต็ม",
+      "clickToExpand": "คลิกเพื่อดูขนาดเต็ม",
+      "dialogDesc": "เทียบชื่อบัญชีและเลขบัญชีในรูปกับข้อมูลที่ผู้สมัครกรอก",
+      "dialogTitle": "รูปหน้าสมุดบัญชี",
+      "loadFailed": "โหลดรูปไม่สำเร็จ",
+      "noImageAttached": "คำขอนี้ส่งมาก่อนระบบรับรูปสมุดบัญชี จึงไม่มีรูปแนบ",
+      "requestingNewImage": "กำลังขอรูปใหม่…"
+    },
+    "decision": {
+      "approveButton": "อนุมัติเปิดร้าน",
+      "approvedBanner": "อนุมัติแล้ว — ผู้ขายได้สิทธิ์เปิดร้านบนแพลตฟอร์ม",
+      "claiming": "กำลังรับคำขอนี้มาตรวจ...",
+      "otherReviewingDesc": "เลือกใบอื่นในคิวได้เลย กดตัดสินแทนเฉพาะตอนแน่ใจว่าคนเดิมไม่ได้ตรวจต่อแล้ว",
+      "otherReviewingTitle": "{reviewer} กำลังตรวจคำขอนี้อยู่",
+      "rejectButton": "ปฏิเสธคำขอ",
+      "rejectedReason": "เหตุผล: {reason}",
+      "rejectedTitle": "ปฏิเสธคำขอแล้ว",
+      "reviewResultDesc": "ตรวจชื่อบัญชีให้ตรงกับชื่อจริงก่อนกดอนุมัติ — การอนุมัติจะให้สิทธิ์ผู้ขายทันที",
+      "reviewResultTitle": "ผลการตรวจสอบ",
+      "submittedErrorFallback": "คำขอนี้อาจถูกแอดมินคนอื่นรับไปแล้ว หรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+      "takeOver": "ตัดสินแทน"
+    },
+    "detail": {
+      "applicationMeta": "{appNumber} · ยื่นเมื่อ {submittedAt}",
+      "bankAccountLabel": "เลขบัญชีธนาคาร",
+      "bankBookLabel": "รูปหน้าสมุดบัญชี / หน้าแอปธนาคาร",
+      "bankLabel": "ธนาคาร",
+      "emptyPrompt": "เลือกคำขอจากคิวทางซ้ายเพื่อดูรายละเอียดและตัดสิน",
+      "legalNameLabel": "ชื่อ-นามสกุล (ตามบัญชี)",
+      "piiNotice": "รับคำขอมาตรวจไม่สำเร็จ",
+      "reviewedAtLabel": "ตรวจเมื่อ",
+      "reviewerAdminId": "แอดมิน #{id}",
+      "reviewerLabel": "ผู้ตรวจ (admin)",
+      "reviewerYou": "คุณ",
+      "sellerProfileIdLabel": "รหัสโปรไฟล์ผู้ขาย"
+    },
+    "pageDesc": "ตรวจสอบชื่อและบัญชีธนาคารก่อนอนุญาตให้เปิดร้านค้าบนแพลตฟอร์ม",
+    "pageTitle": "อนุมัติผู้ขาย",
+    "pagination": {
+      "pageIndicator": "หน้า {current} จาก {total}"
+    },
+    "queue": {
+      "adminReviewing": "แอดมิน #{id} กำลังตรวจ",
+      "emptyDesc": "เมื่อมีคำขอเข้ามา จะแสดงที่นี่โดยเรียงเก่าสุดก่อน",
+      "emptyTitle": "ไม่มีคำขอในสถานะ \"{status}\"",
+      "loadErrorDesc": "ตรวจสอบการเชื่อมต่อแล้วลองใหม่",
+      "loadErrorTitle": "โหลดคิวคำขอไม่สำเร็จ",
+      "sortOldest": "เรียงตาม: เก่าสุด",
+      "submittedAt": "ยื่นเมื่อ {dateTime}",
+      "viewingBadge": "กำลังดู",
+      "youReviewing": "คุณกำลังตรวจ"
+    },
+    "rejectDialog": {
+      "confirmReject": "ยืนยันการปฏิเสธ",
+      "desc": "ผู้ขายจะเห็นเหตุผลนี้ในหน้าสมัคร และส่งเอกสารใหม่มาได้ทีหลัง",
+      "errorFallback": "ปฏิเสธคำขอไม่สำเร็จ ลองใหม่อีกครั้ง",
+      "reasonLabel": "เหตุผลที่ปฏิเสธ",
+      "reasonPlaceholder": "เช่น ชื่อบัญชีไม่ตรงกับชื่อที่กรอก กรุณาส่งสมุดบัญชีที่ชื่อตรงกัน",
+      "successToast": "ปฏิเสธคำขอแล้ว",
+      "title": "ปฏิเสธคำขอเปิดร้าน"
+    },
+    "stats": {
+      "ariaLabel": "กรองคำขอตามสถานะ"
+    },
+    "toast": {
+      "approveErrorTitle": "อนุมัติไม่สำเร็จ",
+      "approveSuccessDesc": "ผู้ขายรายนี้ได้สิทธิ์เปิดร้านบนแพลตฟอร์มแล้ว",
+      "approveSuccessTitle": "อนุมัติแล้ว",
+      "claimErrorFallback": "คำขอนี้อาจถูกรับหรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+      "claimErrorTitle": "รับคำขอมาตรวจไม่สำเร็จ"
+    }
+  },
+  "users": {
+    "actions": {
+      "addAdmin": "เพิ่มผู้ดูแล",
+      "deactivate": "ปิดบัญชี",
+      "exportCsv": "ส่งออก CSV",
+      "restore": "เปิดใช้งานอีกครั้ง",
+      "suspend": "ระงับบัญชี"
+    },
+    "addAdmin": {
+      "alreadyAdmin": "เป็นผู้ดูแลแล้ว",
+      "desc": "ค้นหาบัญชีที่มีอยู่แล้วเพื่อให้สิทธิ์ผู้ดูแล (ไม่ได้สร้างบัญชีใหม่)",
+      "failedTitle": "ทำรายการไม่สำเร็จ",
+      "footerConfirmNext": "ต่อด้วยการยืนยัน “ตั้งเป็นผู้ดูแล”",
+      "grantedSuccess": "ตั้ง @{username} เป็นผู้ดูแลแล้ว",
+      "noMatchDesc": "ผู้ใช้ต้องสมัครสมาชิกก่อน จึงจะตั้งเป็นผู้ดูแลได้",
+      "noMatchTitle": "ไม่พบบัญชีที่ตรงกับ “{query}”",
+      "radioGroupAria": "เลือกบัญชีที่จะตั้งเป็นผู้ดูแล",
+      "searchAria": "ค้นหาบัญชีจากอีเมล username หรือชื่อที่แสดง",
+      "searchFailed": "ค้นหาไม่สำเร็จ ลองใหม่อีกครั้ง",
+      "searchPlaceholder": "อีเมล, username หรือชื่อที่แสดง",
+      "searchResultsCount": "ผลการค้นหา {total} บัญชี · แสดงสูงสุด {max} รายการ ค้นจากอีเมล / username / ชื่อที่แสดง",
+      "title": "เพิ่มผู้ดูแล",
+      "typeToSearch": "พิมพ์เพื่อค้นหา · แสดงสูงสุด {max} รายการ"
+    },
+    "counts": {
+      "loading": "กำลังนับจำนวนบัญชี…",
+      "summary": "ผู้ใช้ทั้งหมด {total} บัญชี · ผู้ขาย {sellers} · ระงับ {suspended}"
+    },
+    "detail": {
+      "accountInfo": "ข้อมูลบัญชีผู้ใช้",
+      "accountSection": "บัญชี",
+      "accountStatusTitle": "สถานะบัญชี",
+      "activateFirstToManageRoles": "เปิดใช้งานก่อนจึงจัดการบทบาทได้",
+      "backToList": "กลับไปที่รายการ",
+      "bannerDeactivatedDesc": "ผู้ใช้เข้าใช้ไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง",
+      "bannerDeactivatedTitle": "บัญชีนี้ถูกปิดแล้ว",
+      "bannerSelfDesc": "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้ — แก้ข้อมูลส่วนตัวที่หน้าโปรไฟล์",
+      "bannerSelfTitle": "นี่คือบัญชีของคุณ",
+      "bannerSuspendedDesc": "ผู้ใช้ถูกออกจากระบบแล้วและเข้าสู่ระบบไม่ได้ จนกว่าจะเปิดใช้งานอีกครั้ง",
+      "bannerSuspendedTitle": "บัญชีนี้ถูกระงับ",
+      "bioEmpty": "ยังไม่ได้เขียนแนะนำตัว",
+      "bioSection": "แนะนำตัว",
+      "btnDeactivate": "ปิดบัญชี…",
+      "btnRestore": "เปิดใช้งานอีกครั้ง…",
+      "btnSuspend": "ระงับบัญชี…",
+      "cannotRemoveOwnAdmin": "ถอน ADMIN ตัวเองไม่ได้",
+      "close": "ปิด",
+      "contactSection": "ข้อมูลติดต่อ",
+      "copiedEmail": "คัดลอกอีเมลแล้ว",
+      "copyEmailAria": "คัดลอกอีเมล",
+      "copyFailed": "คัดลอกไม่สำเร็จ",
+      "emailLabel": "อีเมล",
+      "googleLinked": "เชื่อมต่อด้วยบัญชี Google แล้ว",
+      "hasPassword": "ตั้งรหัสผ่านไว้แล้ว (ใช้อีเมล+รหัสผ่านเข้าได้)",
+      "isSelf": "(คุณ)",
+      "lastLogin": "เข้าสู่ระบบล่าสุด",
+      "lastLoginLabel": "เข้าใช้ล่าสุด",
+      "loadError": "โหลดข้อมูลผู้ใช้ไม่สำเร็จ",
+      "manageButtonsDisabledSelf": "ปุ่มจัดการถูกปิดสำหรับบัญชีตัวเอง",
+      "manageReviews": "จัดการรีวิว",
+      "manageRoles": "จัดการบทบาท",
+      "manageRolesAction": "จัดการบทบาท…",
+      "noReviewsYet": "ยังไม่มีรีวิว",
+      "notFoundDesc": "ลิงก์อาจเก่า หรือรหัสผู้ใช้ไม่ถูกต้อง",
+      "notFoundTitle": "ไม่พบบัญชีนี้แล้ว",
+      "passwordAuth": "ยืนยันตัวตนด้วยรหัสผ่าน",
+      "personalDataBadge": "ข้อมูลส่วนบุคคล",
+      "phoneLabel": "เบอร์โทร",
+      "phonePrivate": "ไม่แสดงต่อสาธารณะ",
+      "phonePublic": "แสดงบนหน้าร้าน",
+      "registered": "สมัครสมาชิก",
+      "registeredAtLabel": "สมัครเมื่อ",
+      "registeredWithGoogle": "สมัครด้วย Google",
+      "reviewsCount": "({count} รีวิว)",
+      "rolesSection": "บทบาท",
+      "rolesTitle": "บทบาท ({count})",
+      "selfStatusLockHint": "นี่คือบัญชีของคุณ — เปลี่ยนสถานะของตัวเองไม่ได้",
+      "sellerAccount": "เลขบัญชี",
+      "sellerBank": "ธนาคารรับเงิน",
+      "sellerHolder": "ชื่อบัญชี",
+      "sellerName": "ชื่อร้านค้า",
+      "sellerRating": "คะแนนเฉลี่ย",
+      "sellerSlug": "slug ร้าน",
+      "shopId": "รหัสร้านค้า: #{id}",
+      "shopInfoTitle": "ข้อมูลร้านค้า (สิทธิ์ผู้ขาย)",
+      "statusCurrent": "สถานะปัจจุบัน",
+      "statusLabel": "สถานะ",
+      "title": "รายละเอียดผู้ใช้",
+      "userId": "รหัสผู้ใช้ #{id}",
+      "viewPublicStore": "ดูหน้าร้านสาธารณะ"
+    },
+    "empty": {
+      "clearFilters": "ล้างตัวกรองทั้งหมด",
+      "filteredDesc": "ลองลดตัวกรอง หรือค้นด้วยอีเมล / username แทน",
+      "filteredTitle": "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง",
+      "unfilteredDesc": "บัญชีจะขึ้นที่นี่เมื่อมีคนสมัครสมาชิก",
+      "unfilteredTitle": "ยังไม่มีผู้ใช้"
+    },
+    "error": {
+      "accessDenied": "เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้",
+      "notFound": "ไม่พบบัญชีนี้แล้ว — รีเฟรชรายการให้อัตโนมัติ",
+      "roleRequiresPassword": "บัญชีที่เข้าสู่ระบบด้วย Google อย่างเดียวไม่สามารถรับสิทธิ์ผู้ดูแลหรือทีมซัพพอร์ตได้"
+    },
+    "lastLogin": {
+      "never": "ยังไม่เคยเข้าใช้"
+    },
+    "menu": {
+      "deactivate": "ปิดบัญชี",
+      "manageRoles": "จัดการบทบาท…",
+      "restore": "เปิดใช้งานอีกครั้ง",
+      "selfAccountHint": "นี่คือบัญชีของคุณ — เปลี่ยนสถานะหรือถอนสิทธิ์ผู้ดูแลของตัวเองไม่ได้",
+      "suspend": "ระงับบัญชี",
+      "viewDetail": "ดูรายละเอียด"
+    },
+    "pageSummary": "{total, plural, other {แสดง {from}–{to} จาก {total} บัญชี}}",
+    "pageSummaryEmpty": "ไม่พบบัญชี",
+    "query": {
+      "errorMessage": "เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ข้อมูลที่ค้นไว้ยังอยู่ใน URL",
+      "errorTitle": "โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
+    },
+    "role": {
+      "admin": "ผู้ดูแล",
+      "buyer": "ผู้ซื้อ",
+      "seller": "ผู้ขาย",
+      "support": "ทีมซัพพอร์ต"
+    },
+    "roles": {
+      "adminDesc": "เข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น",
+      "buyerDesc": "ทุกบัญชีได้อัตโนมัติตอนสมัคร",
+      "cannotRemoveOwnAdmin": "ถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้",
+      "changedBadge": "เปลี่ยนแล้ว",
+      "changedCount": "{count, plural, other {เปลี่ยน {count} รายการ}}",
+      "changedGrantConfirm": "{count, plural, other {เปลี่ยน {count} รายการ · ให้สิทธิ์ผู้ดูแลจะถามยืนยันอีกครั้ง}}",
+      "changedRevokeConfirm": "{count, plural, other {เปลี่ยน {count} รายการ · ถอนสิทธิ์ผู้ดูแลจะถามยืนยันอีกครั้ง}}",
+      "confirmAdminAction": "ยืนยัน: {action}",
+      "confirmAdminSubtitle": "{action} @{username}",
+      "confirmGrantDesc": "จะเข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป",
+      "confirmGrantTitle": "ตั้ง {name} เป็นผู้ดูแล?",
+      "confirmRevokeDesc": "จะเข้าหลังบ้านไม่ได้อีก มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป",
+      "confirmRevokeTitle": "ถอนสิทธิ์ผู้ดูแลของ {name}?",
+      "defaultLocked": "ค่าเริ่มต้น",
+      "dialogDesc": "บทบาทใหม่มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป ไม่ใช่ทันที",
+      "dialogTitle": "จัดการบทบาท @{username}",
+      "failedTitle": "ทำรายการไม่สำเร็จ",
+      "footerAdminConfirmNext": "ต่อด้วยการยืนยัน “สิทธิ์ผู้ดูแล”",
+      "footerRoleCount": "จะเปลี่ยน {count} บทบาท",
+      "fromApprovalLocked": "จากการอนุมัติ",
+      "grantAction": "ตั้งเป็นผู้ดูแล",
+      "grantEffect1": "ให้สิทธิ์เฉพาะคนที่ทีมรู้จักและยืนยันตัวตนแล้ว",
+      "grantEffect2": "ถอนสิทธิ์ได้ภายหลังจาก “จัดการบทบาท”",
+      "grantSuccess": "ตั้ง {name} เป็นผู้ดูแลแล้ว",
+      "multipleSuccess": "อัปเดตบทบาทของ {name} แล้ว",
+      "noChanges": "ยังไม่มีการเปลี่ยนแปลง",
+      "revokeAction": "ถอนสิทธิ์",
+      "revokeSuccess": "ถอนสิทธิ์ผู้ดูแลของ {name} แล้ว",
+      "saveSuccess": "บันทึกบทบาทของ {name} แล้ว",
+      "sellerDesc": "ได้จากการอนุมัติ KYC ที่หน้า “อนุมัติผู้ขาย” ไม่ได้ให้จากที่นี่",
+      "supportDesc": "บทบาททีมช่วยเหลือ — ให้/ถอนได้ที่หน้านี้เท่านั้น",
+      "supportGrantSuccess": "ให้บทบาททีมช่วยเหลือแก่ {name} แล้ว",
+      "supportRevokeSuccess": "ถอนบทบาททีมช่วยเหลือของ {name} แล้ว"
+    },
+    "status": {
+      "active": "ใช้งานปกติ",
+      "deactivateConfirm": "ปิดบัญชี",
+      "deactivateDesc": "ผู้ใช้จะถูกออกจากระบบและเข้าใช้ไม่ได้อีก ใช้กับบัญชีที่ขอปิดหรือไม่ใช้งานแล้ว เปิดกลับได้ภายหลัง",
+      "deactivateSaving": "กำลังปิดบัญชี…",
+      "deactivateTitle": "ปิดบัญชี {name}?",
+      "deactivated": "ปิดบัญชี",
+      "failedTitle": "ทำรายการไม่สำเร็จ",
+      "restoreConfirm": "เปิดใช้งาน",
+      "restoreDesc": "ผู้ใช้จะเข้าสู่ระบบและใช้งานได้ตามปกติ",
+      "restoreSaving": "กำลังเปิดใช้งาน…",
+      "restoreTitle": "เปิดใช้งาน {name} อีกครั้ง?",
+      "successToast": "@{username} {status}แล้ว",
+      "suspendConfirm": "ระงับบัญชี",
+      "suspendDesc": "ผู้ใช้จะถูกออกจากระบบทุกอุปกรณ์ภายในไม่กี่นาที และเข้าสู่ระบบไม่ได้จนกว่าจะเปิดใช้งานอีกครั้ง",
+      "suspendEffect1": "เพิกถอน refresh token ทั้งหมดของบัญชีนี้ทันที",
+      "suspendEffect2": "ประกาศขายและคำสั่งซื้อเดิมไม่ถูกลบ",
+      "suspendEffect3": "เปิดใช้งานกลับได้ภายหลังจากเมนู ⋯",
+      "suspendSaving": "กำลังระงับ…",
+      "suspendTitle": "ระงับบัญชี {name}?",
+      "suspended": "ถูกระงับ"
+    },
+    "table": {
+      "created": "สมัครเมื่อ",
+      "lastLogin": "เข้าใช้ล่าสุด",
+      "moreOptions": "ตัวเลือกเพิ่มเติม",
+      "moreOptionsAria": "ตัวเลือกเพิ่มเติม: {username}",
+      "paginationAria": "เลขหน้า",
+      "roles": "บทบาท",
+      "skeletonAria": "กำลังโหลดรายชื่อผู้ใช้",
+      "status": "สถานะ",
+      "user": "ผู้ใช้",
+      "viewDetailAria": "ดูรายละเอียด: {username}",
+      "you": "(คุณ)"
+    },
+    "title": "จัดการผู้ใช้",
+    "toolbar": {
+      "activeFilters": "ตัวกรองที่ใช้:",
+      "allRoles": "บทบาท: ทั้งหมด",
+      "allStatuses": "สถานะ: ทั้งหมด",
+      "clearAll": "ล้างทั้งหมด",
+      "removeFilterAria": "ลบตัวกรอง: {label}",
+      "roleFilterAria": "กรองตามบทบาท",
+      "searchAria": "ค้นหาชื่อผู้ใช้หรืออีเมล",
+      "searchChip": "ค้นหา: {q}",
+      "searchPlaceholder": "ค้นหาชื่อผู้ใช้, ชื่อที่แสดง, อีเมล...",
+      "statusFilterAria": "กรองตามสถานะ"
+    }
+  },
+  "verification": {
+    "dateTime": "{date} · {time} น.",
+    "error": {
+      "alreadyDecided": "แอดมินคนอื่นรับหรือตัดสินคำขอนี้ไปก่อนแล้ว คิวจะอัปเดตให้เอง",
+      "bankAccountAlreadyUsed": "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง",
+      "notFound": "ไม่พบคำขอนี้แล้ว"
+    },
+    "status": {
+      "approved": "อนุมัติแล้ว",
+      "approvedShort": "อนุมัติแล้ว",
+      "rejected": "ปฏิเสธ",
+      "rejectedShort": "ปฏิเสธ",
+      "submitted": "รอตรวจสอบ",
+      "submittedShort": "รอตรวจสอบ",
+      "underReview": "กำลังตรวจ",
+      "underReviewShort": "กำลังตรวจ"
+    },
+    "timeSuffix": " น.",
+    "validation": {
+      "reasonMax": "เหตุผลต้องไม่เกิน 255 ตัวอักษร",
+      "reasonRequired": "ระบุเหตุผลที่ปฏิเสธ เพื่อให้ผู้ขายรู้ว่าต้องแก้อะไร"
+    }
+  },
+  "weeklyReport": {
+    "chart": {
+      "gameShareTitle": "สัดส่วนสต็อกและกำไรตามเกม",
+      "leaderShareNote": "{game} ครองส่วนแบ่งยอดขายสูงสุด {percentage} · ข้อมูลจากคำสั่งซื้อที่สำเร็จแล้ว",
+      "noGameShare": "ยังไม่มีสัดส่วนตามเกมในสัปดาห์นี้",
+      "other": "อื่น ๆ",
+      "sealed": "กล่อง/ซองสุ่ม",
+      "singles": "การ์ดเดี่ยว",
+      "trendDescription": "แสดงยอดขาย 7 วันของสัปดาห์ที่เลือก (บาท)",
+      "trendTitle": "แนวโน้มสต็อกและกำไรรายวัน (จ. - อา.)"
+    },
+    "empty": {
+      "backToCurrent": "กลับไปสัปดาห์ปัจจุบัน",
+      "desc": "ยังไม่มีคำสั่งซื้อที่สำเร็จสมบูรณ์หรือรายการสต็อกในช่วงเวลานี้ กรุณาเลือกสัปดาห์อื่นหรือเปลี่ยนตัวกรองเกม",
+      "title": "ไม่พบรายการเคลื่อนไหวสต็อกและกำไรในสัปดาห์ที่เลือก"
+    },
+    "export": {
+      "categoryLabel": "หมวดหมู่",
+      "csvHint": "เหมาะสำหรับนำเข้าฐานข้อมูลหรือ Google Sheets",
+      "datasetBreakdown": "รวมตารางแยกตามเกมและประเภทสินค้า",
+      "datasetKpi": "รวมข้อมูลสรุป KPI รายสัปดาห์",
+      "datasetLabel": "ข้อมูลที่ต้องการรวม",
+      "datasetRequired": "เลือกข้อมูลอย่างน้อย 1 ชุด",
+      "errorToastDesc": "กรุณาลองใหม่อีกครั้ง",
+      "errorToastTitle": "ส่งออกรายงานไม่สำเร็จ",
+      "formatLabel": "รูปแบบไฟล์",
+      "generating": "กำลังสร้างไฟล์...",
+      "itemCountLabel": "จำนวนรายการ",
+      "itemCountValue": "{count} หมวดหมู่ (ยอดขายรวม {total})",
+      "periodLabel": "ช่วงเวลา",
+      "submit": "ดาวน์โหลดรายงาน",
+      "successToast": "ดาวน์โหลดรายงานสำเร็จ",
+      "title": "ส่งออกรายงานสต็อกและกำไรรายสัปดาห์",
+      "xlsxHint": "เปิดดูต่อใน Excel ได้ทันที"
+    },
+    "exportReport": "ส่งออกรายงาน",
+    "filter": {
+      "allGames": "ทุกเกม",
+      "currentWeek": "สัปดาห์ปัจจุบัน",
+      "customWeek": "กำหนดช่วงสัปดาห์เอง...",
+      "nextWeekNoData": "สัปดาห์หน้า (ไม่มีข้อมูล)",
+      "previousWeek": "สัปดาห์ก่อนหน้า",
+      "twoWeeksAgo": "2 สัปดาห์ก่อน"
+    },
+    "lastUpdated": " · อัปเดตล่าสุด {time} น.",
+    "loadError": "โหลดรายงานรายสัปดาห์ไม่สำเร็จ",
+    "productType": {
+      "other": "อื่น ๆ",
+      "sealed": "กล่อง/ซองสุ่ม",
+      "singleCard": "การ์ดเดี่ยว"
+    },
+    "settings": {
+      "fastMovingBadge": "สต็อกหมุนเวียนเร็ว",
+      "fastMovingLabel": "เกณฑ์สต็อกหมุนเวียนเร็ว (ยอดขายต่อสัปดาห์ > %)",
+      "loadError": "โหลดเกณฑ์รายงานไม่สำเร็จ",
+      "lowStockLabel": "เกณฑ์แจ้งเตือนสต็อกต่ำ (ชิ้น)",
+      "saveButton": "บันทึกการตั้งค่า",
+      "saveErrorTitle": "บันทึกการตั้งค่าไม่สำเร็จ",
+      "saveSuccess": "บันทึกการตั้งค่าแล้ว",
+      "saving": "กำลังบันทึก...",
+      "standardCommissionHint": "อ้างอิงจากระบบค่าคอมมิชชั่น",
+      "standardCommissionLabel": "อัตราค่าคอมมิชชั่นมาตรฐาน (%)",
+      "title": "ตั้งค่าเกณฑ์รายงานสต็อกและกำไร"
+    },
+    "stat": {
+      "avgShare": "เฉลี่ย",
+      "commission": "ค่าคอมมิชชั่นที่เก็บได้",
+      "commissionFootnote": "{prefix} {share}% ของยอดขายรวมรายสัปดาห์",
+      "gmv": "ยอดขายรวมรายสัปดาห์",
+      "gmvFootnote": "จากคำสั่งซื้อที่สำเร็จแล้ว {count} รายการ",
+      "isShare": "คิดเป็น",
+      "netProfit": "กำไรสุทธิสัปดาห์นี้",
+      "netProfitFootnote": "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม",
+      "netProfitFootnoteCompared": "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม (เทียบ {amount} สัปดาห์ก่อน)",
+      "netProfitNoOrders": "ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก",
+      "stock": "สต็อกที่เปิดขายอยู่",
+      "stockOther": "อื่น ๆ {count}",
+      "stockSealed": "กล่อง/ซองสุ่ม {count}",
+      "stockSingles": "การ์ดเดี่ยว {count}"
+    },
+    "stockStatus": {
+      "fastMoving": "สต็อกหมุนเวียนเร็ว",
+      "lowStock": "สต็อกต่ำ",
+      "normal": "ปกติ"
+    },
+    "subtitle": "สรุปความเคลื่อนไหวสต็อกสินค้าและผลกำไรสุทธิรายสัปดาห์บน Pegasus TCG",
+    "systemSettings": "ตั้งค่าระบบ",
+    "table": {
+      "gameCategory": "หมวดหมู่เกม",
+      "gmv": "ยอดขายรวม",
+      "initialStock": "สต็อกต้นสัปดาห์",
+      "netProfit": "กำไรสุทธิ",
+      "productType": "ประเภทสินค้า",
+      "remainingStock": "สต็อกคงเหลือ",
+      "soldCount": "ขายออกสัปดาห์นี้",
+      "stockStatus": "สถานะสต็อก",
+      "title": "ตารางสรุปสต็อกและกำไรแยกรายเกมและประเภทสินค้า",
+      "totalAll": "รวมทั้งหมด"
+    },
+    "title": "รายงานสต็อกและกำไรรายสัปดาห์",
+    "validation": {
+      "fastMovingPercent": "ระบุเปอร์เซ็นต์เป็นเลขจำนวนเต็ม 1-100",
+      "lowStockThreshold": "ระบุจำนวนชิ้นเป็นเลขจำนวนเต็มตั้งแต่ 0 ขึ้นไป"
+    },
+    "weekNumber": "สัปดาห์ที่ {range}"
   }
 }

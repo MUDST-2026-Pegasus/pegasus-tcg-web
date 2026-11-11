@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslate } from "@/lib/i18n";
 import type { GameSlice } from "../metrics.format";
 
 const SLICE_COLORS = [
@@ -32,6 +33,8 @@ export function GameShareChart({
   footnoteTitle,
   footnoteDescription,
 }: GameShareChartProps) {
+  const { t } = useTranslate("admin");
+
   const chartConfig = Object.fromEntries(
     slices.map((slice, index) => [
       slice.id,
@@ -48,7 +51,7 @@ export function GameShareChart({
 
       {slices.length === 0 ? (
         <p className="flex h-[200px] items-center justify-center text-xs text-muted-foreground">
-          ยังไม่มียอดขายในเดือนนี้
+          {t("metrics.chart.noSalesThisMonth", "ยังไม่มียอดขายในเดือนนี้")}
         </p>
       ) : (
         <ChartContainer config={chartConfig} className="h-[200px] w-full">

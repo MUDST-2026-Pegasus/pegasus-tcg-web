@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { SellerAvatar } from "@/features/admin/components/SellerAvatar";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -44,33 +45,44 @@ type SellerDetailPanelProps = {
  */
 export function SellerDetailPanel(props: SellerDetailPanelProps) {
   const { verification, currentAdminId, onImageExpired } = props;
+  const { t } = useTranslate("admin");
   const meta = VERIFICATION_STATUS_META[verification.status];
 
   // backend ไม่เก็บบัตรประชาชน/เซลฟี่โดยตั้งใจ มีแค่ชื่อ บัญชี และรูปหน้าสมุดบัญชี
   // — ดู `verification.types.ts`
   const details: { label: string; value: string }[] = [
-    { label: "ชื่อ-นามสกุล (ตามบัญชี)", value: legalName(verification) },
     {
-      label: "ธนาคาร",
+      label: t("sellers.detail.legalNameLabel", "ชื่อ-นามสกุล (ตามบัญชี)"),
+      value: legalName(verification),
+    },
+    {
+      label: t("sellers.detail.bankLabel", "ธนาคาร"),
       value: `${verification.bankName} · ${verification.bankCode}`,
     },
     {
-      label: "เลขบัญชีธนาคาร",
+      label: t("sellers.detail.bankAccountLabel", "เลขบัญชีธนาคาร"),
       value: formatBankAccount(verification.bankAccountNumber),
     },
-    { label: "รหัสโปรไฟล์ผู้ขาย", value: `#${verification.sellerProfileId}` },
+    {
+      label: t("sellers.detail.sellerProfileIdLabel", "รหัสโปรไฟล์ผู้ขาย"),
+      value: `#${verification.sellerProfileId}`,
+    },
   ];
 
   if (verification.reviewedAt) {
     details.push({
-      label: "ตรวจเมื่อ",
+      label: t("sellers.detail.reviewedAtLabel", "ตรวจเมื่อ"),
       value: formatThaiDateTime(verification.reviewedAt),
     });
   }
   if (verification.reviewedBy !== null) {
+    const reviewerText =
+      verification.reviewedBy === currentAdminId
+        ? t("sellers.detail.reviewerYou", "คุณ")
+        : t("sellers.detail.reviewerAdminId", "แอดมิน #{id}", { id: verification.reviewedBy });
     details.push({
-      label: "ผู้ตรวจ (admin)",
-      value: reviewerLabel(verification.reviewedBy, currentAdminId),
+      label: t("sellers.detail.reviewerLabel", "ผู้ตรวจ (admin)"),
+      value: reviewerText,
     });
   }
 
@@ -101,8 +113,10 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              {formatApplicationNumber(verification)} · ยื่นเมื่อ{" "}
-              {formatThaiDateTime(verification.submittedAt)}
+              {t("sellers.detail.applicationMeta", "{appNumber} · ยื่นเมื่อ {submittedAt}", {
+                appNumber: formatApplicationNumber(verification),
+                submittedAt: formatThaiDateTime(verification.submittedAt),
+              })}
             </p>
           </div>
         </div>
@@ -123,7 +137,7 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
 
         <div className="flex flex-col gap-2">
           <span className="text-[11px] text-[#9aa5ad]">
-            รูปหน้าสมุดบัญชี / หน้าแอปธนาคาร
+            {t("sellers.detail.bankBookLabel", "รูปหน้าสมุดบัญชี / หน้าแอปธนาคาร")}
           </span>
           <BankBookImage
             url={verification.bankBookImageUrl}
@@ -132,7 +146,7 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
         </div>
 
         <p className="text-[11px] text-[#9aa5ad]">
-          ข้อมูลนี้เป็นข้อมูลส่วนบุคคล ใช้เพื่อการตรวจสอบเท่านั้น
+          {t("sellers.detail.piiNotice", "ข้อมูลนี้เป็นข้อมูลส่วนบุคคล ใช้เพื่อการตรวจสอบเท่านั้น")}
         </p>
       </Card>
 
@@ -144,13 +158,6 @@ export function SellerDetailPanel(props: SellerDetailPanelProps) {
   );
 }
 
-function reviewerLabel(
-  reviewedBy: number,
-  currentAdminId: number | undefined,
-): string {
-  return reviewedBy === currentAdminId ? "คุณ" : `แอดมิน #${reviewedBy}`;
-}
-
 function DecisionArea({
   verification,
   currentAdminId,
@@ -159,9 +166,17 @@ function DecisionArea({
   onApprove,
   onRejectClick,
 }: SellerDetailPanelProps) {
+  const { t } = useTranslate("admin");
   // ใบที่คนอื่นจองไว้ ซ่อนปุ่มไว้ก่อน แต่ยังให้ "ตัดสินแทน" ได้ — backend ไม่มีทางปล่อย
   // ใบที่จองแล้ว ถ้าคนจองหายไป ใบนั้นจะค้างตลอดถ้าไม่มีทางนี้
   const [takingOver, setTakingOver] = useState(false);
+
+  const reviewerText =
+    verification.reviewedBy === currentAdminId
+      ? t("sellers.detail.reviewerYou", "คุณ")
+      : t("sellers.detail.reviewerAdminId", "แอดมิน #{id}", {
+          id: verification.reviewedBy ?? 0,
+        });
 
   switch (verification.status) {
     case "SUBMITTED":
@@ -169,11 +184,14 @@ function DecisionArea({
       if (startReview.isError) {
         return (
           <Alert variant="destructive" className="border-0 p-0">
-            <AlertTitle>รับคำขอมาตรวจไม่สำเร็จ</AlertTitle>
+            <AlertTitle>{t("sellers.toast.claimErrorTitle", "รับคำขอมาตรวจไม่สำเร็จ")}</AlertTitle>
             <AlertDescription>
               {verificationErrorMessage(
                 startReview.error,
-                "คำขอนี้อาจถูกแอดมินคนอื่นรับไปแล้ว หรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+                t(
+                  "sellers.decision.submittedErrorFallback",
+                  "คำขอนี้อาจถูกแอดมินคนอื่นรับไปแล้ว หรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+                ),
               )}
             </AlertDescription>
           </Alert>
@@ -181,7 +199,7 @@ function DecisionArea({
       }
       return (
         <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
-          <Spinner className="size-4" /> กำลังรับคำขอนี้มาตรวจ...
+          <Spinner className="size-4" /> {t("sellers.decision.claiming", "กำลังรับคำขอนี้มาตรวจ...")}
         </p>
       );
 
@@ -197,11 +215,15 @@ function DecisionArea({
               <Lock className="mt-0.5 size-4 shrink-0 text-[#0058bc]" />
               <div className="flex flex-col gap-[3px]">
                 <p className="text-[13px] font-semibold text-foreground">
-                  {reviewerLabel(verification.reviewedBy, currentAdminId)}{" "}
-                  กำลังตรวจคำขอนี้อยู่
+                  {t("sellers.decision.otherReviewingTitle", "{reviewer} กำลังตรวจคำขอนี้อยู่", {
+                    reviewer: reviewerText,
+                  })}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  เลือกใบอื่นในคิวได้เลย กดตัดสินแทนเฉพาะตอนแน่ใจว่าคนเดิมไม่ได้ตรวจต่อแล้ว
+                  {t(
+                    "sellers.decision.otherReviewingDesc",
+                    "เลือกใบอื่นในคิวได้เลย กดตัดสินแทนเฉพาะตอนแน่ใจว่าคนเดิมไม่ได้ตรวจต่อแล้ว",
+                  )}
                 </p>
               </div>
             </div>
@@ -210,7 +232,7 @@ function DecisionArea({
               className="rounded-md px-2.5"
               onClick={() => setTakingOver(true)}
             >
-              ตัดสินแทน
+              {t("sellers.decision.takeOver", "ตัดสินแทน")}
             </Button>
           </>
         );
@@ -219,10 +241,13 @@ function DecisionArea({
         <>
           <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
             <p className="text-[13px] font-semibold text-foreground">
-              ผลการตรวจสอบ
+              {t("sellers.decision.reviewResultTitle", "ผลการตรวจสอบ")}
             </p>
             <p className="text-[11px] text-muted-foreground">
-              ตรวจชื่อบัญชีให้ตรงกับชื่อจริงก่อนกดอนุมัติ — การอนุมัติจะให้สิทธิ์ผู้ขายทันที
+              {t(
+                "sellers.decision.reviewResultDesc",
+                "ตรวจชื่อบัญชีให้ตรงกับชื่อจริงก่อนกดอนุมัติ — การอนุมัติจะให้สิทธิ์ผู้ขายทันที",
+              )}
             </p>
           </div>
 
@@ -232,7 +257,7 @@ function DecisionArea({
             disabled={isApproving}
             onClick={onRejectClick}
           >
-            ปฏิเสธคำขอ
+            {t("sellers.decision.rejectButton", "ปฏิเสธคำขอ")}
           </Button>
           <Button
             className="rounded-md px-2.5"
@@ -240,7 +265,7 @@ function DecisionArea({
             onClick={onApprove}
           >
             {isApproving && <Spinner data-icon="inline-start" />}
-            อนุมัติเปิดร้าน
+            {t("sellers.decision.approveButton", "อนุมัติเปิดร้าน")}
           </Button>
         </>
       );
@@ -249,7 +274,7 @@ function DecisionArea({
       return (
         <div className="flex items-center gap-2.5 text-[13px] font-medium text-[#12805c]">
           <CheckCircle2 className="size-[18px]" />
-          อนุมัติแล้ว — ผู้ขายได้สิทธิ์เปิดร้านบนแพลตฟอร์ม
+          {t("sellers.decision.approvedBanner", "อนุมัติแล้ว — ผู้ขายได้สิทธิ์เปิดร้านบนแพลตฟอร์ม")}
         </div>
       );
 
@@ -257,10 +282,12 @@ function DecisionArea({
       return (
         <div className="flex w-full flex-col gap-1.5">
           <p className="text-[13px] font-semibold text-[#d0342c]">
-            ปฏิเสธคำขอแล้ว
+            {t("sellers.decision.rejectedTitle", "ปฏิเสธคำขอแล้ว")}
           </p>
           <p className="text-[12px] text-muted-foreground">
-            เหตุผล: {verification.rejectionReason ?? "—"}
+            {t("sellers.decision.rejectedReason", "เหตุผล: {reason}", {
+              reason: verification.rejectionReason ?? "—",
+            })}
           </p>
         </div>
       );

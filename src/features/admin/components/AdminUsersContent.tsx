@@ -7,6 +7,7 @@ import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth.queries";
+import { useTranslate } from "@/lib/i18n";
 
 import { downloadBlob } from "@/lib/download";
 
@@ -57,6 +58,7 @@ type OpenDialog =
  * ผ่าน `/admin/users` + `/users/{id}/roles`
  */
 export function AdminUsersContent() {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, ...filters } = readFilters(searchParams);
   const detailUserId = readUserId(searchParams);
@@ -129,20 +131,32 @@ export function AdminUsersContent() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            จัดการผู้ใช้
+            {t("users.title", "จัดการผู้ใช้")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
             {counts.isPending
-              ? "กำลังนับจำนวนบัญชี…"
-              : `ผู้ใช้ทั้งหมด ${formatCount(counts.total)} บัญชี · ผู้ขาย ${formatCount(counts.sellers)} · ระงับ ${formatCount(counts.suspended)}`}
+              ? t("users.counts.loading", "กำลังนับจำนวนบัญชี…")
+              : t(
+                  "users.counts.summary",
+                  "ผู้ใช้ทั้งหมด {total} บัญชี · ผู้ขาย {sellers} · ระงับ {suspended}",
+                  {
+                    total: formatCount(counts.total),
+                    sellers: formatCount(counts.sellers),
+                    suspended: formatCount(counts.suspended),
+                  },
+                )}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <ExportButton label="ส่งออก CSV" pending={usersExport.pending} onClick={exportCsv} />
+          <ExportButton
+            label={t("users.actions.exportCsv", "ส่งออก CSV")}
+            pending={usersExport.pending}
+            onClick={exportCsv}
+          />
           <Button className="rounded-md px-2.5" onClick={() => setDialog({ kind: "add-admin" })}>
             <Plus data-icon="inline-start" />
-            เพิ่มผู้ดูแล
+            {t("users.actions.addAdmin", "เพิ่มผู้ดูแล")}
           </Button>
         </div>
       </div>
@@ -153,8 +167,11 @@ export function AdminUsersContent() {
         <QueryBoundary
           query={users}
           loading={<UsersTableSkeleton />}
-          errorTitle="โหลดรายชื่อผู้ใช้ไม่สำเร็จ"
-          errorMessage="เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ข้อมูลที่ค้นไว้ยังอยู่ใน URL"
+          errorTitle={t("users.query.errorTitle", "โหลดรายชื่อผู้ใช้ไม่สำเร็จ")}
+          errorMessage={t(
+            "users.query.errorMessage",
+            "เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ข้อมูลที่ค้นไว้ยังอยู่ใน URL",
+          )}
           isEmpty={(result) => result.items.length === 0}
           empty={<UsersEmpty filtered={filtered} onClear={clearFilters} />}
         >
@@ -210,22 +227,25 @@ export function AdminUsersContent() {
 
 /** กรองแล้วไม่พบ → มีปุ่มล้าง · ยังไม่มีผู้ใช้เลย → ไม่มีปุ่ม */
 function UsersEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+  const { t } = useTranslate("admin");
   return (
     <div className="flex flex-col items-center gap-2 border-t border-muted px-5 py-11 text-center">
       <div className="grid size-11 place-items-center rounded-full bg-muted">
         <Users aria-hidden="true" className="size-5 text-muted-foreground" />
       </div>
       <p className="text-[13px] font-semibold text-foreground">
-        {filtered ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้"}
+        {filtered
+          ? t("users.empty.filteredTitle", "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง")
+          : t("users.empty.unfilteredTitle", "ยังไม่มีผู้ใช้")}
       </p>
       <p className="text-[11px] text-muted-foreground">
         {filtered
-          ? "ลองลดตัวกรอง หรือค้นด้วยอีเมล / username แทน"
-          : "บัญชีจะขึ้นที่นี่เมื่อมีคนสมัครสมาชิก"}
+          ? t("users.empty.filteredDesc", "ลองลดตัวกรอง หรือค้นด้วยอีเมล / username แทน")
+          : t("users.empty.unfilteredDesc", "บัญชีจะขึ้นที่นี่เมื่อมีคนสมัครสมาชิก")}
       </p>
       {filtered ? (
         <Button variant="outline" size="sm" className="rounded-md" onClick={onClear}>
-          ล้างตัวกรองทั้งหมด
+          {t("users.empty.clearFilters", "ล้างตัวกรองทั้งหมด")}
         </Button>
       ) : null}
     </div>

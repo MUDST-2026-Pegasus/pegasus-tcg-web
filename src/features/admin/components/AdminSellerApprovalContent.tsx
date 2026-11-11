@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useAuth } from "@/features/auth/auth.queries";
 import { hasErrorCode } from "@/lib/api";
+import { useTranslate } from "@/lib/i18n";
 
 import {
   useApproveVerification,
@@ -38,6 +39,7 @@ const PAGE_SIZE = 20;
  * localStorage — การเลือกใบใช้ state ไม่ใช่ route param
  */
 export function AdminSellerApprovalContent() {
+  const { t } = useTranslate("admin");
   const [activeStatus, setActiveStatus] =
     useState<VerificationStatus>("SUBMITTED");
   const [page, setPage] = useState(0);
@@ -73,10 +75,13 @@ export function AdminSellerApprovalContent() {
         onError: async (error) => {
           toast.add({
             type: "error",
-            title: "รับคำขอมาตรวจไม่สำเร็จ",
+            title: t("sellers.toast.claimErrorTitle", "รับคำขอมาตรวจไม่สำเร็จ"),
             description: verificationErrorMessage(
               error,
-              "คำขอนี้อาจถูกรับหรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+              t(
+                "sellers.toast.claimErrorFallback",
+                "คำขอนี้อาจถูกรับหรือถูกตัดสินไปแล้ว ลองรีเฟรชคิว",
+              ),
             ),
           });
           // คิวในมือเราเก่ากว่าของจริง — คนอื่นจองไปก่อน ไปหาในคิว "กำลังตรวจ"
@@ -114,15 +119,18 @@ export function AdminSellerApprovalContent() {
         replaceSelected(updated);
         toast.add({
           type: "success",
-          title: "อนุมัติแล้ว",
-          description: "ผู้ขายรายนี้ได้สิทธิ์เปิดร้านบนแพลตฟอร์มแล้ว",
+          title: t("sellers.toast.approveSuccessTitle", "อนุมัติแล้ว"),
+          description: t(
+            "sellers.toast.approveSuccessDesc",
+            "ผู้ขายรายนี้ได้สิทธิ์เปิดร้านบนแพลตฟอร์มแล้ว",
+          ),
         });
       },
       onError: (error) =>
         toast.add({
           type: "error",
-          title: "อนุมัติไม่สำเร็จ",
-          description: verificationErrorMessage(error, "ลองใหม่อีกครั้ง"),
+          title: t("sellers.toast.approveErrorTitle", "อนุมัติไม่สำเร็จ"),
+          description: verificationErrorMessage(error, t("actions.retry", "ลองใหม่", { ns: "common" })),
         }),
     });
   };
@@ -133,10 +141,13 @@ export function AdminSellerApprovalContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-          อนุมัติผู้ขาย
+          {t("sellers.pageTitle", "อนุมัติผู้ขาย")}
         </h1>
         <p className="text-[13px] text-muted-foreground">
-          ตรวจสอบชื่อและบัญชีธนาคารก่อนอนุญาตให้เปิดร้านค้าบนแพลตฟอร์ม
+          {t(
+            "sellers.pageDesc",
+            "ตรวจสอบชื่อและบัญชีธนาคารก่อนอนุญาตให้เปิดร้านค้าบนแพลตฟอร์ม",
+          )}
         </p>
       </div>
 
@@ -152,14 +163,19 @@ export function AdminSellerApprovalContent() {
           <QueryBoundary
             query={queue}
             loading={<SellerQueueSkeleton />}
-            errorTitle="โหลดคิวคำขอไม่สำเร็จ"
-            errorMessage="ตรวจสอบการเชื่อมต่อแล้วลองใหม่"
+            errorTitle={t("sellers.queue.loadErrorTitle", "โหลดคิวคำขอไม่สำเร็จ")}
+            errorMessage={t("sellers.queue.loadErrorDesc", "ตรวจสอบการเชื่อมต่อแล้วลองใหม่")}
             isEmpty={(data) => data.items.length === 0}
             empty={
               <EmptyState
                 icon={Inbox}
-                title={`ไม่มีคำขอในสถานะ "${VERIFICATION_STATUS_META[activeStatus].label}"`}
-                description="เมื่อมีคำขอเข้ามา จะแสดงที่นี่โดยเรียงเก่าสุดก่อน"
+                title={t("sellers.queue.emptyTitle", "ไม่มีคำขอในสถานะ \"{status}\"", {
+                  status: VERIFICATION_STATUS_META[activeStatus].label,
+                })}
+                description={t(
+                  "sellers.queue.emptyDesc",
+                  "เมื่อมีคำขอเข้ามา จะแสดงที่นี่โดยเรียงเก่าสุดก่อน",
+                )}
               />
             }
           >
@@ -172,8 +188,8 @@ export function AdminSellerApprovalContent() {
                   activeId={selected?.id ?? null}
                   currentAdminId={user?.id}
                   onSelect={handleSelect}
-                  viewingLabel="กำลังดู"
-                  sortLabel="เรียงตาม: เก่าสุด"
+                  viewingLabel={t("sellers.queue.viewingBadge", "กำลังดู")}
+                  sortLabel={t("sellers.queue.sortOldest", "เรียงตาม: เก่าสุด")}
                 />
 
                 {totalPages > 1 && (
@@ -185,10 +201,13 @@ export function AdminSellerApprovalContent() {
                       disabled={page <= 0 || queue.isFetching}
                       onClick={() => setPage((current) => Math.max(0, current - 1))}
                     >
-                      ก่อนหน้า
+                      {t("actions.previous", "ก่อนหน้า", { ns: "common" })}
                     </Button>
                     <span className="text-[11px] text-muted-foreground">
-                      หน้า {page + 1} จาก {totalPages}
+                      {t("sellers.pagination.pageIndicator", "หน้า {current} จาก {total}", {
+                        current: page + 1,
+                        total: totalPages,
+                      })}
                     </span>
                     <Button
                       variant="outline"
@@ -197,7 +216,7 @@ export function AdminSellerApprovalContent() {
                       disabled={page + 1 >= totalPages || queue.isFetching}
                       onClick={() => setPage((current) => current + 1)}
                     >
-                      ถัดไป
+                      {t("actions.next", "ถัดไป", { ns: "common" })}
                     </Button>
                   </div>
                 )}
@@ -224,7 +243,7 @@ export function AdminSellerApprovalContent() {
         ) : (
           <div className="flex w-full min-w-0 flex-1 items-center justify-center rounded-xl border border-dashed border-border p-10 text-center">
             <p className="text-[13px] text-muted-foreground">
-              เลือกคำขอจากคิวทางซ้ายเพื่อดูรายละเอียดและตัดสิน
+              {t("sellers.detail.emptyPrompt", "เลือกคำขอจากคิวทางซ้ายเพื่อดูรายละเอียดและตัดสิน")}
             </p>
           </div>
         )}

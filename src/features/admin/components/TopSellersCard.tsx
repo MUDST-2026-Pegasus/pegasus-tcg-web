@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
-import type { TopSellerBar } from "../metrics.format";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import type { TopSellerBar } from "../metrics.format";
 
 type TopSellersCardProps = {
   title: string;
@@ -15,6 +16,8 @@ export function TopSellersCard({
   description,
   items,
 }: TopSellersCardProps) {
+  const { t } = useTranslate("admin");
+
   return (
     <Card className="min-w-0 flex-1 gap-4 rounded-xl border border-border p-5 shadow-none ring-0">
       <div className="flex flex-col gap-0.5">
@@ -24,7 +27,7 @@ export function TopSellersCard({
 
       {items.length === 0 ? (
         <p className="py-6 text-center text-xs text-muted-foreground">
-          ยังไม่มีร้านค้าที่มียอดขายในเดือนนี้
+          {t("metrics.topSellers.noSales", "ยังไม่มีร้านค้าที่มียอดขายในเดือนนี้")}
         </p>
       ) : null}
 

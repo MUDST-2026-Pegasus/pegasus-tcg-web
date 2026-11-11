@@ -7,8 +7,12 @@ import {
   type Delta,
   type StatCardModel,
 } from "./metrics.format";
-import type { WeeklyReport, WeeklyStockStatus } from "./weekly-report.types";
-import { formatMonth, formatYear, intlLocale, monthStart } from "@/lib/i18n";
+import type {
+  WeeklyProductType,
+  WeeklyReport,
+  WeeklyStockStatus,
+} from "./weekly-report.types";
+import { formatDate, formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -87,10 +91,22 @@ export type WeekOption = { weekStart: string; label: string; range: string };
 export function weekOptions(today: string): WeekOption[] {
   const current = weekStartOf(today);
   return [
-    { weekStart: current, label: "สัปดาห์ปัจจุบัน" },
-    { weekStart: addWeeks(current, -1), label: "สัปดาห์ก่อนหน้า" },
-    { weekStart: addWeeks(current, -2), label: "2 สัปดาห์ก่อน" },
-    { weekStart: addWeeks(current, 1), label: "สัปดาห์หน้า (ไม่มีข้อมูล)" },
+    {
+      weekStart: current,
+      label: translate("admin", "weeklyReport.filter.currentWeek", "สัปดาห์ปัจจุบัน"),
+    },
+    {
+      weekStart: addWeeks(current, -1),
+      label: translate("admin", "weeklyReport.filter.previousWeek", "สัปดาห์ก่อนหน้า"),
+    },
+    {
+      weekStart: addWeeks(current, -2),
+      label: translate("admin", "weeklyReport.filter.twoWeeksAgo", "2 สัปดาห์ก่อน"),
+    },
+    {
+      weekStart: addWeeks(current, 1),
+      label: translate("admin", "weeklyReport.filter.nextWeekNoData", "สัปดาห์หน้า (ไม่มีข้อมูล)"),
+    },
   ].map((option) => ({ ...option, range: weekRangeLabel(option.weekStart) }));
 }
 
@@ -122,38 +138,58 @@ export function weeklyStatCards(
     hasData ? changeFrom(value, last) : flat;
   const history = report.kpiHistory;
   const stockSplit = [
-    `การ์ดเดี่ยว ${formatCount(totals.singleCards)}`,
-    `กล่อง/ซองสุ่ม ${formatCount(totals.sealedBoxes)}`,
-    ...(totals.otherItems > 0 ? [`อื่น ๆ ${formatCount(totals.otherItems)}`] : []),
+    translate("admin", "weeklyReport.stat.stockSingles", "การ์ดเดี่ยว {count}", {
+      count: formatCount(totals.singleCards),
+    }),
+    translate("admin", "weeklyReport.stat.stockSealed", "กล่อง/ซองสุ่ม {count}", {
+      count: formatCount(totals.sealedBoxes),
+    }),
+    ...(totals.otherItems > 0
+      ? [
+          translate("admin", "weeklyReport.stat.stockOther", "อื่น ๆ {count}", {
+            count: formatCount(totals.otherItems),
+          }),
+        ]
+      : []),
   ].join(" · ");
   const commissionShare = summary.gmv > 0 ? (summary.commission / summary.gmv) * 100 : 0;
 
   return [
     {
       id: "net-profit",
-      label: "กำไรสุทธิสัปดาห์นี้",
+      label: translate("admin", "weeklyReport.stat.netProfit", "กำไรสุทธิสัปดาห์นี้"),
       value: formatReportBaht(summary.netProfit),
       delta: delta(summary.netProfit, previous?.summary.netProfit),
       footnote: !hasData
-        ? "ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก"
+        ? translate("admin", "weeklyReport.stat.netProfitNoOrders", "ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก")
         : previous
-          ? `รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม (เทียบ ${formatReportBaht(previous.summary.netProfit)} สัปดาห์ก่อน)`
-          : "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม",
+          ? translate(
+              "admin",
+              "weeklyReport.stat.netProfitFootnoteCompared",
+              "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม (เทียบ {amount} สัปดาห์ก่อน)",
+              { amount: formatReportBaht(previous.summary.netProfit) },
+            )
+          : translate("admin", "weeklyReport.stat.netProfitFootnote", "รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม"),
       bars: sparkBars(history.map((day) => day.netProfit)),
       accent: "primary",
     },
     {
       id: "gmv",
-      label: "ยอดขายรวมรายสัปดาห์",
+      label: translate("admin", "weeklyReport.stat.gmv", "ยอดขายรวมรายสัปดาห์"),
       value: formatReportBaht(summary.gmv),
       delta: percentDelta(summary.wowChangePercent),
-      footnote: `จากคำสั่งซื้อที่สำเร็จแล้ว ${formatCount(summary.soldCount)} รายการ`,
+      footnote: translate(
+        "admin",
+        "weeklyReport.stat.gmvFootnote",
+        "จากคำสั่งซื้อที่สำเร็จแล้ว {count} รายการ",
+        { count: formatCount(summary.soldCount) },
+      ),
       bars: sparkBars(history.map((day) => day.gmv)),
       accent: "primary",
     },
     {
       id: "stock",
-      label: "สต็อกที่เปิดขายอยู่",
+      label: translate("admin", "weeklyReport.stat.stock", "สต็อกที่เปิดขายอยู่"),
       value: formatCount(summary.remainingStock),
       delta: delta(summary.remainingStock, previous?.summary.remainingStock),
       footnote: stockSplit,
@@ -163,23 +199,31 @@ export function weeklyStatCards(
     },
     {
       id: "commission",
-      label: "ค่าคอมมิชชั่นที่เก็บได้",
+      label: translate("admin", "weeklyReport.stat.commission", "ค่าคอมมิชชั่นที่เก็บได้"),
       value: formatReportBaht(summary.commission),
       delta: delta(summary.commission, previous?.summary.commission),
-      footnote: `${hasData ? "คิดเป็น" : "เฉลี่ย"} ${commissionShare.toFixed(1)}% ของยอดขายรวมรายสัปดาห์`,
+      footnote: translate(
+        "admin",
+        "weeklyReport.stat.commissionFootnote",
+        "{prefix} {share}% ของยอดขายรวมรายสัปดาห์",
+        {
+          prefix: hasData
+            ? translate("admin", "weeklyReport.stat.isShare", "คิดเป็น")
+            : translate("admin", "weeklyReport.stat.avgShare", "เฉลี่ย"),
+          share: commissionShare.toFixed(1),
+        },
+      ),
       bars: sparkBars(history.map((day) => day.commission)),
       accent: "primary",
     },
   ];
 }
 
-const WEEKDAY_SHORT = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
-
 export type WeeklyTrendPoint = { day: string; singles: number; sealed: number; other: number };
 
 export function weeklyTrendPoints(report: WeeklyReport): WeeklyTrendPoint[] {
   return report.chartData.map(({ date, singles, sealed, other }) => ({
-    day: WEEKDAY_SHORT[parseISO(date).getDay()],
+    day: formatDate(parseISO(date), { weekday: "short" }),
     singles,
     sealed,
     other,
@@ -197,6 +241,30 @@ export const STOCK_STATUS_BADGE: Record<WeeklyStockStatus, string> = {
   LOW_STOCK: "bg-[#fef3c7] text-[#f59e0b]",
 };
 
+export const PRODUCT_TYPE_LABEL: Record<WeeklyProductType, string> = {
+  get SINGLE_CARD() {
+    return translate("admin", "weeklyReport.productType.singleCard", "การ์ดเดี่ยว");
+  },
+  get SEALED() {
+    return translate("admin", "weeklyReport.productType.sealed", "กล่อง/ซองสุ่ม");
+  },
+  get OTHER() {
+    return translate("admin", "weeklyReport.productType.other", "อื่น ๆ");
+  },
+};
+
+export const STOCK_STATUS_LABEL: Record<WeeklyStockStatus, string> = {
+  get NORMAL() {
+    return translate("admin", "weeklyReport.stockStatus.normal", "ปกติ");
+  },
+  get FAST_MOVING() {
+    return translate("admin", "weeklyReport.stockStatus.fastMoving", "สต็อกหมุนเวียนเร็ว");
+  },
+  get LOW_STOCK() {
+    return translate("admin", "weeklyReport.stockStatus.lowStock", "สต็อกต่ำ");
+  },
+};
+
 /** สีตามลำดับในดีไซน์ เกมเกินจากนี้ไล่สีกราฟของระบบต่อ */
 export const GAME_COLORS = [
   "var(--primary)",
@@ -205,3 +273,28 @@ export const GAME_COLORS = [
   "var(--chart-3)",
   "var(--chart-5)",
 ];
+
+// @tolgee-key {"key":"weeklyReport.filter.currentWeek","ns":"admin","defaultValue":"สัปดาห์ปัจจุบัน"}
+// @tolgee-key {"key":"weeklyReport.filter.previousWeek","ns":"admin","defaultValue":"สัปดาห์ก่อนหน้า"}
+// @tolgee-key {"key":"weeklyReport.filter.twoWeeksAgo","ns":"admin","defaultValue":"2 สัปดาห์ก่อน"}
+// @tolgee-key {"key":"weeklyReport.filter.nextWeekNoData","ns":"admin","defaultValue":"สัปดาห์หน้า (ไม่มีข้อมูล)"}
+// @tolgee-key {"key":"weeklyReport.stat.netProfit","ns":"admin","defaultValue":"กำไรสุทธิสัปดาห์นี้"}
+// @tolgee-key {"key":"weeklyReport.stat.netProfitNoOrders","ns":"admin","defaultValue":"ไม่มีรายการคำสั่งซื้อในสัปดาห์ที่เลือก"}
+// @tolgee-key {"key":"weeklyReport.stat.netProfitFootnoteCompared","ns":"admin","defaultValue":"รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม (เทียบ {amount} สัปดาห์ก่อน)"}
+// @tolgee-key {"key":"weeklyReport.stat.netProfitFootnote","ns":"admin","defaultValue":"รายได้ค่าคอมมิชชั่นของแพลตฟอร์ม"}
+// @tolgee-key {"key":"weeklyReport.stat.gmv","ns":"admin","defaultValue":"ยอดขายรวมรายสัปดาห์"}
+// @tolgee-key {"key":"weeklyReport.stat.gmvFootnote","ns":"admin","defaultValue":"จากคำสั่งซื้อที่สำเร็จแล้ว {count} รายการ"}
+// @tolgee-key {"key":"weeklyReport.stat.stock","ns":"admin","defaultValue":"สต็อกที่เปิดขายอยู่"}
+// @tolgee-key {"key":"weeklyReport.stat.stockSingles","ns":"admin","defaultValue":"การ์ดเดี่ยว {count}"}
+// @tolgee-key {"key":"weeklyReport.stat.stockSealed","ns":"admin","defaultValue":"กล่อง/ซองสุ่ม {count}"}
+// @tolgee-key {"key":"weeklyReport.stat.stockOther","ns":"admin","defaultValue":"อื่น ๆ {count}"}
+// @tolgee-key {"key":"weeklyReport.stat.commission","ns":"admin","defaultValue":"ค่าคอมมิชชั่นที่เก็บได้"}
+// @tolgee-key {"key":"weeklyReport.stat.commissionFootnote","ns":"admin","defaultValue":"{prefix} {share}% ของยอดขายรวมรายสัปดาห์"}
+// @tolgee-key {"key":"weeklyReport.stat.isShare","ns":"admin","defaultValue":"คิดเป็น"}
+// @tolgee-key {"key":"weeklyReport.stat.avgShare","ns":"admin","defaultValue":"เฉลี่ย"}
+// @tolgee-key {"key":"weeklyReport.productType.singleCard","ns":"admin","defaultValue":"การ์ดเดี่ยว"}
+// @tolgee-key {"key":"weeklyReport.productType.sealed","ns":"admin","defaultValue":"กล่อง/ซองสุ่ม"}
+// @tolgee-key {"key":"weeklyReport.productType.other","ns":"admin","defaultValue":"อื่น ๆ"}
+// @tolgee-key {"key":"weeklyReport.stockStatus.normal","ns":"admin","defaultValue":"ปกติ"}
+// @tolgee-key {"key":"weeklyReport.stockStatus.fastMoving","ns":"admin","defaultValue":"สต็อกหมุนเวียนเร็ว"}
+// @tolgee-key {"key":"weeklyReport.stockStatus.lowStock","ns":"admin","defaultValue":"สต็อกต่ำ"}

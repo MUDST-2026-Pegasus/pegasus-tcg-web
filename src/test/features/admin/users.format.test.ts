@@ -12,6 +12,8 @@ import {
   userInitials,
 } from "@/features/admin/users.format";
 import { ApiError } from "@/lib/api";
+import { registerErrorTranslator } from "@/lib/i18n/errors";
+import { testTolgee } from "@/test/i18n";
 
 describe("users.format", () => {
   it("shows the most powerful role first", () => {
@@ -44,6 +46,20 @@ describe("users.format", () => {
     expect(pageSummary(0, 20, 4982)).toBe("แสดง 1–20 จาก 4,982 บัญชี");
     expect(pageSummary(1, 20, 25)).toBe("แสดง 21–25 จาก 25 บัญชี");
     expect(pageSummary(0, 20, 0)).toBe("ไม่พบบัญชี");
+  });
+
+  it("summarises the rows in English with ICU plural support", () => {
+    document.documentElement.lang = "en";
+    registerErrorTranslator(testTolgee("en"));
+    try {
+      expect(pageSummary(0, 20, 1)).toBe("Showing 1–1 of 1 account");
+      expect(pageSummary(0, 20, 2)).toBe("Showing 1–2 of 2 accounts");
+      expect(pageSummary(0, 20, 4982)).toBe("Showing 1–20 of 4,982 accounts");
+      expect(pageSummary(0, 20, 0)).toBe("No accounts found");
+    } finally {
+      document.documentElement.lang = "th";
+      registerErrorTranslator(testTolgee("th"));
+    }
   });
 
   it("lists every page when there are few, and skips the middle when there are many", () => {
