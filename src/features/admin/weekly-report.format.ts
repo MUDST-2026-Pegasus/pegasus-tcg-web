@@ -12,7 +12,7 @@ import type {
   WeeklyReport,
   WeeklyStockStatus,
 } from "./weekly-report.types";
-import { formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
+import { formatMonth, formatYear, monthStart, translate, formatMoney } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -22,14 +22,9 @@ import { formatMonth, formatYear, intlLocale, monthStart, translate } from "@/li
 const ISO_DATE = "yyyy-MM-dd";
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-/** 428500 → "฿428,500" ตามดีไซน์ ยอดที่มีสตางค์คงไว้ 2 ตำแหน่ง ตัวเลขจะได้ตรงกับ API */
+/** 428500 → "THB 428,500.00" */
 export function formatReportBaht(amount: number): string {
-  return new Intl.NumberFormat(intlLocale(), {
-    style: "currency",
-    currency: "THB",
-    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  return formatMoney(amount);
 }
 
 const toIso = (date: Date) => format(date, ISO_DATE);

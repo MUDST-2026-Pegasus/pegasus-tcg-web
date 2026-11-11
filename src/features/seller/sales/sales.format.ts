@@ -19,7 +19,7 @@ export function sellerScopeLabel(sale: Pick<SellerSale, "scopeType" | "scopeIds"
   return translate("sale", "seller.scope.categories", "{count} หมวด", { count: sale.scopeIds.length.toLocaleString(intlLocale()) });
 }
 
-/** "ลด 15%" / "ลด ฿150/ชิ้น" / translate("sale", "seller.discount.fixedPrice", "ราคาใหม่รายชิ้น") */
+/** "ลด 15%" / "ลด THB 150.00/ชิ้น" / translate("sale", "seller.discount.fixedPrice", "ราคาใหม่รายชิ้น") */
 export function sellerDiscountLabel(sale: Pick<SellerSale, "discountType" | "discountValue">): string {
   if (sale.discountType === "PERCENT") return translate("sale", "seller.discount.percent", "ลด {percent}%", { percent: sale.discountValue ?? 0 });
   if (sale.discountType === "FIXED_OFF") return translate("sale", "seller.discount.fixedOff", "ลด {amount}/ชิ้น", { amount: formatSaleBaht(sale.discountValue ?? 0) });

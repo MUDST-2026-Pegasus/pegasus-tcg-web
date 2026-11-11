@@ -8,7 +8,7 @@ auctionDescribe("Auction: buy now", () => {
       login("buyer@example.com").then((buyer) => {
         cy.intercept("POST", `**/api/v1/auctions/${auction.id}/buy-now`).as("buyNow");
         cy.visit(`/auctions/${auction.id}`);
-        cy.contains("button", /^ซื้อทันที ฿/).click();
+        cy.contains("button", /^ซื้อทันที THB/).click();
         cy.get('[role="alertdialog"], [role="dialog"]').within(() => cy.contains("button", /^ซื้อทันที$/).click());
         cy.wait("@buyNow").its("response.statusCode").should("eq", 200);
 

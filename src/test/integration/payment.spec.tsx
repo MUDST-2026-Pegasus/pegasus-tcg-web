@@ -135,7 +135,7 @@ describe("PaymentPage Integration Flow", () => {
     expect(screen.getByText("พร้อมเพย์ 081-999-8888")).toBeInTheDocument();
     expect(screen.getByText("Pegasus TCG Co., Ltd.")).toBeInTheDocument();
 
-    expect(screen.getByText("สแกนเพื่อชำระ | ฿1,050.00")).toBeInTheDocument();
+    expect(screen.getByText("สแกนเพื่อชำระ | THB 1,050.00")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" }).querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
 
     // Order items

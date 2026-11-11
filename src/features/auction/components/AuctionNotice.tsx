@@ -18,7 +18,7 @@ type AuctionNoticeProps = {
   icon: ReactNode;
   title: string;
   detail?: ReactNode;
-  /** ปุ่มชิดขวา เช่น "บิด ฿8,750" ในแบนเนอร์ถูกบิดแซง */
+  /** ปุ่มชิดขวา เช่น "บิด THB 8,750" ในแบนเนอร์ถูกบิดแซง */
   action?: ReactNode;
   /** `alert` ใช้กับ error */
   role?: "alert" | "status";

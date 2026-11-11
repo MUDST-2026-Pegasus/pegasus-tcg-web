@@ -6,8 +6,7 @@ import { AmountInput } from "@/features/seller/products/components/AmountInput";
 import type { AuctionFormValues } from "../auction-form.types";
 import { AuctionFieldError } from "./AuctionFieldError";
 
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-const BAHT_SIGN = "฿";
+const BAHT_SIGN = "THB";
 
 type MoneyFieldName = "startingPrice" | "bidIncrement" | "buyNowPrice";
 
@@ -20,7 +19,7 @@ type BahtFieldProps = {
   required?: boolean;
 };
 
-/** ช่องเงินบาทมี "฿" นำหน้า + ข้อความใต้ช่อง (ใช้ในการ์ดราคาและซื้อทันที) */
+/** ช่องเงินบาทมี "THB" นำหน้า + ข้อความใต้ช่อง (ใช้ในการ์ดราคาและซื้อทันที) */
 export function BahtField({ form, name, id, label, hint, required }: BahtFieldProps) {
   const { errors } = useFormState({ control: form.control, name });
   const error = errors[name]?.message;
@@ -43,7 +42,7 @@ export function BahtField({ form, name, id, label, hint, required }: BahtFieldPr
               onValueChange={field.onChange}
               onBlur={field.onBlur}
               aria-invalid={Boolean(error) || undefined}
-              className="h-9 rounded-lg border-input bg-background pl-7 text-sm"
+              className="h-9 rounded-lg border-input bg-background pl-12 text-sm"
             />
           )}
         />

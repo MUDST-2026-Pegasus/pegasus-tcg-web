@@ -14,9 +14,9 @@ import {
 describe("checkout.format", () => {
   describe("checkoutMoney", () => {
     it("formats baht amount with 2 decimal places max", () => {
-      expect(checkoutMoney(0)).toBe("฿0");
-      expect(checkoutMoney(1500)).toBe("฿1,500");
-      expect(checkoutMoney(3025.5)).toBe("฿3,025.5");
+      expect(checkoutMoney(0)).toBe("THB 0.00");
+      expect(checkoutMoney(1500)).toBe("THB 1,500.00");
+      expect(checkoutMoney(3025.5)).toBe("THB 3,025.50");
     });
   });
 
@@ -66,13 +66,13 @@ describe("checkout.format", () => {
     it("formats percent, fixed, and free shipping", () => {
       expect(formatPromotionValue({ discountType: "FREE_SHIPPING", discountValue: 0 })).toBe("ส่งฟรี");
       expect(formatPromotionValue({ discountType: "PERCENT", discountValue: 15 })).toBe("15%");
-      expect(formatPromotionValue({ discountType: "FIXED", discountValue: 100 })).toBe("฿100");
+      expect(formatPromotionValue({ discountType: "FIXED", discountValue: 100 })).toBe("THB 100.00");
     });
   });
 
   describe("formatPromotionConditions", () => {
     it("formats minimum spend and maximum cap", () => {
-      expect(formatPromotionConditions({ minSpend: 500, maxDiscount: 200 })).toBe("ขั้นต่ำ ฿500 · สูงสุด ฿200");
+      expect(formatPromotionConditions({ minSpend: 500, maxDiscount: 200 })).toBe("ขั้นต่ำ THB 500.00 · สูงสุด THB 200.00");
       expect(formatPromotionConditions({ minSpend: 0, maxDiscount: null })).toBe("ไม่มีขั้นต่ำ");
     });
   });
@@ -86,7 +86,7 @@ describe("checkout.format", () => {
           minSpend: 500,
           maxDiscount: 200,
         }),
-      ).toBe("ลด 10% · ขั้นต่ำ ฿500 · สูงสุด ฿200");
+      ).toBe("ลด 10% · ขั้นต่ำ THB 500.00 · สูงสุด THB 200.00");
     });
   });
 
@@ -101,7 +101,7 @@ describe("checkout.format", () => {
     it("maps all required error codes to Thai messages per spec", () => {
       expect(formatPromotionError("PROMO_EXPIRED")).toBe("โค้ดหมดอายุแล้ว");
       expect(formatPromotionError("PROMO_MIN_SPEND_NOT_MET", { shortfall: 150 })).toBe(
-        "ซื้อสินค้าเพิ่มอีก ฿150 เพื่อใช้โค้ดนี้",
+        "ซื้อสินค้าเพิ่มอีก THB 150.00 เพื่อใช้โค้ดนี้",
       );
       expect(formatPromotionError("PROMO_WRONG_SELLER", { sellerName: "Store A" })).toBe(
         "โค้ดนี้เป็นของร้าน Store A — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น",

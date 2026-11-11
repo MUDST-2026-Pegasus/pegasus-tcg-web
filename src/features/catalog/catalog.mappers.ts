@@ -1,5 +1,5 @@
 import type { CardCondition, ProductMarketDto, ProductType, PublicListingDto } from "./catalog.types";
-import { numberFormat, translate } from "@/lib/i18n";
+import { translate, formatMoney } from "@/lib/i18n";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
@@ -94,17 +94,11 @@ export function productHref(slug: string): string {
   return `/products/${encodeURIComponent(slug)}`;
 }
 
-const priceFormatter = numberFormat({
-  style: "currency",
-  currency: "THB",
-  maximumFractionDigits: 0,
-});
-
 /** null หรือไม่มีค่า = ไม่มีใครขาย */
 export function formatPrice(price: number | null | undefined): string {
   return price === null || price === undefined
     ? translate("common", "listing.outOfStock", "สินค้าหมด")
-    : priceFormatter.format(price);
+    : formatMoney(price);
 }
 export function marketForListing(market: ProductMarketDto[] | undefined, listing: PublicListingDto | undefined) {
   if (!listing) return undefined;

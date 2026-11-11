@@ -212,6 +212,6 @@ describe('Core Finance & Payout Flow', () => {
 
     // Click wallet movements details
     cy.contains('button', 'รายการเคลื่อนไหวกระเป๋า').click();
-    cy.contains('+฿3,500.00').should('be.visible');
+    cy.contains('+THB 3,500.00').should('be.visible');
   });
 });

@@ -55,7 +55,7 @@ const saleShape = z.object({
   saleType: z.enum(["FLASH_SALE", "CATEGORY_SALE"]),
   discountType: z.enum(["PERCENT", "FIXED_OFF"]),
   discountValue: z.number({ error: () => translate("sale", "admin.validation.discountRequired", "กรอกส่วนลด") }).nullable(),
-  maxDiscountPerUnit: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.positive", "ต้องมากกว่า ฿0") }).nullable(),
+  maxDiscountPerUnit: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.positive", "ต้องมากกว่า THB 0.00") }).nullable(),
   scopeType: z.enum(["ALL", "GAME", "CATEGORY", "CARD_SET"]),
   scopeIds: z.array(z.number()),
   conditions: z.array(z.string()),
@@ -63,7 +63,7 @@ const saleShape = z.object({
   excludedSellerIds: z.array(z.number()),
   perListingQuota: optionalCount(() => translate("sale", "admin.field.perListingQuota", "โควตาต่อ listing")),
   perBuyerLimit: optionalCount(() => translate("sale", "admin.field.perBuyerLimit", "จำกัดต่อผู้ซื้อ")),
-  budgetCap: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.budgetPositive", "งบต้องมากกว่า ฿0") }).nullable(),
+  budgetCap: z.number({ error: () => translate("sale", "admin.validation.number", "กรอกเป็นตัวเลข") }).positive({ error: () => translate("sale", "admin.validation.budgetPositive", "งบต้องมากกว่า THB 0.00") }).nullable(),
   bannerImageUrl: z.string().nullable(),
   featuredOnHome: z.boolean(),
   homeSort: z.number().int().min(0, { error: () => translate("sale", "admin.validation.sortNonNegative", "ลำดับต้องไม่ติดลบ") }).nullable(),
@@ -84,7 +84,7 @@ export function createSaleSchema({ existing, now = Date.now() }: SaleFormContext
     } else if (value.discountType === "PERCENT" && (discount < 1 || discount > 90 || !Number.isInteger(discount))) {
       issue("discountValue", translate("sale", "admin.validation.percentRange", "เปอร์เซ็นต์ต้องเป็นจำนวนเต็ม {min}–{max}", { min: 1, max: 90 }));
     } else if (value.discountType === "FIXED_OFF" && discount <= 0) {
-      issue("discountValue", translate("sale", "admin.validation.positive", "ต้องมากกว่า ฿0"));
+      issue("discountValue", translate("sale", "admin.validation.positive", "ต้องมากกว่า THB 0.00"));
     }
 
     if (value.scopeType !== "ALL" && value.scopeIds.length === 0) {
@@ -203,11 +203,11 @@ export function slugify(name: string): string {
 // @tolgee-key {"key": "admin.validation.slugFormat", "ns": "sale", "defaultValue": "ใช้ได้เฉพาะ a–z 0–9 และ - (ห้ามขึ้นต้น/ลงท้ายด้วย -)"}
 // @tolgee-key {"key": "admin.validation.discountRequired", "ns": "sale", "defaultValue": "กรอกส่วนลด"}
 // @tolgee-key {"key": "admin.validation.number", "ns": "sale", "defaultValue": "กรอกเป็นตัวเลข"}
-// @tolgee-key {"key": "admin.validation.positive", "ns": "sale", "defaultValue": "ต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "admin.validation.positive", "ns": "sale", "defaultValue": "ต้องมากกว่า THB 0.00"}
 // @tolgee-key {"key": "admin.validation.nonNegative", "ns": "sale", "defaultValue": "ต้องไม่ติดลบ"}
 // @tolgee-key {"key": "admin.field.perListingQuota", "ns": "sale", "defaultValue": "โควตาต่อ listing"}
 // @tolgee-key {"key": "admin.field.perBuyerLimit", "ns": "sale", "defaultValue": "จำกัดต่อผู้ซื้อ"}
-// @tolgee-key {"key": "admin.validation.budgetPositive", "ns": "sale", "defaultValue": "งบต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "admin.validation.budgetPositive", "ns": "sale", "defaultValue": "งบต้องมากกว่า THB 0.00"}
 // @tolgee-key {"key": "admin.validation.sortNonNegative", "ns": "sale", "defaultValue": "ลำดับต้องไม่ติดลบ"}
 // @tolgee-key {"key": "admin.field.startsAt", "ns": "sale", "defaultValue": "วันเริ่ม"}
 // @tolgee-key {"key": "admin.field.endsAt", "ns": "sale", "defaultValue": "วันสิ้นสุด"}

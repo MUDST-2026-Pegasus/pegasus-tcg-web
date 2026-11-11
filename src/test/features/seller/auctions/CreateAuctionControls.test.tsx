@@ -74,10 +74,10 @@ describe("ConfirmOpenAuctionDialog", () => {
   it("summarises the auction", () => {
     renderDialog();
     expect(screen.getByRole("heading", { name: "เปิดประมูลการ์ดใบนี้?" })).toBeInTheDocument();
-    expect(screen.getByText("฿1,000")).toBeInTheDocument();
-    expect(screen.getByText("+฿50")).toBeInTheDocument();
+    expect(screen.getByText("THB 1,000.00")).toBeInTheDocument();
+    expect(screen.getByText("+THB 50.00")).toBeInTheDocument();
     expect(screen.getByText("จ. 2 พ.ย. 2026 21:00 (อีก 3 วัน 7 ชม.)")).toBeInTheDocument();
-    expect(screen.getByText("฿1,800 (จนกว่าจะมีบิดแรก)")).toBeInTheDocument();
+    expect(screen.getByText("THB 1,800.00 (จนกว่าจะมีบิดแรก)")).toBeInTheDocument();
     expect(screen.getByText("5% เท่าการขายปกติ")).toBeInTheDocument();
   });
 

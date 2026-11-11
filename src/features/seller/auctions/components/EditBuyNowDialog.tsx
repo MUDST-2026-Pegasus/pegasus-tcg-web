@@ -19,8 +19,7 @@ import { buyNowPriceIssue, issueMessage } from "../auction-form.schema";
 import { AuctionFieldError } from "./AuctionFieldError";
 import { translateError, useTranslate } from "@/lib/i18n";
 
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-const BAHT_SIGN = "฿";
+const BAHT_SIGN = "THB";
 
 type EditBuyNowDialogProps = {
   detail: SellerAuctionDetail;
@@ -120,7 +119,7 @@ export function EditBuyNowDialog({ detail, open, onOpenChange }: EditBuyNowDialo
                         setServerError(null);
                       }}
                       aria-invalid={Boolean(fieldError) || undefined}
-                      className="h-9 rounded-lg border-input bg-background pl-7 text-sm"
+                      className="h-9 rounded-lg border-input bg-background pl-12 text-sm"
                     />
                   </div>
                   <FieldDescription className="text-[11px] leading-normal text-gray-400">{hint}</FieldDescription>

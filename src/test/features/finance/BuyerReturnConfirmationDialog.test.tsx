@@ -77,9 +77,9 @@ describe("BuyerReturnConfirmationDialog", () => {
     expect(screen.getByRole("heading", { name: "ขอคืน Gengar · Holo Rare?" })).toBeInTheDocument();
     expect(screen.getByText("ส่วนลดร้านต่อใบ · MINMIN50")).toBeInTheDocument();
     expect(screen.getByText("ส่วนลด Pegasus ต่อใบ · PEGASUS10")).toBeInTheDocument();
-    expect(screen.getByText("− ฿22.89")).toBeInTheDocument();
-    expect(screen.getByText("− ฿22.46")).toBeInTheDocument();
-    expect(screen.getByText("฿334.65")).toBeInTheDocument();
+    expect(screen.getByText("− THB 22.89")).toBeInTheDocument();
+    expect(screen.getByText("− THB 22.46")).toBeInTheDocument();
+    expect(screen.getByText("THB 334.65")).toBeInTheDocument();
     expect(screen.getByText(/ยอดจริงยืนยันหลังร้านรับของคืน/)).toBeInTheDocument();
   });
 

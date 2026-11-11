@@ -6,7 +6,7 @@ import { money } from "../promotions.format";
 import type { SellerPromotionInput } from "../promotions.types";
 import { useTranslate } from "@/lib/i18n";
 
-/** ยอดตัวอย่างใน preview ตาม Figma PRM-S2 A (ลูกค้าซื้อ ฿1,200) */
+/** ยอดตัวอย่างใน preview ตาม Figma PRM-S2 A (ลูกค้าซื้อ THB 1,200) */
 const SAMPLE_SUBTOTAL = 1200;
 /** อัตราคอมมิชชั่นสมมติ 5% ใช้อธิบายการคำนวณเท่านั้น (อัตราจริงอยู่ที่ backend ตอนปล่อยเงิน) */
 const SAMPLE_COMMISSION_RATE = 0.05;

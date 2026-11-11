@@ -1,5 +1,5 @@
 import type { AvailablePromotion, PromoCodeOutcome } from "./promotions.types";
-import { dateTimeFormat, errorText, formatNumber, translate } from "@/lib/i18n";
+import { dateTimeFormat, errorText, translate, formatMoney } from "@/lib/i18n";
 
 // @tolgee-key {"key": "cart.common.freeShipping", "ns": "buyer", "defaultValue": "ส่งฟรี"}
 // @tolgee-key {"key": "cart.code.minSpend", "ns": "buyer", "defaultValue": "ขั้นต่ำ {amount}"}
@@ -13,8 +13,7 @@ import { dateTimeFormat, errorText, formatNumber, translate } from "@/lib/i18n";
 // @tolgee-key {"key": "cart.code.shortfall", "ns": "buyer", "defaultValue": "ซื้อเพิ่มอีก {amount}"}
 // @tolgee-key {"key": "cart.code.unusable", "ns": "buyer", "defaultValue": "โค้ดนี้ยังใช้ไม่ได้"}
 
-export const checkoutMoney = (value: number) =>
-  formatNumber(value, { style: "currency", currency: "THB", currencyDisplay: "narrowSymbol", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+export const checkoutMoney = (value: number) => formatMoney(value);
 
 const dayMonthYear = dateTimeFormat({
   day: "numeric",

@@ -95,7 +95,7 @@ export function BuyerAfterSales({ order }: { order: SellerOrderDetails }) {
             })}
           </p>
           {item.refundAmount != null && (
-            <p>{t("buyerAfterSales.refundAmount", "ยอดคืน ฿{amount}", { amount: item.refundAmount })}</p>
+            <p>{t("buyerAfterSales.refundAmount", "ยอดคืน THB {amount}", { amount: item.refundAmount })}</p>
           )}
           {item.status === "AWAITING_RETURN_SHIPMENT" && (
             <div className="flex gap-2">

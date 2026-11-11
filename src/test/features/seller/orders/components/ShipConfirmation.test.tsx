@@ -140,7 +140,7 @@ describe("the delivery choice the buyer picked", () => {
     expect(box).toHaveTextContent("EMS ด่วน");
     expect(box).toHaveTextContent("ไปรษณีย์ไทย EMS");
     expect(box).toHaveTextContent("ผู้ซื้อคาดว่าจะได้รับใน 1–2 วัน");
-    expect(box).toHaveTextContent("ผู้ซื้อชำระค่าส่ง ฿200");
+    expect(box).toHaveTextContent("ผู้ซื้อชำระค่าส่ง THB 200.00");
     expect(screen.getByRole("combobox")).toHaveTextContent("ไปรษณีย์ไทย EMS");
     expect(screen.getByText(HINT_MATCH)).toBeInTheDocument();
   });

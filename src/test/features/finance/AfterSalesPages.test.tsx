@@ -78,8 +78,8 @@ describe("after sales screens", () => {
     await screen.findByText(/Bent card/);
     expect(screen.getByText("รอคุณตัดสิน")).toBeTruthy();
     expect(screen.getByText("สินค้าเสียหาย")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /อนุมัติคืนเงิน ฿100/ }));
-    fireEvent.click(await screen.findByRole("button", { name: /ยืนยันอนุมัติคืนเงิน ฿100/ }));
+    fireEvent.click(screen.getByRole("button", { name: /อนุมัติคืนเงิน THB 100.00/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /ยืนยันอนุมัติคืนเงิน THB 100.00/ }));
     await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, true));
   });
 

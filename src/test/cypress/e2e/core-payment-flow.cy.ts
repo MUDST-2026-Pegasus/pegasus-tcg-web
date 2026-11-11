@@ -130,7 +130,7 @@ describe('Core Payment & Checkout Flow', () => {
       .should('be.visible')
       .find('image')
       .should('have.attr', 'href', '/site-icon.jpg');
-    cy.contains('สแกนเพื่อชำระ | ฿1,050.00').should('be.visible');
+    cy.contains('สแกนเพื่อชำระ | THB 1,050.00').should('be.visible');
     cy.contains('Pegasus TCG Co., Ltd.').should('be.visible');
     cy.contains('พร้อมเพย์ 081-999-8888').should('be.visible');
 

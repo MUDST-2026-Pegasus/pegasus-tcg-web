@@ -56,7 +56,7 @@ describe("ProductAuctionBox", () => {
     renderWithProviders(<ProductAuctionBox variantIds={[first.item.card.variantId]} productName={first.item.card.productName} />);
 
     expect(await screen.findByText("มีประมูลการ์ดนี้อยู่ 1 รายการ")).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(`ราคาบิดต่ำสุดตอนนี้ ฿${first.currentPrice.toLocaleString("en-US")} · ใกล้จบใน`))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`ราคาบิดต่ำสุดตอนนี้ THB ${first.currentPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })} · ใกล้จบใน`))).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /ดูประมูล/ })).toHaveAttribute("href", `/auctions/${first.id}`);
   });
 

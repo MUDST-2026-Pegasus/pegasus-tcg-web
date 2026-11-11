@@ -54,8 +54,8 @@ describe("sellerNoticeKind", () => {
 
 describe("buyNowSetting", () => {
   it("shows the price, closed after the first bid, or not set", () => {
-    expect(buyNowSetting(F[150])).toBe("฿3,500");
-    expect(buyNowSetting(F[142])).toBe("฿12,000 · ปิดแล้ว (มีบิดแรก)");
+    expect(buyNowSetting(F[150])).toBe("THB 3,500.00");
+    expect(buyNowSetting(F[142])).toBe("THB 12,000.00 · ปิดแล้ว (มีบิดแรก)");
     expect(buyNowSetting(F[126])).toBe("ไม่ได้ตั้ง");
   });
 });

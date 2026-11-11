@@ -122,7 +122,7 @@ describe("AdminPromotionFormPage — editing", () => {
     const dialog = await screen.findByRole("alertdialog", { name: "บันทึกการเปลี่ยนแปลง?" });
     expect(within(dialog).getByText("จำนวนสิทธิ์ใช้")).toBeInTheDocument();
     expect(within(dialog).getByText("800")).toBeInTheDocument();
-    expect(within(dialog).getByText("฿160,000")).toBeInTheDocument();
+    expect(within(dialog).getByText("THB 160,000.00")).toBeInTheDocument();
     expect(within(dialog).getByText("บันทึกใน Activity Log")).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "บันทึก" }));
     await waitFor(() =>
@@ -149,20 +149,20 @@ describe("AdminPromotionFormPage — creating", () => {
 
   it("updates the calculation and campaign budget as the discount changes", async () => {
     const user = renderAt("/admin/promotions/new");
-    expect(screen.getByText("฿100,000")).toBeInTheDocument();
+    expect(screen.getByText("THB 100,000.00")).toBeInTheDocument();
     await user.click(screen.getByRole("radio", { name: "จำนวนเงิน" }));
     const value = screen.getByRole("spinbutton", { name: "มูลค่าส่วนลด" });
     await user.clear(value);
     await user.type(value, "150");
-    expect(screen.getByText("− ฿150")).toBeInTheDocument();
-    expect(screen.getByText("฿75,000")).toBeInTheDocument();
+    expect(screen.getByText("− THB 150.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 75,000.00")).toBeInTheDocument();
   });
 
   it("budgets free shipping from the cap it shows", async () => {
     const user = renderAt("/admin/promotions/new");
     await user.click(screen.getByRole("radio", { name: "ส่งฟรี" }));
-    expect(screen.getByText(/500 สิทธิ์ × ส่วนลดสูงสุด ฿200/)).toBeInTheDocument();
-    expect(screen.getByText("฿100,000")).toBeInTheDocument();
+    expect(screen.getByText(/500 สิทธิ์ × ส่วนลดสูงสุด THB 200.00/)).toBeInTheDocument();
+    expect(screen.getByText("THB 100,000.00")).toBeInTheDocument();
   });
 
   it("clears claim-only switches for private codes and sends consistent values", async () => {
@@ -234,7 +234,7 @@ describe("AdminPromotionFormPage — creating", () => {
     expect(await screen.findByDisplayValue("2")).toBe(screen.getByRole("spinbutton", { name: "ลำดับบนหน้าแรก" }));
     await user.click(screen.getByRole("button", { name: "บันทึกและเปิดใช้" }));
     const dialog = await screen.findByRole("alertdialog", { name: "เปิดใช้โค้ด PEGASUS20?" });
-    expect(within(dialog).getByText("งบสูงสุด (500 × ฿200)")).toBeInTheDocument();
+    expect(within(dialog).getByText("งบสูงสุด (500 × THB 200.00)")).toBeInTheDocument();
     expect(within(dialog).getByText("800 ใบ · หน้าแรก ลำดับ 2")).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "เปิดใช้โค้ด" }));
     await waitFor(() =>

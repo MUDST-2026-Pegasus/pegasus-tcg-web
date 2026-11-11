@@ -16,7 +16,7 @@ export function useFormat() {
     lang,
     locale: intlLocale({ lang }),
     dateFnsLocale: dateFnsLocale(lang),
-    money: (value: number, options?: { satang?: boolean }) => formatMoney(value, { ...options, lang }),
+    money: (value: number) => formatMoney(value, { lang }),
     number: (value: number, options?: Intl.NumberFormatOptions) => formatNumber(value, options, lang),
     date: (value: Date | number | string, options?: Intl.DateTimeFormatOptions) => formatDate(value, options, lang),
     dateTime: (value: Date | number | string, options?: Intl.DateTimeFormatOptions) => formatDateTime(value, options, lang),

@@ -54,7 +54,7 @@ describe("CouponTicket", () => {
 
     rerender(<CouponTicket promotion={shopPromo} />);
     expect(screen.getByText("SHOP")).toBeInTheDocument();
-    expect(screen.getByText("฿50")).toBeInTheDocument();
+    expect(screen.getByText("THB 50.00")).toBeInTheDocument();
   });
 
   it("shows default, selected, and disabled coupon states", () => {
@@ -81,7 +81,7 @@ describe("CouponTicket", () => {
       />,
     );
     expect(screen.getByRole("radio", { name: /PEGASUS10/ })).toHaveAttribute("aria-disabled", "true");
-    expect(screen.getByText(/ซื้อเพิ่มอีก ฿150/)).toBeInTheDocument();
+    expect(screen.getByText(/ซื้อเพิ่มอีก THB 150.00/)).toBeInTheDocument();
   });
 });
 

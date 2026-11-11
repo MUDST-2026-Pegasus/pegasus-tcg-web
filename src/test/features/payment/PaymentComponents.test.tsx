@@ -37,7 +37,7 @@ describe("Payment Components", () => {
 
       expect(screen.getByText("สแกนด้วยแอปธนาคารใดก็ได้")).toBeInTheDocument();
       expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" })).toBeInTheDocument();
-      expect(screen.getByText("สแกนเพื่อชำระ | ฿1,450.00")).toBeInTheDocument();
+      expect(screen.getByText("สแกนเพื่อชำระ | THB 1,450.00")).toBeInTheDocument();
       expect(screen.getByText("Pegasus Store Co.")).toBeInTheDocument();
       expect(screen.getByText("พร้อมเพย์ 081-234-5678")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "บันทึก QR" })).toBeInTheDocument();

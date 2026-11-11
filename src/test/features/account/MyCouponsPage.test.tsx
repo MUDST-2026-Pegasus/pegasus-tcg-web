@@ -52,7 +52,7 @@ const wallet: Wallet = {
 const terms: PromotionTerms = {
   id: 9,
   code: "TCGFAN",
-  name: "ลด ฿80 ทุกเกม",
+  name: "ลด THB 80.00 ทุกเกม",
   description: null,
   ownerType: "PLATFORM",
   shop: null,
@@ -120,7 +120,7 @@ describe("MyCouponsPage", () => {
     expect(claimApi.claimByCode).toHaveBeenCalledWith("TCGFAN");
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("เก็บ TCGFAN แล้ว")).toBeInTheDocument();
-    expect(await within(dialog).findByText("ลด ฿80 ทุกเกม")).toBeInTheDocument();
+    expect(await within(dialog).findByText("ลด THB 80.00 ทุกเกม")).toBeInTheDocument();
   });
 
   it("says when a typed code was collected already", async () => {

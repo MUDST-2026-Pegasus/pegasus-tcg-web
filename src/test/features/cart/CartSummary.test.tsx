@@ -94,7 +94,7 @@ export function CartSummary({
   }, [checkedItems, sellerGroups, baseShippingPerSeller]);
 
   const grandTotal = subtotal > 0 ? subtotal + estimatedShipping : 0;
-  const formatPrice = (val: number) => `฿${val.toLocaleString()}`;
+  const formatPrice = (val: number) => `THB ${val.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
   return (
     <Card className="rounded-xl border shadow-none bg-white p-6 flex flex-col gap-6" data-testid="cart-summary">
@@ -130,7 +130,7 @@ export function CartSummary({
         <div className="flex items-center justify-between" data-testid="cart-shipping-row">
           <span className="text-foreground">Estimated Shipping</span>
           <span className="font-medium text-foreground" data-testid="cart-shipping-value">
-            {checkedItems.length > 0 ? formatPrice(estimatedShipping) : "฿0"}
+            {checkedItems.length > 0 ? formatPrice(estimatedShipping) : "THB 0.00"}
           </span>
         </div>
 
@@ -219,29 +219,29 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
   ];
 
   // Test Case 1: Single Seller calculation
-  it("Case 1: calculates subtotal and single-seller shipping fee (฿50) correctly", () => {
+  it("Case 1: calculates subtotal and single-seller shipping fee (THB 50.00) correctly", () => {
     render(<CartSummary items={sellerAItems} />);
 
     // Subtotal: (250 * 1) + (100 * 2) = 450
     // Shipping: 1 seller * 50 = 50
     // Total: 450 + 50 = 500
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿450");
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿50");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿500");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 450.00");
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 50.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 500.00");
     expect(screen.queryByTestId("multi-seller-breakdown")).not.toBeInTheDocument();
   });
 
   // Test Case 2: Multi-Seller with 2 Sellers
-  it("Case 2: calculates multi-seller shipping split for 2 different sellers (2 x ฿50 = ฿100)", () => {
+  it("Case 2: calculates multi-seller shipping split for 2 different sellers (2 x THB 50.00 = THB 100.00)", () => {
     const twoSellerItems = [...sellerAItems, ...sellerBItems];
     render(<CartSummary items={twoSellerItems} />);
 
     // Subtotal: 450 (A) + 500 (B) = 950
     // Shipping: 2 sellers * 50 = 100
     // Total: 950 + 100 = 1050
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿950");
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿100");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿1,050");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 950.00");
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 100.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 1,050.00");
 
     // Multi-seller breakdown should be visible
     const breakdown = screen.getByTestId("multi-seller-breakdown");
@@ -251,16 +251,16 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
   });
 
   // Test Case 3: Multi-Seller with 3 Sellers
-  it("Case 3: calculates multi-seller shipping split for 3 different sellers (3 x ฿50 = ฿150) and matches grand total", () => {
+  it("Case 3: calculates multi-seller shipping split for 3 different sellers (3 x THB 50.00 = THB 150.00) and matches grand total", () => {
     const threeSellerItems = [...sellerAItems, ...sellerBItems, ...sellerCItems];
     render(<CartSummary items={threeSellerItems} />);
 
     // Subtotal: 450 (A) + 500 (B) + 300 (C) = 1250
     // Shipping: 3 sellers * 50 = 150
     // Total: 1250 + 150 = 1400
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿1,250");
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿150");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿1,400");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 1,250.00");
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 150.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 1,400.00");
 
     const breakdown = screen.getByTestId("multi-seller-breakdown");
     expect(within(breakdown).getByTestId("seller-split-10")).toHaveTextContent("Somchai Cards Shop (2 items)");
@@ -274,10 +274,10 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
     render(<CartSummary items={items} />);
 
     const splitA = screen.getByTestId("seller-split-10");
-    expect(splitA).toHaveTextContent("฿450 + ฿50 shipping");
+    expect(splitA).toHaveTextContent("THB 450.00 + THB 50.00 shipping");
 
     const splitB = screen.getByTestId("seller-split-20");
-    expect(splitB).toHaveTextContent("฿500 + ฿50 shipping");
+    expect(splitB).toHaveTextContent("THB 500.00 + THB 50.00 shipping");
   });
 
   // Test Case 5: Deselecting items adjusts shipping split
@@ -288,25 +288,25 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
 
     render(<CartSummary items={items} selectedItemIds={selectedIds} />);
 
-    // Subtotal should only be Seller A's items (฿450)
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿450");
-    // Shipping should drop to 1 seller (฿50) since Seller B has 0 selected items
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿50");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿500");
+    // Subtotal should only be Seller A's items (THB 450.00)
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 450.00");
+    // Shipping should drop to 1 seller (THB 50.00) since Seller B has 0 selected items
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 50.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 500.00");
     // Multi-seller banner should disappear because only 1 seller is active
     expect(screen.queryByTestId("multi-seller-breakdown")).not.toBeInTheDocument();
   });
 
   // Test Case 6: Empty cart or 0 selected items disables checkout
-  it("Case 6: disables the checkout button and displays ฿0 for empty selection or empty cart", () => {
+  it("Case 6: disables the checkout button and displays THB 0.00 for empty selection or empty cart", () => {
     const handleCheckout = vi.fn();
     const { rerender } = render(
       <CartSummary items={[]} onProceedToCheckout={handleCheckout} />
     );
 
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿0");
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿0");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿0");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 0.00");
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 0.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 0.00");
 
     const button = screen.getByTestId("checkout-button");
     expect(button).toBeDisabled();
@@ -322,7 +322,7 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
         onProceedToCheckout={handleCheckout}
       />
     );
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿0");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 0.00");
     expect(screen.getByTestId("checkout-button")).toBeDisabled();
   });
 
@@ -364,8 +364,8 @@ describe("CartSummary: Multi-Seller Subtotal & Shipping Split Math", () => {
     // Subtotal: (20 * 3) + 100 = 160
     // Shipping: 2 * 50 = 100
     // Total: 260
-    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("฿160");
-    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("฿100");
-    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("฿260");
+    expect(screen.getByTestId("cart-subtotal-value")).toHaveTextContent("THB 160.00");
+    expect(screen.getByTestId("cart-shipping-value")).toHaveTextContent("THB 100.00");
+    expect(screen.getByTestId("cart-total-value")).toHaveTextContent("THB 260.00");
   });
 });

@@ -1,5 +1,5 @@
 import { formatDistanceToNowStrict } from "date-fns";
-import { currentLanguage, dateFnsLocale, intlLocale, translate, useTranslate } from "@/lib/i18n";
+import { currentLanguage, dateFnsLocale, translate, useTranslate, formatMoney } from "@/lib/i18n";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Translator = (key: any, defaultValue: string, options?: any) => string;
@@ -120,18 +120,16 @@ export function useSellerReturnStatusConfig() {
   return (status: string) => sellerReturnStatusConfig(status, t);
 }
 
-/** Format amount to Thai Baht with comma and 2 decimals (e.g. ฿3,420.00) */
+/** Format amount to Thai Baht with comma and 2 decimals (e.g. THB 3,420.00) */
 export function formatBaht(value?: number | null): string {
   const num = typeof value === "number" && !isNaN(value) ? value : 0;
-  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (I18N-02)
-  return `฿${num.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return formatMoney(num);
 }
 
-/** Format amount to short Thai Baht without trailing zero decimals if integer (e.g. ฿3,420) */
+/** Format amount to short Thai Baht without trailing zero decimals if integer (e.g. THB 3,420) */
 export function formatBahtShort(value?: number | null): string {
   const num = typeof value === "number" && !isNaN(value) ? value : 0;
-  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (I18N-02)
-  return `฿${num.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
+  return formatMoney(num);
 }
 
 /** Format date string to relative Thai time, e.g. "2 วันที่แล้ว", "3 ชม. ที่แล้ว" */

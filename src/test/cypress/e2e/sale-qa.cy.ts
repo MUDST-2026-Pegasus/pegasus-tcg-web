@@ -4,7 +4,7 @@
 //   2. ผู้ขายลดราคาแบบเลือก listing → ขึ้นราคา listing นั้น → modal SALE_PRICE_LOCKED
 //   3. Flash Sale: ชิ้นที่ 2 ราคาปกติ (SALE_BUYER_LIMIT_REACHED) · โควตาหมด → SALE_QUOTA_REACHED
 //   4. ราคาลดจบระหว่างอยู่ในตะกร้า → ยืนยันราคาใหม่ → checkout ผ่าน
-//   5. ราคาลด + โค้ดร้าน + โค้ด Pegasus → ยอดตรง Figma SAL-B3 D (฿3,530)
+//   5. ราคาลด + โค้ดร้าน + โค้ด Pegasus → ยอดตรง Figma SAL-B3 D (THB 3,530.00)
 
 const ok = (data: unknown, statusCode = 200) => ({ statusCode, body: { success: true, message: "ok", data } });
 const fail = (statusCode: number, code: string, message: string, details: Record<string, unknown> = {}) => ({
@@ -25,7 +25,7 @@ const seller = {
   salesCount: 100,
 };
 
-/** Figma SAL-B3 A: Charizard ex SAR ฿4,200 ใน Pokémon Month ลด 10% */
+/** Figma SAL-B3 A: Charizard ex SAR THB 4,200.00 ใน Pokémon Month ลด 10% */
 const monthPricing = {
   listPrice: 4200,
   salePrice: 3780,
@@ -33,7 +33,7 @@ const monthPricing = {
   sale: { id: 2, slug: "pokemon-month", name: "Pokémon Month", type: "CATEGORY_SALE", endsAt: inHours(24 * 25), quotaLeft: null, perBuyerLimit: null },
 };
 
-/** Figma SAL-B3 B: OP-09 Booster Box ฿1,990 → ฿1,393 */
+/** Figma SAL-B3 B: OP-09 Booster Box THB 1,990.00 → THB 1,393.00 */
 const flashPricing = {
   listPrice: 1990,
   salePrice: 1393,
@@ -169,7 +169,7 @@ beforeEach(() => {
 });
 
 describe("1. Admin CATEGORY_SALE → sale price on search / listing / cart", () => {
-  it("creates the campaign, then buyers see ฿3,780 struck from ฿4,200 everywhere", () => {
+  it("creates the campaign, then buyers see THB 3,780.00 struck from THB 4,200.00 everywhere", () => {
     cy.loginAs("ADMIN");
     cy.intercept("GET", "**/api/v1/sales", ok([]));
     cy.intercept("GET", "**/api/v1/cart*", ok(cartOf([])));
@@ -233,23 +233,23 @@ describe("1. Admin CATEGORY_SALE → sale price on search / listing / cart", () 
     cy.visit("/search?q=Charizard");
     cy.wait("@search");
     cy.contains("Charizard ex SAR").should("be.visible");
-    cy.contains("฿3,780").should("be.visible");
-    cy.contains("฿4,200").should("exist");
+    cy.contains("THB 3,780.00").should("be.visible");
+    cy.contains("THB 4,200.00").should("exist");
 
     const listing = publicListing(201, "Charizard ex SAR", 4200, monthPricing);
     cy.intercept("GET", "**/api/v1/listings/201", ok({ listing: { ...listing, publicNote: null, gradingCompany: null, gradeValue: null }, photoUrls: [] })).as("getListing");
     cy.visit("/listings/201");
     cy.wait("@getListing");
-    cy.contains("฿3,780").should("be.visible");
-    cy.contains("s", "฿4,200").should("exist");
+    cy.contains("THB 3,780.00").should("be.visible");
+    cy.contains("s", "THB 4,200.00").should("exist");
     cy.contains("Pokémon Month").should("be.visible");
 
     cy.intercept("GET", "**/api/v1/cart", ok(cartOf([cartItem(801, 201, "Charizard ex SAR", 3780, 3780, monthPricing)]))).as("getCart");
     cy.intercept("POST", "**/api/v1/checkout/promo-preview", promoPreview(3780, 0, 0));
     cy.visit("/cart");
     cy.wait("@getCart");
-    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "฿4,200");
-    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "฿420");
+    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "THB 4,200.00");
+    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "THB 420.00");
   });
 });
 
@@ -326,7 +326,7 @@ describe("2. Seller LISTINGS sale → raising that price → SALE_PRICE_LOCKED",
     cy.wait("@changePrice");
     cy.contains("ขึ้นราคาไม่ได้ระหว่างการลดราคา").should("be.visible");
     cy.contains("“Charizard week” (ร้าน)").should("be.visible");
-    cy.contains("ราคาที่จะตั้ง").parent().should("contain.text", "฿4,500");
+    cy.contains("ราคาที่จะตั้ง").parent().should("contain.text", "THB 4,500.00");
     cy.contains("button", "ตกลง").click();
     cy.contains("ขึ้นราคาไม่ได้ระหว่างการลดราคา").should("not.exist");
   });
@@ -353,7 +353,7 @@ describe("3. Flash Sale limits", () => {
     cy.get('[aria-label="เพิ่มจำนวน"]').click();
     cy.contains("button", "เพิ่มลงตะกร้า").click();
     cy.wait("@addItem").its("request.body.quantity").should("equal", 2);
-    cy.contains("ชิ้นที่ 2 คิดราคาปกติ ฿1,990").should("be.visible");
+    cy.contains("ชิ้นที่ 2 คิดราคาปกติ THB 1,990.00").should("be.visible");
   });
 
   it("shows the quota-full modal on SALE_QUOTA_REACHED and buys at the normal price", () => {
@@ -381,7 +381,7 @@ describe("3. Flash Sale limits", () => {
     cy.contains("button", "สั่งซื้อและไปชำระเงิน").click();
     cy.wait("@placeOrder");
     cy.contains("ราคา Flash Sale เต็มแล้ว").should("be.visible");
-    cy.contains("ซื้อต่อได้ที่ราคาปกติ ฿1,990").should("be.visible");
+    cy.contains("ซื้อต่อได้ที่ราคาปกติ THB 1,990.00").should("be.visible");
     cy.intercept("POST", "**/api/v1/checkout/promo-preview", promoPreview(1990, 0, 0));
     cy.intercept("POST", "**/api/v1/checkout/shipping-quotes", ok([
       { sellerProfileId: 10, sellerName: "minmin", itemCount: 1, itemsSubtotal: 1990, defaultOptionId: 7,
@@ -412,8 +412,8 @@ describe("4. Sale ends while in the cart", () => {
     cy.visit("/cart");
     cy.wait("@getCart");
     cy.contains("ราคาสินค้าบางรายการเปลี่ยน").should("be.visible");
-    cy.contains("฿1,393 → ฿1,990").should("be.visible");
-    cy.contains("ยอดรวมใหม่").parent().should("contain.text", "฿1,990");
+    cy.contains("THB 1,393.00 → THB 1,990.00").should("be.visible");
+    cy.contains("ยอดรวมใหม่").parent().should("contain.text", "THB 1,990.00");
     cy.contains("button", "ยืนยันราคาใหม่").click();
     cy.wait("@accept").its("request.body.cartItemIds").should("deep.equal", [701]);
     cy.contains("ยอมรับราคาใหม่แล้ว").should("be.visible");
@@ -431,13 +431,13 @@ describe("4. Sale ends while in the cart", () => {
 });
 
 describe("5. Sale price + shop code + Pegasus code (Figma SAL-B3 D)", () => {
-  it("totals ฿4,200 − ฿420 − ฿100 − ฿200 + ฿50 = ฿3,530", () => {
+  it("totals THB 4,200.00 − THB 420.00 − THB 100.00 − THB 200.00 + THB 50.00 = THB 3,530.00", () => {
     mockBuyer();
     const item = cartItem(801, 201, "Charizard ex SAR", 3780, 3780, monthPricing);
     cy.intercept("GET", "**/api/v1/cart", ok(cartOf([item])));
     mockCheckoutShipping(3780);
     cy.intercept("GET", "**/api/v1/checkout/promotions*", ok([
-      { promotionId: 11, code: "MINMIN100", name: "ลด ฿100", ownerType: "SELLER", sellerProfileId: 10, discountType: "FIXED", discountValue: 100, maxDiscount: null, minSpend: 0, endsAt: inHours(240), source: "CLAIMED", eligible: true, estimatedDiscount: 100 },
+      { promotionId: 11, code: "MINMIN100", name: "ลด THB 100.00", ownerType: "SELLER", sellerProfileId: 10, discountType: "FIXED", discountValue: 100, maxDiscount: null, minSpend: 0, endsAt: inHours(240), source: "CLAIMED", eligible: true, estimatedDiscount: 100 },
       { promotionId: 12, code: "PEGASUS10", name: "ลด 10%", ownerType: "PLATFORM", sellerProfileId: null, discountType: "PERCENT", discountValue: 10, maxDiscount: 200, minSpend: 0, endsAt: inHours(240), source: "CLAIMED", eligible: true, estimatedDiscount: 200 },
     ]));
     cy.intercept("POST", "**/api/v1/checkout/promo-preview", promoPreview(3780, 100, 200, [
@@ -448,8 +448,8 @@ describe("5. Sale price + shop code + Pegasus code (Figma SAL-B3 D)", () => {
 
     cy.visit("/checkout?items=801&platformCode=PEGASUS10&shopCode.10=MINMIN100");
     cy.wait(["@getAddresses", "@getQuotes"]);
-    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "฿4,200");
-    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "฿420");
+    cy.contains("ราคาสินค้า (ก่อนลด)").parent().should("contain.text", "THB 4,200.00");
+    cy.contains("ส่วนลดราคาสินค้า").parent().should("contain.text", "THB 420.00");
     cy.get('[data-testid="checkout-grand-total"]').should("contain.text", "3,530");
     cy.contains("button", "สั่งซื้อและไปชำระเงิน").click();
     cy.wait("@placeOrder").its("request.body.expectedGrandTotal").should("equal", 3530);

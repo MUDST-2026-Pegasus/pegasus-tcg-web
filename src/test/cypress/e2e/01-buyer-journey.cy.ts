@@ -390,7 +390,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
     cy.contains("สรุปคำสั่งซื้อ").should("be.visible");
     cy.contains("ยอดสินค้า (2 ใบ)").should("be.visible");
     cy.contains("คิดในหน้าถัดไป").should("be.visible");
-    cy.get('[aria-label="ยอดรวม"]').should("contain.text", "฿750");
+    cy.get('[aria-label="ยอดรวม"]').should("contain.text", "THB 750.00");
 
     // Click checkout
     cy.contains("button", "ไปชำระเงิน (2)").should("be.visible").and("not.be.disabled");

@@ -21,13 +21,13 @@ import type { ProductDetailDto, PublicListingDto } from "../catalog.types";
 
 const PAGE_SIZE = 20;
 
-function formatMarketPrice(amount: number, currency: string) {
-  return new Intl.NumberFormat(intlLocale(), { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+function formatMarketPrice(amount: number) {
+  return formatMoney(amount);
 }
 
 import { RARITY_LABELS } from "@/lib/card-labels";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale, useTranslate } from "@/lib/i18n";
+import { useTranslate, formatMoney } from "@/lib/i18n";
 
 export function MarketListingsPage() {
   const { t } = useTranslate("buyer");
@@ -140,7 +140,7 @@ function MarketListingsContent({ data }: { data: ProductDetailDto }) {
           </div>
           <div className="shrink-0 text-left sm:text-right">
             <p className="text-xs text-muted-foreground">{t("product.marketPrice", "ราคาตลาด")}</p>
-            <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatMarketPrice(market.medianPrice, listings[0].currency) : "—"}</p>
+            <p className="mt-1 text-[28px] font-bold leading-8">{market?.medianPrice != null ? formatMarketPrice(market.medianPrice) : "—"}</p>
             {market?.lowSample && <p className="mt-1 text-xs text-muted-foreground">{t("market.lowSample", "ข้อมูลราคายังน้อย")}</p>}
           </div>
         </section>

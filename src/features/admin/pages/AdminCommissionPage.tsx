@@ -18,13 +18,12 @@ import type { AuditLogEntry } from "@/features/admin/audit.types";
 import type { CommissionCategory } from "@/features/admin/admin.types";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
 import type { CommissionRuleInput } from "@/features/finance/after-sales.types";
-import { intlLocale, translateError, useTranslate } from "@/lib/i18n";
+import { translateError, useTranslate, formatMoney } from "@/lib/i18n";
 
 const blank = (): CommissionRuleInput => ({ scope: "GLOBAL", gameId: null, categoryId: null,
   sellerProfileId: null, ratePercent: 0, fixedFee: 0, minFee: null, maxFee: null,
   priority: 0, effectiveFrom: new Date().toISOString(), effectiveTo: null, active: true });
-// eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-const money = (value: number) => `฿${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const money = (value: number) => formatMoney(value);
 const formatRate = (value: number) => Number.isInteger(value) ? value.toFixed(1) : String(value);
 const examplePrice = 1290;
 

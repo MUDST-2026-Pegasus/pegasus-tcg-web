@@ -137,13 +137,13 @@ describe("ReorderPreviewModal", () => {
 
     // Previous Purchase Tags
     expect(
-      screen.getByText(/ราคาเดิมที่เคยซื้อ.*฿150.*จำนวน 1 ใบ/)
+      screen.getByText(/ราคาเดิมที่เคยซื้อ.*THB 150.00.*จำนวน 1 ใบ/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/ราคาเดิมที่เคยซื้อ.*฿8,000.*จำนวน 1 ใบ/)
+      screen.getByText(/ราคาเดิมที่เคยซื้อ.*THB 8,000.00.*จำนวน 1 ใบ/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/ราคาเดิมที่เคยซื้อ.*฿3,400.*จำนวน 1 ใบ/)
+      screen.getByText(/ราคาเดิมที่เคยซื้อ.*THB 3,400.00.*จำนวน 1 ใบ/)
     ).toBeInTheDocument();
   });
 
@@ -452,7 +452,7 @@ describe("ReorderPreviewModal", () => {
     expect(screen.getByText("Fallback Card")).toBeInTheDocument();
     expect(screen.getByText("สภาพเดิม: LP")).toBeInTheDocument();
     expect(
-      screen.getByText(/ราคาเดิมที่เคยซื้อ.*฿250.*จำนวน 2 ใบ/)
+      screen.getByText(/ราคาเดิมที่เคยซื้อ.*THB 250.00.*จำนวน 2 ใบ/)
     ).toBeInTheDocument();
   });
 });
