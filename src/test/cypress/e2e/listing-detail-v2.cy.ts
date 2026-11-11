@@ -351,7 +351,7 @@ describe("TCG-663 listing detail v2", () => {
     );
     cy.visit("/listings/877");
     cy.wait("@detail");
-    cy.contains("h3", "Trainer").should("exist");
+    cy.contains("h3", "เทรนเนอร์").should("exist");
     cy.contains("h3", "เอฟเฟกต์การ์ด").should("exist");
     cy.contains("dd", "Supporter").should("exist");
     const energy = product();

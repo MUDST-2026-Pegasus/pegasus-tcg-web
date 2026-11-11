@@ -339,7 +339,7 @@ describe("TCG-664 mini-cart", { defaultCommandTimeout: 10000 }, () => {
   it("opens from product detail and market listing entry points", () => {
     mocks();
     cy.visit("/products/card");
-    cy.contains("button", /^Add to cart$/).click();
+    cy.contains("button", /^เพิ่มลงตะกร้า$/).click();
     cy.wait("@add");
     cy.get("[data-mini-cart-state]").should("be.visible");
     cy.contains("button", "เลือกซื้อต่อ").click();

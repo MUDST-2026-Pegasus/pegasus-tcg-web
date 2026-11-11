@@ -171,19 +171,19 @@ describe('Core Account Orders Flow', () => {
     cy.wait('@getMe');
     cy.wait('@getOrders');
 
-    cy.contains('h1', 'Order History').should('be.visible');
+    cy.contains('h1', 'ประวัติคำสั่งซื้อ').should('be.visible');
     cy.contains('ORD-20261015-000101').should('be.visible');
     cy.contains('Charizard Base Set Holo').should('be.visible');
 
     // Click View Details to open modal
-    cy.contains('button', 'View Details').click();
+    cy.contains('button', 'ดูรายละเอียด').click();
 
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('be.visible');
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('be.visible');
     cy.contains('123 Sukhumvit Road').should('be.visible');
 
     // Close details modal
-    cy.get('button[aria-label="Close"]').click();
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('not.exist');
+    cy.get('button[aria-label="ปิดหน้าต่าง"]').click();
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('not.exist');
   });
 
   it('cancels a pending order with confirmation', () => {
@@ -224,7 +224,7 @@ describe('Core Account Orders Flow', () => {
     cy.contains('ORD-20261015-000101').should('be.visible');
 
     // Click Cancel Order
-    cy.contains('button', 'Cancel Order').click({ force: true });
+    cy.contains('button', 'ยกเลิกคำสั่งซื้อ').click({ force: true });
 
     // Confirm in dialog
     cy.contains('ยกเลิกคำสั่งซื้อนี้?').should('be.visible');
@@ -233,7 +233,7 @@ describe('Core Account Orders Flow', () => {
     });
 
     cy.wait('@cancelOrder');
-    cy.contains('Order Cancelled').should('be.visible');
+    cy.contains('ยกเลิกคำสั่งซื้อแล้ว').should('be.visible');
   });
 
   it('submits a seller review on a completed order from the order details modal', () => {
@@ -285,8 +285,8 @@ describe('Core Account Orders Flow', () => {
     visitAuthenticated('/account/orders');
     cy.wait('@getCompletedOrders');
 
-    cy.contains('button', 'View Details').click();
-    cy.contains('[data-slot="dialog-title"]', 'Order Details').should('be.visible');
+    cy.contains('button', 'ดูรายละเอียด').click();
+    cy.contains('[data-slot="dialog-title"]', 'รายละเอียดคำสั่งซื้อ').should('be.visible');
     cy.wait('@getMyReview');
 
     cy.contains('h4', 'รีวิวผู้ขาย').scrollIntoView().should('be.visible');

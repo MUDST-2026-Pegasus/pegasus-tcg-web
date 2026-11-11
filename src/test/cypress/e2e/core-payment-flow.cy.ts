@@ -121,12 +121,12 @@ describe('Core Payment & Checkout Flow', () => {
     cy.wait('@createPayment');
 
     // Asserts page title and amount due
-    cy.contains('h1', 'Secure Checkout').should('be.visible');
+    cy.contains('h1', 'ชำระเงินอย่างปลอดภัย').should('be.visible');
     cy.contains('THB 1,050.00').should('be.visible');
     cy.contains('ORD-101').should('be.visible');
 
     // Asserts QR Code & PromptPay merchant details
-    cy.get('svg[role="img"][aria-label="PromptPay QR Code"]')
+    cy.get('svg[role="img"][aria-label="QR Code พร้อมเพย์"]')
       .should('be.visible')
       .find('image')
       .should('have.attr', 'href', '/site-icon.jpg');
@@ -169,12 +169,12 @@ describe('Core Payment & Checkout Flow', () => {
     cy.wait('@getSucceededPayment');
 
     // Asserts success message and order details
-    cy.contains('h1', 'Payment Successful').should('be.visible');
+    cy.contains('h1', 'ชำระเงินสำเร็จ').should('be.visible');
     cy.contains('ORD-101').should('be.visible');
     cy.contains('THB 1,050.00').should('be.visible');
 
     // Link to order history
-    cy.contains('a', 'View Order Details')
+    cy.contains('a', 'ดูรายละเอียดคำสั่งซื้อ')
       .should('be.visible')
       .should('have.attr', 'href', '/account/orders?orderId=101');
   });
@@ -251,13 +251,13 @@ describe('Core Payment & Checkout Flow', () => {
 
     cy.wait('@presignSlip');
     cy.wait('@uploadSlipToStorage');
-    cy.contains('Ready').should('be.visible');
+    cy.contains('พร้อม').should('be.visible');
 
     // Enter reference number
     cy.get('input[aria-label="เลขอ้างอิงการโอน"]').type('202610160001');
 
     // Submit payment for verification
-    cy.contains('button', 'Submit payment for verification')
+    cy.contains('button', 'ส่งการชำระเงินเพื่อตรวจสอบ')
       .should('not.be.disabled')
       .click();
 
@@ -267,6 +267,6 @@ describe('Core Payment & Checkout Flow', () => {
     });
 
     cy.contains('ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ').should('be.visible');
-    cy.contains('Payment Under Review').should('be.visible');
+    cy.contains('กำลังตรวจสอบการชำระเงิน').should('be.visible');
   });
 });
