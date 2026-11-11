@@ -12,7 +12,7 @@ import type {
   WeeklyReport,
   WeeklyStockStatus,
 } from "./weekly-report.types";
-import { dateTimeFormat, formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
+import { formatMonth, formatYear, intlLocale, monthStart, translate } from "@/lib/i18n";
 
 /**
  * ตัวช่วยของหน้ารายงานสต็อกและกำไรรายสัปดาห์ ไม่มี React — ทดสอบได้ตรง ๆ
@@ -219,13 +219,21 @@ export function weeklyStatCards(
   ];
 }
 
-export type WeeklyTrendPoint = { day: string; singles: number; sealed: number; other: number };
+const WEEKDAY_SHORT = [
+  () => translate("admin", "weeklyReport.weekday.sun", "อา."),
+  () => translate("admin", "weeklyReport.weekday.mon", "จ."),
+  () => translate("admin", "weeklyReport.weekday.tue", "อ."),
+  () => translate("admin", "weeklyReport.weekday.wed", "พ."),
+  () => translate("admin", "weeklyReport.weekday.thu", "พฤ."),
+  () => translate("admin", "weeklyReport.weekday.fri", "ศ."),
+  () => translate("admin", "weeklyReport.weekday.sat", "ส."),
+];
 
-const weekdayFormat = dateTimeFormat({ weekday: "short" });
+export type WeeklyTrendPoint = { day: string; singles: number; sealed: number; other: number };
 
 export function weeklyTrendPoints(report: WeeklyReport): WeeklyTrendPoint[] {
   return report.chartData.map(({ date, singles, sealed, other }) => ({
-    day: weekdayFormat.format(parseISO(date)),
+    day: WEEKDAY_SHORT[parseISO(date).getDay()]?.() ?? "",
     singles,
     sealed,
     other,
@@ -300,3 +308,10 @@ export const GAME_COLORS = [
 // @tolgee-key {"key":"weeklyReport.stockStatus.normal","ns":"admin","defaultValue":"ปกติ"}
 // @tolgee-key {"key":"weeklyReport.stockStatus.fastMoving","ns":"admin","defaultValue":"สต็อกหมุนเวียนเร็ว"}
 // @tolgee-key {"key":"weeklyReport.stockStatus.lowStock","ns":"admin","defaultValue":"สต็อกต่ำ"}
+// @tolgee-key {"key":"weeklyReport.weekday.sun","ns":"admin","defaultValue":"อา."}
+// @tolgee-key {"key":"weeklyReport.weekday.mon","ns":"admin","defaultValue":"จ."}
+// @tolgee-key {"key":"weeklyReport.weekday.tue","ns":"admin","defaultValue":"อ."}
+// @tolgee-key {"key":"weeklyReport.weekday.wed","ns":"admin","defaultValue":"พ."}
+// @tolgee-key {"key":"weeklyReport.weekday.thu","ns":"admin","defaultValue":"พฤ."}
+// @tolgee-key {"key":"weeklyReport.weekday.fri","ns":"admin","defaultValue":"ศ."}
+// @tolgee-key {"key":"weeklyReport.weekday.sat","ns":"admin","defaultValue":"ส."}
