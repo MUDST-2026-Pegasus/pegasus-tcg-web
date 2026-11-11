@@ -161,7 +161,7 @@ describe("ProductDetailPage cart actions", () => {
     fireEvent.click(screen.getByRole("button", { name: "เพิ่มจำนวนสินค้า" }));
     expect(screen.getByLabelText("จำนวน 2")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "เพิ่มจำนวนสินค้า" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มลงตะกร้า" }));
 
     await waitFor(() => expect(addItem).toHaveBeenCalledWith({ listingId: 56, quantity: 2 }));
   });

@@ -161,3 +161,22 @@ Added tests only for promotion API wrappers, seller return actions, seller produ
 `claim.api.test.ts` covers featured/shop/terms requests, encoded paths, optional claim source, claim-by-code and wallet query filters. `useReturnActions.test.tsx` exercises return draft merging, approval/rejection/receipt actions, no-modal guards, API failure toast and busy-state cleanup. `ProductTable.test.tsx` covers out-of-stock, low-stock and healthy stock indicators. `ProductDetailSections.test.tsx` covers image fallback/gallery selection, missing attributes, and card-effects loading/error/retry/empty/detail states; `ProductDetailCart.test.tsx` checks skipping an out-of-stock listing and enforcing the selected seller's stock maximum.
 
 The full silent V8 coverage run passed 195 files / 1,339 tests. Overall coverage was 62.96% statements (28,097/44,622), 56.32% branches (24,389/43,298), 58.76% functions (3,466/5,898), and 69.01% lines (18,190/26,356). Focused tests passed 5 files / 23 tests. Lint passed with 0 errors and the existing React Compiler warning at `EditProfileDialog.tsx:96`. Build and typecheck passed after aligning the wallet test fixture with the `WalletTab` enum.
+
+## TCG-767 CI failure follow-up (2026-11-11)
+
+Corrected the reported test failures without changing production code. `PaymentSteps.test.tsx` now mounts with the English i18n provider and awaits translated preview/status elements; `ProductDetailCart.test.tsx` queries the cart action by its Thai accessible name; `SellerReturnComponents.test.tsx` asserts the current localized callout title/body and receipt action using an explicit Thai provider. Removed the unrelated `TCG-670` Cypress stockout prediction test from this branch.
+
+| Verification | Result |
+| --- | --- |
+| `PaymentSteps.test.tsx` | Passed: 3/3 tests. |
+| `ProductDetailCart.test.tsx` | Passed: 14/14 tests. |
+| `SellerReturnComponents.test.tsx` | Passed: 9/9 tests. |
+| `vitest run --coverage --passWithNoTests --silent` | Passed: 199 files, 1,372 tests; 0 failed. `coverage/coverage-summary.json` was generated. Statements 63.23% (33,831/53,504), branches 56.32% (29,572/52,507), functions 58.67% (3,828/6,524), lines 69.32% (20,293/29,271). |
+| `features/promotions` | Statements 79.64% (759/953), branches 70.18% (786/1,120), functions 85.81% (127/148), lines 91.36% (465/509). |
+| `features/finance/seller-returns` | Statements 88.24% (1,238/1,403), branches 74.14% (1,081/1,458), functions 62.35% (53/85), lines 95.16% (766/805). |
+| `features/seller/products/components` | Statements 72.77% (1,994/2,740), branches 65.87% (1,843/2,798), functions 57.58% (152/264), lines 77.14% (1,205/1,562). |
+| `features/catalog/components` | Statements 46.89% (279/595), branches 30.21% (226/748), functions 50.00% (18/36), lines 40.51% (111/274). |
+| `pnpm lint` | Passed: 0 errors; existing React Compiler warning at `EditProfileDialog.tsx:99`. |
+| `pnpm build` | Passed: TypeScript and Vite build; 5,606 modules transformed. |
+
+Coverage denominators changed after merging the latest `develop`; folder figures above are from the regenerated report on the merged tree. The machine's `pnpm` shim is unavailable, so these commands use `corepack pnpm@10.18.3`.

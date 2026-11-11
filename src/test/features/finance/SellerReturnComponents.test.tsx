@@ -6,8 +6,9 @@ import { ConfirmReceiptModal } from "@/features/finance/seller-returns/modals/Co
 import { RejectReturnModal } from "@/features/finance/seller-returns/modals/RejectReturnModal";
 import { ReturnInTransitBox } from "@/features/finance/seller-returns/components/ReturnInTransitBox";
 import { ReturnStatusCallout } from "@/features/finance/seller-returns/components/ReturnStatusCallout";
-import { formatBaht, sellerReturnStatusConfig } from "@/features/finance/after-sales.format";
+import { formatBaht } from "@/features/finance/after-sales.format";
 import type { SellerReturnRequest } from "@/features/finance/after-sales.types";
+import { renderWithProviders } from "@/test/utils";
 
 const item = {
   id: 73,
@@ -32,26 +33,33 @@ const item = {
 } as SellerReturnRequest;
 
 describe("seller return status and receipt components", () => {
-  it.each(["AWAITING_RETURN_SHIPMENT", "APPROVED", "RECEIVED", "REFUNDED", "REJECTED", "CLOSED"])("shows API status %s as a readable callout", (status) => {
-    const { container } = render(<ReturnStatusCallout item={{ ...item, status }} />);
-    expect(container).toHaveTextContent(`สถานะคำขอ: ${sellerReturnStatusConfig(status).label}`);
-    expect(container.querySelector("p")?.textContent).not.toBe("");
-    expect(container).toHaveTextContent("TH123456");
+  it.each([
+    ["AWAITING_RETURN_SHIPMENT", "รอผู้ซื้อจัดส่งสินค้าคืนภายใน 3 วันทำการ"],
+    ["APPROVED", "คุณอนุมัติคำขอแล้ว ระบบกำลังดำเนินการคืนเงินให้ผู้ซื้อ"],
+    ["RECEIVED", "คุณยืนยันรับสินค้าคืนแล้ว ระบบกำลังดำเนินการคืนเงินให้ผู้ซื้อ"],
+    ["REFUNDED", "ระบบดำเนินการคืนเงินให้ผู้ซื้อเรียบร้อยแล้ว"],
+    ["REJECTED", "คุณปฏิเสธคำขอนี้แล้ว คำสั่งซื้อจะดำเนินต่อไปตามปกติ"],
+    ["CLOSED", "คำขอคืนสินค้านี้ถูกปิดเรียบร้อยแล้ว"],
+  ])("shows API status %s as a readable callout", (status, message) => {
+    renderWithProviders(<ReturnStatusCallout item={{ ...item, status }} />, { language: "th" });
+    expect(screen.getByText("สถานะปัจจุบัน")).toBeInTheDocument();
+    expect(screen.getByText(message)).toBeInTheDocument();
+    expect(screen.getByText("TH123456")).toBeInTheDocument();
   });
 
   it("toggles restock choice, confirms receipt, and blocks confirmation while a request is busy", async () => {
     const onRestockChange = vi.fn();
     const onReceive = vi.fn();
     const user = userEvent.setup();
-    const { rerender } = render(<ReturnInTransitBox item={item} restock={false} isBusy={false} onRestockChange={onRestockChange} onReceive={onReceive} />);
+    const { rerender } = renderWithProviders(<ReturnInTransitBox item={item} restock={false} isBusy={false} onRestockChange={onRestockChange} onReceive={onReceive} />, { language: "th" });
 
     await user.click(screen.getByRole("switch"));
     expect(onRestockChange.mock.calls[0]?.[0]).toBe(true);
-    await user.click(screen.getByRole("button", { name: "ยืนยันได้รับสินค้าคืน" }));
+    await user.click(screen.getByRole("button", { name: "ยืนยันได้รับสินค้าแล้ว" }));
     expect(onReceive).toHaveBeenCalledTimes(1);
 
     rerender(<ReturnInTransitBox item={item} restock onRestockChange={onRestockChange} onReceive={onReceive} isBusy />);
-    expect(screen.getByRole("button", { name: "ยืนยันได้รับสินค้าคืน" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "ยืนยันได้รับสินค้าแล้ว" })).toBeDisabled();
   });
 
   it("confirms returned stock using the selected restock choice and prevents duplicate confirmation while pending", async () => {

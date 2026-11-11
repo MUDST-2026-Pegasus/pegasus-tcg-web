@@ -4,9 +4,9 @@ import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { financeApi } from "@/features/finance/finance.api";
 import type { Refund } from "@/features/finance/finance.types";
 import { orderStatusLabel } from "@/features/account/order-status.format";
+import { ApiError } from "@/lib/api";
 import { renderWithProviders } from "@/test/utils";
 import type { Language } from "@/lib/i18n";
-import { ApiError } from "@/lib/api";
 
 vi.mock("@/features/finance/finance.api", () => ({ financeApi: {
   myRefunds: vi.fn(), getRefund: vi.fn(), setRefundDestination: vi.fn(),

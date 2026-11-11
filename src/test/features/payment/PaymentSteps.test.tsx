@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 
 import { PaymentSteps } from "@/features/payment/components/PaymentSteps";
 import type { FileUploadState, UploadItem } from "@/hooks/use-file-upload";
+import { renderWithProviders } from "@/test/utils";
 
 function uploadState(items: UploadItem[] = []) {
   return {
@@ -36,38 +37,38 @@ function fileItem(status: UploadItem["status"], overrides: Partial<UploadItem> =
 }
 
 describe("PaymentSteps", () => {
-  it("formats the amount from the payment API and reports reference edits", () => {
+  it("formats the amount from the payment API and reports reference edits", async () => {
     const onReferenceCodeChange = vi.fn();
-    render(<PaymentSteps amount={1250.5} slip={uploadState()} referenceCode="" onReferenceCodeChange={onReferenceCodeChange} />);
+    renderWithProviders(<PaymentSteps amount={1250.5} slip={uploadState()} referenceCode="" onReferenceCodeChange={onReferenceCodeChange} />, { language: "en" });
 
-    expect(screen.getByText(/THB 1,250\.50/)).toBeInTheDocument();
-    fireEvent.change(screen.getByRole("textbox", { name: "เลขอ้างอิงการโอน" }), { target: { value: "REF-42" } });
+    expect(await screen.findByText(/Pay exactly THB 1,250\.50/)).toBeInTheDocument();
+    fireEvent.change(await screen.findByRole("textbox", { name: "Transfer reference" }), { target: { value: "REF-42" } });
     expect(onReferenceCodeChange).toHaveBeenCalledWith("REF-42");
   });
 
-  it("shows upload progress, retry controls, and the disabled submission state", () => {
+  it("shows upload progress, retry controls, and the disabled submission state", async () => {
     const slip = uploadState([fileItem("uploading")]);
-    const view = render(<PaymentSteps slip={slip} referenceCode="" onReferenceCodeChange={vi.fn()} />);
+    const view = renderWithProviders(<PaymentSteps slip={slip} referenceCode="" onReferenceCodeChange={vi.fn()} />, { language: "en" });
 
-    expect(screen.getByText(/THB 13,200\.00/)).toBeInTheDocument();
-    expect(screen.getByText("Uploading...")).toBeInTheDocument();
+    expect(await screen.findByText(/Pay exactly THB 13,200\.00/)).toBeInTheDocument();
+    expect(await screen.findByText("Uploading...")).toBeInTheDocument();
     const retryable = uploadState([fileItem("error")]);
     view.rerender(<PaymentSteps slip={retryable} referenceCode="" onReferenceCodeChange={vi.fn()} />);
     expect(screen.getByRole("alert")).toHaveTextContent("อัปโหลดไม่สำเร็จ");
     fireEvent.click(screen.getByRole("button", { name: "Retry upload" }));
     expect(retryable.retry).toHaveBeenCalledWith("slip-1");
     view.rerender(<PaymentSteps slip={retryable} referenceCode="" onReferenceCodeChange={vi.fn()} disabled />);
-    expect(screen.getByRole("textbox", { name: "เลขอ้างอิงการโอน" })).toBeDisabled();
+    expect(screen.getByRole("textbox", { name: "Transfer reference" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Retry upload" })).not.toBeInTheDocument();
   });
 
-  it("shows an uploaded slip, preview, and remove action", () => {
+  it("shows an uploaded slip, preview, and remove action", async () => {
     const slip = uploadState([fileItem("done", { previewUrl: "https://example.test/slip.png" })]);
-    render(<PaymentSteps slip={slip} referenceCode="ABC" onReferenceCodeChange={vi.fn()} />);
+    renderWithProviders(<PaymentSteps slip={slip} referenceCode="ABC" onReferenceCodeChange={vi.fn()} />, { language: "en" });
 
-    expect(screen.getByRole("img", { name: "Slip preview" })).toHaveAttribute("src", "https://example.test/slip.png");
-    expect(screen.getByText("Ready")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Remove file" }));
+    expect(await screen.findByRole("img", { name: "Slip preview" })).toHaveAttribute("src", "https://example.test/slip.png");
+    expect(await screen.findByText("Ready")).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Remove file" }));
     expect(slip.remove).toHaveBeenCalledWith("slip-1");
   });
 });
