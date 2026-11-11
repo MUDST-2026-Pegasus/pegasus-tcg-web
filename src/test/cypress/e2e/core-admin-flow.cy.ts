@@ -130,7 +130,7 @@ describe('Core Admin Portal Flow', () => {
     cy.contains('สรุปผลประกอบการและกิจกรรมทั้งหมดบน Pegasus TCG').should('be.visible');
 
     // Sidebar navigation checks
-    cy.contains('DASHBOARD').should('be.visible');
+    cy.contains('แดชบอร์ด').should('be.visible');
     cy.contains('ADMIN').should('be.visible');
     cy.contains('จัดการแคตตาล็อก').should('be.visible');
     cy.contains('อนุมัติผู้ขาย').should('be.visible');

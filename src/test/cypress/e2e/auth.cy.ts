@@ -8,7 +8,7 @@ describe('Authentication Flow', () => {
     cy.visit('/login');
     cy.get('input[name="email"]').should('exist');
     cy.get('input[name="password"]').should('exist');
-    cy.get('button[type="submit"]').contains(/log in/i).should('exist');
+    cy.get('button[type="submit"]').contains(/เข้าสู่ระบบ/i).should('exist');
   });
 
   it('removes the old localStorage token on startup', () => {
@@ -28,13 +28,13 @@ describe('Authentication Flow', () => {
   it('shows validation errors when submitting an empty form', () => {
     cy.visit('/login');
     cy.get('button[type="submit"]').click();
-    cy.contains(/email is required/i).should('be.visible');
-    cy.contains(/password is required/i).should('be.visible');
+    cy.contains(/กรุณากรอกอีเมล/i).should('be.visible');
+    cy.contains(/กรุณากรอกรหัสผ่าน/i).should('be.visible');
   });
 
   it('allows a user to navigate to the register page', () => {
     cy.visit('/login');
-    cy.contains(/sign up/i).click();
+    cy.contains(/สมัครสมาชิก/i).click();
     cy.url().should('include', '/register');
     cy.get('input[name="username"]').should('exist');
     cy.get('input[name="email"]').should('exist');
@@ -164,7 +164,7 @@ describe('Authentication Flow', () => {
         },
       });
 
-      cy.contains('By continuing, you agree to the Pegasus').should('be.visible');
+      cy.contains('การดำเนินการต่อถือว่าคุณยอมรับ').should('be.visible');
       cy.get('[data-cy="google-signin-trigger"]').click();
 
       cy.wait('@googleAuthRequest');
@@ -197,7 +197,7 @@ describe('Authentication Flow', () => {
         },
       });
 
-      cy.contains('I agree to the Pegasus').should('be.visible');
+      cy.contains('ฉันยอมรับ').should('be.visible');
       cy.get('[data-cy="google-signin-trigger"]').click();
 
       cy.wait('@googleAuthRequest');
@@ -225,7 +225,7 @@ describe('Authentication Flow', () => {
       cy.get('[data-cy="google-signin-trigger"]').click();
       cy.wait('@googleAuthError');
 
-      cy.contains('Please log in with your email and password').should('be.visible');
+      cy.contains('กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน').should('be.visible');
       cy.contains("An account with this email already exists and can't be linked to Google automatically.").should('be.visible');
     });
   });

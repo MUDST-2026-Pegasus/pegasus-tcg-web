@@ -91,7 +91,7 @@ describe('Core Collection Management Flow', () => {
     cy.wait('@getCollection');
 
     // Heading & card count
-    cy.contains('h1', 'My Collection').should('be.visible');
+    cy.contains('h1', 'คอลเลกชันของฉัน').should('be.visible');
     cy.contains('2 cards in your collection.').should('be.visible');
 
     // Cards
@@ -101,8 +101,8 @@ describe('Core Collection Management Flow', () => {
     cy.contains('Secret Rare').should('be.visible');
 
     // Visibility status toggles
-    cy.contains('Public').should('be.visible');
-    cy.contains('Private').should('be.visible');
+    cy.contains('สาธารณะ').should('be.visible');
+    cy.contains('ส่วนตัว').should('be.visible');
   });
 
   it('opens confirmation modal and removes card from collection', () => {
@@ -143,8 +143,8 @@ describe('Core Collection Management Flow', () => {
     cy.get('button[aria-label="Remove Dark Magician"]').click();
 
     // Confirm alert dialog appears
-    cy.contains('Remove card?').should('be.visible');
-    cy.contains('button', 'Remove Card').click();
+    cy.contains('นำการ์ดออก?').should('be.visible');
+    cy.contains('button', 'นำการ์ดออก').click();
 
     cy.wait('@deleteDarkMagician');
     cy.wait('@getCollectionDynamic');
@@ -185,7 +185,7 @@ describe('Core Collection Management Flow', () => {
     cy.wait('@getPublicCollection');
     cy.contains('@collector_pro').should('be.visible');
     cy.contains('1 cards').should('be.visible');
-    cy.contains('Collection highlights').should('be.visible');
+    cy.contains('การ์ดเด่นในคอลเลกชัน').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
 
@@ -209,7 +209,7 @@ describe('Core Collection Management Flow', () => {
     cy.wait('@getCollectorCollection');
     cy.contains('@collector_pro').should('be.visible');
     cy.contains('1 card').should('be.visible');
-    cy.contains('Collection highlights').should('be.visible');
+    cy.contains('การ์ดเด่นในคอลเลกชัน').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
   });
 });

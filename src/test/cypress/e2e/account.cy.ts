@@ -106,7 +106,7 @@ describe('Account & Profile Flow', () => {
     cy.contains('John Doe').should('be.visible');
 
     // Click edit profile (adjust selector based on actual button text or aria-label)
-    cy.contains(/edit profile/i).click();
+    cy.contains(/แก้ไขโปรไฟล์/i).click();
 
     // Dialog should be open
     cy.get('[data-slot="dialog-content"]').should('be.visible');
@@ -119,7 +119,7 @@ describe('Account & Profile Flow', () => {
     visitProfile();
     cy.wait('@meRequest');
 
-    cy.contains(/edit profile/i).click();
+    cy.contains(/แก้ไขโปรไฟล์/i).click();
     cy.get('[data-slot="dialog-content"]').should('be.visible');
 
     // Edit display name
@@ -127,7 +127,7 @@ describe('Account & Profile Flow', () => {
     cy.get('input[name="displayName"]').type('Jane Doe');
     
     // Save changes
-    cy.get('button[type="submit"]').contains(/save changes/i).click();
+    cy.get('button[type="submit"]').contains(/บันทึกการเปลี่ยนแปลง/i).click();
 
     // Verify API was called
     cy.wait('@updateProfile').then((interception) => {
@@ -136,6 +136,6 @@ describe('Account & Profile Flow', () => {
 
     // Dialog should close and success toast should appear
     cy.get('[data-slot="dialog-content"]').should('not.exist');
-    cy.contains(/profile updated/i).should('be.visible');
+    cy.contains(/อัปเดตโปรไฟล์แล้ว/i).should('be.visible');
   });
 });
