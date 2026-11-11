@@ -31,7 +31,7 @@ describe("Address Book Integration", () => {
         success: true,
         data: {
           id: "addr-1",
-          label: "Home",
+          label: "หน้าแรก",
           recipientName: "Yugi Muto",
           phone: "0891234567",
           line1: "123 Card Shop",
@@ -55,22 +55,22 @@ describe("Address Book Integration", () => {
 
     // Wait for dialog to open
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Add New Address")).toBeInTheDocument();
+    expect(screen.getByText("เพิ่มที่อยู่ใหม่")).toBeInTheDocument();
 
     // Fill form
-    await user.type(screen.getByLabelText(/label/i), "Home");
-    await user.type(screen.getByLabelText(/recipient name/i), "Yugi Muto");
-    await user.type(screen.getByLabelText(/phone number/i), "0891234567");
-    await user.type(screen.getByLabelText(/address line 1/i), "123 Card Shop");
-    await user.type(screen.getByLabelText(/address line 2/i), "Domino City");
-    await user.type(screen.getByLabelText(/subdistrict/i), "Downtown");
-    await user.type(screen.getByLabelText(/^district/i), "Central");
-    await user.type(screen.getByLabelText(/province/i), "Tokyo");
-    await user.type(screen.getByLabelText(/postal code/i), "10110");
-    await user.click(screen.getByRole("checkbox", { name: /default shipping address/i }));
+    await user.type(screen.getByLabelText("ชื่อที่อยู่"), "หน้าแรก");
+    await user.type(screen.getByLabelText("ชื่อผู้รับ"), "Yugi Muto");
+    await user.type(screen.getByLabelText("เบอร์โทรศัพท์"), "0891234567");
+    await user.type(screen.getByLabelText("ที่อยู่บรรทัดที่ 1"), "123 Card Shop");
+    await user.type(screen.getByLabelText("ที่อยู่บรรทัดที่ 2"), "Domino City");
+    await user.type(screen.getByLabelText("ตำบล / แขวง"), "Downtown");
+    await user.type(screen.getByLabelText("อำเภอ / เขต"), "Central");
+    await user.type(screen.getByLabelText("จังหวัด"), "Tokyo");
+    await user.type(screen.getByLabelText("รหัสไปรษณีย์"), "10110");
+    await user.click(screen.getByRole("checkbox", { name: "ใช้เป็นที่อยู่จัดส่งหลัก" }));
 
     // Submit form
-    await user.click(screen.getByRole("button", { name: /add address/i }));
+    await user.click(screen.getByRole("button", { name: "เพิ่มที่อยู่" }));
 
     // Verify API called
     await waitFor(() => {
@@ -79,7 +79,7 @@ describe("Address Book Integration", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({
-            label: "Home",
+            label: "หน้าแรก",
             recipientName: "Yugi Muto",
             phone: "0891234567",
             line1: "123 Card Shop",

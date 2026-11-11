@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
+import errorsTh from '@/i18n/errors/th.json';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { AUTH_ERROR_MESSAGES } from '@/features/auth/auth.errors';
 import * as authQueries from '@/features/auth/auth.queries';
@@ -55,15 +56,15 @@ describe('LoginForm', () => {
   it('renders login form correctly', () => {
     renderWithProviders(<LoginForm />);
     
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+    expect(screen.getByLabelText("อีเมล")).toBeInTheDocument();
+    expect(screen.getByLabelText("รหัสผ่าน")).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: "เข้าสู่ระบบ" })).toBeInTheDocument();
   });
 
   it('toggles with mouse and keyboard without losing the value or selection or submitting', async () => {
     const user = userEvent.setup();
     renderWithProviders(<LoginForm />);
-    const input = screen.getByLabelText(/^password$/i) as HTMLInputElement;
+    const input = screen.getByLabelText("รหัสผ่าน") as HTMLInputElement;
     expect(input).toHaveAttribute('type', 'password');
     await user.type(input, 'password123');
     input.setSelectionRange(2, 5, 'backward');
@@ -82,19 +83,19 @@ describe('LoginForm', () => {
     expect(toggle).toHaveFocus();
     await user.keyboard(' ');
     expect(input).toHaveAttribute('type', 'text');
-    expect(screen.queryByText(/email is required/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("กรุณากรอกอีเมล")).not.toBeInTheDocument();
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('shows validation errors for empty fields', async () => {
     renderWithProviders(<LoginForm />);
     
-    const submitButton = screen.getByRole('button', { name: /log in/i });
+    const submitButton = screen.getByRole('button', { name: "เข้าสู่ระบบ" });
     await userEvent.click(submitButton);
 
     // Schema validation errors from Zod
-    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
-    expect(await screen.findByText(/password is required/i)).toBeInTheDocument();
+    expect(await screen.findByText("กรุณากรอกอีเมล")).toBeInTheDocument();
+    expect(await screen.findByText("กรุณากรอกรหัสผ่าน")).toBeInTheDocument();
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
@@ -106,10 +107,10 @@ describe('LoginForm', () => {
 
     renderWithProviders(<LoginForm />);
     
-    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await userEvent.type(screen.getByLabelText(/^password$/i), 'password123');
+    await userEvent.type(screen.getByLabelText("อีเมล"), 'test@example.com');
+    await userEvent.type(screen.getByLabelText("รหัสผ่าน"), 'password123');
     
-    const submitButton = screen.getByRole('button', { name: /log in/i });
+    const submitButton = screen.getByRole('button', { name: "เข้าสู่ระบบ" });
     await userEvent.click(submitButton);
 
     await waitFor(() => {
@@ -133,19 +134,19 @@ describe('LoginForm', () => {
 
     renderWithProviders(<LoginForm />);
     
-    expect(screen.getByText(/could not sign you in/i)).toBeInTheDocument();
+    expect(screen.getByText(/เข้าสู่ระบบไม่สำเร็จ/)).toBeInTheDocument();
   });
 
-  it('hides Google button and "or" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
+  it('hides Google button and "หรือ" divider when VITE_GOOGLE_CLIENT_ID is missing', () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', '');
     renderWithProviders(<LoginForm />);
 
     expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
-    expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/by continuing, you agree to the pegasus/i)).toBeInTheDocument();
+    expect(screen.queryByText("หรือ")).not.toBeInTheDocument();
+    expect(screen.getByText(/การดำเนินการต่อถือว่าคุณยอมรับ/)).toBeInTheDocument();
   });
 
-  it('hides Google button and "or" divider when GIS script fails to load', async () => {
+  it('hides Google button and "หรือ" divider when GIS script fails to load', async () => {
     vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
     renderWithProviders(<LoginForm />);
 
@@ -159,9 +160,9 @@ describe('LoginForm', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('google-signin-button')).not.toBeInTheDocument();
-      expect(screen.queryByText(/^or$/i)).not.toBeInTheDocument();
+      expect(screen.queryByText("หรือ")).not.toBeInTheDocument();
     });
-    expect(screen.getByLabelText(/email/i)).toBeEnabled();
+    expect(screen.getByLabelText("อีเมล")).toBeEnabled();
   });
 
   it('renders Google Sign-In button with GIS options, consent links, and navigates on success without storing credential', async () => {
@@ -211,10 +212,10 @@ describe('LoginForm', () => {
       }),
     );
 
-    expect(screen.getByText(/by continuing, you agree to the pegasus/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Terms of Service' })).toHaveAttribute('href', '/terms-of-service');
-    expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy-policy');
-    expect(screen.getByText('or')).toBeInTheDocument();
+    expect(screen.getByText(/การดำเนินการต่อถือว่าคุณยอมรับ/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'ข้อกำหนดการใช้บริการ' })).toHaveAttribute('href', '/terms-of-service');
+    expect(screen.getByRole('link', { name: 'นโยบายความเป็นส่วนตัว' })).toHaveAttribute('href', '/privacy-policy');
+    expect(screen.getByText('หรือ')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Continue with Google' }));
 
@@ -248,10 +249,10 @@ describe('LoginForm', () => {
 
     renderWithProviders(<LoginForm />);
 
-    expect(screen.getByText('Signing in with Google...')).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeDisabled();
-    expect(screen.getByLabelText(/^password$/i)).toBeDisabled();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeDisabled();
+    expect(screen.getByText('กำลังเข้าสู่ระบบด้วย Google...')).toBeInTheDocument();
+    expect(screen.getByLabelText("อีเมล")).toBeDisabled();
+    expect(screen.getByLabelText("รหัสผ่าน")).toBeDisabled();
+    expect(screen.getByRole('button', { name: "เข้าสู่ระบบ" })).toBeDisabled();
   });
 
   it.each(
@@ -259,7 +260,8 @@ describe('LoginForm', () => {
       ApiErrorCode,
       { title: string; description: string },
     ][],
-  )('renders ACC-3 alert for error code %s', (code, expected) => {
+  )('renders ACC-3 alert for error code %s', (code) => {
+    const expected = errorsTh.authAlert[code as keyof typeof errorsTh.authAlert];
     vi.spyOn(authQueries, 'useGoogleSignIn').mockReturnValue({
       mutateAsync: mockGoogleMutateAsync,
       reset: vi.fn(),

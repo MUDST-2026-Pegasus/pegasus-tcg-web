@@ -58,7 +58,7 @@ describe("SellerLayout", () => {
     renderWithProviders(<SellerLayout />, { route: "/seller" });
 
     // Sidebar items
-    expect(screen.getByText("DASHBOARD")).toBeInTheDocument();
+    expect(screen.getByText("แดชบอร์ด")).toBeInTheDocument();
     expect(screen.getByText("SELLER")).toBeInTheDocument();
 
     // Verify navigation links exist

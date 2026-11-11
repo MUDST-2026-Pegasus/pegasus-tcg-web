@@ -76,9 +76,9 @@ export function CollectorProfilePage() {
   return (
     <main className="min-h-[580px] bg-muted px-5 py-8 font-sans sm:px-8 sm:py-12 lg:px-12">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8">
-        <div><Button variant="outline" render={<Link to={backHref} />}>{fromSlug ? t("collector.backToCard", "Back to card") : t("collector.backToProducts", "Back to products")}</Button></div>
+        <div><Button variant="outline" render={<Link to={backHref} />}>{fromSlug ? t("collector.backToCard", "กลับไปหน้าการ์ด") : t("collector.backToProducts", "กลับหน้าสินค้า")}</Button></div>
 
-        <section aria-label={t("collector.profile", "Collector profile")} className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-5 rounded-xl border border-border bg-card p-6 sm:flex sm:gap-6 sm:p-8">
+        <section aria-label={t("collector.profile", "โปรไฟล์นักสะสม")} className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-5 rounded-xl border border-border bg-card p-6 sm:flex sm:gap-6 sm:p-8">
           <Avatar className="size-20 shrink-0">
             {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
             <AvatarFallback className="bg-muted text-sm text-muted-foreground">{initials}</AvatarFallback>
@@ -87,13 +87,13 @@ export function CollectorProfilePage() {
             <h1 className="break-all text-xl font-bold leading-7 sm:text-2xl sm:leading-8">{displayName}</h1>
             <p className="mt-2 break-all text-base text-muted-foreground">@{username}</p>
           </div>
-          <p className="col-start-2 text-xl font-semibold text-primary sm:ml-auto sm:shrink-0">{t("product.cardCount", "{count, plural, =1 {# card} other {# cards}}", { count: cardCount })}</p>
+          <p className="col-start-2 text-xl font-semibold text-primary sm:ml-auto sm:shrink-0">{t("product.cardCount", "{count, plural, other {# ใบ}}", { count: cardCount })}</p>
         </section>
 
         <section aria-labelledby="collection-heading" className="space-y-6">
           <div>
-            <h2 id="collection-heading" className="text-xl font-semibold leading-7">{t("collector.highlights", "Collection highlights")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t("collector.intro", "A selection of cards from {name}’s public collection.", { name: displayName })}</p>
+            <h2 id="collection-heading" className="text-xl font-semibold leading-7">{t("collector.highlights", "การ์ดเด่นในคอลเลกชัน")}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{t("collector.intro", "การ์ดคัดสรรจากคอลเลกชันสาธารณะของ {name}", { name: displayName })}</p>
           </div>
           {items.length === 0 ? (
             <p className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">{t("collector.empty", "ยังไม่มีรายการสะสมที่เปิดเป็นสาธารณะ")}</p>

@@ -82,7 +82,7 @@ export function CouponTicket({
         stub={<>
           <span className="text-[10px] opacity-80">{t("buyer.couponTicket.span", "ลด")}</span>
           <strong className="text-[22px] leading-7 font-black">{value}</strong>
-          <small className="text-[9px] font-semibold tracking-widest opacity-80">{t("buyer.couponTicket.shopTag", "SHOP")}</small>
+          <small className="text-[9px] font-semibold tracking-widest opacity-80">{t("buyer.couponTicket.shopTag", "ร้าน")}</small>
         </>}
         body={<>
           <div className="flex min-w-0 items-center justify-between gap-1">

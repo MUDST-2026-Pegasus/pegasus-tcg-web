@@ -82,8 +82,8 @@ describe("AddCardsDialog", () => {
     renderWithProviders(<AddCardsDialog open onOpenChange={onOpenChange} />);
 
     expect(screen.getByRole("button", { name: /Umbreon ex/ })).toHaveTextContent("161/131 · SIR");
-    expect(screen.getByText("0 cards selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    expect(screen.getByText("เลือกการ์ด 0 ใบ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ถัดไป" })).toBeDisabled();
   });
 
   it("adds a picked card with its details and no photo", async () => {
@@ -91,15 +91,15 @@ describe("AddCardsDialog", () => {
     renderWithProviders(<AddCardsDialog open onOpenChange={onOpenChange} />);
 
     await user.click(screen.getByRole("button", { name: /Umbreon ex/ }));
-    expect(screen.getByText("1 card selected")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("เลือกการ์ด 1 ใบ")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "ถัดไป" }));
 
     // The only printing is chosen without asking.
-    expect(await screen.findByRole("combobox", { name: "Printing of Umbreon ex" })).toHaveTextContent(
+    expect(await screen.findByRole("combobox", { name: "เวอร์ชันของ Umbreon ex" })).toHaveTextContent(
       "JP / FOIL / UNLIMITED",
     );
-    await choose(user, "Condition of Umbreon ex", "Lightly Played");
-    await user.click(screen.getByRole("button", { name: "Add 1 card" }));
+    await choose(user, "สภาพของ Umbreon ex", "Lightly Played");
+    await user.click(screen.getByRole("button", { name: "เพิ่มการ์ด 1 ใบ" }));
 
     await waitFor(() => expect(addItems).toHaveBeenCalledTimes(1));
     expect(addItems.mock.calls[0][0]).toEqual([
@@ -113,28 +113,28 @@ describe("AddCardsDialog", () => {
     renderWithProviders(<AddCardsDialog open onOpenChange={onOpenChange} />);
 
     await user.click(screen.getByRole("button", { name: /Charizard ex/ }));
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "ถัดไป" }));
 
-    expect(await screen.findByRole("combobox", { name: "Printing of Charizard ex" })).toHaveTextContent(
-      "Choose printing",
+    expect(await screen.findByRole("combobox", { name: "เวอร์ชันของ Charizard ex" })).toHaveTextContent(
+      "เลือกเวอร์ชัน",
     );
-    expect(screen.getByRole("button", { name: "Add 1 card" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "เพิ่มการ์ด 1 ใบ" })).toBeDisabled();
 
-    await choose(user, "Printing of Charizard ex", "EN / FOIL / UNLIMITED");
-    expect(screen.getByRole("button", { name: "Add 1 card" })).toBeEnabled();
+    await choose(user, "เวอร์ชันของ Charizard ex", "EN / FOIL / UNLIMITED");
+    expect(screen.getByRole("button", { name: "เพิ่มการ์ด 1 ใบ" })).toBeEnabled();
   });
 
   it("searches one game's cards once that game is chosen, and resets to the first page", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AddCardsDialog open onOpenChange={onOpenChange} />);
 
-    expect(screen.getByRole("combobox", { name: "Set" })).toBeDisabled();
-    await choose(user, "Game", "Pokemon TCG");
+    expect(screen.getByRole("combobox", { name: "ชุด" })).toBeDisabled();
+    await choose(user, "เกม", "Pokemon TCG");
 
     expect(catalogQueries.useProductSearch).toHaveBeenLastCalledWith(
       expect.objectContaining({ gameId: [1], cardSetId: undefined, page: 0 }),
     );
-    expect(screen.getByRole("combobox", { name: "Set" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "ชุด" })).toBeEnabled();
   });
 
   it("keeps a card that failed and shows why, so it can be retried", async () => {
@@ -147,14 +147,14 @@ describe("AddCardsDialog", () => {
 
     await user.click(screen.getByRole("button", { name: /Umbreon ex/ }));
     await user.click(screen.getByRole("button", { name: /Charizard ex/ }));
-    await user.click(screen.getByRole("button", { name: "Next" }));
-    await screen.findByRole("combobox", { name: "Printing of Charizard ex" });
-    await choose(user, "Printing of Charizard ex", "JP / FOIL / UNLIMITED");
-    await user.click(screen.getByRole("button", { name: "Add 2 cards" }));
+    await user.click(screen.getByRole("button", { name: "ถัดไป" }));
+    await screen.findByRole("combobox", { name: "เวอร์ชันของ Charizard ex" });
+    await choose(user, "เวอร์ชันของ Charizard ex", "JP / FOIL / UNLIMITED");
+    await user.click(screen.getByRole("button", { name: "เพิ่มการ์ด 2 ใบ" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Variant is no longer available");
-    expect(screen.queryByRole("combobox", { name: "Printing of Umbreon ex" })).not.toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Printing of Charizard ex" })).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "เวอร์ชันของ Umbreon ex" })).not.toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "เวอร์ชันของ Charizard ex" })).toBeInTheDocument();
     expect(onOpenChange).not.toHaveBeenCalledWith(false);
   });
 });

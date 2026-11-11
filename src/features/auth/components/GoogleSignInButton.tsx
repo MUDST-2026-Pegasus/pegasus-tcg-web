@@ -33,7 +33,7 @@ export function GoogleOrDivider() {
       aria-orientation="horizontal"
     >
       <Separator className="flex-1" />
-      <span className="text-xs text-muted-foreground">{t("auth.google.or", "or")}</span>
+      <span className="text-xs text-muted-foreground">{t("auth.google.or", "หรือ")}</span>
       <Separator className="flex-1" />
     </div>
   );
@@ -164,7 +164,7 @@ export function GoogleSignInButton({
           className="mx-auto flex h-10 w-full max-w-[400px] items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 text-sm font-medium text-muted-foreground"
         >
           <Spinner className="size-4" />
-          <span>{t("auth.google.signingIn", "Signing in with Google...")}</span>
+          <span>{t("auth.google.signingIn", "กำลังเข้าสู่ระบบด้วย Google...")}</span>
         </button>
       )}
       <div

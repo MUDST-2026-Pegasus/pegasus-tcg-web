@@ -128,7 +128,7 @@ describe("OrderDetailSheet", () => {
     const user = userEvent.setup();
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
-    const button = await screen.findByRole("button", { name: "Download Order Summary (PDF)" });
+    const button = await screen.findByRole("button", { name: "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)" });
     await user.click(button);
 
     expect(ordersApi.downloadAdminOrderSummary).toHaveBeenCalledOnce();
@@ -155,13 +155,13 @@ describe("OrderDetailSheet", () => {
     vi.mocked(ordersApi.downloadAdminOrderSummary).mockRejectedValue(new ApiError({
       status: 404,
       code: "ORDER_NOT_FOUND",
-      message: "Order not found",
+      message: "ไม่พบคำสั่งซื้อ",
     }));
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     const user = userEvent.setup();
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
-    await user.click(await screen.findByRole("button", { name: "Download Order Summary (PDF)" }));
+    await user.click(await screen.findByRole("button", { name: "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)" }));
 
     await waitFor(() => expect(toast.add).toHaveBeenCalledWith({
       type: "error",

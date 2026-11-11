@@ -16,7 +16,7 @@ export function formatListingPrice(amount: number): string {
 export function formatSellerReputation(seller?: Seller | null): string {
   if (!seller) return "";
   const salesCount = seller.salesCount ?? 0;
-  const salesText = (count: string) => translate("common", "listing.sales", "{count} sales", { count });
+  const salesText = (count: string) => translate("common", "listing.sales", "ขายแล้ว {count} ชิ้น", { count });
   const sales = salesCount > 0 ? salesText(salesFormatter.format(salesCount).toLowerCase()) : "";
   if (seller.ratingAvg == null || (seller.ratingCount ?? 0) === 0) {
     return sales || translate("common", "listing.newShop", "ร้านใหม่");
@@ -26,10 +26,10 @@ export function formatSellerReputation(seller?: Seller | null): string {
 
 export function formatListingDelivery(delivery?: Delivery | null): string {
   if (!delivery || delivery.optionCount === 0) return translate("common", "listing.deliveryNotSet", "ยังไม่ตั้งค่าการจัดส่ง");
-  if (delivery.freeShipping) return translate("common", "listing.freeShipping", "Free shipping");
+  if (delivery.freeShipping) return translate("common", "listing.freeShipping", "ส่งฟรี");
 
-  const tomorrow = () => translate("common", "listing.shipsTomorrow", "Ships tomorrow");
-  const shipsIn = (days: string) => translate("common", "listing.shipsInDays", "Ships in {days} days", { days });
+  const tomorrow = () => translate("common", "listing.shipsTomorrow", "ส่งพรุ่งนี้");
+  const shipsIn = (days: string) => translate("common", "listing.shipsInDays", "ส่งภายใน {days} วัน", { days });
   const min = delivery.fastestEstDaysMin;
   const max = delivery.fastestEstDaysMax;
   if (min != null && max != null) {
@@ -42,10 +42,10 @@ export function formatListingDelivery(delivery?: Delivery | null): string {
 }
 
 // helper นอก component ใช้ translate (namespace common โหลดตั้งแต่เปิดเว็บ) — ประกาศ key ให้ tolgee CLI เห็น
-// @tolgee-key {"key":"listing.sales","ns":"common","defaultValue":"{count} sales"}
+// @tolgee-key {"key":"listing.sales","ns":"common","defaultValue":"ขายแล้ว {count} ชิ้น"}
 // @tolgee-key {"key":"listing.newShop","ns":"common","defaultValue":"ร้านใหม่"}
 // @tolgee-key {"key":"listing.deliveryNotSet","ns":"common","defaultValue":"ยังไม่ตั้งค่าการจัดส่ง"}
-// @tolgee-key {"key":"listing.freeShipping","ns":"common","defaultValue":"Free shipping"}
-// @tolgee-key {"key":"listing.shipsTomorrow","ns":"common","defaultValue":"Ships tomorrow"}
-// @tolgee-key {"key":"listing.shipsInDays","ns":"common","defaultValue":"Ships in {days} days"}
+// @tolgee-key {"key":"listing.freeShipping","ns":"common","defaultValue":"ส่งฟรี"}
+// @tolgee-key {"key":"listing.shipsTomorrow","ns":"common","defaultValue":"ส่งพรุ่งนี้"}
+// @tolgee-key {"key":"listing.shipsInDays","ns":"common","defaultValue":"ส่งภายใน {days} วัน"}
 // @tolgee-key {"key":"listing.deliveryByShop","ns":"common","defaultValue":"จัดส่งตามเงื่อนไขร้าน"}

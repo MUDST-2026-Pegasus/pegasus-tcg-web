@@ -868,7 +868,7 @@
       "commission": "ค่าคอมมิชชั่น",
       "delivery": "การจัดส่ง",
       "discount": "ส่วนลด",
-      "download": "Download Order Summary (PDF)",
+      "download": "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)",
       "downloadFailed": "ดาวน์โหลด Order Summary ไม่สำเร็จ",
       "downloaded": "ดาวน์โหลด Order Summary แล้ว",
       "generating": "กำลังสร้าง PDF...",
@@ -977,11 +977,11 @@
     "export": {
       "activeListings": "ประกาศขายที่เปิดอยู่",
       "auctionSales": "ยอดขายจากประมูล (30 วัน)",
-      "commission": "ค่าคอมมิชชัน",
+      "commission": "ค่าคอมมิชชั่น",
       "gmv": "ยอดขายรวม (GMV)",
       "liveAuctions": "ประมูลที่กำลังเปิด",
       "newSellers": "ผู้ขายรายใหม่",
-      "promotionCost": "ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)",
+      "promotionCost": "ต้นทุนโปรโมชัน (ชดเชยโค้ด Pegasus)",
       "saleSubsidy": "ส่วนลดแคมเปญ"
     }
   },

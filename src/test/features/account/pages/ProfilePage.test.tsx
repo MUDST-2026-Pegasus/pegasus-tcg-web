@@ -82,14 +82,14 @@ describe("ProfilePage", () => {
     renderWithProviders(<ProfilePage />, { route: "/account/profile" });
 
     // Profile header and user details
-    expect(screen.getByText("My Profile")).toBeInTheDocument();
+    expect(screen.getByText("โปรไฟล์ของฉัน")).toBeInTheDocument();
     expect(screen.getAllByText("John Doe").length).toBeGreaterThan(0);
     expect(screen.getAllByText("john@example.com").length).toBeGreaterThan(0);
     expect(screen.getByText("0812345678")).toBeInTheDocument();
     expect(screen.getByText("Trading card enthusiast")).toBeInTheDocument();
 
     // Order status card
-    expect(screen.getByText("Order #ORD-15")).toBeInTheDocument();
+    expect(screen.getByText("คำสั่งซื้อ #ORD-15")).toBeInTheDocument();
 
     // Address card
     expect(await screen.findByText(/123 Sukhumvit Road/i)).toBeInTheDocument();
@@ -99,11 +99,11 @@ describe("ProfilePage", () => {
     const user = userEvent.setup();
     renderWithProviders(<ProfilePage />, { route: "/account/profile" });
 
-    const editBtn = screen.getByRole("button", { name: /Edit Profile/i });
+    const editBtn = screen.getByRole("button", { name: "แก้ไขโปรไฟล์" });
     await user.click(editBtn);
 
     expect(
-      await screen.findByText(/Update your personal information/i),
+      await screen.findByText("แก้ไขข้อมูลส่วนตัวของคุณ"),
     ).toBeInTheDocument();
   });
 
@@ -117,10 +117,10 @@ describe("ProfilePage", () => {
     renderWithProviders(<ProfilePage />);
 
     expect(ordersSpy).toHaveBeenCalledWith(0, 1);
-    expect(screen.getByText("Order #ORD-15")).toBeInTheDocument();
-    expect(screen.getByText("In Transit")).toBeInTheDocument();
+    expect(screen.getByText("คำสั่งซื้อ #ORD-15")).toBeInTheDocument();
+    expect(screen.getByText("กำลังจัดส่ง")).toBeInTheDocument();
     expect(screen.getByText("฿1,050")).toBeInTheDocument();
-    expect(screen.getByText("View Order Details").closest("a")).toHaveAttribute(
+    expect(screen.getByText("ดูรายละเอียดคำสั่งซื้อ").closest("a")).toHaveAttribute(
       "href",
       "/account/orders?orderId=15",
     );
@@ -135,6 +135,6 @@ describe("ProfilePage", () => {
 
     renderWithProviders(<ProfilePage />);
 
-    expect(screen.getByText("No recent orders")).toBeInTheDocument();
+    expect(screen.getByText("ยังไม่มีคำสั่งซื้อล่าสุด")).toBeInTheDocument();
   });
 });

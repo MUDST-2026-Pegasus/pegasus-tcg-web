@@ -12,20 +12,20 @@ export function useAccountLinks() {
   const logout = useLogout();
   const navigate = useNavigate();
   const sellerLink = auth.hasRole("SELLER")
-    ? { label: t("account.sellerDashboard", "Seller Dashboard"), to: "/seller" }
-    : { label: t("account.becomeSeller", "Become a Seller"), to: "/become-a-seller" };
+    ? { label: t("account.sellerDashboard", "แดชบอร์ดผู้ขาย"), to: "/seller" }
+    : { label: t("account.becomeSeller", "สมัครเป็นผู้ขาย"), to: "/become-a-seller" };
   const links = auth.isAuthenticated
     ? [
-        { label: t("account.myAccount", "My Account"), to: "/account/profile" },
-        { label: t("account.myCollection", "My Collection"), to: "/account/collection" },
+        { label: t("account.myAccount", "บัญชีของฉัน"), to: "/account/profile" },
+        { label: t("account.myCollection", "คอลเลกชันของฉัน"), to: "/account/collection" },
         sellerLink,
         ...(auth.hasRole("ADMIN")
-          ? [{ label: t("account.adminDashboard", "Admin Dashboard"), to: "/admin" }]
+          ? [{ label: t("account.adminDashboard", "แดชบอร์ดผู้ดูแล"), to: "/admin" }]
           : []),
       ]
     : [
-        { label: t("nav.login", "Log in"), to: "/login" },
-        { label: t("nav.signup", "Sign up"), to: "/register" },
+        { label: t("nav.login", "เข้าสู่ระบบ"), to: "/login" },
+        { label: t("nav.signup", "สมัครสมาชิก"), to: "/register" },
       ];
   const handleLogout = async () => {
     await logout.mutateAsync();

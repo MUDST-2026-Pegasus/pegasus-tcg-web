@@ -39,16 +39,16 @@ describe('EditProfileDialog', () => {
     );
     
     // Name field
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     expect(nameInput).toHaveValue('John Doe');
 
     // Email field (disabled)
-    const emailInput = screen.getByLabelText(/email/i);
+    const emailInput = screen.getByLabelText("อีเมล");
     expect(emailInput).toHaveValue('john@example.com');
     expect(emailInput).toBeDisabled();
 
     // Phone number field
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     expect(phoneInput).toHaveValue('');
     expect(phoneInput).toHaveAttribute('placeholder', '(+66) 89-123-4567');
 
@@ -57,7 +57,7 @@ describe('EditProfileDialog', () => {
 
     // Avatar upload buttons should be removed
     expect(screen.queryByRole('button', { name: /change photo/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: "นำออก" })).not.toBeInTheDocument();
   });
 
   it('falls back to username when displayName is blank', () => {
@@ -69,7 +69,7 @@ describe('EditProfileDialog', () => {
       />
     );
 
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     expect(nameInput).toHaveValue('custom_username');
   });
 
@@ -81,13 +81,13 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
 
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     await user.type(phoneInput, '0812345678');
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     await user.click(saveButton);
 
     await waitFor(() => {
@@ -107,7 +107,7 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeDisabled();
   });
 
@@ -134,7 +134,7 @@ describe('EditProfileDialog', () => {
       />
     );
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
 
     expect(phoneInput).toBeInTheDocument();
@@ -190,7 +190,7 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={{ ...mockUser, phone: null }} />
     );
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
 
     // Initially blank -> disabled
@@ -237,7 +237,7 @@ describe('EditProfileDialog', () => {
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
     await user.click(switchElement);
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeEnabled();
     await user.click(saveButton);
 
@@ -270,7 +270,7 @@ describe('EditProfileDialog', () => {
     expect(switchElement).toBeChecked();
     await user.click(switchElement);
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeEnabled();
     await user.click(saveButton);
 
