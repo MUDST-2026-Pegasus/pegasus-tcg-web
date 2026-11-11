@@ -23,7 +23,7 @@ const live = Cypress.expose("runLiveSearch") === true || Cypress.expose("runLive
       });
 
       cy.contains(/Showing results for “Pok[eé]mon” · You searched “pokamon”/).should("be.visible");
-      cy.get('input[aria-label="Search products"]').should("have.value", "pokamon");
+      cy.get('input[aria-label="ค้นหาสินค้า"]').should("have.value", "pokamon");
       cy.url().should("include", "q=pokamon");
     });
   });

@@ -146,7 +146,7 @@
       "discountFixed": "Fixed amount per item",
       "discountFixedHint": "Baht per item · sale price can't go below ฿1",
       "discountPercent": "Percentage",
-      "discountPrefix": "ลด",
+      "discountPrefix": "Save ",
       "discountType": "Discount type",
       "durationPrefix": "Lasts",
       "endsAt": "Ends",

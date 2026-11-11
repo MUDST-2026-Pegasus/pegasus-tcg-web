@@ -24,15 +24,15 @@ describe("Auth Pages", () => {
   it("renders LoginPage with header and LoginForm", () => {
     renderWithProviders(<LoginPage />, { route: "/login" });
 
-    expect(screen.getByText("Log in to Pegasus")).toBeInTheDocument();
+    expect(screen.getByText("เข้าสู่ระบบ Pegasus")).toBeInTheDocument();
     expect(screen.getByTestId("login-form")).toBeInTheDocument();
   });
 
   it("renders RegisterPage with header and RegisterForm", () => {
     renderWithProviders(<RegisterPage />, { route: "/register" });
 
-    expect(screen.getByText("Sign up to continue")).toBeInTheDocument();
-    expect(screen.getByText(/To like or purchase an item/i)).toBeInTheDocument();
+    expect(screen.getByText("สมัครสมาชิกเพื่อดำเนินการต่อ")).toBeInTheDocument();
+    expect(screen.getByText(/สร้างบัญชีเพื่อกดถูกใจ/)).toBeInTheDocument();
     expect(screen.getByTestId("register-form")).toBeInTheDocument();
   });
 

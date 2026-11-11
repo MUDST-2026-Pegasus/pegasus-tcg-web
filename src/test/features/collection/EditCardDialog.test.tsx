@@ -47,26 +47,26 @@ describe("EditCardDialog", () => {
   it("opens on the card's current printing, condition and quantity", async () => {
     renderWithProviders(<EditCardDialog item={item} onClose={onClose} />);
 
-    expect(await screen.findByRole("combobox", { name: "Printing of Charizard ex" })).toHaveTextContent(
+    expect(await screen.findByRole("combobox", { name: "เวอร์ชันของ Charizard ex" })).toHaveTextContent(
       "JP / FOIL / UNLIMITED",
     );
-    expect(screen.getByRole("combobox", { name: "Condition of Charizard ex" })).toHaveTextContent("Near Mint");
-    expect(screen.getByLabelText("Quantity of Charizard ex")).toHaveValue(1);
-    expect(screen.getByAltText("Your photo of Charizard ex")).toHaveAttribute("src", item.photoUrl);
+    expect(screen.getByRole("combobox", { name: "สภาพของ Charizard ex" })).toHaveTextContent("Near Mint");
+    expect(screen.getByLabelText("จำนวนของ Charizard ex")).toHaveValue(1);
+    expect(screen.getByAltText("รูปของคุณสำหรับ Charizard ex")).toHaveAttribute("src", item.photoUrl);
   });
 
   it("saves the changed details and keeps the photo and the owner's private fields", async () => {
     const user = userEvent.setup();
     renderWithProviders(<EditCardDialog item={item} onClose={onClose} />);
 
-    await screen.findByRole("combobox", { name: "Printing of Charizard ex" });
-    await user.click(screen.getByRole("combobox", { name: "Printing of Charizard ex" }));
+    await screen.findByRole("combobox", { name: "เวอร์ชันของ Charizard ex" });
+    await user.click(screen.getByRole("combobox", { name: "เวอร์ชันของ Charizard ex" }));
     await user.click(await screen.findByRole("option", { name: "EN / FOIL / UNLIMITED" }));
-    await user.click(screen.getByRole("combobox", { name: "Condition of Charizard ex" }));
+    await user.click(screen.getByRole("combobox", { name: "สภาพของ Charizard ex" }));
     await user.click(await screen.findByRole("option", { name: "Lightly Played" }));
-    await user.clear(screen.getByLabelText("Quantity of Charizard ex"));
-    await user.type(screen.getByLabelText("Quantity of Charizard ex"), "3");
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.clear(screen.getByLabelText("จำนวนของ Charizard ex"));
+    await user.type(screen.getByLabelText("จำนวนของ Charizard ex"), "3");
+    await user.click(screen.getByRole("button", { name: "บันทึกการเปลี่ยนแปลง" }));
 
     await waitFor(() => expect(updateItem).toHaveBeenCalledTimes(1));
     expect(updateItem.mock.calls[0][0]).toBe(6);
@@ -86,9 +86,9 @@ describe("EditCardDialog", () => {
     const user = userEvent.setup();
     renderWithProviders(<EditCardDialog item={item} onClose={onClose} />);
 
-    await user.click(await screen.findByRole("button", { name: "Remove photo of Charizard ex" }));
-    expect(screen.queryByAltText("Your photo of Charizard ex")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    await user.click(await screen.findByRole("button", { name: "ลบรูปของ Charizard ex" }));
+    expect(screen.queryByAltText("รูปของคุณสำหรับ Charizard ex")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "บันทึกการเปลี่ยนแปลง" }));
 
     await waitFor(() => expect(updateItem).toHaveBeenCalledTimes(1));
     expect(updateItem.mock.calls[0][1]).toMatchObject({ catalogVariantId: 21, imageKey: null });
@@ -98,9 +98,9 @@ describe("EditCardDialog", () => {
     vi.spyOn(collectionApi, "getCollectionVariants").mockResolvedValue([variant(21, "JP", false), variant(22, "EN")]);
     renderWithProviders(<EditCardDialog item={item} onClose={onClose} />);
 
-    expect(await screen.findByRole("combobox", { name: "Printing of Charizard ex" })).toHaveTextContent(
+    expect(await screen.findByRole("combobox", { name: "เวอร์ชันของ Charizard ex" })).toHaveTextContent(
       "JP / FOIL / UNLIMITED",
     );
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "บันทึกการเปลี่ยนแปลง" })).toBeEnabled();
   });
 });

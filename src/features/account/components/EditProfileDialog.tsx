@@ -57,10 +57,10 @@ export function EditProfileDialog({
       >
         <DialogHeader className="gap-1 text-left">
           <DialogTitle className="text-xl font-bold text-foreground">
-            {t("account.profile.edit.title", "Edit Profile")}
+            {t("account.profile.edit.title", "แก้ไขโปรไฟล์")}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {t("account.profile.edit.description", "Update your personal information.")}
+            {t("account.profile.edit.description", "แก้ไขข้อมูลส่วนตัวของคุณ")}
           </DialogDescription>
         </DialogHeader>
         <EditProfileForm
@@ -111,8 +111,8 @@ function EditProfileForm({
       await updateProfile.mutateAsync(payload);
       toast.add({
         type: "success",
-        title: t("account.profile.edit.saved", "Profile updated"),
-        description: t("account.profile.edit.savedHint", "Your profile changes have been saved successfully."),
+        title: t("account.profile.edit.saved", "อัปเดตโปรไฟล์แล้ว"),
+        description: t("account.profile.edit.savedHint", "บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว"),
       });
       onSaved();
     } catch (error) {
@@ -125,7 +125,7 @@ function EditProfileForm({
       {updateProfile.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {translateError(updateProfile.error, t("account.profile.edit.failed", "Could not save profile changes."))}
+            {translateError(updateProfile.error, t("account.profile.edit.failed", "บันทึกโปรไฟล์ไม่สำเร็จ"))}
           </AlertDescription>
         </Alert>
       )}
@@ -138,11 +138,11 @@ function EditProfileForm({
         {/* Field 1: Name */}
         <Field className="gap-2" data-invalid={Boolean(errors.displayName) || undefined}>
           <FieldLabel htmlFor="displayName" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.name", "Name")}
+            {t("account.profile.edit.name", "ชื่อ")}
           </FieldLabel>
           <Input
             id="displayName"
-            aria-label={t("account.profile.edit.nameAria", "Display Name")}
+            aria-label={t("account.profile.edit.nameAria", "ชื่อที่แสดง")}
             autoComplete="name"
             className="h-11 rounded-xl border border-input bg-white px-3.5 text-sm font-normal text-foreground dark:bg-background"
             aria-invalid={Boolean(errors.displayName)}
@@ -154,7 +154,7 @@ function EditProfileForm({
         {/* Field 2: Email */}
         <Field className="gap-2">
           <FieldLabel htmlFor="email" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.email", "Email")}
+            {t("account.profile.edit.email", "อีเมล")}
           </FieldLabel>
           <Input
             id="email"
@@ -167,7 +167,7 @@ function EditProfileForm({
         {/* Field 3: Phone Number */}
         <Field className="gap-2" data-invalid={Boolean(errors.phone) || undefined}>
           <FieldLabel htmlFor="phone" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.phone", "Phone Number")}
+            {t("account.profile.edit.phone", "เบอร์โทรศัพท์")}
           </FieldLabel>
           <Input
             id="phone"
@@ -226,7 +226,7 @@ function EditProfileForm({
             />
           }
         >
-          {t("account.orders.cancel", "Cancel")}
+          {t("account.orders.cancel", "ยกเลิก")}
         </DialogClose>
         <Button
           type="submit"
@@ -234,7 +234,7 @@ function EditProfileForm({
           disabled={isSubmitting || !hasChanges}
         >
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {t("account.profile.edit.save", "Save Changes")}
+          {t("account.profile.edit.save", "บันทึกการเปลี่ยนแปลง")}
         </Button>
       </DialogFooter>
     </form>

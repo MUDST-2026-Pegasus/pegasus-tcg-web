@@ -125,7 +125,7 @@ describe("ProductDetailPage cart actions", () => {
     renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: "เพิ่มจำนวนสินค้า" }));
-    fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    fireEvent.click(screen.getByRole("button", { name: "เพิ่มลงตะกร้า" }));
 
     await waitFor(() => {
       expect(addItem).toHaveBeenCalledWith({ listingId: 55, quantity: 2 });
@@ -155,7 +155,7 @@ describe("ProductDetailPage cart actions", () => {
 
     renderPage();
 
-    const outOfStockButtons = screen.getAllByRole("button", { name: "Out of Stock" });
+    const outOfStockButtons = screen.getAllByRole("button", { name: "สินค้าหมด" });
     expect(outOfStockButtons).toHaveLength(2);
     outOfStockButtons.forEach((button) => expect(button).toBeDisabled());
   });
@@ -173,14 +173,14 @@ describe("ProductDetailPage cart actions", () => {
     expect(screen.getByText("ร้านใหม่")).toBeInTheDocument();
     expect(screen.queryByText("★ 0.0")).not.toBeInTheDocument();
     expect(screen.getByText("ยังไม่ตั้งค่าการจัดส่ง")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "เพิ่ม" })).toBeDisabled();
     expect(screen.getByText("100")).toBeInTheDocument();
   });
 
   it("sends guests to login before Buy Now", () => {
     renderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /Buy now/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ซื้อทันที/ }));
     expect(screen.getByText("Login reached")).toBeInTheDocument();
   });
 
@@ -194,7 +194,7 @@ describe("ProductDetailPage cart actions", () => {
 
     renderPage();
 
-    const profileLink = screen.getByRole("link", { name: "View profile" });
+    const profileLink = screen.getByRole("link", { name: "ดูโปรไฟล์" });
     expect(profileLink).toHaveAttribute("href", "/u/ice5?tab=collection");
     fireEvent.click(profileLink);
     expect(screen.getByText("Collection reached tab=collection")).toBeInTheDocument();
@@ -210,7 +210,7 @@ describe("ProductDetailPage cart actions", () => {
     });
     renderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /Buy now/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ซื้อทันที/ }));
 
     expect(await screen.findByText("Checkout reached items=900&productId=1&listingId=55")).toBeInTheDocument();
     expect(addItem).toHaveBeenCalledWith({ listingId: 55, quantity: 1 });
@@ -246,8 +246,8 @@ describe("ProductDetailPage cart actions", () => {
     const user = userEvent.setup();
     renderPage();
 
-    const dropdown = screen.getByRole("combobox", { name: "Select variant" });
-    expect(dropdown).toHaveTextContent("All variants");
+    const dropdown = screen.getByRole("combobox", { name: "เลือกเวอร์ชัน" });
+    expect(dropdown).toHaveTextContent("ทุกเวอร์ชัน");
     expect(screen.getByText("฿3,000.00")).toBeInTheDocument();
     expect(screen.getByLabelText("ดูรายละเอียดสินค้าของ Seller")).toBeInTheDocument();
 
@@ -276,20 +276,20 @@ describe("ProductDetailPage cart actions", () => {
     fireEvent.click(screen.getAllByText("Lightly Played")[0].closest("button")!);
     expect(screen.getByText("฿2,000.00")).toBeInTheDocument();
     expect(screen.getByText("↓ 5%")).toBeInTheDocument();
-    expect(screen.getByText("Last sold").parentElement).toHaveTextContent("—");
+    expect(screen.getByText("ขายล่าสุด").parentElement).toHaveTextContent("—");
   });
 
   it("shows dashes when market data is missing", () => {
     renderPage();
-    expect(screen.getByText("Market price").parentElement).toHaveTextContent("—");
-    expect(screen.getByText("Last sold").parentElement).toHaveTextContent("—");
+    expect(screen.getByText("ราคาตลาด").parentElement).toHaveTextContent("—");
+    expect(screen.getByText("ขายล่าสุด").parentElement).toHaveTextContent("—");
   });
 
   it("keeps the product visible when the market API fails", () => {
     vi.spyOn(catalogQueries, "useProductMarket").mockReturnValue({ data: undefined, isError: true } as never);
     renderPage();
     expect(screen.getByText("Pikachu ex", { selector: "h1" })).toBeInTheDocument();
-    expect(screen.getByText("Market price").parentElement).toHaveTextContent("—");
+    expect(screen.getByText("ราคาตลาด").parentElement).toHaveTextContent("—");
   });
 
   it("renders collector avatar image when avatarUrl is present and initials fallback when null", () => {

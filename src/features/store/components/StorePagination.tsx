@@ -22,7 +22,7 @@ export function StorePagination({
   const pages = Array.from({ length: totalPages }, (_, i) => i);
 
   return (
-    <nav aria-label={t("store.pages", "Store pages")} className="flex items-center justify-center gap-1.5 sm:gap-2 pt-2">
+    <nav aria-label={t("store.pages", "หน้าร้านค้า")} className="flex items-center justify-center gap-1.5 sm:gap-2 pt-2">
       <Button
         variant="outline"
         size="sm"
@@ -30,7 +30,7 @@ export function StorePagination({
         onClick={() => onChange(page - 1)}
         className="h-9 px-3 rounded-lg text-sm text-foreground"
       >
-        <span className="sr-only">{t("store.previous", "Previous")}</span>
+        <span className="sr-only">{t("store.previous", "ก่อนหน้า")}</span>
         <span>{t("actions.previous", "ก่อนหน้า", { ns: "common" })}</span>
       </Button>
 
@@ -63,7 +63,7 @@ export function StorePagination({
         onClick={() => onChange(page + 1)}
         className="h-9 px-3 rounded-lg text-sm text-foreground"
       >
-        <span className="sr-only">{t("store.next", "Next")}</span>
+        <span className="sr-only">{t("store.next", "ถัดไป")}</span>
         <span>{t("actions.next", "ถัดไป", { ns: "common" })}</span>
       </Button>
     </nav>

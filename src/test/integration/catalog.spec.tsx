@@ -95,8 +95,8 @@ describe("Catalog Search and Filter Integration Flow", () => {
     renderWithProviders(<SearchResultsPage />, { route: "/search" });
 
     // Header and results count
-    expect(await screen.findByText("All products")).toBeInTheDocument();
-    expect(await screen.findByText("2 results")).toBeInTheDocument();
+    expect(await screen.findByText("สินค้าทั้งหมด")).toBeInTheDocument();
+    expect(await screen.findByText("2 รายการ")).toBeInTheDocument();
 
     // Filters rendered
     expect(screen.getByText("Yu-Gi-Oh!")).toBeInTheDocument();
@@ -138,7 +138,7 @@ describe("Catalog Search and Filter Integration Flow", () => {
     renderWithProviders(<SearchResultsPage />, { route: "/search?q=NonExistentCard" });
 
     expect(
-      await screen.findByText(/No products match "NonExistentCard"/i),
+      await screen.findByText('ไม่พบสินค้าที่ตรงกับ "NonExistentCard"'),
     ).toBeInTheDocument();
   });
 
@@ -151,7 +151,7 @@ describe("Catalog Search and Filter Integration Flow", () => {
     renderWithProviders(<SearchResultsPage />, { route: "/search?q=pokamon" });
 
     expect(await screen.findByText(/Showing results for “Pokemon” · You searched “pokamon”/)).toBeInTheDocument();
-    expect(screen.getByRole("searchbox", { name: "Search products" })).toHaveValue("pokamon");
+    expect(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" })).toHaveValue("pokamon");
     expect(catalogApi.getProducts).toHaveBeenCalledWith(expect.objectContaining({ q: "pokamon", sort: "relevance" }));
   });
 

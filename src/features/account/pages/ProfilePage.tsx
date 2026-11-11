@@ -91,10 +91,10 @@ function OrderStatus() {
   return (
     <Card className="rounded-xl shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">{t("account.profile.latestOrder", "Latest Order Status")}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{t("account.profile.latestOrder", "สถานะคำสั่งซื้อล่าสุด")}</CardTitle>
         <CardAction>
           <Button variant="link" nativeButton={false} render={<Link to="/account/orders" />}>
-            {t("account.profile.viewAll", "View All")} <ArrowRight data-icon="inline-end" />
+            {t("account.profile.viewAll", "ดูทั้งหมด")} <ArrowRight data-icon="inline-end" />
           </Button>
         </CardAction>
       </CardHeader>
@@ -107,16 +107,16 @@ function OrderStatus() {
           </div>
         ) : orders.isError ? (
           <div className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
-            <p className="text-sm text-destructive">{t("account.profile.latestFailed", "Could not load your latest order.")}</p>
+            <p className="text-sm text-destructive">{t("account.profile.latestFailed", "โหลดคำสั่งซื้อล่าสุดไม่สำเร็จ")}</p>
             <Button variant="outline" onClick={() => void orders.refetch()}>
-              <RotateCw data-icon="inline-start" /> {t("account.profile.tryAgain", "Try again")}
+              <RotateCw data-icon="inline-start" /> {t("account.profile.tryAgain", "ลองอีกครั้ง")}
             </Button>
           </div>
         ) : latestOrder && stage ? (
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-semibold">{t("account.details.orderNumber", "Order #{number}", { number: latestOrder.orderNumber })}</p>
+                <p className="font-semibold">{t("account.details.orderNumber", "คำสั่งซื้อ #{number}", { number: latestOrder.orderNumber })}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatOrderDateTime(latestOrder.placedAt)}
                 </p>
@@ -124,19 +124,19 @@ function OrderStatus() {
               <Badge className={stage.badgeClassName}>{stage.label}</Badge>
             </div>
             <div className="flex items-center justify-between gap-3 border-t pt-4">
-              <span className="text-sm text-muted-foreground">{t("account.profile.orderTotal", "Order total")}</span>
+              <span className="text-sm text-muted-foreground">{t("account.profile.orderTotal", "ยอดคำสั่งซื้อ")}</span>
               <span className="font-semibold">{checkoutMoney(latestOrder.grandTotal)}</span>
             </div>
             <Button variant="outline" nativeButton={false} className="w-full" render={<Link to={`/account/orders?orderId=${latestOrder.id}`} />}>
-              {t("account.profile.viewOrder", "View Order Details")} <ArrowRight data-icon="inline-end" />
+              {t("account.profile.viewOrder", "ดูรายละเอียดคำสั่งซื้อ")} <ArrowRight data-icon="inline-end" />
             </Button>
           </div>
         ) : (
           <div className="flex min-h-52 items-center justify-center">
             <EmptyState
               icon={Package}
-              title={t("account.profile.noOrders", "No recent orders")}
-              description={t("account.profile.noOrdersHint", "Your latest order tracking will appear here once you make a purchase.")}
+              title={t("account.profile.noOrders", "ยังไม่มีคำสั่งซื้อล่าสุด")}
+              description={t("account.profile.noOrdersHint", "การติดตามคำสั่งซื้อล่าสุดจะแสดงที่นี่หลังคุณสั่งซื้อ")}
             />
           </div>
         )}
@@ -186,15 +186,15 @@ function PrimaryAddressCard({
       <Card className="rounded-xl shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-            <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "Primary Address")}
+            <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "ที่อยู่หลัก")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-muted-foreground">
           <p className="text-sm font-medium text-destructive">
-            {t("account.profile.addressFailed", "Could not load your address")}
+            {t("account.profile.addressFailed", "โหลดที่อยู่ไม่สำเร็จ")}
           </p>
           <p className="text-sm">
-            {translateError(error, t("account.profile.connectionHint", "Please check your connection and try again."))}
+            {translateError(error, t("account.profile.connectionHint", "กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"))}
           </p>
         </CardContent>
         {onRetry && (
@@ -204,7 +204,7 @@ function PrimaryAddressCard({
               className="w-full"
               onClick={onRetry}
             >
-              <RotateCw data-icon="inline-start" /> {t("account.profile.tryAgain", "Try again")}
+              <RotateCw data-icon="inline-start" /> {t("account.profile.tryAgain", "ลองอีกครั้ง")}
             </Button>
           </CardFooter>
         )}
@@ -221,12 +221,12 @@ function PrimaryAddressCard({
       <Card className="rounded-xl shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-            <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "Primary Address")}
+            <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "ที่อยู่หลัก")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-muted-foreground">
           <p className="text-sm">
-            {t("account.profile.noAddress", "No shipping address saved yet. Save a primary destination for faster checkout.")}
+            {t("account.profile.noAddress", "ยังไม่มีที่อยู่จัดส่ง บันทึกที่อยู่หลักไว้เพื่อชำระเงินได้เร็วขึ้น")}
           </p>
         </CardContent>
         <CardFooter>
@@ -234,7 +234,7 @@ function PrimaryAddressCard({
             className="w-full"
             render={<Link to="/account/addresses" />}
           >
-            <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
+            <Plus data-icon="inline-start" /> {t("account.address.addNew", "เพิ่มที่อยู่ใหม่")}
           </Button>
         </CardFooter>
       </Card>
@@ -248,13 +248,13 @@ function PrimaryAddressCard({
     <Card className="rounded-xl shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-          <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "Primary Address")}
+          <MapPin className="text-primary" /> {t("account.profile.primaryAddress", "ที่อยู่หลัก")}
         </CardTitle>
         <CardAction>
           <Button
             variant="ghost"
             size="icon"
-            aria-label={t("account.profile.editAddress", "Edit address")}
+            aria-label={t("account.profile.editAddress", "แก้ไขที่อยู่")}
             render={<Link to="/account/addresses" />}
           >
             <Pencil />
@@ -263,7 +263,7 @@ function PrimaryAddressCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-3 leading-7">
         <Badge className="w-fit">
-          {primary.label ?? (primary.defaultShipping ? t("account.profile.default", "Default") : t("account.profile.primary", "Primary"))}
+          {primary.label ?? (primary.defaultShipping ? t("account.profile.default", "ค่าเริ่มต้น") : t("account.profile.primary", "หลัก"))}
         </Badge>
         <address className="not-italic">
           {primary.recipientName} | {primary.phone}
@@ -282,7 +282,7 @@ function PrimaryAddressCard({
           className="w-full"
           render={<Link to="/account/addresses" />}
         >
-          <Plus data-icon="inline-start" /> {t("account.profile.manageAddresses", "Manage Addresses")}
+          <Plus data-icon="inline-start" /> {t("account.profile.manageAddresses", "จัดการที่อยู่")}
         </Button>
       </CardFooter>
     </Card>
@@ -340,16 +340,16 @@ export function ProfilePage() {
           <div className="flex min-w-0 flex-col gap-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-3xl font-semibold">{t("account.profile.title", "My Profile")}</h1>
+                <h1 className="text-3xl font-semibold">{t("account.profile.title", "โปรไฟล์ของฉัน")}</h1>
                 <p className="mt-1 text-muted-foreground">
-                  {t("account.profile.subtitle", "Manage your personal information, order history, and addresses.")}
+                  {t("account.profile.subtitle", "จัดการข้อมูลส่วนตัว ประวัติคำสั่งซื้อ และที่อยู่")}
                 </p>
               </div>
               <Button
                 className="sm:self-start"
                 onClick={() => setIsEditingProfile(true)}
               >
-                <Pencil data-icon="inline-start" /> {t("account.profile.edit.title", "Edit Profile")}
+                <Pencil data-icon="inline-start" /> {t("account.profile.edit.title", "แก้ไขโปรไฟล์")}
               </Button>
             </div>
 

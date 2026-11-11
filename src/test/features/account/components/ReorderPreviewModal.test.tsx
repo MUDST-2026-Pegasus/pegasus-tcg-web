@@ -315,7 +315,7 @@ describe("ReorderPreviewModal", () => {
       <ReorderPreviewModal isOpen onClose={handleClose} orderId={67} />
     );
 
-    const closeIconBtn = screen.getByRole("button", { name: /close/i });
+    const closeIconBtn = screen.getByRole("button", { name: "ปิดหน้าต่าง" });
     await user.click(closeIconBtn);
 
     expect(handleClose).toHaveBeenCalledTimes(1);

@@ -123,12 +123,12 @@ describe('Core Account Addresses Flow', () => {
     cy.wait('@getMe');
     cy.wait('@getAddresses');
 
-    cy.contains('h1', 'Address Book').should('be.visible');
+    cy.contains('h1', 'สมุดที่อยู่').should('be.visible');
     cy.contains('Ash Ketchum').should('be.visible');
     cy.contains('123 Pallet Town').should('be.visible');
 
     // Click Add New Address
-    cy.contains('button', 'Add New Address').click();
+    cy.contains('button', 'เพิ่มที่อยู่ใหม่').click();
 
     // Fill the dialog form
     cy.get('input#label').type('Office');
@@ -142,7 +142,7 @@ describe('Core Account Addresses Flow', () => {
     cy.get('input#postalCode').type('10120');
 
     // Click Add Address
-    cy.contains('button', /Add address/i).click();
+    cy.contains('button', /^เพิ่มที่อยู่$/).click();
 
     cy.wait('@createAddress');
 
@@ -183,14 +183,14 @@ describe('Core Account Addresses Flow', () => {
     cy.contains('Ash Ketchum').should('be.visible');
 
     // Click Edit button on card
-    cy.contains('button', 'Edit').click();
+    cy.contains('button', 'แก้ไข').click();
 
     // Update label and line1
     cy.get('input#label').clear().type('Sweet Home');
     cy.get('input#line1').clear().type('999 Pallet Town Central');
 
     // Save
-    cy.contains('button', /Save changes/i).click();
+    cy.contains('button', /บันทึกการเปลี่ยนแปลง/i).click();
 
     cy.wait('@updateAddress');
 
@@ -233,13 +233,13 @@ describe('Core Account Addresses Flow', () => {
     cy.contains('Brock Pewter')
       .parents('[data-slot="card"]')
       .within(() => {
-        cy.contains('button', 'Delete').click();
+        cy.contains('button', 'ลบ').click();
       });
 
     // Confirmation dialog
-    cy.contains('Delete this address?').should('be.visible');
+    cy.contains('ลบที่อยู่นี้?').should('be.visible');
     cy.get('[data-slot="alert-dialog-content"]').within(() => {
-      cy.contains('button', 'Delete').click();
+      cy.contains('button', 'ลบ').click();
     });
 
     cy.wait('@deleteAddress');

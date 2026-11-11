@@ -33,14 +33,14 @@ const renderSuccess = (route = "/payment/success?orderId=42&paymentId=11") =>
 describe("PaymentSuccessPage", () => {
   it("shows the Figma summary using verified real order and payment data", async () => {
     renderSuccess();
-    expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
-    expect(screen.getByText("Order Number: #ORD-99521")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ชำระเงินสำเร็จ" })).toBeInTheDocument();
+    expect(screen.getByText("เลขคำสั่งซื้อ: #ORD-99521")).toBeInTheDocument();
     expect(screen.getByText("24 ต.ค. 2569 14:32")).toBeInTheDocument();
     expect(screen.getByText("QR", { exact: true })).toBeInTheDocument();
     expect(screen.getByText("3 TCG Booster Boxes")).toBeInTheDocument();
     expect(screen.getByText("THB 4,250.00")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View Order Details" })).toHaveAttribute("href", "/account/orders?orderId=42");
-    expect(screen.getByRole("button", { name: "Continue Shopping" })).toHaveAttribute("href", "/products");
+    expect(screen.getByRole("button", { name: "ดูรายละเอียดคำสั่งซื้อ" })).toHaveAttribute("href", "/account/orders?orderId=42");
+    expect(screen.getByRole("button", { name: "ช้อปต่อ" })).toHaveAttribute("href", "/products");
     const icon = document.querySelector(".payment-success-symbol img");
     expect(icon).toHaveAttribute("src", "/images/payment/success-check.svg");
   });
@@ -67,7 +67,7 @@ describe("PaymentSuccessPage", () => {
 
     renderSuccess();
 
-    expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ชำระเงินสำเร็จ" })).toBeInTheDocument();
     expect(screen.getByText(/ส่วนลดร้าน · MINMIN50/)).toBeInTheDocument();
     expect(screen.getByText(/ส่วนลด Pegasus · PEGASUS10/)).toBeInTheDocument();
     expect(screen.getByText("ลูกค้าจ่ายร้านนี้ · minmin_tcg")).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("PaymentSuccessPage", () => {
   it("uses the actual bank transfer method instead of hardcoding QR", async () => {
     vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, method: "BANK_TRANSFER" });
     renderSuccess();
-    expect(await screen.findByText("Bank Transfer")).toBeInTheDocument();
+    expect(await screen.findByText("โอนผ่านธนาคาร")).toBeInTheDocument();
     expect(screen.queryByText("QR", { exact: true })).not.toBeInTheDocument();
   });
 
@@ -86,8 +86,8 @@ describe("PaymentSuccessPage", () => {
     vi.mocked(ordersApi.getOrder).mockReturnValue(new Promise(() => {}));
     vi.mocked(financeApi.getPayment).mockReturnValue(new Promise(() => {}));
     renderSuccess();
-    expect(screen.getByRole("heading", { name: "Checking Payment" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Payment Successful" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "กำลังตรวจสอบการชำระเงิน" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "ชำระเงินสำเร็จ" })).not.toBeInTheDocument();
     expect(document.querySelector(".payment-success-symbol img")).not.toBeInTheDocument();
   });
 
@@ -95,37 +95,37 @@ describe("PaymentSuccessPage", () => {
     vi.mocked(ordersApi.getOrder).mockResolvedValue({ ...order, status: "PENDING_PAYMENT", paidAt: null });
     vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, status: "AWAITING_VERIFICATION" });
     renderSuccess();
-    expect(await screen.findByRole("heading", { name: "Payment Under Review" })).toBeInTheDocument();
-    expect(screen.queryByText("Transaction Summary")).not.toBeInTheDocument();
-    expect(screen.queryByText("Thank you for using Pegasus TCG")).not.toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "กำลังตรวจสอบการชำระเงิน" })).toBeInTheDocument();
+    expect(screen.queryByText("สรุปรายการ")).not.toBeInTheDocument();
+    expect(screen.queryByText("ขอบคุณที่ใช้บริการ Pegasus TCG")).not.toBeInTheDocument();
   });
 
   it.each(["FAILED", "EXPIRED", "CANCELLED"])("does not show success for %s payment", async (status) => {
     vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, status });
     renderSuccess();
-    expect(await screen.findByRole("heading", { name: "Payment Not Completed" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "การชำระเงินยังไม่สำเร็จ" })).toBeInTheDocument();
     expect(document.querySelector(".payment-success-symbol img")).not.toBeInTheDocument();
   });
 
   it("rejects a successful payment belonging to another order", async () => {
     vi.mocked(financeApi.getPayment).mockResolvedValue({ ...payment, salesOrderId: 99 });
     renderSuccess();
-    expect(await screen.findByRole("heading", { name: "Unable to Verify Payment" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ตรวจสอบการชำระเงินไม่ได้" })).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("รายการชำระเงินนี้ไม่ตรงกับคำสั่งซื้อ");
     expect(screen.queryByText("THB 4,250.00")).not.toBeInTheDocument();
   });
 
   it.each(["/payment/success", "/payment/success?orderId=abc", "/payment/success?orderId=42&paymentId=abc"])("handles invalid identifiers without fetching or pretending to load: %s", (route) => {
     renderSuccess(route);
-    expect(screen.getByRole("heading", { name: "Unable to Verify Payment" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View Orders" })).toHaveAttribute("href", "/account/orders");
+    expect(screen.getByRole("heading", { name: "ตรวจสอบการชำระเงินไม่ได้" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ดูคำสั่งซื้อ" })).toHaveAttribute("href", "/account/orders");
     expect(ordersApi.getOrder).not.toHaveBeenCalled();
     expect(financeApi.getPayment).not.toHaveBeenCalled();
   });
 
   it("supports a paid order without paymentId and leaves unknown payment method empty", async () => {
     renderSuccess("/payment/success?orderId=42");
-    expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ชำระเงินสำเร็จ" })).toBeInTheDocument();
     expect(screen.getByText("THB 4,250.00")).toBeInTheDocument();
     expect(screen.getByText("—")).toBeInTheDocument();
     expect(financeApi.getPayment).not.toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe("PaymentSuccessPage", () => {
       ] }],
     });
     renderSuccess();
-    expect(await screen.findByText("3 items")).toBeInTheDocument();
+    expect(await screen.findByText("3 รายการ")).toBeInTheDocument();
     expect(screen.getByText("—")).toBeInTheDocument();
     expect(screen.queryByText("Oct 24, 2026 14:00")).not.toBeInTheDocument();
   });
@@ -149,9 +149,9 @@ describe("PaymentSuccessPage", () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     vi.mocked(ordersApi.getOrder).mockRejectedValueOnce(new Error("offline")).mockResolvedValue(order);
     renderSuccess();
-    expect(await screen.findByRole("heading", { name: "Unable to Verify Payment" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ตรวจสอบการชำระเงินไม่ได้" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "ลองอีกครั้ง" }));
-    expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "ชำระเงินสำเร็จ" })).toBeInTheDocument();
     await waitFor(() => expect(ordersApi.getOrder).toHaveBeenCalledTimes(2));
   });
 });

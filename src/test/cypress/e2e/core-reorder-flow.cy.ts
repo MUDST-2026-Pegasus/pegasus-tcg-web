@@ -200,7 +200,7 @@ describe('Reorder and order status filter', () => {
     cy.wait('@orders');
 
     cy.contains('[role="tab"]', 'Completed').click();
-    cy.contains('button', 'Reorder').click();
+    cy.contains('button', 'สั่งซื้ออีกครั้ง').click();
     cy.wait('@reorderItems');
 
     // Assert reorder modal is open with title and order number
@@ -220,7 +220,7 @@ describe('Reorder and order status filter', () => {
     // Assert modal is closed
     cy.get('[data-testid="reorder-modal"]').should('not.exist');
 
-    // Assert URL matches the Product Detail Page route (/products/:slug)
+    // Assert URL matches the Product Detail Page route (/product/:slug)
     cy.url().should('match', /\/products\/[a-zA-Z0-9-]+/);
     cy.location('pathname').should('eq', '/products/bio-broly-sr');
   });

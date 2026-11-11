@@ -192,7 +192,7 @@ describe('Core Catalog Listings and Public Shop Flow', () => {
   it('browses market listings, inspects listing details, and navigates to public seller shop', () => {
     // 1. Visit Market Listings page
     cy.visit('/products/charizard-base-set/listings');
-    cy.contains('Market listings').should('be.visible');
+    cy.contains('ประกาศขายในตลาด').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Card Kingdom').should('be.visible');
     cy.contains('15,000').should('be.visible');

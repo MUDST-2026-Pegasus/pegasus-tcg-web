@@ -12,7 +12,7 @@ export function BackHomeLink() {
         className="inline-flex items-center justify-center gap-1.5 rounded-sm text-sm leading-5 font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <img src={backHomeArrow} alt="" width={16} height={16} />
-        {t("auth.backHome", "Back to home")}
+        {t("auth.backHome", "กลับหน้าแรก")}
       </Link>
     </div>
   );

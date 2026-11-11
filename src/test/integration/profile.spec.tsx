@@ -64,14 +64,14 @@ describe("Profile Integration", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
     // Fill form
-    const nameInput = screen.getByLabelText(/display name/i);
+    const nameInput = screen.getByLabelText("ชื่อที่แสดง");
     fireEvent.change(nameInput, { target: { value: "New Master" } });
     
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     fireEvent.change(phoneInput, { target: { value: "0891234567" } });
 
     // Submit form
-    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+    fireEvent.click(screen.getByRole("button", { name: "บันทึกการเปลี่ยนแปลง" }));
 
     // Verify API called
     await waitFor(() => {

@@ -208,8 +208,8 @@ export function OrderHistoryPage() {
     try {
       await ordersApi.cancelOrder(orderId, reason ?? "Buyer requested cancellation");
       toast.add({
-        title: t("account.orders.cancelled", "Order Cancelled"),
-        description: t("account.orders.cancelledHint", "Your order has been cancelled successfully."),
+        title: t("account.orders.cancelled", "ยกเลิกคำสั่งซื้อแล้ว"),
+        description: t("account.orders.cancelledHint", "ยกเลิกคำสั่งซื้อของคุณเรียบร้อยแล้ว"),
         type: "success",
       });
       setIsCancelModalOpen(false);
@@ -219,11 +219,11 @@ export function OrderHistoryPage() {
       queryClient.invalidateQueries({ queryKey: refundKeys.mine });
     } catch (err) {
       toast.add({
-        title: t("account.orders.cancelFailed", "Cancellation Failed"),
+        title: t("account.orders.cancelFailed", "ยกเลิกไม่สำเร็จ"),
         description:
           err instanceof ApiError
             ? err.message
-            : t("account.orders.cancelFailedHint", "Could not cancel this order. Please try again."),
+            : t("account.orders.cancelFailedHint", "ยกเลิกคำสั่งซื้อนี้ไม่สำเร็จ กรุณาลองอีกครั้ง"),
         type: "error",
       });
     } finally {
@@ -237,11 +237,11 @@ export function OrderHistoryPage() {
       const updated = await ordersApi.confirmReceived(orderId);
       setSelectedOrderForDetails((current) => (current && current.id === orderId ? updated : current));
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      toast.add({ title: t("account.orders.receiptConfirmed", "Receipt confirmed"), description: t("account.orders.receiptConfirmedHint", "Your order has been updated."), type: "success" });
+      toast.add({ title: t("account.orders.receiptConfirmed", "ยืนยันรับสินค้าแล้ว"), description: t("account.orders.receiptConfirmedHint", "อัปเดตคำสั่งซื้อของคุณแล้ว"), type: "success" });
     } catch (err) {
       toast.add({
-        title: t("account.orders.receiptFailed", "Could not confirm receipt"),
-        description: err instanceof ApiError ? err.message : t("account.orders.tryAgain", "Please try again."),
+        title: t("account.orders.receiptFailed", "ยืนยันรับสินค้าไม่สำเร็จ"),
+        description: err instanceof ApiError ? err.message : t("account.orders.tryAgain", "กรุณาลองอีกครั้ง"),
         type: "error",
       });
     } finally {
@@ -260,7 +260,7 @@ export function OrderHistoryPage() {
             </p>
           )}
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">{t("account.orders.title", "Order History")}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("account.orders.title", "ประวัติคำสั่งซื้อ")}</h1>
             <p className="text-sm text-muted-foreground">
               {t("account.orders.count", "{count, plural, =1 {# order} other {# orders}} placed", { count: orders.length })}
             </p>
@@ -269,7 +269,7 @@ export function OrderHistoryPage() {
           {/* Status Filter Tab Bar */}
           <div
             role="tablist"
-            aria-label={t("account.orders.filterAria", "Order status filter")}
+            aria-label={t("account.orders.filterAria", "ตัวกรองสถานะคำสั่งซื้อ")}
             className="flex flex-wrap items-center gap-2 pb-1"
           >
             {ORDER_FILTER_TABS.map((tab) => {
@@ -306,16 +306,16 @@ export function OrderHistoryPage() {
           </div>
 
           {isLoading ? (
-            <div role="status" aria-busy="true" aria-label={t("account.orders.loading", "Loading orders")}>
+            <div role="status" aria-busy="true" aria-label={t("account.orders.loading", "กำลังโหลดคำสั่งซื้อ")}>
               <ProductRowsSkeleton />
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 p-6">
               <p className="text-sm text-destructive font-medium">
-                {t("account.orders.loadFailed", "Failed to load orders.")}
+                {t("account.orders.loadFailed", "โหลดคำสั่งซื้อไม่สำเร็จ")}
               </p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
-                {t("account.orders.retry", "Try Again")}
+                {t("account.orders.retry", "ลองอีกครั้ง")}
               </Button>
             </div>
           ) : orders.length === 0 ? (
@@ -324,12 +324,12 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-foreground">{t("account.orders.empty", "No orders yet")}</p>
+                <p className="text-lg font-semibold text-foreground">{t("account.orders.empty", "ยังไม่มีคำสั่งซื้อ")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {t("account.orders.emptyHint", "Once you purchase cards, your orders will appear here.")}
+                  {t("account.orders.emptyHint", "เมื่อคุณซื้อการ์ด คำสั่งซื้อจะแสดงที่นี่")}
                 </p>
               </div>
-              <Button onClick={() => navigate("/products")}>{t("account.orders.startShopping", "Start Shopping")}</Button>
+              <Button onClick={() => navigate("/products")}>{t("account.orders.startShopping", "เริ่มช้อปเลย")}</Button>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 bg-card rounded-xl border gap-3 text-center p-6">
@@ -337,13 +337,13 @@ export function OrderHistoryPage() {
                 <Package className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-base font-semibold text-foreground">{t("account.orders.noMatch", "No orders found")}</p>
+                <p className="text-base font-semibold text-foreground">{t("account.orders.noMatch", "ไม่พบคำสั่งซื้อ")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {t("account.orders.noMatchHint", "There are no orders matching the selected status.")}
+                  {t("account.orders.noMatchHint", "ไม่มีคำสั่งซื้อที่ตรงกับสถานะที่เลือก")}
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setActiveFilter("ALL")}>
-                {t("account.orders.viewAll", "View all orders")}
+                {t("account.orders.viewAll", "ดูคำสั่งซื้อทั้งหมด")}
               </Button>
             </div>
           ) : (
@@ -406,10 +406,10 @@ export function OrderHistoryPage() {
         onOpenChange={(open) => {
           if (!open) setConfirmTarget(null);
         }}
-        title={t("account.orders.confirmTitle", "Confirm receipt?")}
-        description={t("account.orders.confirmDescription", "Confirm that you received the shipped items in this order. This completes their seller orders, adds the cards to your collection and releases payment to the sellers.")}
-        confirmLabel={t("account.orders.confirmAction", "Confirm receipt")}
-        cancelLabel={t("account.orders.cancel", "Cancel")}
+        title={t("account.orders.confirmTitle", "ยืนยันรับสินค้า?")}
+        description={t("account.orders.confirmDescription", "ยืนยันว่าคุณได้รับสินค้าที่จัดส่งในคำสั่งซื้อนี้แล้ว ระบบจะปิดคำสั่งซื้อของผู้ขาย เพิ่มการ์ดเข้าคอลเลกชันของคุณ และโอนเงินให้ผู้ขาย")}
+        confirmLabel={t("account.orders.confirmAction", "ยืนยันรับสินค้า")}
+        cancelLabel={t("account.orders.cancel", "ยกเลิก")}
         onConfirm={() => {
           const target = confirmTarget;
           setConfirmTarget(null);
@@ -540,24 +540,24 @@ function OrderCardItem({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-              {t("account.orders.cardArt", "Card Art")}
+              {t("account.orders.cardArt", "ภาพการ์ด")}
             </div>
           )}
         </div>
 
         <div className="min-w-0">
           <CardTitle className="text-lg font-semibold truncate">
-            {firstItem?.productName || t("account.orders.cardFallback", "Pegasus TCG Card")}
+            {firstItem?.productName || t("account.orders.cardFallback", "การ์ด Pegasus TCG")}
           </CardTitle>
           <p className="mt-1 text-sm text-muted-foreground truncate">
             {[firstItem?.variantLabel, firstItem?.condition]
               .filter(Boolean)
               .join(" • ")}
-            {firstItem && t("account.orders.qtySuffix", " • Qty: {count}", { count: firstItem.quantity })}
+            {firstItem && t("account.orders.qtySuffix", " • จำนวน: {count}", { count: firstItem.quantity })}
           </p>
           {firstSeller?.sellerName && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              {t("account.orders.seller", "Seller:")}{" "}
+              {t("account.orders.seller", "ผู้ขาย:")}{" "}
               {firstSeller.sellerUsername ? (
                 <Link className="text-foreground font-medium hover:underline focus-visible:underline" to={`/u/${encodeURIComponent(firstSeller.sellerUsername)}`}>
                   {firstSeller.sellerName}
@@ -635,7 +635,7 @@ function OrderCardItem({
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{item.productName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")}{t("account.orders.qtySuffix", " • Qty: {count}", { count: item.quantity })}
+                  {[item.variantLabel, item.condition].filter(Boolean).join(" • ")}{t("account.orders.qtySuffix", " • จำนวน: {count}", { count: item.quantity })}
                 </p>
               </div>
               <div className="text-sm font-semibold">
@@ -658,11 +658,11 @@ function OrderCardItem({
               className="px-0"
               disabled={downloadSummary.isPending}
               aria-busy={downloadSummary.isPending}
-              aria-label={downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "Download Order Summary (PDF)")}
+              aria-label={downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)")}
               onClick={handleDownloadSummary}
             >
               {downloadSummary.isPending ? <Spinner /> : <Download data-icon="inline-end" />}
-              {downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "Download Order Summary (PDF)")}
+              {downloadSummary.isPending ? t("account.orders.generatingPdf", "กำลังสร้าง PDF...") : t("account.orders.downloadPdf", "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)")}
             </Button>
           )}
           {canCancel && (
@@ -673,14 +673,14 @@ function OrderCardItem({
               onClick={onCancelOrder}
               disabled={isCancelling}
             >
-              {isCancelling ? t("account.orders.cancelling", "Cancelling...") : t("account.orders.cancelOrder", "Cancel Order")}
+              {isCancelling ? t("account.orders.cancelling", "กำลังยกเลิก...") : t("account.orders.cancelOrder", "ยกเลิกคำสั่งซื้อ")}
             </Button>
           )}
         </div>
 
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="outline" size="sm" onClick={onViewDetails} className="rounded-full">
-            {t("account.orders.viewDetails", "View Details")}
+            {t("account.orders.viewDetails", "ดูรายละเอียด")}
           </Button>
           {stage === "COMPLETED" && (
             <Button
@@ -690,22 +690,22 @@ function OrderCardItem({
               className="bg-[#006699] hover:bg-[#005580] text-white px-4 py-2 rounded-full font-medium text-sm flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <RotateCw className="size-3.5" />
-              {t("account.orders.reorder", "Reorder")}
+              {t("account.orders.reorder", "สั่งซื้ออีกครั้ง")}
             </Button>
           )}
           {stage === "AWAITING_PAYMENT" && (
             <Button type="button" size="sm" onClick={onPayNow} className="bg-primary hover:bg-primary/90 text-white rounded-full">
-              {t("account.orders.payNow", "Pay Now")}
+              {t("account.orders.payNow", "ชำระเงิน")}
             </Button>
           )}
           {stage === "IN_TRANSIT" && (
             <Button type="button" size="sm" onClick={onConfirmReceived} disabled={isConfirming} className="rounded-full">
-              {isConfirming ? t("account.orders.confirming", "Confirming...") : t("account.orders.confirmReceived", "Confirm Received")}
+              {isConfirming ? t("account.orders.confirming", "กำลังยืนยัน...") : t("account.orders.confirmReceived", "ยืนยันรับสินค้า")}
             </Button>
           )}
           {canReview && (
             <Button type="button" size="sm" onClick={onViewDetails} className="rounded-full">
-              {t("account.orders.writeReview", "Write a Review")}
+              {t("account.orders.writeReview", "เขียนรีวิว")}
             </Button>
           )}
         </div>
@@ -736,20 +736,20 @@ function StageHint({
     case "AWAITING_PAYMENT":
       return (
         <p className={cn(base, "text-[#ff9500]")}>
-          <TriangleAlert className="size-3.5" /> {t("account.orders.hint.awaitingPayment", "Pay by bank transfer and upload your slip — unpaid orders are cancelled automatically")}
+          <TriangleAlert className="size-3.5" /> {t("account.orders.hint.awaitingPayment", "โอนเงินผ่านธนาคารแล้วอัปโหลดสลิป คำสั่งซื้อที่ไม่ชำระจะถูกยกเลิกอัตโนมัติ")}
         </p>
       );
     case "PAYMENT_REVIEW":
       return (
         <p className={cn(base, "text-amber-700")}>
-          <Clock className="size-3.5" /> {t("account.orders.hint.paymentReview", "Slip received — we are verifying your payment")}
+          <Clock className="size-3.5" /> {t("account.orders.hint.paymentReview", "ได้รับสลิปแล้ว — กำลังตรวจสอบการชำระเงิน")}
         </p>
       );
     case "PREPARING":
       return (
         <p className={cn(base, "text-muted-foreground")}>
-          <Package className="size-3.5" /> {t("account.orders.hint.preparing", "Seller is preparing your order")}
-          {canCancel && cancellableUntil && t("account.orders.hint.cancelBefore", " • Cancel before {date}", { date: formatOrderDateTime(cancellableUntil) })}
+          <Package className="size-3.5" /> {t("account.orders.hint.preparing", "ผู้ขายกำลังเตรียมคำสั่งซื้อ")}
+          {canCancel && cancellableUntil && t("account.orders.hint.cancelBefore", " • ยกเลิกได้ก่อน {date}", { date: formatOrderDateTime(cancellableUntil) })}
         </p>
       );
     case "IN_TRANSIT":
@@ -761,12 +761,12 @@ function StageHint({
               className="max-w-64 flex-1 gap-0 [&_[data-slot=progress-track]]:h-1"
             />
             <span className="text-[10px] font-medium text-muted-foreground">
-              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : t("account.orders.hint.inTransit", "In Transit")}
+              {tracking ? `${tracking.carrier} ${tracking.trackingNumber}` : t("account.orders.hint.inTransit", "กำลังจัดส่ง")}
             </span>
           </div>
           {autoCompleteAt && (
             <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Truck className="size-3" /> {t("account.orders.hint.autoConfirm", "Auto-confirms on {date} unless you request a return", { date: formatOrderDateTime(autoCompleteAt) })}
+              <Truck className="size-3" /> {t("account.orders.hint.autoConfirm", "ยืนยันรับอัตโนมัติวันที่ {date} หากไม่ขอคืนสินค้า", { date: formatOrderDateTime(autoCompleteAt) })}
             </p>
           )}
         </div>
@@ -774,23 +774,23 @@ function StageHint({
     case "RETURN_IN_PROGRESS":
       return (
         <p className={cn(base, "text-orange-700")}>
-          <RotateCcw className="size-3.5" /> {t("account.orders.hint.returnInProgress", "Return in progress — payment to the seller is on hold until it is settled")}
+          <RotateCcw className="size-3.5" /> {t("account.orders.hint.returnInProgress", "กำลังคืนสินค้า — ระงับการโอนเงินให้ผู้ขายจนกว่าจะเสร็จสิ้น")}
         </p>
       );
     case "COMPLETED":
       return (
         <p className={cn(base, "text-emerald-700")}>
-          <CircleCheck className="size-3.5" /> {t("account.orders.hint.completed", "Delivered — cards added to your collection")}
+          <CircleCheck className="size-3.5" /> {t("account.orders.hint.completed", "จัดส่งสำเร็จ — เพิ่มการ์ดเข้าคอลเลกชันแล้ว")}
         </p>
       );
     case "CANCELLED":
       return cancelReason ? (
-        <p className={cn(base, "text-muted-foreground")}>{t("account.orders.hint.cancelled", "Cancelled: {reason}", { reason: cancelReason })}</p>
+        <p className={cn(base, "text-muted-foreground")}>{t("account.orders.hint.cancelled", "ยกเลิกแล้ว: {reason}", { reason: cancelReason })}</p>
       ) : null;
     case "REFUNDED":
       return (
         <p className={cn(base, "text-violet-700")}>
-          <RotateCcw className="size-3.5" /> {t("account.orders.hint.refunded", "Refund issued — track the transfer in the refund panel below")}
+          <RotateCcw className="size-3.5" /> {t("account.orders.hint.refunded", "คืนเงินแล้ว — ติดตามการโอนได้ในส่วนคืนเงินด้านล่าง")}
         </p>
       );
   }

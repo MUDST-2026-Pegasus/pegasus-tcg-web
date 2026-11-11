@@ -21,9 +21,9 @@ describe("catalog.mappers unit tests", () => {
   });
 
   describe("formatPrice", () => {
-    it("returns 'Out of stock' when price is null or undefined", () => {
-      expect(formatPrice(null)).toBe("Out of stock");
-      expect(formatPrice(undefined)).toBe("Out of stock");
+    it("returns 'สินค้าหมด' when price is null or undefined", () => {
+      expect(formatPrice(null)).toBe("สินค้าหมด");
+      expect(formatPrice(undefined)).toBe("สินค้าหมด");
     });
 
     it("formats 0 as zero Thai Baht currency", () => {

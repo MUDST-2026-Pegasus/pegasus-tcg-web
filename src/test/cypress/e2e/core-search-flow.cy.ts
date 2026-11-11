@@ -123,8 +123,8 @@ describe('Core Search & Navigation Flow', () => {
     cy.wait('@getProducts');
 
     // Verify search page contents
-    cy.contains('All products').should('be.visible');
-    cy.contains('2 results').should('be.visible');
+    cy.contains('สินค้าทั้งหมด').should('be.visible');
+    cy.contains('2 รายการ').should('be.visible');
     cy.contains('Blue-Eyes White Dragon').should('be.visible');
     cy.contains('Charizard Base Set').should('be.visible');
     cy.contains('Yu-Gi-Oh!').should('be.visible');
@@ -183,13 +183,13 @@ describe('Core Search & Navigation Flow', () => {
     cy.wait('@getGames');
 
     // Type "Pikachu" into search box
-    cy.get('input[aria-label="Search products"]').type('Pikachu');
+    cy.get('input[aria-label="ค้นหาสินค้า"]').type('Pikachu');
 
     // URL should update to include q=Pikachu
     cy.url().should('include', 'q=Pikachu');
 
     // Results header and item should appear
-    cy.contains('All products').should('be.visible');
+    cy.contains('สินค้าทั้งหมด').should('be.visible');
     cy.contains('Pikachu Illustrator').should('be.visible');
   });
 
@@ -216,7 +216,7 @@ describe('Core Search & Navigation Flow', () => {
     cy.visit('/search?q=pokamon');
     cy.wait('@correctedProducts');
     cy.contains('Showing results for “Pokemon” · You searched “pokamon”').should('be.visible');
-    cy.get('input[aria-label="Search products"]').should('have.value', 'pokamon');
+    cy.get('input[aria-label="ค้นหาสินค้า"]').should('have.value', 'pokamon');
     cy.contains('Pikachu').should('be.visible');
   });
 });

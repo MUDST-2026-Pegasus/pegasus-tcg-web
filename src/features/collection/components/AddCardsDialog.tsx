@@ -167,15 +167,15 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     const failed: Record<number, string> = {};
     outcomes.forEach((outcome, index) => {
       if (outcome.status === "rejected") {
-        failed[rows[index].card.productId] = translateError(outcome.reason, t("collection.add.failed", "Could not add this card."));
+        failed[rows[index].card.productId] = translateError(outcome.reason, t("collection.add.failed", "เพิ่มการ์ดนี้ไม่สำเร็จ"));
       }
     });
 
     const addedCount = outcomes.length - Object.keys(failed).length;
     if (addedCount > 0) {
       toast.add({
-        title: t("collection.add.added", "{count, plural, =1 {# card added} other {# cards added}}", { count: addedCount }),
-        description: t("collection.add.addedHint", "They are now in your collection."),
+        title: t("collection.add.added", "{count, plural, other {เพิ่มการ์ด # ใบแล้ว}}", { count: addedCount }),
+        description: t("collection.add.addedHint", "การ์ดอยู่ในคอลเลกชันของคุณแล้ว"),
         type: "success",
       });
     }
@@ -188,16 +188,16 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
     setFailures(failed);
   };
 
-  const pickedLabel = t("collection.add.selected", "{count, plural, =1 {# card selected} other {# cards selected}}", { count: picked.length });
+  const pickedLabel = t("collection.add.selected", "{count, plural, other {เลือกการ์ด # ใบ}}", { count: picked.length });
   const totalPages = results.data?.totalPages ?? 0;
 
   if (step === 1) {
     return (
       <>
         <DialogHeader>
-          <p className="text-xs text-muted-foreground">{t("collection.add.step1", "Step 1 of 2")}</p>
-          <DialogTitle>{t("collection.add.chooseTitle", "Choose cards")}</DialogTitle>
-          <DialogDescription>{t("collection.add.chooseHint", "Pick the cards you own from the catalogue.")}</DialogDescription>
+          <p className="text-xs text-muted-foreground">{t("collection.add.step1", "ขั้นที่ 1 จาก 2")}</p>
+          <DialogTitle>{t("collection.add.chooseTitle", "เลือกการ์ด")}</DialogTitle>
+          <DialogDescription>{t("collection.add.chooseHint", "เลือกการ์ดที่คุณมีจากแคตตาล็อก")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -205,8 +205,8 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                aria-label={t("collection.add.search", "Search card name or number")}
-                placeholder={t("collection.add.searchPlaceholder", "Search card name or number...")}
+                aria-label={t("collection.add.search", "ค้นหาชื่อหรือหมายเลขการ์ด")}
+                placeholder={t("collection.add.searchPlaceholder", "ค้นหาชื่อหรือหมายเลขการ์ด...")}
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
@@ -216,10 +216,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               />
             </div>
             <OptionSelect
-              label={t("collection.add.game", "Game")}
+              label={t("collection.add.game", "เกม")}
               value={gameId}
               options={(games.data ?? []).map((game) => ({ value: game.id, label: game.name }))}
-              placeholder={t("collection.add.allGames", "All games")}
+              placeholder={t("collection.add.allGames", "ทุกเกม")}
               clearable
               onChange={(next) => {
                 setGameId(next);
@@ -228,10 +228,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
               }}
             />
             <OptionSelect
-              label={t("collection.add.set", "Set")}
+              label={t("collection.add.set", "ชุด")}
               value={cardSetId}
               options={(cardSets.data ?? []).map((set) => ({ value: set.id, label: set.name }))}
-              placeholder={gameId === null ? t("collection.add.chooseGameFirst", "Choose a game first") : t("collection.add.allSets", "All sets")}
+              placeholder={gameId === null ? t("collection.add.chooseGameFirst", "เลือกเกมก่อน") : t("collection.add.allSets", "ทุกชุด")}
               clearable
               disabled={gameId === null}
               onChange={(next) => {
@@ -243,21 +243,21 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
 
           {results.isPending ? (
             <p role="status" className="py-10 text-center text-sm text-muted-foreground">
-              {t("collection.add.loading", "Loading cards...")}
+              {t("collection.add.loading", "กำลังโหลดการ์ด...")}
             </p>
           ) : results.isError ? (
             <div role="alert" className="flex flex-col items-center gap-3 py-10 text-sm">
-              <p className="text-destructive">{t("collection.add.loadFailed", "Could not load the catalogue.")}</p>
+              <p className="text-destructive">{t("collection.add.loadFailed", "โหลดแคตตาล็อกไม่สำเร็จ")}</p>
               <Button variant="outline" size="sm" onClick={() => void results.refetch()}>
-                {t("collection.tryAgain", "Try again")}
+                {t("collection.tryAgain", "ลองอีกครั้ง")}
               </Button>
             </div>
           ) : results.data.items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">{t("collection.add.noMatch", "No matching cards.")}</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">{t("collection.add.noMatch", "ไม่พบการ์ดที่ตรงกัน")}</p>
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
-                {t("collection.add.found", "{count, plural, =1 {# card found} other {# cards found}}", { count: results.data.totalItems })}
+                {t("collection.add.found", "{count, plural, other {พบการ์ด # ใบ}}", { count: results.data.totalItems })}
               </p>
               <ul
                 className={cn(
@@ -276,9 +276,9 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
                 ))}
               </ul>
               {totalPages > 1 && (
-                <nav aria-label={t("collection.add.pages", "Catalogue pages")} className="flex items-center justify-center gap-3">
+                <nav aria-label={t("collection.add.pages", "หน้าแคตตาล็อก")} className="flex items-center justify-center gap-3">
                   <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>
-                    {t("collection.previous", "Previous")}
+                    {t("collection.previous", "ก่อนหน้า")}
                   </Button>
                   <span className="text-xs text-muted-foreground tabular-nums">
                     Page {page + 1} of {totalPages}
@@ -289,7 +289,7 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
                     disabled={page + 1 >= totalPages}
                     onClick={() => setPage(page + 1)}
                   >
-                    {t("collection.next", "Next")}
+                    {t("collection.next", "ถัดไป")}
                   </Button>
                 </nav>
               )}
@@ -303,10 +303,10 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
           </p>
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button variant="outline" onClick={onClose}>
-              {t("collection.cancel", "Cancel")}
+              {t("collection.cancel", "ยกเลิก")}
             </Button>
             <Button disabled={picked.length === 0} onClick={() => setStep(2)}>
-              {t("collection.next", "Next")}
+              {t("collection.next", "ถัดไป")}
             </Button>
           </div>
         </DialogFooter>
@@ -317,16 +317,16 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <DialogHeader>
-        <p className="text-xs text-muted-foreground">{t("collection.add.step2", "Step 2 of 2")}</p>
-        <DialogTitle>{t("collection.add.detailsTitle", "Add details")}</DialogTitle>
+        <p className="text-xs text-muted-foreground">{t("collection.add.step2", "ขั้นที่ 2 จาก 2")}</p>
+        <DialogTitle>{t("collection.add.detailsTitle", "ใส่รายละเอียด")}</DialogTitle>
         <DialogDescription>
-          {t("collection.add.detailsHint", "Choose the printing and condition of each card. A photo of your own card is optional.")}
+          {t("collection.add.detailsHint", "เลือกเวอร์ชันและสภาพของการ์ดแต่ละใบ รูปการ์ดของคุณเองจะใส่หรือไม่ก็ได้")}
         </DialogDescription>
       </DialogHeader>
 
       {rows.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
-          {t("collection.add.noneSelected", "No cards selected. Go back to choose some.")}
+          {t("collection.add.noneSelected", "ยังไม่ได้เลือกการ์ด กลับไปเลือกก่อน")}
         </p>
       ) : (
         <ul className="flex flex-col divide-y">
@@ -356,15 +356,15 @@ function AddCardsForm({ onClose }: { onClose: () => void }) {
       <DialogFooter className="sm:items-center sm:justify-between">
         <label className="flex items-center gap-2 text-sm">
           <Switch checked={publicItem} disabled={add.isPending} onCheckedChange={setPublicItem} />
-          {t("collection.add.showPublic", "Show on my public profile")}
+          {t("collection.add.showPublic", "แสดงบนโปรไฟล์สาธารณะของฉัน")}
         </label>
         <div className="flex flex-col-reverse gap-2 sm:flex-row">
           <Button variant="outline" disabled={add.isPending} onClick={() => setStep(1)}>
-            {t("collection.back", "Back")}
+            {t("collection.back", "ย้อนกลับ")}
           </Button>
           <Button disabled={!ready || add.isPending} onClick={() => void submit()}>
             {add.isPending ? <Spinner data-icon="inline-start" /> : null}
-            {t("collection.add.submit", "{count, plural, =1 {Add # card} other {Add # cards}}", { count: rows.length })}
+            {t("collection.add.submit", "{count, plural, other {เพิ่มการ์ด # ใบ}}", { count: rows.length })}
           </Button>
         </div>
       </DialogFooter>

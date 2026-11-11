@@ -69,13 +69,13 @@ export function LoginForm() {
   const formAlert = googleSignIn.isError
     ? getAuthErrorAlert(
         googleSignIn.error,
-        t("auth.login.failed", "Could not sign you in. Please try again."),
+        t("auth.login.failed", "เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง"),
       )
     : login.isError
       ? {
           description: translateError(
             login.error,
-            t("auth.login.failed", "Could not sign you in. Please try again."),
+            t("auth.login.failed", "เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง"),
           ),
         }
       : null;
@@ -92,12 +92,12 @@ export function LoginForm() {
 
       <FieldGroup className="gap-5">
         <Field className="gap-2" data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">{t("auth.fields.email", "Email")}</FieldLabel>
+          <FieldLabel htmlFor="email">{t("auth.fields.email", "อีเมล")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder={t("auth.fields.emailPlaceholder", "Enter your email")}
+            placeholder={t("auth.fields.emailPlaceholder", "กรอกอีเมล")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -106,11 +106,11 @@ export function LoginForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field className="gap-2" data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">{t("auth.fields.password", "Password")}</FieldLabel>
+          <FieldLabel htmlFor="password">{t("auth.fields.password", "รหัสผ่าน")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="current-password"
-            placeholder={t("auth.login.passwordPlaceholder", "Enter your password")}
+            placeholder={t("auth.login.passwordPlaceholder", "กรอกรหัสผ่าน")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -126,7 +126,7 @@ export function LoginForm() {
         className="h-12 w-full rounded-lg text-base"
       >
         {isSubmitting && <Spinner />}
-        {isSubmitting ? t("auth.login.submitting", "Signing in…") : t("auth.login.submit", "Log in")}
+        {isSubmitting ? t("auth.login.submitting", "กำลังเข้าสู่ระบบ…") : t("auth.login.submit", "เข้าสู่ระบบ")}
       </Button>
 
       <GoogleSignInButton
@@ -138,31 +138,31 @@ export function LoginForm() {
       <div className="flex flex-col gap-2 pt-2">
         <Separator />
         <p className="text-center text-sm text-muted-foreground">
-          {t("auth.login.noAccount", "Don't have an account?")}{" "}
+          {t("auth.login.noAccount", "ยังไม่มีบัญชี?")}{" "}
           <Link to={{ pathname: "/register", search: location.search }} className="font-medium text-primary">
-            {t("auth.login.signUp", "Sign up")}
+            {t("auth.login.signUp", "สมัครสมาชิก")}
           </Link>
         </p>
       </div>
       <BackHomeLink />
       <p className="pt-2 text-center text-xs leading-relaxed tracking-[0.24px] text-muted-foreground">
-        {t("auth.login.agreePrefix", "By continuing, you agree to the Pegasus")}{" "}
+        {t("auth.login.agreePrefix", "การดำเนินการต่อถือว่าคุณยอมรับ")}{" "}
         <Link
           to="/terms-of-service"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-primary hover:underline"
         >
-          {t("auth.terms", "Terms of Service")}
+          {t("auth.terms", "ข้อกำหนดการใช้บริการ")}
         </Link>{" "}
-        {t("auth.and", "and")}{" "}
+        {t("auth.and", "และ")}{" "}
         <Link
           to="/privacy-policy"
           target="_blank"
           rel="noopener noreferrer"
           className="font-medium text-primary hover:underline"
         >
-          {t("auth.privacy", "Privacy Policy")}
+          {t("auth.privacy", "นโยบายความเป็นส่วนตัว")}
         </Link>
         .
       </p>

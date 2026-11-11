@@ -35,7 +35,7 @@ export function StoreHero({
 
   return (
     <section
-      aria-label={t("store.profile", "Store profile")}
+      aria-label={t("store.profile", "โปรไฟล์ร้านค้า")}
       className="overflow-hidden rounded-2xl border border-border bg-card shadow-2xs sm:rounded-3xl"
     >
       {/* Section 1: Store banner */}
@@ -85,7 +85,7 @@ export function StoreHero({
                   <span className="text-muted-foreground/60">•</span>
                   <span className="inline-flex items-center gap-1.5">
                     <Phone className="size-3.5 text-muted-foreground" aria-hidden="true" />
-                    <span className="sr-only">{t("store.phone", "Phone number : ")}</span>
+                    <span className="sr-only">{t("store.phone", "เบอร์โทรศัพท์ : ")}</span>
                     <a
                       href={`tel:${profile.phone.replace(/[^+\d]/g, "")}`}
                       className="font-medium text-foreground hover:underline"

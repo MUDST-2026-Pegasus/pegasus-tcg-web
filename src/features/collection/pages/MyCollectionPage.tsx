@@ -34,7 +34,7 @@ export function MyCollectionPage() {
       await update.mutateAsync({ id: item.id, payload: payloadOf(item, { publicItem }) });
       setError("");
     } catch (cause) {
-      setError(translateError(cause, t("collection.mine.visibilityFailed", "Could not change visibility.")));
+      setError(translateError(cause, t("collection.mine.visibilityFailed", "เปลี่ยนการมองเห็นไม่สำเร็จ")));
     }
   };
 
@@ -45,7 +45,7 @@ export function MyCollectionPage() {
       setRemoving(null);
       setError("");
     } catch (cause) {
-      setError(translateError(cause, t("collection.mine.removeFailed", "Could not remove this card.")));
+      setError(translateError(cause, t("collection.mine.removeFailed", "นำการ์ดนี้ออกไม่สำเร็จ")));
     }
   };
 
@@ -54,16 +54,16 @@ export function MyCollectionPage() {
   return <main className="min-h-[580px] bg-muted/60 px-4 py-12 font-sans sm:px-8 lg:px-12">
     <div className="mx-auto max-w-[1440px]">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div><h1 className="text-3xl font-bold">{t("collection.mine.title", "My Collection")}</h1><p className="mt-1 text-muted-foreground">{t("collection.mine.total", "{count} cards in your collection.", { count: total })}</p></div>
+        <div><h1 className="text-3xl font-bold">{t("collection.mine.title", "คอลเลกชันของฉัน")}</h1><p className="mt-1 text-muted-foreground">{t("collection.mine.total", "มีการ์ด {count} ใบในคอลเลกชัน", { count: total })}</p></div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>{t("collection.mine.viewPublic", "View public profile")}</Button>
-          <Button variant="outline" render={<Link to="/account/profile" />}>{t("collection.mine.account", "My Account")}</Button>
-          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> {t("collection.mine.addCard", "Add Card")}</Button>
+          <Button variant="outline" render={<Link to={`/u/${user.username}?tab=collection`} />}>{t("collection.mine.viewPublic", "ดูโปรไฟล์สาธารณะ")}</Button>
+          <Button variant="outline" render={<Link to="/account/profile" />}>{t("collection.mine.account", "บัญชีของฉัน")}</Button>
+          <Button onClick={() => setAdding(true)}><Plus data-icon="inline-start" /> {t("collection.mine.addCard", "เพิ่มการ์ด")}</Button>
         </div>
       </div>
       {error ? <p role="alert" className="mb-4 text-sm text-destructive">{error}</p> : null}
-      <QueryBoundary query={collection} errorTitle={t("collection.mine.loadFailed", "Could not load your collection")} errorRetryLabel={t("collection.tryAgain", "Try again")}
-        loading={<div role="status" aria-busy="true" aria-label={t("collection.mine.loading", "Loading your collection")}><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
+      <QueryBoundary query={collection} errorTitle={t("collection.mine.loadFailed", "โหลดคอลเลกชันไม่สำเร็จ")} errorRetryLabel={t("collection.tryAgain", "ลองอีกครั้ง")}
+        loading={<div role="status" aria-busy="true" aria-label={t("collection.mine.loading", "กำลังโหลดคอลเลกชัน")}><ItemGridSkeleton className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3" /></div>}>
         {() => <>
           {cards.length ? <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((item) => <ItemCard key={item.id} imageSrc={item.photoUrl ?? item.card.officialImageUrl ?? undefined}
@@ -71,13 +71,13 @@ export function MyCollectionPage() {
               className="w-full [&_img]:object-contain"
               footer={<div className="flex w-full items-center justify-between gap-2">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={item.publicItem} disabled={update.isPending}
-                  onCheckedChange={(checked) => void togglePublic(item, checked)} aria-label={t("collection.mine.makePublic", "Make {name} public", { name: item.card.productName })} />
-                  {item.publicItem ? t("collection.mine.public", "Public") : t("collection.mine.private", "Private")}</label>
-                <div className="flex"><Button variant="ghost" size="icon" aria-label={t("collection.mine.editCard", "Edit {name}", { name: item.card.productName })} onClick={() => setEditing(item)}><Pencil /></Button>
-                  <Button variant="ghost" size="icon" aria-label={t("collection.row.removeCard", "Remove {name}", { name: item.card.productName })} onClick={() => setRemoving(item)}><Trash2 /></Button></div>
+                  onCheckedChange={(checked) => void togglePublic(item, checked)} aria-label={t("collection.mine.makePublic", "เปิดให้ {name} เป็นสาธารณะ", { name: item.card.productName })} />
+                  {item.publicItem ? t("collection.mine.public", "สาธารณะ") : t("collection.mine.private", "ส่วนตัว")}</label>
+                <div className="flex"><Button variant="ghost" size="icon" aria-label={t("collection.mine.editCard", "แก้ไข {name}", { name: item.card.productName })} onClick={() => setEditing(item)}><Pencil /></Button>
+                  <Button variant="ghost" size="icon" aria-label={t("collection.row.removeCard", "นำ {name} ออก", { name: item.card.productName })} onClick={() => setRemoving(item)}><Trash2 /></Button></div>
               </div>} />)}
-          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.mine.empty", "No cards yet. Add your first card from the catalogue.")}</p>}
-          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "Load more")}</Button></div> : null}
+          </div> : <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">{t("collection.mine.empty", "ยังไม่มีการ์ด เพิ่มการ์ดใบแรกจากแคตตาล็อกได้เลย")}</p>}
+          {collection.hasNextPage ? <div className="mt-6 text-center"><Button variant="outline" disabled={collection.isFetchingNextPage} onClick={() => void collection.fetchNextPage()}>{t("collection.loadMore", "โหลดเพิ่ม")}</Button></div> : null}
         </>}
       </QueryBoundary>
     </div>
@@ -87,7 +87,7 @@ export function MyCollectionPage() {
     <EditCardDialog item={editing} onClose={() => setEditing(null)} />
 
     <ConfirmDialog open={removing !== null} onOpenChange={(open) => { if (!open) setRemoving(null); }}
-      variant="destructive" title={t("collection.mine.removeTitle", "Remove card?")} description={t("collection.mine.removeConfirm", "Remove this card from your collection?")}
-      confirmLabel={t("collection.mine.removeAction", "Remove Card")} cancelLabel={t("collection.cancel", "Cancel")} isPending={remove.isPending} onConfirm={() => void deleteCard()} />
+      variant="destructive" title={t("collection.mine.removeTitle", "นำการ์ดออก?")} description={t("collection.mine.removeConfirm", "นำการ์ดนี้ออกจากคอลเลกชัน?")}
+      confirmLabel={t("collection.mine.removeAction", "นำการ์ดออก")} cancelLabel={t("collection.cancel", "ยกเลิก")} isPending={remove.isPending} onConfirm={() => void deleteCard()} />
   </main>;
 }

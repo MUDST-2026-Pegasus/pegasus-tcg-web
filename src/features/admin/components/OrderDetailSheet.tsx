@@ -117,11 +117,11 @@ function OrderDetailBody({ detail }: { detail: AdminOrderDetail }) {
             className="rounded-md px-2.5"
             disabled={downloadSummary.isPending}
             aria-busy={downloadSummary.isPending}
-            aria-label={downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "Download Order Summary (PDF)")}
+            aria-label={downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)")}
             onClick={handleDownloadSummary}
           >
             {downloadSummary.isPending ? <Spinner /> : null}
-            {downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "Download Order Summary (PDF)")}
+            {downloadSummary.isPending ? t("orders.detail.generating", "กำลังสร้าง PDF...") : t("orders.detail.download", "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)")}
           </Button>
         </div>
       </SheetHeader>

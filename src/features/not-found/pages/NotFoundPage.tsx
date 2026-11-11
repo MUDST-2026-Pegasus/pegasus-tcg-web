@@ -47,7 +47,7 @@ export function NotFoundPage() {
         </div>
 
         <div className="mt-7 space-y-2.5">
-          <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground">{t("notFound.eyebrow", "ERROR 404 · PAGE NOT FOUND")}</p>
+          <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground">{t("notFound.eyebrow", "ERROR 404 · ไม่พบหน้านี้")}</p>
           <h1 className="text-2xl font-bold text-foreground sm:text-[30px]">{t("notFound.title", "ไม่พบหน้าที่คุณกำลังหา")}</h1>
           <p className="text-sm leading-[1.6] text-muted-foreground">
             {t("notFound.body1", "การ์ดใบนี้อาจถูกย้ายไปที่อื่น ถูกลบไปแล้ว หรือลิงก์อาจพิมพ์ผิด")}<br className="hidden sm:block" />

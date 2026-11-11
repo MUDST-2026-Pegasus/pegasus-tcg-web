@@ -106,9 +106,9 @@ export function Navbar() {
   const onePieceSlug =
     games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
   const navLinks = [
-    { label: t("nav.home", "Home"), to: "/", active: location.pathname === "/" },
+    { label: t("nav.home", "หน้าแรก"), to: "/", active: location.pathname === "/" },
     {
-      label: t("nav.allProducts", "All products"),
+      label: t("nav.allProducts", "สินค้าทั้งหมด"),
       to: "/search",
       active: isSearch && !currentGame && !newest,
     },
@@ -123,14 +123,14 @@ export function Navbar() {
       active: isSearch && currentGame === onePieceSlug,
     },
     {
-      label: t("nav.newArrivals", "New arrivals"),
+      label: t("nav.newArrivals", "มาใหม่"),
       to: "/search?sort=newest",
       active: isSearch && !currentGame && newest,
       icon: SparklesIcon,
     },
     // ระบบประมูล [TCG-636]
     {
-      label: t("nav.auction", "Auction"),
+      label: t("nav.auction", "ประมูล"),
       to: "/auctions",
       active: location.pathname.startsWith("/auctions"),
       icon: GavelIcon,
@@ -139,7 +139,7 @@ export function Navbar() {
     ...(sales && sales.length > 0
       ? [
           {
-            label: t("nav.sale", "Sale"),
+            label: t("nav.sale", "ลดราคา"),
             to: "/sale",
             active: location.pathname.startsWith("/sale"),
             icon: PercentIcon,
@@ -239,7 +239,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={t("nav.openMenu", "Open menu")}
+                aria-label={t("nav.openMenu", "เปิดเมนู")}
                 className="size-10 shrink-0 md:hidden"
               />
             }
@@ -258,7 +258,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={t("nav.closeMenu", "Close menu")}
+                aria-label={t("nav.closeMenu", "ปิดเมนู")}
                 onClick={() => setDrawerOpen(false)}
               >
                 <XIcon className="size-5" />
@@ -301,7 +301,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      {t("nav.login", "Log in")}
+                      {t("nav.login", "เข้าสู่ระบบ")}
                     </Button>
                     <Button
                       variant="outline"
@@ -314,7 +314,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      {t("nav.signup", "Sign up")}
+                      {t("nav.signup", "สมัครสมาชิก")}
                     </Button>
                   </div>
                 </>
@@ -322,7 +322,7 @@ export function Navbar() {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
               <div className="px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                {t("nav.shop", "SHOP")}
+                {t("nav.shop", "ช้อป")}
               </div>
               {navLinks.map(({ label, to, active, icon: Icon }) => (
                 <Link
@@ -344,7 +344,7 @@ export function Navbar() {
               {!isLoading && isAuthenticated && (
                 <>
                   <div className="mt-6 px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                    {t("nav.account", "ACCOUNT")}
+                    {t("nav.account", "บัญชี")}
                   </div>
                   {links.map(({ label, to }) => (
                     <Link
@@ -372,7 +372,7 @@ export function Navbar() {
                   }}
                 >
                   <LogOutIcon className="size-4" />
-                  {t("nav.logout", "Log out")}
+                  {t("nav.logout", "ออกจากระบบ")}
                 </Button>
               </div>
             )}
@@ -420,7 +420,7 @@ export function Navbar() {
         />
       </form>
       <nav
-        aria-label={t("nav.categories", "Shop categories")}
+        aria-label={t("nav.categories", "หมวดหมู่สินค้า")}
         className="h-11 overflow-x-auto border-t border-border [scrollbar-width:none] md:h-11"
       >
         <div className="mx-auto flex h-full min-w-max max-w-[1440px] items-center gap-1 px-3 md:px-6 lg:px-8">
@@ -433,7 +433,7 @@ export function Navbar() {
               <StoreIcon className="size-4" />
               {sellerLink.to === "/seller"
                 ? sellerLink.label
-                : t("nav.becomeSeller", "Become a seller")}
+                : t("nav.becomeSeller", "สมัครเป็นผู้ขาย")}
             </Link>
           )}
         </div>

@@ -191,7 +191,7 @@
         "none": "No reviews yet"
       },
       "withdrawable": {
-        "footnote": "Excludes withdrawals in progress",
+        "footnote": "Excludes payouts in progress",
         "label": "Available to withdraw"
       }
     },
@@ -1373,7 +1373,7 @@
         "checkboxCondition": "I have received the returned item and inspected its condition",
         "confirmButton": "Confirm receipt and release refund",
         "desc": "Please inspect condition of returned item before confirming",
-        "footerNote": "เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ",
+        "footerNote": "Once you confirm, the escrowed payment is automatically refunded to the buyer.",
         "refundAmountLabel": "Refund amount to buyer:",
         "restockLabel": "Inventory restock:",
         "restockNo": "Do not return to stock",
@@ -1388,9 +1388,9 @@
         "title": "Return request evidence RT-{id} ({current}/{total})"
       },
       "evidencePreview": {
-        "fullAlt": "หลักฐานขนาดเต็ม {number}",
-        "thumbAlt": "หลักฐาน {number}",
-        "title": "หลักฐานจากผู้ซื้อ #{number} จาก {total} ไฟล์"
+        "fullAlt": "Full-size evidence {number}",
+        "thumbAlt": "Evidence {number}",
+        "title": "Buyer evidence #{number} of {total}"
       },
       "policy": {
         "closeButton": "Understood",

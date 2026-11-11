@@ -90,7 +90,7 @@ const mockAddresses: Address[] = [
   {
     id: 1,
     userId: 10,
-    label: "Home",
+    label: "หน้าแรก",
     recipientName: "Ash Ketchum",
     phone: "0812345678",
     line1: "123 Pallet Town",
@@ -473,7 +473,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("ยังไม่มีที่อยู่จัดส่ง")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ใช้ที่อยู่นี้" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "+ เพิ่มที่อยู่ใหม่" }));
-    expect(await screen.findByRole("dialog", { name: "Add New Address" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "เพิ่มที่อยู่ใหม่" })).toBeInTheDocument();
   });
 
   it("opens the shared edit form from the selected address", async () => {
@@ -482,8 +482,8 @@ describe("CheckoutPage", () => {
     await ready();
     await user.click(screen.getByRole("button", { name: "เปลี่ยน" }));
     await user.click(screen.getByRole("button", { name: "แก้ไขที่อยู่ Office" }));
-    expect(await screen.findByRole("dialog", { name: "Edit Address" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Address line 1")).toHaveValue("456 Oak Lab");
+    expect(await screen.findByRole("dialog", { name: "แก้ไขที่อยู่" })).toBeInTheDocument();
+    expect(screen.getByLabelText("ที่อยู่บรรทัดที่ 1")).toHaveValue("456 Oak Lab");
   });
 
   it("refreshes invalid shipping, selects the new default, and requires a second purchase click", async () => {
@@ -556,7 +556,7 @@ describe("CheckoutPage", () => {
   it("displays stock errors without navigating to payment", async () => {
     const user = userEvent.setup();
     vi.spyOn(checkoutApi, "checkout").mockRejectedValue(new ApiError({
-      status: 409, code: "INSUFFICIENT_STOCK", message: "Out of stock",
+      status: 409, code: "INSUFFICIENT_STOCK", message: "สินค้าหมด",
     }));
     renderCheckout("/checkout?items=42");
     await ready();
@@ -1015,7 +1015,7 @@ describe("CheckoutPage", () => {
     it("starts a new idempotency key after a 4xx failure on the same order", async () => {
       const user = userEvent.setup();
       const submit = vi.spyOn(checkoutApi, "checkout").mockRejectedValueOnce(new ApiError({
-        status: 409, code: "INSUFFICIENT_STOCK", message: "Out of stock",
+        status: 409, code: "INSUFFICIENT_STOCK", message: "สินค้าหมด",
       })).mockResolvedValue(orderResponse);
       renderCheckout("/checkout?items=42");
       await ready();
