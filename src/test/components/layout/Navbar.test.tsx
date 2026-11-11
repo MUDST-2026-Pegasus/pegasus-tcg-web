@@ -85,6 +85,10 @@ describe("Navbar", () => {
     renderNavbar(path);
     expect(activeLabels()).toEqual(label ? [label] : []);
   });
+  it("shows the TH/EN language switch [TCG-562]", () => {
+    renderNavbar();
+    expect(screen.getByRole("switch", { name: "ภาษาอังกฤษ / English" })).toHaveAttribute("aria-checked", "false");
+  });
   it("resolves game slugs from the catalog", async () => {
     getGames.mockResolvedValue([
       {
