@@ -2,6 +2,7 @@ import pegasusCampaignTable from "@/assets/home/pegasus-campaign-table.jpeg";
 import {
   CONDITION_LABELS,
   PRODUCT_TYPE_LABELS,
+  categoryLabel,
   productHref,
 } from "@/features/catalog/catalog.mappers";
 import type {
@@ -95,9 +96,9 @@ export function toFeaturedCategories(
       ? [
           {
             id: String(category.id),
-            name: category.name,
+            name: categoryLabel(category),
             image: category.imageUrl,
-            imageAlt: category.name,
+            imageAlt: categoryLabel(category),
             href: `/search?category=${encodeURIComponent(category.slug)}`,
           },
         ]

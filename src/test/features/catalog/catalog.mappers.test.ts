@@ -4,6 +4,7 @@ import {
   formatPrice,
   productHref,
   PRODUCT_TYPE_LABELS,
+  categoryLabel,
 } from "@/features/catalog/catalog.mappers";
 import type { CardCondition, ProductType } from "@/features/catalog/catalog.types";
 
@@ -59,6 +60,14 @@ describe("catalog.mappers unit tests", () => {
 
       expect(PRODUCT_TYPE_LABELS.SINGLE_CARD).toBe("การ์ดใบเดี่ยว");
       expect(PRODUCT_TYPE_LABELS.BOOSTER_BOX).toBe("กล่องสุ่ม");
+    });
+  });
+
+  describe("categoryLabel [TCG-560]", () => {
+    it("translates known category codes and falls back to the DB name", () => {
+      expect(categoryLabel({ code: "SLEEVES", name: "x" })).toBe("ซองใส่การ์ด");
+      expect(categoryLabel({ code: "NEW_THING", name: "หมวดใหม่" })).toBe("หมวดใหม่");
+      expect(categoryLabel({ code: "toString", name: "หมวดใหม่" })).toBe("หมวดใหม่");
     });
   });
 

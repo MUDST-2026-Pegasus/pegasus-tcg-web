@@ -40,6 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   CONDITION_LABELS,
   PRODUCT_TYPE_LABELS,
+  categoryLabel,
   formatPrice,
   productHref,
 } from "@/features/catalog/catalog.mappers";
@@ -340,7 +341,7 @@ export function SearchResultsPage() {
                     return (
                       <Field key={category.id} orientation="horizontal" className={cn(child && "pl-5")}>
                         <RadioGroupItem id={id} value={category.slug} />
-                        <FieldLabel htmlFor={id} className="font-normal text-muted-foreground">{category.name}</FieldLabel>
+                        <FieldLabel htmlFor={id} className="font-normal text-muted-foreground">{categoryLabel(category)}</FieldLabel>
                       </Field>
                     );
                   })}

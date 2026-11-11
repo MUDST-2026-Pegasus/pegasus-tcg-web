@@ -607,6 +607,21 @@
       "tryAgain": "กรุณาลองอีกครั้ง"
     }
   },
+  "category": {
+    "accessory": "อุปกรณ์เสริม",
+    "binders": "แฟ้มสะสมการ์ด",
+    "boosterBoxes": "กล่องสุ่ม",
+    "boosterPacks": "ซองสุ่ม",
+    "cardProtection": "ท็อปโหลดเดอร์และเคส",
+    "deckBoxes": "กล่องใส่เด็ค",
+    "eliteTrainerBoxes": "Elite Trainer Box",
+    "other": "อื่น ๆ",
+    "playmats": "แผ่นรองเล่น",
+    "sealed": "สินค้าซีล",
+    "singles": "การ์ดใบเดี่ยว",
+    "sleeves": "ซองใส่การ์ด",
+    "starterDecks": "เด็คพร้อมเล่น"
+  },
   "checkout": {
     "address": {
       "add": "+ เพิ่มที่อยู่ใหม่",

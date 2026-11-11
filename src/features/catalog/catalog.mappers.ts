@@ -43,6 +43,53 @@ export const CONDITION_LABELS: Record<CardCondition, string> = {
   },
 };
 
+// ชื่อหมวดใน DB มีแค่ภาษาไทย — แปลตาม code ที่คงที่ หมวดใหม่ที่ยังไม่มีในนี้ใช้ชื่อจาก DB [TCG-560]
+const CATEGORY_LABELS: Record<string, string> = {
+  get SINGLES() {
+    return translate("buyer", "category.singles", "การ์ดใบเดี่ยว");
+  },
+  get BOOSTER_PACKS() {
+    return translate("buyer", "category.boosterPacks", "ซองสุ่ม");
+  },
+  get BOOSTER_BOXES() {
+    return translate("buyer", "category.boosterBoxes", "กล่องสุ่ม");
+  },
+  get SEALED() {
+    return translate("buyer", "category.sealed", "สินค้าซีล");
+  },
+  get STARTER_DECKS() {
+    return translate("buyer", "category.starterDecks", "เด็คพร้อมเล่น");
+  },
+  get ELITE_TRAINER_BOXES() {
+    return translate("buyer", "category.eliteTrainerBoxes", "Elite Trainer Box");
+  },
+  get ACCESSORY() {
+    return translate("buyer", "category.accessory", "อุปกรณ์เสริม");
+  },
+  get SLEEVES() {
+    return translate("buyer", "category.sleeves", "ซองใส่การ์ด");
+  },
+  get BINDERS() {
+    return translate("buyer", "category.binders", "แฟ้มสะสมการ์ด");
+  },
+  get DECK_BOXES() {
+    return translate("buyer", "category.deckBoxes", "กล่องใส่เด็ค");
+  },
+  get PLAYMATS() {
+    return translate("buyer", "category.playmats", "แผ่นรองเล่น");
+  },
+  get CARD_PROTECTION() {
+    return translate("buyer", "category.cardProtection", "ท็อปโหลดเดอร์และเคส");
+  },
+  get OTHER() {
+    return translate("buyer", "category.other", "อื่น ๆ");
+  },
+};
+
+export function categoryLabel(category: { code: string; name: string }): string {
+  return Object.hasOwn(CATEGORY_LABELS, category.code) ? CATEGORY_LABELS[category.code] : category.name;
+}
+
 export function productHref(slug: string): string {
   return `/products/${encodeURIComponent(slug)}`;
 }
