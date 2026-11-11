@@ -19,11 +19,11 @@ export function LanguageSwitch({ className }: { className?: string }) {
         className,
       )}
     >
-      <span aria-hidden className={cn(!en && "text-primary")}>TH</span>
+      <span aria-hidden className={cn("hidden sm:inline", !en && "text-primary")}>TH</span>
       <span aria-hidden className="flex h-[22px] w-10 items-center rounded-full bg-primary p-[3px]">
         <span className={cn("size-4 rounded-full bg-background transition-transform", en && "translate-x-[18px]")} />
       </span>
-      <span aria-hidden className={cn(en && "text-primary")}>EN</span>
+      <span aria-hidden className={cn("hidden sm:inline", en && "text-primary")}>EN</span>
     </button>
   );
 }
