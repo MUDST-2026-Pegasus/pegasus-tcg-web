@@ -265,7 +265,7 @@ describe("CheckoutPage", () => {
 
     renderCheckout("/checkout?items=42");
     await ready();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 300.00");
     previewSpy.mockClear();
     await userEvent.setup().click(purchase());
 
@@ -276,7 +276,7 @@ describe("CheckoutPage", () => {
     await waitFor(() =>
       expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull(),
     );
-    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340"));
+    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 340.00"));
 
     await waitFor(() => expect(purchase()).toBeEnabled());
     await userEvent.setup().click(purchase());
