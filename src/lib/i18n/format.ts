@@ -94,6 +94,11 @@ export function dateTimeFormat(options?: Intl.DateTimeFormatOptions, localeOptio
 type DateInput = Date | number | string;
 const toDate = (value: DateInput) => (value instanceof Date ? value : new Date(value));
 
+/** ชื่อไทยจาก DB (nameLocal) ใช้เฉพาะตอนเป็นภาษาไทย — โหมด EN ใช้ชื่อหลัก */
+export function localName(item: { name?: string | null; nameLocal?: string | null } | null | undefined): string | undefined {
+  return (currentLanguage() === "th" && item?.nameLocal) || item?.name || undefined;
+}
+
 /** "THB 1,234.50" ทั้งสองภาษา ทุกหน้าใช้รูปแบบเดียวกัน [TCG-560] · ติดลบ = "-THB 120.00" */
 export function formatMoney(value: number, { lang }: { lang?: Language } = {}): string {
   const amount = getNumberFormat({ minimumFractionDigits: 2, maximumFractionDigits: 2 }, intlLocale({ lang })).format(Math.abs(value));

@@ -1,5 +1,5 @@
 import type { CardCondition, ProductMarketDto, ProductType, PublicListingDto } from "./catalog.types";
-import { translate, formatMoney } from "@/lib/i18n";
+import { currentLanguage, translate, formatMoney } from "@/lib/i18n";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
@@ -106,3 +106,8 @@ export function marketForListing(market: ProductMarketDto[] | undefined, listing
 }
 
 // @tolgee-key {"key":"listing.outOfStock","ns":"common","defaultValue":"สินค้าหมด"}
+
+/** nameLocal เป็นชื่อไทยจาก DB — โชว์เฉพาะตอนเป็นภาษาไทย โหมด EN ไม่แสดง */
+export function localNameOnly(value: string | null | undefined): string | null {
+  return currentLanguage() === "th" ? value ?? null : null;
+}

@@ -4,6 +4,7 @@ export { useLanguage } from "@/lib/i18n/use-language";
 export { useTranslate, type TranslationKey } from "@/lib/i18n/use-translate";
 export {
   currentLanguage,
+  localName,
   dateFnsLocale,
   dayPickerLocale,
   dateTimeFormat,
