@@ -223,12 +223,13 @@ function ProductDetailContent({
     addViewedProduct({
       slug: product.slug,
       name: product.name,
-      subtitle: [product.cardNumber, gameName].filter(Boolean).join(" · ") || null,
+      // ไม่เก็บเลขการ์ดลง localStorage — CodeQL มองชื่อ cardNumber เป็นข้อมูลบัตร
+      subtitle: gameName ?? null,
       imageUrl: viewedImage,
       lowestPrice: viewedLowest,
       sellerCount: viewedSellers,
     });
-  }, [listingsReady, product.slug, product.name, product.cardNumber, gameName, viewedImage, viewedLowest, viewedSellers]);
+  }, [listingsReady, product.slug, product.name, gameName, viewedImage, viewedLowest, viewedSellers]);
 
   async function addListingToCart(listingId: number, amount: number, trigger?: HTMLElement) {
     const opening = miniCart.capture(listingId, trigger);
