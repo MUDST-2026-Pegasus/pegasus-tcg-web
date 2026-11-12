@@ -4,6 +4,7 @@ import type {
   GameDto,
   ProductQuery,
   ProductSort,
+  ShopQuery,
 } from "./catalog.types";
 
 /**
@@ -20,6 +21,15 @@ export const SEARCH_SORTS = ["relevance", "featured", "newest", "price_asc", "pr
 
 /** ที่อยู่ในเมนู "เรียงตาม" [TCG-777] — `name` ยังอ่านจากลิงก์เก่าได้แต่ไม่อยู่ในเมนู */
 export const SEARCH_SORT_MENU = ["relevance", "price_asc", "price_desc", "newest", "featured"] as const;
+
+export const SEARCH_TABS = ["products", "shops"] as const;
+export type SearchTab = (typeof SEARCH_TABS)[number];
+
+/** คะแนนร้านขั้นต่ำในแท็บร้านค้า — null = ทั้งหมด */
+export const SHOP_RATINGS = ["4.5", "4"] as const;
+export type ShopRating = (typeof SHOP_RATINGS)[number];
+
+export const SHOP_PAGE_SIZE = 10;
 
 export const SEARCH_VIEWS = ["grid", "list"] as const;
 export type SearchView = (typeof SEARCH_VIEWS)[number];
@@ -52,6 +62,12 @@ export type SearchFilters = {
   sort: SearchSort;
   /** null = ไม่ได้ระบุใน URL ใช้ค่าที่ผู้ใช้เลือกล่าสุด (localStorage) */
   view: SearchView | null;
+  /** แท็บผลการค้นหา [TCG-778] */
+  tab: SearchTab;
+  /** แท็บร้านค้า: คะแนนร้านขั้นต่ำ */
+  minRating: ShopRating | null;
+  /** แท็บร้านค้า: เรียงตามจำนวนสินค้าที่ตรง (ค่าเริ่มต้น) หรือคะแนน */
+  shopSort: "MATCHES" | "RATING";
   /** นับจาก 1 เหมือนที่คนเห็น — API นับจาก 0 */
   page: number;
 };
@@ -102,6 +118,11 @@ export function readFilters(params: URLSearchParams): SearchFilters {
     view: (SEARCH_VIEWS as readonly string[]).includes(params.get("view") ?? "")
       ? (params.get("view") as SearchView)
       : null,
+    tab: params.get("tab") === "shops" ? "shops" : "products",
+    minRating: (SHOP_RATINGS as readonly string[]).includes(params.get("rating") ?? "")
+      ? (params.get("rating") as ShopRating)
+      : null,
+    shopSort: params.get("shopSort") === "RATING" ? "RATING" : "MATCHES",
     sort: isSort(sort) ? sort : q ? "relevance" : "featured",
     page: Number.isInteger(page) && page > 1 ? page : 1,
   };
@@ -120,6 +141,9 @@ export function writeFilters(filters: SearchFilters): URLSearchParams {
   if (filters.onSale) params.set("onSale", "true");
   if (filters.sort !== (filters.q ? "relevance" : "featured")) params.set("sort", filters.sort);
   if (filters.view) params.set("view", filters.view);
+  if (filters.tab !== "products") params.set("tab", filters.tab);
+  if (filters.minRating) params.set("rating", filters.minRating);
+  if (filters.shopSort !== "MATCHES") params.set("shopSort", filters.shopSort);
   if (filters.page > 1) params.set("page", String(filters.page));
   return params;
 }
@@ -201,6 +225,32 @@ export function clearedFilters(filters: SearchFilters): SearchFilters {
     q: filters.q,
     sort: filters.sort,
     view: filters.view,
+    tab: filters.tab,
+    shopSort: filters.shopSort,
+  };
+}
+
+/**
+ * สลับแท็บ — คง q และเกมไว้ (ใช้ได้ทั้งสองแท็บ) กลับหน้า 1 [TCG-778]
+ * ตัวกรองเฉพาะแท็บสินค้ายังอยู่ใน URL กลับมาแท็บสินค้าแล้วได้สถานะเดิม
+ */
+export function switchTab(filters: SearchFilters, tab: SearchTab): SearchFilters {
+  return { ...filters, tab, page: 1 };
+}
+
+/** แปลงตัวกรองใน URL เป็น query ของ `/catalog/shops` */
+export function toShopQuery(filters: SearchFilters, games: GameDto[] | undefined): { query: ShopQuery; ready: boolean } {
+  const gameIds = (games ?? []).filter((game) => filters.games.includes(game.slug)).map((game) => game.id);
+  return {
+    ready: filters.games.length === 0 || games !== undefined,
+    query: {
+      q: filters.q || undefined,
+      gameId: gameIds.length ? gameIds : undefined,
+      minRating: filters.minRating ? Number(filters.minRating) : undefined,
+      sort: filters.shopSort,
+      page: filters.page - 1,
+      size: SHOP_PAGE_SIZE,
+    },
   };
 }
 

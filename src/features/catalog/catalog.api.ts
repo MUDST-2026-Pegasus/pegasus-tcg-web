@@ -14,6 +14,8 @@ import type {
   ProductCollectorDto,
   CatalogCardEffectDto,
   SearchFacetsDto,
+  SearchShopDto,
+  ShopQuery,
   SearchSuggestDto,
   TrendingSearchDto,
 } from "./catalog.types";
@@ -148,6 +150,15 @@ export function getTrendingSearches(limit = 5, signal?: AbortSignal) {
 /** ตัวเลขของ sidebar + ยอดต่อแท็บ — ส่งตัวกรองชุดเดียวกับ /catalog/products (ไม่มี sort/page) [TCG-777] */
 export function getSearchFacets(query: Omit<ProductQuery, "sort" | "page" | "size">, signal?: AbortSignal) {
   return api.get<SearchFacetsDto>("/catalog/products/facets", {
+    ...PUBLIC,
+    signal,
+    query,
+  });
+}
+
+/** แท็บ "ร้านค้า" ของหน้าค้นหา [TCG-778] */
+export function getSearchShops(query: ShopQuery, signal?: AbortSignal) {
+  return api.get<PageResponse<SearchShopDto>>("/catalog/shops", {
     ...PUBLIC,
     signal,
     query,

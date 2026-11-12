@@ -315,3 +315,26 @@ export type TrendingSearchDto = {
   query: string;
   rank: number;
 };
+
+/** `GET /catalog/shops` — ร้านที่ขายของที่ค้นเจอ [TCG-778] */
+export type SearchShopDto = {
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  ratingAvg: number | null;
+  ratingCount: number;
+  matchCount: number;
+  lowestPrice: number | null;
+  previews: { productId: number; imageUrl: string | null }[];
+};
+
+export type ShopSort = "MATCHES" | "RATING";
+
+export type ShopQuery = {
+  q?: string;
+  gameId?: number[];
+  minRating?: number;
+  sort?: ShopSort;
+  page?: number;
+  size?: number;
+};
