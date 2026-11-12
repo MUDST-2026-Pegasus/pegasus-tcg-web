@@ -182,8 +182,8 @@ describe('Core Search & Navigation Flow', () => {
     cy.visit('/search');
     cy.wait('@getGames');
 
-    // Type "Pikachu" into search box
-    cy.get('input[aria-label="ค้นหาสินค้า"]').type('Pikachu');
+    // Type "Pikachu" into the navbar search box [TCG-777 removed the in-page box]
+    cy.get('header form[role="search"] input').first().type('Pikachu{enter}');
 
     // URL should update to include q=Pikachu
     cy.url().should('include', 'q=Pikachu');
@@ -216,7 +216,7 @@ describe('Core Search & Navigation Flow', () => {
     cy.visit('/search?q=pokamon');
     cy.wait('@correctedProducts');
     cy.contains('แสดงผลลัพธ์ของ “Pokemon” · คุณค้นหา “pokamon”').should('be.visible');
-    cy.get('input[aria-label="ค้นหาสินค้า"]').should('have.value', 'pokamon');
+    cy.get('h1').should('contain.text', 'ผลการค้นหา “pokamon”');
     cy.contains('Pikachu').should('be.visible');
   });
 });

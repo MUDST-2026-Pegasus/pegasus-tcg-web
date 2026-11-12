@@ -128,6 +128,7 @@ describe("Catalog Search and Filter Integration Flow", () => {
         expect.objectContaining({
           gameId: [1],
         }),
+        expect.any(AbortSignal),
       );
     });
   });
@@ -151,8 +152,11 @@ describe("Catalog Search and Filter Integration Flow", () => {
     renderWithProviders(<SearchResultsPage />, { route: "/search?q=pokamon" });
 
     expect(await screen.findByText(/แสดงผลลัพธ์ของ “Pokemon” · คุณค้นหา “pokamon”/)).toBeInTheDocument();
-    expect(screen.getByRole("searchbox", { name: "ค้นหาสินค้า" })).toHaveValue("pokamon");
-    expect(catalogApi.getProducts).toHaveBeenCalledWith(expect.objectContaining({ q: "pokamon", sort: "relevance" }));
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("ผลการค้นหา “pokamon”");
+    expect(catalogApi.getProducts).toHaveBeenCalledWith(
+      expect.objectContaining({ q: "pokamon", sort: "relevance" }),
+      expect.any(AbortSignal),
+    );
   });
 
   it("renders error state when product query fails", async () => {
@@ -160,6 +164,7 @@ describe("Catalog Search and Filter Integration Flow", () => {
 
     renderWithProviders(<SearchResultsPage />, { route: "/search" });
 
-    expect(await screen.findByText("ค้นหาไม่สำเร็จ")).toBeInTheDocument();
+    expect(await screen.findByText("โหลดผลการค้นหาไม่สำเร็จ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ลองอีกครั้ง" })).toBeInTheDocument();
   });
 });
