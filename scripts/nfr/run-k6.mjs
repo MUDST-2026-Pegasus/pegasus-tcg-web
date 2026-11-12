@@ -31,4 +31,27 @@ const result = useDocker
   ? spawnSync("docker", ["run", "--rm", "-v", `${root}:/workspace`, "-w", "/workspace", "grafana/k6:0.55.0", ...args], { cwd: root, stdio: "inherit", timeout: profiles.timeoutSeconds[mode] * 1000, windowsHide: true, env: { ...process.env, DRY_RUN: dryRun ? "1" : "0" } })
   : spawnSync(executable, args, { cwd: root, stdio: "inherit", timeout: profiles.timeoutSeconds[mode] * 1000, windowsHide: true, env: { ...process.env, DRY_RUN: dryRun ? "1" : "0" } });
 if (result.error) throw new Error(`k6 failed or timed out: ${result.error.message}`);
-process.exitCode = result.status ?? 1;
+
+let thresholdsPassed = true;
+try {
+  const summaryRaw = await readFile(summaryPath, "utf8");
+  const summary = JSON.parse(summaryRaw);
+  for (const [metricName, metricData] of Object.entries(summary.metrics ?? {})) {
+    if (metricData?.thresholds) {
+      for (const [condition, val] of Object.entries(metricData.thresholds)) {
+        // In k6 0.55.0 --summary-export, threshold values are booleans indicating whether the threshold failed (false = passed/no breach, true = breached/failed).
+        const failed = typeof val === "boolean" ? val : (val && typeof val === "object" && val.ok === false);
+        if (failed) {
+          thresholdsPassed = false;
+          process.stderr.write(`[k6-threshold] FAILED: ${metricName} (${condition})\n`);
+        }
+      }
+    }
+  }
+} catch {
+  // summary file not yet generated or parse error
+}
+
+const finalStatus = (result.status === 0 && thresholdsPassed) ? "Pass" : "Fail";
+process.stdout.write(`\n[k6-evaluation] mode=${mode} status=${finalStatus} (exitCode=${result.status}, thresholdsPassed=${thresholdsPassed})\n`);
+process.exitCode = result.status ?? (thresholdsPassed ? 0 : 1);
