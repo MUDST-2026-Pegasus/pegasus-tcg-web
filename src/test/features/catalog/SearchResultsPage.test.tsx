@@ -222,4 +222,99 @@ describe("SearchResultsPage [TCG-777]", () => {
     expect(await screen.findAllByTestId("search-result-card")).toHaveLength(2);
     expect(screen.getByTestId("location")).toHaveTextContent("?q=charizard&game=pokemon-tcg");
   });
+
+  describe("shops tab [TCG-778]", () => {
+    const shop = {
+      username: "charizard-vault",
+      displayName: "Charizard Vault BKK",
+      avatarUrl: null,
+      ratingAvg: 4.9,
+      ratingCount: 312,
+      matchCount: 54,
+      lowestPrice: 420,
+      previews: [
+        { productId: 11, imageUrl: null },
+        { productId: 12, imageUrl: null },
+        { productId: 13, imageUrl: null },
+      ],
+    };
+
+    beforeEach(() => {
+      vi.mocked(catalogApi.getSearchShops).mockResolvedValue({
+        items: [shop],
+        page: 0,
+        size: 10,
+        totalItems: 12,
+        totalPages: 2,
+      });
+    });
+
+    it("switches tabs through the URL and keeps q and the game filter", async () => {
+      const user = userEvent.setup();
+      renderPage("/search?q=charizard&game=pokemon-tcg&page=2");
+      const tabs = screen.getByRole("navigation", { name: "ประเภทผลการค้นหา" });
+      await user.click(within(tabs).getByRole("link", { name: /ร้านค้า/ }));
+
+      expect(screen.getByTestId("location")).toHaveTextContent("?q=charizard&game=pokemon-tcg&tab=shops");
+      expect(await screen.findByTestId("shop-result")).toBeInTheDocument();
+      expect(catalogApi.getSearchShops).toHaveBeenCalledWith(
+        { q: "charizard", gameId: [1], sort: "MATCHES", page: 0, size: 10 },
+        expect.any(AbortSignal),
+      );
+
+      await user.click(within(tabs).getByRole("link", { name: /สินค้า/ }));
+      expect(screen.getByTestId("location")).toHaveTextContent("?q=charizard&game=pokemon-tcg");
+    });
+
+    it("maps a shop to its card", async () => {
+      renderPage("/search?q=charizard&tab=shops");
+      const card = await screen.findByTestId("shop-result");
+      expect(within(card).getByRole("link", { name: "Charizard Vault BKK" })).toHaveAttribute("href", "/u/charizard-vault");
+      expect(within(card).getByText("4.9 (312 รีวิว)")).toBeInTheDocument();
+      expect(within(card).getByText(/54 สินค้าที่ตรงกับ “charizard”/)).toHaveTextContent("เริ่มต้น THB 420.00");
+      const previews = within(card).getAllByRole("link", { name: "สินค้าตัวอย่างจาก Charizard Vault BKK" });
+      expect(previews.map((link) => link.getAttribute("href"))).toEqual(["/products/11", "/products/12", "/products/13"]);
+      expect(within(card).getByRole("link", { name: "+51" })).toHaveAttribute("href", "/u/charizard-vault");
+      expect(within(card).getByRole("button", { name: "ดูร้าน" })).toHaveAttribute("href", "/u/charizard-vault");
+      expect(screen.getByText("แสดง 1–10 จาก 12 ร้านค้า")).toBeInTheDocument();
+      expect(screen.getByText("พบ 32 ร้านค้าที่ขาย “charizard”")).toBeInTheDocument();
+    });
+
+    it("sends the rating filter and shop sort", async () => {
+      const user = userEvent.setup();
+      renderPage("/search?q=charizard&tab=shops");
+      await screen.findByTestId("shop-result");
+      const sidebar = screen.getByRole("complementary", { name: "ตัวกรองการค้นหา" });
+      await user.click(within(sidebar).getByRole("button", { name: /4\.5 ขึ้นไป/ }));
+
+      expect(screen.getByTestId("location")).toHaveTextContent("?q=charizard&tab=shops&rating=4.5");
+      await waitFor(() =>
+        expect(catalogApi.getSearchShops).toHaveBeenLastCalledWith(
+          expect.objectContaining({ minRating: 4.5, sort: "MATCHES" }),
+          expect.any(AbortSignal),
+        ),
+      );
+    });
+
+    it("tells when no shop sells the term and links back to products", async () => {
+      const user = userEvent.setup();
+      vi.mocked(catalogApi.getSearchShops).mockResolvedValue({ items: [], page: 0, size: 10, totalItems: 0, totalPages: 0 });
+      renderPage("/search?q=charizard&tab=shops");
+      expect(await screen.findByText("ไม่มีร้านที่ขาย “charizard”")).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "กลับไปดูสินค้า" }));
+      expect(screen.getByTestId("location")).toHaveTextContent("?q=charizard");
+      expect(screen.getByTestId("location")).not.toHaveTextContent("tab=shops");
+    });
+
+    it("shows a loading skeleton and an error with retry", async () => {
+      const user = userEvent.setup();
+      vi.mocked(catalogApi.getSearchShops).mockRejectedValueOnce(new Error("down"));
+      renderPage("/search?q=charizard&tab=shops");
+      expect(screen.getByTestId("shop-skeleton")).toBeInTheDocument();
+      const alert = await screen.findByRole("alert");
+      expect(within(alert).getByText("โหลดร้านค้าไม่สำเร็จ")).toBeInTheDocument();
+      await user.click(within(alert).getByRole("button", { name: "ลองอีกครั้ง" }));
+      expect(await screen.findByTestId("shop-result")).toBeInTheDocument();
+    });
+  });
 });
