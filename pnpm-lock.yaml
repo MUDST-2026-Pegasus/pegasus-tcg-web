@@ -4,6 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  proxy-addr: '>=2.0.8'
+  '@modelcontextprotocol/sdk': '>=1.32.0'
+  body-parser@>=2.0.0 <2.4.0: '>=2.4.0'
+  brace-expansion@>=5.0.0 <5.0.11: '>=5.0.11'
+  fast-uri@>=3.0.0 <3.1.7: '>=3.1.7'
+  source-map-js: '>=1.2.2'
+  systeminformation: '>=5.33.16'
+  undici: '>=8.12.2'
+
 importers:
 
   .:
@@ -3831,10 +3841,6 @@ packages:
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
-  undici@7.30.2:
-    resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
-    engines: {node: '>=20.18.1'}
-
   undici@8.12.4:
     resolution: {integrity: sha512-8Mx+uNKKER2bA4AdtedkqRbwUCIJFr2nJckXRe5yrDqzePqwLP7VNcctN8/XdmDSbF7mS+jJKIszlL+vbam1VA==}
     engines: {node: '>=22.19.0'}
@@ -4549,7 +4555,7 @@ snapshots:
       open: 8.4.2
       picomatch: 4.0.7
       systeminformation: 5.33.19
-      undici: 7.30.2
+      undici: 8.12.4
       which: 4.0.0
       yocto-spinner: 1.2.2
 
@@ -7421,7 +7427,7 @@ snapshots:
       tailwind-merge: 3.6.0
       ts-morph: 26.0.0
       tsconfig-paths: 4.2.0
-      undici: 7.30.2
+      undici: 8.12.4
       validate-npm-package-name: 7.0.2
       zod: 3.25.76
       zod-to-json-schema: 3.25.2(zod@3.25.76)
@@ -7693,8 +7699,6 @@ snapshots:
   ua-parser-js@1.0.41: {}
 
   undici-types@8.9.0: {}
-
-  undici@7.30.2: {}
 
   undici@8.12.4: {}
 
