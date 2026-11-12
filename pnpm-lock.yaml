@@ -53,6 +53,9 @@ importers:
       '@tsparticles/react':
         specifier: 4.4.0
         version: 4.4.0(@tsparticles/engine@4.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@tsparticles/shape-image':
+        specifier: 4.4.0
+        version: 4.4.0(@tsparticles/engine@4.4.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1388,6 +1391,11 @@ packages:
 
   '@tsparticles/shape-circle@4.4.0':
     resolution: {integrity: sha512-pCdCenLohHwaeeuMCw9bh1icGB+CKwBYx67L5dTBw6aig7LRvL+Kd1PKClJTgXkx8Mb1Xb7KLNmSYgh/ABRtEQ==}
+    peerDependencies:
+      '@tsparticles/engine': 4.4.0
+
+  '@tsparticles/shape-image@4.4.0':
+    resolution: {integrity: sha512-wCco8PILtywD4KdtlGF4BfSwdqkkd/WS8CfJMd+wmyLUYVxpUSz9HW8aYzzLFTWZZ0WAmiyMmqBIm9AsADzNSA==}
     peerDependencies:
       '@tsparticles/engine': 4.4.0
 
@@ -5308,6 +5316,10 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
 
   '@tsparticles/shape-circle@4.4.0(@tsparticles/engine@4.4.0)':
+    dependencies:
+      '@tsparticles/engine': 4.4.0
+
+  '@tsparticles/shape-image@4.4.0(@tsparticles/engine@4.4.0)':
     dependencies:
       '@tsparticles/engine': 4.4.0
 
