@@ -142,20 +142,6 @@
 :lang(th) [class*="tracking-"] { letter-spacing: normal; }
 
 /* หิมะตกธีมคริสต์มาส (Snowfall.tsx) */
-.snowflake {
-  position: absolute;
-  top: -10px;
-  border-radius: 9999px;
-  background: #fff;
-  box-shadow: 0 0 4px rgb(148 163 184 / 0.8);
-  opacity: 0.85;
-  animation-name: snowfall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-@keyframes snowfall {
-  to { transform: translate(var(--drift), 105vh); }
-}
 @media (prefers-reduced-motion: reduce) {
   .snowfall { display: none; }
 }

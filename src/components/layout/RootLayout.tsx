@@ -1,7 +1,7 @@
+import { lazy, Suspense } from "react";
 import { Outlet, ScrollRestoration } from "react-router-dom";
 
 import { PageTitleSync } from "@/components/layout/PageTitleSync";
-import { Snowfall } from "@/components/layout/Snowfall";
 import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
 
 /**
@@ -9,6 +9,9 @@ import { FaroPageViewTracker } from "@/observability/FaroPageViewTracker";
  * Includes <ScrollRestoration /> to ensure that any route navigation
  * automatically resets the window scroll position to (0, 0).
  */
+// แยก chunk — tsparticles ไม่ต้องอยู่ใน bundle แรก
+const Snowfall = lazy(() => import("@/components/layout/Snowfall").then((m) => ({ default: m.Snowfall })));
+
 export function RootLayout() {
   return (
     <>
@@ -16,7 +19,9 @@ export function RootLayout() {
       <FaroPageViewTracker />
       <ScrollRestoration />
       <Outlet />
-      <Snowfall />
+      <Suspense fallback={null}>
+        <Snowfall />
+      </Suspense>
     </>
   );
 }
