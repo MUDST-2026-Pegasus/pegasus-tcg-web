@@ -49,6 +49,41 @@ type EditProfileDialogProps = {
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png"];
 
+function sanitizeImageSrc(rawUrl: string | null | undefined): string | undefined {
+  if (!rawUrl) return undefined;
+  try {
+    const baseOrigin =
+      typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "http://localhost";
+    const parsed = new URL(rawUrl, baseOrigin);
+    if (
+      parsed.protocol === "https:" ||
+      parsed.protocol === "http:" ||
+      parsed.protocol === "blob:"
+    ) {
+      if (rawUrl.startsWith("/") && !rawUrl.startsWith("//")) {
+        return rawUrl;
+      }
+      return parsed.href;
+    }
+  } catch {
+    if (
+      typeof rawUrl === "string" &&
+      (rawUrl.startsWith("blob:") ||
+        rawUrl.startsWith("https://") ||
+        rawUrl.startsWith("http://") ||
+        (rawUrl.startsWith("/") && !rawUrl.startsWith("//")))
+    ) {
+      if (!rawUrl.toLowerCase().includes("javascript:") && !rawUrl.toLowerCase().includes("data:")) {
+        return rawUrl;
+      }
+    }
+    return undefined;
+  }
+  return undefined;
+}
+
 export function EditProfileDialog({
   open,
   onOpenChange,
@@ -157,7 +192,13 @@ function EditProfileForm({
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
-    const nextPreview = URL.createObjectURL(file);
+    const resolvedType = ALLOWED_AVATAR_TYPES.includes(type)
+      ? type
+      : name.endsWith(".png")
+        ? "image/png"
+        : "image/jpeg";
+    const safeBlob = new Blob([file], { type: resolvedType });
+    const nextPreview = URL.createObjectURL(safeBlob);
     setPreviewUrl(nextPreview);
     upload.addFiles([file]);
   };
@@ -181,6 +222,7 @@ function EditProfileForm({
   });
 
   const displayAvatarUrl = previewUrl || user.avatarUrl;
+  const safeAvatarUrl = sanitizeImageSrc(displayAvatarUrl);
 
   return (
     <form className="flex flex-col gap-6" onSubmit={onSubmit} noValidate>
@@ -208,9 +250,9 @@ function EditProfileForm({
           aria-label={t("account.profile.edit.changePhoto", "เปลี่ยนรูปโปรไฟล์")}
         >
           <div className="size-full overflow-hidden rounded-full border border-border/50 bg-muted shadow-sm flex items-center justify-center">
-            {displayAvatarUrl ? (
+            {safeAvatarUrl ? (
               <img
-                src={displayAvatarUrl}
+                src={safeAvatarUrl}
                 alt={user.displayName?.trim() || user.username || t("account.profile.edit.avatarAlt", "รูปโปรไฟล์")}
                 className="size-full object-cover"
               />

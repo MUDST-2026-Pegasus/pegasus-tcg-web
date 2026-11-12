@@ -90,6 +90,19 @@ describe('EditProfileDialog', () => {
     expect(avatarImg).toHaveAttribute('src', 'https://example.com/avatar.jpg');
   });
 
+  it('does not render img when avatarUrl has unsafe protocol like javascript:', () => {
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, avatarUrl: 'javascript:alert(1)' }}
+      />
+    );
+
+    expect(screen.queryByRole('img', { name: 'John Doe' })).not.toBeInTheDocument();
+    expect(screen.getByText('JD')).toBeInTheDocument();
+  });
+
   it('triggers hidden file input when clicking avatar wrapper', async () => {
     const user = userEvent.setup();
     renderWithProviders(
@@ -107,11 +120,11 @@ describe('EditProfileDialog', () => {
 
   it('previews a valid JPG/PNG file and submits avatarUrl in payload', async () => {
     const user = userEvent.setup();
-    vi.stubGlobal('URL', {
-      ...URL,
-      createObjectURL: vi.fn(() => 'blob:mock-avatar-preview'),
-      revokeObjectURL: vi.fn(),
-    });
+    class MockURL extends URL {
+      static createObjectURL = vi.fn(() => 'blob:mock-avatar-preview');
+      static revokeObjectURL = vi.fn();
+    }
+    vi.stubGlobal('URL', MockURL);
     vi.mocked(uploadLib.uploadFile).mockResolvedValue('avatars/uploaded-key.png');
     mockMutateAsync.mockResolvedValueOnce({});
 
@@ -196,11 +209,11 @@ describe('EditProfileDialog', () => {
   it('revokes the created object URL cleanly when unmounting', async () => {
     const user = userEvent.setup();
     const revokeSpy = vi.fn();
-    vi.stubGlobal('URL', {
-      ...URL,
-      createObjectURL: vi.fn(() => 'blob:mock-avatar-preview'),
-      revokeObjectURL: revokeSpy,
-    });
+    class MockURL extends URL {
+      static createObjectURL = vi.fn(() => 'blob:mock-avatar-preview');
+      static revokeObjectURL = revokeSpy;
+    }
+    vi.stubGlobal('URL', MockURL);
     vi.mocked(uploadLib.uploadFile).mockResolvedValue('avatars/uploaded-key.png');
 
     const { unmount } = renderWithProviders(
