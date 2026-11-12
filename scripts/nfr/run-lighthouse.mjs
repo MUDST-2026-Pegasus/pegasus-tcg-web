@@ -27,12 +27,11 @@ function runLighthouse(args, timeout) {
   if (process.env.NFR_LIGHTHOUSE_CLI) {
     return spawnSync(process.execPath, [process.env.NFR_LIGHTHOUSE_CLI, ...args], { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
   }
-  if (usePnpmDlx && process.platform === "win32") {
-    const quote = (value) => `"${String(value).replaceAll('"', '""')}"`;
-    const command = ["corepack", "pnpm", "dlx", `lighthouse@${config.lighthouseVersion}`, ...args].map((value, index) => index < 4 ? value : quote(value)).join(" ");
-    return spawnSync("cmd.exe", ["/d", "/s", "/c", command], { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+  if (usePnpmDlx) {
+    const bin = process.platform === "win32" ? "corepack.cmd" : "corepack";
+    return spawnSync(bin, ["pnpm", "dlx", `lighthouse@${config.lighthouseVersion}`, ...args], { cwd: root, encoding: "utf8", timeout, windowsHide: true, shell: true, maxBuffer: 15 * 1024 * 1024 });
   }
-  return spawnSync(usePnpmDlx ? "corepack" : "lighthouse", usePnpmDlx ? ["pnpm", "dlx", `lighthouse@${config.lighthouseVersion}`, ...args] : args, { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+  return spawnSync("lighthouse", args, { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
 }
 const version = runLighthouse(["--version"], 30_000);
 if (version.error || version.status !== 0 || !version.stdout.includes(config.lighthouseVersion)) {

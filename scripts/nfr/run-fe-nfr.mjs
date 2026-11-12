@@ -28,7 +28,7 @@ if (packageJson.version !== config.cypressVersion) throw new Error(`Expected Cyp
 const output = path.join(root, "artifacts/nfr", runId, "frontend");
 await mkdir(output, { recursive: true });
 const cypress = path.join(root, "node_modules/cypress/bin/cypress");
-const cypressEnv = [`nfrRunId=${runId}`, `listingId=${listingId}`, `nfrApiHost=${apiBase.hostname.toLowerCase()}`];
+const cypressEnv = [`nfrRunId=${runId}`, `listingId=${listingId}`, `nfrApiHost=${apiBase.hostname.toLowerCase()}`, "NFR_STRICT_ASSERT=true"];
 if (process.env.NFR_MOBILE === "1") cypressEnv.push("mobile=true");
 const args = [cypress, "run", "--spec", "src/test/cypress/e2e/nfr/tcg-753-nfr.cy.ts", "--browser", browser, "--config", `baseUrl=${target.origin},screenshotsFolder=${path.join(output, "screenshots")}`, "--env", cypressEnv.join(",")];
 const result = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8", timeout: config.timeoutSeconds * 1000, windowsHide: true, maxBuffer: 30 * 1024 * 1024 });
@@ -43,13 +43,23 @@ try {
   const incompletePage = measurements.filter((item) => !item.mainContentVisible).length;
   const thresholdBreaches = measurements.filter((item) => item.lcpMs > 2500 || item.cls > 0.1 || item.interactionLatencyMs > 200).map(({ page, run, lcpMs, cls, interactionLatencyMs }) => ({ page, run, lcpMs, cls, interactionLatencyMs }));
   const reasons = [];
+  let axeSummary = null;
+  try {
+    axeSummary = JSON.parse(await readFile(path.join(output, "axe-status.json"), "utf8"));
+    if ((axeSummary?.criticalOrSeriousViolations ?? 0) > 0) {
+      reasons.push(`${axeSummary.criticalOrSeriousViolations} critical/serious WCAG violations detected by axe-core`);
+    }
+  } catch {
+    // ignore
+  }
+  const hasAxeFailures = (axeSummary?.criticalOrSeriousViolations ?? 0) > 0;
   if (result.status !== 0) reasons.push(`Cypress exited with ${result.status}; review cypress.log for failed UI/a11y assertions`);
   if (measurements.length !== expectedMeasurements) reasons.push(`Expected ${expectedMeasurements} page runs; captured ${measurements.length}`);
   if (missingLcp) reasons.push(`LCP unavailable in ${missingLcp} page runs`);
   if (missingInteraction) reasons.push(`Interaction latency unavailable in ${missingInteraction} page runs`);
   if (incompletePage) reasons.push(`Main app content unavailable in ${incompletePage} page runs`);
   if (thresholdBreaches.length) reasons.push(`${thresholdBreaches.length} frozen performance budget breaches`);
-  summary = { status: thresholdBreaches.length || result.status !== 0 ? "Fail" : reasons.length ? "Blocked" : "Pass", reasons, measurements: measurements.length, expectedMeasurements, missingLcp, missingInteraction, incompletePage, thresholdBreaches };
+  summary = { status: thresholdBreaches.length || hasAxeFailures || result.status !== 0 ? "Fail" : reasons.length ? "Blocked" : "Pass", reasons, measurements: measurements.length, expectedMeasurements, missingLcp, missingInteraction, incompletePage, thresholdBreaches, axeStatus: axeSummary?.status ?? "Unknown", criticalOrSeriousViolations: axeSummary?.criticalOrSeriousViolations ?? 0 };
 } catch (error) {
   summary.reasons = [`Could not read measurement evidence: ${error.message}`];
 }
