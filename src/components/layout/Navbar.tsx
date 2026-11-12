@@ -1,22 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronRightIcon,
   LogOutIcon,
   PercentIcon,
   MenuIcon,
-  SearchIcon,
   ShoppingCartIcon,
   SparklesIcon,
   GavelIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { LanguageSwitch } from "@/lib/i18n/LanguageSwitch";
 import { AccountAvatar, useAccountLinks } from "@/components/layout/nav-shared";
@@ -30,6 +24,11 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/features/cart/cart.queries";
+import {
+  DesktopNavbarSearch,
+  MobileNavbarSearch,
+} from "@/features/catalog/components/search/NavbarSearch";
+import { useNavbarSearch } from "@/features/catalog/search/use-navbar-search";
 import { useGameList } from "@/features/catalog/catalog.queries";
 import { useSales } from "@/features/sale/sale.queries";
 import { useTranslate } from "@/lib/i18n";
@@ -64,7 +63,6 @@ function Logo({ onClick }: { onClick?: () => void }) {
 export function Navbar() {
   const { t } = useTranslate();
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: cart } = useCart();
   const { data: games } = useGameList();
@@ -79,12 +77,7 @@ export function Navbar() {
     logoutPending,
   } = useAccountLinks();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [draft, setDraft] = useState<{ key: string; value: string } | null>(
-    null,
-  );
-  const query =
-    draft?.key === location.key ? draft.value : (searchParams.get("q") ?? "");
-  const setQuery = (value: string) => setDraft({ key: location.key, value });
+  const search = useNavbarSearch();
   const searchRef = useRef<HTMLInputElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
   const isSearch = location.pathname === "/search";
@@ -161,20 +154,6 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const submitSearch = (event: FormEvent) => {
-    event.preventDefault();
-    const params = isSearch
-      ? new URLSearchParams(searchParams)
-      : new URLSearchParams();
-    const trimmed = query.trim();
-    if (trimmed) params.set("q", trimmed);
-    else params.delete("q");
-    params.delete("page");
-    navigate(`/search${params.size ? `?${params}` : ""}`);
-  };
-  const blurSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape") event.currentTarget.blur();
-  };
   const quantity = cart?.totalQuantity ?? 0;
   const cartButton = (
     <Button
@@ -368,47 +347,14 @@ export function Navbar() {
           </SheetContent>
         </Sheet>
         <Logo />
-        <form
-          onSubmit={submitSearch}
-          role="search"
-          className="group hidden h-11 min-w-0 max-w-[640px] flex-1 items-center gap-2 rounded-full border border-border bg-muted px-4 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring md:flex"
-        >
-          <SearchIcon className="size-[18px] shrink-0 text-muted-foreground" />
-          <input
-            ref={searchRef}
-            aria-label={t("nav.search", "ค้นหา")}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={blurSearch}
-            placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
-            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-          <kbd className="rounded border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground group-focus-within:hidden">
-            /
-          </kbd>
-        </form>
+        <DesktopNavbarSearch search={search} inputRef={searchRef} />
         <div className="ml-auto flex items-center gap-1">
           <LanguageSwitch className="mr-2" />
           <AccountMenu />
           {cartButton}
         </div>
       </div>
-      <form
-        onSubmit={submitSearch}
-        role="search"
-        className="mx-4 mb-2.5 flex h-10 items-center gap-2 rounded-full border border-border bg-muted px-4 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring md:hidden"
-      >
-        <SearchIcon className="size-[18px] text-muted-foreground" />
-        <input
-          ref={mobileSearchRef}
-          aria-label={t("nav.search", "ค้นหา")}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onKeyDown={blurSearch}
-          placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
-          className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </form>
+      <MobileNavbarSearch search={search} inputRef={mobileSearchRef} />
       <nav
         aria-label={t("nav.categories", "หมวดหมู่สินค้า")}
         className="h-11 overflow-x-auto border-t border-border [scrollbar-width:none] md:h-11"
