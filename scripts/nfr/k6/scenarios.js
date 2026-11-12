@@ -4,11 +4,10 @@ import { Counter, Rate } from "k6/metrics";
 
 const mode = __ENV.MODE || "smoke";
 const target = __ENV.TARGET || "http://127.0.0.1:8080/api/v1";
-const allowed = new Set(["localhost", "127.0.0.1", "::1"]);
-const targetUrl = new URL(target);
-if (!["http:", "https:"].includes(targetUrl.protocol) || !allowed.has(targetUrl.hostname.replace(/^\[|\]$/g, ""))) {
-  throw new Error(`Refusing non-loopback NFR target: ${targetUrl.hostname}`);
-}
+const allowed = new Set(["localhost", "127.0.0.1", "::1", "pegasus-dev.gameinwza.com", "100.86.49.143", "100.86.61.35"]);
+const match = target.match(/^(https?):\/\/(\[[^\]]+\]|[^/:?#]+)/i);
+const targetHost = match?.[2].replace(/^\[|\]$/g, "").toLowerCase();
+if (!match || !allowed.has(targetHost)) throw new Error(`Refusing non-allowlisted NFR target: ${targetHost || target}`);
 
 const profiles = {
   smoke: { executor: "constant-vus", vus: 3, duration: "5m" },
@@ -67,5 +66,5 @@ export function journey() {
 
 export function handleSummary(data) {
   const dropped = data.metrics.dropped_iterations?.values?.count ?? 0;
-  return { stdout: `NFR mode=${mode}; target=${targetUrl.host}; dropped_iterations=${dropped}; expected_business_outcomes=${data.metrics.expected_business_outcomes?.values?.count ?? 0}\n` };
+  return { stdout: `NFR mode=${mode}; target=${targetHost}; dropped_iterations=${dropped}; expected_business_outcomes=${data.metrics.expected_business_outcomes?.values?.count ?? 0}\n` };
 }

@@ -9,9 +9,32 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const config = JSON.parse(await readFile(path.join(root, "scripts/nfr/fe/config.json"), "utf8"));
 const target = assertAllowedTarget(process.env.NFR_UI_TARGET ?? "http://127.0.0.1:4173");
 const runId = assertSafeRunId(process.env.NFR_RUN_ID ?? "tcg753-lighthouse-local");
+const apiBase = assertAllowedTarget(process.env.NFR_API_BASE_URL ?? "https://pegasus-dev.gameinwza.com");
+let listingId = process.env.NFR_LISTING_ID;
+if (!listingId) {
+  const response = await fetch(new URL("/api/v1/listings?page=0&size=20", apiBase), { signal: AbortSignal.timeout(8_000), headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error(`Could not discover a Dev listing ID: HTTP ${response.status}`);
+  const envelope = await response.json();
+  const items = envelope?.data?.items;
+  if (!Array.isArray(items) || !items.length || items[0]?.id == null) throw new Error("Dev API returned no usable listing IDs");
+  listingId = String(items[0].id);
+}
+if (!/^\d+$/.test(listingId)) throw new Error("NFR_LISTING_ID must be a numeric Dev listing ID");
 const output = path.join(root, "artifacts/nfr", runId, "lighthouse");
 await mkdir(output, { recursive: true });
-const version = spawnSync("lighthouse", ["--version"], { cwd: root, encoding: "utf8", timeout: 10_000, windowsHide: true });
+const usePnpmDlx = process.env.NFR_LIGHTHOUSE_VIA_PNPM === "1";
+function runLighthouse(args, timeout) {
+  if (process.env.NFR_LIGHTHOUSE_CLI) {
+    return spawnSync(process.execPath, [process.env.NFR_LIGHTHOUSE_CLI, ...args], { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+  }
+  if (usePnpmDlx && process.platform === "win32") {
+    const quote = (value) => `"${String(value).replaceAll('"', '""')}"`;
+    const command = ["corepack", "pnpm", "dlx", `lighthouse@${config.lighthouseVersion}`, ...args].map((value, index) => index < 4 ? value : quote(value)).join(" ");
+    return spawnSync("cmd.exe", ["/d", "/s", "/c", command], { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+  }
+  return spawnSync(usePnpmDlx ? "corepack" : "lighthouse", usePnpmDlx ? ["pnpm", "dlx", `lighthouse@${config.lighthouseVersion}`, ...args] : args, { cwd: root, encoding: "utf8", timeout, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+}
+const version = runLighthouse(["--version"], 30_000);
 if (version.error || version.status !== 0 || !version.stdout.includes(config.lighthouseVersion)) {
   const reason = version.error?.message ?? `Expected Lighthouse ${config.lighthouseVersion}; found ${version.stdout?.trim() ?? version.stderr?.trim()}`;
   await writeFile(path.join(output, "run.json"), `${JSON.stringify({ runId, target: target.origin, status: "Blocked", reason }, null, 2)}\n`);
@@ -23,11 +46,11 @@ const results = [];
 let failed = false;
 for (const page of config.pages) {
   for (let run = 1; run <= config.runsPerPage; run += 1) {
-    const url = new URL(page.path, target);
+    const url = new URL(page.path.replace("{listingId}", listingId), target);
     const reportPath = path.join(output, `${page.name}-run-${run}.json`);
     const args = [url.toString(), "--quiet", "--chrome-flags=--headless --no-sandbox", "--only-categories=performance", "--output=json", `--output-path=${reportPath}`, "--max-wait-for-load=45000"];
     if (process.env.CHROME_PATH) args.push(`--chrome-path=${process.env.CHROME_PATH}`);
-    const result = spawnSync("lighthouse", args, { cwd: root, encoding: "utf8", timeout: 90_000, windowsHide: true, maxBuffer: 15 * 1024 * 1024 });
+    const result = runLighthouse(args, 120_000);
     if (result.error || result.status !== 0) {
       failed = true;
       results.push({ page: page.name, run, status: "Fail", reason: result.error?.message ?? result.stderr?.slice(-2000), exitCode: result.status });
@@ -41,6 +64,6 @@ for (const page of config.pages) {
     results.push({ page: page.name, run, status: passed ? "Pass" : "Fail", metrics, interactionLatencyNote: "TBT is a lab proxy; real INP/interaction <=200ms requires browser interaction trace or field data." });
   }
 }
-await writeFile(path.join(output, "run.json"), `${JSON.stringify({ runId, target: target.origin, lighthouseVersion: config.lighthouseVersion, runsPerPage: config.runsPerPage, results }, null, 2)}\n`);
+await writeFile(path.join(output, "run.json"), `${JSON.stringify({ runId, target: target.origin, apiTarget: apiBase.origin, listingId, lighthouseVersion: config.lighthouseVersion, runsPerPage: config.runsPerPage, results }, null, 2)}\n`);
 process.stdout.write(`${JSON.stringify({ results, report: path.join(output, "run.json") }, null, 2)}\n`);
 if (failed) process.exitCode = 1;

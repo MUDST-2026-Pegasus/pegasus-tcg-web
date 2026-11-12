@@ -9,6 +9,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const config = JSON.parse(await readFile(path.join(root, "scripts/nfr/fe/config.json"), "utf8"));
 const target = assertAllowedTarget(process.env.NFR_UI_TARGET ?? "http://127.0.0.1:4173");
 const runId = assertSafeRunId(process.env.NFR_RUN_ID ?? "tcg753-fe-local");
+const apiBase = assertAllowedTarget(process.env.NFR_API_BASE_URL ?? "https://pegasus-dev.gameinwza.com");
+const apiTimeout = AbortSignal.timeout(8_000);
+let listingId = process.env.NFR_LISTING_ID;
+if (!listingId) {
+  const response = await fetch(new URL("/api/v1/listings?page=0&size=20", apiBase), { signal: apiTimeout, headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error(`Could not discover a Dev listing ID: HTTP ${response.status}`);
+  const envelope = await response.json();
+  const items = envelope?.data?.items;
+  if (!Array.isArray(items) || !items.length || items[0]?.id == null) throw new Error("Dev API returned no usable listing IDs");
+  listingId = String(items[0].id);
+}
+if (!/^\d+$/.test(listingId)) throw new Error("NFR_LISTING_ID must be a numeric Dev listing ID");
 const browser = process.env.NFR_BROWSER ?? "electron";
 if (!["chrome", "edge", "firefox", "webkit", "electron"].includes(browser)) throw new Error("NFR_BROWSER must be chrome, edge, firefox, webkit, or electron");
 const packageJson = JSON.parse(await readFile(path.join(root, "node_modules/cypress/package.json"), "utf8"));
@@ -16,7 +28,7 @@ if (packageJson.version !== config.cypressVersion) throw new Error(`Expected Cyp
 const output = path.join(root, "artifacts/nfr", runId, "frontend");
 await mkdir(output, { recursive: true });
 const cypress = path.join(root, "node_modules/cypress/bin/cypress");
-const cypressEnv = [`nfrRunId=${runId}`];
+const cypressEnv = [`nfrRunId=${runId}`, `listingId=${listingId}`, `nfrApiHost=${apiBase.hostname.toLowerCase()}`];
 if (process.env.NFR_MOBILE === "1") cypressEnv.push("mobile=true");
 const args = [cypress, "run", "--spec", "src/test/cypress/e2e/nfr/tcg-753-nfr.cy.ts", "--browser", browser, "--config", `baseUrl=${target.origin},screenshotsFolder=${path.join(output, "screenshots")}`, "--env", cypressEnv.join(",")];
 const result = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8", timeout: config.timeoutSeconds * 1000, windowsHide: true, maxBuffer: 30 * 1024 * 1024 });
@@ -41,7 +53,7 @@ try {
 } catch (error) {
   summary.reasons = [`Could not read measurement evidence: ${error.message}`];
 }
-await writeFile(path.join(output, "summary.json"), `${JSON.stringify({ runId, target: target.origin, browser, cypressVersion: config.cypressVersion, cypressExitCode: result.status, ...summary }, null, 2)}\n`);
+await writeFile(path.join(output, "summary.json"), `${JSON.stringify({ runId, target: target.origin, apiTarget: apiBase.origin, listingId, browser, cypressVersion: config.cypressVersion, cypressExitCode: result.status, ...summary }, null, 2)}\n`);
 if (result.error) {
   process.stderr.write(`Frontend NFR execution failed: ${result.error.message}\n`);
   process.exitCode = 1;

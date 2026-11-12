@@ -10,7 +10,7 @@ const config = JSON.parse(await readFile(path.join(root, "scripts/nfr/resources/
 const runId = assertSafeRunId(process.env.NFR_RUN_ID ?? "tcg753-db-local");
 const host = process.env.PGHOST ?? "127.0.0.1";
 const port = process.env.PGPORT ?? "5432";
-const allowedHosts = new Set(["localhost", "127.0.0.1", "::1", ...(process.env.NFR_TEST_TARGET_HOSTS ?? "").split(",").map((item) => item.trim().toLowerCase()).filter((item) => item.endsWith(".test") || item.endsWith(".localhost"))]);
+const allowedHosts = new Set(["localhost", "127.0.0.1", "::1", "100.86.49.143", ...(process.env.NFR_TEST_TARGET_HOSTS ?? "").split(",").map((item) => item.trim().toLowerCase()).filter((item) => item.endsWith(".test") || item.endsWith(".localhost"))]);
 if (!allowedHosts.has(host.toLowerCase())) throw new Error(`PostgreSQL host is not allowlisted: ${host}`);
 const outputDirectory = path.join(root, "artifacts/nfr", runId, "resources");
 await mkdir(outputDirectory, { recursive: true });

@@ -4,7 +4,7 @@ type NfrMetric = { page: string; run: number; url: string; lcpMs: number | null;
 const pages: NfrPage[] = [
   { name: "home", path: "/" },
   { name: "catalog", path: "/search" },
-  { name: "detail", path: "/products/1" },
+  { name: "detail", path: `/listings/${Cypress.expose("listingId") || "missing-listing-id"}` },
   { name: "cart", path: "/cart" },
   { name: "checkout", path: "/checkout" },
   { name: "auction", path: "/auctions" },
@@ -19,6 +19,11 @@ const output = `artifacts/nfr/${runId}/frontend`;
 function assertLoopbackUiOrigin() {
   const origin = new URL(Cypress.config("baseUrl") || "http://localhost:4173");
   expect(["localhost", "127.0.0.1", "::1"], "NFR browser target must be loopback").to.include(origin.hostname.replace(/^\[|\]$/g, ""));
+}
+
+function allowedRequestHosts() {
+  const apiHost = Cypress.expose("nfrApiHost");
+  return ["localhost", "127.0.0.1", "::1", ...(typeof apiHost === "string" && apiHost ? [apiHost.toLowerCase()] : [])];
 }
 
 function beginMetrics(win: Window) {
@@ -93,7 +98,8 @@ describe("TCG-753 frontend NFR (loopback production preview only)", () => {
       for (let run = 1; run <= runsPerPage; run += 1) {
         cy.intercept("**/*", (request) => {
           const requestHost = new URL(request.url).hostname.replace(/^\[|\]$/g, "");
-          if (!["localhost", "127.0.0.1", "::1"].includes(requestHost)) request.destroy();
+          if (!allowedRequestHosts().includes(requestHost)) request.destroy();
+          else request.continue();
         });
         cy.visit(page.path, { failOnStatusCode: false, onBeforeLoad: beginMetrics });
         installMetrics(page, run);
@@ -106,25 +112,33 @@ describe("TCG-753 frontend NFR (loopback production preview only)", () => {
     });
   }
 
-  it("reports axe results as unavailable when axe-core is not injected by the harness", () => {
-    cy.visit("/", { failOnStatusCode: false });
-    cy.window().then((win) => {
-      const axe = (win as Window & { axe?: { run: (context?: Document) => Promise<{ violations: { impact?: string }[] }> } }).axe;
-      if (!axe) {
-        cy.writeFile(`${output}/axe-status.json`, { status: "Blocked", reason: "axe-core is not installed/injected in this repository environment" });
-        return;
-      }
-      return axe.run(win.document).then((results) => {
-        const serious = results.violations.filter((violation) => ["critical", "serious"].includes(violation.impact || ""));
-        cy.writeFile(`${output}/axe-status.json`, { status: serious.length ? "Fail" : "Pass", criticalOrSeriousViolations: serious.length });
-        expect(serious, "zero axe critical/serious violations").to.have.length(0);
-      });
-    });
+  it("runs axe-core WCAG 2.2 AA checks on all eight pages", () => {
+    const pageResults: { page: string; violationCount: number; criticalOrSerious: number; violations: { id: string; impact?: string; nodes: number }[] }[] = [];
+    for (const page of pages) {
+      cy.visit(page.path, { failOnStatusCode: false });
+      cy.readFile(".nfr-runs/axe/node_modules/axe-core/axe.min.js").then((source: string) =>
+        cy.window().then((win) => {
+          const script = win.document.createElement("script");
+          script.textContent = source;
+          win.document.head.appendChild(script);
+          const axe = (win as Window & { axe?: { run: (context?: Document, options?: unknown) => Promise<{ violations: { id: string; impact?: string; nodes: unknown[] }[] }> } }).axe;
+          expect(axe, "axe-core injected").not.to.equal(undefined);
+          return axe!.run(win.document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] } }).then((results) => {
+            const serious = results.violations.filter((violation) => ["critical", "serious"].includes(violation.impact || ""));
+            pageResults.push({ page: page.name, violationCount: results.violations.length, criticalOrSerious: serious.length, violations: results.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.length })) });
+          });
+        }),
+      );
+    }
+    cy.then(() => {
+      const criticalOrSerious = pageResults.reduce((total, page) => total + page.criticalOrSerious, 0);
+      return cy.writeFile(`${output}/axe-status.json`, { tool: "axe-core 4.10.3", standard: "WCAG 2.2 AA tags", status: criticalOrSerious ? "Fail" : "Pass", pages: pageResults, criticalOrSeriousViolations: criticalOrSerious });
+    }).then(() => expect(pageResults.reduce((total, page) => total + page.criticalOrSerious, 0), "zero axe critical/serious violations across eight pages").to.equal(0));
   });
 
   it("preserves usable error shell for local API 401/403/429/5xx and offline conditions", () => {
     const failures = [401, 403, 429, 500, 503];
-    failures.forEach((status) => cy.intercept("http://127.0.0.1:8080/api/v1/**", { statusCode: status, body: { message: `NFR ${status}` } }).as(`api-${status}`));
+    failures.forEach((status) => cy.intercept("**/api/v1/**", { statusCode: status, body: { message: `NFR ${status}` } }).as(`api-${status}`));
     cy.visit("/", { failOnStatusCode: false });
     cy.get("body").should("be.visible");
     cy.window().then((win) => cy.writeFile(`${output}/resilience.json`, { statusesInjected: failures, offlineRun: "Not Run: requires browser-level network control", target: win.location.origin }));

@@ -7,7 +7,7 @@
   "pages": [
     { "name": "home", "path": "/" },
     { "name": "catalog", "path": "/search" },
-    { "name": "detail", "path": "/products/1" },
+    { "name": "detail", "path": "/listings/{listingId}" },
     { "name": "cart", "path": "/cart" },
     { "name": "checkout", "path": "/checkout" },
     { "name": "auction", "path": "/auctions" },

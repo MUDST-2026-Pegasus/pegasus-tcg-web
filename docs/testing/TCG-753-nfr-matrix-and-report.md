@@ -1,10 +1,52 @@
 # TCG-753 Standalone NFR Testing Matrix and Report
 
+## Latest live VPN execution — 2026-11-12
+
+**Overall TCG-753 result: Fail.** Live evidence now exists for the Dev Gateway and local production preview. Frozen thresholds are unchanged. Remaining unmeasured areas stay `Blocked`; they are not counted as passes.
+
+| Area | Result | Measured outcome |
+| --- | --- | --- |
+| Gateway/API connectivity | Pass | Gateway root and `/api/v1/games`, `/catalog/products`, `/listings`, `/home/banners`, `/listings/90` returned HTTP 200 JSON. Listing ID `90` was used for detail. |
+| Cypress NFR | Fail | 24/24 page captures; 23/24 Cypress LCP values unavailable and 24/24 interaction values unavailable. Accessibility axe check failed. |
+| Lighthouse web vitals | Fail | 24/24 runs breached LCP 2.5 s. LCP range by page: home 14.1–15.1 s; catalog 10.4 s; detail 17.7–17.8 s; cart 10.4 s; checkout 15.9 s; auction 12.5–13.2 s; seller dashboard 13.5 s; admin report 13.4 s. CLS exceeded 0.10 in 13/24 runs. |
+| WCAG axe-core | Fail | One Serious `aria-prohibited-attr` violation on Home; 0 Critical/Serious violations on each of the other seven pages. Manual 200% zoom, screen reader announcements, and full keyboard journey remain unverified. |
+| k6 smoke / baseline | Blocked pending threshold evaluator review | Smoke 3 VUs/5 min: 2,621 iterations, 0 dropped, read p95/p99 184.5/245.2 ms, search 224.9/308.6 ms, unexpected error rate 0. Baseline 15 VUs/15 min: 36,953 iterations, 0 dropped, read p95/p99 288.4/517.0 ms, search 328.3/589.5 ms, unexpected error rate 0. Both numeric samples are below frozen budgets, but exported k6 threshold booleans were `false` for those values while process exit was 0; do not report a threshold pass until that runner discrepancy is resolved. |
+| Security probes / headers | Partial; findings recorded | Anonymous profile/seller/admin endpoints returned 401; untrusted CORS preflight returned 403. API responses had `X-Content-Type-Options: nosniff`; HSTS and CSP were absent on those responses. Actuator/Swagger paths through the Gateway returned the same HTML fallback shape, so exposure is not confirmed. |
+| Gitleaks | Fail / triage required | Four redacted `generic-api-key` candidates: `scripts/test-auction-e2e.sh:23` and `src/features/auction/components/MyAuctionRow.tsx:192-194`. |
+| Trivy | Fail | Lockfile scan reported 1 Critical, 17 High, 25 Medium, and 6 Low dependency findings; Dockerfiles each reported a High root-user misconfiguration. See raw report. |
+| Semgrep | Blocked | Pinned image ran but `--config=auto` did not return a report before the bounded wait; no Semgrep pass is claimed. |
+| Actuator / MinIO / PostgreSQL / DB analysis | Blocked | Direct Actuator and MinIO requests timed out; PostgreSQL TCP check failed. No `psql` executable or DB credential keys were found. No `EXPLAIN ANALYZE` or `pg_stat_statements` query ran. |
+| DB-backed synthetic seed | Blocked | Existing seed utility only creates local offline fixtures. It created 25 run-tagged records; it does not insert API/DB data. No shared Dev DB data was written, dropped, or truncated. |
+
+### Live run metadata and topology
+
+| Field | Value |
+| --- | --- |
+| Run ID | `tcg753-vpn-20261112` |
+| Commit SHA at execution | `58aced49bf05e6f9e07e101a3750bc2891cbfaa9` (working tree contained NFR/report-only changes; production application sources were not changed) |
+| Topology | Windows x64 workstation → local production preview `http://127.0.0.1:4173` → Dev API Gateway `https://pegasus-dev.gameinwza.com`; direct backend `100.86.49.143:8080`, PostgreSQL `100.86.49.143:5432`, and MinIO `100.86.61.35:9000` were unreachable from this host during checks. |
+| Frontend build | `VITE_API_BASE_URL=https://pegasus-dev.gameinwza.com`; `pnpm build` passed. Local preview used an ignored temporary static SPA server because installed Vite preview dependencies were incomplete. |
+| Versions | Node `22.20.0`; pnpm `10.6.5`; Vite `8.3.5`; Cypress `16.1.0` / Electron `146`; Lighthouse `12.2.1`; Chrome; k6 `0.55.0` in `grafana/k6:0.55.0`; Docker server `29.1.3` (resource runner pins `27.5.1`); Gitleaks `8.21.2`; Semgrep `1.99.0`; Trivy `0.58.1`; `psql` unavailable. |
+| Database credentials | `.env` contains no PostgreSQL/DB host, username, or password keys. Credentials were not available to the runner. |
+| Synthetic fixture | 25 local records tagged `tcg753-vpn-20261112`; manifest says `offline synthetic fixture only; no API/database writes`. |
+
+### Live evidence paths
+
+- Cypress: `artifacts/nfr/tcg753-vpn-20261112/frontend/cypress.log`, `summary.json`, `measurements.json`, `axe-status.json`, `manual-a11y-checklist.json`, and `screenshots/`.
+- Lighthouse: `artifacts/nfr/tcg753-vpn-20261112/lighthouse/run.json` and 24 per-page JSON reports.
+- k6: `artifacts/nfr/tcg753-vpn-20261112/performance/smoke-summary.json` and `baseline-summary.json`.
+- API security: `artifacts/nfr/tcg753-vpn-20261112/security/attack-probes.json`.
+- Resource and DB: `artifacts/nfr/tcg753-vpn-20261112/resources/warmup.json` and `postgres.json`.
+- Static scans: `artifacts/nfr/tcg753-vpn-20261112/security/gitleaks.json` and `trivy-fs.json`. The source snapshot used for Gitleaks is ignored at `.nfr-runs/tcg753-gitleaks-source/`.
+- Seed manifest: `.nfr-runs/tcg753-vpn-20261112/manifest.json`.
+
+The prior Phase 1–5 entries below are historical local checkpoints. The live status and evidence above supersede any older statements that tools or Dev services were unavailable.
+
 ## Scope and evidence rules
 
 This repository contains the React/Vite frontend only. `README.md` identifies the API as a separate `pegasus-tcg-api` project; `docker-compose.yml` starts only the web container and explicitly expects an API on host port `8080`. The API paths below are **client request contracts observed in this repository**, not a claim that backend route handlers were inspected. No API, database, JVM, MinIO, or production source is present here.
 
-All targets must pass the guard in `scripts/nfr/target-guard.mjs`: loopback only by default (`localhost`, `127.0.0.1`, `::1`), or an exact `.test` / `.localhost` hostname explicitly added to `NFR_TEST_TARGET_HOSTS`. Production hosts and arbitrary public IPs are rejected. Every runner must set a timeout and record its tool version. No production target is permitted.
+All targets pass `scripts/nfr/target-guard.mjs`: loopback by default, the exact TCG-753 Dev hosts (`pegasus-dev.gameinwza.com`, `100.86.49.143`, `100.86.61.35`), or an exact `.test` / `.localhost` hostname explicitly added to `NFR_TEST_TARGET_HOSTS`. Other production hosts and arbitrary public IPs remain rejected. Every runner must set a timeout and record its tool version.
 
 Status values describe evidence from this run, not expected outcomes: `Pass`, `Fail`, `Blocked`, `Not Run`, or `N/A`. A missing backend/tool is recorded as `Blocked` or `Not Run`; it is never reported as a pass.
 
@@ -37,7 +79,7 @@ Thresholds are frozen before measurements. They are initial project NFR budgets,
 | NFR-AUTH-RES-01 | Auth / Account | Resource Efficiency | API auth/session and browser storage | 4 h authenticated session / repeated login-refresh-logout | Soak / resource budgets | Blocked | `artifacts/nfr/<run-id>/auth/resources/` |
 | NFR-CATALOG-PERF-01 | Home / Catalog / Search | Performance | `/`, `/search`, `/products/:productId`; `/home/banners`, `/catalog/products`, `/catalog/trending`, `/listings` | Cold/warm cache; anonymous browse; search/filter pages 0-10 | Search p95 ≤800 ms / p99 ≤1,500 ms | Blocked | `artifacts/nfr/<run-id>/catalog/perf/` |
 | NFR-CATALOG-SEC-01 | Home / Catalog / Search | Security / Privacy | `/catalog/products/:id`, `/listings/:id`, search query inputs | Injection/XSS strings in search and identifiers; malformed filters | No execution/reflected script; no unexpected errors | Blocked | `artifacts/nfr/<run-id>/catalog/security/` |
-| NFR-CATALOG-UI-01 | Home / Catalog / Search | Accessibility / Compatibility | `/`, `/search`, `/products/:productId`, `/products/:productId/listings`, `/listings/:listingId` | 8-page Lighthouse set; keyboard; browser/mobile matrix | Web vitals, WCAG, compatibility budgets | Blocked | `artifacts/nfr/<run-id>/catalog/ui/` |
+| NFR-CATALOG-UI-01 | Home / Catalog / Search | Accessibility / Compatibility | `/`, `/search`, `/products/:productId`, `/products/:productId/listings`, `/listings/:listingId` | 8-page Lighthouse set; keyboard; browser/mobile matrix | Web vitals, WCAG, compatibility budgets | Fail | `artifacts/nfr/tcg753-vpn-20261112/frontend/`, `artifacts/nfr/tcg753-vpn-20261112/lighthouse/` |
 | NFR-CATALOG-RES-01 | Home / Catalog / Search | Resource Efficiency | Catalog pagination, filters, detail/market APIs | 4 h paginated/filter navigation; repeated detail open | Soak / resource budgets; no unbounded client growth | Blocked | `artifacts/nfr/<run-id>/catalog/resources/` |
 | NFR-COL-PERF-01 | Collection | Performance | `/account/collection`, `/users/:username`; `/collection`, `/users/:username/collection` | Owner read/write; public read; pages 0-20 | Read/write API budgets | Blocked | `artifacts/nfr/<run-id>/collection/perf/` |
 | NFR-COL-SEC-01 | Collection | Security / Privacy | `/collection`, `/collection/:id`, `/users/:username/collection` | Cross-user ownership / IDOR, mass assignment, malformed payload | Zero cross-user access; no unauthorized mutation | Blocked | `artifacts/nfr/<run-id>/collection/security/` |
@@ -111,7 +153,7 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 - `smoke` is 3 VUs / 5 min; `baseline` is 15 VUs / 15 min; `load` ramps 25 → 50 → 100 VUs and holds at 100 for 15 min; `stress`, `spike`, `soak` (4 h), and `cooldown` use arrival-rate executors and report `dropped_iterations` separately. `--dry-run` shortens scenario durations for validation only and must not be reported as a measurement.
 - Read and search thresholds are applied to their tagged requests. The first per-VU request uses `Cache-Control: no-cache` and is tagged cold; subsequent iterations are tagged warm. Authenticated cart reads require a test-only `NFR_AUTH_TOKEN`, otherwise they remain anonymous. Write/report thresholds are frozen in the config/matrix; no mutating checkout/payment or report endpoint is exercised by default to avoid non-disposable side effects.
 - Syntax checks: `node --check scripts/nfr/k6/scenarios.js` and `node --check scripts/nfr/run-k6.mjs` **Pass**.
-- Smoke/dry-run execution: **Blocked**. k6 `0.55.0` is not installed (`spawnSync k6.exe ENOENT`); the local API at `127.0.0.1:8080` was also unavailable at discovery. No latency or capacity result is claimed.
+- Live execution (k6 `0.55.0` via pinned Docker image) completed smoke and baseline before either run overlapped another. Smoke: 3 VUs / 5 min, 2,621 iterations, 0 dropped, read p95/p99 184.540/245.171 ms, search p95/p99 224.902/308.586 ms, overall p95/p99 199.238/275.218 ms, unexpected errors 0%. Baseline: 15 VUs / 15 min, 36,953 iterations, 0 dropped, read p95/p99 288.413/516.958 ms, search p95/p99 328.330/589.504 ms, overall p95/p99 303.014/537.532 ms, unexpected errors 0%. The raw k6 summaries mark the threshold booleans false despite these measurements; both runs remain **Blocked pending evaluator discrepancy review**, not Pass. Evidence: `artifacts/nfr/tcg753-vpn-20261112/performance/`.
 
 ### Phase 1 — seed/cleanup validation
 
@@ -122,9 +164,8 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 
 - Added pinned scanner runner `scripts/nfr/security/run-scans.mjs`: Gitleaks `8.21.2`, Semgrep `1.99.0`, Trivy `0.58.1`, and ZAP image `ghcr.io/zaproxy/zaproxy:2.16.0`. Each host scan has a 900 s timeout; ZAP is target-guarded and runs a 5-minute baseline scan. Raw JSON goes only to ignored `artifacts/nfr/<run-id>/security/`.
 - Added `scripts/nfr/security/attack-probes.mjs`, loopback-only with a 5 s per-request timeout. It checks anonymous profile/seller/admin access, injection/XSS query handling, actuator/metrics/Swagger/debug exposure, CORS, basic response headers, and obvious token/secret leakage. It records response bodies by byte count only, never their contents.
-- Scanner run: **Blocked** for all four tools: Gitleaks, Semgrep, and Trivy executables are not installed; Docker daemon is unavailable for pinned ZAP. Evidence: `artifacts/nfr/tcg753-security-local/security/scan-run.json` (ignored runtime artifact).
-- Attack probes: all 9 local requests **Blocked** because API `127.0.0.1:8080` refused/unavailable. Cross-user IDOR, JWT replay/refresh, CSRF, upload/KYC/payment-slip ownership, mass assignment, oversized payload, and rate-limit checks are **Blocked** pending explicitly disposable local accounts/entity IDs; no destructive probe was sent. Evidence: `artifacts/nfr/tcg753-attacks-local/security/attack-probes.json`.
-- Findings: no security pass/fail conclusion can be made without the tools and backend. No secrets or PII were emitted by the probe report. Static scanner findings are **Not Run**, not zero findings.
+- Live Dev Gateway probes: anonymous profile, seller, and admin endpoints returned 401; an untrusted CORS preflight returned 403. API responses included `X-Content-Type-Options: nosniff`; HSTS and CSP were absent on sampled responses. Actuator/Swagger/metrics/debug paths through the Gateway returned the same HTML fallback, so direct endpoint exposure remains unverified. Evidence: `artifacts/nfr/tcg753-vpn-20261112/security/attack-probes.json`. IDOR, JWT replay, CSRF, authenticated role boundaries, upload ownership, and rate-limit checks remain **Blocked** because no disposable identities/tokens were available.
+- Live static scans: Gitleaks reported four redacted generic-api-key candidates for triage; Trivy reported 1 Critical, 17 High, 25 Medium, and 6 Low dependency findings plus a High root-user finding in each Dockerfile. Semgrep did not produce a report within the bounded run, and ZAP did not complete. Evidence: `artifacts/nfr/tcg753-vpn-20261112/security/gitleaks.json`, `trivy-fs.json`. These scanner findings are not yet triaged as confirmed exploitable defects.
 
 ### Phase 4 — frontend performance, accessibility, and compatibility
 
@@ -132,8 +173,8 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 - Added Cypress `16.1.0` spec `src/test/cypress/e2e/nfr/tcg-753-nfr.cy.ts`: 3 visits per page, screenshots, LCP/CLS/interaction observer metrics, repeated API URL count, keyboard labels/focus, mobile overflow/touch targets, local API 401/403/429/5xx shell, and a manual WCAG checklist. The harness rejects remote browser requests; the UI target itself must be loopback.
 - Test source: TypeScript check **Pass**; runner and Lighthouse script syntax checks **Pass**. Production build with `VITE_API_BASE_URL=http://127.0.0.1:8080` and CI-pinned pnpm `10.6.5`: **Pass**. `pnpm lint`: **Pass** with one existing React Compiler warning in `src/features/account/components/EditProfileDialog.tsx`.
 - Cypress `16.1.0` / Electron 146 headless against the loopback production preview ran: **11 passing, 0 failing**; all 24 planned page-run samples were collected. An earlier label assertion incorrectly rejected valid native `<label>` associations because it checked the Cypress runner's `HTMLInputElement` realm; the checker now resolves `element.labels` and `aria-labelledby` text correctly. Evidence: `artifacts/nfr/tcg753-fe-local/frontend/cypress.log`, screenshots, and `summary.json`.
-- The local API was unavailable, so 23 of 24 samples had no LCP entry, all 24 lacked an interaction event, and all three product-detail samples had no main content. These metrics are **Blocked**, not passes; overall NFR summary is **Blocked**. The first home sample observed LCP `1,328 ms`, CLS `0.00398`, JS transfer `509,898 bytes`; this single Electron lab observation is not a full page budget result.
-- Lighthouse: **Blocked** (`lighthouse` CLI not installed). axe-core: **Blocked** (`axe-core`/`cypress-axe` not present); the spec records that status rather than asserting a false zero-violation pass. Chrome/Edge/Firefox/WebKit cross-browser runs, real 200% browser zoom, visual comparison baseline, contrast, screen-reader announcements, and offline browser-level control remain **Not Verified**. WebKit automation, if later provisioned, is not Safari certification.
+- Live run used listing `90` from the Gateway API, loaded the local production build, and completed 24 Cypress page captures. Cypress recorded 23/24 LCP values and 24/24 interaction values unavailable, and the aggregate failed. Lighthouse completed 3 runs for each of 8 pages: all 24 LCP values breached 2.5 s; CLS breached 0.10 in 13/24 runs. Lighthouse TBT exceeded the 200 ms lab proxy in 14/24 runs; TBT is a lab proxy only, not a measured interaction latency. Evidence: `artifacts/nfr/tcg753-vpn-20261112/frontend/summary.json`, `measurements.json`, and `artifacts/nfr/tcg753-vpn-20261112/lighthouse/run.json`.
+- axe-core 4.10.3 scanned all eight pages: one Serious `aria-prohibited-attr` violation on Home and none Critical/Serious on the other seven pages. Full keyboard journey, 200% zoom, visual focus, and screen-reader announcements remain **Not Verified**. Evidence: `artifacts/nfr/tcg753-vpn-20261112/frontend/axe-status.json` and `manual-a11y-checklist.json`.
 - An initial local build attempt was blocked by stale/missing pnpm package links. After reinstalling with CI-pinned pnpm `10.6.5`, the production build passed with a loopback API base; no remote API target was used.
 - Raw run logs/screenshots (when available) are written under ignored `artifacts/nfr/<run-id>/frontend/` and `artifacts/nfr/<run-id>/lighthouse/`.
 
@@ -142,16 +183,15 @@ Cleanup requires the run ID and removes only `.nfr-runs/<run-id>` after validati
 - Added `scripts/nfr/resources/resource-snapshot.mjs` for bounded 5-second HTTP collection of JVM memory/Prometheus metrics, optional MinIO health/cluster metrics, host CPU/memory/process metrics, and pinned Docker stats. It supports warmup/soak-end/cooldown snapshots and time series (up to 240 samples, max 5-hour command timeout; 240 × 60-second intervals cover a 4-hour soak).
 - Added PostgreSQL read-only snapshot and slow-query files (`pg-stat-snapshot.sql`, `pg-slow-queries.sql`) plus `explain-analyze.mjs`. PostgreSQL host is loopback by default; only exact allowlisted `.test`/`.localhost` hosts are accepted. EXPLAIN runs in a read-only transaction with a 10-second server statement timeout and accepts only one SELECT/WITH query file inside this repository. API schema/migrations are absent, so no synthetic schema query is invented.
 - Added `analyze-resources.mjs`; it requires warmup, soak-end, and cooldown files and reports `Blocked` if any are missing. Missing JVM/DB/MinIO/container telemetry never counts as a threshold pass.
-- Local warmup snapshot: **Blocked** for JVM (`127.0.0.1:8080` unavailable), MinIO (`NFR_MINIO_TARGET` unset), and containers (installed Docker CLI `29.1.3` differs from pinned `27.5.1`; daemon was unavailable at discovery). Host snapshot is available, but Windows `os.loadavg()` returns zeros and is not treated as CPU utilization evidence. Evidence: `artifacts/nfr/tcg753-resources-local/resources/warmup.json`.
-- PostgreSQL / EXPLAIN / `pg_stat_statements`: **Blocked** (`psql` executable not installed); no DB connection or query was attempted. Evidence: `artifacts/nfr/tcg753-db-local/resources/postgres.json`.
+- Live direct Actuator `http://100.86.49.143:8080/actuator` and MinIO `http://100.86.61.35:9000` timed out. JVM/GC/thread/CPU and MinIO service snapshots are **Blocked**. PostgreSQL TCP to `100.86.49.143:5432` failed, `psql` and DB credential keys were unavailable; no connection, seed, EXPLAIN, or `pg_stat_statements` query ran. Evidence: `artifacts/nfr/tcg753-vpn-20261112/resources/warmup.json` and `postgres.json`.
 - Resource phase comparison: **Blocked**; soak-end/cooldown samples were not possible without local services. Deep ledger/financial reconciliation remains **Not Verified (Out of Scope)**.
 
 ### Final verification
 
-- CI-pinned pnpm `10.6.5` full Vitest suite: **Pass — 201 test files, 1,383 tests**. The run emitted existing expected i18n-missing-parameter and Base UI test warnings; there were no failed tests or unhandled errors.
+- CI-pinned pnpm full Vitest suite: **Pass — 201 test files, 1,383 tests** (0 failed). Existing expected i18n-missing-parameter and Base UI button warnings were emitted; no unhandled errors.
 - `pnpm lint`: **Pass** (0 errors, 1 existing React Compiler warning in `EditProfileDialog.tsx`).
-- `pnpm build`: **Pass** with `VITE_API_BASE_URL=http://127.0.0.1:8080`; all FE API requests in the built test app were restricted to loopback. The only source changes are docs, NFR scripts, Cypress config/spec; no application/business logic changed.
-- NFR result is **not an overall pass**: k6/security/Lighthouse/axe/JVM/PostgreSQL/MinIO/soak evidence remains Blocked for missing pinned tools or local services. Cypress UI harness passed its 11 assertions, while its aggregate performance result remains Blocked because 23/24 LCP and 24/24 interaction samples are unavailable and detail content needs the API.
+- `pnpm build`: **Pass** with `VITE_API_BASE_URL=https://pegasus-dev.gameinwza.com`. No production application code or business logic changed; only NFR test scripts and reports were updated.
+- Overall TCG-753 result: **Fail** from measured frontend LCP and axe findings. k6 threshold flags, Semgrep, direct Actuator/MinIO/PostgreSQL telemetry, authenticated security scenarios, and long soak remain **Blocked** or incomplete; none are represented as passes.
 
 ## Standalone CLI runbook
 

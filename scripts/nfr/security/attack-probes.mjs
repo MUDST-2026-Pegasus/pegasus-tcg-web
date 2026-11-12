@@ -33,10 +33,10 @@ async function probe(name, request) {
 }
 
 const probes = [
-  { name: "anonymous-profile-access", path: "/users/me" },
-  { name: "anonymous-seller-access", path: "/sellers/me" },
-  { name: "anonymous-admin-access", path: "/admin/metrics/overview" },
-  { name: "catalog-injection-and-xss-query", path: `/catalog/products?search=${encodeURIComponent("' OR 1=1 -- <img src=x onerror=alert(1)>")}` },
+  { name: "anonymous-profile-access", path: "/api/v1/users/me" },
+  { name: "anonymous-seller-access", path: "/api/v1/sellers/me" },
+  { name: "anonymous-admin-access", path: "/api/v1/admin/metrics/overview" },
+  { name: "catalog-injection-and-xss-query", path: `/api/v1/catalog/products?search=${encodeURIComponent("' OR 1=1 -- <img src=x onerror=alert(1)>")}` },
   { name: "actuator-exposure", path: "/actuator" },
   { name: "metrics-exposure", path: "/actuator/prometheus" },
   { name: "swagger-exposure", path: "/swagger-ui/index.html" },
@@ -46,7 +46,7 @@ const results = [];
 for (const item of probes) {
   results.push(await probe(item.name, { method: "GET", path: item.path }));
 }
-results.push(await probe("cors-untrusted-origin", { method: "OPTIONS", path: "/auth/me", headers: { Origin: "https://untrusted.example", "Access-Control-Request-Method": "GET" } }));
+results.push(await probe("cors-untrusted-origin", { method: "OPTIONS", path: "/api/v1/auth/me", headers: { Origin: "https://untrusted.example", "Access-Control-Request-Method": "GET" } }));
 
 const missingFixtures = ["NFR_USER_A_TOKEN", "NFR_USER_B_TOKEN", "NFR_SELLER_A_TOKEN", "NFR_SELLER_B_TOKEN", "NFR_TEST_PAYMENT_ID", "NFR_TEST_PRIVATE_UPLOAD_KEY"].filter((name) => !process.env[name]);
 const report = { runId, target: target.origin, perRequestTimeoutMs: timeoutMs, probeCount: results.length, probes: results, authenticatedIdorJwtReplayRefreshCsrfUploadMassAssignmentOversizedAndRateLimit: missingFixtures.length ? { status: "Blocked", reason: "Disposable local auth and entity fixtures are not configured", missingFixtureNames: missingFixtures } : { status: "Not Run", reason: "Probe execution requires endpoint-specific server contract and approved local disposable fixtures" } };
