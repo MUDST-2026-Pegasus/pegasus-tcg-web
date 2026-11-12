@@ -15,6 +15,8 @@ export function useLanguage() {
   // View Transition = ภาพเก่าค่อย ๆ จางเป็นภาพใหม่ ไม่เห็นจังหวะ remount ว่างเปล่า (เบราว์เซอร์ที่ไม่รองรับก็สลับตรง ๆ)
   const setLanguage = async (next: Language) => {
     const y = window.scrollY;
+    // โหลดคำแปลของภาษาใหม่ให้เสร็จก่อน — ไม่งั้น view transition ค้างภาพเก่าไว้ระหว่างรอโหลดเหมือนหน้าค้าง
+    await tolgee.loadRecords(tolgee.getRequiredDescriptors(next));
     const swap = async () => {
       await tolgee.changeLanguage(next);
       await new Promise(requestAnimationFrame);
