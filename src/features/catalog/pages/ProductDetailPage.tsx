@@ -22,7 +22,7 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
-import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, localNameOnly, marketForListing } from "../catalog.mappers";
 import { effectivePrice } from "@/components/sale";
 import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
 import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
@@ -34,6 +34,7 @@ import { useGameList, useProductCollectors, useProductDetail, useProductListings
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
+
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
 const ALL_VARIANTS = "all";
@@ -304,7 +305,7 @@ function ProductDetailContent({
             <div>
               <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
-              <p className="mt-2 min-h-6 text-muted-foreground">{[product.nameLocal, product.cardNumber].filter(Boolean).join(" · ") || "—"}</p>
+              {[localNameOnly(product.nameLocal, product.productType), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal, product.productType), product.cardNumber].filter(Boolean).join(" · ")}</p>}
             </div>
 
             <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">

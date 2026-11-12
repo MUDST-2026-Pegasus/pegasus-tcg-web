@@ -5,6 +5,7 @@ import {
   productHref,
   PRODUCT_TYPE_LABELS,
   categoryLabel,
+  localNameOnly,
 } from "@/features/catalog/catalog.mappers";
 import type { CardCondition, ProductType } from "@/features/catalog/catalog.types";
 
@@ -68,6 +69,16 @@ describe("catalog.mappers unit tests", () => {
       expect(categoryLabel({ code: "SLEEVES", name: "x" })).toBe("ซองใส่การ์ด");
       expect(categoryLabel({ code: "NEW_THING", name: "หมวดใหม่" })).toBe("หมวดใหม่");
       expect(categoryLabel({ code: "toString", name: "หมวดใหม่" })).toBe("หมวดใหม่");
+    });
+  });
+
+  describe("localNameOnly [TCG-560]", () => {
+    it("shows the Thai local name only in Thai", () => {
+      expect(localNameOnly("ซองสุ่ม FB07", "BOOSTER_PACK")).toBe("ซองสุ่ม FB07");
+      document.documentElement.lang = "en";
+      expect(localNameOnly("ชื่อไทยล้วน", "OTHER")).toBeNull();
+      expect(localNameOnly("FB07", "OTHER")).toBe("FB07");
+      document.documentElement.lang = "th";
     });
   });
 

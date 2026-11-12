@@ -1,5 +1,6 @@
+import buyerTh from "@/i18n/buyer/th.json";
 import type { CardCondition, ProductMarketDto, ProductType, PublicListingDto } from "./catalog.types";
-import { translate, formatMoney } from "@/lib/i18n";
+import { currentLanguage, translate, formatMoney } from "@/lib/i18n";
 
 /** ป้ายที่คนอ่าน สำหรับค่าที่ backend ส่งมาเป็นรหัส — ไม่มี React ในไฟล์นี้ */
 
@@ -106,3 +107,14 @@ export function marketForListing(market: ProductMarketDto[] | undefined, listing
 }
 
 // @tolgee-key {"key":"listing.outOfStock","ns":"common","defaultValue":"สินค้าหมด"}
+
+/**
+ * nameLocal เป็นชื่อไทยจาก DB เช่น "ซองสุ่ม FB07" — โหมด EN แปลคำประเภทสินค้าข้างหน้า ("Booster Pack FB07")
+ * ถ้ายังเหลือภาษาไทยอยู่ก็ไม่แสดง
+ */
+export function localNameOnly(value: string | null | undefined, productType: string): string | null {
+  if (!value || currentLanguage() === "th") return value ?? null;
+  const thaiType = Object.values(buyerTh.productType).find((label) => value.startsWith(label));
+  const english = thaiType ? `${PRODUCT_TYPE_LABELS[productType as keyof typeof PRODUCT_TYPE_LABELS] ?? ""}${value.slice(thaiType.length)}` : value;
+  return /[\u0E00-\u0E3E\u0E40-\u0E7F]/.test(english) ? null : english;
+}

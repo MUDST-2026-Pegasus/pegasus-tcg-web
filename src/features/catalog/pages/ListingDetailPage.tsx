@@ -75,7 +75,7 @@ import {
 } from "../components/ListingDetailSections";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { translateError } from "@/lib/i18n";
+import { currentLanguage, localName, translateError } from "@/lib/i18n";
 import { useListingText } from "@/lib/listing-detail.messages";
 
 export function ListingDetailPage() {
@@ -199,7 +199,7 @@ function ListingDetailContent({
               ...(game
                 ? [
                     {
-                      label: game.nameLocal || game.name,
+                      label: localName(game),
                       href: `/products?game=${game.slug}`,
                     },
                   ]
@@ -207,7 +207,7 @@ function ListingDetailContent({
               ...(cardSet
                 ? [
                     {
-                      label: cardSet.nameLocal || cardSet.name,
+                      label: localName(cardSet),
                       href: `/products?cardSetId=${cardSet.id}`,
                     },
                   ]
@@ -246,7 +246,7 @@ function ListingDetailContent({
               <div className="mb-5 flex flex-wrap items-center gap-2 text-xs leading-normal font-medium">
                 {game && (
                   <span className="rounded-full bg-sky-50 px-2.5 py-1 text-primary">
-                    {game.nameLocal || game.name}
+                    {localName(game)}
                   </span>
                 )}
                 {product?.rarityCode && (
@@ -271,14 +271,14 @@ function ListingDetailContent({
               <h1 className="text-[30px] leading-[38px] font-bold tracking-normal sm:text-[36px] sm:leading-[44px]">
                 {listing.card.productName}
               </h1>
-              {product?.nameLocal && (
+              {product?.nameLocal && currentLanguage() === "th" && (
                 <p className="mt-1.5 text-base leading-normal text-muted-foreground">
                   {product.nameLocal}
                 </p>
               )}
               <p className="mt-1.5 text-sm leading-normal font-medium text-muted-foreground">
                 {[
-                  cardSet?.nameLocal || cardSet?.name,
+                  localName(cardSet),
                   product?.cardNumber ? `#${product.cardNumber}` : null,
                   languageLabel(variant?.languageCode),
                   finishLabel(variant?.finish),
@@ -549,7 +549,7 @@ function ListingDetailContent({
               listing={listing}
               variant={variant}
               cardSet={cardSet}
-              gameName={game?.nameLocal || game?.name}
+              gameName={localName(game)}
               gameCode={game?.code}
               definitions={attributesQuery.data ?? []}
               effects={effectsQuery.data ?? []}

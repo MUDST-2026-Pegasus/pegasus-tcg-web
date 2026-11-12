@@ -11,6 +11,11 @@ export function useLanguage() {
     () => tolgee.getLanguage(),
   );
   const current = LANGUAGES.includes(language as Language) ? (language as Language) : DEFAULT_LANGUAGE;
-  const setLanguage = (next: Language) => tolgee.changeLanguage(next);
+  // สลับภาษาแล้วแอป remount (I18nProvider) — เก็บตำแหน่ง scroll ไว้ ไม่ให้เด้งกลับบนสุด
+  const setLanguage = async (next: Language) => {
+    const y = window.scrollY;
+    await tolgee.changeLanguage(next);
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
+  };
   return { language: current, setLanguage };
 }
