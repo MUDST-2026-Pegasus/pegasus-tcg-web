@@ -74,10 +74,9 @@ describe("catalog.mappers unit tests", () => {
 
   describe("localNameOnly [TCG-560]", () => {
     it("shows the Thai local name only in Thai", () => {
-      expect(localNameOnly("ซองสุ่ม FB07", "BOOSTER_PACK")).toBe("ซองสุ่ม FB07");
+      expect(localNameOnly("ซองสุ่ม FB07")).toBe("ซองสุ่ม FB07");
       document.documentElement.lang = "en";
-      expect(localNameOnly("ชื่อไทยล้วน", "OTHER")).toBeNull();
-      expect(localNameOnly("FB07", "OTHER")).toBe("FB07");
+      expect(localNameOnly("แชงคูส (SEC)")).toBeNull();
       document.documentElement.lang = "th";
     });
   });

@@ -305,7 +305,7 @@ function ProductDetailContent({
             <div>
               <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
-              {[localNameOnly(product.nameLocal, product.productType), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal, product.productType), product.cardNumber].filter(Boolean).join(" · ")}</p>}
+              {[localNameOnly(product.nameLocal), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal), product.cardNumber].filter(Boolean).join(" · ")}</p>}
             </div>
 
             <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">
