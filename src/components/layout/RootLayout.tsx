@@ -19,9 +19,12 @@ export function RootLayout() {
       <FaroPageViewTracker />
       <ScrollRestoration />
       <Outlet />
-      <Suspense fallback={null}>
-        <Snowfall />
-      </Suspense>
+      {/* tsparticles ต้องใช้ OffscreenCanvas — เบราว์เซอร์เก่าและ jsdom ในเทสต์ไม่มี ก็ไม่แสดงหิมะ */}
+      {typeof OffscreenCanvas !== "undefined" && (
+        <Suspense fallback={null}>
+          <Snowfall />
+        </Suspense>
+      )}
     </>
   );
 }
