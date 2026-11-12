@@ -34,6 +34,10 @@ QA/
 .vitest/
 test-results/
 coverage/
+cypress/screenshots/
+cypress/videos/
+src/test/cypress/screenshots/
+src/test/cypress/videos/
 
 # TCG-753 NFR run data and raw evidence (may contain sensitive scan output)
 .nfr-runs/
