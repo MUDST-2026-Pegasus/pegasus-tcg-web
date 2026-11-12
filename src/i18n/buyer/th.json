@@ -1302,13 +1302,45 @@
     "allCategories": "ทุกหมวดหมู่",
     "applyFilter": "ใช้ตัวกรอง",
     "breadcrumb": "ผลการค้นหา",
+    "card": {
+      "from": "เริ่มต้น",
+      "sellers": "{count} ร้าน",
+      "soldOut": "สินค้าหมด"
+    },
     "categoriesFailed": "โหลดหมวดหมู่ไม่สำเร็จ",
     "category": "หมวดหมู่",
+    "clearAllFilters": "ล้างตัวกรองทั้งหมด",
     "clearFilters": "ล้างตัวกรอง",
     "corrected": "แสดงผลลัพธ์ของ “{corrected}” · คุณค้นหา “{query}”",
+    "correctedAlias": "รวมผลของ “{corrected}” สำหรับ “{query}”",
+    "didYouMean": "คุณหมายถึง",
+    "didYouMeanSuffix": "ใช่ไหม?",
     "empty": "ไม่พบสินค้า",
     "emptyHint": "ลองเอาตัวกรองออกสักหนึ่งหรือสองตัว",
+    "error": {
+      "code": "รหัส: {code}",
+      "hint": "ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง ตัวกรองที่เลือกไว้ยังอยู่",
+      "home": "กลับหน้าแรก",
+      "retry": "ลองอีกครั้ง",
+      "title": "โหลดผลการค้นหาไม่สำเร็จ"
+    },
     "failed": "ค้นหาไม่สำเร็จ",
+    "filter": {
+      "active": "ตัวกรองที่ใช้อยู่",
+      "button": "ตัวกรอง",
+      "clearAll": "ล้างทั้งหมด",
+      "condition": "สภาพการ์ด",
+      "inStock": "มีของพร้อมขาย",
+      "maxPlaceholder": "สูงสุด",
+      "minPlaceholder": "ต่ำสุด",
+      "more": "ตัวเลือกเพิ่มเติม",
+      "moreGames": "+ แสดงเพิ่มอีก {count} เกม",
+      "onSale": "กำลังลดราคา",
+      "priceRange": "ช่วงราคา (฿)",
+      "remove": "เอา “{label}” ออก",
+      "showResults": "ดูผลลัพธ์ {count} รายการ",
+      "title": "ตัวกรอง"
+    },
     "filters": "ตัวกรองการค้นหา",
     "filtersFailed": "โหลดตัวกรองไม่สำเร็จ",
     "game": "เกม",
@@ -1316,17 +1348,28 @@
     "inStockOnly": "เฉพาะสินค้าที่มีของ",
     "inputLabel": "ค้นหาสินค้า",
     "inputPlaceholder": "ค้นหาการ์ด ชุด หรือหมายเลขการ์ด",
+    "loadMore": "โหลดเพิ่ม",
     "maxPlaceholder": "THB Max",
     "maxPrice": "ราคาสูงสุด",
     "minPlaceholder": "THB Min",
     "minPrice": "ราคาต่ำสุด",
     "noMatch": "ไม่พบสินค้าที่ตรงกับ \"{query}\"",
+    "noResultsSummary": "ไม่พบสินค้าที่ตรงกับคำค้นและตัวกรองที่เลือก",
+    "popularNow": "สินค้ายอดนิยมตอนนี้",
     "priceRange": "ช่วงราคา",
     "priceRangeInvalid": "ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด",
     "productAria": "{name} ราคา {price}",
+    "related": "การค้นหาที่เกี่ยวข้อง",
     "resultCount": "{count, plural, other {# รายการ}}",
     "results": "ผลการค้นหา",
+    "row": {
+      "sellingShops": "ร้านที่ขาย",
+      "shopsAndListings": "{shops} ร้าน · {listings} รายการ",
+      "viewListings": "ดูรายการขาย"
+    },
+    "searchInstead": "ค้นหา “{query}” แทน",
     "searching": "กำลังค้นหา…",
+    "showing": "แสดง {from}–{to} จาก {total} สินค้า",
     "sort": {
       "featured": "แนะนำ",
       "name": "ชื่อ: ก–ฮ / A–Z",
@@ -1336,8 +1379,34 @@
       "relevance": "เกี่ยวข้องที่สุด"
     },
     "sortBy": "เรียงตาม:",
+    "sortMenu": {
+      "newest": "มาใหม่ล่าสุด",
+      "popular": "ขายดีที่สุด",
+      "priceAsc": "ราคา: ต่ำ → สูง",
+      "priceDesc": "ราคา: สูง → ต่ำ",
+      "relevance": "เกี่ยวข้องที่สุด"
+    },
+    "summary": "พบ {products} สินค้า จาก {shops} ร้านค้า",
+    "tab": {
+      "listings": "รายการขาย",
+      "products": "สินค้า",
+      "shops": "ร้านค้า"
+    },
+    "tabs": "ประเภทผลการค้นหา",
+    "tips": {
+      "filters": "ลองเอาตัวกรองบางรายการออก",
+      "number": "ค้นด้วยเลขการ์ด เช่น 020/189 หรือรหัสชุด sv2a",
+      "spelling": "ตรวจสะกด หรือใช้ชื่อภาษาอังกฤษของการ์ด"
+    },
     "title": "สินค้าทั้งหมด",
-    "typeOther": "อื่น ๆ"
+    "titleFor": "ผลการค้นหา “{query}”",
+    "typeOther": "อื่น ๆ",
+    "view": {
+      "grid": "ตาราง",
+      "label": "มุมมอง",
+      "list": "รายการ"
+    },
+    "viewAll": "ดูทั้งหมด"
   },
   "searchSuggest": {
     "back": "กลับ",
