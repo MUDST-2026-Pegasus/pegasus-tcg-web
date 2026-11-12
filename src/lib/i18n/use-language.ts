@@ -11,20 +11,13 @@ export function useLanguage() {
     () => tolgee.getLanguage(),
   );
   const current = LANGUAGES.includes(language as Language) ? (language as Language) : DEFAULT_LANGUAGE;
-  // สลับภาษาแล้วแอป remount (I18nProvider) — เก็บตำแหน่ง scroll ไว้ ไม่ให้เด้งกลับบนสุด
-  // View Transition = ภาพเก่าค่อย ๆ จางเป็นภาพใหม่ ไม่เห็นจังหวะ remount ว่างเปล่า (เบราว์เซอร์ที่ไม่รองรับก็สลับตรง ๆ)
+  // สลับภาษาแล้วแอป remount (I18nProvider) — โหลดคำแปลให้ครบก่อนแล้วค่อยสลับในครั้งเดียว
+  // ไม่ให้มีจังหวะหน้าว่าง และเก็บตำแหน่ง scroll ไว้ไม่ให้เด้งกลับบนสุด
   const setLanguage = async (next: Language) => {
     const y = window.scrollY;
-    const swap = async () => {
-      await tolgee.changeLanguage(next);
-      await new Promise(requestAnimationFrame);
-      window.scrollTo(0, y);
-    };
-    if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      await document.startViewTransition(swap).finished;
-    } else {
-      await swap();
-    }
+    await tolgee.loadRecords(tolgee.getRequiredDescriptors(next));
+    await tolgee.changeLanguage(next);
+    window.scrollTo(0, y);
   };
   return { language: current, setLanguage };
 }

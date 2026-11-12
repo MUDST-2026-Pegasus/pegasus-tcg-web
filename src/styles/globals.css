@@ -137,12 +137,3 @@
     }
 }
 
-
-/* TCG-562: สลับภาษาแบบ crossfade */
-::view-transition-old(root),
-::view-transition-new(root) { animation-duration: 250ms; }
-
-/* หิมะตกธีมคริสต์มาส (Snowfall.tsx) */
-@media (prefers-reduced-motion: reduce) {
-  .snowfall { display: none; }
-}
