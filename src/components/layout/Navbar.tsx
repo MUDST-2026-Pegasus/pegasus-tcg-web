@@ -42,12 +42,17 @@ function Logo({ onClick }: { onClick?: () => void }) {
       to="/"
       onClick={onClick}
       aria-label={t("nav.logoAria", "Pegasus TCG — กลับหน้าแรก")}
-      className="flex shrink-0 items-center gap-2"
+      className="group flex shrink-0 items-center gap-2"
     >
       <img
-        src="/site-icon.jpg"
+        src="/pegasus-santa-still.png"
         alt=""
-        className="size-9 rounded-full object-cover"
+        className="size-9 object-contain motion-safe:group-hover:hidden"
+      />
+      <img
+        src="/pegasus-santa-left.gif"
+        alt=""
+        className="hidden size-9 object-contain motion-safe:group-hover:block"
       />
       <span className="text-[22px] font-extrabold tracking-[-0.8px] text-primary">
         PEGASUS
