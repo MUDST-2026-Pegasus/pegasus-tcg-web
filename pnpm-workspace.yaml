@@ -2,4 +2,5 @@ packages:
   - '.'
 
 allowBuilds:
+  '@tsparticles/engine': false
   cypress: false
