@@ -38,6 +38,7 @@ import {
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { ActiveFilterChips } from "@/features/catalog/components/search/ActiveFilterChips";
 import { SearchFilterPanel } from "@/features/catalog/components/search/SearchFilterPanel";
+import { SearchShopsTab } from "@/features/catalog/components/search/SearchShopsTab";
 import {
   SearchResultCard,
   SearchResultRow,
@@ -62,6 +63,7 @@ import {
   readViewPreference,
   saveViewPreference,
   toProductQuery,
+  switchTab,
   writeFilters,
   type SearchFilters,
   type SearchSort,
@@ -109,7 +111,7 @@ export function SearchResultsPage() {
   const context: ResultContext = { games: games.data, categories: categories.data };
   const { query: pageQuery, ready } = toProductQuery(filters, games.data, categories.data);
   const query = isMobile ? { ...pageQuery, page: 0, size: SEARCH_PAGE_SIZE * filters.page } : pageQuery;
-  const results = useProductSearch(query, ready);
+  const results = useProductSearch(query, ready && filters.tab === "products");
   const facets = useSearchFacets(pageQuery, ready);
   const related = useSearchSuggest(filters.q);
   const popular = useProductSearch({ sort: "popular", size: 4, inStock: true }, results.data?.totalItems === 0);
@@ -270,7 +272,13 @@ export function SearchResultsPage() {
               {filters.q ? t("search.titleFor", "ผลการค้นหา “{query}”", { query: filters.q }) : t("search.title", "สินค้าทั้งหมด")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground" aria-live="polite">
-              {waiting && !data
+              {filters.tab === "shops"
+                ? totalShops !== undefined
+                  ? filters.q
+                    ? t("search.shops.summary", "พบ {count} ร้านค้าที่ขาย “{query}”", { count: format.number(totalShops), query: filters.q })
+                    : t("search.shops.summaryNoQuery", "พบ {count} ร้านค้า", { count: format.number(totalShops) })
+                  : t("search.searching", "กำลังค้นหา…")
+                : waiting && !data
                 ? t("search.searching", "กำลังค้นหา…")
                 : totalProducts === 0
                   ? t("search.noResultsSummary", "ไม่พบสินค้าที่ตรงกับคำค้นและตัวกรองที่เลือก")
@@ -282,26 +290,47 @@ export function SearchResultsPage() {
                     : t("search.resultCount", "{count, plural, other {# รายการ}}", { count: totalProducts ?? 0 })}
             </p>
           </div>
-          <nav aria-label={t("search.tabs", "ประเภทผลการค้นหา")} className="flex shrink-0 border-b border-border">
-            <span aria-current="page" className="flex items-center gap-2 border-b-2 border-primary px-4 pb-2 text-sm font-semibold text-primary">
-              {t("search.tab.products", "สินค้า")}
-              {facets.data ? (
-                <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{format.number(facets.data.totals.products)}</span>
-              ) : null}
-            </span>
-            <span className="flex items-center gap-2 px-4 pb-2 text-sm text-muted-foreground">
-              {t("search.tab.shops", "ร้านค้า")}
-              {facets.data ? <span className="text-xs">{format.number(facets.data.totals.shops)}</span> : null}
-            </span>
-            <span className="flex items-center gap-2 px-4 pb-2 text-sm text-muted-foreground">
+          <nav aria-label={t("search.tabs", "ประเภทผลการค้นหา")} className="flex shrink-0 overflow-x-auto border-b border-border">
+            {(["products", "shops"] as const).map((tab) => {
+              const active = filters.tab === tab;
+              const count = facets.data ? (tab === "products" ? facets.data.totals.products : facets.data.totals.shops) : undefined;
+              return (
+                <Link
+                  key={tab}
+                  to={`?${writeFilters(switchTab(filters, tab))}`}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "-mb-px flex items-center gap-2 border-b-2 px-4 pb-2 text-sm whitespace-nowrap",
+                    active ? "border-primary font-semibold text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab === "products" ? t("search.tab.products", "สินค้า") : t("search.tab.shops", "ร้านค้า")}
+                  {count !== undefined ? (
+                    <span className={cn("text-xs", active && "rounded-full bg-primary px-2 text-primary-foreground")}>
+                      {format.number(count)}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+            <span className="flex items-center gap-2 px-4 pb-2 text-sm whitespace-nowrap text-muted-foreground">
               {t("search.tab.listings", "รายการขาย")}
               {facets.data ? <span className="text-xs">{format.number(facets.data.totals.listings)}</span> : null}
             </span>
           </nav>
         </header>
 
-        {correction}
+        {filters.tab === "products" ? correction : null}
 
+        {filters.tab === "shops" ? (
+          <SearchShopsTab
+            filters={filters}
+            facets={facets.data}
+            onChange={update}
+            onClear={() => update({ games: [], minRating: null })}
+            onBackToProducts={() => setParams((current) => writeFilters(switchTab(readFilters(current), "products")))}
+          />
+        ) : (
         <div className="grid items-start gap-6 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[248px_minmax(0,1fr)]">
           <aside
             className="hidden rounded-xl border border-border bg-background p-4 md:block"
@@ -356,6 +385,7 @@ export function SearchResultsPage() {
             {results$}
           </section>
         </div>
+        )}
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
