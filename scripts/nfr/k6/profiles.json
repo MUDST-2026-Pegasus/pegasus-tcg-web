@@ -1,0 +1,30 @@
+{
+  "tool": "k6",
+  "version": "0.55.0",
+  "timeoutSeconds": {
+    "smoke": 420,
+    "baseline": 1020,
+    "load": 1920,
+    "stress": 3600,
+    "spike": 360,
+    "soak": 14580,
+    "cooldown": 420
+  },
+  "profiles": {
+    "smoke": { "executor": "constant-vus", "vus": 3, "duration": "5m" },
+    "baseline": { "executor": "constant-vus", "vus": 15, "duration": "15m" },
+    "load": { "executor": "ramping-vus", "startVUs": 0, "stages": [{"duration":"5m","target":25},{"duration":"5m","target":50},{"duration":"5m","target":100},{"duration":"15m","target":100}] },
+    "stress": { "executor": "ramping-arrival-rate", "startRate": 10, "timeUnit": "1s", "preAllocatedVUs": 50, "maxVUs": 500, "stages": [{"duration":"5m","target":25},{"duration":"5m","target":50},{"duration":"5m","target":100},{"duration":"5m","target":200},{"duration":"5m","target":400}] },
+    "spike": { "executor": "ramping-arrival-rate", "startRate": 10, "timeUnit": "1s", "preAllocatedVUs": 100, "maxVUs": 500, "stages": [{"duration":"30s","target":50},{"duration":"30s","target":250},{"duration":"5m","target":250},{"duration":"30s","target":10}] },
+    "soak": { "executor": "constant-arrival-rate", "rate": 20, "timeUnit": "1s", "duration": "4h", "preAllocatedVUs": 50, "maxVUs": 200 },
+    "cooldown": { "executor": "ramping-arrival-rate", "startRate": 250, "timeUnit": "1s", "preAllocatedVUs": 100, "maxVUs": 500, "stages": [{"duration":"30s","target":10},{"duration":"5m","target":10}] }
+  },
+  "thresholds": {
+    "read": { "http_req_duration": ["p(95)<=500", "p(99)<=1000"] },
+    "write": { "http_req_duration": ["p(95)<=1000", "p(99)<=2000"] },
+    "search": { "http_req_duration": ["p(95)<=800", "p(99)<=1500"] },
+    "report": { "http_req_duration": ["p(95)<=2000", "p(99)<=4000"] },
+    "unexpected_errors": ["rate<0.01"]
+  },
+  "note": "Smoke profile is exactly 5 minutes. --dry-run shortens only duration-bearing stages for syntax/target validation; it is not a measurement. Arrival-rate profiles report dropped_iterations separately."
+}
