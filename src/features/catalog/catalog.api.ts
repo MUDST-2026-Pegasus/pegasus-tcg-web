@@ -13,6 +13,7 @@ import type {
   PublicListingDetailDto,
   ProductCollectorDto,
   CatalogCardEffectDto,
+  SearchFacetsDto,
   SearchSuggestDto,
   TrendingSearchDto,
 } from "./catalog.types";
@@ -39,9 +40,11 @@ export function getCardSets(gameId: number): Promise<CardSetDto[]> {
 
 export function getProducts(
   query: ProductQuery,
+  signal?: AbortSignal,
 ): Promise<PageResponse<ProductSummaryDto>> {
   return api.get<PageResponse<ProductSummaryDto>>("/catalog/products", {
     ...PUBLIC,
+    signal,
     query,
   });
 }
@@ -139,5 +142,14 @@ export function getTrendingSearches(limit = 5, signal?: AbortSignal) {
     ...PUBLIC,
     signal,
     query: { limit },
+  });
+}
+
+/** ตัวเลขของ sidebar + ยอดต่อแท็บ — ส่งตัวกรองชุดเดียวกับ /catalog/products (ไม่มี sort/page) [TCG-777] */
+export function getSearchFacets(query: Omit<ProductQuery, "sort" | "page" | "size">, signal?: AbortSignal) {
+  return api.get<SearchFacetsDto>("/catalog/products/facets", {
+    ...PUBLIC,
+    signal,
+    query,
   });
 }

@@ -34,6 +34,8 @@ export type PageResponse<T> = {
   totalItems: number;
   totalPages: number;
   correctedQuery?: string;
+  /** ทำไมเปลี่ยนคำค้น: TYPO / KEYBOARD_LAYOUT / ALIAS */
+  correctionReason?: "TYPO" | "KEYBOARD_LAYOUT" | "ALIAS";
 };
 
 export const API_ERROR_CODES = [

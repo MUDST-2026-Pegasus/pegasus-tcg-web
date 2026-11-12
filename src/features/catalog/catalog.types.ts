@@ -68,6 +68,12 @@ export type ProductSummaryDto = {
   listingCount: number;
   /** ราคาที่มีผลของ listing ถูกสุด (SAL-04) — `null`/ไม่มี = ไม่ลดราคา หรือ API เก่า */
   pricing?: ListingPricing | null;
+  /** ช่วงราคาในตลาด + กี่ร้านขาย (SRCH-04) — API เก่าไม่ส่ง */
+  highestPrice?: number | null;
+  /** ราคาก่อนลดของชิ้นที่ถูกสุด — ต่างจาก lowestPrice เมื่อกำลังลดราคา */
+  lowestRegularPrice?: number | null;
+  sellerCount?: number;
+  onSale?: boolean;
 };
 
 /** `ProductDetailResponse` — one product, its printings, and signed image URLs. */
@@ -237,9 +243,26 @@ export type ProductQuery = {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  onSale?: boolean;
   sort?: ProductSort;
   page?: number;
   size?: number;
+};
+
+/** `GET /catalog/products/facets` — ตัวเลขข้าง sidebar นับโดยไม่ใช้ตัวกรองของกลุ่มตัวเอง [TCG-775] */
+export type SearchFacetsDto = {
+  games: SearchFacetOptionDto[];
+  categories: SearchFacetOptionDto[];
+  conditions: { code: CardCondition; count: number }[];
+  onSaleCount: number;
+  totals: { products: number; shops: number; listings: number };
+};
+
+export type SearchFacetOptionDto = {
+  id: number;
+  name: string;
+  parentId: number | null;
+  count: number;
 };
 
 /** ทำไม API เปลี่ยนคำค้น — พิมพ์ผิด / ลืมสลับแป้น / ชื่อไทย (alias) */
