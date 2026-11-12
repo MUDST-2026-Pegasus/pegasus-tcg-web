@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
 
@@ -32,6 +32,7 @@ import { ProductAuctionBox } from "../components/ProductAuctionBox";
 import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+import { addViewedProduct } from "../search/search-history";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
 
@@ -211,6 +212,24 @@ function ProductDetailContent({
   const listingsReady = listingsQuery.isSuccess;
   const availableQuantity = filteredListings.reduce((sum, row) => sum + row.quantityAvailable, 0);
   const hasListings = filteredListings.length > 0;
+
+  // "ดูล่าสุด" ใน dropdown ค้นหา [TCG-776] — บันทึกเมื่อรู้ราคาแล้ว
+  const viewedImage = gallery[0]?.url ?? listings[0]?.card.officialImageUrl ?? null;
+  const viewedPrices = listings.map((listing) => effectivePrice(listing.pricing, listing.price));
+  const viewedLowest = viewedPrices.length > 0 ? Math.min(...viewedPrices) : null;
+  const viewedSellers = new Set(listings.map((listing) => listing.seller.username)).size;
+  useEffect(() => {
+    if (!listingsReady) return;
+    addViewedProduct({
+      slug: product.slug,
+      name: product.name,
+      // ไม่เก็บเลขการ์ดลง localStorage — CodeQL มองชื่อ cardNumber เป็นข้อมูลบัตร
+      subtitle: gameName ?? null,
+      imageUrl: viewedImage,
+      lowestPrice: viewedLowest,
+      sellerCount: viewedSellers,
+    });
+  }, [listingsReady, product.slug, product.name, gameName, viewedImage, viewedLowest, viewedSellers]);
 
   async function addListingToCart(listingId: number, amount: number, trigger?: HTMLElement) {
     const opening = miniCart.capture(listingId, trigger);

@@ -110,7 +110,7 @@ describe("Navbar", () => {
   });
   it("submits a search and preserves the game filter while resetting page", () => {
     renderNavbar("/search?game=pokemon-tcg&page=3&q=old");
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getByRole("combobox", { name: "ค้นหา" });
     expect(input).toHaveValue("old");
     fireEvent.change(input, { target: { value: "Pikachu" } });
     fireEvent.submit(input.closest("form")!);
@@ -120,7 +120,7 @@ describe("Navbar", () => {
   });
   it("focuses search with slash unless another field is active", () => {
     renderNavbar();
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getByRole("combobox", { name: "ค้นหา" });
     fireEvent.keyDown(window, { key: "/" });
     expect(input).toHaveFocus();
     const other = document.createElement("input");
@@ -130,8 +130,10 @@ describe("Navbar", () => {
     expect(other).toHaveFocus();
     other.remove();
     input.focus();
+    expect(input).toHaveAttribute("aria-expanded", "true");
     fireEvent.keyDown(input, { key: "Escape" });
     expect(input).not.toHaveFocus();
+    expect(input).toHaveAttribute("aria-expanded", "false");
   });
   it("hides the seller link for guests, shows it for buyers, and sends sellers to their dashboard", () => {
     const { unmount } = renderNavbar();

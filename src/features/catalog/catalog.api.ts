@@ -13,6 +13,8 @@ import type {
   PublicListingDetailDto,
   ProductCollectorDto,
   CatalogCardEffectDto,
+  SearchSuggestDto,
+  TrendingSearchDto,
 } from "./catalog.types";
 
 /**
@@ -121,4 +123,21 @@ export function getSellerListings(username: string, signal?: AbortSignal) {
       query: { page: 0, size: 6, sort: "newest" },
     },
   );
+}
+
+/** dropdown ของช่องค้นหา — ส่ง `signal` เพื่อยกเลิก request เก่าเมื่อพิมพ์ต่อ [TCG-776] */
+export function getSearchSuggest(q: string, signal?: AbortSignal) {
+  return api.get<SearchSuggestDto>("/catalog/search/suggest", {
+    ...PUBLIC,
+    signal,
+    query: { q },
+  });
+}
+
+export function getTrendingSearches(limit = 5, signal?: AbortSignal) {
+  return api.get<TrendingSearchDto[]>("/catalog/search/trending", {
+    ...PUBLIC,
+    signal,
+    query: { limit },
+  });
 }
