@@ -24,7 +24,7 @@ export function Snowfall() {
           fullScreen: { enable: false },
           detectRetina: true,
           particles: {
-            number: { value: 25 },
+            number: { value: 12 },
             shape: { type: "image", options: { image: { src: `data:image/svg+xml,${encodeURIComponent(FLAKE_SVG)}`, width: 100, height: 100 } } },
             size: { value: { min: 6, max: 14 } },
             opacity: { value: { min: 0.6, max: 0.95 } },
