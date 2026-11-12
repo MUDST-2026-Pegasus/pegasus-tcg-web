@@ -241,6 +241,11 @@
       "connectionHint": "Please check your connection and try again.",
       "default": "Default",
       "edit": {
+        "avatarAlt": "Profile photo",
+        "avatarHint": "Click photo to change · JPG, PNG up to 5MB",
+        "avatarInvalidType": "Only JPG and PNG files are supported",
+        "avatarTooLarge": "File size must not exceed 5MB",
+        "changePhoto": "Change profile photo",
         "description": "Update your personal information.",
         "email": "Email",
         "failed": "Could not save profile changes.",
@@ -253,7 +258,8 @@
         "saved": "Profile updated",
         "savedHint": "Your profile changes have been saved successfully.",
         "showPhone": "Show phone number on my shop",
-        "title": "Edit Profile"
+        "title": "Edit Profile",
+        "uploadPhoto": "Upload profile photo"
       },
       "editAddress": "Edit address",
       "latestFailed": "Could not load your latest order.",
