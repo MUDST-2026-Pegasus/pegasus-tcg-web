@@ -14,7 +14,7 @@ export function Snowfall() {
           fullScreen: { enable: false },
           detectRetina: true,
           // เงาเทาอ่อนให้เกล็ดสีขาวยังเห็นบนพื้นหลังสว่าง
-          particles: { number: { value: 80 }, shadow: { enable: true, color: "#64748b", blur: 4 } },
+          particles: { number: { value: 40 }, shadow: { enable: true, color: "#64748b", blur: 4 } },
         }}
       />
     </ParticlesProvider>
