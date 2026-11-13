@@ -1161,6 +1161,7 @@
   "product": {
     "add": "Add",
     "addToCart": "Add to cart",
+    "saveToCollection": "Save to collection",
     "addToCartFailed": "Could not add to cart",
     "allConditions": "All conditions",
     "allProducts": "All products",

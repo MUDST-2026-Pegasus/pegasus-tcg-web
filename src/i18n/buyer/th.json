@@ -1161,6 +1161,7 @@
   "product": {
     "add": "เพิ่ม",
     "addToCart": "เพิ่มลงตะกร้า",
+    "saveToCollection": "บันทึกลงคอลเลกชัน",
     "addToCartFailed": "เพิ่มลงรถเข็นไม่สำเร็จ",
     "allConditions": "ทุกสภาพ",
     "allProducts": "สินค้าทั้งหมด",

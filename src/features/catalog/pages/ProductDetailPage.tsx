@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, ChevronRight, Minus, Plus, Loader2, LibraryBig } from "lucide-react";
 
 import { DetailPageSkeleton, ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +34,7 @@ import { useGameList, useProductCollectors, useProductDetail, useProductListings
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 import { addViewedProduct } from "../search/search-history";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { AddCardsDialog } from "@/features/collection/components/AddCardsDialog";
 import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
 
 
@@ -123,6 +124,7 @@ function ProductDetailContent({
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
   const miniCart = useMiniCart();
+  const [savingToCollection, setSavingToCollection] = useState(false);
   const itemCount = (count: number) =>
     product.productType === "SINGLE_CARD"
       ? t("product.cardCount", "{count, plural, other {# ใบ}}", { count })
@@ -248,6 +250,15 @@ function ProductDetailContent({
   async function handleAddToCart(trigger?: HTMLElement) {
     if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
     await addListingToCart(purchasableListing.id, selectedQuantity, trigger);
+  }
+
+  function handleSaveToCollection() {
+    if (isAuthLoading) return;
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: { pathname: `/products/${encodeURIComponent(product.slug)}` } } });
+      return;
+    }
+    setSavingToCollection(true);
   }
 
   async function handleBuyNow() {
@@ -412,6 +423,22 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : t("product.addToCart", "เพิ่มลงตะกร้า")}
               </Button>
             </div>
+            <Button type="button" variant="ghost" className="h-12 w-full text-base font-semibold" disabled={isAuthLoading} onClick={handleSaveToCollection}>
+              <LibraryBig className="size-5" />
+              {t("product.saveToCollection", "บันทึกลงคอลเลกชัน")}
+            </Button>
+            <AddCardsDialog
+              open={savingToCollection}
+              onOpenChange={setSavingToCollection}
+              initialCard={{
+                productId: product.id,
+                name: product.name,
+                imageUrl: (images.find((image) => image.primary) ?? images[0])?.url ?? null,
+                cardNumber: product.cardNumber,
+                rarityCode: product.rarityCode,
+              }}
+              initialVariantId={selectedVariant ? Number(selectedVariant) : null}
+            />
             {/* มีประมูลการ์ดรุ่นนี้เปิดอยู่ [TCG-636] */}
             <ProductAuctionBox
               variantIds={selectedVariant ? [Number(selectedVariant)] : variants.map((variant) => variant.id)}

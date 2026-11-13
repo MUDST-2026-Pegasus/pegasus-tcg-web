@@ -41,30 +41,45 @@ const PAGE_SIZE = 12;
 export function AddCardsDialog({
   open,
   onOpenChange,
+  initialCard,
+  initialVariantId = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Opens straight on the details step with this card picked (product detail page). */
+  initialCard?: PickedCard;
+  initialVariantId?: number | null;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
         {/* The popup unmounts when closed, so the picker starts clean every time it opens. */}
-        <AddCardsForm onClose={() => onOpenChange(false)} />
+        <AddCardsForm onClose={() => onOpenChange(false)} initialCard={initialCard} initialVariantId={initialVariantId} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function AddCardsForm({ onClose }: { onClose: () => void }) {
+function AddCardsForm({
+  onClose,
+  initialCard,
+  initialVariantId,
+}: {
+  onClose: () => void;
+  initialCard?: PickedCard;
+  initialVariantId: number | null;
+}) {
   const { t } = useTranslate("buyer");
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(initialCard ? 2 : 1);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [gameId, setGameId] = useState<number | null>(null);
   const [cardSetId, setCardSetId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
-  const [picked, setPicked] = useState<PickedCard[]>([]);
-  const [drafts, setDrafts] = useState<Record<number, CardDraft>>({});
+  const [picked, setPicked] = useState<PickedCard[]>(initialCard ? [initialCard] : []);
+  const [drafts, setDrafts] = useState<Record<number, CardDraft>>(
+    initialCard ? { [initialCard.productId]: { ...DEFAULT_DRAFT, variantId: initialVariantId } } : {},
+  );
   const [photos, setPhotos] = useState<Record<number, File>>({});
   const [failures, setFailures] = useState<Record<number, string>>({});
   const [publicItem, setPublicItem] = useState(true);
