@@ -51,9 +51,10 @@ export function getStorefront(
   size: number,
   page = 0,
   signal?: AbortSignal,
+  q?: string,
 ): Promise<PageResponse<PublicListingDto>> {
   return api.get<PageResponse<PublicListingDto>>(
     `/u/${encodeURIComponent(username)}/listings`,
-    { ...PUBLIC, signal, query: { sort: "newest", size, page } },
+    { ...PUBLIC, signal, query: { sort: "newest", size, page, q: q || undefined } },
   );
 }
