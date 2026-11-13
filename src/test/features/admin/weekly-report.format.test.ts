@@ -110,10 +110,10 @@ describe("weeklyStatCards", () => {
     previous.summary = { ...previous.summary, netProfit: 10875, remainingStock: 6000, commission: 10875 };
     const cards = weeklyStatCards(report(), previous);
 
-    expect(byId(cards, "net-profit").value).toBe("฿12,855");
+    expect(byId(cards, "net-profit").value).toBe("THB 12,855.00");
     expect(byId(cards, "net-profit").delta).toEqual({ label: "+18.2%", trend: "up" });
-    expect(byId(cards, "net-profit").footnote).toContain("฿10,875");
-    expect(byId(cards, "gmv").value).toBe("฿428,500");
+    expect(byId(cards, "net-profit").footnote).toContain("THB 10,875.00");
+    expect(byId(cards, "gmv").value).toBe("THB 428,500.00");
     expect(byId(cards, "gmv").delta).toEqual({ label: "+18.2%", trend: "up" });
     expect(byId(cards, "stock").value).toBe("6,184");
     expect(byId(cards, "stock").delta).toEqual({ label: "+3.1%", trend: "up" });
@@ -182,9 +182,9 @@ describe("small formatters", () => {
   });
 
   it("drops satang only when there is none, so figures still match the API", () => {
-    expect(formatReportBaht(428500)).toBe("฿428,500");
-    expect(formatReportBaht(12855.5)).toBe("฿12,855.50");
-    expect(formatReportBaht(0)).toBe("฿0");
+    expect(formatReportBaht(428500)).toBe("THB 428,500.00");
+    expect(formatReportBaht(12855.5)).toBe("THB 12,855.50");
+    expect(formatReportBaht(0)).toBe("THB 0.00");
   });
 
   it("formats shares without NaN", () => {

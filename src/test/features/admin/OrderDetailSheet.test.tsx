@@ -97,9 +97,9 @@ describe("OrderDetailSheet", () => {
     expect(table).toHaveTextContent("minmin_tcg");
     expect(table).toHaveTextContent("MINMIN50");
     expect(table).toHaveTextContent("PEGASUS10");
-    expect(table).toHaveTextContent("฿775.94");
-    expect(table).toHaveTextContent("฿39.00");
-    expect(table).toHaveTextContent("฿786.00");
+    expect(table).toHaveTextContent("THB 775.94");
+    expect(table).toHaveTextContent("THB 39.00");
+    expect(table).toHaveTextContent("THB 786.00");
     expect(screen.queryByText("ส่วนลด", { exact: true })).not.toBeInTheDocument();
   });
 
@@ -128,7 +128,7 @@ describe("OrderDetailSheet", () => {
     const user = userEvent.setup();
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
-    const button = await screen.findByRole("button", { name: "Download Order Summary (PDF)" });
+    const button = await screen.findByRole("button", { name: "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)" });
     await user.click(button);
 
     expect(ordersApi.downloadAdminOrderSummary).toHaveBeenCalledOnce();
@@ -155,13 +155,13 @@ describe("OrderDetailSheet", () => {
     vi.mocked(ordersApi.downloadAdminOrderSummary).mockRejectedValue(new ApiError({
       status: 404,
       code: "ORDER_NOT_FOUND",
-      message: "Order not found",
+      message: "ไม่พบคำสั่งซื้อ",
     }));
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     const user = userEvent.setup();
     renderWithProviders(<OrderDetailSheet sellerOrderId={12} onClose={vi.fn()} />);
 
-    await user.click(await screen.findByRole("button", { name: "Download Order Summary (PDF)" }));
+    await user.click(await screen.findByRole("button", { name: "ดาวน์โหลดสรุปคำสั่งซื้อ (PDF)" }));
 
     await waitFor(() => expect(toast.add).toHaveBeenCalledWith({
       type: "error",

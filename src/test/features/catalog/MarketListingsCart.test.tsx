@@ -136,15 +136,15 @@ describe("MarketListingsPage Add button", () => {
       { catalogVariantId: 10, condition: "SEALED", medianPrice: 3000, statDate: "2026-10-15", change30dPercent: 1, lastSold: null, lowSample: false },
     ] } as never);
     renderPage();
-    expect(screen.getByText("฿3,000")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,000.00")).toBeInTheDocument();
   });
 
   it("shows seller reputation and delivery from the listing API", () => {
     renderPage();
 
     expect(screen.getByLabelText("ร้านค้ายืนยันแล้ว")).toBeInTheDocument();
-    expect(screen.getByText("★ 4.9 · 1.2k sales")).toBeInTheDocument();
-    expect(screen.getByText("Ships in 1–2 days")).toBeInTheDocument();
+    expect(screen.getByText("★ 4.9 · ขายแล้ว 1.2k ชิ้น")).toBeInTheDocument();
+    expect(screen.getByText("ส่งภายใน 1–2 วัน")).toBeInTheDocument();
     expect(screen.getByText("5,590")).toBeInTheDocument();
   });
 

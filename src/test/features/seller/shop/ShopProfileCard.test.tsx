@@ -148,13 +148,13 @@ describe('ShopProfileCard', () => {
     renderWithProviders(<ShopProfileCard user={{ ...user, phonePublic: false }} handlingDays={2} verified stats={null} verification={null}/>);
     const interaction = userEvent.setup();
 
-    expect(screen.queryByText(/Phone number/)).not.toBeInTheDocument();
+    expect(screen.queryByText("เบอร์โทรศัพท์")).not.toBeInTheDocument();
     const toggle = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
     expect(toggle).not.toBeChecked();
 
     await interaction.click(toggle);
     expect(toggle).toBeChecked();
-    expect(screen.getByText('Phone number : 0812345678')).toBeInTheDocument();
+    expect(screen.getByText('เบอร์โทรศัพท์ : 0812345678')).toBeInTheDocument();
 
     await interaction.click(screen.getByRole('button', { name: 'บันทึกข้อมูลหน้าร้าน' }));
     await waitFor(() => expect(save).toHaveBeenCalledWith({ phone: null, avatarUrl: null, phonePublic: true }));

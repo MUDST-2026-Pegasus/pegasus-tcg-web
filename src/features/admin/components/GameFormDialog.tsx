@@ -194,7 +194,7 @@ function GameForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.slug) || undefined}>
-            <FieldLabel htmlFor="gameSlug">Slug</FieldLabel>
+            <FieldLabel htmlFor="gameSlug">{t("catalog.form.slug", "Slug (ชื่อใน URL)")}</FieldLabel>
             <Input
               id="gameSlug"
               maxLength={100}

@@ -39,8 +39,8 @@ export function AddressBookPage() {
       onError: (error) =>
         toast.add({
           type: "error",
-          title: t("account.address.setDefaultFailed", "Could not set the default address"),
-          description: translateError(error, t("account.orders.tryAgain", "Please try again.")),
+          title: t("account.address.setDefaultFailed", "ตั้งที่อยู่หลักไม่สำเร็จ"),
+          description: translateError(error, t("account.orders.tryAgain", "กรุณาลองอีกครั้ง")),
         }),
     });
   };
@@ -49,27 +49,27 @@ export function AddressBookPage() {
     <>
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-semibold">{t("account.nav.addresses", "Address Book")}</h1>
+            <h1 className="text-3xl font-semibold">{t("account.nav.addresses", "สมุดที่อยู่")}</h1>
             <Button disabled={(addresses.data?.length ?? 0) >= MAX_ADDRESSES} onClick={() => setEditing("new")}>
-              <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
+              <Plus data-icon="inline-start" /> {t("account.address.addNew", "เพิ่มที่อยู่ใหม่")}
             </Button>
           </div>
 
           <QueryBoundary
             query={addresses}
             loading={<AddressBookSkeleton />}
-            errorTitle={t("account.address.loadFailed", "Could not load your addresses")}
-            errorMessage={t("account.address.loadFailedHint", "Check your connection and try again.")}
-            errorRetryLabel={t("account.profile.tryAgain", "Try again")}
+            errorTitle={t("account.address.loadFailed", "โหลดที่อยู่ไม่สำเร็จ")}
+            errorMessage={t("account.address.loadFailedHint", "ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง")}
+            errorRetryLabel={t("account.profile.tryAgain", "ลองอีกครั้ง")}
             isEmpty={(items) => items.length === 0}
             empty={
               <EmptyState
                 icon={MapPinPlus}
-                title={t("account.address.empty", "No saved addresses yet")}
-                description={t("account.address.emptyHint", "Save a shipping destination now and checkout will be one step shorter.")}
+                title={t("account.address.empty", "ยังไม่มีที่อยู่ที่บันทึกไว้")}
+                description={t("account.address.emptyHint", "บันทึกที่อยู่จัดส่งไว้ตอนนี้ ตอนชำระเงินจะได้สั้นลงหนึ่งขั้น")}
               >
                 <Button onClick={() => setEditing("new")}>
-                  <Plus data-icon="inline-start" /> {t("account.address.addNew", "Add New Address")}
+                  <Plus data-icon="inline-start" /> {t("account.address.addNew", "เพิ่มที่อยู่ใหม่")}
                 </Button>
               </EmptyState>
             }
@@ -97,9 +97,9 @@ export function AddressBookPage() {
                   <span className="flex size-12 items-center justify-center rounded-full border">
                     <MapPinPlus />
                   </span>
-                  <span className="text-lg font-semibold">{t("account.address.addNew", "Add New Address")}</span>
+                  <span className="text-lg font-semibold">{t("account.address.addNew", "เพิ่มที่อยู่ใหม่")}</span>
                   <span className="max-w-52 whitespace-normal text-sm font-normal text-muted-foreground">
-                    {t("account.address.addNewHint", "Save a new shipping destination for faster checkout.")}
+                    {t("account.address.addNewHint", "บันทึกที่อยู่จัดส่งไว้ เพื่อชำระเงินได้เร็วขึ้น")}
                   </span>
                 </Button>}
               </div>

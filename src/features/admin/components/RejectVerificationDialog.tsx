@@ -17,6 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { applyApiErrors } from "@/lib/form";
+import { useTranslate } from "@/lib/i18n";
 
 import { verificationErrorMessage } from "../verification.format";
 import { useRejectVerification } from "../verification.queries";
@@ -47,13 +48,18 @@ export function RejectVerificationDialog({
   verification,
   onRejected,
 }: RejectVerificationDialogProps) {
+  const { t } = useTranslate("admin");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>ปฏิเสธคำขอเปิดร้าน</DialogTitle>
+          <DialogTitle>{t("sellers.rejectDialog.title", "ปฏิเสธคำขอเปิดร้าน")}</DialogTitle>
           <DialogDescription>
-            ผู้ขายจะเห็นเหตุผลนี้ในหน้าสมัคร และส่งเอกสารใหม่มาได้ทีหลัง
+            {t(
+              "sellers.rejectDialog.desc",
+              "ผู้ขายจะเห็นเหตุผลนี้ในหน้าสมัคร และส่งเอกสารใหม่มาได้ทีหลัง",
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -79,6 +85,7 @@ function RejectForm({
   onRejected: (updated: Verification) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslate("admin");
   const rejectVerification = useRejectVerification();
 
   const {
@@ -87,7 +94,7 @@ function RejectForm({
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RejectVerificationValues>({
-    resolver: zodResolver(rejectVerificationSchema),
+    resolver: zodResolver(rejectVerificationSchema()),
     defaultValues: EMPTY_REJECT_FORM,
   });
 
@@ -97,7 +104,7 @@ function RejectForm({
         id: verification.id,
         payload: { reason: values.reason },
       });
-      toast.add({ type: "success", title: "ปฏิเสธคำขอแล้ว" });
+      toast.add({ type: "success", title: t("sellers.rejectDialog.successToast", "ปฏิเสธคำขอแล้ว") });
       onRejected(updated);
       onClose();
     } catch (error) {
@@ -114,19 +121,22 @@ function RejectForm({
           <AlertDescription>
             {verificationErrorMessage(
               rejectVerification.error,
-              "ปฏิเสธคำขอไม่สำเร็จ ลองใหม่อีกครั้ง",
+              t("sellers.rejectDialog.errorFallback", "ปฏิเสธคำขอไม่สำเร็จ ลองใหม่อีกครั้ง"),
             )}
           </AlertDescription>
         </Alert>
       )}
 
       <Field data-invalid={Boolean(errors.reason) || undefined}>
-        <FieldLabel htmlFor="reason">เหตุผลที่ปฏิเสธ</FieldLabel>
+        <FieldLabel htmlFor="reason">{t("sellers.rejectDialog.reasonLabel", "เหตุผลที่ปฏิเสธ")}</FieldLabel>
         <Textarea
           id="reason"
           rows={4}
           maxLength={255}
-          placeholder="เช่น ชื่อบัญชีไม่ตรงกับชื่อที่กรอก กรุณาส่งสมุดบัญชีที่ชื่อตรงกัน"
+          placeholder={t(
+            "sellers.rejectDialog.reasonPlaceholder",
+            "เช่น ชื่อบัญชีไม่ตรงกับชื่อที่กรอก กรุณาส่งสมุดบัญชีที่ชื่อตรงกัน",
+          )}
           aria-invalid={Boolean(errors.reason)}
           {...register("reason")}
         />
@@ -135,11 +145,11 @@ function RejectForm({
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </DialogClose>
         <Button type="submit" variant="destructive" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          ยืนยันการปฏิเสธ
+          {t("sellers.rejectDialog.confirmReject", "ยืนยันการปฏิเสธ")}
         </Button>
       </DialogFooter>
     </form>

@@ -35,12 +35,12 @@ describe("Payment Components", () => {
         />,
       );
 
-      expect(screen.getByText("Scan with any banking app")).toBeInTheDocument();
-      expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
-      expect(screen.getByText("Scan to Pay | ฿1,450.00")).toBeInTheDocument();
+      expect(screen.getByText("สแกนด้วยแอปธนาคารใดก็ได้")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" })).toBeInTheDocument();
+      expect(screen.getByText("สแกนเพื่อชำระ | THB 1,450.00")).toBeInTheDocument();
       expect(screen.getByText("Pegasus Store Co.")).toBeInTheDocument();
-      expect(screen.getByText("PromptPay ID 081-234-5678")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Save QR/i })).toBeInTheDocument();
+      expect(screen.getByText("พร้อมเพย์ 081-234-5678")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "บันทึก QR" })).toBeInTheDocument();
     });
 
     it("renders raw qrPayload directly without demo watermark or warning", () => {
@@ -56,10 +56,10 @@ describe("Payment Components", () => {
           }}
         />,
       );
-      const qr = screen.getByRole("img", { name: "PromptPay QR Code" });
+      const qr = screen.getByRole("img", { name: "QR Code พร้อมเพย์" });
       expect(qr.querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
-      expect(screen.getByText("Scan with any banking app")).toBeInTheDocument();
-      expect(screen.getByText("PAY VIA QR SCAN")).toBeInTheDocument();
+      expect(screen.getByText("สแกนด้วยแอปธนาคารใดก็ได้")).toBeInTheDocument();
+      expect(screen.getByText("ชำระผ่านการสแกน QR")).toBeInTheDocument();
       expect(screen.queryByText(/DEMO QR/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/QR ตัวอย่าง/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/ยอดตัวอย่าง/i)).not.toBeInTheDocument();
@@ -83,7 +83,7 @@ describe("Payment Components", () => {
       expect(screen.getByText("PEGASUS TCG CO., LTD.")).toBeInTheDocument();
       expect(screen.queryByText(/Kasikornbank/)).not.toBeInTheDocument();
       expect(screen.queryByText(/012-3-45678-9/)).not.toBeInTheDocument();
-      expect(screen.getByText("PromptPay ID 081-999-8888")).toBeInTheDocument();
+      expect(screen.getByText("พร้อมเพย์ 081-999-8888")).toBeInTheDocument();
     });
 
     it("omits bank name line and dummy account number entirely under QR code", () => {
@@ -104,7 +104,7 @@ describe("Payment Components", () => {
       expect(screen.getByText("PEGASUS TCG")).toBeInTheDocument();
       expect(screen.queryByText(/SCB/)).not.toBeInTheDocument();
       expect(screen.queryByText(/000-0-00000-0/)).not.toBeInTheDocument();
-      expect(screen.getByText("PromptPay ID 094-xxx-1119")).toBeInTheDocument();
+      expect(screen.getByText("พร้อมเพย์ 094-xxx-1119")).toBeInTheDocument();
     });
 
     it("shows expired overlay and disables Save QR button when expired", () => {
@@ -122,14 +122,14 @@ describe("Payment Components", () => {
 
       expect(screen.getByText("QR หมดอายุแล้ว")).toBeInTheDocument();
       expect(screen.getByText("กรุณาเริ่มการชำระเงินใหม่")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /Save QR/i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "บันทึก QR" })).toBeDisabled();
     });
 
     it("changes QR modules when the amount changes", () => {
       const { rerender } = renderWithProviders(<PaymentQrCard amount={150} account={{ promptPayId: "0812345678" }} />);
-      const before = screen.getByRole("img", { name: "PromptPay QR Code" }).innerHTML;
+      const before = screen.getByRole("img", { name: "QR Code พร้อมเพย์" }).innerHTML;
       rerender(<PaymentQrCard amount={151} account={{ promptPayId: "0812345678" }} />);
-      expect(screen.getByRole("img", { name: "PromptPay QR Code" }).innerHTML).not.toBe(before);
+      expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" }).innerHTML).not.toBe(before);
     });
 
     it("exports a PNG after embedding and loading the logo", async () => {
@@ -151,7 +151,7 @@ describe("Payment Components", () => {
       });
       try {
         renderWithProviders(<PaymentQrCard amount={1450} orderNumber="ORD-999" account={{ promptPayId: "0812345678" }} />);
-        fireEvent.click(screen.getByRole("button", { name: "Save QR" }));
+        fireEvent.click(screen.getByRole("button", { name: "บันทึก QR" }));
         await waitFor(() => expect(click).toHaveBeenCalledOnce());
         expect(decodeURIComponent(imageSource)).toContain("data:image/jpeg;base64,");
         expect(decodeURIComponent(imageSource)).not.toContain('href="/site-icon.jpg"');
@@ -194,7 +194,7 @@ describe("Payment Components", () => {
             account={{ promptPayId: "0812345678", accountName: "Pegasus Store Co." }}
           />,
         );
-        fireEvent.click(screen.getByRole("button", { name: "Save QR" }));
+        fireEvent.click(screen.getByRole("button", { name: "บันทึก QR" }));
         await waitFor(() => expect(click).toHaveBeenCalledOnce());
         expect(drawImage).toHaveBeenCalledOnce();
         expect(fillText).toHaveBeenCalledWith("Thai QR Payment", expect.any(Number), expect.any(Number));
@@ -209,7 +209,7 @@ describe("Payment Components", () => {
     it("reports logo loading failure without downloading an incomplete QR", async () => {
       vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
       renderWithProviders(<PaymentQrCard amount={1450} account={{ promptPayId: "0812345678" }} />);
-      fireEvent.click(screen.getByRole("button", { name: "Save QR" }));
+      fireEvent.click(screen.getByRole("button", { name: "บันทึก QR" }));
       expect(await screen.findByRole("alert")).toHaveTextContent("บันทึก QR ไม่สำเร็จ");
     });
 
@@ -226,8 +226,8 @@ describe("Payment Components", () => {
       );
 
       expect(screen.getByText("Kasikornbank · 123-4-56789-0")).toBeInTheDocument();
-      expect(screen.queryByRole("img", { name: "PromptPay QR Code" })).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /Save QR/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("img", { name: "QR Code พร้อมเพย์" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "บันทึก QR" })).not.toBeInTheDocument();
     });
   });
 
@@ -285,9 +285,9 @@ describe("Payment Components", () => {
         route: "/payment/success?orderId=101&paymentId=201",
       });
 
-      expect(await screen.findByRole("heading", { name: "Payment Successful" })).toBeInTheDocument();
-      expect(screen.getByText("Order Number: #ORD-101")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "View Order Details" })).toHaveAttribute(
+      expect(await screen.findByRole("heading", { name: "ชำระเงินสำเร็จ" })).toBeInTheDocument();
+      expect(screen.getByText("เลขคำสั่งซื้อ: #ORD-101")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "ดูรายละเอียดคำสั่งซื้อ" })).toHaveAttribute(
         "href",
         "/account/orders?orderId=101",
       );
@@ -313,8 +313,8 @@ describe("Payment Components", () => {
         route: "/payment/success?orderId=102&paymentId=202",
       });
 
-      expect(await screen.findByRole("heading", { name: "Payment Under Review" })).toBeInTheDocument();
-      expect(screen.getByText("Order Number: #ORD-102")).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "กำลังตรวจสอบการชำระเงิน" })).toBeInTheDocument();
+      expect(await screen.findByText("เลขคำสั่งซื้อ: #ORD-102")).toBeInTheDocument();
       expect(screen.getByText("ได้รับข้อมูลแล้ว กำลังรอการยืนยันการชำระเงิน")).toBeInTheDocument();
     });
   });

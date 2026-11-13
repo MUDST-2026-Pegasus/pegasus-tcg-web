@@ -167,6 +167,9 @@
       "title": "ระงับประมูลไม่สำเร็จ"
     }
   },
+  "breadcrumb": {
+    "home": "หน้าแรก"
+  },
   "buyer": {
     "auctionCard": {
       "text": "ซื้อทันที"
@@ -464,6 +467,12 @@
       "title2": "คุณไม่ชำระเงินภายในเวลา ({unpaidStrikes}/{strikeLimit})"
     }
   },
+  "detail": {
+    "attacksTitle": "ท่าโจมตี"
+  },
+  "myAuctions": {
+    "auctionLabel": "ประมูล"
+  },
   "seller": {
     "auctionFormSchema": {
       "detail": "ตอนนี้ {buyNow} ≤ {startingPrice}",
@@ -478,7 +487,7 @@
       "label2": "+1 วัน",
       "label3": "+3 วัน",
       "label4": "+7 วัน",
-      "message": "{label}ต้องมากกว่า ฿0",
+      "message": "{label}ต้องมากกว่า THB 0.00",
       "message10": "เลือกวันปิดประมูล",
       "message11": "เวลาไม่ถูกต้อง",
       "message12": "หมายเหตุต้องไม่เกิน {MAX_SELLER_NOTE} ตัวอักษร",
@@ -489,7 +498,7 @@
       "message5": "เวลาปิดไกลเกินไป",
       "message6": "การ์ดใบนี้ไม่ว่าง",
       "message7": "เลือกการ์ดจากสต็อกก่อน",
-      "message8": "ขั้นบิดต้องมากกว่า ฿0",
+      "message8": "ขั้นบิดต้องมากกว่า THB 0.00",
       "message9": "ขั้นบิดสูงเกินไป",
       "text": "{days} วัน {hours} ชม.",
       "text10": "พฤ.",

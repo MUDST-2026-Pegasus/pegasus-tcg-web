@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ROLE_LABEL, userErrorMessage } from "../users.format";
@@ -21,20 +22,6 @@ type RoleRow = {
   locked?: string;
 };
 
-const ROLE_ROWS: RoleRow[] = [
-  { role: "BUYER", description: "ทุกบัญชีได้อัตโนมัติตอนสมัคร", locked: "ค่าเริ่มต้น" },
-  {
-    role: "SELLER",
-    description: "ได้จากการอนุมัติ KYC ที่หน้า “อนุมัติผู้ขาย” ไม่ได้ให้จากที่นี่",
-    locked: "จากการอนุมัติ",
-  },
-  { role: "SUPPORT", description: "บทบาททีมช่วยเหลือ — ให้/ถอนได้ที่หน้านี้เท่านั้น" },
-  {
-    role: "ADMIN",
-    description: "เข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น",
-  },
-];
-
 const EDITABLE: RoleCode[] = ["SUPPORT", "ADMIN"];
 
 type UserRolesDialogProps = {
@@ -49,11 +36,26 @@ type UserRolesDialogProps = {
  * กดบันทึกแล้วยิงเฉพาะที่เปลี่ยน ถ้ามีการเปิด/ปิด ADMIN ต้องผ่านหน้า confirm ก่อน
  */
 export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialogProps) {
+  const { t } = useTranslate("admin");
   const updateRoles = useUpdateRoles();
   const [draft, setDraft] = useState<RoleCode[]>(user.roles);
   const [confirming, setConfirming] = useState(false);
   const saving = updateRoles.isPending;
   const isSelf = user.id === currentUserId;
+
+  const roleRows: RoleRow[] = [
+    { role: "BUYER", description: t("users.roles.buyerDesc", "ทุกบัญชีได้อัตโนมัติตอนสมัคร"), locked: t("users.roles.defaultLocked", "ค่าเริ่มต้น") },
+    {
+      role: "SELLER",
+      description: t("users.roles.sellerDesc", "ได้จากการอนุมัติ KYC ที่หน้า “อนุมัติผู้ขาย” ไม่ได้ให้จากที่นี่"),
+      locked: t("users.roles.fromApprovalLocked", "จากการอนุมัติ"),
+    },
+    { role: "SUPPORT", description: t("users.roles.supportDesc", "บทบาททีมช่วยเหลือ — ให้/ถอนได้ที่หน้านี้เท่านั้น") },
+    {
+      role: "ADMIN",
+      description: t("users.roles.adminDesc", "เข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น"),
+    },
+  ];
 
   const changes: RoleChange[] = EDITABLE.filter(
     (role) => draft.includes(role) !== user.roles.includes(role),
@@ -64,20 +66,42 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
     setDraft((current) => (on ? [...current, role] : current.filter((value) => value !== role)));
   }
 
+  function getRolesSuccessTitle(user: AdminUser, changes: RoleChange[]): string {
+    const name = `@${user.username}`;
+    if (changes.length === 1 && changes[0].role === "ADMIN") {
+      return changes[0].grant
+        ? t("users.roles.grantSuccess", "ตั้ง {name} เป็นผู้ดูแลแล้ว", { name })
+        : t("users.roles.revokeSuccess", "ถอนสิทธิ์ผู้ดูแลของ {name} แล้ว", { name });
+    }
+    return t("users.roles.saveSuccess", "บันทึกบทบาทของ {name} แล้ว", { name });
+  }
+
+  function getFooterNote(count: number, adminChange: RoleChange | undefined): string {
+    if (count === 0) {
+      return t("users.roles.noChanges", "ยังไม่มีการเปลี่ยนแปลง");
+    }
+    if (!adminChange) {
+      return t("users.roles.changedCount", "เปลี่ยน {count} รายการ", { count });
+    }
+    return adminChange.grant
+      ? t("users.roles.changedGrantConfirm", "เปลี่ยน {count} รายการ · ให้สิทธิ์ผู้ดูแลจะถามยืนยันอีกครั้ง", { count })
+      : t("users.roles.changedRevokeConfirm", "เปลี่ยน {count} รายการ · ถอนสิทธิ์ผู้ดูแลจะถามยืนยันอีกครั้ง", { count });
+  }
+
   function save() {
     updateRoles.mutate(
       { userId: user.id, changes },
       {
         onSuccess: () => {
-          toast.add({ type: "success", title: rolesSuccessTitle(user, changes) });
+          toast.add({ type: "success", title: getRolesSuccessTitle(user, changes) });
           onClose();
         },
         onError: (error) => {
           setConfirming(false);
           toast.add({
             type: "error",
-            title: "ทำรายการไม่สำเร็จ",
-            description: userErrorMessage(error, "ลองใหม่อีกครั้ง"),
+            title: t("users.roles.failedTitle", "ทำรายการไม่สำเร็จ"),
+            description: userErrorMessage(error, t("actions.retry", "ลองใหม่", { ns: "common" })),
           });
         },
       },
@@ -104,13 +128,13 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
       onClose={onClose}
       tone="info"
       icon={<Shield />}
-      title={`จัดการบทบาท @${user.username}`}
-      description="บทบาทใหม่มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป ไม่ใช่ทันที"
-      footerNote={footerNote(changes.length, adminChange)}
+      title={t("users.roles.dialogTitle", "จัดการบทบาท @{username}", { username: user.username })}
+      description={t("users.roles.dialogDesc", "บทบาทใหม่มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป ไม่ใช่ทันที")}
+      footerNote={getFooterNote(changes.length, adminChange)}
       actions={
         <>
           <Button variant="outline" size="sm" disabled={saving} onClick={onClose}>
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           <Button
             size="sm"
@@ -118,14 +142,14 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
             onClick={() => (adminChange ? setConfirming(true) : save())}
           >
             {saving && <Spinner data-icon="inline-start" />}
-            บันทึก
+            {t("actions.save", "บันทึก", { ns: "common" })}
           </Button>
         </>
       }
     >
       <UserSummary user={user} />
       <ul className="flex flex-col gap-2">
-        {ROLE_ROWS.map(({ role, description, locked }) => {
+        {roleRows.map(({ role, description, locked }) => {
           const changed = changes.some((change) => change.role === role);
           const selfAdmin = isSelf && role === "ADMIN";
           const switchId = `role-switch-${role}`;
@@ -141,11 +165,11 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
                 <div className="flex items-center gap-1.5">
                   <RoleBadge role={role} />
                   {changed ? (
-                    <span className="text-[10px] font-medium text-[#0058bc]">เปลี่ยนแล้ว</span>
+                    <span className="text-[10px] font-medium text-[#0058bc]">{t("users.roles.changedBadge", "เปลี่ยนแล้ว")}</span>
                   ) : null}
                 </div>
                 <p id={`${switchId}-desc`} className="text-[11px] leading-[15px] text-muted-foreground">
-                  {selfAdmin ? "ถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้" : description}
+                  {selfAdmin ? t("users.roles.cannotRemoveOwnAdmin", "ถอนสิทธิ์ผู้ดูแลของบัญชีตัวเองไม่ได้") : description}
                 </p>
               </div>
               {locked ? (
@@ -171,26 +195,6 @@ export function UserRolesDialog({ user, currentUserId, onClose }: UserRolesDialo
   );
 }
 
-function footerNote(count: number, adminChange: RoleChange | undefined): string {
-  if (count === 0) {
-    return "ยังไม่มีการเปลี่ยนแปลง";
-  }
-  if (!adminChange) {
-    return `เปลี่ยน ${count} รายการ`;
-  }
-  return `เปลี่ยน ${count} รายการ · ${adminChange.grant ? "ให้" : "ถอน"}สิทธิ์ผู้ดูแลจะถามยืนยันอีกครั้ง`;
-}
-
-function rolesSuccessTitle(user: AdminUser, changes: RoleChange[]): string {
-  const name = `@${user.username}`;
-  if (changes.length === 1 && changes[0].role === "ADMIN") {
-    return changes[0].grant
-      ? `ตั้ง ${name} เป็น${ROLE_LABEL.ADMIN}แล้ว`
-      : `ถอนสิทธิ์${ROLE_LABEL.ADMIN}ของ ${name} แล้ว`;
-  }
-  return `บันทึกบทบาทของ ${name} แล้ว`;
-}
-
 type AdminRoleConfirmDialogProps = {
   user: AdminUser;
   grant: boolean;
@@ -207,6 +211,7 @@ export function AdminRoleConfirmDialog({
   onCancel,
   onConfirm,
 }: AdminRoleConfirmDialogProps) {
+  const { t } = useTranslate("admin");
   const name = `@${user.username}`;
   return (
     <UserDialog
@@ -215,16 +220,20 @@ export function AdminRoleConfirmDialog({
       onClose={onCancel}
       tone={grant ? "info" : "danger"}
       icon={grant ? <Shield /> : <ShieldOff />}
-      title={grant ? `ตั้ง ${name} เป็นผู้ดูแล?` : `ถอนสิทธิ์ผู้ดูแลของ ${name}?`}
+      title={
+        grant
+          ? t("users.roles.confirmGrantTitle", "ตั้ง {name} เป็นผู้ดูแล?", { name })
+          : t("users.roles.confirmRevokeTitle", "ถอนสิทธิ์ผู้ดูแลของ {name}?", { name })
+      }
       description={
         grant
-          ? "จะเข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป"
-          : "จะเข้าหลังบ้านไม่ได้อีก มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป"
+          ? t("users.roles.confirmGrantDesc", "จะเข้าหลังบ้านได้ทุกหน้า รวมถึงอนุมัติผู้ขาย แก้ค่าคอม และระงับบัญชีผู้อื่น มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป")
+          : t("users.roles.confirmRevokeDesc", "จะเข้าหลังบ้านไม่ได้อีก มีผลเมื่อผู้ใช้ต่ออายุการเข้าสู่ระบบครั้งถัดไป")
       }
       actions={
         <>
           <Button variant="outline" size="sm" disabled={saving} onClick={onCancel}>
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           <Button
             size="sm"
@@ -233,7 +242,7 @@ export function AdminRoleConfirmDialog({
             onClick={onConfirm}
           >
             {saving && <Spinner data-icon="inline-start" />}
-            {grant ? "ตั้งเป็นผู้ดูแล" : "ถอนสิทธิ์"}
+            {grant ? t("users.roles.grantAction", "ตั้งเป็นผู้ดูแล") : t("users.roles.revokeAction", "ถอนสิทธิ์")}
           </Button>
         </>
       }
@@ -243,8 +252,8 @@ export function AdminRoleConfirmDialog({
         <EffectList
           tone="info"
           items={[
-            "ให้สิทธิ์เฉพาะคนที่ทีมรู้จักและยืนยันตัวตนแล้ว",
-            "ถอนสิทธิ์ได้ภายหลังจาก “จัดการบทบาท”",
+            t("users.roles.grantEffect1", "ให้สิทธิ์เฉพาะคนที่ทีมรู้จักและยืนยันตัวตนแล้ว"),
+            t("users.roles.grantEffect2", "ถอนสิทธิ์ได้ภายหลังจาก “จัดการบทบาท”"),
           ]}
         />
       ) : null}

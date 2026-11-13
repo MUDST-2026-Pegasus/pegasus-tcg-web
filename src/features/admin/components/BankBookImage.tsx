@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { useTranslate } from "@/lib/i18n";
 
 type BankBookImageProps = {
   /** presigned GET อายุสั้นจาก `bankBookImageUrl` — `null` = ใบนี้ไม่มีรูป */
@@ -31,6 +32,7 @@ type BankBookImageProps = {
  * ไม่วนขอใหม่ไม่รู้จบตอนไฟล์หายจริง
  */
 export function BankBookImage({ url, onExpired }: BankBookImageProps) {
+  const { t } = useTranslate("admin");
   const [expanded, setExpanded] = useState(false);
   const [retriedUrl, setRetriedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
     return (
       <Placeholder>
         <ImageOff className="size-5" aria-hidden />
-        คำขอนี้ส่งมาก่อนระบบรับรูปสมุดบัญชี จึงไม่มีรูปแนบ
+        {t("sellers.bankBook.noImageAttached", "คำขอนี้ส่งมาก่อนระบบรับรูปสมุดบัญชี จึงไม่มีรูปแนบ")}
       </Placeholder>
     );
   }
@@ -73,7 +75,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
     return (
       <Placeholder>
         <Spinner className="size-5" />
-        กำลังขอรูปใหม่…
+        {t("sellers.bankBook.requestingNewImage", "กำลังขอรูปใหม่…")}
       </Placeholder>
     );
   }
@@ -82,7 +84,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
     return (
       <Placeholder>
         <ImageOff className="size-5" aria-hidden />
-        โหลดรูปไม่สำเร็จ
+        {t("sellers.bankBook.loadFailed", "โหลดรูปไม่สำเร็จ")}
         <Button
           type="button"
           variant="outline"
@@ -91,7 +93,7 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
           onClick={() => refresh(url)}
         >
           <RefreshCw data-icon="inline-start" />
-          ลองอีกครั้ง
+          {t("actions.retry", "ลองอีกครั้ง", { ns: "common" })}
         </Button>
       </Placeholder>
     );
@@ -106,28 +108,31 @@ export function BankBookImage({ url, onExpired }: BankBookImageProps) {
       >
         <img
           src={url}
-          alt="รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา"
+          alt={t("sellers.bankBook.alt", "รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา")}
           referrerPolicy="no-referrer"
           onError={handleError}
           className="max-h-full max-w-full object-contain"
         />
         <span className="absolute right-2 bottom-2 flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-[11px] text-muted-foreground shadow-sm group-hover:text-foreground">
           <Maximize2 className="size-3" aria-hidden />
-          คลิกเพื่อดูขนาดเต็ม
+          {t("sellers.bankBook.clickToExpand", "คลิกเพื่อดูขนาดเต็ม")}
         </span>
       </button>
 
       <Dialog open={expanded} onOpenChange={setExpanded}>
         <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>รูปหน้าสมุดบัญชี</DialogTitle>
+            <DialogTitle>{t("sellers.bankBook.dialogTitle", "รูปหน้าสมุดบัญชี")}</DialogTitle>
             <DialogDescription>
-              เทียบชื่อบัญชีและเลขบัญชีในรูปกับข้อมูลที่ผู้สมัครกรอก
+              {t(
+                "sellers.bankBook.dialogDesc",
+                "เทียบชื่อบัญชีและเลขบัญชีในรูปกับข้อมูลที่ผู้สมัครกรอก",
+              )}
             </DialogDescription>
           </DialogHeader>
           <img
             src={url}
-            alt="รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา ขนาดเต็ม"
+            alt={t("sellers.bankBook.altFull", "รูปหน้าสมุดบัญชีที่ผู้สมัครแนบมา ขนาดเต็ม")}
             referrerPolicy="no-referrer"
             onError={handleError}
             className="max-h-[70svh] w-full rounded-md object-contain"

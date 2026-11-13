@@ -131,12 +131,12 @@ describe("PaymentPage Integration Flow", () => {
     renderWithProviders(<PaymentPage />, { route: "/payment?orderId=101" });
 
     // Header & QR details
-    expect(await screen.findByText("Secure Checkout")).toBeInTheDocument();
-    expect(screen.getByText("PromptPay ID 081-999-8888")).toBeInTheDocument();
+    expect(await screen.findByText("ชำระเงินอย่างปลอดภัย")).toBeInTheDocument();
+    expect(screen.getByText("พร้อมเพย์ 081-999-8888")).toBeInTheDocument();
     expect(screen.getByText("Pegasus TCG Co., Ltd.")).toBeInTheDocument();
 
-    expect(screen.getByText("Scan to Pay | ฿1,050.00")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "PromptPay QR Code" }).querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
+    expect(screen.getByText("สแกนเพื่อชำระ | THB 1,050.00")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" }).querySelector("image")).toHaveAttribute("href", "/site-icon.jpg");
 
     // Order items
     expect(screen.getByText("Blue-Eyes White Dragon")).toBeInTheDocument();

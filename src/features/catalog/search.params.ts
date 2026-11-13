@@ -4,6 +4,7 @@ import type {
   GameDto,
   ProductQuery,
   ProductSort,
+  ShopQuery,
 } from "./catalog.types";
 
 /**
@@ -14,9 +15,32 @@ import type {
  * ไม่มี React ในไฟล์นี้
  */
 
-export const SEARCH_PAGE_SIZE = 20;
+export const SEARCH_PAGE_SIZE = 24;
 
 export const SEARCH_SORTS = ["relevance", "featured", "newest", "price_asc", "price_desc", "name"] as const;
+
+/** ที่อยู่ในเมนู "เรียงตาม" [TCG-777] — `name` ยังอ่านจากลิงก์เก่าได้แต่ไม่อยู่ในเมนู */
+export const SEARCH_SORT_MENU = ["relevance", "price_asc", "price_desc", "newest", "featured"] as const;
+
+export const SEARCH_TABS = ["products", "shops"] as const;
+export type SearchTab = (typeof SEARCH_TABS)[number];
+
+/** คะแนนร้านขั้นต่ำในแท็บร้านค้า — null = ทั้งหมด */
+export const SHOP_RATINGS = ["4.5", "4"] as const;
+export type ShopRating = (typeof SHOP_RATINGS)[number];
+
+export const SHOP_PAGE_SIZE = 10;
+
+export const SEARCH_VIEWS = ["grid", "list"] as const;
+export type SearchView = (typeof SEARCH_VIEWS)[number];
+
+/** chip ราคาเร็วใต้ช่อง min–max */
+export const PRICE_PRESETS: { min: string; max: string }[] = [
+  { min: "", max: "500" },
+  { min: "500", max: "2000" },
+  { min: "2000", max: "10000" },
+  { min: "10000", max: "" },
+];
 
 export type SearchSort = (typeof SEARCH_SORTS)[number];
 
@@ -33,7 +57,17 @@ export type SearchFilters = {
   minPrice: string;
   maxPrice: string;
   inStock: boolean;
+  /** เฉพาะสินค้าที่กำลังลดราคา */
+  onSale: boolean;
   sort: SearchSort;
+  /** null = ไม่ได้ระบุใน URL ใช้ค่าที่ผู้ใช้เลือกล่าสุด (localStorage) */
+  view: SearchView | null;
+  /** แท็บผลการค้นหา [TCG-778] */
+  tab: SearchTab;
+  /** แท็บร้านค้า: คะแนนร้านขั้นต่ำ */
+  minRating: ShopRating | null;
+  /** แท็บร้านค้า: เรียงตามจำนวนสินค้าที่ตรง (ค่าเริ่มต้น) หรือคะแนน */
+  shopSort: "MATCHES" | "RATING";
   /** นับจาก 1 เหมือนที่คนเห็น — API นับจาก 0 */
   page: number;
 };
@@ -80,6 +114,15 @@ export function readFilters(params: URLSearchParams): SearchFilters {
     minPrice,
     maxPrice,
     inStock: params.get("inStock") === "true",
+    onSale: params.get("onSale") === "true",
+    view: (SEARCH_VIEWS as readonly string[]).includes(params.get("view") ?? "")
+      ? (params.get("view") as SearchView)
+      : null,
+    tab: params.get("tab") === "shops" ? "shops" : "products",
+    minRating: (SHOP_RATINGS as readonly string[]).includes(params.get("rating") ?? "")
+      ? (params.get("rating") as ShopRating)
+      : null,
+    shopSort: params.get("shopSort") === "RATING" ? "RATING" : "MATCHES",
     sort: isSort(sort) ? sort : q ? "relevance" : "featured",
     page: Number.isInteger(page) && page > 1 ? page : 1,
   };
@@ -95,7 +138,12 @@ export function writeFilters(filters: SearchFilters): URLSearchParams {
   if (filters.minPrice) params.set("min", filters.minPrice);
   if (filters.maxPrice) params.set("max", filters.maxPrice);
   if (filters.inStock) params.set("inStock", "true");
+  if (filters.onSale) params.set("onSale", "true");
   if (filters.sort !== (filters.q ? "relevance" : "featured")) params.set("sort", filters.sort);
+  if (filters.view) params.set("view", filters.view);
+  if (filters.tab !== "products") params.set("tab", filters.tab);
+  if (filters.minRating) params.set("rating", filters.minRating);
+  if (filters.shopSort !== "MATCHES") params.set("shopSort", filters.shopSort);
   if (filters.page > 1) params.set("page", String(filters.page));
   return params;
 }
@@ -107,7 +155,8 @@ export function hasActiveFilters(filters: SearchFilters): boolean {
     filters.conditions.length > 0 ||
     filters.minPrice !== "" ||
     filters.maxPrice !== "" ||
-    filters.inStock
+    filters.inStock ||
+    filters.onSale
   );
 }
 
@@ -144,6 +193,7 @@ export function toProductQuery(
       minPrice: min,
       maxPrice: max,
       inStock: filters.inStock || undefined,
+      onSale: filters.onSale || undefined,
       sort: SORT_TO_API[filters.sort],
       page: filters.page - 1,
       size: SEARCH_PAGE_SIZE,
@@ -166,4 +216,59 @@ export function pageWindow(current: number, total: number): (number | null)[] {
     result.push(page);
   });
   return result;
+}
+
+/** ตัวกรองว่าง (คง q / sort / view เดิม) — ปุ่ม "ล้างทั้งหมด" */
+export function clearedFilters(filters: SearchFilters): SearchFilters {
+  return {
+    ...readFilters(new URLSearchParams()),
+    q: filters.q,
+    sort: filters.sort,
+    view: filters.view,
+    tab: filters.tab,
+    shopSort: filters.shopSort,
+  };
+}
+
+/**
+ * สลับแท็บ — คง q และเกมไว้ (ใช้ได้ทั้งสองแท็บ) กลับหน้า 1 [TCG-778]
+ * ตัวกรองเฉพาะแท็บสินค้ายังอยู่ใน URL กลับมาแท็บสินค้าแล้วได้สถานะเดิม
+ */
+export function switchTab(filters: SearchFilters, tab: SearchTab): SearchFilters {
+  return { ...filters, tab, page: 1 };
+}
+
+/** แปลงตัวกรองใน URL เป็น query ของ `/catalog/shops` */
+export function toShopQuery(filters: SearchFilters, games: GameDto[] | undefined): { query: ShopQuery; ready: boolean } {
+  const gameIds = (games ?? []).filter((game) => filters.games.includes(game.slug)).map((game) => game.id);
+  return {
+    ready: filters.games.length === 0 || games !== undefined,
+    query: {
+      q: filters.q || undefined,
+      gameId: gameIds.length ? gameIds : undefined,
+      minRating: filters.minRating ? Number(filters.minRating) : undefined,
+      sort: filters.shopSort,
+      page: filters.page - 1,
+      size: SHOP_PAGE_SIZE,
+    },
+  };
+}
+
+const VIEW_KEY = "pegasus.search.view";
+
+/** มุมมองที่ผู้ใช้เลือกล่าสุด — ครอบ try/catch โหมด private ใช้ grid */
+export function readViewPreference(): SearchView {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
+  } catch {
+    return "grid";
+  }
+}
+
+export function saveViewPreference(view: SearchView) {
+  try {
+    window.localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    // จำไม่ได้ก็ไม่เป็นไร URL ยังมี ?view=
+  }
 }

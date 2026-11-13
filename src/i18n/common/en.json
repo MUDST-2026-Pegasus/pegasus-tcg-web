@@ -16,7 +16,8 @@
     "next": "Next",
     "previous": "Previous",
     "reload": "Reload",
-    "retry": "Retry"
+    "retry": "Retry",
+    "save": "Save"
   },
   "auth": {
     "checkingSession": "Checking your sign-in"
@@ -75,6 +76,8 @@
     "categories": "Shop categories",
     "closeMenu": "Close menu",
     "home": "Home",
+    "languageSwitch": "English / ภาษาอังกฤษ",
+    "loggingOut": "Logging out…",
     "login": "Log in",
     "loginHint": "Log in to see your orders and collection",
     "logoAria": "Pegasus TCG — back to home",
@@ -122,7 +125,7 @@
       "marketListings": "Loading listing",
       "myAuctions": "Loading my auctions",
       "myCollection": "Loading collection",
-      "myCoupons": "Loading my coupons",
+      "myCoupons": "Loading my codes",
       "orderHistory": "Loading order history",
       "payment": "Loading payment page",
       "productDetail": "Loading product",
@@ -241,6 +244,7 @@
         "weeklyReport": "Weekly stock/profit report"
       }
     },
+    "dashboardTitle": "DASHBOARD",
     "seller": {
       "groups": {
         "finance": "Finance",

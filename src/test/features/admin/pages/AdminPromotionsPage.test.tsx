@@ -123,7 +123,7 @@ describe("AdminPromotionsPage", () => {
     renderWithProviders(<AdminPromotionsPage />, { route: "/admin/promotions" });
     const row = await screen.findByRole("row", { name: /PEGASUS10/ });
     expect(within(row).getByText("ไม่มีขั้นต่ำ")).toBeInTheDocument();
-    expect(within(row).getByText("สูงสุด ฿200")).toBeInTheDocument();
+    expect(within(row).getByText("สูงสุด THB 200.00")).toBeInTheDocument();
     expect(within(row).getByLabelText("แสดงบนหน้าแรก")).toBeInTheDocument();
     expect(screen.getByText("shady_cards · ล้างสต็อก")).toBeInTheDocument();
     expect(screen.getByText("+18% จากเดือนก่อน")).toBeInTheDocument();
@@ -227,8 +227,8 @@ describe("AdminPromotionsPage", () => {
       expect(promotionsApi.getPromotions).toHaveBeenCalledWith({ owner: "PLATFORM", status: "ACTIVE", q: "PEGA", page: 1, size: 8 }),
     );
     expect(await screen.findByText("ธนภัทร ส.")).toBeInTheDocument();
-    expect(screen.getByText("฿27,940")).toBeInTheDocument();
-    expect(screen.getByText("฿214,300")).toBeInTheDocument();
+    expect(screen.getByText("THB 27,940.00")).toBeInTheDocument();
+    expect(screen.getByText("THB 214,300.00")).toBeInTheDocument();
     expect(screen.getByText(/สร้างโดย Kant S\./)).toBeInTheDocument();
     expect(screen.getByText("ใช้แล้ว")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "PG-20261029-0412" })).toHaveAttribute(

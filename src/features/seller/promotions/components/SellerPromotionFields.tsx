@@ -87,8 +87,8 @@ export function NumberField({
           value={field.value}
           onBlur={field.onBlur}
           onChange={field.onChange}
-          prefix={unit === t("seller.sellerPromotionFields.prefix", "฿") ? unit : undefined}
-          suffix={unit === t("seller.sellerPromotionFields.prefix", "฿") ? undefined : unit}
+          prefix={unit === t("seller.sellerPromotionFields.prefix", "THB") ? unit : undefined}
+          suffix={unit === t("seller.sellerPromotionFields.prefix", "THB") ? undefined : unit}
           locked={locked}
         />
       )}
@@ -185,13 +185,13 @@ export function DiscountFields({ control, errors }: FieldProps) {
   return (
     <>
       <Row>
-        <NumberField control={control} errors={errors} name="discountValue" label={t("seller.sellerPromotionFields.label", "ลด")} unit={fixed ? t("seller.sellerPromotionFields.prefix", "฿") : "%"} required />
+        <NumberField control={control} errors={errors} name="discountValue" label={t("seller.sellerPromotionFields.label", "ลด")} unit={fixed ? t("seller.sellerPromotionFields.prefix", "THB") : "%"} required />
         <NumberField
           control={control}
           errors={errors}
           name="minSpend"
           label={t("seller.sellerPromotionFields.label2", "ยอดขั้นต่ำ (เฉพาะสินค้าร้านนี้)")}
-          unit={t("seller.sellerPromotionFields.prefix", "฿")}
+          unit={t("seller.sellerPromotionFields.prefix", "THB")}
           hint={fixed ? t("seller.sellerPromotionFields.hint", "ส่วนลดต้องไม่เกินยอดขั้นต่ำ · 0 = ไม่มีขั้นต่ำ") : t("seller.sellerPromotionFields.hint2", "0 = ไม่มีขั้นต่ำ")}
         />
       </Row>
@@ -201,7 +201,7 @@ export function DiscountFields({ control, errors }: FieldProps) {
           errors={errors}
           name="maxDiscount"
           label={t("seller.sellerPromotionFields.label3", "ลดสูงสุด")}
-          unit={t("seller.sellerPromotionFields.prefix", "฿")}
+          unit={t("seller.sellerPromotionFields.prefix", "THB")}
           hint={t("seller.sellerPromotionFields.hint3", "เว้นว่าง = ไม่จำกัด")}
         />
       )}

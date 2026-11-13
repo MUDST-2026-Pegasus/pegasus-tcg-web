@@ -167,6 +167,9 @@
       "title": "Could not suspend the auction"
     }
   },
+  "breadcrumb": {
+    "home": "Home"
+  },
   "buyer": {
     "auctionCard": {
       "text": "Buy now"
@@ -464,6 +467,12 @@
       "title2": "You did not pay in time ({unpaidStrikes}/{strikeLimit})"
     }
   },
+  "detail": {
+    "attacksTitle": "Attacks"
+  },
+  "myAuctions": {
+    "auctionLabel": "AUCTION"
+  },
   "seller": {
     "auctionFormSchema": {
       "detail": "Now {buyNow} ≤ {startingPrice}",
@@ -478,7 +487,7 @@
       "label2": "+1 day",
       "label3": "+3 days",
       "label4": "+7 days",
-      "message": "{label} must be more than ฿0",
+      "message": "{label} must be more than THB 0.00",
       "message10": "Choose the closing date",
       "message11": "Invalid time",
       "message12": "Note must be at most {MAX_SELLER_NOTE} characters",
@@ -489,7 +498,7 @@
       "message5": "Closing time is too far away",
       "message6": "This card is not available",
       "message7": "Choose a card from stock first",
-      "message8": "Bid increment must be more than ฿0",
+      "message8": "Bid increment must be more than THB 0.00",
       "message9": "Bid increment is too high",
       "text": "{days} d {hours} h",
       "text10": "Thu",

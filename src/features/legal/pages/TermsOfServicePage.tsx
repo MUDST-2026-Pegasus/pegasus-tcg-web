@@ -1,107 +1,17 @@
 import { FileText } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { Suspense } from "react";
+import { useFormat, useLanguage, useTranslate } from "@/lib/i18n";
+import { LegalContentSkeleton } from "../components/LegalContentSkeleton";
 
-type TermsSection = { id: string; title: string; content: string; rules?: string[] };
-
-const sections: TermsSection[] = [
-  {
-    id: "01",
-    title: "Introduction",
-    content: "Welcome to PEGASUS. By accessing or using our website, you agree to these Terms of Service. If you do not agree to these terms, you may not access the website or use our services.",
-  },
-  {
-    id: "02",
-    title: "Accounts and Registration",
-    content: "Some features require an account. You are responsible for keeping your account credentials confidential and for all activity that occurs under your account.",
-  },
-  {
-    id: "03",
-    title: "Products and Pricing",
-    content: "Products are subject to availability. We may update prices, discontinue products, or cancel orders affected by pricing errors. Shipping fees and duties are excluded unless stated otherwise.",
-  },
-  {
-    id: "04",
-    title: "Payment and Billing",
-    content: "By providing a payment method, you confirm that you are authorized to use it. Transactions are handled securely by third-party payment processors.",
-  },
-  {
-    id: "05",
-    title: "Shipping and Returns",
-    content: "Delivery timelines are estimates and are not guaranteed. If you are not satisfied with a purchase, review our Return Policy for refund and exchange eligibility.",
-  },
-  {
-    id: "06",
-    title: "Auctions",
-    content: "Auctions on PEGASUS follow these rules:",
-    // กติกาจาก Epic TCG-612 [TCG-636]
-    rules: [
-      "Bids cannot be withdrawn. You confirm every bid before it is placed.",
-      "Extended bidding: a bid in the last 2 minutes resets the timer to 2 minutes, with no limit on extensions.",
-      "Buy now: the seller can turn it on or change its price until the first bid. After that, the Buy now option is removed.",
-      "The winner must pay within 24 hours through the regular checkout, at the winning price.",
-      "If the winner does not pay in time, the order and the auction are cancelled, the card returns to the seller's stock, and the winner receives one non-payment strike.",
-      "Three non-payment strikes ban the user from bidding for 30 days. Regular purchases are still allowed.",
-    ],
-  },
-  {
-    id: "07",
-    title: "Limitation of Liability",
-    content: "PEGASUS is not liable for indirect, incidental, or consequential damages arising from use of our services or products purchased through the platform.",
-  },
-];
+const TermsOfServiceTh = React.lazy(() => import("../components/TermsOfService.th"));
+const TermsOfServiceEn = React.lazy(() => import("../components/TermsOfService.en"));
 
 export function TermsOfServicePage() {
-  const [activeId, setActiveId] = useState("01");
-  const isManualScroll = useRef(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { t } = useTranslate("buyer");
+  const { language } = useLanguage();
+  const format = useFormat();
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isManualScroll.current) return;
-
-      const scrollPosition = window.scrollY + 140;
-      const atBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 50;
-
-      if (atBottom) {
-        setActiveId(sections[sections.length - 1].id);
-        return;
-      }
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(`section-${sections[i].id}`);
-        if (el && el.offsetTop <= scrollPosition) {
-          setActiveId(sections[i].id);
-          break;
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    };
-  }, []);
-
-  const handleScrollToSection = (id: string) => {
-    setActiveId(id);
-    isManualScroll.current = true;
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    scrollTimeoutRef.current = setTimeout(() => {
-      isManualScroll.current = false;
-    }, 800);
-
-    const element = document.getElementById(`section-${id}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const Content = language === "en" ? TermsOfServiceEn : TermsOfServiceTh;
 
   return (
     <div className="min-h-screen bg-muted/30 pb-16 pt-8">
@@ -110,70 +20,26 @@ export function TermsOfServicePage() {
         <div className="rounded-xl border border-border/50 bg-background p-8 md:p-10 shadow-sm">
           <div className="flex w-fit items-center gap-2 rounded-md bg-muted px-2.5 py-1 text-xs font-semibold tracking-wider text-foreground">
             <FileText className="size-4" />
-            LEGAL CENTER
+            {t("legal.center", "ศูนย์ข้อมูลกฎหมาย")}
           </div>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-            Terms of Service
+            {t("legal.terms.title", "ข้อกำหนดการใช้บริการ")}
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Clear, practical terms for using PEGASUS, managing your account, and purchasing products.
+            {t("legal.terms.subtitle", "ข้อกำหนดที่ชัดเจนและใช้งานได้จริงสำหรับการใช้งาน PEGASUS การจัดการบัญชีของคุณ และการสั่งซื้อสินค้า")}
           </p>
           <div className="mt-8 text-sm text-muted-foreground">
-            Last updated <span className="font-semibold text-primary">August 29, 2026</span>
+            {t("legal.lastUpdatedLabel", "อัปเดตล่าสุด")}{" "}
+            <span className="font-semibold text-primary">
+              {format.date("2026-08-29T12:00:00+07:00", { day: "numeric", month: "long", year: "numeric" })}
+            </span>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className="mt-6 flex flex-col items-start gap-6 lg:flex-row">
-          {/* Sidebar */}
-          <aside className="sticky top-24 w-full shrink-0 lg:w-[280px]">
-            <div className="rounded-xl border border-border/50 bg-background p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground">On this page</h3>
-              <ul className="mt-5 space-y-4 text-sm">
-                {sections.map((section) => (
-                  <li key={section.id}>
-                    <button
-                      type="button"
-                      onClick={() => handleScrollToSection(section.id)}
-                      className="flex items-center gap-3 text-left transition-colors hover:text-foreground text-muted-foreground data-[active=true]:text-foreground data-[active=true]:font-medium"
-                      data-active={section.id === activeId}
-                    >
-                      <span className="font-semibold text-primary">{section.id}</span>
-                      {section.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-
-          {/* Main Content */}
-          <main className="flex-1 rounded-xl border border-border/50 bg-background p-8 shadow-sm md:p-10">
-            <div className="space-y-10">
-              {sections.map((section, index) => (
-                <div key={section.id} id={`section-${section.id}`} className="scroll-mt-24">
-                  <h2 className="flex items-center gap-3 text-xl font-bold text-foreground">
-                    <span className="text-[15px] font-semibold text-primary">{section.id}</span>
-                    {section.title}
-                  </h2>
-                  <p className="mt-4 leading-relaxed text-muted-foreground">
-                    {section.content}
-                  </p>
-                  {section.rules ? (
-                    <ol className="mt-3 list-decimal space-y-1.5 pl-5 leading-relaxed text-muted-foreground">
-                      {section.rules.map((rule) => (
-                        <li key={rule}>{rule}</li>
-                      ))}
-                    </ol>
-                  ) : null}
-                  {index < sections.length - 1 && (
-                    <hr className="mt-10 border-border/60" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </main>
-        </div>
+        <Suspense fallback={<LegalContentSkeleton />}>
+          <Content />
+        </Suspense>
       </div>
     </div>
   );

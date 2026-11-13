@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
 
@@ -22,7 +22,7 @@ import { addToCartErrorMessage } from "@/features/cart/cart.format";
 import { useMiniCart } from "@/features/cart/mini-cart.store";
 import { useAddCartItem } from "@/features/cart/cart.queries";
 import { initialsOf } from "@/features/account/account.format";
-import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, marketForListing } from "../catalog.mappers";
+import { CONDITION_LABELS, PRODUCT_TYPE_LABELS, localNameOnly, marketForListing } from "../catalog.mappers";
 import { effectivePrice } from "@/components/sale";
 import { ListingRowPrice } from "@/features/sale/components/ListingRowPrice";
 import { notifyAddedAtSalePrice } from "@/features/sale/sale.notify";
@@ -32,17 +32,16 @@ import { ProductAuctionBox } from "../components/ProductAuctionBox";
 import { formatListingDelivery } from "../listing.format";
 import { useGameList, useProductCollectors, useProductDetail, useProductListings, useProductMarket } from "../catalog.queries";
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
+import { addViewedProduct } from "../search/search-history";
 import { usePageTitle } from "@/hooks/use-page-title";
-import { intlLocale, useTranslate } from "@/lib/i18n";
+import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
+
 
 /** ค่าของตัวเลือก "All variants" ใน Select (แบบเดียวกับ ALL ใน UsersToolbar) — state ในหน้ายังเก็บเป็น "" เหมือนเดิม */
 const ALL_VARIANTS = "all";
 
-function formatPrice(amount: number, currency = "THB") {
-  return new Intl.NumberFormat(intlLocale(), {
-    style: "currency",
-    currency,
-  }).format(amount);
+function formatPrice(amount: number) {
+  return formatMoney(amount);
 }
 
 export function ProductDetailPage() {
@@ -126,10 +125,10 @@ function ProductDetailContent({
   const miniCart = useMiniCart();
   const itemCount = (count: number) =>
     product.productType === "SINGLE_CARD"
-      ? t("product.cardCount", "{count, plural, =1 {# card} other {# cards}}", { count })
-      : t("product.itemCount", "{count, plural, =1 {# item} other {# items}}", { count });
+      ? t("product.cardCount", "{count, plural, other {# ใบ}}", { count })
+      : t("product.itemCount", "{count, plural, other {# รายการ}}", { count });
   const variantItems = [
-    { value: ALL_VARIANTS, label: t("product.allVariants", "All variants") },
+    { value: ALL_VARIANTS, label: t("product.allVariants", "ทุกเวอร์ชัน") },
     ...variants.map((variant) => ({
       value: String(variant.id),
       label: [variant.languageCode, variant.finish !== "NOT_APPLICABLE" ? variant.finish : null, variant.edition !== "NOT_APPLICABLE" ? variant.edition : null, variant.printingNote].filter(Boolean).join(" / "),
@@ -214,6 +213,24 @@ function ProductDetailContent({
   const availableQuantity = filteredListings.reduce((sum, row) => sum + row.quantityAvailable, 0);
   const hasListings = filteredListings.length > 0;
 
+  // "ดูล่าสุด" ใน dropdown ค้นหา [TCG-776] — บันทึกเมื่อรู้ราคาแล้ว
+  const viewedImage = gallery[0]?.url ?? listings[0]?.card.officialImageUrl ?? null;
+  const viewedPrices = listings.map((listing) => effectivePrice(listing.pricing, listing.price));
+  const viewedLowest = viewedPrices.length > 0 ? Math.min(...viewedPrices) : null;
+  const viewedSellers = new Set(listings.map((listing) => listing.seller.username)).size;
+  useEffect(() => {
+    if (!listingsReady) return;
+    addViewedProduct({
+      slug: product.slug,
+      name: product.name,
+      // ไม่เก็บเลขการ์ดลง localStorage — CodeQL มองชื่อ cardNumber เป็นข้อมูลบัตร
+      subtitle: gameName ?? null,
+      imageUrl: viewedImage,
+      lowestPrice: viewedLowest,
+      sellerCount: viewedSellers,
+    });
+  }, [listingsReady, product.slug, product.name, gameName, viewedImage, viewedLowest, viewedSellers]);
+
   async function addListingToCart(listingId: number, amount: number, trigger?: HTMLElement) {
     const opening = miniCart.capture(listingId, trigger);
     try {
@@ -282,10 +299,10 @@ function ProductDetailContent({
   return (
     <div className="flex-1 bg-secondary font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-5 py-8 sm:px-6 lg:py-10">
-        <nav aria-label={t("product.breadcrumb", "Breadcrumb")} className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary">{t("nav.home", "Home", { ns: "common" })}</Link>
+        <nav aria-label={t("product.breadcrumb", "เส้นทางนำทาง")} className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-primary">{t("nav.home", "หน้าแรก", { ns: "common" })}</Link>
           <ChevronRight className="size-4" />
-          <Link to="/products" className="hover:text-primary">{t("product.products", "Products")}</Link>
+          <Link to="/products" className="hover:text-primary">{t("product.products", "สินค้า")}</Link>
           <ChevronRight className="size-4" />
           {gameName && <><span>{gameName}</span><ChevronRight className="size-4" /></>}
           <span className="font-medium text-foreground">{product.name}</span>
@@ -307,32 +324,32 @@ function ProductDetailContent({
             <div>
               <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
-              <p className="mt-2 min-h-6 text-muted-foreground">{[product.nameLocal, product.cardNumber].filter(Boolean).join(" · ") || "—"}</p>
+              {[localNameOnly(product.nameLocal), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal), product.cardNumber].filter(Boolean).join(" · ")}</p>}
             </div>
 
             <Card className="gap-0 rounded-2xl border bg-card p-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div><p className="text-sm font-medium text-muted-foreground">{t("product.marketPrice", "Market price")}</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice, firstListing.currency) : "—"}</p></div>
-                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}%`}</span>{t("product.last30Days", "last 30 days")}</div>
+                  <div><p className="text-sm font-medium text-muted-foreground">{t("product.marketPrice", "ราคาตลาด")}</p><p className="mt-1 text-4xl font-bold">{market?.medianPrice != null ? formatPrice(market.medianPrice) : "—"}</p></div>
+                  <div className={`rounded-xl px-3 py-2 text-right text-xs font-semibold ${change30d == null ? "bg-muted text-muted-foreground" : change30d < 0 ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}><span className="block text-sm">{change30d == null ? "—" : `${change30d < 0 ? "↓" : "↑"} ${Math.abs(change30d).toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}%`}</span>{t("product.last30Days", "30 วันล่าสุด")}</div>
                 </div>
                 {market?.lowSample && <p className="mt-2 text-xs text-muted-foreground">{t("product.lowSampleDetail", "ข้อมูลราคายังน้อย (น้อยกว่า 3 รายการ)")}</p>}
                 <div className="mt-5 grid grid-cols-3 gap-2 border-t pt-4 text-sm">
-                  <div><span className="block text-xs text-muted-foreground">{t("product.lastSold", "Last sold")}</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price, firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">{t("product.listedFrom", "Listed from")}</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price), firstListing.currency) : "—"}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">{t("product.available", "Available")}</span><strong>{listingsReady ? itemCount(availableQuantity) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.lastSold", "ขายล่าสุด")}</span><strong>{market?.lastSold ? formatPrice(market.lastSold.price) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.listedFrom", "ราคาเริ่มต้น")}</span><strong>{listingsReady && firstListing ? formatPrice(effectivePrice(firstListing.pricing, firstListing.price)) : "—"}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.available", "พร้อมขาย")}</span><strong>{listingsReady ? itemCount(availableQuantity) : "—"}</strong></div>
                 </div>
               </CardContent>
             </Card>
 
             <div>
-              <p className="mb-3 font-bold">{t("product.selectVariant", "Select variant")}</p>
+              <p className="mb-3 font-bold">{t("product.selectVariant", "เลือกเวอร์ชัน")}</p>
               <Select
                 items={variantItems}
                 value={selectedVariant || ALL_VARIANTS}
                 onValueChange={(value) => changeVariant(!value || value === ALL_VARIANTS ? "" : value)}
               >
-                <SelectTrigger aria-label={t("product.selectVariant", "Select variant")} className="h-12 w-full rounded-xl border-border bg-card px-4">
+                <SelectTrigger aria-label={t("product.selectVariant", "เลือกเวอร์ชัน")} className="h-12 w-full rounded-xl border-border bg-card px-4">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -347,10 +364,10 @@ function ProductDetailContent({
 
             <div>
               <div className="mb-3 flex items-center justify-between gap-2">
-                <h2 className="font-bold">{t("product.selectCondition", "Select condition")}</h2>
-                {effectiveCondition && <button type="button" onClick={() => changeCondition("")} className="text-sm font-semibold text-primary hover:underline">{t("product.allConditions", "All conditions")}</button>}
+                <h2 className="font-bold">{t("product.selectCondition", "เลือกสภาพ")}</h2>
+                {effectiveCondition && <button type="button" onClick={() => changeCondition("")} className="text-sm font-semibold text-primary hover:underline">{t("product.allConditions", "ทุกสภาพ")}</button>}
               </div>
-              <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label={t("product.selectCondition", "Select condition")}>
+              <div className="grid gap-3 sm:grid-cols-3" role="group" aria-label={t("product.selectCondition", "เลือกสภาพ")}>
                 {conditionOptions.map((condition) => {
                   const offer = variantListings.find((row) => row.condition === condition);
                   const enabled = Boolean(offer) && listingsReady;
@@ -361,7 +378,7 @@ function ProductDetailContent({
                       className={["flex min-h-[86px] flex-col rounded-xl border-2 bg-card p-3 text-left transition focus-visible:outline-2 focus-visible:outline-primary", effectiveCondition === condition ? "border-primary ring-2 ring-primary/10" : "border-border", enabled ? "hover:border-primary/40" : "cursor-not-allowed"].join(" ")}>
                       <span className="text-sm font-bold">{condition}</span>
                       <span className="text-xs text-muted-foreground">{CONDITION_LABELS[condition]}</span>
-                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price), offer.currency) : "—"}</span>
+                      <span className="mt-auto pt-2 text-sm font-semibold">{offer ? formatPrice(effectivePrice(offer.pricing, offer.price)) : "—"}</span>
                     </button>
                   );
                 })}
@@ -372,8 +389,8 @@ function ProductDetailContent({
 
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold">{t("product.quantity", "Quantity")}</p>
-                <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? t("product.availableFrom", "{count} available from {seller}", { count: availableForSelectedListing, seller: (purchasableListing?.seller.displayName || purchasableListing?.seller.username) ?? "" }) : t("product.outOfStock", "Out of stock")}</p>
+                <p className="text-sm font-semibold">{t("product.quantity", "จำนวน")}</p>
+                <p className="text-xs text-muted-foreground">{availableForSelectedListing > 0 ? t("product.availableFrom", "พร้อมขาย {count} ชิ้นจาก {seller}", { count: availableForSelectedListing, seller: (purchasableListing?.seller.displayName || purchasableListing?.seller.username) ?? "" }) : t("product.outOfStock", "สินค้าหมด")}</p>
               </div>
               <div className="flex items-center rounded-lg border bg-card">
                 <Button type="button" variant="ghost" size="icon" aria-label={t("product.decreaseQuantity", "ลดจำนวนสินค้า")} disabled={!purchasableListing || selectedQuantity <= 1 || addCartItem.isPending || isBuyingNow} onClick={() => setQuantitySelection({ listingId: purchasableListing?.id ?? null, quantity: Math.max(1, selectedQuantity - 1) })}>
@@ -388,11 +405,11 @@ function ProductDetailContent({
             <div className="grid grid-cols-2 gap-3">
               <Button type="button" className="h-14 text-base font-bold shadow-md" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing || isAuthLoading} onClick={() => void handleBuyNow()}>
                 {isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "Out of Stock") : isAuthLoading ? t("product.loadingButton", "Loading…") : t("product.buyNow", "Buy now")}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price), purchasableListing.currency)}` : ""}
+                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : isAuthLoading ? t("product.loadingButton", "กำลังโหลด…") : t("product.buyNow", "ซื้อทันที")}{purchasableListing ? ` · ${formatPrice(effectivePrice(purchasableListing.pricing, purchasableListing.price))}` : ""}
               </Button>
               <Button type="button" variant="outline" className="h-14 text-base font-bold" disabled={!purchasableListing || addCartItem.isPending || isBuyingNow || selectedQuantity > availableForSelectedListing} onClick={(event) => void handleAddToCart(event.currentTarget)}>
                 {addCartItem.isPending && !isBuyingNow ? <Loader2 className="size-5 animate-spin" /> : <ShoppingCart className="size-5" />}
-                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "Out of Stock") : t("product.addToCart", "Add to cart")}
+                {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : t("product.addToCart", "เพิ่มลงตะกร้า")}
               </Button>
             </div>
             {/* มีประมูลการ์ดรุ่นนี้เปิดอยู่ [TCG-636] */}
@@ -406,7 +423,7 @@ function ProductDetailContent({
 
         <section className="min-w-0 rounded-2xl border bg-card p-5 shadow-sm sm:p-7">
           <div className="mb-6">
-            <div><p className="text-sm font-semibold text-primary">{listingsReady ? t("product.availableCount", "{count} available", { count: availableQuantity }) : t("product.availableUnknown", "— available")}</p><h2 className="mt-1 text-2xl font-bold">{t("product.marketListings", "Market listings")}</h2></div>
+            <div><p className="text-sm font-semibold text-primary">{listingsReady ? t("product.availableCount", "พร้อมขาย {count} ชิ้น", { count: availableQuantity }) : t("product.availableUnknown", "พร้อมขาย —")}</p><h2 className="mt-1 text-2xl font-bold">{t("product.marketListings", "ประกาศขายในตลาด")}</h2></div>
           </div>
           {listingsQuery.isPending ? <div role="status" aria-busy="true" aria-label={t("product.loadingListings", "กำลังโหลดประกาศขาย")}><ListRowsSkeleton rows={4} /></div> : listingsQuery.isError ? (
             <div role="alert" className="space-y-3 py-8 text-center"><p>{t("product.listingsFailed", "โหลดประกาศขายไม่สำเร็จ")}</p><Button onClick={() => void listingsQuery.refetch()}>{t("actions.retry", "ลองใหม่", { ns: "common" })}</Button></div>
@@ -415,9 +432,9 @@ function ProductDetailContent({
               {visibleListings.map((listing) => (
                 <article key={listing.id} className="grid gap-4 py-5 first:pt-0 last:pb-0 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,.8fr)_minmax(0,.9fr)_auto] sm:items-center">
                   <ListingSeller seller={listing.seller} productSlug={product.slug} />
-                  <div><span className="block text-xs text-muted-foreground">{t("product.condition", "Condition")}</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
-                  <div><span className="block text-xs text-muted-foreground">{t("product.delivery", "Delivery")}</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={(event) => void addListingToCart(listing.id, 1, event.currentTarget)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : t("product.add", "Add")}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "more")}</Button></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.condition", "สภาพ")}</span><strong className="text-sm">{CONDITION_LABELS[listing.condition]}</strong></div>
+                  <div><span className="block text-xs text-muted-foreground">{t("product.delivery", "การจัดส่ง")}</span><strong className="text-sm">{formatListingDelivery(listing.delivery)}</strong></div>
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end"><span className="min-w-20 whitespace-nowrap text-[17.5px] leading-[24.5px]"><ListingRowPrice price={listing.price} pricing={listing.pricing} /></span><Button type="button" className="h-10 min-w-20 rounded-full px-4 text-sm font-semibold" disabled={listing.quantityAvailable <= 0 || listing.delivery?.optionCount === 0 || addCartItem.isPending || isBuyingNow} onClick={(event) => void addListingToCart(listing.id, 1, event.currentTarget)}>{addCartItem.isPending ? <Loader2 className="size-4 animate-spin" /> : t("product.add", "เพิ่ม")}</Button><Button nativeButton={false} className="h-10 min-w-20 rounded-full bg-[#22292B] px-4 text-sm font-semibold text-white hover:bg-[#22292B]/80" render={<Link to={`/listings/${listing.id}`} aria-label={t("product.viewSellerListing", "ดูรายละเอียดสินค้าของ {seller}", { seller: listing.seller.displayName || listing.seller.username })} />}>{t("product.more", "เพิ่มเติม")}</Button></div>
                 </article>
               ))}
             </div>
@@ -430,7 +447,7 @@ function ProductDetailContent({
                 <div className="h-4 w-1/6 rounded bg-muted-foreground/30" />
               </div>
               <div className="relative -mt-3 flex justify-center bg-gradient-to-t from-white via-white to-transparent px-3 pt-3">
-                <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{t("product.viewAll", "View all")}</Link>
+                <Link to={`/products/${encodeURIComponent(product.slug)}/listings`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-8 text-sm font-semibold text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{t("product.viewAll", "ดูทั้งหมด")}</Link>
               </div>
             </div>
           )}
@@ -465,8 +482,8 @@ function ProductDetailContent({
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    <Badge variant="secondary">{t("product.inCatalog", "In catalog")}</Badge>
-                    <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>{t("product.viewProfile", "View profile")}</Button>
+                    <Badge variant="secondary">{t("product.inCatalog", "ในแคตตาล็อก")}</Badge>
+                    <Button variant="outline" size="sm" render={<Link to={`/u/${encodeURIComponent(collector.username)}?tab=collection`} />}>{t("product.viewProfile", "ดูโปรไฟล์")}</Button>
                   </div>
                 </article>
               ))}

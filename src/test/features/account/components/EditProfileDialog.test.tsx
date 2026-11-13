@@ -4,7 +4,20 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
 import { EditProfileDialog } from '@/features/account/components/EditProfileDialog';
 import * as profileQueries from '@/features/account/profile.queries';
+import * as uploadLib from '@/lib/upload';
+import { toast } from '@/components/ui/toast';
 import type { AuthUser } from '@/features/auth/auth.types';
+
+vi.mock('@/components/ui/toast', () => ({
+  toast: {
+    add: vi.fn(),
+  },
+}));
+
+vi.mock('@/lib/upload', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/upload')>(),
+  uploadFile: vi.fn(),
+}));
 
 const mockUser: AuthUser = {
   id: 1,
@@ -33,31 +46,193 @@ describe('EditProfileDialog', () => {
     } as unknown as ReturnType<typeof profileQueries.useUpdateProfile>);
   });
 
-  it('renders form fields with default values without Avatar or Bio', () => {
+  it('renders form fields with default values, circular avatar uploader, and no Bio', () => {
     renderWithProviders(
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
     
+    // Circular Avatar uploader & helper caption
+    expect(screen.getByRole('button', { name: "เปลี่ยนรูปโปรไฟล์" })).toBeInTheDocument();
+    expect(screen.getByText("คลิกที่รูปเพื่อเปลี่ยน · JPG, PNG ไม่เกิน 5MB")).toBeInTheDocument();
+    expect(screen.getByText('JD')).toBeInTheDocument();
+
     // Name field
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     expect(nameInput).toHaveValue('John Doe');
 
     // Email field (disabled)
-    const emailInput = screen.getByLabelText(/email/i);
+    const emailInput = screen.getByLabelText("อีเมล");
     expect(emailInput).toHaveValue('john@example.com');
     expect(emailInput).toBeDisabled();
 
     // Phone number field
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     expect(phoneInput).toHaveValue('');
     expect(phoneInput).toHaveAttribute('placeholder', '(+66) 89-123-4567');
 
     // Bio field should be removed
     expect(screen.queryByLabelText(/bio/i)).not.toBeInTheDocument();
 
-    // Avatar upload buttons should be removed
-    expect(screen.queryByRole('button', { name: /change photo/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+    // Avatar remove button should not be present
+    expect(screen.queryByRole('button', { name: "นำออก" })).not.toBeInTheDocument();
+  });
+
+  it('renders existing avatar image when user has avatarUrl', () => {
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, avatarUrl: 'https://example.com/avatar.jpg' }}
+      />
+    );
+
+    const avatarImg = screen.getByRole('img', { name: 'John Doe' });
+    expect(avatarImg).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+  });
+
+  it('does not render img when avatarUrl has unsafe protocol like javascript:', () => {
+    renderWithProviders(
+      <EditProfileDialog
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        user={{ ...mockUser, avatarUrl: 'javascript:alert(1)' }}
+      />
+    );
+
+    expect(screen.queryByRole('img', { name: 'John Doe' })).not.toBeInTheDocument();
+    expect(screen.getByText('JD')).toBeInTheDocument();
+  });
+
+  it('triggers hidden file input when clicking avatar wrapper', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const fileInput = screen.getByLabelText('อัปโหลดรูปโปรไฟล์');
+    const clickSpy = vi.spyOn(fileInput, 'click');
+
+    const avatarButton = screen.getByRole('button', { name: 'เปลี่ยนรูปโปรไฟล์' });
+    await user.click(avatarButton);
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it('previews a valid JPG/PNG file and submits avatarUrl in payload', async () => {
+    const user = userEvent.setup();
+    class MockURL extends URL {
+      static createObjectURL = vi.fn(() => 'blob:mock-avatar-preview');
+      static revokeObjectURL = vi.fn();
+    }
+    vi.stubGlobal('URL', MockURL);
+    vi.mocked(uploadLib.uploadFile).mockResolvedValue('avatars/uploaded-key.png');
+    mockMutateAsync.mockResolvedValueOnce({});
+
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const fileInput = screen.getByLabelText('อัปโหลดรูปโปรไฟล์');
+    const validFile = new File(['valid png bytes'], 'avatar.png', { type: 'image/png' });
+    await user.upload(fileInput, validFile);
+
+    // Instant preview is shown
+    await waitFor(() => {
+      expect(screen.getByRole('img', { name: 'John Doe' })).toHaveAttribute(
+        'src',
+        'blob:mock-avatar-preview',
+      );
+    });
+
+    // Save button becomes enabled
+    const saveButton = screen.getByRole('button', { name: 'บันทึกการเปลี่ยนแปลง' });
+    await waitFor(() => expect(saveButton).toBeEnabled());
+
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          avatarUrl: 'avatars/uploaded-key.png',
+        }),
+      );
+    });
+
+    expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+    vi.unstubAllGlobals();
+  });
+
+  it('rejects files larger than 5MB and shows an error toast', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const fileInput = screen.getByLabelText('อัปโหลดรูปโปรไฟล์');
+    const largeFile = new File(['x'], 'large.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(largeFile, 'size', { value: 5 * 1024 * 1024 + 1 });
+
+    await user.upload(fileInput, largeFile);
+
+    expect(toast.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'error',
+        title: 'ขนาดไฟล์ต้องไม่เกิน 5MB',
+      }),
+    );
+
+    expect(screen.queryByRole('img', { name: 'John Doe' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'บันทึกการเปลี่ยนแปลง' })).toBeDisabled();
+  });
+
+  it('rejects files with unsupported format and shows an error toast', async () => {
+    renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const fileInput = screen.getByLabelText('อัปโหลดรูปโปรไฟล์');
+    const invalidFile = new File(['pdf data'], 'doc.pdf', { type: 'application/pdf' });
+
+    fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+
+    expect(toast.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'error',
+        title: 'รองรับเฉพาะไฟล์ JPG และ PNG เท่านั้น',
+      }),
+    );
+
+    expect(screen.queryByRole('img', { name: 'John Doe' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'บันทึกการเปลี่ยนแปลง' })).toBeDisabled();
+  });
+
+  it('revokes the created object URL cleanly when unmounting', async () => {
+    const user = userEvent.setup();
+    const revokeSpy = vi.fn();
+    class MockURL extends URL {
+      static createObjectURL = vi.fn(() => 'blob:mock-avatar-preview');
+      static revokeObjectURL = revokeSpy;
+    }
+    vi.stubGlobal('URL', MockURL);
+    vi.mocked(uploadLib.uploadFile).mockResolvedValue('avatars/uploaded-key.png');
+
+    const { unmount } = renderWithProviders(
+      <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
+    );
+
+    const fileInput = screen.getByLabelText('อัปโหลดรูปโปรไฟล์');
+    const validFile = new File(['valid png bytes'], 'avatar.png', { type: 'image/png' });
+    await user.upload(fileInput, validFile);
+
+    expect(screen.getByRole('img', { name: 'John Doe' })).toHaveAttribute(
+      'src',
+      'blob:mock-avatar-preview',
+    );
+
+    unmount();
+
+    expect(revokeSpy).toHaveBeenCalledWith('blob:mock-avatar-preview');
+    vi.unstubAllGlobals();
   });
 
   it('falls back to username when displayName is blank', () => {
@@ -69,7 +244,7 @@ describe('EditProfileDialog', () => {
       />
     );
 
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     expect(nameInput).toHaveValue('custom_username');
   });
 
@@ -81,13 +256,13 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
 
-    const nameInput = screen.getByLabelText(/name/i);
+    const nameInput = screen.getByLabelText("ชื่อ");
     fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     await user.type(phoneInput, '0812345678');
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     await user.click(saveButton);
 
     await waitFor(() => {
@@ -107,7 +282,7 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={mockUser} />
     );
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeDisabled();
   });
 
@@ -134,7 +309,7 @@ describe('EditProfileDialog', () => {
       />
     );
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
 
     expect(phoneInput).toBeInTheDocument();
@@ -190,7 +365,7 @@ describe('EditProfileDialog', () => {
       <EditProfileDialog open={true} onOpenChange={mockOnOpenChange} user={{ ...mockUser, phone: null }} />
     );
 
-    const phoneInput = screen.getByLabelText(/phone number/i);
+    const phoneInput = screen.getByLabelText("เบอร์โทรศัพท์");
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
 
     // Initially blank -> disabled
@@ -237,7 +412,7 @@ describe('EditProfileDialog', () => {
     const switchElement = screen.getByRole('switch', { name: 'แสดงเบอร์โทรบนหน้าร้าน' });
     await user.click(switchElement);
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeEnabled();
     await user.click(saveButton);
 
@@ -270,7 +445,7 @@ describe('EditProfileDialog', () => {
     expect(switchElement).toBeChecked();
     await user.click(switchElement);
 
-    const saveButton = screen.getByRole('button', { name: /save changes/i });
+    const saveButton = screen.getByRole('button', { name: "บันทึกการเปลี่ยนแปลง" });
     expect(saveButton).toBeEnabled();
     await user.click(saveButton);
 

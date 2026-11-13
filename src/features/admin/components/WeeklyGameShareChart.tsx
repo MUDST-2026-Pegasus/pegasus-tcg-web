@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useTranslate } from "@/lib/i18n";
 
 import { formatShare, GAME_COLORS } from "../weekly-report.format";
 import type { WeeklyGameDistribution } from "../weekly-report.types";
@@ -17,6 +18,7 @@ type WeeklyGameShareChartProps = {
 };
 
 export function WeeklyGameShareChart({ description, items: allItems }: WeeklyGameShareChartProps) {
+  const { t } = useTranslate("admin");
   // เกมที่ส่วนแบ่ง 0% ไม่มีชิ้นบนโดนัท ไม่ต้องกินที่ในคำอธิบายสี
   const items = allItems.filter((item) => item.percentage > 0);
   const colorOf = (index: number) => GAME_COLORS[index % GAME_COLORS.length];
@@ -31,7 +33,9 @@ export function WeeklyGameShareChart({ description, items: allItems }: WeeklyGam
 
   return (
     <Card className="w-full gap-0 rounded-xl border border-border p-6 shadow-none ring-0 lg:w-[385px]">
-      <p className="text-lg font-semibold text-card-foreground">สัดส่วนสต็อกและกำไรตามเกม</p>
+      <p className="text-lg font-semibold text-card-foreground">
+        {t("weeklyReport.chart.gameShareTitle", "สัดส่วนสต็อกและกำไรตามเกม")}
+      </p>
       <p className="mt-[3px] text-[13px] text-muted-foreground">{description}</p>
 
       {hasShare && leader ? (
@@ -78,13 +82,19 @@ export function WeeklyGameShareChart({ description, items: allItems }: WeeklyGam
           </ul>
 
           <p className="mt-4 text-[13px] leading-[19.5px] font-medium text-foreground">
-            {leader.game} ครองส่วนแบ่งยอดขายสูงสุด {formatShare(leader.percentage)} ·
-            ข้อมูลจากคำสั่งซื้อที่สำเร็จแล้ว
+            {t(
+              "weeklyReport.chart.leaderShareNote",
+              "{game} ครองส่วนแบ่งยอดขายสูงสุด {percentage} · ข้อมูลจากคำสั่งซื้อที่สำเร็จแล้ว",
+              {
+                game: leader.game,
+                percentage: formatShare(leader.percentage),
+              },
+            )}
           </p>
         </>
       ) : (
         <p className="flex h-[220px] items-center justify-center text-xs text-muted-foreground">
-          ยังไม่มีสัดส่วนตามเกมในสัปดาห์นี้
+          {t("weeklyReport.chart.noGameShare", "ยังไม่มีสัดส่วนตามเกมในสัปดาห์นี้")}
         </p>
       )}
     </Card>

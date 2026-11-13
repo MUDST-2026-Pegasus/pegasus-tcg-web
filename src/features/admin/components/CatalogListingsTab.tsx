@@ -276,7 +276,7 @@ export function CatalogListingsTab({
           onChange={(event) => setSearchText(event.target.value)}
         />
         <FilterSelect
-          label="Variant"
+          label={t("catalog.listings.variant", "เวอร์ชัน")}
           value={variantId === null ? ALL : String(variantId)}
           options={variantOptions}
           onChange={(value) => {

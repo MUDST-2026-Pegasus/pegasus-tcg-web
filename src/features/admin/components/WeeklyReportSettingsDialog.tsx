@@ -17,9 +17,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { applyApiErrors } from "@/lib/form";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-import { formatShare, STOCK_STATUS_BADGE } from "../weekly-report.format";
+import {
+  formatShare,
+  STOCK_STATUS_BADGE,
+  STOCK_STATUS_LABEL,
+} from "../weekly-report.format";
 import { useSaveWeeklyThresholds, useWeeklyThresholds } from "../weekly-report.queries";
 import { weeklyThresholdsSchema, type WeeklyThresholdsValues } from "../weekly-report.schema";
 import type { WeeklyStockStatus, WeeklyStockThresholds } from "../weekly-report.types";
@@ -34,6 +39,7 @@ type WeeklyReportSettingsDialogProps = {
  * ตัวฟอร์มอยู่ใน `DialogContent` ที่ถูก unmount ตอนปิด ค่าที่แก้ค้างจึงรีเซ็ตเอง
  */
 export function WeeklyReportSettingsDialog({ open, onOpenChange }: WeeklyReportSettingsDialogProps) {
+  const { t } = useTranslate("admin");
   const thresholds = useWeeklyThresholds(open);
 
   return (
@@ -41,7 +47,7 @@ export function WeeklyReportSettingsDialog({ open, onOpenChange }: WeeklyReportS
       <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-[440px]">
         <DialogHeader className="border-b border-border px-6 py-5">
           <DialogTitle className="text-lg font-semibold">
-            ตั้งค่าเกณฑ์รายงานสต็อกและกำไร
+            {t("weeklyReport.settings.title", "ตั้งค่าเกณฑ์รายงานสต็อกและกำไร")}
           </DialogTitle>
         </DialogHeader>
         <QueryBoundary
@@ -53,7 +59,7 @@ export function WeeklyReportSettingsDialog({ open, onOpenChange }: WeeklyReportS
               ))}
             </div>
           }
-          errorTitle="โหลดเกณฑ์รายงานไม่สำเร็จ"
+          errorTitle={t("weeklyReport.settings.loadError", "โหลดเกณฑ์รายงานไม่สำเร็จ")}
         >
           {(current) => <SettingsForm current={current} onClose={() => onOpenChange(false)} />}
         </QueryBoundary>
@@ -76,6 +82,7 @@ function StatusBadge({ status, children }: { status: WeeklyStockStatus; children
 }
 
 function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; onClose: () => void }) {
+  const { t } = useTranslate("admin");
   const save = useSaveWeeklyThresholds();
   const {
     register,
@@ -83,7 +90,7 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
     setError,
     formState: { errors },
   } = useForm<WeeklyThresholdsValues>({
-    resolver: zodResolver(weeklyThresholdsSchema),
+    resolver: zodResolver(weeklyThresholdsSchema()),
     defaultValues: {
       lowStockThreshold: String(current.lowStockThreshold),
       fastMovingPercent: String(current.fastMovingPercent),
@@ -98,15 +105,18 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
       },
       {
         onSuccess: () => {
-          toast.add({ type: "success", title: "บันทึกการตั้งค่าแล้ว" });
+          toast.add({
+            type: "success",
+            title: t("weeklyReport.settings.saveSuccess", "บันทึกการตั้งค่าแล้ว"),
+          });
           onClose();
         },
         onError: (error) => {
           if (!applyApiErrors(error, setError)) {
             toast.add({
               type: "error",
-              title: "บันทึกการตั้งค่าไม่สำเร็จ",
-              description: "กรุณาลองใหม่อีกครั้ง",
+              title: t("weeklyReport.settings.saveErrorTitle", "บันทึกการตั้งค่าไม่สำเร็จ"),
+              description: t("actions.retry", "กรุณาลองใหม่อีกครั้ง", { ns: "common" }),
             });
           }
         },
@@ -118,7 +128,9 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
     <form onSubmit={onSubmit} noValidate>
       <div className="flex flex-col gap-4 px-6 py-5">
         <Field data-invalid={Boolean(errors.lowStockThreshold) || undefined}>
-          <FieldLabel htmlFor="low-stock-threshold">เกณฑ์แจ้งเตือนสต็อกต่ำ (ชิ้น)</FieldLabel>
+          <FieldLabel htmlFor="low-stock-threshold">
+            {t("weeklyReport.settings.lowStockLabel", "เกณฑ์แจ้งเตือนสต็อกต่ำ (ชิ้น)")}
+          </FieldLabel>
           <div className="relative">
             <Input
               id="low-stock-threshold"
@@ -127,14 +139,17 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
               aria-invalid={Boolean(errors.lowStockThreshold)}
               {...register("lowStockThreshold")}
             />
-            <StatusBadge status="LOW_STOCK">สต็อกต่ำ</StatusBadge>
+            <StatusBadge status="LOW_STOCK">{STOCK_STATUS_LABEL.LOW_STOCK}</StatusBadge>
           </div>
           <FieldError errors={[errors.lowStockThreshold]} />
         </Field>
 
         <Field data-invalid={Boolean(errors.fastMovingPercent) || undefined}>
           <FieldLabel htmlFor="fast-moving-percent">
-            เกณฑ์สต็อกหมุนเวียนเร็ว (ยอดขายต่อสัปดาห์ &gt; %)
+            {t(
+              "weeklyReport.settings.fastMovingLabel",
+              "เกณฑ์สต็อกหมุนเวียนเร็ว (ยอดขายต่อสัปดาห์ > %)",
+            )}
           </FieldLabel>
           <div className="relative">
             <Input
@@ -144,13 +159,17 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
               aria-invalid={Boolean(errors.fastMovingPercent)}
               {...register("fastMovingPercent")}
             />
-            <StatusBadge status="FAST_MOVING">สต็อกหมุนเวียนเร็ว</StatusBadge>
+            <StatusBadge status="FAST_MOVING">
+              {t("weeklyReport.settings.fastMovingBadge", "สต็อกหมุนเวียนเร็ว")}
+            </StatusBadge>
           </div>
           <FieldError errors={[errors.fastMovingPercent]} />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="standard-commission-rate">อัตราค่าคอมมิชชั่นมาตรฐาน (%)</FieldLabel>
+          <FieldLabel htmlFor="standard-commission-rate">
+            {t("weeklyReport.settings.standardCommissionLabel", "อัตราค่าคอมมิชชั่นมาตรฐาน (%)")}
+          </FieldLabel>
           <div className="relative">
             <Input
               id="standard-commission-rate"
@@ -160,7 +179,7 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
               value={formatShare(current.standardCommissionRatePercent)}
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-              อ้างอิงจากระบบค่าคอมมิชชั่น
+              {t("weeklyReport.settings.standardCommissionHint", "อ้างอิงจากระบบค่าคอมมิชชั่น")}
             </span>
           </div>
         </Field>
@@ -174,15 +193,15 @@ function SettingsForm({ current, onClose }: { current: WeeklyStockThresholds; on
           disabled={save.isPending}
           onClick={onClose}
         >
-          ยกเลิก
+          {t("actions.cancel", "ยกเลิก", { ns: "common" })}
         </Button>
         <Button type="submit" className="h-[41px] rounded-lg px-4" disabled={save.isPending}>
           {save.isPending ? (
             <>
-              <Spinner /> กำลังบันทึก...
+              <Spinner /> {t("weeklyReport.settings.saving", "กำลังบันทึก...")}
             </>
           ) : (
-            "บันทึกการตั้งค่า"
+            t("weeklyReport.settings.saveButton", "บันทึกการตั้งค่า")
           )}
         </Button>
       </DialogFooter>

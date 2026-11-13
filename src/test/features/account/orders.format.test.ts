@@ -21,22 +21,22 @@ describe("orders.format", () => {
 
   describe("formatOrderStatus", () => {
     it("formats known backend status enums accurately", () => {
-      expect(formatOrderStatus("PENDING_PAYMENT")).toBe("Pending Payment");
-      expect(formatOrderStatus("PAID")).toBe("Paid");
-      expect(formatOrderStatus("PREPARING")).toBe("Processing");
-      expect(formatOrderStatus("PROCESSING")).toBe("Processing");
-      expect(formatOrderStatus("SHIPPED")).toBe("Shipped");
-      expect(formatOrderStatus("DELIVERED")).toBe("Completed");
-      expect(formatOrderStatus("COMPLETED")).toBe("Completed");
-      expect(formatOrderStatus("CANCELLED")).toBe("Cancelled");
-      expect(formatOrderStatus("CANCELED")).toBe("Cancelled");
+      expect(formatOrderStatus("PENDING_PAYMENT")).toBe("รอชำระเงิน");
+      expect(formatOrderStatus("PAID")).toBe("ชำระแล้ว");
+      expect(formatOrderStatus("PREPARING")).toBe("กำลังเตรียมสินค้า");
+      expect(formatOrderStatus("PROCESSING")).toBe("กำลังเตรียมสินค้า");
+      expect(formatOrderStatus("SHIPPED")).toBe("จัดส่งแล้ว");
+      expect(formatOrderStatus("DELIVERED")).toBe("สำเร็จ");
+      expect(formatOrderStatus("COMPLETED")).toBe("สำเร็จ");
+      expect(formatOrderStatus("CANCELLED")).toBe("ยกเลิกแล้ว");
+      expect(formatOrderStatus("CANCELED")).toBe("ยกเลิกแล้ว");
     });
 
     it("handles case-insensitive and trimmed inputs", () => {
-      expect(formatOrderStatus("pending_payment")).toBe("Pending Payment");
-      expect(formatOrderStatus("  paid  ")).toBe("Paid");
-      expect(formatOrderStatus("preparing")).toBe("Processing");
-      expect(formatOrderStatus("processing")).toBe("Processing");
+      expect(formatOrderStatus("pending_payment")).toBe("รอชำระเงิน");
+      expect(formatOrderStatus("  paid  ")).toBe("ชำระแล้ว");
+      expect(formatOrderStatus("preparing")).toBe("กำลังเตรียมสินค้า");
+      expect(formatOrderStatus("processing")).toBe("กำลังเตรียมสินค้า");
     });
 
     it("falls back to title case for other SNAKE_CASE statuses", () => {
@@ -55,45 +55,45 @@ describe("orders.format", () => {
   describe("getOrderStatusBadge", () => {
     it("returns correct variant and class for PENDING_PAYMENT", () => {
       const result = getOrderStatusBadge("PENDING_PAYMENT");
-      expect(result.label).toBe("Pending Payment");
+      expect(result.label).toBe("รอชำระเงิน");
       expect(result.variant).toBe("secondary");
       expect(result.className).toContain("bg-amber-500");
     });
 
     it("returns correct variant and class for PAID and PROCESSING", () => {
       const paidResult = getOrderStatusBadge("PAID");
-      expect(paidResult.label).toBe("Paid");
+      expect(paidResult.label).toBe("ชำระแล้ว");
       expect(paidResult.variant).toBe("secondary");
       expect(paidResult.className).toContain("bg-blue-100");
 
       const procResult = getOrderStatusBadge("PROCESSING");
-      expect(procResult.label).toBe("Processing");
+      expect(procResult.label).toBe("กำลังเตรียมสินค้า");
       expect(procResult.variant).toBe("secondary");
       expect(procResult.className).toContain("bg-blue-100");
     });
 
     it("returns correct variant and class for SHIPPED", () => {
       const result = getOrderStatusBadge("SHIPPED");
-      expect(result.label).toBe("Shipped");
+      expect(result.label).toBe("จัดส่งแล้ว");
       expect(result.variant).toBe("secondary");
       expect(result.className).toContain("bg-purple-100");
     });
 
     it("returns correct variant and class for COMPLETED and DELIVERED", () => {
       const compResult = getOrderStatusBadge("COMPLETED");
-      expect(compResult.label).toBe("Completed");
+      expect(compResult.label).toBe("สำเร็จ");
       expect(compResult.variant).toBe("secondary");
       expect(compResult.className).toContain("bg-emerald-100");
 
       const delivResult = getOrderStatusBadge("DELIVERED");
-      expect(delivResult.label).toBe("Completed");
+      expect(delivResult.label).toBe("สำเร็จ");
       expect(delivResult.variant).toBe("secondary");
       expect(delivResult.className).toContain("bg-emerald-100");
     });
 
     it("returns outline variant for CANCELLED", () => {
       const result = getOrderStatusBadge("CANCELLED");
-      expect(result.label).toBe("Cancelled");
+      expect(result.label).toBe("ยกเลิกแล้ว");
       expect(result.variant).toBe("outline");
     });
 

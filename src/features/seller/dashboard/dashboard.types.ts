@@ -13,7 +13,7 @@ export type SalesChartBar = {
   /** "YYYY-MM" */
   month: string;
   amount: number;
-  /** ไว้ให้ screen reader / tooltip อ่าน เช่น "ต.ค. 69 ฿1,850" */
+  /** ไว้ให้ screen reader / tooltip อ่าน เช่น "ต.ค. 69 THB 1,850" */
   label: string;
   /** true = เดือนที่เลือก เน้นสีขาวเต็ม ที่เหลือจางกว่า */
   highlighted: boolean;

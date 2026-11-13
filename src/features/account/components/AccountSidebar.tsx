@@ -26,12 +26,12 @@ export function AccountSidebar({ user }: { user: AccountSidebarUser }) {
   const { pathname } = useLocation();
   const { t } = useTranslate("buyer");
   const accountLinks = [
-    { label: t("account.nav.overview", "Account Overview"), to: "/account/profile", icon: CircleUserRound },
-    { label: t("account.nav.orders", "Order History"), to: "/account/orders", icon: ClipboardList },
-    { label: t("account.nav.auctions", "Auctions"), to: "/account/auctions", icon: Gavel },
-    { label: t("account.nav.addresses", "Address Book"), to: "/account/addresses", icon: MapPin },
-    { label: t("account.nav.coupons", "My Coupons"), to: "/account/coupons", icon: TicketPercent },
-    { label: t("account.nav.collection", "My Collection"), to: "/account/collection", icon: GalleryVerticalEnd },
+    { label: t("account.nav.overview", "ภาพรวมบัญชี"), to: "/account/profile", icon: CircleUserRound },
+    { label: t("account.nav.orders", "ประวัติคำสั่งซื้อ"), to: "/account/orders", icon: ClipboardList },
+    { label: t("account.nav.auctions", "การประมูล"), to: "/account/auctions", icon: Gavel },
+    { label: t("account.nav.addresses", "สมุดที่อยู่"), to: "/account/addresses", icon: MapPin },
+    { label: t("account.nav.coupons", "โค้ดของฉัน"), to: "/account/coupons", icon: TicketPercent },
+    { label: t("account.nav.collection", "คอลเลกชันของฉัน"), to: "/account/collection", icon: GalleryVerticalEnd },
   ];
 
   return (

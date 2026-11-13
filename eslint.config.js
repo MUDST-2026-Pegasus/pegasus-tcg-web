@@ -19,7 +19,6 @@ const I18N_PENDING = [
   // TCG-744 I18N-24 ลดราคา / Flash Sale (namespace sale)
   // TCG-745 I18N-25 ประมูล (namespace auction)
   // TCG-553 I18N-13 คืนสินค้า / คืนเงิน / รีวิว
-  'src/features/finance/**',
   // TCG-558 I18N-18 admin: ผู้ใช้ อนุมัติผู้ขาย รีวิว ภาพรวม บันทึกกิจกรรม รายงาน
   'src/features/admin/admin.fixture.ts',
   'src/features/admin/audit.format.ts',
@@ -63,6 +62,8 @@ const I18N_PENDING = [
   'src/features/admin/verification.schema.ts',
   'src/features/admin/weekly-report.format.ts',
   'src/features/admin/weekly-report.schema.ts',
+  // TCG-559 I18N-19 หน้า Terms / Privacy ฉบับไทย (แยกไฟล์ per-language)
+  'src/features/legal/**/*.th.tsx',
   // ยังไม่มีการ์ด
   'src/hooks/use-file-upload.ts',
   // จบรายการ

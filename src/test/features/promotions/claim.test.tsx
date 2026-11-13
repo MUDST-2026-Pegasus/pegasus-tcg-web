@@ -44,7 +44,7 @@ const shopCode: ClaimableCode = {
   ...pegasus10,
   id: 42,
   code: "CVBKK100",
-  name: "ลด ฿100 สินค้าในร้าน",
+  name: "ลด THB 100.00 สินค้าในร้าน",
   ownerType: "SELLER",
   shop: { sellerProfileId: 6, name: "CardVault BKK", username: "cardvaultbkk" },
   discountType: "FIXED",
@@ -106,11 +106,11 @@ describe("ClaimTicket", () => {
       </>,
     );
     expect(screen.getByText("PEGASUS")).toBeInTheDocument();
-    expect(screen.getByText("สูงสุด ฿200")).toBeInTheDocument();
+    expect(screen.getByText("สูงสุด THB 200.00")).toBeInTheDocument();
     expect(screen.getByText("ไม่จำกัดจำนวน")).toBeInTheDocument();
     expect(screen.getByText("SHOP")).toBeInTheDocument();
     expect(screen.getByText("CardVault BKK")).toBeInTheDocument();
-    expect(screen.getByText("ขั้นต่ำ ฿2,000 จากร้านนี้")).toBeInTheDocument();
+    expect(screen.getByText("ขั้นต่ำ THB 2,000.00 จากร้านนี้")).toBeInTheDocument();
   });
 
   it("hides the button for a shop looking at its own codes", () => {
@@ -141,7 +141,7 @@ describe("ClaimTicketRail", () => {
     signedIn(true);
     renderRail([{ ...pegasus10, claimed: true }, shopCode]);
     const codes = within(screen.getByRole("list", { name: "โค้ดส่วนลด" })).getAllByRole("listitem");
-    expect(codes[0]).toHaveTextContent("ลด ฿100 สินค้าในร้าน");
+    expect(codes[0]).toHaveTextContent("ลด THB 100.00 สินค้าในร้าน");
     expect(codes[1]).toHaveTextContent("ลด 10% ทุกเกม");
   });
 

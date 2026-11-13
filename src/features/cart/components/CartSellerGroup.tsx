@@ -77,7 +77,7 @@ export function CartSellerGroup({
 
       <ul className="flex flex-col">
         {items.map((item) => {
-          const name = item.productName || t("cart.common.listingFallback", "Listing #{id}", { id: item.listingId });
+          const name = item.productName || t("cart.common.listingFallback", "ประกาศ #{id}", { id: item.listingId });
           const price = item.currentPrice ?? item.unitPriceAtAdd;
           const condition = item.condition
             ? CONDITION_LABELS[item.condition as CardCondition] ?? item.condition

@@ -4,6 +4,8 @@ import {
   formatPrice,
   productHref,
   PRODUCT_TYPE_LABELS,
+  categoryLabel,
+  localNameOnly,
 } from "@/features/catalog/catalog.mappers";
 import type { CardCondition, ProductType } from "@/features/catalog/catalog.types";
 
@@ -21,9 +23,9 @@ describe("catalog.mappers unit tests", () => {
   });
 
   describe("formatPrice", () => {
-    it("returns 'Out of stock' when price is null or undefined", () => {
-      expect(formatPrice(null)).toBe("Out of stock");
-      expect(formatPrice(undefined)).toBe("Out of stock");
+    it("returns 'สินค้าหมด' when price is null or undefined", () => {
+      expect(formatPrice(null)).toBe("สินค้าหมด");
+      expect(formatPrice(undefined)).toBe("สินค้าหมด");
     });
 
     it("formats 0 as zero Thai Baht currency", () => {
@@ -40,7 +42,7 @@ describe("catalog.mappers unit tests", () => {
   });
 
   describe("PRODUCT_TYPE_LABELS", () => {
-    it("maps all standard product types to human-readable English labels", () => {
+    it("maps all standard product types to labels in the current language", () => {
       const types: ProductType[] = [
         "SINGLE_CARD",
         "BOOSTER_PACK",
@@ -57,8 +59,25 @@ describe("catalog.mappers unit tests", () => {
         expect(typeof PRODUCT_TYPE_LABELS[type]).toBe("string");
       }
 
-      expect(PRODUCT_TYPE_LABELS.SINGLE_CARD).toBe("Single Card");
-      expect(PRODUCT_TYPE_LABELS.BOOSTER_BOX).toBe("Booster Box");
+      expect(PRODUCT_TYPE_LABELS.SINGLE_CARD).toBe("การ์ดใบเดี่ยว");
+      expect(PRODUCT_TYPE_LABELS.BOOSTER_BOX).toBe("กล่องสุ่ม");
+    });
+  });
+
+  describe("categoryLabel [TCG-560]", () => {
+    it("translates known category codes and falls back to the DB name", () => {
+      expect(categoryLabel({ code: "SLEEVES", name: "x" })).toBe("ซองใส่การ์ด");
+      expect(categoryLabel({ code: "NEW_THING", name: "หมวดใหม่" })).toBe("หมวดใหม่");
+      expect(categoryLabel({ code: "toString", name: "หมวดใหม่" })).toBe("หมวดใหม่");
+    });
+  });
+
+  describe("localNameOnly [TCG-560]", () => {
+    it("shows the Thai local name only in Thai", () => {
+      expect(localNameOnly("ซองสุ่ม FB07")).toBe("ซองสุ่ม FB07");
+      document.documentElement.lang = "en";
+      expect(localNameOnly("แชงคูส (SEC)")).toBeNull();
+      document.documentElement.lang = "th";
     });
   });
 
@@ -76,7 +95,7 @@ describe("catalog.mappers unit tests", () => {
       expect(CONDITION_LABELS.MP).toBe("Moderately Played");
       expect(CONDITION_LABELS.HP).toBe("Heavily Played");
       expect(CONDITION_LABELS.DMG).toBe("Damaged");
-      expect(CONDITION_LABELS.SEALED).toBe("Sealed");
+      expect(CONDITION_LABELS.SEALED).toBe("ซีล");
     });
   });
 });

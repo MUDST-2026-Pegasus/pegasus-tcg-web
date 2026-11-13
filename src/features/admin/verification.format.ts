@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 
 import { hasErrorCode } from "@/lib/api";
+import { formatDate, formatYear, translate, translateError } from "@/lib/i18n";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { Verification, VerificationStatus } from "./verification.types";
-import { currentLanguage, formatDate, formatYear, translateError } from "@/lib/i18n";
 
 /**
  * ตัวช่วยแปลง `Verification` ที่ backend ส่งมา → ชิ้นส่วนที่เอาไปโชว์ได้
@@ -14,7 +14,10 @@ import { currentLanguage, formatDate, formatYear, translateError } from "@/lib/i
 /** "14 ก.ย. 2569 · 10:24 น." */
 export function formatThaiDateTime(value: string): string {
   const date = new Date(value);
-  return `${formatDate(date)} · ${format(date, "HH:mm")}${currentLanguage() === "th" ? " น." : ""}`;
+  return translate("admin", "verification.dateTime", "{date} · {time} น.", {
+    date: formatDate(date),
+    time: format(date, "HH:mm"),
+  });
 }
 
 export type VerificationStatusMeta = {
@@ -32,29 +35,37 @@ export const VERIFICATION_STATUS_META: Record<
   VerificationStatus,
   VerificationStatusMeta
 > = {
-  SUBMITTED: {
-    label: "รอตรวจสอบ",
-    shortLabel: "รอตรวจสอบ",
-    dotClass: "bg-[#b45309]",
-    badgeClass: "bg-[#fdf0dd] text-[#b45309]",
+  get SUBMITTED() {
+    return {
+      label: translate("admin", "verification.status.submitted", "รอตรวจสอบ"),
+      shortLabel: translate("admin", "verification.status.submittedShort", "รอตรวจสอบ"),
+      dotClass: "bg-[#b45309]",
+      badgeClass: "bg-[#fdf0dd] text-[#b45309]",
+    };
   },
-  UNDER_REVIEW: {
-    label: "กำลังตรวจ",
-    shortLabel: "กำลังตรวจ",
-    dotClass: "bg-[#0058bc]",
-    badgeClass: "bg-[#e8f1fc] text-[#0058bc]",
+  get UNDER_REVIEW() {
+    return {
+      label: translate("admin", "verification.status.underReview", "กำลังตรวจ"),
+      shortLabel: translate("admin", "verification.status.underReviewShort", "กำลังตรวจ"),
+      dotClass: "bg-[#0058bc]",
+      badgeClass: "bg-[#e8f1fc] text-[#0058bc]",
+    };
   },
-  APPROVED: {
-    label: "อนุมัติแล้ว",
-    shortLabel: "อนุมัติแล้ว",
-    dotClass: "bg-[#12805c]",
-    badgeClass: "bg-[#e3f4ec] text-[#12805c]",
+  get APPROVED() {
+    return {
+      label: translate("admin", "verification.status.approved", "อนุมัติแล้ว"),
+      shortLabel: translate("admin", "verification.status.approvedShort", "อนุมัติแล้ว"),
+      dotClass: "bg-[#12805c]",
+      badgeClass: "bg-[#e3f4ec] text-[#12805c]",
+    };
   },
-  REJECTED: {
-    label: "ปฏิเสธ",
-    shortLabel: "ปฏิเสธ",
-    dotClass: "bg-[#d0342c]",
-    badgeClass: "bg-[#fbe9e8] text-[#d0342c]",
+  get REJECTED() {
+    return {
+      label: translate("admin", "verification.status.rejected", "ปฏิเสธ"),
+      shortLabel: translate("admin", "verification.status.rejectedShort", "ปฏิเสธ"),
+      dotClass: "bg-[#d0342c]",
+      badgeClass: "bg-[#fbe9e8] text-[#d0342c]",
+    };
   },
 };
 
@@ -110,14 +121,27 @@ export function verificationErrorMessage(
   fallback: string,
 ): string {
   if (hasErrorCode(error, "VERIFICATION_ALREADY_DECIDED")) {
-    return "แอดมินคนอื่นรับหรือตัดสินคำขอนี้ไปก่อนแล้ว คิวจะอัปเดตให้เอง";
+    return translate("admin", "verification.error.alreadyDecided", "แอดมินคนอื่นรับหรือตัดสินคำขอนี้ไปก่อนแล้ว คิวจะอัปเดตให้เอง");
   }
   if (hasErrorCode(error, "VERIFICATION_NOT_FOUND")) {
-    return "ไม่พบคำขอนี้แล้ว";
+    return translate("admin", "verification.error.notFound", "ไม่พบคำขอนี้แล้ว");
   }
   // คำขอสองใบใช้เลขบัญชีเดียวกันรอตรวจพร้อมกันได้ ใบแรกอนุมัติไปแล้ว ใบนี้จึงอนุมัติไม่ได้อีก
   if (hasErrorCode(error, "BANK_ACCOUNT_ALREADY_USED")) {
-    return "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง";
+    return translate("admin", "verification.error.bankAccountAlreadyUsed", "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง");
   }
   return translateError(error, fallback);
 }
+
+// @tolgee-key {"key": "verification.status.submitted", "ns": "admin", "defaultValue": "รอตรวจสอบ"}
+// @tolgee-key {"key": "verification.status.submittedShort", "ns": "admin", "defaultValue": "รอตรวจสอบ"}
+// @tolgee-key {"key": "verification.status.underReview", "ns": "admin", "defaultValue": "กำลังตรวจ"}
+// @tolgee-key {"key": "verification.status.underReviewShort", "ns": "admin", "defaultValue": "กำลังตรวจ"}
+// @tolgee-key {"key": "verification.status.approved", "ns": "admin", "defaultValue": "อนุมัติแล้ว"}
+// @tolgee-key {"key": "verification.status.approvedShort", "ns": "admin", "defaultValue": "อนุมัติแล้ว"}
+// @tolgee-key {"key": "verification.status.rejected", "ns": "admin", "defaultValue": "ปฏิเสธ"}
+// @tolgee-key {"key": "verification.status.rejectedShort", "ns": "admin", "defaultValue": "ปฏิเสธ"}
+// @tolgee-key {"key": "verification.error.alreadyDecided", "ns": "admin", "defaultValue": "แอดมินคนอื่นรับหรือตัดสินคำขอนี้ไปก่อนแล้ว คิวจะอัปเดตให้เอง"}
+// @tolgee-key {"key": "verification.error.notFound", "ns": "admin", "defaultValue": "ไม่พบคำขอนี้แล้ว"}
+// @tolgee-key {"key": "verification.error.bankAccountAlreadyUsed", "ns": "admin", "defaultValue": "เลขบัญชีนี้ผูกกับร้านอื่นที่อนุมัติไปแล้ว ให้ปฏิเสธคำขอนี้พร้อมแจ้งผู้ขายยื่นใหม่ด้วยบัญชีของตัวเอง"}
+// @tolgee-key {"key": "verification.dateTime", "ns": "admin", "defaultValue": "{date} · {time} น."}

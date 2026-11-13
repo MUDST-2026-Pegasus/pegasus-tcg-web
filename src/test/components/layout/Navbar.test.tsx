@@ -16,8 +16,8 @@ vi.mock("@/components/layout/nav-shared", () => ({
   useAccountLinks: () => {
     const sellerLink =
       authState.role === "SELLER"
-        ? { label: "Seller Dashboard", to: "/seller" }
-        : { label: "Become a Seller", to: "/become-a-seller" };
+        ? { label: "แดชบอร์ดผู้ขาย", to: "/seller" }
+        : { label: "สมัครเป็นผู้ขาย", to: "/become-a-seller" };
     return {
       user: null,
       isAuthenticated: authState.isAuthenticated,
@@ -56,7 +56,7 @@ function renderNavbar(path = "/") {
   );
 }
 const categoryNav = () =>
-  screen.getByRole("navigation", { name: "Shop categories" });
+  screen.getByRole("navigation", { name: "หมวดหมู่สินค้า" });
 const activeLabels = () =>
   Array.from(categoryNav().querySelectorAll('[aria-current="page"]')).map(
     (element) => element.textContent,
@@ -71,19 +71,23 @@ describe("Navbar", () => {
     authState.role = "";
   });
   it.each([
-    ["/", "Home"],
-    ["/search", "All products"],
+    ["/", "หน้าแรก"],
+    ["/search", "สินค้าทั้งหมด"],
     ["/search?game=pokemon-tcg", "Pokémon"],
     ["/search?game=one-piece-card-game", "One Piece"],
-    ["/search?sort=newest", "New arrivals"],
-    ["/auctions", "Auction"],
-    ["/auctions/142", "Auction"],
-    ["/search?q=Pikachu", "All products"],
+    ["/search?sort=newest", "มาใหม่"],
+    ["/auctions", "ประมูล"],
+    ["/auctions/142", "ประมูล"],
+    ["/search?q=Pikachu", "สินค้าทั้งหมด"],
     ["/search?game=pokemon-tcg&sort=newest", "Pokémon"],
     ["/cart", null],
   ])("marks only the current category at %s", (path, label) => {
     renderNavbar(path);
     expect(activeLabels()).toEqual(label ? [label] : []);
+  });
+  it("shows the TH/EN language switch [TCG-562]", () => {
+    renderNavbar();
+    expect(screen.getByRole("switch", { name: "ภาษาอังกฤษ / English" })).toHaveAttribute("aria-checked", "false");
   });
   it("resolves game slugs from the catalog", async () => {
     getGames.mockResolvedValue([
@@ -106,7 +110,7 @@ describe("Navbar", () => {
   });
   it("submits a search and preserves the game filter while resetting page", () => {
     renderNavbar("/search?game=pokemon-tcg&page=3&q=old");
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getByRole("combobox", { name: "ค้นหา" });
     expect(input).toHaveValue("old");
     fireEvent.change(input, { target: { value: "Pikachu" } });
     fireEvent.submit(input.closest("form")!);
@@ -116,7 +120,7 @@ describe("Navbar", () => {
   });
   it("focuses search with slash unless another field is active", () => {
     renderNavbar();
-    const input = screen.getAllByRole("textbox", { name: "ค้นหา" })[0];
+    const input = screen.getByRole("combobox", { name: "ค้นหา" });
     fireEvent.keyDown(window, { key: "/" });
     expect(input).toHaveFocus();
     const other = document.createElement("input");
@@ -126,8 +130,10 @@ describe("Navbar", () => {
     expect(other).toHaveFocus();
     other.remove();
     input.focus();
+    expect(input).toHaveAttribute("aria-expanded", "true");
     fireEvent.keyDown(input, { key: "Escape" });
     expect(input).not.toHaveFocus();
+    expect(input).toHaveAttribute("aria-expanded", "false");
   });
   it("hides the seller link for guests, shows it for buyers, and sends sellers to their dashboard", () => {
     const { unmount } = renderNavbar();
@@ -139,13 +145,13 @@ describe("Navbar", () => {
     const buyer = renderNavbar();
     expect(
       categoryNav().querySelector('a[href="/become-a-seller"]'),
-    ).toHaveTextContent("Become a seller");
+    ).toHaveTextContent("สมัครเป็นผู้ขาย");
     buyer.unmount();
     authState.isAuthenticated = true;
     authState.role = "SELLER";
     renderNavbar();
     expect(categoryNav().querySelector('a[href="/seller"]')).toHaveTextContent(
-      "Seller Dashboard",
+      "แดชบอร์ดผู้ขาย",
     );
   });
   it("hides the seller link while the account role is loading", () => {
@@ -160,19 +166,19 @@ describe("Navbar", () => {
   });
   it("shows guest account actions without a seller link in the mobile drawer", async () => {
     renderNavbar();
-    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+    fireEvent.click(screen.getByRole("button", { name: "เปิดเมนู" }));
     expect(
       await screen.findByText("เข้าสู่ระบบเพื่อดูคำสั่งซื้อและคอลเลกชันของคุณ"),
     ).toBeInTheDocument();
     expect(screen.queryByText("SELL")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /Become a seller/i }),
+      screen.queryByRole("link", { name: "สมัครเป็นผู้ขาย" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Log in" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "เข้าสู่ระบบ" })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(screen.getByRole("button", { name: "Sign up" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "สมัครสมาชิก" })).toHaveAttribute(
       "href",
       "/register",
     );
@@ -182,17 +188,17 @@ describe("Navbar", () => {
     );
   });
   it.each([
-    ["", "Become a Seller", "/become-a-seller"],
-    ["SELLER", "Seller Dashboard", "/seller"],
+    ["", "สมัครเป็นผู้ขาย", "/become-a-seller"],
+    ["SELLER", "แดชบอร์ดผู้ขาย", "/seller"],
   ])(
     "shows the correct mobile seller destination for role %s",
     async (role, label, to) => {
       authState.isAuthenticated = true;
       authState.role = role;
       renderNavbar();
-      fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+      fireEvent.click(screen.getByRole("button", { name: "เปิดเมนู" }));
       expect(await screen.findByRole("dialog")).toBeInTheDocument();
-      expect(screen.getByText("ACCOUNT")).toBeInTheDocument();
+      expect(screen.getByText("บัญชี")).toBeInTheDocument();
       expect(
         screen.getByRole("dialog").querySelector(`a[href="${to}"]`),
       ).toHaveTextContent(label);

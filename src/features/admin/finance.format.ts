@@ -4,18 +4,16 @@ import { hasErrorCode } from "@/lib/api";
 
 import type { SellerAvatarAccent } from "./admin.types";
 import type { PayoutStatus, RefundStatus } from "./finance.types";
-import { currentLanguage, dateFnsLocale, formatDateTime, intlLocale, translate, translateError } from "@/lib/i18n";
+import { currentLanguage, dateFnsLocale, formatDateTime, translate, translateError, formatMoney } from "@/lib/i18n";
 
-/** "฿1,850.00" — ยอดในรายละเอียด */
+/** "THB 1,850.00" — ยอดในรายละเอียด */
 export function formatBaht(value: number): string {
-  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-  return `฿${value.toLocaleString(intlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return formatMoney(value);
 }
 
-/** "฿1,850" — ยอดบนการ์ดคิว (ทศนิยมโผล่เฉพาะเมื่อมีสตางค์) */
+/** "THB 1,850" — ยอดบนการ์ดคิว (ทศนิยมโผล่เฉพาะเมื่อมีสตางค์) */
 export function formatBahtShort(value: number): string {
-  // eslint-disable-next-line no-restricted-syntax -- ฿ คือสัญลักษณ์สกุลเงิน (format เงินเป็นงาน I18N-02)
-  return `฿${value.toLocaleString(intlLocale(), { maximumFractionDigits: 2 })}`;
+  return formatMoney(value);
 }
 
 /** "14 ต.ค. 2569 00:05" / "14 Oct 2026, 00:05" */

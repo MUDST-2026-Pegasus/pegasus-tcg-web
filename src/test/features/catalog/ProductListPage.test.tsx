@@ -136,7 +136,8 @@ describe("ProductListPage Component", () => {
     await user.click(nextButton);
 
     expect(getProductsSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, size: 20 })
+      expect.objectContaining({ page: 1, size: 20 }),
+      expect.any(AbortSignal),
     );
   });
 });

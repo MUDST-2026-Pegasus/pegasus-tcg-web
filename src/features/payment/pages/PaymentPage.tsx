@@ -232,10 +232,10 @@ export function PaymentPage() {
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            {t("payment.page.title", "Secure Checkout")}
+            {t("payment.page.title", "ชำระเงินอย่างปลอดภัย")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {t("payment.page.subtitle", "Pay with PromptPay, then upload your slip so we can confirm your order.")}
+            {t("payment.page.subtitle", "ชำระด้วยพร้อมเพย์ แล้วอัปโหลดสลิปเพื่อให้เรายืนยันคำสั่งซื้อ")}
           </p>
         </div>
 
@@ -251,13 +251,13 @@ export function PaymentPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-                    {t("payment.page.amountDue", "AMOUNT DUE")}
+                    {t("payment.page.amountDue", "ยอดที่ต้องชำระ")}
                   </span>
                   <p className="text-3xl font-extrabold text-foreground tracking-tight mt-0.5">
                     THB {formattedAmount}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {t("payment.page.orderLine", "Order #{number} · Pay exactly this amount", { number: orderNumber })}
+                    {t("payment.page.orderLine", "คำสั่งซื้อ #{number} · ชำระยอดนี้ให้ตรงทุกสตางค์", { number: orderNumber })}
                   </p>
                   {auctionNumber && <AuctionOrderBadge auctionNumber={auctionNumber} className="mt-2" />}
                 </div>
@@ -281,14 +281,14 @@ export function PaymentPage() {
                         isExpired ? "text-red-600" : "text-amber-600"
                       }`}
                     >
-                      {isExpired ? t("payment.page.status", "Status") : t("payment.page.expiresIn", "Expires in")}
+                      {isExpired ? t("payment.page.status", "สถานะ") : t("payment.page.expiresIn", "หมดเวลาใน")}
                     </span>
                     <span
                       className={`text-sm font-bold leading-tight ${
                         isExpired ? "text-red-700" : "text-amber-900"
                       }`}
                     >
-                      {isExpired ? t("payment.page.expired", "Expired (00:00)") : timeLeft}
+                      {isExpired ? t("payment.page.expired", "หมดเวลา (00:00)") : timeLeft}
                     </span>
                   </div>
                 </div>
@@ -339,7 +339,7 @@ export function PaymentPage() {
                           {t("payment.page.reviewTitle", "ส่งหลักฐานเรียบร้อยแล้ว · รอผู้ดูแลระบบตรวจสอบ")}
                         </h4>
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-200/80 text-sky-900">
-                          {t("payment.status.underReview", "Payment Under Review")}
+                          {t("payment.status.underReview", "กำลังตรวจสอบการชำระเงิน")}
                         </span>
                       </div>
                       <p className="text-xs text-sky-800/90 leading-relaxed">
@@ -385,19 +385,19 @@ export function PaymentPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        <span>{t("payment.page.submitting", "Submitting payment...")}</span>
+                        <span>{t("payment.page.submitting", "กำลังส่งการชำระเงิน...")}</span>
                       </>
                     ) : (
                       <>
                         <Lock className="size-4" />
-                        <span>{t("payment.page.submit", "Submit payment for verification")}</span>
+                        <span>{t("payment.page.submit", "ส่งการชำระเงินเพื่อตรวจสอบ")}</span>
                       </>
                     )}
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5 mt-3">
                     <Shield className="size-3.5 text-muted-foreground" />
-                    <span>{t("payment.page.submitHint", "Upload your slip and reference no. to continue.")}</span>
+                    <span>{t("payment.page.submitHint", "อัปโหลดสลิปและเลขอ้างอิงเพื่อดำเนินการต่อ")}</span>
                   </p>
                 </div>
               )}

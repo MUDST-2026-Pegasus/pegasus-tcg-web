@@ -14,10 +14,10 @@
     "i18n:compare": "tolgee compare",
     "i18n:sync": "tolgee sync",
     "i18n:pull": "tolgee pull",
-    "test": "vitest run --passWithNoTests",
-    "test:unit": "vitest run --exclude \"src/test/integration/**\" --outputFile.junit=test-results/unit.xml --passWithNoTests",
-    "test:integration": "vitest run src/test/integration --outputFile.junit=test-results/integration.xml --passWithNoTests",
-    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude \"src/test/integration/**\" --outputFile.junit=test-results/unit.xml",
+    "test:integration": "vitest run src/test/integration --outputFile.junit=test-results/integration.xml",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest --passWithNoTests",
     "test:e2e": "cypress run",
     "test:e2e:promotions": "cypress run --spec src/test/cypress/e2e/promotions-ledger.cy.ts --env runPromotions=true",
@@ -38,6 +38,9 @@
     "@tanstack/react-table": "^9.3.1",
     "@tolgee/format-icu": "7.3.0",
     "@tolgee/react": "7.3.0",
+    "@tsparticles/engine": "4.4.0",
+    "@tsparticles/preset-snow": "4.4.0",
+    "@tsparticles/react": "4.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -85,5 +88,27 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
     "vitest": "^5.0.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "proxy-addr": ">=2.0.8",
+      "@modelcontextprotocol/sdk": ">=1.32.0",
+      "body-parser@>=2.0.0 <2.4.0": ">=2.4.0",
+      "brace-expansion@>=5.0.0 <5.0.11": ">=5.0.11",
+      "fast-uri@>=3.0.0 <3.1.7": ">=3.1.7",
+      "source-map-js": ">=1.2.2",
+      "systeminformation": ">=5.33.16",
+      "undici": ">=8.12.2"
+    }
+  },
+  "resolutions": {
+    "proxy-addr": ">=2.0.8",
+    "@modelcontextprotocol/sdk": ">=1.32.0",
+    "body-parser@>=2.0.0 <2.4.0": ">=2.4.0",
+    "brace-expansion@>=5.0.0 <5.0.11": ">=5.0.11",
+    "fast-uri@>=3.0.0 <3.1.7": ">=3.1.7",
+    "source-map-js": ">=1.2.2",
+    "systeminformation": ">=5.33.16",
+    "undici": ">=8.12.2"
   }
 }

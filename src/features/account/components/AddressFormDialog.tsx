@@ -63,10 +63,10 @@ export function AddressFormDialog({
       <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? t("account.address.form.editTitle", "Edit Address") : t("account.address.form.addTitle", "Add New Address")}
+            {isEdit ? t("account.address.form.editTitle", "แก้ไขที่อยู่") : t("account.address.form.addTitle", "เพิ่มที่อยู่ใหม่")}
           </DialogTitle>
           <DialogDescription>
-            {t("account.address.form.description", "Saved addresses show up at checkout, so you only type this once.")}
+            {t("account.address.form.description", "ที่อยู่ที่บันทึกไว้จะแสดงตอนชำระเงิน กรอกแค่ครั้งเดียว")}
           </DialogDescription>
         </DialogHeader>
         <AddressForm
@@ -127,17 +127,17 @@ function AddressForm({
       {failed && (
         <Alert variant="destructive">
           <AlertDescription>
-            {translateError(failed, t("account.address.form.failed", "Could not save this address."))}
+            {translateError(failed, t("account.address.form.failed", "บันทึกที่อยู่นี้ไม่สำเร็จ"))}
           </AlertDescription>
         </Alert>
       )}
 
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(errors.label) || undefined}>
-          <FieldLabel htmlFor="label">{t("account.address.field.label", "Label")}</FieldLabel>
+          <FieldLabel htmlFor="label">{t("account.address.field.label", "ชื่อที่อยู่")}</FieldLabel>
           <Input
             id="label"
-            placeholder={t("account.address.form.labelPlaceholder", "Home, Office, …")}
+            placeholder={t("account.address.form.labelPlaceholder", "บ้าน, ที่ทำงาน, …")}
             aria-invalid={Boolean(errors.label)}
             {...register("label")}
           />
@@ -145,7 +145,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.recipientName) || undefined}>
-          <FieldLabel htmlFor="recipientName">{t("account.address.field.recipientName", "Recipient name")}</FieldLabel>
+          <FieldLabel htmlFor="recipientName">{t("account.address.field.recipientName", "ชื่อผู้รับ")}</FieldLabel>
           <Input
             id="recipientName"
             autoComplete="name"
@@ -156,7 +156,7 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.phone) || undefined}>
-          <FieldLabel htmlFor="phone">{t("account.address.field.phone", "Phone number")}</FieldLabel>
+          <FieldLabel htmlFor="phone">{t("account.address.field.phone", "เบอร์โทรศัพท์")}</FieldLabel>
           <Input
             id="phone"
             inputMode="tel"
@@ -169,11 +169,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line1) || undefined}>
-          <FieldLabel htmlFor="line1">{t("account.address.field.line1", "Address line 1")}</FieldLabel>
+          <FieldLabel htmlFor="line1">{t("account.address.field.line1", "ที่อยู่บรรทัดที่ 1")}</FieldLabel>
           <Input
             id="line1"
             autoComplete="address-line1"
-            placeholder={t("account.address.form.line1Placeholder", "House number, street")}
+            placeholder={t("account.address.form.line1Placeholder", "บ้านเลขที่ ถนน")}
             aria-invalid={Boolean(errors.line1)}
             {...register("line1")}
           />
@@ -181,11 +181,11 @@ function AddressForm({
         </Field>
 
         <Field data-invalid={Boolean(errors.line2) || undefined}>
-          <FieldLabel htmlFor="line2">{t("account.address.field.line2", "Address line 2")}</FieldLabel>
+          <FieldLabel htmlFor="line2">{t("account.address.field.line2", "ที่อยู่บรรทัดที่ 2")}</FieldLabel>
           <Input
             id="line2"
             autoComplete="address-line2"
-            placeholder={t("account.address.form.line2Placeholder", "Building, floor, room")}
+            placeholder={t("account.address.form.line2Placeholder", "อาคาร ชั้น ห้อง")}
             aria-invalid={Boolean(errors.line2)}
             {...register("line2")}
           />
@@ -194,7 +194,7 @@ function AddressForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={Boolean(errors.subdistrict) || undefined}>
-            <FieldLabel htmlFor="subdistrict">{t("account.address.field.subdistrict", "Subdistrict")}</FieldLabel>
+            <FieldLabel htmlFor="subdistrict">{t("account.address.field.subdistrict", "ตำบล / แขวง")}</FieldLabel>
             <Input
               id="subdistrict"
               aria-invalid={Boolean(errors.subdistrict)}
@@ -204,7 +204,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.district) || undefined}>
-            <FieldLabel htmlFor="district">{t("account.address.field.district", "District")}</FieldLabel>
+            <FieldLabel htmlFor="district">{t("account.address.field.district", "อำเภอ / เขต")}</FieldLabel>
             <Input
               id="district"
               aria-invalid={Boolean(errors.district)}
@@ -214,7 +214,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.province) || undefined}>
-            <FieldLabel htmlFor="province">{t("account.address.field.province", "Province")}</FieldLabel>
+            <FieldLabel htmlFor="province">{t("account.address.field.province", "จังหวัด")}</FieldLabel>
             <Input
               id="province"
               autoComplete="address-level1"
@@ -225,7 +225,7 @@ function AddressForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.postalCode) || undefined}>
-            <FieldLabel htmlFor="postalCode">{t("account.address.field.postalCode", "Postal code")}</FieldLabel>
+            <FieldLabel htmlFor="postalCode">{t("account.address.field.postalCode", "รหัสไปรษณีย์")}</FieldLabel>
             <Input
               id="postalCode"
               inputMode="numeric"
@@ -254,18 +254,18 @@ function AddressForm({
             )}
           />
           <FieldLabel htmlFor="defaultShipping" className="font-normal">
-            {t("account.address.form.default", "Use as my default shipping address")}
+            {t("account.address.form.default", "ใช้เป็นที่อยู่จัดส่งหลัก")}
           </FieldLabel>
         </Field>
       </FieldGroup>
 
       <DialogFooter>
         <DialogClose render={<Button type="button" variant="outline" />}>
-          {t("account.orders.cancel", "Cancel")}
+          {t("account.orders.cancel", "ยกเลิก")}
         </DialogClose>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Spinner data-icon="inline-start" />}
-          {address ? t("account.address.form.save", "Save changes") : t("account.address.form.add", "Add address")}
+          {address ? t("account.address.form.save", "บันทึกการเปลี่ยนแปลง") : t("account.address.form.add", "เพิ่มที่อยู่")}
         </Button>
       </DialogFooter>
     </form>

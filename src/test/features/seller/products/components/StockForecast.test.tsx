@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StockForecast } from "@/features/seller/products/components/StockForecast";
 import { getVisiblePages } from "@/features/seller/products/utils/pagination";
@@ -170,5 +170,101 @@ describe("StockForecast component pagination", () => {
     // On page 3 of 3, next button is disabled
     expect(nextBtn).toBeDisabled();
     expect(nextBtn).toHaveClass("disabled:cursor-not-allowed");
+  });
+
+  it("shows at most two preview rows and renders API forecast and insufficient-data values in the modal", async () => {
+    vi.mocked(api.get).mockResolvedValue([
+      { listingId: 101, listingName: "Normal Forecast", availableStock: 4, completedSales30Days: 12, status: "FORECAST_AVAILABLE", daysRemaining: 10, estimatedStockoutDate: "2026-11-20" },
+      { listingId: 102, listingName: "No Sales", availableStock: 7, completedSales30Days: 0, status: "NO_SALES", daysRemaining: null, estimatedStockoutDate: null },
+      { listingId: 103, listingName: "Fast Seller", availableStock: 80, completedSales30Days: 120, status: "FORECAST_AVAILABLE", daysRemaining: 20, estimatedStockoutDate: "2026-11-30" },
+    ]);
+
+    const user = userEvent.setup();
+    renderWithProviders(<StockForecast />);
+
+    expect(await screen.findByText("Fast Seller")).toBeInTheDocument();
+    expect(screen.getByText("Normal Forecast")).toBeInTheDocument();
+    expect(screen.queryByText("No Sales")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "ดูทั้งหมด" }));
+    const modal = screen.getByRole("dialog");
+    const normalRow = within(modal).getByText("Normal Forecast").parentElement;
+    const noSalesRow = within(modal).getByText("No Sales").parentElement;
+    expect(modal.textContent!.indexOf("Normal Forecast")).toBeLessThan(modal.textContent!.indexOf("Fast Seller"));
+    expect(normalRow).toHaveTextContent("4 ชิ้น");
+    expect(normalRow).toHaveTextContent("12 ชิ้น");
+    expect(normalRow).toHaveTextContent("~10 วัน");
+    expect(normalRow).toHaveTextContent("20 พ.ย. 2569");
+    expect(noSalesRow).toHaveTextContent("7 ชิ้น");
+    expect(noSalesRow).toHaveTextContent("0 ชิ้น");
+    expect(noSalesRow).toHaveTextContent("ยังไม่มีการขาย");
+    expect(noSalesRow).not.toHaveTextContent(/~\d+ วัน|\d+ ม\.ค\.|\d+ พ\.ย\./);
+    expect(within(normalRow!).getByRole("link", { name: "ดูสินค้า" })).toHaveAttribute("href", "/listings/101");
+    expect(within(normalRow!).getByRole("link", { name: "เติมสต็อก" })).toHaveAttribute("href", "/seller/products/101/restock");
+  });
+
+  it("filters and searches the full API result set and resets pagination", async () => {
+    const rows: Array<{
+      listingId: number;
+      listingName: string;
+      availableStock: number;
+      completedSales30Days: number;
+      status: "FORECAST_AVAILABLE" | "NO_SALES";
+      daysRemaining: number | null;
+      estimatedStockoutDate: string | null;
+    }> = Array.from({ length: 7 }, (_, index) => ({
+      listingId: index + 1,
+      listingName: index === 6 ? "Target on later page" : `Soon Card ${index + 1}`,
+      availableStock: 3,
+      completedSales30Days: 9,
+      status: "FORECAST_AVAILABLE" as const,
+      daysRemaining: 7,
+      estimatedStockoutDate: "2026-11-17",
+    }));
+    rows.push({ listingId: 8, listingName: "No sale record", availableStock: 8, completedSales30Days: 0, status: "NO_SALES" as const, daysRemaining: null, estimatedStockoutDate: null });
+    vi.mocked(api.get).mockResolvedValue(rows);
+
+    const user = userEvent.setup();
+    renderWithProviders(<StockForecast />);
+    await user.click(await screen.findByRole("button", { name: "ดูทั้งหมด" }));
+    const modal = screen.getByRole("dialog");
+
+    await user.click(within(modal).getByRole("button", { name: "ใกล้หมดตามยอดขาย" }));
+    expect(within(modal).getByText("แสดง 1–5 จาก 7 รายการ")).toBeInTheDocument();
+    await user.click(within(modal).getByRole("button", { name: "2" }));
+    expect(within(modal).getByText("Target on later page")).toBeInTheDocument();
+
+    await user.click(within(modal).getByRole("button", { name: "ข้อมูลไม่พอ" }));
+    expect(within(modal).getByText("แสดง 1–1 จาก 1 รายการ")).toBeInTheDocument();
+    expect(within(modal).getByText("No sale record")).toBeInTheDocument();
+
+    await user.click(within(modal).getByRole("button", { name: "ทั้งหมด" }));
+    await user.type(within(modal).getByRole("textbox", { name: "ค้นหาสินค้า" }), "Target");
+    expect(within(modal).getByText("แสดง 1–1 จาก 1 รายการ")).toBeInTheDocument();
+    expect(within(modal).getByText("Target on later page")).toBeInTheDocument();
+  });
+
+  it("renders loading, API error, empty, and no-match states", async () => {
+    let resolveForecast!: (rows: typeof mockItems) => void;
+    vi.mocked(api.get).mockReturnValueOnce(new Promise((resolve) => { resolveForecast = resolve; }));
+    const { unmount } = renderWithProviders(<StockForecast />);
+    expect(screen.getByText("กำลังโหลดคาดการณ์…")).toBeInTheDocument();
+    resolveForecast([]);
+    expect(await screen.findByText("ยังไม่มีสินค้าในร้าน")).toBeInTheDocument();
+    unmount();
+
+    vi.mocked(api.get).mockRejectedValueOnce(new Error("unavailable"));
+    const user = userEvent.setup();
+    const { unmount: unmountError } = renderWithProviders(<StockForecast />);
+    expect(await screen.findByText("โหลดคาดการณ์ไม่สำเร็จ")).toBeInTheDocument();
+    unmountError();
+
+    vi.mocked(api.get).mockResolvedValueOnce(mockItems.slice(0, 2));
+    const { unmount: unmountLoaded } = renderWithProviders(<StockForecast />);
+    await screen.findByText("Card Item #1");
+    await user.click(screen.getByRole("button", { name: "ดูทั้งหมด" }));
+    await user.type(screen.getByRole("textbox", { name: "ค้นหาสินค้า" }), "missing");
+    expect(await screen.findByText("ไม่พบสินค้าที่ตรงกับการค้นหาหรือตัวกรอง")).toBeInTheDocument();
+    unmountLoaded();
   });
 });

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import {
@@ -29,6 +30,8 @@ type AuditEntrySheetProps = {
  * metadata แสดงเป็น "ค่าเดิม → ค่าใหม่" หรือคู่ชื่อ/ค่า ไม่ใช่ JSON ดิบ
  */
 export function AuditEntrySheet({ entry, onClose }: AuditEntrySheetProps) {
+  const { t } = useTranslate("admin");
+
   return (
     <Sheet
       open={entry !== null}
@@ -42,14 +45,23 @@ export function AuditEntrySheet({ entry, onClose }: AuditEntrySheetProps) {
       >
         <header className="flex items-center border-b border-muted py-[18px] pr-4 pl-6">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <SheetTitle className="text-[15px] font-bold text-foreground">รายละเอียดกิจกรรม</SheetTitle>
+            <SheetTitle className="text-[15px] font-bold text-foreground">
+              {t("audit.sheet.title", "รายละเอียดกิจกรรม")}
+            </SheetTitle>
             <SheetDescription className="text-[11px] text-[#9aa5ad]">
-              {entry ? `บันทึก #${entry.id}` : "รายละเอียดกิจกรรม"}
+              {entry
+                ? t("audit.sheet.logNumber", "บันทึก #{id}", { id: entry.id })
+                : t("audit.sheet.desc", "รายละเอียดกิจกรรม")}
             </SheetDescription>
           </div>
           <SheetClose
             render={
-              <Button variant="ghost" size="icon-sm" aria-label="ปิด" className="size-7 rounded-[7px] text-muted-foreground" />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t("audit.sheet.close", "ปิด")}
+                className="size-7 rounded-[7px] text-muted-foreground"
+              />
             }
           >
             <X />
@@ -63,6 +75,7 @@ export function AuditEntrySheet({ entry, onClose }: AuditEntrySheetProps) {
 }
 
 function AuditEntryBody({ entry }: { entry: AuditLogEntry }) {
+  const { t } = useTranslate("admin");
   const tone = AUDIT_TONE_META[actionTone(entry)];
   const href = targetHref(entry);
   const rows = metadataRows(entry.metadata);
@@ -79,19 +92,21 @@ function AuditEntryBody({ entry }: { entry: AuditLogEntry }) {
       </div>
 
       <dl className="grid grid-cols-[96px_1fr] gap-x-3 gap-y-2.5 text-[13px]">
-        <dt className="text-muted-foreground">เวลา</dt>
+        <dt className="text-muted-foreground">{t("audit.sheet.timeLabel", "เวลา")}</dt>
         <dd className="text-foreground">{formatFullDateTime(entry.occurredAt)}</dd>
-        <dt className="text-muted-foreground">ผู้ทำ</dt>
+        <dt className="text-muted-foreground">{t("audit.sheet.actorLabel", "ผู้ทำ")}</dt>
         <dd className="text-foreground">
-          {entry.actor ? `${entry.actor.displayName} (@${entry.actor.username})` : "ระบบ (งานอัตโนมัติ)"}
+          {entry.actor
+            ? `${entry.actor.displayName} (@${entry.actor.username})`
+            : t("audit.sheet.systemAutomated", "ระบบ (งานอัตโนมัติ)")}
         </dd>
-        <dt className="text-muted-foreground">เป้าหมาย</dt>
+        <dt className="text-muted-foreground">{t("audit.sheet.targetLabel", "เป้าหมาย")}</dt>
         <dd className="text-foreground">
           {TARGET_TYPE_LABEL[entry.targetType] ?? entry.targetType} · {targetLabel(entry)}
         </dd>
         {entry.ipAddress ? (
           <>
-            <dt className="text-muted-foreground">IP</dt>
+            <dt className="text-muted-foreground">{t("audit.sheet.ipLabel", "IP")}</dt>
             <dd className="font-mono text-xs text-foreground">{entry.ipAddress}</dd>
           </>
         ) : null}
@@ -99,7 +114,9 @@ function AuditEntryBody({ entry }: { entry: AuditLogEntry }) {
 
       {rows.length > 0 ? (
         <section className="flex flex-col gap-2">
-          <h3 className="text-xs font-semibold text-foreground">รายละเอียดที่บันทึกไว้</h3>
+          <h3 className="text-xs font-semibold text-foreground">
+            {t("audit.sheet.recordedDetails", "รายละเอียดที่บันทึกไว้")}
+          </h3>
           <ul className="flex flex-col divide-y divide-muted rounded-lg border border-border">
             {rows.map((row) => (
               <li key={row.key} className="flex flex-col gap-1 px-3.5 py-2.5 text-[13px]">
@@ -109,7 +126,10 @@ function AuditEntryBody({ entry }: { entry: AuditLogEntry }) {
                     <span className="text-muted-foreground line-through decoration-muted-foreground/50">
                       {row.before}
                     </span>
-                    <ArrowRight aria-label="เปลี่ยนเป็น" className="size-3.5 shrink-0 text-muted-foreground" />
+                    <ArrowRight
+                      aria-label={t("audit.sheet.arrowChangedTo", "เปลี่ยนเป็น")}
+                      className="size-3.5 shrink-0 text-muted-foreground"
+                    />
                     <span className="font-medium">{row.after}</span>
                   </span>
                 ) : (
@@ -122,13 +142,15 @@ function AuditEntryBody({ entry }: { entry: AuditLogEntry }) {
       ) : null}
 
       <p className="text-[11px] leading-4 text-muted-foreground">
-        ข้อความต้นฉบับจากระบบ: {entry.summary}
+        {t("audit.sheet.rawSystemSummary", "ข้อความต้นฉบับจากระบบ: {summary}", {
+          summary: entry.summary,
+        })}
       </p>
 
       {href ? (
         <Button variant="outline" className="w-fit rounded-md px-2.5" render={<Link to={href} />}>
           <ExternalLink data-icon="inline-start" />
-          ไปที่หน้าที่เกี่ยวข้อง
+          {t("audit.sheet.goToRelatedPage", "ไปที่หน้าที่เกี่ยวข้อง")}
         </Button>
       ) : null}
     </div>

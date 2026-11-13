@@ -313,7 +313,7 @@ export function ListingEditContent({
                 id: String(listing.id),
                 type: selectedCondition?.badgeLabel ?? "—",
                 title: listing.card.productName,
-                price: price === null ? t("products.create.noPrice", "฿—") : formatBaht(price),
+                price: price === null ? t("products.create.noPrice", "THB —") : formatBaht(price),
                 image: previewImage,
                 imageAlt: listing.card.productName,
               }}

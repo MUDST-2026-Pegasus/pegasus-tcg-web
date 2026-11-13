@@ -48,15 +48,15 @@ describe("Register Flow Integration", () => {
     );
 
     // Fill out the form
-    await user.type(screen.getByLabelText(/username/i), "new_player");
-    await user.type(screen.getByLabelText(/display name/i), "New Player");
-    await user.type(screen.getByLabelText(/email/i), "new@pegasus.com");
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+    await user.type(screen.getByLabelText("ชื่อผู้ใช้"), "new_player");
+    await user.type(screen.getByLabelText("ชื่อที่แสดง"), "New Player");
+    await user.type(screen.getByLabelText("อีเมล"), "new@pegasus.com");
+    await user.type(screen.getByLabelText("รหัสผ่าน"), "password123");
+    await user.type(screen.getByLabelText("ยืนยันรหัสผ่าน"), "password123");
     await user.click(screen.getByRole("checkbox"));
 
     // Submit
-    await user.click(screen.getByRole("button", { name: /sign up/i }));
+    await user.click(screen.getByRole("button", { name: "สมัครสมาชิก" }));
 
     // Verify API was called correctly
     await waitFor(() => {

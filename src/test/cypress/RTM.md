@@ -25,13 +25,13 @@ Verifies subtotal, multi-seller item grouping, shipping fee split calculation, a
 
 | ID | Test Scenario | Expected Outcome | Status |
 | :--- | :--- | :--- | :--- |
-| `TC-CART-01` | Multi-seller cart items subtotal calculation | Sum of `currentPrice * quantity` across distinct sellers (e.g., ฿250 + ฿500 = ฿750) | **Implemented** |
-| `TC-CART-02` | Multi-seller shipping fee split (฿50 / shop) | 2 sellers = ฿100, 3 sellers = ฿150 correctly separated and billed | **Implemented** |
-| `TC-CART-03` | Single-seller order subtotal and single shipping | 1 seller = ฿50 shipping fee; subtotal matches single item price | **Implemented** |
-| `TC-CART-04` | Multiple items from same seller consolidated shipping | 3 items from Shop A = 1 × ฿50 shipping fee (฿50 total shipping) | **Implemented** |
+| `TC-CART-01` | Multi-seller cart items subtotal calculation | Sum of `currentPrice * quantity` across distinct sellers (e.g., THB 250.00 + THB 500.00 = THB 750.00) | **Implemented** |
+| `TC-CART-02` | Multi-seller shipping fee split (THB 50.00 / shop) | 2 sellers = THB 100,.00 3 sellers = THB 150.00 correctly separated and billed | **Implemented** |
+| `TC-CART-03` | Single-seller order subtotal and single shipping | 1 seller = THB 50.00 shipping fee; subtotal matches single item price | **Implemented** |
+| `TC-CART-04` | Multiple items from same seller consolidated shipping | 3 items from Shop A = 1 × THB 50.00 shipping fee (THB 50.00 total shipping) | **Implemented** |
 | `TC-CART-05` | Grand total computation accuracy | Grand Total = Subtotal + Total Shipping Split without discrepancies | **Implemented** |
 | `TC-CART-06` | Quantity and price update reactivity | Subtotal and grand total dynamically recalculate on prop changes | **Implemented** |
-| `TC-CART-07` | Zero items / empty cart state | Renders ฿0 subtotal and disables proceed action safely | **Implemented** |
+| `TC-CART-07` | Zero items / empty cart state | Renders THB 0.00 subtotal and disables proceed action safely | **Implemented** |
 | `TC-CART-08` | Loading / disabled state handling | Disables checkout submission during pending operations | **Implemented** |
 
 ---
@@ -41,7 +41,7 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 
 | ID | Test Scenario | Expected Outcome | Status |
 | :--- | :--- | :--- | :--- |
-| `TC-PAY-01` | Initial render & QR code display | Modal displays PromptPay title, formatted amount (฿300.00), and QR canvas/image | **Implemented** |
+| `TC-PAY-01` | Initial render & QR code display | Modal displays PromptPay title, formatted amount (THB 300.00), and QR canvas/image | **Implemented** |
 | `TC-PAY-02` | 5-minute countdown clock tick | Time ticks down every second using `vi.useFakeTimers()` (05:00 → 04:59 → ...) | **Implemented** |
 | `TC-PAY-03` | Expired state transition at 00:00 | When countdown reaches 00:00, QR disappears and UI indicates "QR Code Expired" | **Implemented** |
 | `TC-PAY-04` | Valid slip MIME upload (`image/jpeg`, `image/png`) | Accepts `.jpg` and `.png` file uploads and enables submit button | **Implemented** |
@@ -62,7 +62,7 @@ Verifies PromptPay QR code rendering, 5-minute countdown to expired state with f
 | **2** | **Buyer Login** | Logs in with valid credentials, obtains auth session tokens, redirects to landing page | **Implemented** |
 | **3** | **Catalog & Search** | Browses product catalog, verifies card listings with prices and details | **Implemented** |
 | **4** | **Product Detail & Add to Cart** | Navigates to product detail page (`/products/pikachu-ex-025-187`), adds card listing to shopping cart | **Implemented** |
-| **5** | **Shopping Cart Multi-Seller Math** | Views cart grouped by shop (Shop A: ฿250, Shop B: ฿500), verifies ยอดสินค้า ฿750, shipping "คิดในหน้าถัดไป", ยอดรวม ฿750 before shipping | **Implemented** |
+| **5** | **Shopping Cart Multi-Seller Math** | Views cart grouped by shop (Shop A: THB 250,.00 Shop B: THB 500.00), verifies ยอดสินค้า THB 750,.00 shipping "คิดในหน้าถัดไป", ยอดรวม THB 750.00 before shipping | **Implemented** |
 | **6** | **Checkout & Place Order** | Enters `/checkout?items=101`, validates default shipping address, selects payment, submits order, navigates to `/payment` | **Implemented** |
 
 ---

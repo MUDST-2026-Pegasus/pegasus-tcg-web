@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { OrderRefunds } from "@/features/finance/BuyerRefunds";
 import { financeApi } from "@/features/finance/finance.api";
 import type { Refund } from "@/features/finance/finance.types";
 import { orderStatusLabel } from "@/features/account/order-status.format";
+import { ApiError } from "@/lib/api";
+import { renderWithProviders } from "@/test/utils";
+import type { Language } from "@/lib/i18n";
 
 vi.mock("@/features/finance/finance.api", () => ({ financeApi: {
   myRefunds: vi.fn(), getRefund: vi.fn(), setRefundDestination: vi.fn(),
@@ -17,12 +19,10 @@ const refund: Refund = {
   requestedAt: "2026-10-13T00:00:00Z", processedAt: null,
 };
 
-function setup(data: Refund, others: Refund[] = []) {
+function setup(data: Refund, others: Refund[] = [], language: Language = "th") {
   vi.mocked(financeApi.myRefunds).mockResolvedValue([data, ...others]);
   vi.mocked(financeApi.getRefund).mockResolvedValue(data);
-  return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    <OrderRefunds salesOrderId={23} />
-  </QueryClientProvider>);
+  return renderWithProviders(<OrderRefunds salesOrderId={23} />, { language });
 }
 
 afterEach(() => { vi.clearAllMocks(); });
@@ -61,19 +61,37 @@ describe("buyer refunds", () => {
     expect(screen.queryByRole("button", { name: "แก้ไขบัญชีรับเงินคืน" })).toBeNull();
   });
 
+  it("shows a loading state and a not-found error when the refund detail API returns 404", async () => {
+    let rejectDetail!: (reason: unknown) => void;
+    setup(refund);
+    vi.mocked(financeApi.getRefund).mockReturnValue(new Promise((_, reject) => { rejectDetail = reject; }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "ดูรายละเอียดล่าสุด" }));
+    expect(screen.getByRole("status", { name: "กำลังโหลดรายละเอียด" })).toBeInTheDocument();
+    rejectDetail(new ApiError({ status: 404, code: "REFUND_NOT_FOUND", message: "Not found" }));
+    expect(await screen.findByText("โหลดรายละเอียดไม่สำเร็จ")).toBeInTheDocument();
+  });
+
   it("shows only the refunds of its own order", async () => {
     setup(refund, [{ ...refund, id: 14, salesOrderId: 99, amount: 777 }]);
-    expect(await screen.findByText("การคืนเงิน ฿500.00")).toBeTruthy();
-    expect(screen.queryByText(/฿777/)).toBeNull();
+    expect(await screen.findByText("การคืนเงิน THB 500.00")).toBeTruthy();
+    expect(screen.queryByText(/THB 777.00/)).toBeNull();
   });
 
   it("renders nothing for an order without refunds", async () => {
     vi.mocked(financeApi.myRefunds).mockResolvedValue([{ ...refund, salesOrderId: 99 }]);
-    const { container } = render(<QueryClientProvider client={new QueryClient()}>
-      <OrderRefunds salesOrderId={23} />
-    </QueryClientProvider>);
+    const { container } = renderWithProviders(<OrderRefunds salesOrderId={23} />);
     await waitFor(() => expect(financeApi.myRefunds).toHaveBeenCalled());
     expect(container.querySelector("section")).toBeNull();
+  });
+
+  it("renders refund statuses and methods in English with zero Thai text", async () => {
+    setup(refund, [], "en");
+    expect(await screen.findByText("Approved")).toBeTruthy();
+    expect(screen.getByText(/Refund account saved/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "View latest details" }));
+    expect(await screen.findByText("Refund method: Bank transfer")).toBeTruthy();
+    expect(screen.getByText("Latest status: Approved")).toBeTruthy();
   });
 
   it("translates buyer order status codes", () => {

@@ -1,23 +1,18 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronRightIcon,
   LogOutIcon,
   PercentIcon,
   MenuIcon,
-  SearchIcon,
   ShoppingCartIcon,
   SparklesIcon,
   GavelIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { LanguageSwitch } from "@/lib/i18n/LanguageSwitch";
 import { AccountAvatar, useAccountLinks } from "@/components/layout/nav-shared";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,27 +24,15 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/features/cart/cart.queries";
+import {
+  DesktopNavbarSearch,
+  MobileNavbarSearch,
+} from "@/features/catalog/components/search/NavbarSearch";
+import { useNavbarSearch } from "@/features/catalog/search/use-navbar-search";
 import { useGameList } from "@/features/catalog/catalog.queries";
 import { useSales } from "@/features/sale/sale.queries";
 import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
-
-export function LanguageSwitch() {
-  return (
-    <button
-      type="button"
-      disabled
-      aria-label="Switch language"
-      className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"
-    >
-      <span className="text-primary">TH</span>
-      <span className="flex h-[22px] w-10 items-center rounded-full bg-primary p-[3px]">
-        <span className="size-4 rounded-full bg-background" />
-      </span>
-      <span>EN</span>
-    </button>
-  );
-}
 
 function Logo({ onClick }: { onClick?: () => void }) {
   const { t } = useTranslate();
@@ -58,12 +41,17 @@ function Logo({ onClick }: { onClick?: () => void }) {
       to="/"
       onClick={onClick}
       aria-label={t("nav.logoAria", "Pegasus TCG — กลับหน้าแรก")}
-      className="flex shrink-0 items-center gap-2"
+      className="group flex shrink-0 items-center gap-2"
     >
       <img
-        src="/site-icon.jpg"
+        src="/pegasus-santa-still.png"
         alt=""
-        className="size-9 rounded-full object-cover"
+        className="size-9 object-contain motion-safe:group-hover:hidden"
+      />
+      <img
+        src="/pegasus-santa-left.gif"
+        alt=""
+        className="hidden size-9 object-contain motion-safe:group-hover:block"
       />
       <span className="text-[22px] font-extrabold tracking-[-0.8px] text-primary">
         PEGASUS
@@ -75,7 +63,6 @@ function Logo({ onClick }: { onClick?: () => void }) {
 export function Navbar() {
   const { t } = useTranslate();
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: cart } = useCart();
   const { data: games } = useGameList();
@@ -90,12 +77,7 @@ export function Navbar() {
     logoutPending,
   } = useAccountLinks();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [draft, setDraft] = useState<{ key: string; value: string } | null>(
-    null,
-  );
-  const query =
-    draft?.key === location.key ? draft.value : (searchParams.get("q") ?? "");
-  const setQuery = (value: string) => setDraft({ key: location.key, value });
+  const search = useNavbarSearch();
   const searchRef = useRef<HTMLInputElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
   const isSearch = location.pathname === "/search";
@@ -106,9 +88,9 @@ export function Navbar() {
   const onePieceSlug =
     games?.find((g) => g.code === "ONE_PIECE")?.slug ?? "one-piece-card-game";
   const navLinks = [
-    { label: t("nav.home", "Home"), to: "/", active: location.pathname === "/" },
+    { label: t("nav.home", "หน้าแรก"), to: "/", active: location.pathname === "/" },
     {
-      label: t("nav.allProducts", "All products"),
+      label: t("nav.allProducts", "สินค้าทั้งหมด"),
       to: "/search",
       active: isSearch && !currentGame && !newest,
     },
@@ -123,14 +105,14 @@ export function Navbar() {
       active: isSearch && currentGame === onePieceSlug,
     },
     {
-      label: t("nav.newArrivals", "New arrivals"),
+      label: t("nav.newArrivals", "มาใหม่"),
       to: "/search?sort=newest",
       active: isSearch && !currentGame && newest,
       icon: SparklesIcon,
     },
     // ระบบประมูล [TCG-636]
     {
-      label: t("nav.auction", "Auction"),
+      label: t("nav.auction", "ประมูล"),
       to: "/auctions",
       active: location.pathname.startsWith("/auctions"),
       icon: GavelIcon,
@@ -139,7 +121,7 @@ export function Navbar() {
     ...(sales && sales.length > 0
       ? [
           {
-            label: t("nav.sale", "Sale"),
+            label: t("nav.sale", "ลดราคา"),
             to: "/sale",
             active: location.pathname.startsWith("/sale"),
             icon: PercentIcon,
@@ -172,20 +154,6 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const submitSearch = (event: FormEvent) => {
-    event.preventDefault();
-    const params = isSearch
-      ? new URLSearchParams(searchParams)
-      : new URLSearchParams();
-    const trimmed = query.trim();
-    if (trimmed) params.set("q", trimmed);
-    else params.delete("q");
-    params.delete("page");
-    navigate(`/search${params.size ? `?${params}` : ""}`);
-  };
-  const blurSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape") event.currentTarget.blur();
-  };
   const quantity = cart?.totalQuantity ?? 0;
   const cartButton = (
     <Button
@@ -239,7 +207,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={t("nav.openMenu", "Open menu")}
+                aria-label={t("nav.openMenu", "เปิดเมนู")}
                 className="size-10 shrink-0 md:hidden"
               />
             }
@@ -258,7 +226,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={t("nav.closeMenu", "Close menu")}
+                aria-label={t("nav.closeMenu", "ปิดเมนู")}
                 onClick={() => setDrawerOpen(false)}
               >
                 <XIcon className="size-5" />
@@ -301,7 +269,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      {t("nav.login", "Log in")}
+                      {t("nav.login", "เข้าสู่ระบบ")}
                     </Button>
                     <Button
                       variant="outline"
@@ -314,7 +282,7 @@ export function Navbar() {
                         />
                       }
                     >
-                      {t("nav.signup", "Sign up")}
+                      {t("nav.signup", "สมัครสมาชิก")}
                     </Button>
                   </div>
                 </>
@@ -322,7 +290,7 @@ export function Navbar() {
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
               <div className="px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                {t("nav.shop", "SHOP")}
+                {t("nav.shop", "ช้อป")}
               </div>
               {navLinks.map(({ label, to, active, icon: Icon }) => (
                 <Link
@@ -344,7 +312,7 @@ export function Navbar() {
               {!isLoading && isAuthenticated && (
                 <>
                   <div className="mt-6 px-2 text-xs font-bold tracking-widest text-muted-foreground">
-                    {t("nav.account", "ACCOUNT")}
+                    {t("nav.account", "บัญชี")}
                   </div>
                   {links.map(({ label, to }) => (
                     <Link
@@ -372,55 +340,23 @@ export function Navbar() {
                   }}
                 >
                   <LogOutIcon className="size-4" />
-                  {t("nav.logout", "Log out")}
+                  {t("nav.logout", "ออกจากระบบ")}
                 </Button>
               </div>
             )}
           </SheetContent>
         </Sheet>
         <Logo />
-        <form
-          onSubmit={submitSearch}
-          role="search"
-          className="group hidden h-11 min-w-0 max-w-[640px] flex-1 items-center gap-2 rounded-full border border-border bg-muted px-4 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring md:flex"
-        >
-          <SearchIcon className="size-[18px] shrink-0 text-muted-foreground" />
-          <input
-            ref={searchRef}
-            aria-label={t("nav.search", "ค้นหา")}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={blurSearch}
-            placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
-            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-          <kbd className="rounded border border-border bg-background px-2 py-0.5 text-xs text-muted-foreground group-focus-within:hidden">
-            /
-          </kbd>
-        </form>
+        <DesktopNavbarSearch search={search} inputRef={searchRef} />
         <div className="ml-auto flex items-center gap-1">
+          <LanguageSwitch className="mr-2" />
           <AccountMenu />
           {cartButton}
         </div>
       </div>
-      <form
-        onSubmit={submitSearch}
-        role="search"
-        className="mx-4 mb-2.5 flex h-10 items-center gap-2 rounded-full border border-border bg-muted px-4 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring md:hidden"
-      >
-        <SearchIcon className="size-[18px] text-muted-foreground" />
-        <input
-          ref={mobileSearchRef}
-          aria-label={t("nav.search", "ค้นหา")}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onKeyDown={blurSearch}
-          placeholder={t("nav.searchPlaceholder", "ค้นหาการ์ด ชุดการ์ด หรือร้านค้า…")}
-          className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </form>
+      <MobileNavbarSearch search={search} inputRef={mobileSearchRef} />
       <nav
-        aria-label={t("nav.categories", "Shop categories")}
+        aria-label={t("nav.categories", "หมวดหมู่สินค้า")}
         className="h-11 overflow-x-auto border-t border-border [scrollbar-width:none] md:h-11"
       >
         <div className="mx-auto flex h-full min-w-max max-w-[1440px] items-center gap-1 px-3 md:px-6 lg:px-8">
@@ -433,7 +369,7 @@ export function Navbar() {
               <StoreIcon className="size-4" />
               {sellerLink.to === "/seller"
                 ? sellerLink.label
-                : t("nav.becomeSeller", "Become a seller")}
+                : t("nav.becomeSeller", "สมัครเป็นผู้ขาย")}
             </Link>
           )}
         </div>

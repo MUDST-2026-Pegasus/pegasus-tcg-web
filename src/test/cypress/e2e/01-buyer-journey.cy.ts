@@ -56,7 +56,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
     }).as("registerRequest");
 
     cy.visit("/register");
-    cy.contains(/Sign up|Create your account/i).should("be.visible");
+    cy.contains(/สมัครสมาชิก|Create your account/i).should("be.visible");
 
     // Fill registration inputs
     cy.get('input[name="username"]').type("somying_buyer");
@@ -303,7 +303,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
     cy.contains("Pikachu ex").should("be.visible");
     cy.contains("Somchai Cards Shop").should("be.visible");
 
-    cy.contains("button", /^Add$/i).first().click();
+    cy.contains("button", /^เพิ่ม$/i).first().click();
     cy.wait("@addToCart").its("request.body").should("deep.equal", {
       listingId: 1,
       quantity: 1,
@@ -390,7 +390,7 @@ describe("E2E Flow 1: Buyer Complete Journey", () => {
     cy.contains("สรุปคำสั่งซื้อ").should("be.visible");
     cy.contains("ยอดสินค้า (2 ใบ)").should("be.visible");
     cy.contains("คิดในหน้าถัดไป").should("be.visible");
-    cy.get('[aria-label="ยอดรวม"]').should("contain.text", "฿750");
+    cy.get('[aria-label="ยอดรวม"]').should("contain.text", "THB 750.00");
 
     // Click checkout
     cy.contains("button", "ไปชำระเงิน (2)").should("be.visible").and("not.be.disabled");

@@ -96,13 +96,13 @@ export function RegisterForm() {
   const formAlert = googleSignIn.isError
     ? getAuthErrorAlert(
         googleSignIn.error,
-        t("auth.register.failed", "Could not create your account. Please try again."),
+        t("auth.register.failed", "สร้างบัญชีไม่สำเร็จ กรุณาลองอีกครั้ง"),
       )
     : registerAccount.isError
       ? {
           description: translateError(
             registerAccount.error,
-            t("auth.register.failed", "Could not create your account. Please try again."),
+            t("auth.register.failed", "สร้างบัญชีไม่สำเร็จ กรุณาลองอีกครั้ง"),
           ),
         }
       : null;
@@ -119,11 +119,11 @@ export function RegisterForm() {
 
       <FieldGroup>
         <Field data-invalid={Boolean(errors.username) || undefined}>
-          <FieldLabel htmlFor="username">{t("auth.fields.username", "Username")}</FieldLabel>
+          <FieldLabel htmlFor="username">{t("auth.fields.username", "ชื่อผู้ใช้")}</FieldLabel>
           <Input
             id="username"
             autoComplete="username"
-            placeholder={t("auth.register.usernamePlaceholder", "Create your username")}
+            placeholder={t("auth.register.usernamePlaceholder", "ตั้งชื่อผู้ใช้")}
             aria-invalid={Boolean(errors.username)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("username")}
@@ -132,11 +132,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.username]} />
         </Field>
         <Field data-invalid={Boolean(errors.displayName) || undefined}>
-          <FieldLabel htmlFor="displayName">{t("auth.fields.displayName", "Display name")}</FieldLabel>
+          <FieldLabel htmlFor="displayName">{t("auth.fields.displayName", "ชื่อที่แสดง")}</FieldLabel>
           <Input
             id="displayName"
             autoComplete="name"
-            placeholder={t("auth.register.displayNamePlaceholder", "Name other members will see")}
+            placeholder={t("auth.register.displayNamePlaceholder", "ชื่อที่สมาชิกคนอื่นจะเห็น")}
             aria-invalid={Boolean(errors.displayName)}
             {...register("displayName")}
             disabled={isGoogleSigningIn}
@@ -145,12 +145,12 @@ export function RegisterForm() {
           <FieldError errors={[errors.displayName]} />
         </Field>
         <Field data-invalid={Boolean(errors.email) || undefined}>
-          <FieldLabel htmlFor="email">{t("auth.fields.email", "Email")}</FieldLabel>
+          <FieldLabel htmlFor="email">{t("auth.fields.email", "อีเมล")}</FieldLabel>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder={t("auth.fields.emailPlaceholder", "Enter your email")}
+            placeholder={t("auth.fields.emailPlaceholder", "กรอกอีเมล")}
             aria-invalid={Boolean(errors.email)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("email")}
@@ -159,11 +159,11 @@ export function RegisterForm() {
           <FieldError errors={[errors.email]} />
         </Field>
         <Field data-invalid={Boolean(errors.password) || undefined}>
-          <FieldLabel htmlFor="password">{t("auth.fields.password", "Password")}</FieldLabel>
+          <FieldLabel htmlFor="password">{t("auth.fields.password", "รหัสผ่าน")}</FieldLabel>
           <PasswordInput
             id="password"
             autoComplete="new-password"
-            placeholder={t("auth.register.passwordPlaceholder", "Create a password")}
+            placeholder={t("auth.register.passwordPlaceholder", "ตั้งรหัสผ่าน")}
             aria-invalid={Boolean(errors.password)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("password")}
@@ -172,15 +172,15 @@ export function RegisterForm() {
           {errors.password ? (
             <FieldError errors={[errors.password]} />
           ) : (
-            <FieldDescription>{t("auth.register.passwordHint", "At least {min} characters", { min: 8 })}</FieldDescription>
+            <FieldDescription>{t("auth.register.passwordHint", "อย่างน้อย {min} ตัวอักษร", { min: 8 })}</FieldDescription>
           )}
         </Field>
         <Field data-invalid={Boolean(errors.confirmPassword) || undefined}>
-          <FieldLabel htmlFor="confirmPassword">{t("auth.fields.confirmPassword", "Confirm password")}</FieldLabel>
+          <FieldLabel htmlFor="confirmPassword">{t("auth.fields.confirmPassword", "ยืนยันรหัสผ่าน")}</FieldLabel>
           <PasswordInput
             id="confirmPassword"
             autoComplete="new-password"
-            placeholder={t("auth.register.confirmPasswordPlaceholder", "Confirm your password")}
+            placeholder={t("auth.register.confirmPasswordPlaceholder", "กรอกรหัสผ่านอีกครั้ง")}
             aria-invalid={Boolean(errors.confirmPassword)}
             className="h-12 rounded-lg border-border bg-background px-4"
             {...register("confirmPassword")}
@@ -207,14 +207,14 @@ export function RegisterForm() {
           />
           <span className="text-sm leading-snug">
             <FieldLabel htmlFor="terms" className="inline cursor-pointer font-normal">
-              {t("auth.register.agreePrefix", "I agree to the Pegasus")}
+              {t("auth.register.agreePrefix", "ฉันยอมรับ")}
             </FieldLabel>{" "}
             <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              {t("auth.terms", "Terms of Service")}
+              {t("auth.terms", "ข้อกำหนดการใช้บริการ")}
             </Link>{" "}
-            {t("auth.and", "and")}{" "}
+            {t("auth.and", "และ")}{" "}
             <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              {t("auth.privacy", "Privacy Policy")}
+              {t("auth.privacy", "นโยบายความเป็นส่วนตัว")}
             </Link>
           </span>
         </Field>
@@ -225,7 +225,7 @@ export function RegisterForm() {
           className="h-12 w-full rounded-lg text-base"
         >
           {isSubmitting && <Spinner />}
-          {isSubmitting ? t("auth.register.submitting", "Creating account…") : t("auth.register.submit", "Sign up")}
+          {isSubmitting ? t("auth.register.submitting", "กำลังสร้างบัญชี…") : t("auth.register.submit", "สมัครสมาชิก")}
         </Button>
       </FieldGroup>
 
@@ -235,14 +235,14 @@ export function RegisterForm() {
         disabled={isSubmitting}
       />
       <p className="text-center text-sm text-muted-foreground ">
-        {t("auth.register.haveAccount", "Already have an account?")} &nbsp;
+        {t("auth.register.haveAccount", "มีบัญชีอยู่แล้ว?")} &nbsp;
         <Link to={{ pathname: "/login", search: location.search }} className="font-medium text-primary">
-          {t("auth.register.logIn", "Log in")}
+          {t("auth.register.logIn", "เข้าสู่ระบบ")}
         </Link>
       </p>
       <BackHomeLink />
       <p className="pt-2 text-center text-xs tracking-[0.24px] text-muted-foreground">
-        {t("auth.register.privacyNote", "We keep your information safe. We never use your information outside of Pegasus TCG.")}
+        {t("auth.register.privacyNote", "เราเก็บข้อมูลของคุณอย่างปลอดภัย และไม่นำไปใช้นอก Pegasus TCG")}
       </p>
     </form>
   );

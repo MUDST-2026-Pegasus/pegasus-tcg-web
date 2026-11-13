@@ -90,9 +90,9 @@
       "allShops": "All shops",
       "and": " and ",
       "cancelling": "Cancelling...",
-      "codeRestored": "Codes used will return to “My Coupons” to use again (if not yet expired)",
+      "codeRestored": "Codes used will return to “My Codes” to use again (if not yet expired)",
       "codesLost": "Codes used on this order will not be restored because it has been paid",
-      "codesRestored": "Code {codes} will return to “My Coupons” to use again (if not yet expired)",
+      "codesRestored": "Code {codes} will return to “My Codes” to use again (if not yet expired)",
       "confirm": "Cancel order",
       "discountUsed": "Discounts used",
       "keep": "Keep order",
@@ -150,7 +150,7 @@
       "addresses": "Address Book",
       "auctions": "Auctions",
       "collection": "My Collection",
-      "coupons": "My Coupons",
+      "coupons": "My Codes",
       "orders": "Order History",
       "overview": "Account Overview"
     },
@@ -195,6 +195,8 @@
       "loading": "Loading orders",
       "noMatch": "No orders found",
       "noMatchHint": "There are no orders matching the selected status.",
+      "orderId": "Order ID",
+      "orderTotal": "Order Total",
       "otherItems": "{count, plural, =1 {+ # other item} other {+ # other items}}",
       "payNow": "Pay Now",
       "qtySuffix": " • Qty: {count}",
@@ -239,6 +241,11 @@
       "connectionHint": "Please check your connection and try again.",
       "default": "Default",
       "edit": {
+        "avatarAlt": "Profile photo",
+        "avatarHint": "Click photo to change · JPG, PNG up to 5MB",
+        "avatarInvalidType": "Only JPG and PNG files are supported",
+        "avatarTooLarge": "File size must not exceed 5MB",
+        "changePhoto": "Change profile photo",
         "description": "Update your personal information.",
         "email": "Email",
         "failed": "Could not save profile changes.",
@@ -251,7 +258,8 @@
         "saved": "Profile updated",
         "savedHint": "Your profile changes have been saved successfully.",
         "showPhone": "Show phone number on my shop",
-        "title": "Edit Profile"
+        "title": "Edit Profile",
+        "uploadPhoto": "Upload profile photo"
       },
       "editAddress": "Edit address",
       "latestFailed": "Could not load your latest order.",
@@ -387,7 +395,7 @@
     "loadReturnsFailed": "Failed to load return requests",
     "loadingReturnsAria": "Loading return requests",
     "productMaxQuantity": "{name} (max {max})",
-    "refundAmount": "Refund amount ฿{amount}",
+    "refundAmount": "Refund amount THB {amount}",
     "requestReturnCardTitle": "Request return (before return window closes)",
     "requestReturnSuccess": "Return request submitted",
     "retryHint": "Please try again",
@@ -448,7 +456,7 @@
     "pendingCount": "Pending",
     "reasonAndMethod": "Reason: {reason} · {method}",
     "refundMethod": "Refund method: {method}",
-    "refundTitle": "Refund ฿{amount}",
+    "refundTitle": "Refund THB {amount}",
     "saveAccountButton": "Save refund account",
     "saveFailed": "Failed to save",
     "savedAccountDisplay": "Refund account saved: {bank} · {account} · Ending in {last4}",
@@ -562,8 +570,8 @@
       "loading": "Loading cart",
       "login": "Log in",
       "loginForCodes": "Sign in to use your collected codes",
-      "myCodes": "My coupons",
-      "myCodesCount": "My coupons ({count})",
+      "myCodes": "My codes",
+      "myCodesCount": "My codes ({count})",
       "pickCode": "Pick a discount code",
       "pickItemsFirst": "Select items first, then pick a code",
       "platformCodes": "Pegasus discount codes",
@@ -604,6 +612,21 @@
       "removedSelected": "Selected items removed",
       "tryAgain": "Please try again"
     }
+  },
+  "category": {
+    "accessory": "Accessories",
+    "binders": "Binders",
+    "boosterBoxes": "Booster Boxes",
+    "boosterPacks": "Booster Packs",
+    "cardProtection": "Toploaders & Cases",
+    "deckBoxes": "Deck Boxes",
+    "eliteTrainerBoxes": "Elite Trainer Boxes",
+    "other": "Other",
+    "playmats": "Playmats",
+    "sealed": "Sealed Products",
+    "singles": "Single Cards",
+    "sleeves": "Card Sleeves",
+    "starterDecks": "Starter Decks"
   },
   "checkout": {
     "address": {
@@ -788,6 +811,9 @@
     "profile": "Collector profile",
     "userNotFound": "User not found"
   },
+  "condition": {
+    "sealed": "Sealed"
+  },
   "home": {
     "auctions": {
       "description": "Bid before time runs out — if someone bids near the end, the auction will be extended by 2 minutes",
@@ -847,6 +873,19 @@
     "shops": {
       "description": "Verified shops ranked by buyer reviews",
       "title": "Recommended shops"
+    }
+  },
+  "legal": {
+    "center": "LEGAL CENTER",
+    "lastUpdatedLabel": "Last updated",
+    "onThisPage": "On this page",
+    "privacy": {
+      "subtitle": "How PEGASUS collects, uses, protects, and respects your personal information.",
+      "title": "Privacy Policy"
+    },
+    "terms": {
+      "subtitle": "Clear, practical terms for using PEGASUS, managing your account, and purchasing products.",
+      "title": "Terms of Service"
     }
   },
   "listing": {
@@ -1207,6 +1246,16 @@
     "viewProfile": "View profile",
     "viewSellerListing": "View {seller}'s listing details"
   },
+  "productType": {
+    "accessory": "Accessory",
+    "boosterBox": "Booster Box",
+    "boosterPack": "Booster Pack",
+    "bundle": "Bundle",
+    "eliteTrainerBox": "Elite Trainer Box",
+    "other": "Other",
+    "singleCard": "Single Card",
+    "starterDeck": "Starter Deck"
+  },
   "refundMethod": {
     "bankTransfer": "Bank transfer",
     "cashOnDelivery": "Cash on delivery",
@@ -1253,12 +1302,45 @@
     "allCategories": "All categories",
     "applyFilter": "Apply Filter",
     "breadcrumb": "Search Results",
+    "card": {
+      "from": "From",
+      "sellers": "{count, plural, one {# shop} other {# shops}}",
+      "soldOut": "Sold out"
+    },
     "categoriesFailed": "Could not load categories",
     "category": "Category",
+    "clearAllFilters": "Clear all filters",
     "clearFilters": "Clear filters",
+    "corrected": "Showing results for “{corrected}” · You searched “{query}”",
+    "correctedAlias": "Including results for “{corrected}” for “{query}”",
+    "didYouMean": "Did you mean",
+    "didYouMeanSuffix": "?",
     "empty": "No products found",
     "emptyHint": "Try removing a filter or two.",
+    "error": {
+      "code": "Code: {code}",
+      "hint": "Check your connection and try again. Your filters are kept.",
+      "home": "Back to home",
+      "retry": "Try again",
+      "title": "Couldn't load search results"
+    },
     "failed": "Search failed",
+    "filter": {
+      "active": "Active filters",
+      "button": "Filters",
+      "clearAll": "Clear all",
+      "condition": "Card condition",
+      "inStock": "In stock",
+      "maxPlaceholder": "Max",
+      "minPlaceholder": "Min",
+      "more": "More options",
+      "moreGames": "+ Show {count} more games",
+      "onSale": "On sale",
+      "priceRange": "Price (฿)",
+      "remove": "Remove “{label}”",
+      "showResults": "Show {count} results",
+      "title": "Filters"
+    },
     "filters": "Search filters",
     "filtersFailed": "Could not load filters",
     "game": "Game",
@@ -1266,17 +1348,49 @@
     "inStockOnly": "In stock only",
     "inputLabel": "Search products",
     "inputPlaceholder": "Search cards, sets or card numbers",
-    "maxPlaceholder": "฿ Max",
+    "loadMore": "Load more",
+    "maxPlaceholder": "THB Max",
     "maxPrice": "Maximum price",
-    "minPlaceholder": "฿ Min",
+    "minPlaceholder": "THB Min",
     "minPrice": "Minimum price",
     "noMatch": "No products match \"{query}\"",
+    "noResultsSummary": "No products match your search and filters",
+    "popularNow": "Popular right now",
     "priceRange": "Price Range",
     "priceRangeInvalid": "The minimum price must not exceed the maximum price",
     "productAria": "{name}, price {price}",
+    "related": "Related searches",
     "resultCount": "{count, plural, =1 {# result} other {# results}}",
     "results": "Search results",
+    "row": {
+      "sellingShops": "Sold by",
+      "shopsAndListings": "{shops} shops · {listings} listings",
+      "viewListings": "View listings"
+    },
+    "searchInstead": "Search “{query}” instead",
     "searching": "Searching…",
+    "shops": {
+      "backToProducts": "Back to products",
+      "empty": "No shops sell “{query}”",
+      "emptyNoQuery": "No shops found",
+      "failed": "Couldn't load shops",
+      "from": "from {price}",
+      "matches": "{count} products matching “{query}”",
+      "matchesNoQuery": "{count} products",
+      "preview": "Sample product from {shop}",
+      "rating": "Shop rating",
+      "ratingAll": "All",
+      "ratingAtLeast": "{rating} & up",
+      "ratingSummary": "{rating} ({count} reviews)",
+      "results": "Shops selling",
+      "showing": "Showing {from}–{to} of {total} shops",
+      "sortMatches": "Most matching products",
+      "sortRating": "Highest rated",
+      "summary": "{count} shops sell “{query}”",
+      "summaryNoQuery": "{count} shops",
+      "viewShop": "View shop"
+    },
+    "showing": "Showing {from}–{to} of {total} products",
     "sort": {
       "featured": "Featured",
       "name": "Name: A to Z",
@@ -1286,8 +1400,72 @@
       "relevance": "Most relevant"
     },
     "sortBy": "Sort by:",
+    "sortMenu": {
+      "newest": "Newest",
+      "popular": "Best selling",
+      "priceAsc": "Price: low → high",
+      "priceDesc": "Price: high → low",
+      "relevance": "Most relevant"
+    },
+    "summary": "{products} products from {shops} shops",
+    "tab": {
+      "listings": "Listings",
+      "products": "Products",
+      "shops": "Shops"
+    },
+    "tabs": "Result types",
+    "tips": {
+      "filters": "Try removing some filters",
+      "number": "Search by card number, e.g. 020/189, or set code sv2a",
+      "spelling": "Check the spelling or use the card's English name"
+    },
     "title": "All products",
-    "typeOther": "Other"
+    "titleFor": "Results for “{query}”",
+    "typeOther": "Other",
+    "view": {
+      "grid": "Grid",
+      "label": "View",
+      "list": "List"
+    },
+    "viewAll": "View all"
+  },
+  "searchSuggest": {
+    "back": "Back",
+    "categories": "Categories",
+    "clear": "Clear",
+    "clearInput": "Clear search",
+    "corrected": "Showing results for “{corrected}” · you typed “{query}”",
+    "dialogTitle": "Search products",
+    "didYouMean": "Did you mean",
+    "didYouMeanSuffix": "?",
+    "hint": "Type a card name, set or card number, e.g. 020/189",
+    "keyClose": "close",
+    "keyOpen": "open",
+    "keySelect": "select",
+    "listLabel": "Search suggestions",
+    "loading": "Searching…",
+    "noResults": "No results for “{query}”",
+    "noResultsHint": "Check the spelling, use fewer words, or search by card number, e.g. 020/189",
+    "popularGames": "Popular games",
+    "products": "Matching products",
+    "productsFailed": "Couldn't load products",
+    "productsFailedHint": "Check your connection and try again",
+    "recent": "Recent searches",
+    "removeRecent": "Remove “{query}” from history",
+    "resultCount": "{count, plural, one {# product found} other {# products found}}",
+    "retry": "Try again",
+    "searchFurther": "Search “{query}” on the results page",
+    "searchIn": "Search “{query}” in",
+    "seeAll": "See all results for “{query}”",
+    "sellerCount": "{count, plural, one {# shop} other {# shops}}",
+    "shopMatches": "{count, plural, one {# matching product} other {# matching products}}",
+    "shopRating": "{rating} ({count} reviews)",
+    "shops": "Shops",
+    "suggestions": "Suggestions",
+    "trending": "Trending now",
+    "tryPopular": "Try a popular search",
+    "viewAll": "View all {count}",
+    "viewed": "Recently viewed"
   },
   "store": {
     "activeListings": "Listings currently on sale",

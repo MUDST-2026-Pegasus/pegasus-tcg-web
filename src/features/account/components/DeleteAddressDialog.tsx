@@ -47,18 +47,18 @@ export function DeleteAddressDialog({
       onOpenChange={handleOpenChange}
       icon={Trash2}
       variant="destructive"
-      title={t("account.address.deleteTitle", "Delete this address?")}
+      title={t("account.address.deleteTitle", "ลบที่อยู่นี้?")}
       description={
         <>
           {address?.recipientName} · {address?.line1}
           <br />
-          {t("account.address.deleteHint", "Past orders keep their own copy, so they stay unchanged.")}
+          {t("account.address.deleteHint", "คำสั่งซื้อเดิมเก็บสำเนาที่อยู่ไว้แล้ว จึงไม่เปลี่ยนตาม")}
         </>
       }
-      confirmLabel={t("account.address.delete", "Delete")}
-      cancelLabel={t("account.orders.cancel", "Cancel")}
+      confirmLabel={t("account.address.delete", "ลบ")}
+      cancelLabel={t("account.orders.cancel", "ยกเลิก")}
       isPending={deleteAddress.isPending}
-      error={deleteAddress.isError ? translateError(deleteAddress.error, t("account.address.deleteFailed", "Could not delete this address.")) : null}
+      error={deleteAddress.isError ? translateError(deleteAddress.error, t("account.address.deleteFailed", "ลบที่อยู่นี้ไม่สำเร็จ")) : null}
       onConfirm={() => void onConfirm()}
     />
   );

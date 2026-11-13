@@ -6,6 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import { EmptyState, QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useTranslate } from "@/lib/i18n";
 
 import {
   AUDIT_CATEGORIES,
@@ -49,6 +50,7 @@ type AdminActivityLogContentProps = {
  * ตัวกรองและหน้าปัจจุบันอยู่ใน URL (`q`, `type`, `range`, `page`)
  */
 export function AdminActivityLogContent({ now }: AdminActivityLogContentProps) {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const { page, ...filters } = readActivityFilters(searchParams);
   // คำนวณครั้งเดียวต่อการเปิดหน้า ไม่งั้น query key เปลี่ยนทุก render
@@ -86,9 +88,11 @@ export function AdminActivityLogContent({ now }: AdminActivityLogContentProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">บันทึกกิจกรรม</h1>
+        <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
+          {t("audit.pageTitle", "บันทึกกิจกรรม")}
+        </h1>
         <p className="text-[13px] text-muted-foreground">
-          บันทึกทุกการกระทำของผู้ดูแลและระบบ · แก้ไขหรือลบไม่ได้
+          {t("audit.pageDesc", "บันทึกทุกการกระทำของผู้ดูแลและระบบ · แก้ไขหรือลบไม่ได้")}
         </p>
       </div>
 
@@ -100,8 +104,11 @@ export function AdminActivityLogContent({ now }: AdminActivityLogContentProps) {
             <QueryBoundary
               query={logs}
               loading={<ActivityTimelineSkeleton />}
-              errorTitle="โหลดบันทึกกิจกรรมไม่สำเร็จ"
-              errorMessage="เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ตัวกรองที่เลือกไว้ยังอยู่ใน URL"
+              errorTitle={t("audit.loadErrorTitle", "โหลดบันทึกกิจกรรมไม่สำเร็จ")}
+              errorMessage={t(
+                "audit.loadErrorDesc",
+                "เครือข่ายขัดข้องหรือเซสชันหมดอายุ — ตัวกรองที่เลือกไว้ยังอยู่ใน URL",
+              )}
               isEmpty={(result) => result.items.length === 0}
               empty={<ActivityEmpty filtered={filtered} onClear={clearFilters} />}
             >
@@ -118,7 +125,11 @@ export function AdminActivityLogContent({ now }: AdminActivityLogContentProps) {
 
           {logs.data && logs.data.totalItems > 0 ? (
             <div className="flex flex-col gap-1">
-              <p className="text-xs text-muted-foreground">ทั้งหมด {formatCount(logs.data.totalItems)} เหตุการณ์</p>
+              <p className="text-xs text-muted-foreground">
+                {t("audit.totalEventsCount", "ทั้งหมด {count} เหตุการณ์", {
+                  count: formatCount(logs.data.totalItems),
+                })}
+              </p>
               <CatalogPagination
                 page={logs.data.page + 1}
                 totalPages={logs.data.totalPages}
@@ -138,20 +149,26 @@ export function AdminActivityLogContent({ now }: AdminActivityLogContentProps) {
 }
 
 function ActivityEmpty({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+  const { t } = useTranslate("admin");
+
   return (
     <EmptyState
       icon={History}
-      title={filtered ? "ไม่พบกิจกรรมที่ตรงกับตัวกรอง" : "ยังไม่มีกิจกรรม"}
+      title={
+        filtered
+          ? t("audit.empty.filteredTitle", "ไม่พบกิจกรรมที่ตรงกับตัวกรอง")
+          : t("audit.empty.title", "ยังไม่มีกิจกรรม")
+      }
       description={
         filtered
-          ? "ลองเปลี่ยนคำค้นหา ประเภท หรือขยายช่วงเวลา"
-          : "เมื่อผู้ดูแลหรือระบบทำรายการ เหตุการณ์จะขึ้นที่นี่"
+          ? t("audit.empty.filteredDesc", "ลองเปลี่ยนคำค้นหา ประเภท หรือขยายช่วงเวลา")
+          : t("audit.empty.desc", "เมื่อผู้ดูแลหรือระบบทำรายการ เหตุการณ์จะขึ้นที่นี่")
       }
       className="min-h-[320px] border-0"
     >
       {filtered ? (
         <Button variant="outline" className="rounded-md px-2.5" onClick={onClear}>
-          ล้างตัวกรอง
+          {t("audit.filter.clear", "ล้างตัวกรอง")}
         </Button>
       ) : null}
     </EmptyState>

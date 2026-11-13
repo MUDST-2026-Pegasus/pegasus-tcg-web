@@ -2,6 +2,7 @@ import { EyeOff, MessageSquareReply } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { useTranslate } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { initialsOf } from "../finance.format";
@@ -23,11 +24,15 @@ export function ReviewModerationCard({
   pending: boolean;
   onVisibleChange: (visible: boolean) => void;
 }) {
+  const { t } = useTranslate("admin");
   const hidden = !review.visible;
   const switchId = `review-visible-${review.id}`;
+
   return (
     <article
-      aria-label={`รีวิวจาก ${review.reviewerUsername}`}
+      aria-label={t("reviews.moderationCard.ariaLabel", "รีวิวจาก {username}", {
+        username: review.reviewerUsername,
+      })}
       className={cn(
         "flex w-full flex-col gap-2.5 rounded-xl border px-[18px] py-4",
         hidden ? "border-dashed border-border bg-[#fbfbfc]" : "border-border bg-background",
@@ -48,19 +53,26 @@ export function ReviewModerationCard({
             <ReviewStars rating={review.rating} />
           </div>
           <p className="text-[11px] text-[#9aa5ad]">
-            {formatThaiDate(review.createdAt)} · คำสั่งซื้อย่อย #{review.sellerOrderId}
+            {t("reviews.moderationCard.subOrder", "{date} · คำสั่งซื้อย่อย #{id}", {
+              date: formatThaiDate(review.createdAt),
+              id: review.sellerOrderId,
+            })}
           </p>
         </div>
         {hidden ? (
-          <Badge className="rounded-[5px] bg-[#fbe9e8] text-[10px] text-[#d0342c]">ซ่อนอยู่</Badge>
+          <Badge className="rounded-[5px] bg-[#fbe9e8] text-[10px] text-[#d0342c]">
+            {t("reviews.filter.hidden", "ซ่อนอยู่")}
+          </Badge>
         ) : (
           review.replyComment == null && (
-            <Badge className="bg-[#fdf0dd] text-[11px] text-[#b45309]">ยังไม่ตอบกลับ</Badge>
+            <Badge className="bg-[#fdf0dd] text-[11px] text-[#b45309]">
+              {t("reviews.filter.unreplied", "ยังไม่ตอบกลับ")}
+            </Badge>
           )
         )}
         <div className="flex items-center gap-2">
           <label htmlFor={switchId} className="text-xs text-muted-foreground">
-            แสดงบนโปรไฟล์
+            {t("reviews.moderationCard.showOnProfile", "แสดงบนโปรไฟล์")}
           </label>
           <Switch
             id={switchId}
@@ -85,7 +97,7 @@ export function ReviewModerationCard({
           <div className="mt-1 flex flex-col gap-1 rounded-lg bg-secondary px-3 py-2.5">
             <p className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
               <MessageSquareReply aria-hidden="true" className="size-3" />
-              ผู้ขายตอบกลับ
+              {t("reviews.moderationCard.sellerReply", "ผู้ขายตอบกลับ")}
             </p>
             <p className="text-xs whitespace-pre-line text-[#414755]">{review.replyComment}</p>
           </div>
@@ -93,7 +105,10 @@ export function ReviewModerationCard({
         {hidden && (
           <p className="flex items-center gap-1.5 text-[11px] text-[#c71a1f]">
             <EyeOff aria-hidden="true" className="size-[13px]" />
-            ไม่แสดงบนหน้าโปรไฟล์และไม่นับในคะแนน
+            {t(
+              "reviews.moderationCard.hiddenNote",
+              "ไม่แสดงบนหน้าโปรไฟล์และไม่นับในคะแนน",
+            )}
           </p>
         )}
       </div>

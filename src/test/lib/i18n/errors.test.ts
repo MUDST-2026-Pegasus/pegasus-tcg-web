@@ -29,10 +29,10 @@ describe("translateError", () => {
   });
 
   it("passes API details into ICU params (BID_TOO_LOW minNextBid)", () => {
-    const tooLow = new ApiError({ status: 409, code: "BID_TOO_LOW", message: "Bid too low", details: { minNextBid: "฿1,500" } });
-    expect(translateError(tooLow, "fallback")).toBe("ต้องบิดอย่างน้อย ฿1,500");
+    const tooLow = new ApiError({ status: 409, code: "BID_TOO_LOW", message: "Bid too low", details: { minNextBid: "THB 1,500.00" } });
+    expect(translateError(tooLow, "fallback")).toBe("ต้องบิดอย่างน้อย THB 1,500.00");
     registerErrorTranslator(testTolgee("en"));
-    expect(errorText("BID_TOO_LOW", { minNextBid: "฿1,500" })).toBe("Your bid must be at least ฿1,500");
+    expect(errorText("BID_TOO_LOW", { minNextBid: "THB 1,500.00" })).toBe("Your bid must be at least THB 1,500.00");
   });
 });
 

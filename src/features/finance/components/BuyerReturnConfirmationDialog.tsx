@@ -14,7 +14,7 @@ import { PromotionDiscountLines } from "@/features/promotions/PromotionDiscountL
 import type { OrderItemDetails, SellerOrderDetails } from "@/features/account/orders.types";
 
 import { formatBaht, returnReasonLabel } from "../after-sales.format";
-import { intlLocale } from "@/lib/i18n";
+import { intlLocale, useTranslate } from "@/lib/i18n";
 
 type BuyerReturnConfirmationDialogProps = {
   open: boolean;
@@ -62,14 +62,17 @@ export function BuyerReturnConfirmationDialog({
   isSubmitting,
   onConfirm,
 }: BuyerReturnConfirmationDialogProps) {
+  const { t } = useTranslate("buyer");
   const selected = selectedItems(order.items, quantities);
   const hasPromotions = (order.promotions?.length ?? 0) > 0
     || (order.discountAmount ?? 0) > 0
     || selected.some(({ item }) => (item.sellerDiscountAllocated ?? 0) > 0 || (item.platformDiscountAllocated ?? 0) > 0);
   const oneItem = selected.length === 1 ? selected[0].item : null;
   const title = hasPromotions && oneItem
-    ? `ขอคืน ${oneItem.productName}${oneItem.variantLabel ? ` · ${oneItem.variantLabel}` : ""}?`
-    : "ยืนยันคำขอคืนสินค้า";
+    ? t("buyerReturnDialog.singleItemTitle", "ขอคืน {name}?", {
+        name: `${oneItem.productName}${oneItem.variantLabel ? ` · ${oneItem.variantLabel}` : ""}`,
+      })
+    : t("buyerReturnDialog.defaultTitle", "ยืนยันคำขอคืนสินค้า");
   const deadline = returnDeadline(order.autoCompleteAt);
 
   return (
@@ -82,7 +85,8 @@ export function BuyerReturnConfirmationDialog({
           <div className="flex flex-col gap-1">
             <DialogTitle className="text-base font-bold text-foreground sm:text-lg">{title}</DialogTitle>
             <p className="text-xs text-muted-foreground">
-              {order.sellerOrderNumber}{deadline ? ` · คืนได้ถึง ${deadline}` : ""}
+              {order.sellerOrderNumber}
+              {deadline ? t("buyerReturnDialog.deadlineSuffix", " · คืนได้ถึง {date}", { date: deadline }) : ""}
             </p>
           </div>
 
@@ -97,20 +101,30 @@ export function BuyerReturnConfirmationDialog({
 
           {hasPromotions && (
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              ส่วนลดคิดตามสัดส่วนราคาสินค้าในคำสั่งซื้อ · โค้ดไม่ได้คืนสิทธิ์ · ยอดจริงยืนยันหลังร้านรับของคืน
+              {t("buyerReturnDialog.promotionNotice", "ส่วนลดคิดตามสัดส่วนราคาสินค้าในคำสั่งซื้อ · โค้ดไม่ได้คืนสิทธิ์ · ยอดจริงยืนยันหลังร้านรับของคืน")}
             </p>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-foreground" htmlFor="buyer-return-reason">เหตุผล *</label>
-            <Select items={reasons.map((value) => ({ value, label: returnReasonLabel(value) }))} value={reason} onValueChange={(value) => onReasonChange(value ?? reasons[0])}>
-              <SelectTrigger id="buyer-return-reason" aria-label="สาเหตุคืนสินค้า" className="w-full rounded-lg border-border bg-background">
+            <label className="text-xs font-medium text-foreground" htmlFor="buyer-return-reason">
+              {t("buyerReturnDialog.reasonLabel", "เหตุผล *")}
+            </label>
+            <Select
+              items={reasons.map((value) => ({ value, label: returnReasonLabel(value, t) }))}
+              value={reason}
+              onValueChange={(value) => onReasonChange(value ?? reasons[0])}
+            >
+              <SelectTrigger
+                id="buyer-return-reason"
+                aria-label={t("buyerReturnDialog.reasonAria", "สาเหตุคืนสินค้า")}
+                className="w-full rounded-lg border-border bg-background"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   {reasons.map((value) => (
-                    <SelectItem key={value} value={value}>{returnReasonLabel(value)}</SelectItem>
+                    <SelectItem key={value} value={value}>{returnReasonLabel(value, t)}</SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
@@ -120,10 +134,10 @@ export function BuyerReturnConfirmationDialog({
 
         <DialogFooter className="flex-row items-center justify-end gap-2 border-t bg-muted/30 px-6 py-3.5">
           <Button type="button" variant="outline" size="sm" disabled={isSubmitting} onClick={() => onOpenChange(false)}>
-            ยกเลิก
+            {t("actions.cancel", "ยกเลิก", { ns: "common" })}
           </Button>
           <Button type="button" size="sm" disabled={isSubmitting || selected.length === 0} onClick={onConfirm}>
-            {isSubmitting ? "กำลังส่งคำขอ..." : "ส่งคำขอคืนสินค้า"}
+            {isSubmitting ? t("buyerReturnDialog.submittingButton", "กำลังส่งคำขอ...") : t("buyerReturnDialog.submitButton", "ส่งคำขอคืนสินค้า")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -140,13 +154,14 @@ function ReturnItemSummary({
   quantity: number;
   promotions: SellerOrderDetails["promotions"];
 }) {
+  const { t } = useTranslate("buyer");
   const hasAllocatedDiscount = (item.discountAllocated ?? 0) > 0
     || (item.sellerDiscountAllocated ?? 0) > 0
     || (item.platformDiscountAllocated ?? 0) > 0
     || (promotions?.length ?? 0) > 0;
   const labels = {
-    SELLER: "ส่วนลดร้านต่อใบ",
-    PLATFORM: "ส่วนลด Pegasus ต่อใบ",
+    SELLER: t("buyerReturnDialog.labels.sellerDiscount", "ส่วนลดร้านต่อใบ"),
+    PLATFORM: t("buyerReturnDialog.labels.platformDiscount", "ส่วนลด Pegasus ต่อใบ"),
   };
 
   return (
@@ -170,7 +185,11 @@ function ReturnItemSummary({
           />
           <Separator />
           <div className="flex items-center justify-between gap-3 text-[13px] font-semibold">
-            <span>ยอดคืนโดยประมาณ{quantity > 1 ? "ต่อใบ" : ""}</span>
+            <span>
+              {t("buyerReturnDialog.estimatedRefund", "ยอดคืนโดยประมาณ{perUnit, select, true {ต่อใบ} other {}}", {
+                perUnit: String(quantity > 1),
+              })}
+            </span>
             <span className="shrink-0 text-lg font-black tabular-nums text-foreground">
               {item.refundEstimatePerUnit == null ? "—" : formatBaht(item.refundEstimatePerUnit)}
             </span>

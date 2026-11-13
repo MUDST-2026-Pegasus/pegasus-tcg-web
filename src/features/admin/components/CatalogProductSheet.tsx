@@ -185,7 +185,7 @@ function EditProductPanel({
                 </TabsTrigger>
                 <TabsTrigger value="images">{t("catalog.sheet.tabs.images", "รูปภาพ ({count})", { count: images.length })}</TabsTrigger>
                 {hasEffects && (
-                  <TabsTrigger value="effects">Abilities &amp; Attacks</TabsTrigger>
+                  <TabsTrigger value="effects">{t("catalog.product.tabEffects", "ความสามารถและท่าโจมตี")}</TabsTrigger>
                 )}
               </TabsList>
 

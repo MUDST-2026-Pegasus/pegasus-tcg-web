@@ -7,6 +7,7 @@ import { QueryBoundary } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslate } from "@/lib/i18n";
 
 import { useAdminGames } from "../catalog.queries";
 import {
@@ -29,6 +30,7 @@ import { WeeklyTrendChart } from "./WeeklyTrendChart";
 
 /** รายงานสต็อกและกำไรรายสัปดาห์ — ตัวกรองอยู่ใน URL (`?week=&game=`) เปิดลิงก์ซ้ำได้สัปดาห์เดิม */
 export function AdminWeeklyReportContent() {
+  const { t } = useTranslate("admin");
   const [searchParams, setSearchParams] = useSearchParams();
   const today = bangkokToday();
   const weekStart = resolveWeekParam(searchParams.get("week"), today);
@@ -58,7 +60,9 @@ export function AdminWeeklyReportContent() {
         })),
     [games.data, allGames.data],
   );
-  const gameLabel = gameOptions.find((option) => option.slug === game)?.name ?? (game ?? "ทุกเกม");
+  const gameLabel =
+    gameOptions.find((option) => option.slug === game)?.name ??
+    (game ?? t("weeklyReport.filter.allGames", "ทุกเกม"));
 
   const setFilter = (key: "week" | "game", value: string | null) => {
     setSearchParams(
@@ -77,12 +81,14 @@ export function AdminWeeklyReportContent() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-[26px] leading-tight font-bold tracking-[-0.5px] text-foreground">
-            รายงานสต็อกและกำไรรายสัปดาห์
+            {t("weeklyReport.title", "รายงานสต็อกและกำไรรายสัปดาห์")}
           </h1>
           <p className="text-[13px] text-muted-foreground">
-            สรุปความเคลื่อนไหวสต็อกสินค้าและผลกำไรสุทธิรายสัปดาห์บน Pegasus TCG
+            {t("weeklyReport.subtitle", "สรุปความเคลื่อนไหวสต็อกสินค้าและผลกำไรสุทธิรายสัปดาห์บน Pegasus TCG")}
             {report.dataUpdatedAt
-              ? ` · อัปเดตล่าสุด ${format(report.dataUpdatedAt, "HH:mm")} น.`
+              ? t("weeklyReport.lastUpdated", " · อัปเดตล่าสุด {time} น.", {
+                  time: format(report.dataUpdatedAt, "HH:mm"),
+                })
               : ""}
           </p>
         </div>
@@ -105,13 +111,13 @@ export function AdminWeeklyReportContent() {
             disabled={report.isFetching || !report.data?.hasData}
             onClick={() => setExportOpen(true)}
           >
-            ส่งออกรายงาน
+            {t("weeklyReport.exportReport", "ส่งออกรายงาน")}
           </Button>
           <Button
             className="h-[41px] rounded-lg px-3.5 font-normal"
             onClick={() => setSettingsOpen(true)}
           >
-            ตั้งค่าระบบ
+            {t("weeklyReport.systemSettings", "ตั้งค่าระบบ")}
           </Button>
         </div>
       </div>
@@ -119,7 +125,7 @@ export function AdminWeeklyReportContent() {
       <QueryBoundary
         query={report}
         loading={<WeeklyReportSkeleton />}
-        errorTitle="โหลดรายงานรายสัปดาห์ไม่สำเร็จ"
+        errorTitle={t("weeklyReport.loadError", "โหลดรายงานรายสัปดาห์ไม่สำเร็จ")}
       >
         {(data) => (
           <>
@@ -134,7 +140,9 @@ export function AdminWeeklyReportContent() {
                 <div className="flex flex-col items-stretch gap-4 lg:flex-row">
                   <WeeklyTrendChart points={weeklyTrendPoints(data)} />
                   <WeeklyGameShareChart
-                    description={`สัปดาห์ที่ ${weekRangeLabel(weekStart)}`}
+                    description={t("weeklyReport.weekNumber", "สัปดาห์ที่ {range}", {
+                      range: weekRangeLabel(weekStart),
+                    })}
                     items={data.gameDistribution}
                   />
                 </div>
@@ -170,6 +178,8 @@ function WeeklyReportEmptyCard({
   isCurrentWeek: boolean;
   onBackToCurrent: () => void;
 }) {
+  const { t } = useTranslate("admin");
+
   return (
     <Card className="items-center gap-0 rounded-xl border border-border px-6 py-20 text-center shadow-none ring-0">
       {/* Card ตัด padding บนออกเมื่อลูกตัวแรกเป็น img จึงต้องมีกรอบครอบ */}
@@ -177,11 +187,13 @@ function WeeklyReportEmptyCard({
         <img src={emptyIllustration} alt="" width={96} height={96} />
       </div>
       <p className="mt-5 text-xl font-semibold text-foreground">
-        ไม่พบรายการเคลื่อนไหวสต็อกและกำไรในสัปดาห์ที่เลือก
+        {t("weeklyReport.empty.title", "ไม่พบรายการเคลื่อนไหวสต็อกและกำไรในสัปดาห์ที่เลือก")}
       </p>
       <p className="mt-2 max-w-[520px] text-sm leading-[22.4px] text-muted-foreground">
-        ยังไม่มีคำสั่งซื้อที่สำเร็จสมบูรณ์หรือรายการสต็อกในช่วงเวลานี้
-        กรุณาเลือกสัปดาห์อื่นหรือเปลี่ยนตัวกรองเกม
+        {t(
+          "weeklyReport.empty.desc",
+          "ยังไม่มีคำสั่งซื้อที่สำเร็จสมบูรณ์หรือรายการสต็อกในช่วงเวลานี้ กรุณาเลือกสัปดาห์อื่นหรือเปลี่ยนตัวกรองเกม",
+        )}
       </p>
       {isCurrentWeek ? null : (
         <Button
@@ -189,7 +201,7 @@ function WeeklyReportEmptyCard({
           className="mt-6 h-[43px] rounded-lg border-primary px-5 font-medium text-primary hover:text-primary"
           onClick={onBackToCurrent}
         >
-          กลับไปสัปดาห์ปัจจุบัน
+          {t("weeklyReport.empty.backToCurrent", "กลับไปสัปดาห์ปัจจุบัน")}
         </Button>
       )}
     </Card>

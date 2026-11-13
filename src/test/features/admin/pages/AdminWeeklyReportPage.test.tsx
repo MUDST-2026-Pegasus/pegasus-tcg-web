@@ -94,7 +94,7 @@ const games = [
 ] as Game[];
 
 async function openExportDialog(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByText("฿428,500", { selector: "p" });
+  await screen.findByText("THB 428,500.00", { selector: "p" });
   await user.click(screen.getByRole("button", { name: "ส่งออกรายงาน" }));
   return screen.findByRole("dialog");
 }
@@ -109,10 +109,10 @@ describe("AdminWeeklyReportPage", () => {
   it("requests the selected Monday-to-Sunday week and shows API figures", async () => {
     renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
 
-    expect(await screen.findByText("฿428,500", { selector: "p" })).toBeInTheDocument();
+    expect(await screen.findByText("THB 428,500.00", { selector: "p" })).toBeInTheDocument();
     expect(reportApi.getWeeklyReport).toHaveBeenCalledWith({ weekStart: "2026-08-03", game: null });
-    expect(screen.getByText("฿12,855", { selector: "p" })).toBeInTheDocument();
-    expect(screen.getByText("฿12,000", { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByText("THB 12,855.00", { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByText("THB 12,000.00", { selector: "p" })).toBeInTheDocument();
     expect(screen.getByText("6,184", { selector: "p" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /สัปดาห์ที่ 3 - 9 ส.ค. 2569/ })).toBeInTheDocument();
   });
@@ -123,7 +123,7 @@ describe("AdminWeeklyReportPage", () => {
     const single = (await screen.findByRole("cell", { name: "การ์ดเดี่ยว" })).closest("tr")!;
     expect(within(single).getByText("Pokémon")).toBeInTheDocument();
     expect(within(single).getByText("1,740")).toBeInTheDocument();
-    expect(within(single).getByText("฿146,800")).toBeInTheDocument();
+    expect(within(single).getByText("THB 146,800.00")).toBeInTheDocument();
     expect(within(single).getByText("สต็อกหมุนเวียนเร็ว")).toBeInTheDocument();
 
     const sealed = screen.getByRole("cell", { name: "กล่อง/ซองสุ่ม" }).closest("tr")!;
@@ -131,15 +131,15 @@ describe("AdminWeeklyReportPage", () => {
 
     const totals = screen.getByRole("cell", { name: "รวมทั้งหมด" }).closest("tr")!;
     expect(within(totals).getByText("7,654")).toBeInTheDocument();
-    expect(within(totals).getByText("฿428,500")).toBeInTheDocument();
-    expect(within(totals).getByText("฿12,855")).toBeInTheDocument();
+    expect(within(totals).getByText("THB 428,500.00")).toBeInTheDocument();
+    expect(within(totals).getByText("THB 12,855.00")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "กำไรสุทธิ" })).toBeInTheDocument();
   });
 
   it("refetches when the game filter changes and lists only active games with shares", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
-    await screen.findByText("฿428,500", { selector: "p" });
+    await screen.findByText("THB 428,500.00", { selector: "p" });
 
     await user.click(screen.getByRole("button", { name: /ทุกเกม/ }));
     expect(screen.queryByRole("button", { name: /Retired/ })).not.toBeInTheDocument();
@@ -153,7 +153,7 @@ describe("AdminWeeklyReportPage", () => {
   it("refetches when the week changes", async () => {
     const user = userEvent.setup();
     renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
-    await screen.findByText("฿428,500", { selector: "p" });
+    await screen.findByText("THB 428,500.00", { selector: "p" });
 
     await user.click(screen.getByRole("button", { name: /สัปดาห์ที่ 3 - 9 ส.ค. 2569/ }));
     await user.click(await screen.findByRole("button", { name: /สัปดาห์ก่อนหน้า/ }));
@@ -204,7 +204,7 @@ describe("AdminWeeklyReportPage", () => {
     renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
 
     const dialog = await openExportDialog(user);
-    expect(within(dialog).getByText("2 หมวดหมู่ (ยอดขายรวม ฿428,500)")).toBeInTheDocument();
+    expect(within(dialog).getByText("2 หมวดหมู่ (ยอดขายรวม THB 428,500.00)")).toBeInTheDocument();
     await user.click(within(dialog).getByText("Excel (.xlsx)"));
     await user.click(within(dialog).getByRole("button", { name: "ดาวน์โหลดรายงาน" }));
 
@@ -295,7 +295,7 @@ describe("AdminWeeklyReportPage", () => {
       const add = vi.spyOn(toast, "add");
       vi.mocked(reportApi.updateWeeklyThresholds).mockResolvedValue({ ...thresholds, lowStockThreshold: 800 });
       renderWithProviders(<AdminWeeklyReportPage />, { route: ROUTE });
-      await screen.findByText("฿428,500", { selector: "p" });
+      await screen.findByText("THB 428,500.00", { selector: "p" });
       await openSettings(user);
       vi.mocked(reportApi.getWeeklyReport).mockClear();
 

@@ -50,17 +50,26 @@ export interface PromoPreview {
   platformDiscountTotal: number;
   grandTotal: number;
   shippingEstimated: boolean;
-  codes: Array<{
-    code: string;
-    ownerType: PromotionOwner;
-    sellerProfileId: number | null;
-    sellerName: string | null;
-    status: string;
-    discount: number | null;
-    shortfall: number | null;
-    pendingShipping: boolean;
-  }>;
+  codes: PromoCodeOutcome[];
   bestPick: PromotionSelection | null;
+}
+
+/**
+ * One typed code's result. `ownerType`/`sellerProfileId` say whose code it is (null
+ * owner for an unknown code); `slot*` say which slot it was typed in [TCG-769].
+ */
+export interface PromoCodeOutcome {
+  code: string;
+  ownerType: PromotionOwner | null;
+  sellerProfileId: number | null;
+  sellerName: string | null;
+  status: string;
+  discount: number | null;
+  shortfall: number | null;
+  pendingShipping: boolean;
+  /** Missing on an API older than TCG-769. */
+  slotOwnerType?: PromotionOwner;
+  slotSellerProfileId?: number | null;
 }
 
 export interface PromotionUiError {

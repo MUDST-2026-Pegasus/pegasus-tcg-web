@@ -45,6 +45,7 @@ import type {
 import { CONDITION_LABELS } from "../catalog.mappers";
 import { cn } from "@/lib/utils";
 import { useListingText } from "@/lib/listing-detail.messages";
+import { localName } from "@/lib/i18n";
 
 export function ListingGallery({
   photos,
@@ -361,7 +362,7 @@ export function ListingCardInformation({
           title={t.card}
           rows={[
             [t.game, gameName],
-            [t.set, cardSet?.nameLocal || cardSet?.name],
+            [t.set, localName(cardSet)],
             [t.number, product.cardNumber],
             [t.rarity, rarityLabel(product.rarityCode)],
             [

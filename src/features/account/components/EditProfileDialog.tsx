@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { Camera } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -26,7 +28,9 @@ import { cn } from "@/lib/utils";
 
 import { applyApiErrors } from "@/lib/form";
 import type { AuthUser } from "@/features/auth/auth.types";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
+import { initialsOf } from "../account.format";
 import { useUpdateProfile } from "../profile.queries";
 import {
   useEditProfileSchema,
@@ -41,6 +45,44 @@ type EditProfileDialogProps = {
   onOpenChange: (open: boolean) => void;
   user: AuthUser;
 };
+
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png"];
+
+function sanitizeImageSrc(rawUrl: string | null | undefined): string | undefined {
+  if (!rawUrl) return undefined;
+  try {
+    const baseOrigin =
+      typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "http://localhost";
+    const parsed = new URL(rawUrl, baseOrigin);
+    if (
+      parsed.protocol === "https:" ||
+      parsed.protocol === "http:" ||
+      parsed.protocol === "blob:"
+    ) {
+      if (rawUrl.startsWith("/") && !rawUrl.startsWith("//")) {
+        return rawUrl;
+      }
+      return parsed.href;
+    }
+  } catch {
+    if (
+      typeof rawUrl === "string" &&
+      (rawUrl.startsWith("blob:") ||
+        rawUrl.startsWith("https://") ||
+        rawUrl.startsWith("http://") ||
+        (rawUrl.startsWith("/") && !rawUrl.startsWith("//")))
+    ) {
+      if (!rawUrl.toLowerCase().includes("javascript:") && !rawUrl.toLowerCase().includes("data:")) {
+        return rawUrl;
+      }
+    }
+    return undefined;
+  }
+  return undefined;
+}
 
 export function EditProfileDialog({
   open,
@@ -57,10 +99,10 @@ export function EditProfileDialog({
       >
         <DialogHeader className="gap-1 text-left">
           <DialogTitle className="text-xl font-bold text-foreground">
-            {t("account.profile.edit.title", "Edit Profile")}
+            {t("account.profile.edit.title", "แก้ไขโปรไฟล์")}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {t("account.profile.edit.description", "Update your personal information.")}
+            {t("account.profile.edit.description", "แก้ไขข้อมูลส่วนตัวของคุณ")}
           </DialogDescription>
         </DialogHeader>
         <EditProfileForm
@@ -80,15 +122,26 @@ function EditProfileForm({
   user: AuthUser;
   onSaved: () => void;
 }) {
+  "use no memo";
   const { t } = useTranslate("buyer");
   const updateProfile = useUpdateProfile();
+  const upload = useFileUpload({ purpose: "AVATAR_IMAGE" });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const schema = useEditProfileSchema();
   const {
     register,
     handleSubmit,
     control,
-    watch,
     setError,
     formState: { errors, isSubmitting, isDirty, dirtyFields },
   } = useForm<EditProfileFormValues>({
@@ -96,23 +149,71 @@ function EditProfileForm({
     defaultValues: toEditProfileForm(user),
   });
 
-  const phone = watch("phone") ?? "";
-  const phonePublic = watch("phonePublic") ?? false;
+  const phone = useWatch({ control, name: "phone" }) ?? "";
+  const phonePublic = useWatch({ control, name: "phonePublic" }) ?? false;
   const isPhoneBlank = !phone.trim();
   const isSwitchDisabled = isSubmitting || isPhoneBlank;
 
-  const hasChanges = isDirty;
+  const hasAvatarChange = Boolean(previewUrl);
+  const hasChanges = isDirty || hasAvatarChange;
+  const busy = isSubmitting || upload.isUploading;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input value so re-selecting the same file fires onChange
+    e.target.value = "";
+
+    const type = file.type.toLowerCase();
+    const name = file.name.toLowerCase();
+    const isJpegOrPng =
+      ALLOWED_AVATAR_TYPES.includes(type) ||
+      name.endsWith(".jpg") ||
+      name.endsWith(".jpeg") ||
+      name.endsWith(".png");
+
+    if (!isJpegOrPng) {
+      toast.add({
+        type: "error",
+        title: t("account.profile.edit.avatarInvalidType", "รองรับเฉพาะไฟล์ JPG และ PNG เท่านั้น"),
+      });
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      toast.add({
+        type: "error",
+        title: t("account.profile.edit.avatarTooLarge", "ขนาดไฟล์ต้องไม่เกิน 5MB"),
+      });
+      return;
+    }
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    const resolvedType = ALLOWED_AVATAR_TYPES.includes(type)
+      ? type
+      : name.endsWith(".png")
+        ? "image/png"
+        : "image/jpeg";
+    const safeBlob = new Blob([file], { type: resolvedType });
+    const nextPreview = URL.createObjectURL(safeBlob);
+    setPreviewUrl(nextPreview);
+    upload.addFiles([file]);
+  };
 
   const onSubmit = handleSubmit(async (values) => {
     try {
       const payload = toUpdateProfilePayload(values, {
         dirtyFields,
+        newAvatarKey: upload.objectKeys[0],
       });
       await updateProfile.mutateAsync(payload);
       toast.add({
         type: "success",
-        title: t("account.profile.edit.saved", "Profile updated"),
-        description: t("account.profile.edit.savedHint", "Your profile changes have been saved successfully."),
+        title: t("account.profile.edit.saved", "อัปเดตโปรไฟล์แล้ว"),
+        description: t("account.profile.edit.savedHint", "บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว"),
       });
       onSaved();
     } catch (error) {
@@ -120,15 +221,67 @@ function EditProfileForm({
     }
   });
 
+  const displayAvatarUrl = previewUrl || user.avatarUrl;
+  const safeAvatarUrl = sanitizeImageSrc(displayAvatarUrl);
+
   return (
     <form className="flex flex-col gap-6" onSubmit={onSubmit} noValidate>
       {updateProfile.isError && (
         <Alert variant="destructive">
           <AlertDescription>
-            {translateError(updateProfile.error, t("account.profile.edit.failed", "Could not save profile changes."))}
+            {translateError(updateProfile.error, t("account.profile.edit.failed", "บันทึกโปรไฟล์ไม่สำเร็จ"))}
           </AlertDescription>
         </Alert>
       )}
+      {upload.items[0]?.error && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {upload.items[0].error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Centered Circular Profile Photo Uploader */}
+      <div className="flex flex-col items-center gap-2.5 my-2">
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="relative h-24 w-24 rounded-full cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label={t("account.profile.edit.changePhoto", "เปลี่ยนรูปโปรไฟล์")}
+        >
+          <div className="size-full overflow-hidden rounded-full border border-border/50 bg-muted shadow-sm flex items-center justify-center">
+            {safeAvatarUrl ? (
+              <img
+                src={safeAvatarUrl}
+                alt={user.displayName?.trim() || user.username || t("account.profile.edit.avatarAlt", "รูปโปรไฟล์")}
+                className="size-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl font-semibold text-muted-foreground select-none">
+                {initialsOf(user.displayName || user.username || "?")}
+              </span>
+            )}
+          </div>
+          <div
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#0066AD] text-white ring-2 ring-white shadow-sm transition-transform group-hover:scale-105"
+            aria-hidden="true"
+          >
+            <Camera className="h-4 w-4" />
+          </div>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png"
+          className="sr-only"
+          tabIndex={-1}
+          aria-label={t("account.profile.edit.uploadPhoto", "อัปโหลดรูปโปรไฟล์")}
+          onChange={handleFileChange}
+        />
+        <p className="text-xs text-muted-foreground">
+          {t("account.profile.edit.avatarHint", "คลิกที่รูปเพื่อเปลี่ยน · JPG, PNG ไม่เกิน 5MB")}
+        </p>
+      </div>
 
       {/* Hidden inputs to preserve existing avatarUrl and bio without overwriting */}
       <input type="hidden" {...register("avatarUrl")} />
@@ -138,11 +291,11 @@ function EditProfileForm({
         {/* Field 1: Name */}
         <Field className="gap-2" data-invalid={Boolean(errors.displayName) || undefined}>
           <FieldLabel htmlFor="displayName" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.name", "Name")}
+            {t("account.profile.edit.name", "ชื่อ")}
           </FieldLabel>
           <Input
             id="displayName"
-            aria-label={t("account.profile.edit.nameAria", "Display Name")}
+            aria-label={t("account.profile.edit.nameAria", "ชื่อที่แสดง")}
             autoComplete="name"
             className="h-11 rounded-xl border border-input bg-white px-3.5 text-sm font-normal text-foreground dark:bg-background"
             aria-invalid={Boolean(errors.displayName)}
@@ -154,7 +307,7 @@ function EditProfileForm({
         {/* Field 2: Email */}
         <Field className="gap-2">
           <FieldLabel htmlFor="email" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.email", "Email")}
+            {t("account.profile.edit.email", "อีเมล")}
           </FieldLabel>
           <Input
             id="email"
@@ -167,7 +320,7 @@ function EditProfileForm({
         {/* Field 3: Phone Number */}
         <Field className="gap-2" data-invalid={Boolean(errors.phone) || undefined}>
           <FieldLabel htmlFor="phone" className="text-sm font-medium text-foreground">
-            {t("account.profile.edit.phone", "Phone Number")}
+            {t("account.profile.edit.phone", "เบอร์โทรศัพท์")}
           </FieldLabel>
           <Input
             id="phone"
@@ -226,15 +379,15 @@ function EditProfileForm({
             />
           }
         >
-          {t("account.orders.cancel", "Cancel")}
+          {t("account.orders.cancel", "ยกเลิก")}
         </DialogClose>
         <Button
           type="submit"
           className="h-10 rounded-full bg-primary px-6 font-medium text-primary-foreground hover:bg-primary/90"
-          disabled={isSubmitting || !hasChanges}
+          disabled={busy || !hasChanges}
         >
-          {isSubmitting && <Spinner data-icon="inline-start" />}
-          {t("account.profile.edit.save", "Save Changes")}
+          {busy && <Spinner data-icon="inline-start" />}
+          {t("account.profile.edit.save", "บันทึกการเปลี่ยนแปลง")}
         </Button>
       </DialogFooter>
     </form>

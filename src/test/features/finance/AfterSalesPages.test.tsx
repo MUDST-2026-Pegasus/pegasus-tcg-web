@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BuyerAfterSales } from "@/features/finance/BuyerAfterSales";
 import { SellerReturnsPage } from "@/features/finance/seller-returns/SellerReturnsPage";
 import { afterSalesApi } from "@/features/finance/after-sales.api";
+import { testTolgee } from "@/test/i18n";
+import { renderWithProviders } from "@/test/utils";
 
 vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   buyerReturns: vi.fn(), requestReturn: vi.fn(), shipReturn: vi.fn(), createReview: vi.fn(), myReview: vi.fn(),
@@ -12,14 +13,13 @@ vi.mock("@/features/finance/after-sales.api", () => ({ afterSalesApi: {
   sellerReturnEvidence: vi.fn(),
 } }));
 afterEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); });
-const wrapper = ({ children }: { children: React.ReactNode }) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>;
 
 describe("after sales screens", () => {
   it("shows a saved review instead of the submit form after loading the order", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
     vi.mocked(afterSalesApi.myReview).mockResolvedValue({ id: 8, sellerOrderId: 41, rating: 5,
       title: "Great", comment: "Fast shipping" } as never);
-    render(<BuyerAfterSales order={{ id: 41, status: "COMPLETED", items: [] } as never} />, { wrapper });
+    renderWithProviders(<BuyerAfterSales order={{ id: 41, status: "COMPLETED", items: [] } as never} />);
     expect(await screen.findByText("Fast shipping")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "ส่งรีวิว" })).not.toBeInTheDocument();
     expect(afterSalesApi.myReview).toHaveBeenCalledWith(41);
@@ -28,8 +28,8 @@ describe("after sales screens", () => {
   it("submits a buyer return with the seller-order and selected order-item IDs", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
     vi.mocked(afterSalesApi.requestReturn).mockResolvedValue({} as never);
-    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
-      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    renderWithProviders(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
+      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />);
     fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
     fireEvent.click(await screen.findByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
@@ -42,8 +42,8 @@ describe("after sales screens", () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([]);
     vi.mocked(afterSalesApi.requestReturn).mockResolvedValue({} as never);
     const user = userEvent.setup();
-    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
-      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />, { wrapper });
+    renderWithProviders(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", autoCompleteAt: "2030-01-01T00:00:00Z",
+      items: [{ id: 72, productName: "Card", quantity: 2 }] } as never} />);
     fireEvent.change(await screen.findByRole("spinbutton"), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "ส่งคำขอคืนสินค้า" }));
     await user.click(screen.getByRole("combobox", { name: "สาเหตุคืนสินค้า" }));
@@ -55,7 +55,7 @@ describe("after sales screens", () => {
   it("shows buyer return statuses and reasons as readable labels", async () => {
     vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{ id: 7, sellerOrderId: 41,
       status: "AWAITING_RETURN_SHIPMENT", reasonCode: "DAMAGED", evidenceKeys: [] }] as never);
-    render(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />, { wrapper });
+    renderWithProviders(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />);
     expect(await screen.findByText("คำขอคืน #7 · รอผู้ซื้อส่งสินค้าคืน · สินค้าเสียหาย")).toBeTruthy();
   });
 
@@ -74,12 +74,12 @@ describe("after sales screens", () => {
       requestedAt: "2026-10-10T10:00:00Z",
     }] as never);
     vi.mocked(afterSalesApi.approveReturn).mockResolvedValue({} as never);
-    render(<SellerReturnsPage />, { wrapper });
+    renderWithProviders(<SellerReturnsPage />);
     await screen.findByText(/Bent card/);
     expect(screen.getByText("รอคุณตัดสิน")).toBeTruthy();
     expect(screen.getByText("สินค้าเสียหาย")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /อนุมัติคืนเงิน ฿100/ }));
-    fireEvent.click(await screen.findByRole("button", { name: /ยืนยันอนุมัติคืนเงิน ฿100/ }));
+    fireEvent.click(screen.getByRole("button", { name: /อนุมัติคืนเงิน THB 100.00/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /ยืนยันอนุมัติคืนเงิน THB 100.00/ }));
     await waitFor(() => expect(afterSalesApi.approveReturn).toHaveBeenCalledWith(9, "FULL_REFUND", 100, true));
   });
 
@@ -97,7 +97,7 @@ describe("after sales screens", () => {
       items: [],
       requestedAt: "2026-10-10T10:00:00Z",
     }] as never);
-    render(<SellerReturnsPage />, { wrapper });
+    renderWithProviders(<SellerReturnsPage />);
     fireEvent.click(await screen.findByRole("button", { name: /รอผู้ซื้อส่งคืน \(1\)/ }));
     expect(await screen.findByText("RT-13")).toBeTruthy();
     expect(screen.getByText("รอผู้ซื้อส่งคืน")).toBeTruthy();
@@ -121,11 +121,56 @@ describe("after sales screens", () => {
       number: 1,
       url: "https://example.test/presigned",
     }]);
-    render(<SellerReturnsPage />, { wrapper });
+    renderWithProviders(<SellerReturnsPage />);
     const thumbBtn = await screen.findByRole("button", { name: "เปิดดูหลักฐาน 1" });
     fireEvent.click(thumbBtn);
-    const modalImg = await screen.findByAltText("หลักฐานขนาดเต็ม 1");
+    const modalImg = await screen.findByAltText("หลักฐาน 1");
     expect(modalImg.getAttribute("src")).toBe("https://example.test/presigned");
     expect(screen.queryByText(/returns\/private-photo/)).toBeNull();
+  });
+
+  it("renders in English with zero Thai UI text when set to en", async () => {
+    vi.mocked(afterSalesApi.buyerReturns).mockResolvedValue([{
+      id: 7,
+      sellerOrderId: 41,
+      status: "AWAITING_RETURN_SHIPMENT",
+      reasonCode: "DAMAGED",
+      evidenceKeys: [],
+    }] as never);
+    renderWithProviders(<BuyerAfterSales order={{ id: 41, status: "SHIPPED", items: [] } as never} />, { language: "en" });
+    expect(await screen.findByText("Return request #7 · Awaiting buyer return shipment · Damaged product")).toBeInTheDocument();
+    expect(screen.getByText("Returns and Store Reviews")).toBeInTheDocument();
+  });
+
+  it("switches status labels and UI reactively when language changes", async () => {
+    vi.mocked(afterSalesApi.sellerReturns).mockResolvedValue([{
+      id: 13,
+      sellerOrderId: 41,
+      sellerOrderNumber: "ORD-101",
+      buyer: { username: "rare.gems", displayName: "Rare Gems" },
+      sellerOrderGrandTotal: 500,
+      status: "AWAITING_RETURN_SHIPMENT",
+      reasonCode: "WRONG_ITEM",
+      description: "Wrong card",
+      evidenceKeys: [],
+      items: [],
+      requestedAt: "2026-10-10T10:00:00Z",
+    }] as never);
+
+    const tolgee = testTolgee("th");
+    renderWithProviders(<SellerReturnsPage />, { language: "th" });
+    expect(await screen.findByRole("button", { name: /รอผู้ซื้อส่งคืน \(1\)/ })).toBeInTheDocument();
+
+    await act(async () => {
+      await tolgee.changeLanguage("en");
+    });
+
+    expect(await screen.findByRole("button", { name: /Awaiting buyer return \(1\)/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /รอผู้ซื้อส่งคืน/ })).not.toBeInTheDocument();
+
+    await act(async () => {
+      await tolgee.changeLanguage("th");
+    });
+    expect(await screen.findByRole("button", { name: /รอผู้ซื้อส่งคืน \(1\)/ })).toBeInTheDocument();
   });
 });

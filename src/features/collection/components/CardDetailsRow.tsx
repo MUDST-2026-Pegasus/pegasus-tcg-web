@@ -158,20 +158,20 @@ export function CardDetailsRow({
 
         {variantsPending ? (
           <p role="status" className="text-xs text-muted-foreground">
-            {t("collection.row.loadingPrintings", "Loading printings...")}
+            {t("collection.row.loadingPrintings", "กำลังโหลดเวอร์ชัน...")}
           </p>
         ) : variantsFailed ? (
           <Button variant="outline" size="sm" onClick={onRetryVariants}>
-            {t("collection.row.retryPrintings", "Retry printings")}
+            {t("collection.row.retryPrintings", "โหลดเวอร์ชันอีกครั้ง")}
           </Button>
         ) : variants.length === 0 ? (
-          <p className="text-xs text-destructive">{t("collection.row.noPrinting", "No printing available for this card.")}</p>
+          <p className="text-xs text-destructive">{t("collection.row.noPrinting", "การ์ดนี้ยังไม่มีเวอร์ชันให้เลือก")}</p>
         ) : (
           <OptionSelect
-            label={t("collection.row.printingOf", "Printing of {name}", { name: card.name })}
+            label={t("collection.row.printingOf", "เวอร์ชันของ {name}", { name: card.name })}
             value={variantId}
             options={variants.map((variant) => ({ value: variant.id, label: variantLabelOf(variant) }))}
-            placeholder={t("collection.row.choosePrinting", "Choose printing")}
+            placeholder={t("collection.row.choosePrinting", "เลือกเวอร์ชัน")}
             disabled={disabled}
             invalid={variantId === null}
             onChange={(next) => onChange({ variantId: next })}
@@ -179,17 +179,17 @@ export function CardDetailsRow({
         )}
 
         <OptionSelect
-          label={t("collection.row.conditionOf", "Condition of {name}", { name: card.name })}
+          label={t("collection.row.conditionOf", "สภาพของ {name}", { name: card.name })}
           value={draft.condition}
           options={CONDITION_OPTIONS}
-          placeholder={t("collection.row.condition", "Condition")}
+          placeholder={t("collection.row.condition", "สภาพ")}
           disabled={disabled}
           onChange={(next) => onChange({ condition: next ?? draft.condition })}
         />
 
         <Input
           type="number"
-          aria-label={t("collection.row.quantityOf", "Quantity of {name}", { name: card.name })}
+          aria-label={t("collection.row.quantityOf", "จำนวนของ {name}", { name: card.name })}
           min={1}
           max={MAX_QUANTITY}
           step={1}
@@ -203,7 +203,7 @@ export function CardDetailsRow({
             variant="ghost"
             size="icon-sm"
             disabled={disabled}
-            aria-label={t("collection.row.removeCard", "Remove {name}", { name: card.name })}
+            aria-label={t("collection.row.removeCard", "นำ {name} ออก", { name: card.name })}
             onClick={onRemove}
           >
             <Trash2 />
@@ -218,7 +218,7 @@ export function CardDetailsRow({
           accept={accept}
           className="sr-only"
           tabIndex={-1}
-          aria-label={t("collection.row.photoOf", "Photo of {name}", { name: card.name })}
+          aria-label={t("collection.row.photoOf", "รูปของ {name}", { name: card.name })}
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) onPhoto(file);
@@ -226,15 +226,15 @@ export function CardDetailsRow({
           }}
         />
         {previewUrl && photo?.status !== "error" && (
-          <img src={previewUrl} alt={t("collection.row.yourPhotoOf", "Your photo of {name}", { name: card.name })} className="size-16 rounded-md border object-cover" />
+          <img src={previewUrl} alt={t("collection.row.yourPhotoOf", "รูปของคุณสำหรับ {name}", { name: card.name })} className="size-16 rounded-md border object-cover" />
         )}
         {photo?.status === "uploading" ? (
           <>
             <p role="status" className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
-              <Spinner /> {t("collection.row.uploading", "Uploading {percent}%", { percent: Math.round(photo.progress * 100) })}
+              <Spinner /> {t("collection.row.uploading", "กำลังอัปโหลด {percent}%", { percent: Math.round(photo.progress * 100) })}
             </p>
             <Button variant="ghost" size="sm" onClick={onDropPhoto}>
-              {t("collection.cancel", "Cancel")}
+              {t("collection.cancel", "ยกเลิก")}
             </Button>
           </>
         ) : photo?.status === "error" ? (
@@ -243,33 +243,33 @@ export function CardDetailsRow({
               {photo.error}
             </p>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> {t("collection.row.chooseAnother", "Choose another")}
+              <Upload data-icon="inline-start" /> {t("collection.row.chooseAnother", "เลือกรูปอื่น")}
             </Button>
             <Button variant="ghost" size="sm" disabled={disabled} onClick={onDropPhoto}>
-              {t("collection.row.dismiss", "Dismiss")}
+              {t("collection.row.dismiss", "ปิด")}
             </Button>
           </>
         ) : previewUrl ? (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> {t("collection.row.replacePhoto", "Replace photo")}
+              <Upload data-icon="inline-start" /> {t("collection.row.replacePhoto", "เปลี่ยนรูป")}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               disabled={disabled}
-              aria-label={t("collection.row.removePhotoOf", "Remove photo of {name}", { name: card.name })}
+              aria-label={t("collection.row.removePhotoOf", "ลบรูปของ {name}", { name: card.name })}
               onClick={onDropPhoto}
             >
-              {t("collection.row.remove", "Remove")}
+              {t("collection.row.remove", "นำออก")}
             </Button>
           </>
         ) : (
           <>
             <Button variant="outline" size="sm" disabled={disabled} onClick={pickPhoto}>
-              <Upload data-icon="inline-start" /> {t("collection.row.addPhoto", "Add photo")}
+              <Upload data-icon="inline-start" /> {t("collection.row.addPhoto", "เพิ่มรูป")}
             </Button>
-            <p className="text-xs text-muted-foreground">{t("collection.row.photoHint", "Optional. Without one, the official card image is shown.")}</p>
+            <p className="text-xs text-muted-foreground">{t("collection.row.photoHint", "ใส่หรือไม่ก็ได้ ถ้าไม่ใส่จะแสดงรูปการ์ดทางการ")}</p>
           </>
         )}
       </div>

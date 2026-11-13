@@ -68,6 +68,12 @@ export type ProductSummaryDto = {
   listingCount: number;
   /** ราคาที่มีผลของ listing ถูกสุด (SAL-04) — `null`/ไม่มี = ไม่ลดราคา หรือ API เก่า */
   pricing?: ListingPricing | null;
+  /** ช่วงราคาในตลาด + กี่ร้านขาย (SRCH-04) — API เก่าไม่ส่ง */
+  highestPrice?: number | null;
+  /** ราคาก่อนลดของชิ้นที่ถูกสุด — ต่างจาก lowestPrice เมื่อกำลังลดราคา */
+  lowestRegularPrice?: number | null;
+  sellerCount?: number;
+  onSale?: boolean;
 };
 
 /** `ProductDetailResponse` — one product, its printings, and signed image URLs. */
@@ -237,7 +243,98 @@ export type ProductQuery = {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  onSale?: boolean;
   sort?: ProductSort;
+  page?: number;
+  size?: number;
+};
+
+/** `GET /catalog/products/facets` — ตัวเลขข้าง sidebar นับโดยไม่ใช้ตัวกรองของกลุ่มตัวเอง [TCG-775] */
+export type SearchFacetsDto = {
+  games: SearchFacetOptionDto[];
+  categories: SearchFacetOptionDto[];
+  conditions: { code: CardCondition; count: number }[];
+  onSaleCount: number;
+  totals: { products: number; shops: number; listings: number };
+};
+
+export type SearchFacetOptionDto = {
+  id: number;
+  name: string;
+  parentId: number | null;
+  count: number;
+};
+
+/** ทำไม API เปลี่ยนคำค้น — พิมพ์ผิด / ลืมสลับแป้น / ชื่อไทย (alias) */
+export type SearchCorrectionReason = "TYPO" | "KEYBOARD_LAYOUT" | "ALIAS";
+
+/** `GET /catalog/search/suggest?q=` — ข้อมูลของ dropdown ในช่องค้นหา [TCG-774] */
+export type SearchSuggestDto = {
+  query: string;
+  correctedQuery: string | null;
+  correctionReason: SearchCorrectionReason | null;
+  completions: string[];
+  /** ≤3 รายการ — เกมมาก่อนหมวดหมู่ */
+  scopes: SearchSuggestScopeDto[];
+  /** ≤4 สินค้า */
+  products: SearchSuggestProductDto[];
+  shops: SearchSuggestShopDto[];
+  totalProducts: number;
+};
+
+export type SearchSuggestScopeDto = {
+  type: "GAME" | "CATEGORY";
+  id: number;
+  name: string;
+  count: number;
+};
+
+export type SearchSuggestProductDto = {
+  id: number;
+  slug: string;
+  name: string;
+  setName: string | null;
+  cardNumber: string | null;
+  gameName: string | null;
+  imageUrl: string | null;
+  lowestPrice: number | null;
+  sellerCount: number;
+};
+
+export type SearchSuggestShopDto = {
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  ratingAvg: number | null;
+  ratingCount: number;
+  matchCount: number;
+};
+
+/** `GET /catalog/search/trending` */
+export type TrendingSearchDto = {
+  query: string;
+  rank: number;
+};
+
+/** `GET /catalog/shops` — ร้านที่ขายของที่ค้นเจอ [TCG-778] */
+export type SearchShopDto = {
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  ratingAvg: number | null;
+  ratingCount: number;
+  matchCount: number;
+  lowestPrice: number | null;
+  previews: { productId: number; imageUrl: string | null }[];
+};
+
+export type ShopSort = "MATCHES" | "RATING";
+
+export type ShopQuery = {
+  q?: string;
+  gameId?: number[];
+  minRating?: number;
+  sort?: ShopSort;
   page?: number;
   size?: number;
 };

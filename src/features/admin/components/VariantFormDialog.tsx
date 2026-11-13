@@ -187,7 +187,7 @@ function VariantForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.finish) || undefined}>
-            <FieldLabel htmlFor="finish">Finish</FieldLabel>
+            <FieldLabel htmlFor="finish">{t("catalog.variant.finish", "ผิวการ์ด")}</FieldLabel>
             <Controller
               control={control}
               name="finish"
@@ -222,7 +222,7 @@ function VariantForm({
           </Field>
 
           <Field data-invalid={Boolean(errors.edition) || undefined}>
-            <FieldLabel htmlFor="edition">Edition</FieldLabel>
+            <FieldLabel htmlFor="edition">{t("catalog.variant.edition", "รุ่นพิมพ์")}</FieldLabel>
             <Controller
               control={control}
               name="edition"

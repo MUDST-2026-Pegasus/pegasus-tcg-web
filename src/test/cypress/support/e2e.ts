@@ -14,3 +14,11 @@ Cypress.on("uncaught:exception", (err) => {
   }
   return true;
 });
+
+// TCG-561: pin Thai before each page load so specs don't depend on a language left over from another run.
+// A spec that wants English sets "en" in its own onBeforeLoad; we only fill the key when it's empty.
+Cypress.on("window:before:load", (win) => {
+  if (!win.localStorage.getItem("__tolgee_currentLanguage")) {
+    win.localStorage.setItem("__tolgee_currentLanguage", "th");
+  }
+});

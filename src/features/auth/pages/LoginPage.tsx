@@ -22,7 +22,7 @@ export function LoginPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
           <h1 className="absolute bottom-4 left-6 right-6 text-[32px] leading-10 font-bold tracking-[-0.64px] text-foreground">
-            {t("auth.login.title", "Log in to Pegasus")}
+            {t("auth.login.title", "เข้าสู่ระบบ Pegasus")}
           </h1>
         </div>
         <div className="p-8">

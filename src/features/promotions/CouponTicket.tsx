@@ -1,7 +1,7 @@
-import { PromotionTicketFrame } from "@/features/promotions/PromotionTicketFrame";
+import { PromotionTicketFrame, StubAmount, StubText } from "@/features/promotions/PromotionTicketFrame";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import type { SellerPromotion, SellerPromotionInput } from "@/features/seller/promotions/promotions.types";
-import { discountCapLabel, minSpendLabel, money, thaiDate } from "@/features/seller/promotions/promotions.format";
+import { discountCapLabel, minSpendLabel, thaiDate } from "@/features/seller/promotions/promotions.format";
 import type { AdminPromotionInput } from "@/features/admin/promotions.types";
 import { formatBaht, formatPromoDate } from "@/features/admin/promotions.format";
 import {
@@ -36,8 +36,8 @@ export function CouponTicket({
   const { t } = useTranslate("promotions");
   if ("scopeType" in promotion) {
     const value = promotion.discountType === "FREE_SHIPPING"
-      ? t("buyer.couponTicket.value", "ส่งฟรี") : promotion.discountType === "PERCENT"
-        ? `${promotion.discountValue || 0}%` : formatBaht(promotion.discountValue);
+      ? <StubText>{t("buyer.couponTicket.value", "ส่งฟรี")}</StubText> : promotion.discountType === "PERCENT"
+        ? `${promotion.discountValue || 0}%` : <StubAmount amount={promotion.discountValue} />;
     const endsAt = Number.isFinite(Date.parse(promotion.endsAt))
       ? formatPromoDate(promotion.endsAt) : "—";
     const cap = promotion.discountType === "PERCENT" && promotion.maxDiscount
@@ -66,7 +66,7 @@ export function CouponTicket({
 
   if (!("ownerType" in promotion)) {
     const value = promotion.discountType === "PERCENT"
-      ? `${promotion.discountValue || 0}%` : money(promotion.discountValue || 0);
+      ? `${promotion.discountValue || 0}%` : <StubAmount amount={promotion.discountValue || 0} />;
     const isScheduled = "status" in promotion && promotion.status === "SCHEDULED";
     const isAdminPaused = "pausedBy" in promotion && promotion.pausedBy === "ADMIN";
     const visibility = promotion.visibility === "PUBLIC" ? t("buyer.couponTicket.visibility", "สาธารณะ") : t("buyer.couponTicket.visibility2", "ส่วนตัว");
@@ -82,7 +82,7 @@ export function CouponTicket({
         stub={<>
           <span className="text-[10px] opacity-80">{t("buyer.couponTicket.span", "ลด")}</span>
           <strong className="text-[22px] leading-7 font-black">{value}</strong>
-          <small className="text-[9px] font-semibold tracking-widest opacity-80">{t("buyer.couponTicket.shopTag", "SHOP")}</small>
+          <small className="text-[9px] font-semibold tracking-widest opacity-80">{t("buyer.couponTicket.shopTag", "ร้าน")}</small>
         </>}
         body={<>
           <div className="flex min-w-0 items-center justify-between gap-1">
@@ -98,7 +98,7 @@ export function CouponTicket({
   const needsClaim = promotion.source === "CLAIMABLE";
   const disabled = propDisabled ?? (!promotion.applicable || needsClaim);
   const platform = promotion.ownerType === "PLATFORM";
-  const value = formatPromotionValue(promotion);
+  const value = promotion.discountType === "FIXED" ? <StubAmount amount={promotion.discountValue} /> : promotion.discountType === "FREE_SHIPPING" ? <StubText>{formatPromotionValue(promotion)}</StubText> : formatPromotionValue(promotion);
 
   const disabledReason = formatPromotionUnavailableReason(promotion);
 

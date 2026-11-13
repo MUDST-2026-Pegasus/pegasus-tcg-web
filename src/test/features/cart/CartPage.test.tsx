@@ -198,7 +198,7 @@ describe("CartPage", () => {
     });
     renderCart();
     expect(await screen.findByText("ราคาสินค้าบางรายการเปลี่ยนแปลง")).toBeInTheDocument();
-    expect(screen.getByText(`ราคาเปลี่ยน: ฿100 → ฿${price}`)).toBeInTheDocument();
+    expect(screen.getByText(`ราคาเปลี่ยน: THB 100.00 → THB ${price}.00`)).toBeInTheDocument();
     expect(checkoutButton()).toBeDisabled();
     expect(screen.getByText("กรุณายอมรับราคาใหม่ หรือยกเลิกเลือกรายการที่ราคาเปลี่ยนก่อนสั่งซื้อ")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "ยอมรับราคาใหม่" }));
@@ -206,7 +206,7 @@ describe("CartPage", () => {
     await waitFor(() => expect(checkoutButton()).toBeEnabled());
     expect(screen.queryByText(/ราคาเปลี่ยน:/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "ยอมรับราคาใหม่" })).not.toBeInTheDocument();
-    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent(`฿${price}`);
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent(`THB ${price}.00`);
   });
 
   it.each([
@@ -250,7 +250,7 @@ describe("CartPage", () => {
     expect(screen.getByRole("checkbox", { name: "เลือก Pikachu ex" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "เลือก Charizard ex" })).toBeChecked();
     expect(screen.getByText("ยอดสินค้า (1 ใบ)")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿200"));
+    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 200.00"));
   });
 });
 
@@ -281,12 +281,15 @@ describe("CartPage codes", () => {
     if (shopCode) {
       codes.push({ code: shopCode, ownerType: "SELLER", sellerProfileId: 5, sellerName: "minmin_tcg Cards",
         status: shopApplied ? "APPLIED" : "PROMO_MIN_SPEND_NOT_MET", discount: shopApplied ? 50 : null,
-        shortfall: shopApplied ? null : 500 - shop5, pendingShipping: false });
+        shortfall: shopApplied ? null : 500 - shop5, pendingShipping: false,
+        slotOwnerType: "SELLER", slotSellerProfileId: 5 });
     }
     if (platformCode) {
-      codes.push({ code: platformCode, ownerType: "PLATFORM", sellerProfileId: null, sellerName: null,
-        status: platformCode === "PEGASUS10" ? "APPLIED" : "PROMO_NOT_FOUND", discount: platformDiscount || null,
-        shortfall: null, pendingShipping: false });
+      // As the API sends it: an unknown code has no owner, only the slot it was typed in [TCG-769].
+      const known = platformCode === "PEGASUS10";
+      codes.push({ code: platformCode, ownerType: known ? "PLATFORM" : null, sellerProfileId: null, sellerName: null,
+        status: known ? "APPLIED" : "PROMO_NOT_FOUND", discount: platformDiscount || null,
+        shortfall: null, pendingShipping: false, slotOwnerType: "PLATFORM", slotSellerProfileId: null });
     }
     return {
       sellers: shop5 ? [{ sellerProfileId: 5, sellerName: "minmin_tcg Cards", itemsSubtotal: shop5, shippingFee: null,
@@ -312,15 +315,15 @@ describe("CartPage codes", () => {
     previewPromotions.mockImplementation(async (request) => c1Preview(request));
   });
 
-  it("auto-picks the best codes on first load and totals C1 to ฿2,980", async () => {
+  it("auto-picks the best codes on first load and totals C1 to THB 2,980.00", async () => {
     renderCart();
-    expect(await screen.findByText("ประหยัดไป ฿250")).toBeInTheDocument();
-    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿2,980");
-    expect(screen.getByText("ยอดสินค้า (3 ใบ)").nextSibling).toHaveTextContent("฿3,230");
+    expect(await screen.findByText("ประหยัดไป THB 250.00")).toBeInTheDocument();
+    expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 2,980.00");
+    expect(screen.getByText("ยอดสินค้า (3 ใบ)").nextSibling).toHaveTextContent("THB 3,230.00");
     expect(screen.getByRole("button", { name: "โค้ด Pegasus PEGASUS10 — เปลี่ยนโค้ด" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "โค้ดร้าน MINMIN50 — เปลี่ยนโค้ด" })).toBeInTheDocument();
     expect(screen.getByText("เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว")).toBeInTheDocument();
-    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "เลือกโค้ดที่ลดมากที่สุดให้แล้ว (– ฿250)" }));
+    expect(toast.add).toHaveBeenCalledWith(expect.objectContaining({ title: "เลือกโค้ดที่ลดมากที่สุดให้แล้ว (– THB 250.00)" }));
     expect(previewPromotions).toHaveBeenCalledWith(expect.objectContaining({ autoPick: true }), expect.anything());
     // CheckoutPage picks the same codes up from sessionStorage.
     await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!))
@@ -334,7 +337,7 @@ describe("CartPage codes", () => {
     const dialog = await screen.findByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: "ไม่ใช้โค้ด" }));
 
-    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("฿3,180"));
+    await waitFor(() => expect(screen.getByLabelText("ยอดรวม")).toHaveTextContent("THB 3,180.00"));
     expect(sessionStorage.getItem(PROMOTION_MANUAL_KEY)).toBe("1");
     expect(screen.queryByText("เลือกโค้ดที่ลดได้มากที่สุดให้แล้ว")).not.toBeInTheDocument();
 
@@ -357,7 +360,7 @@ describe("CartPage codes", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "เลือก Gengar · Holo Rare" }));
 
-    expect(await screen.findByText("นำ MINMIN50 ออกแล้ว: ซื้อสินค้าเพิ่มอีก ฿50 เพื่อใช้โค้ดนี้ (ยังอยู่ในกระเป๋าโค้ด)"))
+    expect(await screen.findByText("นำ MINMIN50 ออกแล้ว: ซื้อสินค้าเพิ่มอีก THB 50.00 เพื่อใช้โค้ดนี้ (ยังอยู่ในกระเป๋าโค้ด)"))
       .toBeInTheDocument();
     await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).sellerCodes).toEqual({}));
   });
@@ -379,5 +382,19 @@ describe("CartPage codes", () => {
     await waitFor(() => expect(previewPromotions).toHaveBeenCalledWith(
       expect.objectContaining({ platformCode: "PEGASUS10" }), expect.anything()));
     expect(await screen.findByRole("button", { name: "โค้ด Pegasus PEGASUS10 — เปลี่ยนโค้ด" })).toBeInTheDocument();
+  });
+
+  it("shows why an unknown code failed and does not keep it [TCG-769]", async () => {
+    const user = userEvent.setup();
+    signedIn(false);
+    getPromotions.mockResolvedValue([]);
+    previewPromotions.mockImplementation(async (request) => c1Preview({ ...request, autoPick: false }));
+    renderCart();
+
+    await user.type(await screen.findByRole("textbox", { name: "กรอกโค้ดอื่นที่ไม่ได้เก็บไว้" }), "nosuch");
+    await user.click(screen.getByRole("button", { name: "ใช้โค้ด" }));
+
+    expect(await screen.findByText("ไม่พบโค้ด ตรวจสอบตัวสะกดอีกครั้ง")).toBeInTheDocument();
+    await waitFor(() => expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull());
   });
 });

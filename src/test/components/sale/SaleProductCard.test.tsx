@@ -15,7 +15,7 @@ describe("SaleProductCard", () => {
   it("Flash: badge, flash price and quota bar", () => {
     renderWithProviders(<SaleProductCard title="Charizard ex SAR" href="/listings/1" pricing={flash(8)} quota={25} />);
     expect(screen.getByText("⚡ FLASH SALE")).toBeInTheDocument();
-    expect(screen.getByText("฿3,346")).toBeInTheDocument();
+    expect(screen.getByText("THB 3,346.00")).toBeInTheDocument();
     expect(screen.getByText("ขายแล้ว 17/25 · เหลือ 8 ชิ้น")).toBeInTheDocument();
   });
 
@@ -28,14 +28,14 @@ describe("SaleProductCard", () => {
     expect(screen.getByText("หมดแล้ว")).toBeInTheDocument();
     expect(screen.getByText("ราคา Flash หมดแล้ว")).toBeInTheDocument();
     // ราคาปกติ ไม่มีราคาขีดฆ่า
-    expect(screen.getByText("฿4,780")).toBeInTheDocument();
-    expect(screen.queryByText("฿3,346")).toBeNull();
+    expect(screen.getByText("THB 4,780.00")).toBeInTheDocument();
+    expect(screen.queryByText("THB 3,346.00")).toBeNull();
   });
 
   it("upcoming flash: regular price with 'เร็วๆ นี้'", () => {
     renderWithProviders(<SaleProductCard title="Mew VMAX" href="/listings/3" pricing={flash(20)} quota={20} upcoming />);
     expect(screen.getByText("⚡ เร็วๆ นี้")).toBeInTheDocument();
-    expect(screen.getByText("฿4,780")).toBeInTheDocument();
+    expect(screen.getByText("THB 4,780.00")).toBeInTheDocument();
   });
 
   it("Sale: -N% badge on the image", () => {

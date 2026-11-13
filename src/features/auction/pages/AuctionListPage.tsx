@@ -40,7 +40,7 @@ import {
   writeAuctionFilters,
   type AuctionSearchFilters,
 } from "../search.params";
-import { intlLocale, useTranslate } from "@/lib/i18n";
+import { intlLocale, localName, useTranslate } from "@/lib/i18n";
 
 const TYPING_DELAY_MS = 300;
 const ALL_GAMES = "__all__";
@@ -89,7 +89,7 @@ export function AuctionListPage() {
   const data = auctions.data;
   const gameItems = [
     { value: ALL_GAMES, label: t("buyer.auctionListPage.label", "เกม: ทั้งหมด") },
-    ...(games.data ?? []).map((game) => ({ value: game.slug, label: t("buyer.auctionListPage.label2", "เกม: {value}", { value: game.nameLocal ?? game.name }) })),
+    ...(games.data ?? []).map((game) => ({ value: game.slug, label: t("buyer.auctionListPage.label2", "เกม: {value}", { value: localName(game) }) })),
   ];
 
   return (
@@ -97,7 +97,7 @@ export function AuctionListPage() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-[21px] pt-8 pb-14 xl:px-[64px]">
         <Breadcrumb>
           <BreadcrumbList className="text-[12px]">
-            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink render={<Link to="/" />}>{t("breadcrumb.home", "หน้าแรก")}</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbPage>{t("buyer.auctionListPage.text", "ประมูล")}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>

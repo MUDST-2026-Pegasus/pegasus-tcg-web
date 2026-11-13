@@ -8,9 +8,10 @@ import { toast } from '@/components/ui/toast';
 import { afterSalesApi } from './after-sales.api';
 import { RatingInput, ReviewStars } from './ReviewStars';
 import { reviewKeys } from './reviews.queries';
-import { translateError } from "@/lib/i18n";
+import { translateError, useTranslate } from "@/lib/i18n";
 
 export function BuyerOrderReview({ orderId, status }: { orderId: number; status: string }) {
+  const { t } = useTranslate("buyer");
   const cache = useQueryClient();
   const key = reviewKeys.mine(orderId);
   const review = useQuery({ queryKey: key, queryFn: () => afterSalesApi.myReview(orderId), enabled: status === 'COMPLETED' });
@@ -23,22 +24,48 @@ export function BuyerOrderReview({ orderId, status }: { orderId: number; status:
       cache.setQueryData(key, saved);
       void cache.invalidateQueries({ queryKey: ['finance', 'public-reviews'] });
       void cache.invalidateQueries({ queryKey: ['seller-dashboard'] });
-      toast.add({ type: 'success', title: 'ส่งรีวิวแล้ว' });
+      toast.add({ type: 'success', title: t("buyerOrderReview.toastSuccess", "ส่งรีวิวแล้ว") });
     },
-    onError: (error) => { toast.add({ type: 'error', title: translateError(error, 'ส่งรีวิวไม่สำเร็จ') }); },
+    onError: (error) => { toast.add({ type: 'error', title: translateError(error, t("buyerOrderReview.toastFailed", "ส่งรีวิวไม่สำเร็จ")) }); },
   });
   if (status !== 'COMPLETED') return null;
-  if (review.isPending) return <div role="status" aria-busy="true" aria-label="กำลังโหลดรีวิว"><TextLinesSkeleton lines={2} /></div>;
-  if (review.isError) return <p role="alert">โหลดรีวิวไม่สำเร็จ <Button variant="outline" size="sm" onClick={() => void review.refetch()}>ลองอีกครั้ง</Button></p>;
+  if (review.isPending) return <div role="status" aria-busy="true" aria-label={t("buyerOrderReview.loadingAria", "กำลังโหลดรีวิว")}><TextLinesSkeleton lines={2} /></div>;
+  if (review.isError) return (
+    <p role="alert">
+      {t("buyerOrderReview.loadFailed", "โหลดรีวิวไม่สำเร็จ")}{" "}
+      <Button variant="outline" size="sm" onClick={() => void review.refetch()}>
+        {t("actions.retry", "ลองอีกครั้ง", { ns: "common" })}
+      </Button>
+    </p>
+  );
   if (review.data) return <div className="space-y-2 rounded-lg border p-4">
-    <p className="font-medium">รีวิวที่ส่งแล้ว</p><ReviewStars rating={review.data.rating}/>
-    {review.data.title && <p>{review.data.title}</p>}<p className="whitespace-pre-wrap break-words">{review.data.comment}</p>
+    <p className="font-medium">{t("buyerOrderReview.submittedTitle", "รีวิวที่ส่งแล้ว")}</p>
+    <ReviewStars rating={review.data.rating}/>
+    {review.data.title && <p>{review.data.title}</p>}
+    <p className="whitespace-pre-wrap break-words">{review.data.comment}</p>
   </div>;
   return <form className="space-y-4 rounded-lg border p-4" onSubmit={(event) => { event.preventDefault(); if (comment.trim() && !save.isPending) save.mutate(); }}>
-    <h4 className="font-semibold">รีวิวผู้ขาย</h4><p className="text-xs text-muted-foreground">ให้คะแนนร้านค้าจากคำสั่งซื้อที่เสร็จสมบูรณ์ได้ 1 ครั้ง</p>
+    <h4 className="font-semibold">{t("buyerOrderReview.title", "รีวิวผู้ขาย")}</h4>
+    <p className="text-xs text-muted-foreground">{t("buyerOrderReview.subtitle", "ให้คะแนนร้านค้าจากคำสั่งซื้อที่เสร็จสมบูรณ์ได้ 1 ครั้ง")}</p>
     <RatingInput value={rating} onChange={setRating} disabled={save.isPending}/>
-    <Input aria-label="หัวข้อรีวิว" maxLength={150} placeholder="หัวข้อ (ไม่บังคับ)" value={title} disabled={save.isPending} onChange={(e) => setTitle(e.target.value)}/>
-    <Textarea aria-label="ข้อความรีวิว" placeholder="ความคิดเห็นเกี่ยวกับร้านค้า" required value={comment} disabled={save.isPending} onChange={(e) => setComment(e.target.value)}/>
-    <Button type="submit" disabled={save.isPending || !comment.trim()}>{save.isPending ? 'กำลังส่งรีวิว…' : 'ส่งรีวิว'}</Button>
+    <Input
+      aria-label={t("buyerOrderReview.titleAria", "หัวข้อรีวิว")}
+      maxLength={150}
+      placeholder={t("buyerOrderReview.titlePlaceholder", "หัวข้อ (ไม่บังคับ)")}
+      value={title}
+      disabled={save.isPending}
+      onChange={(e) => setTitle(e.target.value)}
+    />
+    <Textarea
+      aria-label={t("buyerOrderReview.commentAria", "ข้อความรีวิว")}
+      placeholder={t("buyerOrderReview.commentPlaceholder", "ความคิดเห็นเกี่ยวกับร้านค้า")}
+      required
+      value={comment}
+      disabled={save.isPending}
+      onChange={(e) => setComment(e.target.value)}
+    />
+    <Button type="submit" disabled={save.isPending || !comment.trim()}>
+      {save.isPending ? t("buyerOrderReview.submittingButton", "กำลังส่งรีวิว…") : t("buyerOrderReview.submitButton", "ส่งรีวิว")}
+    </Button>
   </form>;
 }

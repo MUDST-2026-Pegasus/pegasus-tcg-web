@@ -191,7 +191,7 @@
         "none": "No reviews yet"
       },
       "withdrawable": {
-        "footnote": "Excludes withdrawals in progress",
+        "footnote": "Excludes payouts in progress",
         "label": "Available to withdraw"
       }
     },
@@ -766,7 +766,7 @@
       },
       "duplicate": "Your listing #{id} already sells this card in the same condition — consider merging them into one listing",
       "noCard": "No card selected yet",
-      "noPrice": "฿—",
+      "noPrice": "THB —",
       "photos": {
         "alt": "Image {number}",
         "cancelUpload": "Cancel uploading {name}",
@@ -1373,7 +1373,7 @@
         "checkboxCondition": "I have received the returned item and inspected its condition",
         "confirmButton": "Confirm receipt and release refund",
         "desc": "Please inspect condition of returned item before confirming",
-        "footerNote": "เมื่อยืนยันแล้ว ระบบจะปล่อยเงินคืนจากระบบ Escrow ให้แก่ผู้ซื้อโดยอัตโนมัติ",
+        "footerNote": "Once you confirm, the escrowed payment is automatically refunded to the buyer.",
         "refundAmountLabel": "Refund amount to buyer:",
         "restockLabel": "Inventory restock:",
         "restockNo": "Do not return to stock",
@@ -1388,14 +1388,14 @@
         "title": "Return request evidence RT-{id} ({current}/{total})"
       },
       "evidencePreview": {
-        "fullAlt": "หลักฐานขนาดเต็ม {number}",
-        "thumbAlt": "หลักฐาน {number}",
-        "title": "หลักฐานจากผู้ซื้อ #{number} จาก {total} ไฟล์"
+        "fullAlt": "Full-size evidence {number}",
+        "thumbAlt": "Evidence {number}",
+        "title": "Buyer evidence #{number} of {total}"
       },
       "policy": {
         "closeButton": "Understood",
         "contactTeam": "If you have questions or need assistance, contact our team 24/7",
-        "desc": "Terms and process for sellers when managing return requests",
+        "desc": "Terms and conditions for return requests on the Pegasus TCG platform",
         "gotIt": "Understood",
         "intro": "Pegasus TCG provides protection for both buyers and sellers with the following conditions:",
         "rule1": "Buyers may request returns within 2 days after status becomes DELIVERED",
@@ -1411,7 +1411,7 @@
         "section3Title": "3. Return Shipment",
         "section4Body": "Funds of orders with active return requests are held in Escrow until resolved. If rejected, funds are released according to original schedule",
         "section4Title": "4. Financial Impact",
-        "title": "Return and Refund Policy"
+        "title": "Return Policy and Procedures"
       },
       "reject": {
         "checkCarefully": "Please review evidence and messages from the buyer carefully before deciding to reject",

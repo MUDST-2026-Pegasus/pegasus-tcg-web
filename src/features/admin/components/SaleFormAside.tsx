@@ -11,7 +11,7 @@ import { useTranslate } from "@/lib/i18n";
 const ROW = "flex justify-between gap-3 [&>dt]:text-muted-foreground [&>dd]:font-semibold";
 
 /**
- * คอลัมน์ขวาของ Figma SAL-A2 — การ์ดตัวอย่างที่ผู้ซื้อเห็น, ตัวอย่างการคำนวณ (listing ฿4,200 · คอมมิชชั่น 5%), สรุป
+ * คอลัมน์ขวาของ Figma SAL-A2 — การ์ดตัวอย่างที่ผู้ซื้อเห็น, ตัวอย่างการคำนวณ (listing THB 4,200 · คอมมิชชั่น 5%), สรุป
  * ตัวเลขในนี้คิดที่หน้าเว็บเพื่อแสดงเท่านั้น ราคาจริงคิดที่ server
  */
 export function SaleFormAside({

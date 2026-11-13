@@ -174,7 +174,7 @@ export function ShopProfileCard({ user, handlingDays, verified, stats, verificat
         <div className="space-y-3 px-[18px] pb-[18px]">
           <ShopAvatar name={name} url={avatar} small/>
           <h3 className="flex items-center gap-2 break-all text-base font-bold">{name}{verified && <BadgeCheck className="size-4 shrink-0 text-teal-600"/>}</h3>
-          {phonePublic && phone && <p className="text-xs text-muted-foreground">{t("shop.preview.phone", "Phone number : {phone}", { phone })}</p>}
+          {phonePublic && phone && <p className="text-xs text-muted-foreground">{t("shop.preview.phone", "เบอร์โทรศัพท์ : {phone}", { phone })}</p>}
           {stats}
           <div className="flex flex-wrap gap-1">{[...(handlingDays === null ? [] : [t("shop.preview.handling", "จัดส่งภายใน {days} วัน", { days: handlingDays })]), t("shop.preview.returns", "รับคืน 7 วัน"), t("shop.preview.authentic", "รับประกันของแท้")].map((label) => <span key={label} className="rounded bg-[#e6f4f2] px-1.5 py-1 text-[10px] text-teal-700">{label}</span>)}</div>
         </div>

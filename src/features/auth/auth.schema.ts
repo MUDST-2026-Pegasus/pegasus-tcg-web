@@ -13,41 +13,41 @@ export function useAuthSchemas() {
   const email = z
     .string()
     .trim()
-    .min(1, t("auth.validation.emailRequired", "Email is required"))
-    .max(255, t("auth.validation.emailMax", "Email must be at most {max} characters", { max: 255 }))
-    .pipe(z.email(t("auth.validation.emailInvalid", "Enter a valid email address")));
+    .min(1, t("auth.validation.emailRequired", "กรุณากรอกอีเมล"))
+    .max(255, t("auth.validation.emailMax", "อีเมลต้องไม่เกิน {max} ตัวอักษร", { max: 255 }))
+    .pipe(z.email(t("auth.validation.emailInvalid", "กรอกอีเมลให้ถูกต้อง")));
 
   const password = z
     .string()
-    .min(8, t("auth.validation.passwordMin", "Password must be at least {min} characters", { min: 8 }))
-    .max(128, t("auth.validation.passwordMax", "Password must be at most {max} characters", { max: 128 }));
+    .min(8, t("auth.validation.passwordMin", "รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร", { min: 8 }))
+    .max(128, t("auth.validation.passwordMax", "รหัสผ่านต้องไม่เกิน {max} ตัวอักษร", { max: 128 }));
 
   const username = z
     .string()
     .trim()
-    .min(3, t("auth.validation.usernameMin", "Username must be at least {min} characters", { min: 3 }))
-    .max(50, t("auth.validation.usernameMax", "Username must be at most {max} characters", { max: 50 }))
+    .min(3, t("auth.validation.usernameMin", "ชื่อผู้ใช้ต้องมีอย่างน้อย {min} ตัวอักษร", { min: 3 }))
+    .max(50, t("auth.validation.usernameMax", "ชื่อผู้ใช้ต้องไม่เกิน {max} ตัวอักษร", { max: 50 }))
     .regex(
       /^[A-Za-z0-9_]+$/,
-      t("auth.validation.usernamePattern", "Username may only contain letters, digits and underscores"),
+      t("auth.validation.usernamePattern", "ชื่อผู้ใช้ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ ตัวเลข และขีดล่าง"),
     );
 
   const displayName = z
     .string()
     .trim()
-    .min(1, t("auth.validation.displayNameRequired", "Display name is required"))
-    .max(100, t("auth.validation.displayNameMax", "Display name must be at most {max} characters", { max: 100 }));
+    .min(1, t("auth.validation.displayNameRequired", "กรุณากรอกชื่อที่แสดง"))
+    .max(100, t("auth.validation.displayNameMax", "ชื่อที่แสดงต้องไม่เกิน {max} ตัวอักษร", { max: 100 }));
 
   const phone = z
     .string()
     .trim()
-    .max(20, t("auth.validation.phoneMax", "Phone number must be at most {max} characters", { max: 20 }))
-    .regex(/^[0-9+()\-\s]*$/, t("auth.validation.phoneInvalid", "Enter a valid phone number"))
+    .max(20, t("auth.validation.phoneMax", "เบอร์โทรศัพท์ต้องไม่เกิน {max} ตัวอักษร", { max: 20 }))
+    .regex(/^[0-9+()\-\s]*$/, t("auth.validation.phoneInvalid", "กรอกเบอร์โทรศัพท์ให้ถูกต้อง"))
     .optional();
 
   const loginSchema = z.object({
     email,
-    password: z.string().min(1, t("auth.validation.passwordRequired", "Password is required")).max(128),
+    password: z.string().min(1, t("auth.validation.passwordRequired", "กรุณากรอกรหัสผ่าน")).max(128),
   });
 
   const registerSchema = z.object({
@@ -58,35 +58,35 @@ export function useAuthSchemas() {
     confirmPassword: z.string(),
     phone,
     acceptTerms: z.literal(true, {
-      error: t("auth.validation.acceptTerms", "Please accept the Terms of Service and Privacy Policy"),
+      error: t("auth.validation.acceptTerms", "กรุณายอมรับข้อกำหนดการใช้บริการและนโยบายความเป็นส่วนตัว"),
     }),
   }).refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
-    message: t("auth.validation.passwordMismatch", "Passwords do not match"),
+    message: t("auth.validation.passwordMismatch", "รหัสผ่านไม่ตรงกัน"),
   });
 
   const forgotPasswordSchema = z.object({ email });
 
   const resetPasswordSchema = z
     .object({
-      token: z.string().min(1, t("auth.validation.resetTokenRequired", "Reset token is required")).max(512),
+      token: z.string().min(1, t("auth.validation.resetTokenRequired", "ไม่พบรหัสสำหรับรีเซ็ตรหัสผ่าน")).max(512),
       newPassword: password,
       confirmPassword: z.string(),
     })
     .refine((values) => values.newPassword === values.confirmPassword, {
       path: ["confirmPassword"],
-      error: t("auth.validation.passwordMismatch", "Passwords do not match"),
+      error: t("auth.validation.passwordMismatch", "รหัสผ่านไม่ตรงกัน"),
     });
 
   const changePasswordSchema = z
     .object({
-      currentPassword: z.string().min(1, t("auth.validation.currentPasswordRequired", "Current password is required")).max(128),
+      currentPassword: z.string().min(1, t("auth.validation.currentPasswordRequired", "กรุณากรอกรหัสผ่านปัจจุบัน")).max(128),
       newPassword: password,
       confirmPassword: z.string(),
     })
     .refine((values) => values.newPassword === values.confirmPassword, {
       path: ["confirmPassword"],
-      error: t("auth.validation.passwordMismatch", "Passwords do not match"),
+      error: t("auth.validation.passwordMismatch", "รหัสผ่านไม่ตรงกัน"),
     });
 
   return { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema };

@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useTranslate } from "@/lib/i18n";
 import type { NavGroup } from "@/lib/nav-config";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ role, groups }: AppSidebarProps) {
+  const { t } = useTranslate();
   const { isMobile } = useSidebar();
 
   return (
@@ -45,7 +47,7 @@ export function AppSidebar({ role, groups }: AppSidebarProps) {
                 DASHBOARD_BLUE_TEXT,
               )}
             >
-              DASHBOARD
+              {t("sidebar.dashboardTitle", "แดชบอร์ด")}
             </span>
             <Badge
               className={cn(

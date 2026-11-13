@@ -208,7 +208,7 @@ export function PaymentQrCard({
       {payload ? (
         <>
           <p className="text-xs text-muted-foreground font-medium mb-3 text-center">
-            {t("payment.qr.scanHint", "Scan with any banking app")}
+            {t("payment.qr.scanHint", "สแกนด้วยแอปธนาคารใดก็ได้")}
           </p>
           <div className="relative w-full max-w-[240px] bg-[#F8FAFC] border border-muted/90 rounded-2xl p-5 flex flex-col items-center justify-center shadow-xs overflow-hidden">
             <QRCodeSVG
@@ -227,19 +227,19 @@ export function PaymentQrCard({
               }}
               className="w-40 h-40 md:w-44 md:h-44"
               role="img"
-              aria-label={t("payment.qr.aria", "PromptPay QR Code")}
+              aria-label={t("payment.qr.aria", "QR Code พร้อมเพย์")}
             />
             <span className="text-[11px] font-bold tracking-wider text-slate-800 mt-3 uppercase">
-              {t("payment.qr.payVia", "PAY VIA QR SCAN")}
+              {t("payment.qr.payVia", "ชำระผ่านการสแกน QR")}
             </span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
-              {t("payment.qr.scanToPay", "Scan to Pay | {amount}", { amount: amountText })}
+              {t("payment.qr.scanToPay", "สแกนเพื่อชำระ | {amount}", { amount: amountText })}
             </span>
 
             {isExpired && (
               <div
                 role="alert"
-                aria-label={t("payment.qr.expiredAria", "QR Code Expired")}
+                aria-label={t("payment.qr.expiredAria", "QR Code หมดอายุ")}
                 className="absolute inset-0 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10 transition-all"
               >
                 <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-2 shadow-xs">
@@ -270,7 +270,7 @@ export function PaymentQrCard({
           )}
           {promptpayId && (
             <p className="text-xs text-muted-foreground">
-              {t("payment.qr.promptPayId", "PromptPay ID {id}", { id: promptpayId })}
+              {t("payment.qr.promptPayId", "พร้อมเพย์ {id}", { id: promptpayId })}
             </p>
           )}
         </div>
@@ -312,7 +312,7 @@ export function PaymentQrCard({
           className="mt-4 rounded-full px-5 py-2 text-xs font-semibold border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 shadow-2xs disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download className="size-3.5" />
-          <span>{saving ? t("payment.qr.saving", "Saving QR…") : t("payment.qr.save", "Save QR")}</span>
+          <span>{saving ? t("payment.qr.saving", "กำลังบันทึก QR…") : t("payment.qr.save", "บันทึก QR")}</span>
         </Button>
       )}
       {saveError && (

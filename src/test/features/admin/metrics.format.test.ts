@@ -106,8 +106,8 @@ describe("statCards", () => {
       "active-listings",
       "commission",
     ]);
-    expect(cards[0].value).toBe("฿428,500.00");
-    expect(cards[0].footnote).toBe("เทียบกับ ฿362,400.00 เดือนก่อน");
+    expect(cards[0].value).toBe("THB 428,500.00");
+    expect(cards[0].footnote).toBe("เทียบกับ THB 362,400.00 เดือนก่อน");
     expect(cards[1].delta?.label).toBe("ใหม่");
     expect(cards[2].footnote).toBe("จาก 442 ร้านค้าทั่วแพลตฟอร์ม");
     expect(cards[3].footnote).toBe("เฉลี่ย 3.0% ของยอดขายที่สำเร็จ");
@@ -175,8 +175,8 @@ describe("overviewCsvRows [TCG-749]", () => {
       ["ยอดขายรวม (GMV)", 428500, 362400],
       ["ผู้ขายรายใหม่", 32, 0],
       ["ประกาศขายที่เปิดอยู่", 6184, null],
-      ["ค่าคอมมิชชัน", 12850, 12850],
-      ["ต้นทุนโปรโมชั่น (ชดเชยโค้ด Pegasus)", 0, 0],
+      ["ค่าคอมมิชชั่น", 12850, 12850],
+      ["ต้นทุนโปรโมชัน (ชดเชยโค้ด Pegasus)", 0, 0],
       ["ส่วนลดแคมเปญ", 900, 450],
       ["ประมูลที่กำลังเปิด", 7, null],
       ["ยอดขายจากประมูล (30 วัน)", 52000, null],

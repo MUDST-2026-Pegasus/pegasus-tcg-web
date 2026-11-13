@@ -1,0 +1,9 @@
+{
+  "nodeVersion": "22.20.0",
+  "psqlVersion": "16.6",
+  "dockerCliVersion": "27.5.1",
+  "requestTimeoutMs": 5000,
+  "psqlTimeoutMs": 15000,
+  "dockerTimeoutMs": 10000,
+  "thresholds": { "postWarmupHeapGrowthRatio": 0.1, "cpuP95Percent": 80, "dbConnectionPoolPercent": 80, "containerRestarts": 0, "oomEvents": 0 }
+}

@@ -139,7 +139,7 @@ export function formatCloseDate(date: string): string {
 function moneyIssue(text: string, path: AuctionFormField, label: string, required: string): AuctionFormIssue | null {
   const value = toNumber(text);
   if (value === null) return { path, message: required };
-  if (value <= 0) return { path, message: translate("auction", "seller.auctionFormSchema.message", "{label}ต้องมากกว่า ฿0", { label }) };
+  if (value <= 0) return { path, message: translate("auction", "seller.auctionFormSchema.message", "{label}ต้องมากกว่า THB 0.00", { label }) };
   if (value > MAX_MONEY) return { path, message: translate("auction", "seller.auctionFormSchema.message2", "{label}สูงเกินไป", { label }) };
   return null;
 }
@@ -199,7 +199,7 @@ export function auctionFormIssues(values: AuctionFormValues, now: number): Aucti
 
   const increment = toNumber(values.bidIncrement);
   if (increment === null || increment <= 0) {
-    issues.push({ path: "bidIncrement", message: translate("auction", "seller.auctionFormSchema.message8", "ขั้นบิดต้องมากกว่า ฿0"), detail: translate("auction", "seller.auctionFormSchema.detail5", "กรอกขั้นบิดขั้นต่ำครั้งละ") });
+    issues.push({ path: "bidIncrement", message: translate("auction", "seller.auctionFormSchema.message8", "ขั้นบิดต้องมากกว่า THB 0.00"), detail: translate("auction", "seller.auctionFormSchema.detail5", "กรอกขั้นบิดขั้นต่ำครั้งละ") });
   } else if (increment > MAX_MONEY) {
     issues.push({ path: "bidIncrement", message: translate("auction", "seller.auctionFormSchema.message9", "ขั้นบิดสูงเกินไป") });
   }
@@ -365,7 +365,7 @@ export function createAuctionErrorIssue(
 // @tolgee-key {"key": "seller.auctionFormSchema.text22", "ns": "auction", "defaultValue": "ต.ค."}
 // @tolgee-key {"key": "seller.auctionFormSchema.text23", "ns": "auction", "defaultValue": "พ.ย."}
 // @tolgee-key {"key": "seller.auctionFormSchema.text24", "ns": "auction", "defaultValue": "ธ.ค."}
-// @tolgee-key {"key": "seller.auctionFormSchema.message", "ns": "auction", "defaultValue": "{label}ต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "seller.auctionFormSchema.message", "ns": "auction", "defaultValue": "{label}ต้องมากกว่า THB 0.00"}
 // @tolgee-key {"key": "seller.auctionFormSchema.message2", "ns": "auction", "defaultValue": "{label}สูงเกินไป"}
 // @tolgee-key {"key": "seller.auctionFormSchema.text25", "ns": "auction", "defaultValue": "ราคาซื้อทันที"}
 // @tolgee-key {"key": "seller.auctionFormSchema.text26", "ns": "auction", "defaultValue": "กรอกราคาซื้อทันที"}
@@ -380,7 +380,7 @@ export function createAuctionErrorIssue(
 // @tolgee-key {"key": "seller.auctionFormSchema.message7", "ns": "auction", "defaultValue": "เลือกการ์ดจากสต็อกก่อน"}
 // @tolgee-key {"key": "seller.auctionFormSchema.text27", "ns": "auction", "defaultValue": "ราคาเริ่มต้น"}
 // @tolgee-key {"key": "seller.auctionFormSchema.text28", "ns": "auction", "defaultValue": "กรอกราคาเริ่มต้น"}
-// @tolgee-key {"key": "seller.auctionFormSchema.message8", "ns": "auction", "defaultValue": "ขั้นบิดต้องมากกว่า ฿0"}
+// @tolgee-key {"key": "seller.auctionFormSchema.message8", "ns": "auction", "defaultValue": "ขั้นบิดต้องมากกว่า THB 0.00"}
 // @tolgee-key {"key": "seller.auctionFormSchema.detail5", "ns": "auction", "defaultValue": "กรอกขั้นบิดขั้นต่ำครั้งละ"}
 // @tolgee-key {"key": "seller.auctionFormSchema.message9", "ns": "auction", "defaultValue": "ขั้นบิดสูงเกินไป"}
 // @tolgee-key {"key": "seller.auctionFormSchema.message10", "ns": "auction", "defaultValue": "เลือกวันปิดประมูล"}

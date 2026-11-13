@@ -90,7 +90,7 @@ const mockAddresses: Address[] = [
   {
     id: 1,
     userId: 10,
-    label: "Home",
+    label: "หน้าแรก",
     recipientName: "Ash Ketchum",
     phone: "0812345678",
     line1: "123 Pallet Town",
@@ -182,7 +182,7 @@ describe("CheckoutPage", () => {
     expect(checkoutApi.getShippingQuotes).toHaveBeenCalledWith([42]);
     expect(screen.getByText("Pikachu Illustrator")).toBeInTheDocument();
     expect(screen.queryByText("Charizard Base Set")).not.toBeInTheDocument();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 340.00");
   });
 
   it("keeps cart promotion codes and submits the total returned by preview", async () => {
@@ -196,7 +196,7 @@ describe("CheckoutPage", () => {
     const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
     renderCheckout("/checkout?items=42");
     await ready();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿261");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 261.00");
     await userEvent.setup().click(purchase());
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
     expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({
@@ -228,8 +228,8 @@ describe("CheckoutPage", () => {
     await ready();
     await userEvent.setup().click(purchase());
     expect(await screen.findByRole("dialog", { name: "ยอดชำระเปลี่ยนไป" })).toBeInTheDocument();
-    expect(screen.getByText(/ยอดเดิม: ฿340/)).toBeInTheDocument();
-    expect(await screen.findByText(/ยอดใหม่: ฿300/)).toBeInTheDocument();
+    expect(screen.getByText(/ยอดเดิม: THB 340.00/)).toBeInTheDocument();
+    expect(await screen.findByText(/ยอดใหม่: THB 300.00/)).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole("button", { name: "สั่งซื้อด้วยยอดใหม่" }));
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
     expect(submit.mock.calls[1][0].expectedGrandTotal).toBe(300);
@@ -314,9 +314,9 @@ describe("CheckoutPage", () => {
 
     renderCheckout("/checkout?items=42");
     await ready();
-    expect(screen.getByText("฿999")).toBeInTheDocument();
-    expect(screen.getAllByText("฿77").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿1,076");
+    expect(screen.getByText("THB 999.00")).toBeInTheDocument();
+    expect(screen.getAllByText("THB 77.00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 1,076.00");
   });
 
   it("shows every item grouped by seller, physical quantity, and free shipping", async () => {
@@ -326,7 +326,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("ยอดสินค้า (3 ใบ)")).toBeInTheDocument();
     expect(screen.getByText("รวมร้านนี้ (2 ใบ)")).toBeInTheDocument();
     expect(screen.getAllByText("ส่งฟรี").length).toBeGreaterThan(0);
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿840");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 840.00");
   });
 
   it("supports a direct product/listing selection", async () => {
@@ -433,7 +433,7 @@ describe("CheckoutPage", () => {
     renderCheckout("/checkout?items=42");
     await ready();
     await user.click(screen.getByRole("radio", { name: /EMS Store A/ }));
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 365.00");
     await user.click(purchase());
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
     expect(submit.mock.calls[0][0]).toEqual({ cartItemIds: [42], shippingAddressId: 1, shippingOptionBySeller: { 1: 12 }, platformCode: null, sellerCodes: {}, expectedGrandTotal: 365 });
@@ -473,7 +473,7 @@ describe("CheckoutPage", () => {
     expect(screen.getByText("ยังไม่มีที่อยู่จัดส่ง")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ใช้ที่อยู่นี้" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "+ เพิ่มที่อยู่ใหม่" }));
-    expect(await screen.findByRole("dialog", { name: "Add New Address" })).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: "เพิ่มที่อยู่ใหม่" })).toBeInTheDocument();
   });
 
   it("opens the shared edit form from the selected address", async () => {
@@ -482,8 +482,8 @@ describe("CheckoutPage", () => {
     await ready();
     await user.click(screen.getByRole("button", { name: "เปลี่ยน" }));
     await user.click(screen.getByRole("button", { name: "แก้ไขที่อยู่ Office" }));
-    expect(await screen.findByRole("dialog", { name: "Edit Address" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Address line 1")).toHaveValue("456 Oak Lab");
+    expect(await screen.findByRole("dialog", { name: "แก้ไขที่อยู่" })).toBeInTheDocument();
+    expect(screen.getByLabelText("ที่อยู่บรรทัดที่ 1")).toHaveValue("456 Oak Lab");
   });
 
   it("refreshes invalid shipping, selects the new default, and requires a second purchase click", async () => {
@@ -501,7 +501,7 @@ describe("CheckoutPage", () => {
     await ready();
     expect(screen.getByRole("alert")).toHaveTextContent("ตัวเลือกการจัดส่งของ Store A มีการเปลี่ยนแปลง");
     expect(screen.getByRole("radio", { name: /EMS Store A/ })).toBeChecked();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 365.00");
     expect(submit).toHaveBeenCalledTimes(1);
     await user.click(purchase());
     expect(submit.mock.calls[1][0].shippingOptionBySeller).toEqual({ 1: 12 });
@@ -556,7 +556,7 @@ describe("CheckoutPage", () => {
   it("displays stock errors without navigating to payment", async () => {
     const user = userEvent.setup();
     vi.spyOn(checkoutApi, "checkout").mockRejectedValue(new ApiError({
-      status: 409, code: "INSUFFICIENT_STOCK", message: "Out of stock",
+      status: 409, code: "INSUFFICIENT_STOCK", message: "สินค้าหมด",
     }));
     renderCheckout("/checkout?items=42");
     await ready();
@@ -591,10 +591,10 @@ describe("CheckoutPage", () => {
     const view = renderCheckout("/checkout?items=42");
     await ready();
     await user.click(screen.getByRole("radio", { name: /EMS Store A/ }));
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿365");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 365.00");
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
-    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340"));
+    await waitFor(() => expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 340.00"));
     await act(() => view.queryClient.invalidateQueries({ queryKey: ["checkout-shipping-quotes"] }));
     await ready();
     expect(quoteSpy).toHaveBeenCalledTimes(3);
@@ -696,10 +696,10 @@ describe("CheckoutPage", () => {
     renderCheckout("/checkout?items=42");
     await ready();
 
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿3,025");
-    expect(screen.getByText(/ประหยัดไป ฿250/)).toBeInTheDocument();
-    expect(screen.getAllByText("− ฿50").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("− ฿200").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 3,025.00");
+    expect(screen.getByText(/ประหยัดไป THB 250.00/)).toBeInTheDocument();
+    expect(screen.getAllByText("− THB 50.00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("− THB 200.00").length).toBeGreaterThanOrEqual(1);
 
     const summaryCard = screen.getByRole("heading", { name: "สรุปคำสั่งซื้อ" }).parentElement;
     expect(summaryCard).toHaveClass(
@@ -741,7 +741,7 @@ describe("CheckoutPage", () => {
     await user.click(screen.getByRole("button", { name: "ใช้โค้ด" }));
 
     await waitFor(() => {
-      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿290");
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 290.00");
     });
     expect(previewSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ platformCode: "PEGASUS50" }),
@@ -751,7 +751,7 @@ describe("CheckoutPage", () => {
     // Remove platform code
     await user.click(screen.getByRole("button", { name: "นำโค้ด Pegasus ออก" }));
     await waitFor(() => {
-      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿340");
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 340.00");
     });
   });
 
@@ -773,14 +773,14 @@ describe("CheckoutPage", () => {
     });
     renderCheckout("/checkout?items=42");
     await ready();
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 300.00");
 
     await userEvent.setup().click(screen.getByRole("radio", { name: /EMS Store A/ }));
     await waitFor(() => expect(previewSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ shippingOptionBySeller: { 1: 12 } }), expect.anything(),
     ));
-    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿300");
-    expect(screen.getAllByText("− ฿65")).toHaveLength(2);
+    expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 300.00");
+    expect(screen.getAllByText("− THB 65.00")).toHaveLength(2);
   });
 
   it("displays Thai error with seller name when promo is for wrong seller", async () => {
@@ -798,14 +798,17 @@ describe("CheckoutPage", () => {
       shippingEstimated: false,
       codes: [
         {
+          // A Store A code typed in the Pegasus slot, as the API sends it [TCG-769].
           code: "WRONGSHOP",
-          ownerType: "PLATFORM",
+          ownerType: "SELLER",
           sellerProfileId: 1,
           sellerName: "Store A",
           status: "PROMO_WRONG_SELLER",
           discount: null,
           shortfall: null,
           pendingShipping: false,
+          slotOwnerType: "PLATFORM",
+          slotSellerProfileId: null,
         },
       ],
       bestPick: null,
@@ -815,6 +818,10 @@ describe("CheckoutPage", () => {
     expect(
       await screen.findByText("โค้ดนี้เป็นของร้าน Store A — ใส่ในช่อง “โค้ดร้าน” ของร้านนั้น"),
     ).toBeInTheDocument();
+    // Dropped before it can reach POST /checkout [TCG-769].
+    await waitFor(() =>
+      expect(JSON.parse(sessionStorage.getItem(PROMOTION_SELECTION_KEY)!).platformCode).toBeNull(),
+    );
   });
 
   it("displays Thai shortfall error when min spend is not met and drops invalid code while keeping valid code", async () => {
@@ -867,7 +874,7 @@ describe("CheckoutPage", () => {
     renderCheckout("/checkout?items=42");
     await ready();
 
-    expect(await screen.findByText("ซื้อสินค้าเพิ่มอีก ฿200 เพื่อใช้โค้ดนี้")).toBeInTheDocument();
+    expect(await screen.findByText("ซื้อสินค้าเพิ่มอีก THB 200.00 เพื่อใช้โค้ดนี้")).toBeInTheDocument();
     // Valid shop promo remains active
     expect(screen.getByText("โค้ดร้าน · VALIDSHOP")).toBeInTheDocument();
 
@@ -1015,7 +1022,7 @@ describe("CheckoutPage", () => {
     it("starts a new idempotency key after a 4xx failure on the same order", async () => {
       const user = userEvent.setup();
       const submit = vi.spyOn(checkoutApi, "checkout").mockRejectedValueOnce(new ApiError({
-        status: 409, code: "INSUFFICIENT_STOCK", message: "Out of stock",
+        status: 409, code: "INSUFFICIENT_STOCK", message: "สินค้าหมด",
       })).mockResolvedValue(orderResponse);
       renderCheckout("/checkout?items=42");
       await ready();
@@ -1105,10 +1112,10 @@ describe("CheckoutPage", () => {
       const submit = vi.spyOn(checkoutApi, "checkout").mockResolvedValue(orderResponse);
       renderCheckout("/checkout?items=42");
       await ready();
-      expect(screen.getByText("ราคาสินค้า (ก่อนลด)").parentElement).toHaveTextContent("฿400");
-      expect(screen.getByText("ส่วนลดราคาสินค้า").parentElement).toHaveTextContent("−฿100");
-      expect(screen.getAllByText("− ฿50").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("฿290");
+      expect(screen.getByText("ราคาสินค้า (ก่อนลด)").parentElement).toHaveTextContent("THB 400.00");
+      expect(screen.getByText("ส่วนลดราคาสินค้า").parentElement).toHaveTextContent("−THB 100.00");
+      expect(screen.getAllByText("− THB 50.00").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTestId("checkout-grand-total")).toHaveTextContent("THB 290.00");
       await userEvent.setup().click(purchase());
       await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
       expect(submit.mock.calls[0][0]).toEqual(expect.objectContaining({

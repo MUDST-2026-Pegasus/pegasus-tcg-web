@@ -50,10 +50,10 @@ describe("PaymentPage", () => {
     expect(await screen.findByText(/Test Bank/)).toBeInTheDocument();
     expect(screen.getByText(/12345/)).toBeInTheDocument();
     expect(screen.getAllByText(/150/)[0]).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Secure Checkout" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Order Summary" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Submit payment for verification/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Save QR/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ชำระเงินอย่างปลอดภัย" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "สรุปคำสั่งซื้อ" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ส่งการชำระเงินเพื่อตรวจสอบ" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "บันทึก QR" })).not.toBeInTheDocument();
     await waitFor(() => expect(financeApi.createPayment).toHaveBeenCalledWith(42, expect.any(String)));
     expect(ordersApi.payOrder).not.toHaveBeenCalled();
   });
@@ -64,8 +64,8 @@ describe("PaymentPage", () => {
     vi.mocked(financeApi.getPayment).mockResolvedValue(promptPay);
     vi.mocked(ordersApi.getOrder).mockResolvedValue({ orderNumber: "ORD-42", grandTotal: 9999 } as never);
     renderPaymentPage();
-    expect(await screen.findByText("Scan to Pay | ฿1,450.00")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
+    expect(await screen.findByText("สแกนเพื่อชำระ | THB 1,450.00")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" })).toBeInTheDocument();
     expect(screen.queryByText(/129.99 USD/)).not.toBeInTheDocument();
   });
 
@@ -112,7 +112,7 @@ describe("PaymentPage", () => {
 
     expect(await screen.findByText("Charizard VMAX #020")).toBeInTheDocument();
     expect(screen.getByText(/DARKNESS ABLAZE · NM/)).toBeInTheDocument();
-    expect(screen.getByText("Order #ORD-10241 · Pay exactly this amount")).toBeInTheDocument();
+    expect(screen.getByText("คำสั่งซื้อ #ORD-10241 · ชำระยอดนี้ให้ตรงทุกสตางค์")).toBeInTheDocument();
   });
 
   it("shows awaiting verification notice when payment status is AWAITING_VERIFICATION", async () => {
@@ -154,10 +154,10 @@ describe("PaymentPage", () => {
 
     renderPaymentPage(42);
 
-    expect(await screen.findByText("Payment submitted")).toBeInTheDocument();
+    expect(await screen.findByText("ส่งการชำระเงินแล้ว")).toBeInTheDocument();
     const refInput = screen.getByLabelText("เลขอ้างอิงการโอน");
     expect(refInput).toBeDisabled();
-    const dropzone = screen.getByRole("button", { name: /payment submitted/i });
+    const dropzone = screen.getByRole("button", { name: /ส่งการชำระเงินแล้ว/ });
     expect(dropzone).toHaveAttribute("aria-disabled", "true");
   });
 
@@ -178,8 +178,8 @@ describe("PaymentPage", () => {
 
     expect(await screen.findByText("Pegasus Card Shop")).toBeInTheDocument();
     expect(screen.queryByText(/Kasikornbank/)).not.toBeInTheDocument();
-    expect(screen.getByText("PromptPay ID 081-234-5678")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "PromptPay QR Code" })).toBeInTheDocument();
+    expect(screen.getByText("พร้อมเพย์ 081-234-5678")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "QR Code พร้อมเพย์" })).toBeInTheDocument();
     expect(screen.queryByText(/DEMO QR/i)).not.toBeInTheDocument();
   });
 
@@ -198,8 +198,8 @@ describe("PaymentPage", () => {
     renderPaymentPage(42);
 
     expect(await screen.findByText("QR หมดอายุแล้ว")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Submit payment for verification/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Save QR/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "ส่งการชำระเงินเพื่อตรวจสอบ" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "บันทึก QR" })).toBeDisabled();
     expect(screen.getByRole("button", { name: /เริ่มการชำระเงินใหม่/i })).toBeInTheDocument();
   });
 });

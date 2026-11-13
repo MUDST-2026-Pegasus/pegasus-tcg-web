@@ -44,24 +44,24 @@ describe("AccountMenu states", () => {
   it("shows a skeleton without an account menu while auth is loading", () => {
     state.isLoading = true;
     showMenu();
-    expect(screen.getByLabelText("Loading account")).toBeInTheDocument();
+    expect(screen.getByLabelText("กำลังโหลดบัญชี")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Account" }),
+      screen.queryByRole("button", { name: "บัญชี" }),
     ).not.toBeInTheDocument();
   });
 
   it("offers guest login and signup", async () => {
     state.links = [
-      { label: "Log in", to: "/login" },
-      { label: "Sign up", to: "/register" },
+      { label: "เข้าสู่ระบบ", to: "/login" },
+      { label: "สมัครสมาชิก", to: "/register" },
     ];
     showMenu();
-    fireEvent.click(screen.getByRole("button", { name: "Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "บัญชี" }));
     expect(
-      await screen.findByRole("menuitem", { name: "Log in" }),
+      await screen.findByRole("menuitem", { name: "เข้าสู่ระบบ" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "Sign up" }),
+      screen.getByRole("menuitem", { name: "สมัครสมาชิก" }),
     ).toBeInTheDocument();
   });
 
@@ -73,19 +73,19 @@ describe("AccountMenu states", () => {
       avatarUrl: null,
     };
     state.links = [
-      { label: "My Account", to: "/account/profile" },
-      { label: "Seller Dashboard", to: "/seller" },
+      { label: "บัญชีของฉัน", to: "/account/profile" },
+      { label: "แดชบอร์ดผู้ขาย", to: "/seller" },
     ];
     showMenu();
-    expect(screen.getByRole("button", { name: "Account" })).toHaveTextContent(
+    expect(screen.getByRole("button", { name: "บัญชี" })).toHaveTextContent(
       "Somchai K.",
     );
-    fireEvent.click(screen.getByRole("button", { name: "Account" }));
+    fireEvent.click(screen.getByRole("button", { name: "บัญชี" }));
     expect(
-      await screen.findByRole("menuitem", { name: "Seller Dashboard" }),
+      await screen.findByRole("menuitem", { name: "แดชบอร์ดผู้ขาย" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "Log out" }),
+      screen.getByRole("menuitem", { name: "ออกจากระบบ" }),
     ).toBeInTheDocument();
   });
 });

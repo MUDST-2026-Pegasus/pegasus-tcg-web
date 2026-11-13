@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import { PageTransition } from "@/components/common/PageTransition";
+import { LanguageSwitch } from "@/lib/i18n/LanguageSwitch";
 
 /**
  * โครงหน้า Login / Register — การ์ดกลางจอ ไม่มี Navbar และ Footer
@@ -11,6 +12,7 @@ import { PageTransition } from "@/components/common/PageTransition";
 export function AuthLayout() {
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden p-6 md:p-12">
+      <LanguageSwitch className="absolute top-4 right-4 z-10" />
       <PageTransition className="flex w-full items-center justify-center">
         <Outlet />
       </PageTransition>
