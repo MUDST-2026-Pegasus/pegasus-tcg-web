@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, SearchIcon } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import {
   ProfileHeaderSkeleton,
 } from "@/components/common/PageSkeletons";
 import { Button } from "@/components/ui/button";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CONDITION_LABELS, productHref } from "@/features/catalog/catalog.mappers";
 import type { CardCondition } from "@/features/catalog/catalog.types";
@@ -58,6 +59,14 @@ function Storefront({ username }: { username: string }) {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [listingPage, setListingPage] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const q = useDebouncedValue(searchInput.trim(), 300);
+  const [lastQ, setLastQ] = useState(q);
+  if (q !== lastQ) {
+    // ค้นใหม่ → กลับไปหน้าแรกของผลลัพธ์
+    setLastQ(q);
+    setListingPage(0);
+  }
   const [collectionPage, setCollectionPage] = useState(0);
 
   // 1. Fetch store profile
@@ -71,8 +80,8 @@ function Storefront({ username }: { username: string }) {
 
   // 2. Fetch storefront listings
   const listings = useQuery({
-    queryKey: ["storefront", username, listingPage, PAGE_SIZE],
-    queryFn: ({ signal }) => getStorefront(username, PAGE_SIZE, listingPage, signal),
+    queryKey: ["storefront", username, listingPage, PAGE_SIZE, q],
+    queryFn: ({ signal }) => getStorefront(username, PAGE_SIZE, listingPage, signal, q),
     placeholderData: keepPreviousData,
     retry,
     staleTime: 0,
@@ -234,14 +243,34 @@ function Storefront({ username }: { username: string }) {
                         {t("store.listingsHint", "เลือกสินค้าเพื่อดูรายละเอียดและสั่งซื้อจาก {name}", { name: displayName })}
                       </p>
                     </div>
+                    {/* หน้าตาเดียวกับช่องค้นหาบน navbar */}
+                    <div className="flex h-11 w-full sm:w-80 items-center gap-2 rounded-full border border-border bg-muted px-4 focus-within:bg-background focus-within:ring-2 focus-within:ring-ring">
+                      <SearchIcon aria-hidden className="size-[18px] shrink-0 text-muted-foreground" />
+                      <input
+                        type="search"
+                        value={searchInput}
+                        onChange={(event) => setSearchInput(event.target.value)}
+                        placeholder={t("store.searchPlaceholder", "ค้นหาสินค้าในร้าน…")}
+                        aria-label={t("store.searchLabel", "ค้นหาสินค้าในร้าน")}
+                        className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                      />
+                    </div>
                     {listings.data && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="w-full text-sm text-muted-foreground">
                         {listings.data.totalItems > 0
                           ? t("store.showingRange", "แสดง {from}–{to} จาก {total} รายการ", { from: listingPage * PAGE_SIZE + 1, to: Math.min((listingPage + 1) * PAGE_SIZE, listings.data.totalItems), total: listings.data.totalItems })
                           : t("store.showingNone", "แสดง 0 รายการ")}
                       </p>
                     )}
                   </div>
+
+                  {q && listings.data?.correctedQuery && (
+                    <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary" role="status">
+                      {listings.data.correctionReason === "ALIAS"
+                        ? t("search.correctedAlias", "รวมผลของ “{corrected}” สำหรับ “{query}”", { corrected: listings.data.correctedQuery, query: q })
+                        : t("search.corrected", "แสดงผลลัพธ์ของ “{corrected}” · คุณค้นหา “{query}”", { corrected: listings.data.correctedQuery, query: q })}
+                    </p>
+                  )}
 
                   {listings.isPending ? (
                     <div
@@ -257,16 +286,23 @@ function Storefront({ username }: { username: string }) {
                       onRetry={() => void listings.refetch()}
                     />
                   ) : listings.data.items.length === 0 ? (
-                    <EmptyState
-                      title={t("store.noListings", "ยังไม่มีประกาศขาย")}
-                      description={t("store.noListingsHint", "ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่")}
-                    />
+                    q ? (
+                      <EmptyState
+                        title={t("store.noSearchResults", "ไม่พบสินค้าที่ตรงกับ \"{q}\"", { q })}
+                        description={t("store.noSearchResultsHint", "ลองค้นด้วยชื่อหรือเลขการ์ดอื่น")}
+                      />
+                    ) : (
+                      <EmptyState
+                        title={t("store.noListings", "ยังไม่มีประกาศขาย")}
+                        description={t("store.noListingsHint", "ร้านนี้ยังไม่มีสินค้าที่เปิดขายอยู่")}
+                      />
+                    )
                   ) : (
                     <div className={gridClassName} aria-busy={listings.isFetching}>
                       {listings.data.items.map((listing) => (
                         <ItemCard
                           key={listing.id}
-                          href={productHref(listing.card.productSlug)}
+                          href={`/listings/${listing.id}`}
                           imageSrc={
                             listing.primaryPhotoUrl ??
                             listing.card.officialImageUrl ??

@@ -1523,6 +1523,10 @@
     "showingRange": "แสดง {from}–{to} จาก {total} รายการ",
     "tabs": "แท็บร้านค้า",
     "unitCards": "ใบ",
-    "unitItems": "รายการ"
+    "unitItems": "รายการ",
+    "searchPlaceholder": "ค้นหาสินค้าในร้าน…",
+    "searchLabel": "ค้นหาสินค้าในร้าน",
+    "noSearchResults": "ไม่พบสินค้าที่ตรงกับ \"{q}\"",
+    "noSearchResultsHint": "ลองค้นด้วยชื่อหรือเลขการ์ดอื่น"
   }
 }
