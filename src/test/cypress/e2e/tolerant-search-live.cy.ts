@@ -114,6 +114,35 @@ describeLive("Tolerant search on the live API", () => {
     });
   });
 
+  // จาก TCG-693: request ยังส่งคำที่พิมพ์ + เกม + relevance และหน้าโชว์ข้อความแก้คำ
+  // (ช่องค้นหาในหน้าถูกเอาออกใน TCG-777 — เช็คหัวข้อแทนค่าในช่อง)
+  it("keeps the typed query and game filter while showing corrected products", () => {
+    const apiBaseUrl = String(Cypress.expose("apiBaseUrl") || "http://localhost:8080");
+    cy.request(`${apiBaseUrl}/api/v1/games`).then(({ body }) => {
+      const game = body.data.find((entry: { name: string }) => /pok[eé]mon/i.test(entry.name));
+      expect(game, "a seeded Pokémon game").to.not.equal(undefined);
+
+      cy.intercept("GET", "**/api/v1/catalog/products?*").as("products");
+      cy.visit(`/search?q=pokamon&game=${game.slug}`);
+
+      cy.wait("@products").then(({ request, response }) => {
+        const url = new URL(request.url);
+        expect(url.origin).to.eq(apiBaseUrl);
+        expect(url.searchParams.get("q")).to.eq("pokamon");
+        expect(url.searchParams.get("gameId")).to.eq(String(game.id));
+        expect(url.searchParams.get("sort")).to.eq("relevance");
+        expect(response?.statusCode).to.eq(200);
+        expect(response?.body.data.correctedQuery).to.match(/pok[eé]mon/i);
+        expect(response?.body.data.totalItems).to.be.greaterThan(0);
+        cy.contains(response?.body.data.items[0].name).should("be.visible");
+      });
+
+      cy.contains(/แสดงผลลัพธ์ของ “Pok[eé]mon” · คุณค้นหา “pokamon”/).should("be.visible");
+      cy.get("h1").should("contain.text", "ผลการค้นหา “pokamon”");
+      cy.url().should("include", "q=pokamon");
+    });
+  });
+
   it("shows the alias banner and shops tab in the browser", () => {
     cy.visit("/search?q=" + encodeURIComponent("ชาริซาร์ด"));
     cy.contains("รวมผลของ “Charizard” สำหรับ “ชาริซาร์ด”").should("be.visible");
