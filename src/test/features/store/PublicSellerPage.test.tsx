@@ -107,7 +107,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("PublicSellerPage V3", () => {
-  it("starts at the top, links back to the product and hides prices in collection", async () => {
+  it("starts at the top, links listings to their listing page and hides prices in collection", async () => {
     const user = userEvent.setup();
     renderStore();
     expect(await screen.findByRole("heading", { name: "CardVault BKK" })).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe("PublicSellerPage V3", () => {
     );
     expect(screen.getByRole("link", { name: /Charizard/ })).toHaveAttribute(
       "href",
-      "/products/charizard",
+      "/listings/1",
     );
     await user.click(await screen.findByRole("tab", { name: /คอลเลกชัน/i }));
     const panel = screen.getByRole("tabpanel");
@@ -172,9 +172,30 @@ describe("PublicSellerPage V3", () => {
     await screen.findByRole("heading", { name: "CardVault BKK" });
     await user.click(screen.getByRole("button", { name: /Next|ถัดไป/i }));
     await waitFor(() =>
-      expect(getStorefront).toHaveBeenCalledWith("cardvault", 6, 1, expect.any(AbortSignal)),
+      expect(getStorefront).toHaveBeenCalledWith("cardvault", 6, 1, expect.any(AbortSignal), ""),
     );
     expect(screen.getByRole("heading", { name: "CardVault BKK" })).toBeInTheDocument();
+  });
+
+  it("says when the shop search was corrected", async () => {
+    const user = userEvent.setup();
+    vi.mocked(getStorefront).mockImplementation(async (_u, _s, _p, _sig, q) =>
+      q ? { ...page([listing], 1), correctedQuery: "Charizard", correctionReason: "TYPO" } : page([listing], 7),
+    );
+    renderStore();
+    await screen.findByRole("heading", { name: "CardVault BKK" });
+    await user.type(screen.getByLabelText("ค้นหาสินค้าในร้าน"), "charzard");
+    expect(await screen.findByRole("status")).toHaveTextContent("แสดงผลลัพธ์ของ “Charizard” · คุณค้นหา “charzard”");
+  });
+
+  it("searches the seller's listings by name", async () => {
+    const user = userEvent.setup();
+    renderStore();
+    await screen.findByRole("heading", { name: "CardVault BKK" });
+    await user.type(screen.getByLabelText("ค้นหาสินค้าในร้าน"), " charizard ");
+    await waitFor(() =>
+      expect(getStorefront).toHaveBeenCalledWith("cardvault", 6, 0, expect.any(AbortSignal), "charizard"),
+    );
   });
 
   it("supports direct collection URLs and empty stores without fabricated identity", async () => {

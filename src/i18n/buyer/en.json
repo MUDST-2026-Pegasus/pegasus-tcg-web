@@ -1523,6 +1523,10 @@
     "showingRange": "Showing {from}–{to} of {total}",
     "tabs": "Store tabs",
     "unitCards": "cards",
-    "unitItems": "items"
+    "unitItems": "items",
+    "searchPlaceholder": "Search this shop…",
+    "searchLabel": "Search this shop",
+    "noSearchResults": "No items match \"{q}\"",
+    "noSearchResultsHint": "Try another card name or number"
   }
 }
