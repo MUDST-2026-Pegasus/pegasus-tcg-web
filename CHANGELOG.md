@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.1.0](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/compare/v1.0.0...v1.1.0) (2026-11-13)
+
+
+### Features
+
+* animate Santa Pegasus navbar logo on hover ([bcc5624](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/bcc56247f06af86930fb2e498fab2654c9db8a3f))
+* Christmas snowfall on every page ([c79c9c5](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/c79c9c5b092f70f13fab97c75c93854be4ae205b))
+* Christmas snowfall on every page ([61b6135](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/61b613506dd77b4df22a6f6f107d6b7367960517))
+* **no-ticket:** animate Santa navbar logo on hover ([0189c50](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/0189c50d0c0586518760dd4ae7297a6b1539d6e6))
+* **TCG-561:** EN smoke + strict i18n-check in CI ([8f6d769](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/8f6d7699e54798de24c0686c62a024c6cc2f4534))
+* **TCG-561:** EN smoke spec, Thai default in Cypress, strict i18n-check in CI ([05ff350](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/05ff350822e3b4c505942afe73193fd5109061b2))
+* **TCG-562:** enable TH/EN language switch ([bafbef9](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/bafbef94e0c534c65f5ad6fe08e357f39396c355))
+* **TCG-562:** enable TH/EN language switch ([ada524a](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ada524a75a0477bb812b451ed524566b2e927394))
+* **TCG-776:** debounced suggest query, trending query and search history ([2949624](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/2949624da46bb9b3b3b5828cc829a47524123f39))
+* **TCG-776:** remember opened products for "ดูล่าสุด" ([200eeb6](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/200eeb6c8f2530b77d0314a2a501643c9df8708b))
+* **TCG-776:** search autocomplete dropdown in the navbar ([d78d47f](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/d78d47f98021ec9f23da1e2375d4e9b267145ca8))
+* **TCG-776:** search autocomplete dropdown in the navbar (SRCH-05) ([339acb8](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/339acb87b95a5ab7088b3075f63e8f7cd320aefd))
+* **TCG-776:** types and client for search suggest + trending ([0d729e0](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/0d729e0169eea16e8d827748dfb2cdb81aaf76ca))
+* **TCG-777, TCG-778, TCG-779:** bring the merged search stack into develop ([adb6f43](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/adb6f4332c2ca1e30026a91b7ae3087843856e36))
+* **TCG-777:** facets query, onSale filter and market spread fields ([26bc4e2](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/26bc4e2bc47196d39438eb89606ff0740b16d113))
+* **TCG-777:** onSale, view and the new sort menu in the search URL ([22b7801](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/22b780157f40a0054f69a3da44efe31bdd33c38a))
+* **TCG-777:** redesign /search — sidebar, grid/list, states, mobile sheet ([fbc15c4](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/fbc15c41561ec112a61572493ac5ad34ba0d6577))
+* **TCG-777:** result card/row, facet filter panel and active filter chips ([224d51e](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/224d51e3d8130bed6d0aca9bc1102934930334ca))
+* **TCG-778:** shop search query and tab / rating / shop sort in the URL ([2e6a0cf](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/2e6a0cfb800c13b1a7a974b3ea1545da4dd73c55))
+* **TCG-778:** shops tab — shop results, rating filter, sort and states ([4bc2d2a](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/4bc2d2a4469a60a095340afefebec571b4f72bea))
+* **TCG-778:** tabs switch through the URL on /search ([2fc5891](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/2fc5891515128ba1fbb43a2e6243a73637118be6))
+* use tsparticles snow preset for the snowfall ([702efc7](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/702efc76cf8aa4e8d350f2311f4a2d9741b29a6e))
+
+
+### Bug Fixes
+
+* **build:** remove pnpm-workspace.yaml and use package.json resolutions for pnpm v9 CI compatibility ([ba691f6](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ba691f6f683cd15bef030b53e50fedd6975c8924))
+* **build:** sync overrides across package.json and pnpm-workspace.yaml for pnpm v9-v11 CI compatibility ([ac27068](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ac270681cc687a8ca67023c9cf5ccaa68e208d71))
+* **nfr:** TCG-753 decouple CI cypress run from strict NFR CLI gate and re-verify failed checks ([fa2e54a](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/fa2e54adbe1561553a3b59aa9789ae94148dc7f6))
+* render snowfall only where OffscreenCanvas exists ([a019b9e](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/a019b9ed16d5c550c90a902f6dc7ccd0fe584e2f))
+* **security:** resolve critical and high dependency vulnerabilities in pnpm-lock.yaml ([f79b499](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/f79b4996ad0d32955fbb41912e458298b868e7f4))
+* **Snowfall:** reduce snow particle count from 80 to 40 ([10531a4](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/10531a443e83fbbd880d4ef2b8d1279f10ccafac))
+* **Snowfall:** reduce snow particle count from 80 to 40 ([5ab1f3b](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/5ab1f3bedf51561b29d90a9606817a0156d01ad8))
+* **TCG-560:** compact THB amount on coupon stubs ([8acc46e](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/8acc46e99161bc839f8b6f3b52a1eea77de1560b))
+* **TCG-560:** compact THB and free-shipping text on coupon stubs ([c3e08e7](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/c3e08e74e4a38cbf602f678fd19ddd92ff8b6d28))
+* **TCG-560:** show every price as THB 1,150.00 ([1548af8](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/1548af8374b846a9a198ffb1a238ddeda4ae7bd0))
+* **TCG-560:** show every price as THB 1,150.00 ([e840655](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/e840655c95fff9c02a55841e69718dbcb8fed7ca))
+* **TCG-560:** shrink free-shipping text on coupon stubs ([3beb62f](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/3beb62f56e40695598ddff685075dbd8b51d769c))
+* **TCG-560:** translate category names by code ([6b332b2](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/6b332b29d98e9dc869e98f1bb208dbc8c43e740a))
+* **TCG-560:** translate category names by code (DB only has Thai) ([d73bccd](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/d73bccda65c78f564591ed082a5a2e12abb80ad8))
+* **TCG-560:** translate product type and Sealed labels ([0f72b73](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/0f72b7350f2287c9ada6ddc693171b9d42f678b7))
+* **TCG-560:** translate product type and Sealed labels ([34ddebf](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/34ddebf7675395f4134aa17934ae1e6c6b1cd589))
+* **TCG-560:** translate remaining hardcoded English UI text ([58dc2e2](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/58dc2e2a17edeeafa221eb7c268a0d3385537b57))
+* **TCG-560:** translate remaining hardcoded English UI text ([dc59076](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/dc59076421c36d74da8c5fb9cbafac32d89083cd))
+* **TCG-562:** crossfade the page when switching language ([cf40afb](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/cf40afbe5392fcf0437188374aaa243311aa1eb8))
+* **TCG-562:** hide Thai DB names entirely in English ([ba2d28d](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ba2d28d2247895dfd2bf00c452eb94d2f4a465c9))
+* **TCG-562:** keep mobile header within 375px, scope admin review switch in Cypress ([e78db4f](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/e78db4f2e02a56721562f6ead7e14c01a1371ac2))
+* **TCG-562:** keep names and scroll when switching language ([ecb83df](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ecb83df748262e2f6c261991c99b5c115e18ce2d))
+* **TCG-562:** keep names and scroll when switching language ([3eb9dd7](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/3eb9dd753eda850427275cf6466964ce77689890))
+* **TCG-562:** load the new language before the crossfade starts ([87b2a50](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/87b2a50b1bc7bc510fbedfa5661a88879ccf963c))
+* **TCG-562:** switch language instantly without a page flash ([a9e1a7b](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/a9e1a7b6b4beebf082a2a55dc88b97100d38d024))
+* **TCG-562:** switch language instantly, no crossfade ([792e096](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/792e09635f9bc7af9f8faa4595bca7c5df042a34))
+* **TCG-769:** pair promo outcomes with the slot they were typed in ([344f380](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/344f3801822f60c0370149c7b09de23e1fd1d528))
+* **TCG-769:** pair promo outcomes with the slot they were typed in ([ec5f624](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/ec5f6246eef2a309c9832fec35149d1af83d3582))
+* **TCG-776:** keep the card number out of recently viewed storage ([15e0cf4](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/15e0cf43e8d5e015cf94564a2d066fdc3d9a8e14))
+
 ## 1.0.0 (2026-11-10)
 
 
