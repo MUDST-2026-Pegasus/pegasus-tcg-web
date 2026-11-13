@@ -4,6 +4,8 @@
 
 Welcome to the frontend for **Pegasus TCG**, a trading card marketplace. This guide will help you get the app running and find the right place to make your first change.
 
+Live site: [pegasus-tcg.gameinwza.com](https://pegasus-tcg.gameinwza.com) (production) · [pegasus-dev.gameinwza.com](https://pegasus-dev.gameinwza.com) (dev)
+
 ## What is here?
 
 | Area | What you can work on | Example routes |
