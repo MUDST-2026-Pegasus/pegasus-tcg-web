@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import * as catalogApi from "./catalog.api";
-import type { ProductQuery } from "./catalog.types";
+import type { ProductQuery, ShopQuery } from "./catalog.types";
 import { isApiError } from "@/lib/api";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -28,6 +28,9 @@ export const catalogKeys = {
     [...catalogKeys.all, "product", productId, "collectors", page] as const,
   effects: (productId: number) =>
     [...catalogKeys.all, "product", productId, "effects"] as const,
+  facets: (query: Omit<ProductQuery, "sort" | "page" | "size">) =>
+    [...catalogKeys.all, "facets", query] as const,
+  shops: (query: ShopQuery) => [...catalogKeys.all, "shops", query] as const,
   suggest: (q: string) => [...catalogKeys.all, "suggest", q] as const,
   trending: () => [...catalogKeys.all, "trending"] as const,
 };
@@ -64,7 +67,7 @@ export function useCardSetList(gameId: number | null) {
 export function useProductSearch(query: ProductQuery, enabled = true) {
   return useQuery({
     queryKey: catalogKeys.products(query),
-    queryFn: () => catalogApi.getProducts(query),
+    queryFn: ({ signal }) => catalogApi.getProducts(query, signal),
     placeholderData: keepPreviousData,
     enabled,
   });
@@ -164,6 +167,28 @@ export function useTrendingSearches(enabled = true) {
     queryKey: catalogKeys.trending(),
     queryFn: ({ signal }) => catalogApi.getTrendingSearches(5, signal),
     staleTime: 5 * 60_000,
+    enabled,
+  });
+}
+
+/** ตัวเลขข้าง sidebar ของหน้าค้นหา — เปลี่ยนตัวกรองแล้วโชว์ตัวเลขเดิมไว้ระหว่างโหลด [TCG-777] */
+export function useSearchFacets(query: ProductQuery, enabled = true) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- facets ไม่ใช้ sort/page/size
+  const { sort, page, size, ...filters } = query;
+  return useQuery({
+    queryKey: catalogKeys.facets(filters),
+    queryFn: ({ signal }) => catalogApi.getSearchFacets(filters, signal),
+    placeholderData: keepPreviousData,
+    enabled,
+  });
+}
+
+/** ร้านที่ขายของที่ค้นเจอ — เปลี่ยนตัวกรองแล้วโชว์รายการเดิมไว้ระหว่างโหลด [TCG-778] */
+export function useSearchShops(query: ShopQuery, enabled = true) {
+  return useQuery({
+    queryKey: catalogKeys.shops(query),
+    queryFn: ({ signal }) => catalogApi.getSearchShops(query, signal),
+    placeholderData: keepPreviousData,
     enabled,
   });
 }

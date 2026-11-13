@@ -1302,13 +1302,45 @@
     "allCategories": "All categories",
     "applyFilter": "Apply Filter",
     "breadcrumb": "Search Results",
+    "card": {
+      "from": "From",
+      "sellers": "{count, plural, one {# shop} other {# shops}}",
+      "soldOut": "Sold out"
+    },
     "categoriesFailed": "Could not load categories",
     "category": "Category",
+    "clearAllFilters": "Clear all filters",
     "clearFilters": "Clear filters",
     "corrected": "Showing results for “{corrected}” · You searched “{query}”",
+    "correctedAlias": "Including results for “{corrected}” for “{query}”",
+    "didYouMean": "Did you mean",
+    "didYouMeanSuffix": "?",
     "empty": "No products found",
     "emptyHint": "Try removing a filter or two.",
+    "error": {
+      "code": "Code: {code}",
+      "hint": "Check your connection and try again. Your filters are kept.",
+      "home": "Back to home",
+      "retry": "Try again",
+      "title": "Couldn't load search results"
+    },
     "failed": "Search failed",
+    "filter": {
+      "active": "Active filters",
+      "button": "Filters",
+      "clearAll": "Clear all",
+      "condition": "Card condition",
+      "inStock": "In stock",
+      "maxPlaceholder": "Max",
+      "minPlaceholder": "Min",
+      "more": "More options",
+      "moreGames": "+ Show {count} more games",
+      "onSale": "On sale",
+      "priceRange": "Price (฿)",
+      "remove": "Remove “{label}”",
+      "showResults": "Show {count} results",
+      "title": "Filters"
+    },
     "filters": "Search filters",
     "filtersFailed": "Could not load filters",
     "game": "Game",
@@ -1316,17 +1348,49 @@
     "inStockOnly": "In stock only",
     "inputLabel": "Search products",
     "inputPlaceholder": "Search cards, sets or card numbers",
+    "loadMore": "Load more",
     "maxPlaceholder": "THB Max",
     "maxPrice": "Maximum price",
     "minPlaceholder": "THB Min",
     "minPrice": "Minimum price",
     "noMatch": "No products match \"{query}\"",
+    "noResultsSummary": "No products match your search and filters",
+    "popularNow": "Popular right now",
     "priceRange": "Price Range",
     "priceRangeInvalid": "The minimum price must not exceed the maximum price",
     "productAria": "{name}, price {price}",
+    "related": "Related searches",
     "resultCount": "{count, plural, =1 {# result} other {# results}}",
     "results": "Search results",
+    "row": {
+      "sellingShops": "Sold by",
+      "shopsAndListings": "{shops} shops · {listings} listings",
+      "viewListings": "View listings"
+    },
+    "searchInstead": "Search “{query}” instead",
     "searching": "Searching…",
+    "shops": {
+      "backToProducts": "Back to products",
+      "empty": "No shops sell “{query}”",
+      "emptyNoQuery": "No shops found",
+      "failed": "Couldn't load shops",
+      "from": "from {price}",
+      "matches": "{count} products matching “{query}”",
+      "matchesNoQuery": "{count} products",
+      "preview": "Sample product from {shop}",
+      "rating": "Shop rating",
+      "ratingAll": "All",
+      "ratingAtLeast": "{rating} & up",
+      "ratingSummary": "{rating} ({count} reviews)",
+      "results": "Shops selling",
+      "showing": "Showing {from}–{to} of {total} shops",
+      "sortMatches": "Most matching products",
+      "sortRating": "Highest rated",
+      "summary": "{count} shops sell “{query}”",
+      "summaryNoQuery": "{count} shops",
+      "viewShop": "View shop"
+    },
+    "showing": "Showing {from}–{to} of {total} products",
     "sort": {
       "featured": "Featured",
       "name": "Name: A to Z",
@@ -1336,8 +1400,34 @@
       "relevance": "Most relevant"
     },
     "sortBy": "Sort by:",
+    "sortMenu": {
+      "newest": "Newest",
+      "popular": "Best selling",
+      "priceAsc": "Price: low → high",
+      "priceDesc": "Price: high → low",
+      "relevance": "Most relevant"
+    },
+    "summary": "{products} products from {shops} shops",
+    "tab": {
+      "listings": "Listings",
+      "products": "Products",
+      "shops": "Shops"
+    },
+    "tabs": "Result types",
+    "tips": {
+      "filters": "Try removing some filters",
+      "number": "Search by card number, e.g. 020/189, or set code sv2a",
+      "spelling": "Check the spelling or use the card's English name"
+    },
     "title": "All products",
-    "typeOther": "Other"
+    "titleFor": "Results for “{query}”",
+    "typeOther": "Other",
+    "view": {
+      "grid": "Grid",
+      "label": "View",
+      "list": "List"
+    },
+    "viewAll": "View all"
   },
   "searchSuggest": {
     "back": "Back",
