@@ -62,7 +62,7 @@ describe('Search page filter sheet on mobile', () => {
     cy.wait('@products');
     cy.contains('Charlotte Katakuri').should('be.visible');
 
-    cy.contains('button', 'ตัวกรอง').click();
+    cy.contains('button', /^ตัวกรอง/).click();
     cy.get('[role="dialog"]').within(() => {
       cy.contains('label', 'Pokémon TCG').click();
       cy.contains('button', 'ดูผลลัพธ์ 2 รายการ').click();
