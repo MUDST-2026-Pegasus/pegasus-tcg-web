@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/compare/v1.1.0...v1.2.0) (2026-11-13)
+
+
+### Features
+
+* **no-ticket:** store page search + cards open the listing ([6152e17](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/6152e17a5a6fa063d4142a11cdf1366dc5085fcb))
+* **no-ticket:** store page search, cards open the listing ([c14540d](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/c14540dc68e6a5179d906f1c86bcbe2260d2259e))
+
+
+### Bug Fixes
+
+* **security:** remove Figma capture script from index.html ([b8edb42](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/b8edb422ff516edd39511fad6ab93e990ff120fc))
+* **security:** remove Figma capture script from index.html ([e502b3a](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/commit/e502b3a208392a0dc612414afc5b54035c1f43f0))
+
 ## [1.1.0](https://github.com/MUDST-2026-Pegasus/pegasus-tcg-web/compare/v1.0.0...v1.1.0) (2026-11-13)
 
 
