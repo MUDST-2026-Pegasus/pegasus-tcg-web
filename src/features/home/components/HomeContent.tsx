@@ -468,7 +468,7 @@ function FeaturedCategories({
     >
       <div className="mx-auto max-w-[1216px]">
         <div id="featured-title">
-          <SectionHeader title={t("home.sections.featured", "แนะนำ")} />
+          <SectionHeader title={t("home.sections.featured", "หมวดหมู่")} />
         </div>
         <Carousel
           setApi={setApi}
@@ -621,7 +621,6 @@ function PromotionsSection() {
         <div id="home-promotions-title">
           <SectionHeader
             title={t("home.promotions.title", "โค้ดส่วนลด")}
-            description={t("home.promotions.description", "กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้")}
             actionLabel={t("home.promotions.myCodes", "ดูโค้ดของฉัน")}
             actionHref="/account/coupons"
           />
@@ -660,7 +659,7 @@ export function RecommendedShopsSection() {
   return (
     <section aria-label={t("home.shops.title", "ร้านค้าแนะนำ")} className="min-w-0 overflow-hidden bg-secondary px-4 py-7 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1216px] min-w-0">
-        <SectionHeader title={t("home.shops.title", "ร้านค้าแนะนำ")} description={t("home.shops.description", "ร้านที่ยืนยันตัวตนแล้ว จัดอันดับจากรีวิวของผู้ซื้อ")} />
+        <SectionHeader title={t("home.shops.title", "ร้านค้าแนะนำ")} />
         <Carousel opts={{ align: "start", dragFree: true, containScroll: "trimSnaps" }} className="mt-[18px] min-w-0">
           <CarouselContent className="cursor-grab pl-4 pr-4 pt-1 pb-6 active:cursor-grabbing">
             {query.isPending
@@ -698,7 +697,7 @@ function FeaturedSection() {
   const query = useFeaturedCategories();
 
   if (query.isPending) return <FeaturedSkeleton />;
-  if (query.isError) return <SectionError title={t("home.sections.featured", "แนะนำ")} query={query} />;
+  if (query.isError) return <SectionError title={t("home.sections.featured", "หมวดหมู่")} query={query} />;
   if (query.data.length === 0) return null;
   return <FeaturedCategories categories={query.data} />;
 }
@@ -713,7 +712,6 @@ function PegasusPicksSection() {
   return (
     <ProductRail
       title={t("home.sections.pegasusPicks", "Pegasus คัดให้")}
-      description={t("home.picks.description", "คัดสรร ตรวจสอบ และจัดส่งโดย Pegasus")}
       actionLabel={t("home.picks.action", "ช้อปกับ Pegasus")}
       actionHref={`/u/${encodeURIComponent(env.pegasusStoreUsername)}`}
       products={query.data}

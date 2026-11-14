@@ -816,7 +816,6 @@
   },
   "home": {
     "auctions": {
-      "description": "Bid before time runs out — if someone bids near the end, the auction will be extended by 2 minutes",
       "title": "Ending soon",
       "viewAll": "View all auctions"
     },
@@ -838,19 +837,17 @@
       "pagination": "Select promotion"
     },
     "picks": {
-      "action": "Shop Pegasus",
-      "description": "Curated, verified, and shipped by Pegasus."
+      "action": "Shop Pegasus"
     },
     "productAria": "{name} price {price}",
     "promotions": {
-      "description": "Save it now, then apply it in your cart · Can be used with a shop code",
       "myCodes": "View my codes",
       "title": "Discount codes"
     },
     "sectionError": "Failed to load {title}",
     "sections": {
       "explore": "More to Explore",
-      "featured": "Featured",
+      "featured": "Categories",
       "more": "more",
       "newReleases": "New Releases",
       "pegasusPicks": "Pegasus Picks",
@@ -871,7 +868,6 @@
       "visitAria": "Visit {name} shop"
     },
     "shops": {
-      "description": "Verified shops ranked by buyer reviews",
       "title": "Recommended shops"
     }
   },
@@ -1161,6 +1157,7 @@
   "product": {
     "add": "Add",
     "addToCart": "Add to cart",
+    "saveToCollection": "Save to collection",
     "addToCartFailed": "Could not add to cart",
     "allConditions": "All conditions",
     "allProducts": "All products",

@@ -31,7 +31,6 @@ describe("Home · ประมูลใกล้จบ", () => {
     renderWithProviders(<AuctionEndingSoonSection />);
 
     expect(await screen.findByRole("heading", { name: "ประมูลใกล้จบ" })).toBeInTheDocument();
-    expect(screen.getByText("บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /ดูประมูลทั้งหมด/ })).toHaveAttribute("href", "/auctions");
     for (const auction of SUMMARIES.slice(0, 4)) {
       expect(screen.getByText(auction.item.card.productName)).toBeInTheDocument();

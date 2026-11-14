@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ShoppingCart, ChevronRight, Minus, Plus, Loader2 } from "lucide-react";
+import { ShoppingCart, ChevronRight, Minus, Plus, Loader2, LibraryBig } from "lucide-react";
 
 import { DetailPageSkeleton, ListRowsSkeleton } from "@/components/common/PageSkeletons";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +34,7 @@ import { useGameList, useProductCollectors, useProductDetail, useProductListings
 import type { CardCondition, ProductDetailDto } from "../catalog.types";
 import { addViewedProduct } from "../search/search-history";
 import { usePageTitle } from "@/hooks/use-page-title";
+import { AddCardsDialog } from "@/features/collection/components/AddCardsDialog";
 import { intlLocale, useTranslate, formatMoney } from "@/lib/i18n";
 
 
@@ -123,6 +124,7 @@ function ProductDetailContent({
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const addCartItem = useAddCartItem();
   const miniCart = useMiniCart();
+  const [savingToCollection, setSavingToCollection] = useState(false);
   const itemCount = (count: number) =>
     product.productType === "SINGLE_CARD"
       ? t("product.cardCount", "{count, plural, other {# ใบ}}", { count })
@@ -250,6 +252,15 @@ function ProductDetailContent({
     await addListingToCart(purchasableListing.id, selectedQuantity, trigger);
   }
 
+  function handleSaveToCollection() {
+    if (isAuthLoading) return;
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: { pathname: `/products/${encodeURIComponent(product.slug)}` } } });
+      return;
+    }
+    setSavingToCollection(true);
+  }
+
   async function handleBuyNow() {
     if (!purchasableListing || selectedQuantity > availableForSelectedListing) return;
     if (isAuthLoading) return;
@@ -322,7 +333,13 @@ function ProductDetailContent({
 
           <div className="flex min-w-0 flex-col gap-6">
             <div>
-              <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
+              <div className="flex items-start justify-between gap-3">
+                <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
+                <Button type="button" variant="outline" className="shrink-0 rounded-full border-primary/30 bg-card font-semibold text-primary hover:bg-primary/5 hover:text-primary" disabled={isAuthLoading} onClick={handleSaveToCollection}>
+                  <LibraryBig className="size-4" />
+                  {t("product.saveToCollection", "บันทึกลงคอลเลกชัน")}
+                </Button>
+              </div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
               {[localNameOnly(product.nameLocal), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal), product.cardNumber].filter(Boolean).join(" · ")}</p>}
             </div>
@@ -412,6 +429,18 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : t("product.addToCart", "เพิ่มลงตะกร้า")}
               </Button>
             </div>
+            <AddCardsDialog
+              open={savingToCollection}
+              onOpenChange={setSavingToCollection}
+              initialCard={{
+                productId: product.id,
+                name: product.name,
+                imageUrl: (images.find((image) => image.primary) ?? images[0])?.url ?? null,
+                cardNumber: product.cardNumber,
+                rarityCode: product.rarityCode,
+              }}
+              initialVariantId={selectedVariant ? Number(selectedVariant) : null}
+            />
             {/* มีประมูลการ์ดรุ่นนี้เปิดอยู่ [TCG-636] */}
             <ProductAuctionBox
               variantIds={selectedVariant ? [Number(selectedVariant)] : variants.map((variant) => variant.id)}

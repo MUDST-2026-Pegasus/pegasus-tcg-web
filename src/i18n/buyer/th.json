@@ -816,7 +816,6 @@
   },
   "home": {
     "auctions": {
-      "description": "บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที",
       "title": "ประมูลใกล้จบ",
       "viewAll": "ดูประมูลทั้งหมด"
     },
@@ -838,19 +837,17 @@
       "pagination": "เลือกโปรโมชัน"
     },
     "picks": {
-      "action": "ช้อปกับ Pegasus",
-      "description": "คัดสรร ตรวจสอบ และจัดส่งโดย Pegasus"
+      "action": "ช้อปกับ Pegasus"
     },
     "productAria": "{name} ราคา {price}",
     "promotions": {
-      "description": "กดเก็บไว้ก่อน แล้วเลือกใช้ได้ในตะกร้า · ใช้คู่กับโค้ดร้านได้",
       "myCodes": "ดูโค้ดของฉัน",
       "title": "โค้ดส่วนลด"
     },
     "sectionError": "โหลด {title} ไม่สำเร็จ",
     "sections": {
       "explore": "สำรวจเพิ่มเติม",
-      "featured": "แนะนำ",
+      "featured": "หมวดหมู่",
       "more": "เพิ่มเติม",
       "newReleases": "มาใหม่",
       "pegasusPicks": "Pegasus คัดให้",
@@ -871,7 +868,6 @@
       "visitAria": "เข้าชมร้าน {name}"
     },
     "shops": {
-      "description": "ร้านที่ยืนยันตัวตนแล้ว จัดอันดับจากรีวิวของผู้ซื้อ",
       "title": "ร้านค้าแนะนำ"
     }
   },
@@ -1161,6 +1157,7 @@
   "product": {
     "add": "เพิ่ม",
     "addToCart": "เพิ่มลงตะกร้า",
+    "saveToCollection": "บันทึกลงคอลเลกชัน",
     "addToCartFailed": "เพิ่มลงรถเข็นไม่สำเร็จ",
     "allConditions": "ทุกสภาพ",
     "allProducts": "สินค้าทั้งหมด",
