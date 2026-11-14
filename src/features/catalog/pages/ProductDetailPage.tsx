@@ -333,7 +333,13 @@ function ProductDetailContent({
 
           <div className="flex min-w-0 flex-col gap-6">
             <div>
-              <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
+              <div className="flex items-start justify-between gap-3">
+                <ProductBadges game={gameName ?? PRODUCT_TYPE_LABELS[product.productType]} rarity={product.rarityCode} />
+                <Button type="button" variant="outline" className="shrink-0 rounded-full border-primary/30 bg-card font-semibold text-primary hover:bg-primary/5 hover:text-primary" disabled={isAuthLoading} onClick={handleSaveToCollection}>
+                  <LibraryBig className="size-4" />
+                  {t("product.saveToCollection", "บันทึกลงคอลเลกชัน")}
+                </Button>
+              </div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{product.name}{product.cardNumber && <span className="ml-2 text-muted-foreground">#{product.cardNumber.split("/")[0]}</span>}</h1>
               {[localNameOnly(product.nameLocal), product.cardNumber].some(Boolean) && <p className="mt-2 min-h-6 text-muted-foreground">{[localNameOnly(product.nameLocal), product.cardNumber].filter(Boolean).join(" · ")}</p>}
             </div>
@@ -423,10 +429,6 @@ function ProductDetailContent({
                 {availableForSelectedListing === 0 ? t("product.outOfStockButton", "สินค้าหมด") : t("product.addToCart", "เพิ่มลงตะกร้า")}
               </Button>
             </div>
-            <Button type="button" variant="ghost" className="h-12 w-full text-base font-semibold" disabled={isAuthLoading} onClick={handleSaveToCollection}>
-              <LibraryBig className="size-5" />
-              {t("product.saveToCollection", "บันทึกลงคอลเลกชัน")}
-            </Button>
             <AddCardsDialog
               open={savingToCollection}
               onOpenChange={setSavingToCollection}
