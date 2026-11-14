@@ -29,7 +29,6 @@ export function AuctionEndingSoonSection() {
               AUCTION
             </span>
             <h2 className="text-[28px] leading-8 font-semibold text-foreground">{t("home.auctions.title", "ประมูลใกล้จบ")}</h2>
-            <p className="text-xs text-muted-foreground">{t("home.auctions.description", "บิดก่อนหมดเวลา — มีคนบิดช่วงท้าย เวลาจะต่อให้อีก 2 นาที")}</p>
           </div>
           <Button
             variant="link"
